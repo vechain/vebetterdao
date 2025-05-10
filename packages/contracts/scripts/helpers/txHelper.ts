@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
-import { type TransactionClause, type TransactionBody, Transaction } from "@vechain/sdk-core"
+import { type TransactionClause, type TransactionBody, Transaction, Address } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
+import { TestPk } from "./seedAccounts"
 
 const thorClient = ThorClient.at(getConfig().nodeUrl)
 let chainTag: number
@@ -30,15 +31,15 @@ export const getChainTag = async (): Promise<number> => {
   return chainTag
 }
 
-export const buildTxBody = async (
+const buildTxBody = async (
   clauses: TransactionClause[],
-  senderAddress: string,
+  senderAddress: Address,
   expiration: number,
   gas?: number,
 ): Promise<TransactionBody> => {
   if (!gas) {
     // Get gas estimate
-    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress)
+    const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress.toString())
 
     if (gasResult.reverted) {
       throw new Error(`Gas estimation failed: ${gasResult.revertReasons} - ${gasResult.vmErrors}`)
@@ -47,21 +48,12 @@ export const buildTxBody = async (
     gas = gasResult.totalGas + 200_000
   }
 
-  const body: TransactionBody = {
-    chainTag: await getChainTag(),
-    blockRef: await getBestBlockRef(),
-    expiration,
-    clauses,
-    gasPriceCoef: 128,
-    gas,
-    dependsOn: null,
-    nonce: Math.floor(Math.random() * 10000000),
-  }
+  const body = await thorClient.transactions.buildTransactionBody(clauses, gas)
 
   return body
 }
 
-export const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
+const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
   const signedTx = Transaction.of(body).sign(Buffer.from(pk))
 
   const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
@@ -73,5 +65,35 @@ export const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
   }
   if (txReceipt.reverted) {
     throw new Error("Transaction reverted")
+  }
+}
+
+export const sendTx = async (clauses: TransactionClause[], sender: TestPk, retries: number = 30) => {
+  const actualRetries = Math.max(0, retries) // Ensure retries is not negative
+
+  for (let attempt = 1; attempt < actualRetries + 1; attempt++) {
+    try {
+      if (attempt > 1) {
+        console.log(`Attempt ${attempt} of ${actualRetries}: Sending transaction...`)
+      }
+      // Rebuild the transaction body for each attempt to get fresh gas, nonce, and blockRef.
+      const body: TransactionBody = await buildTxBody(clauses, sender.address, 32)
+
+      await signAndSendTx(body, sender.pk) // This function signs the body and sends the transaction
+      return // Transaction was successful, exit the function
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      console.error(`Attempt ${attempt} of ${actualRetries + 1} failed: ${errorMessage}`)
+
+      if (attempt >= actualRetries) {
+        console.error(`All ${actualRetries + 1} attempts to send transaction failed. Rethrowing last error.`)
+        throw error // All retries failed, rethrow the last encountered error
+      }
+
+      // Linear backoff delay (e.g., 1s, 2s, 3s...)
+      const delayMs = 1000 * attempt
+      console.log(`Waiting ${delayMs / 1000} second(s) before next attempt...`)
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+    }
   }
 }

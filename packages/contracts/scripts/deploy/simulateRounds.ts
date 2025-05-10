@@ -1,4 +1,4 @@
-import { B3TR, VeBetterPassport, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
+import { B3TR, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { distributeEmissions, startEmissions, toggleQuadraticRewarding } from "../helpers/emissions"
@@ -40,17 +40,21 @@ export const simulateRounds = async () => {
 
   // Whitelist all seed accounts
   await whitelist(
-    seedAccounts.map(account => account.key.address),
+    seedAccounts.map(account => account.key.address.toString()),
     admin,
     config.veBetterPassportContractAddress,
   )
 
   // Airdrop VTHO
-  await airdropVTHO(seedAccounts, accounts[8])
+  await airdropVTHO(
+    seedAccounts.map(acct => acct.key.address),
+    500n,
+    admin,
+  )
 
   // Airdrop B3TR from Treasury
   //// Top the treasury up with tokens from the migration account
-  const bal = await b3tr.balanceOf(migrationAccount.address)
+  const bal = await b3tr.balanceOf(migrationAccount.address.toString())
   await transferErc20(await b3tr.getAddress(), migrationAccount, config.treasuryContractAddress, bal)
   await airdropB3trFromTreasury(config.treasuryContractAddress, admin, seedAccounts)
 

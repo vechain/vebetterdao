@@ -43,7 +43,7 @@ import {
   XAllocationVotingV3,
 } from "../typechain-types"
 import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
-import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
+import { sendTx } from "../scripts/helpers/txHelper"
 import { APPS } from "../scripts/deploy/setup"
 import { ABIContract, Address, Clause, VET, type TransactionBody } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
@@ -1573,7 +1573,7 @@ describe("X-Apps - @shard15", function () {
 
         // Add moderators
         for (let i = 0; i < 3; i++) {
-          await x2EarnAppsV1.connect(owner).addAppModerator(appId, testKeys[index + i].address)
+          await x2EarnAppsV1.connect(owner).addAppModerator(appId, testKeys[index + i].address.toString())
         }
       })
 
@@ -6254,11 +6254,15 @@ describe("X-Apps - @shard17", function () {
       })
 
       // aidrop VTHO
-      await airdropVTHO(seedAccounts, accounts[2])
+      await airdropVTHO(
+        seedAccounts.map(acct => acct.key.address),
+        5000n,
+        accounts[2],
+      )
 
       for (let i = 0; i < 50; i++) {
         // Create two node holders with an endorsement score
-        await vechainNodesMock.addToken(accounts[i].address, level, false, 0, 0)
+        await vechainNodesMock.addToken(accounts[i].address.toString(), level, false, 0, 0)
 
         const clauses = [
           Clause.callFunction(
@@ -6268,11 +6272,7 @@ describe("X-Apps - @shard17", function () {
           ),
         ]
 
-        const body: TransactionBody = await buildTxBody(clauses, accounts[i].address, 32, 10_000_000)
-
-        if (!accounts[i].pk) throw new Error("No private key")
-
-        await signAndSendTx(body, accounts[i].pk)
+        await sendTx(clauses, accounts[i])
       }
 
       const endorsers = await x2EarnApps.getEndorsers(app1Id)

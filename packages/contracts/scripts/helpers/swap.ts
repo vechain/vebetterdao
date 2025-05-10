@@ -1,6 +1,6 @@
 import { B3TR, B3TR__factory, VOT3, VOT3__factory } from "../../typechain-types"
 import { type TransactionClause, type TransactionBody, Clause, ABIContract, Address } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { sendTx } from "./txHelper"
 import { SeedAccount } from "./seedAccounts"
 import { chunk } from "./chunk"
 
@@ -17,8 +17,7 @@ export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedA
       chunk.map(async account => {
         const clauses: TransactionClause[] = []
 
-        const b3trAmount = await b3tr.balanceOf(account.key.address)
-
+        const b3trAmount = await b3tr.balanceOf(account.key.address.toString())
         clauses.push(
           Clause.callFunction(Address.of(b3trAddr), ABIContract.ofAbi(B3TR__factory.abi).getFunction("approve"), [
             vot3Addr,
@@ -32,9 +31,7 @@ export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedA
           ]),
         )
 
-        const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32)
-
-        await signAndSendTx(body, account.key.pk)
+        await sendTx(clauses, account.key)
       }),
     )
   }

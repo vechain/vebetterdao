@@ -1,6 +1,6 @@
 import { Emissions__factory, VoterRewards, VoterRewards__factory } from "../../typechain-types"
 import { type TransactionClause, type TransactionBody, Clause, Address, ABIContract } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { sendTx } from "./txHelper"
 import { TestPk } from "./seedAccounts"
 
 export const bootstrapEmissions = async (contractAddress: string, admin: TestPk) => {
@@ -16,12 +16,7 @@ export const bootstrapEmissions = async (contractAddress: string, admin: TestPk)
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, admin.address, 32)
-
-  if (!admin.pk) {
-    throw new Error("Account does not have a private key")
-  }
-  await signAndSendTx(body, admin.pk)
+  await sendTx(clauses, admin)
 }
 
 export const startEmissions = async (contractAddress: string, acct: TestPk) => {
@@ -37,13 +32,7 @@ export const startEmissions = async (contractAddress: string, acct: TestPk) => {
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
-
-  if (!acct.pk) {
-    throw new Error("Account does not have a private key")
-  }
-
-  await signAndSendTx(body, acct.pk)
+  await sendTx(clauses, acct)
 }
 
 export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct: TestPk) => {
@@ -59,13 +48,7 @@ export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct:
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
-
-  if (!acct.pk) {
-    throw new Error("Account does not have a private key")
-  }
-
-  await signAndSendTx(body, acct.pk)
+  await sendTx(clauses, acct)
 }
 
 export const distributeEmissions = async (contractAddress: string, acct: TestPk) => {
@@ -81,11 +64,5 @@ export const distributeEmissions = async (contractAddress: string, acct: TestPk)
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
-
-  if (!acct.pk) {
-    throw new Error("Account does not have a private key")
-  }
-
-  await signAndSendTx(body, acct.pk)
+  await sendTx(clauses, acct)
 }

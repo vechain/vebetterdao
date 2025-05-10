@@ -4,32 +4,33 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ## Version History
 
-| Date       | Contract(s)              | Summary |
-| ---------- | ------------------------ | ------- |
-| 2 May 2025 | `X2EarnApps` version `5` | Restricting to submit one app for each creator NFT received>
-| 25 March 2025 | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5` | Added optional dual-pool balance to manage rewards and app treasury separately |
-| 27th February 2025 | `X2EarnRewardsPool` version `6` | Added support for rewards distribution with metadata. |
-| 13th January 2025 | `XAllocationVoting` version `5` | Fixed issue with duplicate app voting in the same transaction. |
-| 4th December 2024 | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts. |
-| 29th November 2024 | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4 | Added GM level as personhood check in VeBetter passport. |
-| 28th November 2024 | `NodeManagement` version `2` | Added new functions to check node delegation status and improved node management capabilities. |
-| 15th November 2024 | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5` | Added Vechain Node Binding with Galaxy Member feature |
-| 15th November 2024 | `X2EarnApps` version `2` | Added X2Earn Apps Vechain Node Endorsement feature |
-| 21th October 2024 | `VeBetterPassport` version `2` | Check if the entity is a delegatee when request is created |
-| 11th October 2024 | `XAllocationVoting` version `2` | Check isPerson when casting vote & fixed weight during vote |
-| 11th October 2024 | `B3TRGovernor` version `4` | Check isPerson when casting vote |
-| 11th October 2024 | `X2EarnRewardsPool` version `3` | Register action in VeBetter Passport contract |
-| 27th September 2024 | `Emissions` version `2` | Aligned emissions with the expected schedule |
-| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2` | - Added toggling of quadratic voting and funding |
-| 4th September 2024 | `X2EarnRewardsPool` version `2` | - Added impact key management and proof building |
-| 31st August 2024 | `VoterRewards` version `2` | - Added quadratic rewarding features |
-| 29th August 2024 | `B3TRGovernor` version `2` | Updated access control modifiers |
+| Date                | Contract(s)                                                                                                                   | Summary                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 2 May 2025          | `X2EarnApps` version `5`                                                                                                      | Restricting to submit one app for each creator NFT received>                                   |
+| 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                 |
+| 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                          |
+| 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                 |
+| 4th December 2024   | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts.                                        |
+| 29th November 2024  | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4                                      | Added GM level as personhood check in VeBetter passport.                                       |
+| 28th November 2024  | `NodeManagement` version `2`                                                                                                  | Added new functions to check node delegation status and improved node management capabilities. |
+| 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5`                                            | Added Vechain Node Binding with Galaxy Member feature                                          |
+| 15th November 2024  | `X2EarnApps` version `2`                                                                                                      | Added X2Earn Apps Vechain Node Endorsement feature                                             |
+| 21th October 2024   | `VeBetterPassport` version `2`                                                                                                | Check if the entity is a delegatee when request is created                                     |
+| 11th October 2024   | `XAllocationVoting` version `2`                                                                                               | Check isPerson when casting vote & fixed weight during vote                                    |
+| 11th October 2024   | `B3TRGovernor` version `4`                                                                                                    | Check isPerson when casting vote                                                               |
+| 11th October 2024   | `X2EarnRewardsPool` version `3`                                                                                               | Register action in VeBetter Passport contract                                                  |
+| 27th September 2024 | `Emissions` version `2`                                                                                                       | Aligned emissions with the expected schedule                                                   |
+| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2`                                                                     | - Added toggling of quadratic voting and funding                                               |
+| 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                               |
+| 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                           |
+| 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                               |
 
 ---
 
 ## Upgrade `X2EarnApps` to Version 5
 
 ### Key Updates 🗂
+
 Restriction on creators who have already submitted an app. Any creator added to an xApp (via the `_addCreator` function) will be considered as someone who has already submitted an app, preventing them from creating multiple applications.
 
 ### Changes 🚀
@@ -37,12 +38,13 @@ Restriction on creators who have already submitted an app. Any creator added to 
 - `x2EarnApps` updated to version `5`
 
 ### Storage Changes 📦
+
 - None.
 
 ### New Features 🚀
 
 - **`X2EarnApps`**:
-  - Added `isCreatorOfAnyApp` check based on `_creatorApps[creator]` counter. 
+  - Added `isCreatorOfAnyApp` check based on `_creatorApps[creator]` counter.
   - Added `CreatorNFTAlreadyUsed` error, trigger when a creator try to submit an app while having already submitted an app
 
 ### Bug Fixes 🐛
@@ -60,24 +62,20 @@ This upgrade introduces the ability for XApps to include metadata in the reward 
 - **Backward Compatibility Preserved**: The original `distributeRewardWithProof` function remains unchanged and continues to work as before for apps that do not wish to use metadata.
 - **New Metadata Functionality**: The `distributeRewardWithProofAndMetadata` function accepts a string intended to be a JSON representation. A dedicated event, `RewardMetadata`, is emitted to store this information, following the established internal standards of `_emitProof`.
 
-
 ### Changes 🚀
 
 - **Upgraded Contracts:**
   - `X2EarnRewardsPool.sol` updated to version `6`.
 
-
 ### Storage Changes 📦
 
 - None.
-
 
 ### New Features 🚀
 
 - **`X2EarnRewardsPool`:**
   - Added `distributeRewardWithProofAndMetadata()`, which accepts a string intended to be a JSON representation and emits a new event, `RewardMetadata`, containing this information.
   - Updated internal logic with `_emitMetadata`, following the `_emitProof` pattern, to emit the event with the JSON data.
-
 
 ### Bug Fixes 🐛
 

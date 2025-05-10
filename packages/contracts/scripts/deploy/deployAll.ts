@@ -19,9 +19,8 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
+import { APPS, setupEnvironment } from "./setup"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { shouldEndorseXApps } from "@repo/config/contracts"
 import {
   deployAndUpgrade,
   deployProxy,
@@ -51,6 +50,7 @@ const symbol = "GM"
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
+
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
@@ -824,46 +824,21 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  const appEnv = process.env.NEXT_PUBLIC_APP_ENV
-  switch (network.name) {
-    case "vechain_mainnet":
-      await setupMainnetEnvironment(emissions, x2EarnApps)
-      break
-    case "vechain_testnet":
-      if (appEnv === "testnet-staging") {
-        await setupLocalEnvironment(
-          emissions,
-          treasury,
-          x2EarnApps,
-          governor,
-          xAllocationVoting,
-          b3tr,
-          vot3,
-          vechainNodesMock,
-          shouldEndorseXApps(),
-        )
-      } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
-      break
-    case "vechain_solo":
-      await setupLocalEnvironment(
-        emissions,
-        treasury,
-        x2EarnApps,
-        governor,
-        xAllocationVoting,
-        b3tr,
-        vot3,
-        vechainNodesMock,
-        shouldEndorseXApps(),
-      )
-      break
-  }
-
-  console.log(`appEnv: ${appEnv}`)
+  await setupEnvironment(
+    config.NEXT_PUBLIC_APP_ENV,
+    emissions,
+    treasury,
+    x2EarnApps,
+    governor,
+    xAllocationVoting,
+    b3tr,
+    vot3,
+    vechainNodesMock,
+  )
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time
-  if (appEnv === "testnet" || network.name === "mainnet") {
+  if (process.env.NEXT_PUBLIC_APP_ENV === "testnet" || network.name === "mainnet") {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 

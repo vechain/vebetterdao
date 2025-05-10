@@ -7,7 +7,7 @@ import {
   TokenAuction,
 } from "../../typechain-types"
 import { type TransactionClause, type TransactionBody, Clause, Address, ABIContract } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { sendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 import { getContractsConfig } from "@repo/config"
@@ -37,13 +37,7 @@ export const registerXDapps = async (contractAddress: string, accounts: TestPk[]
         [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
       )
 
-      const body: TransactionBody = await buildTxBody([clause], account.address, 32)
-
-      if (!account.pk) {
-        throw new Error("Account does not have a private key")
-      }
-
-      await signAndSendTx(body, account.pk)
+      await sendTx([clause], account)
     }
   }
 }
@@ -63,19 +57,14 @@ export const endorseXApps = async (
 
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
-    const nodeId = await vechainNodesMock.ownerToId(owner)
+    const nodeId = await vechainNodesMock.ownerToId(owner.toString())
     const clause = Clause.callFunction(
       Address.of(await x2EarnApps.getAddress()),
       ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
       [apps[i], nodeId],
     )
 
-    try {
-      const body: TransactionBody = await buildTxBody([clause], owner, 32)
-      await signAndSendTx(body, endorsers[i].key.pk)
-    } catch (e) {
-      console.log("Endorsing x-apps failed with error: ", e)
-    }
+    await sendTx([clause], endorsers[i].key)
   }
 
   console.log("x-apps endorsed.")
@@ -102,7 +91,7 @@ export const castVotesToXDapps = async (
       chunk.map(async account => {
         try {
           const clauses: TransactionClause[] = []
-          const votePower = BigInt(await vot3.balanceOf(account.key.address))
+          const votePower = BigInt(await vot3.balanceOf(account.key.address.toString()))
 
           const splits: { app: string; weight: bigint }[] = []
 
@@ -126,10 +115,7 @@ export const castVotesToXDapps = async (
           console.log(
             `Casting round ${roundId} votes for ${account.key.address} with ${splits.map(split => split.weight)} votes to ${splits.map(split => split.app)}`,
           )
-          const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32, 250_000 * splits.length)
-
-          await signAndSendTx(body, account.key.pk)
-          console.log("Votes cast for account", account.key.address)
+          await sendTx(clauses, account.key)
         } catch (e) {
           if (ignoreErrors) {
             console.error(`Error casting vote for account ${account.key.address}:`, e)
@@ -141,14 +127,4 @@ export const castVotesToXDapps = async (
     )
   }
   console.log("Votes cast.")
-}
-
-/**
- * Returns an array of accounts that will be used to create xDapps
- * @param accounts - The array of accounts
- * @param numberOfCreators - The number of creators to return
- * @returns array of accounts, admin includes as the first creator
- */
-export const xDappsCreatorAccounts = (accounts: TestPk[], numberOfCreators: number) => {
-  return accounts.slice(0, numberOfCreators)
 }

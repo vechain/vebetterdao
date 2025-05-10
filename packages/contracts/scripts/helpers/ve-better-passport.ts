@@ -1,8 +1,7 @@
 import { VeBetterPassport__factory } from "../../typechain-types"
 import { chunk } from "./chunk"
 import { type TransactionClause, type TransactionBody, Clause, ABIContract, Address } from "@vechain/sdk-core"
-import { buildTxBody } from "./txHelper"
-import { signAndSendTx } from "./txHelper"
+import { sendTx } from "./txHelper"
 import { TestPk } from "./seedAccounts"
 
 export const whitelist = async (accounts: string[], admin: TestPk, veBetterPassportAddress: string) => {
@@ -22,11 +21,7 @@ export const whitelist = async (accounts: string[], admin: TestPk, veBetterPassp
         ),
       )
     })
-    const body: TransactionBody = await buildTxBody(clauses, admin.address, 32)
 
-    if (!admin.pk) {
-      throw new Error("Account does not have a private key")
-    }
-    await signAndSendTx(body, admin.pk)
+    await sendTx(clauses, admin)
   }
 }

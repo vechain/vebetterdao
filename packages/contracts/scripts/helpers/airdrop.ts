@@ -1,19 +1,10 @@
 import { Treasury__factory } from "../../typechain-types"
-import {
-  type TransactionClause,
-  type TransactionBody,
-  Clause,
-  Address,
-  Units,
-  VTHO,
-  ERC20_ABI,
-  ABIContract,
-} from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { type TransactionClause, Clause, Address, VTHO, ERC20_ABI, ABIContract } from "@vechain/sdk-core"
+import { sendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 
-export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) => {
+export const airdropVTHO = async (accounts: Address[], amount: bigint, sourceAccount: TestPk) => {
   console.log(`Airdropping VTHO...`)
 
   const accountChunks = chunk(accounts, 200)
@@ -21,16 +12,11 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
   for (const accountChunk of accountChunks) {
     const clauses: TransactionClause[] = []
 
-    accountChunk.forEach(account => {
-      clauses.push(Clause.transferVTHOToken(Address.of(account.key.address), VTHO.of(5000, Units.wei)))
+    accountChunk.forEach(address => {
+      clauses.push(Clause.transferVTHOToken(address, VTHO.of(amount)))
     })
 
-    const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
-
-    if (!signingAcct.pk) {
-      throw new Error("Account does not have a private key")
-    }
-    await signAndSendTx(body, signingAcct.pk)
+    await sendTx(clauses, sourceAccount)
   }
 }
 
@@ -38,6 +24,11 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
  * Transfer ERC20 tokens
  */
 export const transferErc20 = async (tokenAddress: string, sender: TestPk, recipient: string, amount: bigint) => {
+  console.log(`Transferring ${amount} ${tokenAddress} tokens from ${sender.address} to ${recipient}`)
+  if (amount === 0n) {
+    console.log(`Skipping transfer of 0 tokens from ${sender.address} to ${recipient}`)
+    return
+  }
   const clauses: TransactionClause[] = []
 
   clauses.push(
@@ -47,9 +38,7 @@ export const transferErc20 = async (tokenAddress: string, sender: TestPk, recipi
     ]),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, sender.address, 32)
-
-  await signAndSendTx(body, sender.pk)
+  await sendTx(clauses, sender)
 }
 
 /**
@@ -68,16 +57,11 @@ export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: Te
         Clause.callFunction(
           Address.of(treasuryAddress),
           ABIContract.ofAbi(Treasury__factory.abi).getFunction("transferB3TR"),
-          [account.key.address, account.amount],
+          [account.key.address.toString(), account.amount],
         ),
       )
     })
 
-    const body: TransactionBody = await buildTxBody(clauses, admin.address, 32)
-
-    if (!admin.pk) {
-      throw new Error("Account does not have a private key")
-    }
-    await signAndSendTx(body, admin.pk)
+    await sendTx(clauses, admin)
   }
 }

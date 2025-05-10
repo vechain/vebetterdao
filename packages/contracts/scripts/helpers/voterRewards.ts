@@ -1,6 +1,6 @@
 import { VoterRewards, VoterRewards__factory } from "../../typechain-types"
 import { type TransactionClause, type TransactionBody, Clause, ABIContract, Address } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { sendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 
@@ -25,22 +25,20 @@ export const claimVoterRewards = async (
           Clause.callFunction(
             Address.of(contractAddress),
             ABIContract.ofAbi(VoterRewards__factory.abi).getFunction("claimReward"),
-            [roundId, account.key.address],
+            [roundId, account.key.address.toString()],
           ),
         )
       })
 
-      const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
+      await sendTx(clauses, signingAcct)
 
-      if (!signingAcct.pk) {
-        throw new Error("Account does not have a private key")
-      }
-
-      await signAndSendTx(body, signingAcct.pk)
-      console.log(`Rewards claimed for chunk starting with account ${accountChunk[0]?.key.address}`)
+      console.log(`Rewards claimed for chunk starting with account ${accountChunk[0]?.key.address.toString()}`)
     } catch (e) {
       if (ignoreErrors) {
-        console.error(`Error claiming rewards for chunk starting with account ${accountChunk[0]?.key.address}:`, e)
+        console.error(
+          `Error claiming rewards for chunk starting with account ${accountChunk[0]?.key.address.toString()}:`,
+          e,
+        )
       } else {
         throw e
       }

@@ -1,11 +1,8 @@
 import { Address, HDKey, VET } from "@vechain/sdk-core"
-
-const VECHAIN_DEFAULT_MNEMONIC = "denial kitchen pet squirrel other broom bar gas better priority spoil cross"
-
+import { getMnemonic } from "./env"
 export type TestPk = {
   pk: Uint8Array
-  pkHex: string
-  address: string
+  address: Address
 }
 
 export type SeedAccount = {
@@ -19,28 +16,17 @@ export enum SeedStrategy {
   LINEAR,
 }
 
-const isStagingEnv = process.env.NEXT_PUBLIC_APP_ENV === "testnet-staging"
-
-const PHRASE = (
-  isStagingEnv ? process.env.TESTNET_STAGING_MNEMONIC : process.env.MNEMONIC || VECHAIN_DEFAULT_MNEMONIC
-)?.split(" ")
+const mnemonic = getMnemonic()
+const hdnode = HDKey.fromMnemonic(mnemonic.split(" "))
 
 export const getTestKey = (index: number): TestPk => {
-  if (!PHRASE) {
-    throw new Error("Mnemonic not found")
-  }
-
-  const hdnode = HDKey.fromMnemonic(PHRASE)
   const pk = hdnode.deriveChild(index)
   if (!pk.privateKey) {
     throw new Error("Private key not found")
   }
-  const buffer = Buffer.from(pk.privateKey)
-  const pkHex = buffer.toString("hex")
   return {
     pk: pk.privateKey,
-    pkHex,
-    address: Address.ofPrivateKey(pk.privateKey).toString(),
+    address: Address.ofPrivateKey(pk.privateKey),
   }
 }
 

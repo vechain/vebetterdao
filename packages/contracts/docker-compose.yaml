@@ -1,6 +1,6 @@
 services:
   thor-solo:
-    image: vechain/thor:v2.2.2
+    image: ghcr.io/vechain/thor:release-galactica-latest
     hostname: thor-solo
     container_name: thor-solo
     user: root
