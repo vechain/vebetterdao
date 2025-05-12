@@ -1,8 +1,14 @@
 import { useMemo, useState, useCallback, useEffect } from "react"
 import { XApp, UnendorsedApp, AllApps } from "@/api"
-import { sortByCreationDate, sortAlphabetically, sortByRewards, sortByImpact } from "../utils/sortingFunctions"
+import { sortByCreationDate, sortAlphabetically, sortByRewards } from "../utils/sortingFunctions"
 import { useAppsSustainabilityData } from "./useAppsSustainabilityData"
-import { SortOption } from "@/types/appDetails"
+import {
+  FILTER_ENDORSEMENT_LOST,
+  FILTER_GRACE_PERIOD,
+  FILTER_NEW_APPS,
+  SortOption,
+  FILTER_ACTIVE_APPS,
+} from "@/types/appDetails"
 
 export const DEFAULT_SORT_OPTION: SortOption = "default"
 
@@ -30,7 +36,7 @@ export function useAppsSorting(
     return [...currentActiveApps, ...newApps, ...gracePeriodApps, ...endorsementLostApps]
   }, [currentActiveApps, newApps, gracePeriodApps, endorsementLostApps])
 
-  const { rewardsMap, impactMap, isLoading: isRewardsLoading } = useAppsSustainabilityData(allApps)
+  const { rewardsMap, isLoading: isRewardsLoading } = useAppsSustainabilityData(allApps)
 
   // Create sorted collections
   const sortedApps = useMemo<SortedAppsWithStatus>(() => {
@@ -53,12 +59,6 @@ export function useAppsSorting(
         gracePeriodApps: sortByRewards(gracePeriodApps, rewardsMap) as UnendorsedApp[],
         endorsementLostApps: sortByRewards(endorsementLostApps, rewardsMap) as UnendorsedApp[],
       },
-      impact: {
-        currentActiveApps: sortByImpact(currentActiveApps, impactMap) as XApp[],
-        newApps: sortByImpact(newApps, impactMap) as AllApps[],
-        gracePeriodApps: sortByImpact(gracePeriodApps, impactMap) as UnendorsedApp[],
-        endorsementLostApps: sortByImpact(endorsementLostApps, impactMap) as UnendorsedApp[],
-      },
       default: {
         currentActiveApps: [...currentActiveApps],
         newApps: [...newApps],
@@ -66,7 +66,14 @@ export function useAppsSorting(
         endorsementLostApps: [...endorsementLostApps],
       },
     }
-  }, [currentActiveApps, newApps, gracePeriodApps, endorsementLostApps, rewardsMap, impactMap])
+  }, [currentActiveApps, newApps, gracePeriodApps, endorsementLostApps, rewardsMap])
+
+  const appWithStatusCounts = {
+    [FILTER_ACTIVE_APPS]: sortedApps[sortOption].currentActiveApps.length,
+    [FILTER_NEW_APPS]: sortedApps[sortOption].newApps.length,
+    [FILTER_GRACE_PERIOD]: sortedApps[sortOption].gracePeriodApps.length,
+    [FILTER_ENDORSEMENT_LOST]: sortedApps[sortOption].endorsementLostApps.length,
+  }
 
   const onSortChange = useCallback(
     (option: SortOption) => {
@@ -87,9 +94,8 @@ export function useAppsSorting(
   // Effect to handle the actual sort change
   useEffect(() => {
     if (pendingSortOption !== null && isSorting) {
-      // Only proceed if we're not waiting for rewards data for rewards/impact sort
-      const isWaitingForRewardsData =
-        isRewardsLoading && (pendingSortOption === "rewards" || pendingSortOption === "impact")
+      // Only proceed if we're not waiting for rewards data for rewards sort
+      const isWaitingForRewardsData = isRewardsLoading && pendingSortOption === "rewards"
 
       if (!isWaitingForRewardsData) {
         const animationFrame = requestAnimationFrame(() => {
@@ -103,12 +109,13 @@ export function useAppsSorting(
     }
   }, [pendingSortOption, isSorting, isRewardsLoading])
 
-  const isLoadingState = isSorting || (isRewardsLoading && (sortOption === "rewards" || sortOption === "impact"))
+  const isLoadingState = isSorting || (isRewardsLoading && sortOption === "rewards")
 
   return {
     sortOption,
     sortedApps,
     isSorting: isLoadingState,
+    appWithStatusCounts,
     onSortChange,
     isSorted,
   }

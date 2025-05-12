@@ -18,7 +18,7 @@ import {
  */
 export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: SortOption, searchQuery: string) {
   const [statusFilter, setStatusFilter] = useState(FILTER_ACTIVE_APPS)
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([])
 
   const { data: appCategories } = useXAppsCategories()
 
@@ -51,30 +51,33 @@ export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: So
   }, [statusFilter, sortedApp, sortOption, searchQuery])
 
   const filteredAppsByCategory = useMemo(() => {
-    if (!categoryFilter) return []
-
-    return filteredAppsByStatus.filter(app => appCategories?.[app.id]?.includes(categoryFilter))
-  }, [filteredAppsByStatus, appCategories, categoryFilter])
+    return filteredAppsByStatus.filter(app => {
+      const appsCats = appCategories?.[app.id] || []
+      return appsCats.some(cat => categoryFilters.includes(cat))
+    })
+  }, [filteredAppsByStatus, appCategories, categoryFilters])
 
   const filteredApps = useMemo(() => {
-    if (!categoryFilter || !filteredAppsByCategory) return filteredAppsByStatus
+    if (categoryFilters.length == 0) return filteredAppsByStatus
     return filteredAppsByCategory
-  }, [filteredAppsByStatus, filteredAppsByCategory, categoryFilter])
+  }, [filteredAppsByStatus, filteredAppsByCategory, categoryFilters])
 
   const toggleCategoryFilter = (categoryId: string) => {
-    if (categoryFilter === categoryId) {
-      // If the same category is clicked again, clear the filter
-      setCategoryFilter(null)
-    } else {
-      setCategoryFilter(categoryId)
-    }
+    setCategoryFilters(prev => {
+      if (prev.includes(categoryId)) {
+        // Remove the category if it's already in the filters
+        return prev.filter(id => id !== categoryId)
+      } else {
+        return [...prev, categoryId]
+      }
+    })
   }
 
   return {
     statusFilter,
     setStatusFilter,
-    categoryFilter,
-    setCategoryFilter,
+    categoryFilters, // Array of selected categories
+    setCategoryFilters,
     toggleCategoryFilter,
     filteredApps,
     statusFilterOptions: [FILTER_ACTIVE_APPS, FILTER_NEW_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST],

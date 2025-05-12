@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Box,
+  Badge,
   HStack,
   VStack,
   Grid,
@@ -28,8 +29,7 @@ import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
 import { UilSortAmountDown, UilCheck, UilSearch, UilFilter } from "@iconscout/react-unicons"
-
-import { APP_CATEGORIES, FILTER_ACTIVE_APPS, sortOptions } from "@/types/appDetails"
+import { APP_CATEGORIES, sortOptions, FILTER_ACTIVE_APPS } from "@/types/appDetails"
 
 import { useAppsSorting, useAppsSearch, useAppsFiltering } from "../hooks"
 import { usePagination } from "@/hooks"
@@ -40,6 +40,7 @@ type Props = {
   gracePeriodApps: UnendorsedApp[]
   endorsementLostApps: UnendorsedApp[]
   isXAppsLoading: boolean
+  headingComponent?: React.ReactNode
 }
 
 type LayoutKey = "endorser" | "default"
@@ -50,11 +51,12 @@ export const AllApps = ({
   gracePeriodApps,
   endorsementLostApps,
   isXAppsLoading,
+  headingComponent,
 }: Props) => {
   const { t } = useTranslation()
   const { isEndorsingApp } = useXNode()
 
-  const { sortOption, sortedApps, isSorting, onSortChange, isSorted } = useAppsSorting(
+  const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange, isSorted } = useAppsSorting(
     currentActiveApps,
     newApps,
     gracePeriodApps,
@@ -85,12 +87,11 @@ export const AllApps = ({
         return [...prev, categoryId]
       }
     })
-
     toggleCategoryFilter(categoryId)
   }
 
   const appsSection = useMemo(() => {
-    const isEmpty = !displayAppsRestricted?.length // if no apps or no categories selected, show empty state
+    const isEmpty = !displayAppsRestricted?.length // if no apps, show empty state
     return isXAppsLoading || isSorting ? (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size="lg" />
@@ -134,30 +135,33 @@ export const AllApps = ({
           transition="all 0.3s ease-in-out"
           color={isSorted ? "white" : "black"}
           _hover={{
-            opacity: "0.6",
+            bg: "#D5D5D5",
+            color: "black",
             transition: "all 0.3s ease-in-out",
           }}
+          border="1px solid #D5D5D5"
+          borderRadius={"24px"}
           icon={<UilSortAmountDown />}
-          variant="black"
+          size="md"
         />
-        <MenuList minW="240px" shadow="lg" borderRadius="md" p={0}>
+        <MenuList minW="220px" shadow="lg" borderRadius={"24px"} p={2}>
           {sortOptions.map(option => (
             <MenuItem
               key={option.id}
               onClick={() => onSortChange(option.id)}
               role="group"
-              position="relative"
-              bg={sortOption === option.id && sortOption !== "default" ? "gray.100" : undefined}
-              _dark={{ bg: sortOption === option.id && sortOption !== "default" ? "gray.700" : undefined }}>
-              <HStack w="full" spacing={3} justifyContent="space-between">
-                <Box>
+              borderRadius={"16px"}
+              bg={sortOption === option.id && sortOption !== "default" ? "#D5D5D5" : undefined}
+              _hover={{ bg: "#D5D5D5" }}>
+              <HStack justifyContent="space-between" w="full">
+                <VStack align="flex-start" spacing={0}>
                   <Text fontWeight={sortOption === option.id && sortOption !== "default" ? "semibold" : "normal"}>
                     {option.label}
                   </Text>
                   <Text fontSize="xs" color="gray.500">
                     {option.description}
                   </Text>
-                </Box>
+                </VStack>
                 {sortOption === option.id && sortOption !== "default" && (
                   <Icon as={UilCheck} color="black" boxSize={5} />
                 )}
@@ -176,27 +180,41 @@ export const AllApps = ({
           as={IconButton}
           isRound={true}
           aria-label={t("Filters")}
+          border="1px solid #D5D5D5"
           icon={<UilFilter />}
           variant="black"
-          bg={statusFilter !== FILTER_ACTIVE_APPS || selectedCategories.length > 0 ? "black" : "transparent"}
-          color={statusFilter !== FILTER_ACTIVE_APPS || selectedCategories.length > 0 ? "white" : "black"}
+          bg={selectedCategories.length > 0 || !!statusFilter ? "black" : "transparent"}
+          color={selectedCategories.length > 0 || !!statusFilter ? "white" : "black"}
         />
-        <MenuList minW="280px" shadow="lg" borderRadius="md" p={3}>
+        <MenuList maxW="300px" minW="333px" shadow="lg" borderRadius={"24px"} p={3}>
           {/* Governance Status Section */}
           <Text fontWeight="bold" mb={2}>
             {t("Status")}
           </Text>
-          <VStack align="start" spacing={2} mb={4} pl={2}>
+          <Flex flexWrap="wrap" gap={2} mb={4}>
             {statusFilterOptions.map(status => (
-              <Checkbox
+              <Button
                 key={status}
-                isChecked={statusFilter === status}
-                onChange={() => setStatusFilter(status)}
-                colorScheme="blackAlpha">
-                {status}
-              </Checkbox>
+                size="sm"
+                onClick={() => setStatusFilter(status)}
+                bg={statusFilter === status ? "black" : "white"}
+                color={statusFilter === status ? "white" : "black"}
+                borderRadius="16px"
+                border="1px solid"
+                borderColor={statusFilter === status ? "black" : "gray.200"}
+                _hover={{
+                  bg: statusFilter === status ? "blackAlpha.800" : "gray.100",
+                }}
+                px={3}
+                py={1}
+                fontWeight="medium">
+                {status}{" "}
+                <Badge ml={1} colorScheme={statusFilter === status ? "white" : "blackAlpha"} borderRadius="full" px={2}>
+                  {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
+                </Badge>
+              </Button>
             ))}
-          </VStack>
+          </Flex>
 
           <MenuDivider />
 
@@ -211,10 +229,7 @@ export const AllApps = ({
                 isChecked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryChange(category.id)}
                 colorScheme="blackAlpha">
-                <Flex align="center">
-                  <Box w="12px" h="12px" borderRadius="full" bg={category.color} mr={2} />
-                  {category.name}
-                </Flex>
+                <Flex align="center">{category.name}</Flex>
               </Checkbox>
             ))}
           </VStack>
@@ -224,10 +239,11 @@ export const AllApps = ({
   }
 
   return (
-    <>
-      <VStack spacing={8} w="full" data-testid="apps-page">
-        <HStack w="full" mt={0}>
-          <InputGroup w="full">
+    <VStack spacing={8} w="full" data-testid="apps-page">
+      <HStack w="full" mt={0}>
+        {headingComponent && <Box>{headingComponent}</Box>}
+        <HStack spacing={4} ml={headingComponent ? "auto" : 0}>
+          <InputGroup w={headingComponent ? "300px" : "full"}>
             <InputLeftElement pointerEvents="none">
               <UilSearch color="#3B3B3B" />
             </InputLeftElement>
@@ -243,11 +259,13 @@ export const AllApps = ({
               _focus={{ borderColor: "black", boxShadow: "0px 0px 3px 0px rgba(0, 76, 252, 0.35)" }}
             />
           </InputGroup>
-          {sortingMenu()}
-          {filteringMenu()}
+          <HStack spacing={2}>
+            {sortingMenu()}
+            {filteringMenu()}
+          </HStack>
         </HStack>
-        {appsSection}
-      </VStack>
-    </>
+      </HStack>
+      {appsSection}
+    </VStack>
   )
 }

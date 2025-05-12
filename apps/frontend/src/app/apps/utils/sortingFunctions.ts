@@ -15,10 +15,3 @@ export function sortByRewards<T extends { id: string }>(apps: T[], rewardsMap?: 
   }
   return [...apps].sort((a, b) => (rewardsMap.get(b.id) || 0) - (rewardsMap.get(a.id) || 0))
 }
-
-export function sortByImpact(apps: AllApps[], impactMap: Map<string, number>): AllApps[] {
-  if (!impactMap || impactMap.size === 0) {
-    return [...apps]
-  }
-  return [...apps].sort((a, b) => (impactMap.get(b.id) || 0) - (impactMap.get(a.id) || 0))
-}

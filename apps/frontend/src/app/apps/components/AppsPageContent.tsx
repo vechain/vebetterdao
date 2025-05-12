@@ -1,6 +1,6 @@
 import { useXApps, useXNode } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
-import { VStack, Heading, Text, Box } from "@chakra-ui/react"
+import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
 import { AllApps } from "./AllApps"
@@ -20,6 +20,7 @@ export type XAppInformations = {
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
+  const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
@@ -57,16 +58,29 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
-      <VStack alignItems={"flex-start"} spacing={4} w="full">
-        <Heading size="lg">{t("Sustainability apps")}</Heading>
-        <AllApps
-          newApps={newAppsEndorsedandUnendorsed}
-          currentActiveApps={currentActiveApps}
-          gracePeriodApps={gracePeriodApps}
-          endorsementLostApps={endorsementLostApps}
-          isXAppsLoading={appsLoading}
-        />
-      </VStack>
+      {!isAbove800 ? (
+        <VStack alignItems={"flex-start"} spacing={4} w="full">
+          <Heading size="lg">{t("Sustainability apps")}</Heading>
+          <AllApps
+            newApps={newAppsEndorsedandUnendorsed}
+            currentActiveApps={currentActiveApps}
+            gracePeriodApps={gracePeriodApps}
+            endorsementLostApps={endorsementLostApps}
+            isXAppsLoading={appsLoading}
+          />
+        </VStack>
+      ) : (
+        <HStack w="full" alignItems={"flex-start"} spacing={0}>
+          <AllApps
+            headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
+            newApps={newAppsEndorsedandUnendorsed}
+            currentActiveApps={currentActiveApps}
+            gracePeriodApps={gracePeriodApps}
+            endorsementLostApps={endorsementLostApps}
+            isXAppsLoading={appsLoading}
+          />
+        </HStack>
+      )}
 
       <JoinB3TRAppsBanner />
 

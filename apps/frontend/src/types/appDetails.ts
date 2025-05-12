@@ -20,52 +20,45 @@ export enum XAppStatus {
 }
 
 export const APP_CATEGORIES = [
-  { id: "plastic-waste-recycling", name: "Plastic Waste & Recycling", color: "#FFD4E0" },
   { id: "carbon-footprint", name: "Carbon Footprint", color: "#feeab6" },
-  { id: "nutrition", name: "Nutrition", color: "#CEF5D1" },
+  { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
   { id: "fitness-wellness", name: "Fitness & Wellness", color: "#D1E2FF" },
-  { id: "sustainable-shopping", name: "Sustainable Shopping", color: "#C4ECFF" },
-  { id: "social-community-activism", name: "Social, Community, Activism", color: "#c2f4f0" },
   { id: "green-finance-defi", name: "Green Finance, DeFi", color: "##ffe0cd" },
   { id: "green-mobility-travel", name: "Green Travel", color: "#FAD1FC" },
+  { id: "nutrition", name: "Nutrition", color: "#CEF5D1" },
+  { id: "plastic-waste-recycling", name: "Plastic Waste & Recycling", color: "#FFD4E0" },
   { id: "renewable-energy-efficiency", name: "Renewable Energy", color: "#E0DAFD" },
-  { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
+  { id: "social-community-activism", name: "Social, Community, Activism", color: "#c2f4f0" },
+  { id: "sustainable-shopping", name: "Sustainable Shopping", color: "#C4ECFF" },
 ]
 
 // SORTING
-export type SortOption = "newest" | "rewards" | "impact" | "alphabetical" | "default"
+export type SortOption = "newest" | "rewards" | "alphabetical" | "default"
 export interface SortOptionProps {
   id: SortOption
   label: string
   description: string
 }
-
 // Sort options configuration
 export const sortOptions: SortOptionProps[] = [
-  {
-    id: "newest",
-    label: "Newest",
-    description: "Most recently created apps",
-  },
   {
     id: "alphabetical",
     label: "Alphabetical",
     description: "A to Z by app name",
   },
   {
+    id: "newest",
+    label: "Newest",
+    description: "Most recently created apps",
+  },
+  {
     id: "rewards",
     label: "Rewards",
     description: "Highest rewards distributed",
   },
-  {
-    id: "impact",
-    label: "Impact",
-    description: "Highest proof of impact",
-  },
 ]
 
 // FILTERING
-
 export const FILTER_ACTIVE_APPS = "Active apps"
 export const FILTER_NEW_APPS = "New apps"
 export const FILTER_GRACE_PERIOD = "In grace period"
