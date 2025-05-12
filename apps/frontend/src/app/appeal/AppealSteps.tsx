@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { AnalyticsUtils } from "@/utils"
 import { useWallet } from "@vechain/vechain-kit"
-import { queryClient, useUserBotSignals, useUserSignalsReset, useUserSignalEvents, useXApps } from "@/api"
+import { queryClient, useUserBotSignals, useUserSignalEvents, useXApps } from "@/api"
 import {
   VStack,
   Heading,
@@ -43,7 +43,6 @@ export const AppealSteps = () => {
   const isConnectedUser = !!connectedAccount?.address
   const { data: isVerifiedVetDomain } = useVerifiedVetDomain(connectedAccount?.address)
   const { data: userSignalCounter } = useUserBotSignals(connectedAccount?.address)
-  const { data: userSignalsResetEvents } = useUserSignalsReset(connectedAccount?.address)
   const { data: userSignalEvents } = useUserSignalEvents(connectedAccount?.address as string)
   const { data: apps } = useXApps()
 
@@ -123,10 +122,8 @@ export const AppealSteps = () => {
       const data = await response.json()
 
       if (data.status === RESET_STATUS.SUCCESS) {
-        const resetEvents = userSignalsResetEvents?.userSignalsResetEvents ?? []
-
-        if (resetEvents.length > 0) {
-          // Store successful reset in localStorage
+        // Store successful reset in localStorage
+        if (connectedAccount?.address) {
           const resetKey = `${RESET_SIGNAL_KEY_LOCAL_STORAGE_PREFIX}_${connectedAccount.address}`
           localStorage.setItem(resetKey, "true")
         }
