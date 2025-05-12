@@ -141,10 +141,11 @@ export const useSelectedGmNft = (profile?: string) => {
     errorAttachedNodeId ||
     errorMaxGmLevel
 
-  const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
-  const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
-
   const b3trLeftover = Number(gmNfts[Number(gmLevel)]?.b3trToUpgrade || 0) - b3trToUpgradeGMToNextLevel
+
+  const isEnoughBalanceToUpgradeGM =
+    (b3trBalance && Number(b3trBalance?.scaled || 0)) || b3trLeftover >= b3trToUpgradeGMToNextLevel
+  const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
 
   const { xNodeId } = useXNode(profile)
   const isXNodeAttachedToGM = attachedNodeId === xNodeId
