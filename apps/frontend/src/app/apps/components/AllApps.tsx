@@ -29,14 +29,14 @@ import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
 import { UilSortAmountDown, UilCheck, UilSearch, UilFilter } from "@iconscout/react-unicons"
 
-import { APP_CATEGORIES, FILTER_ACTIVE_APPS } from "@/types/appDetails"
+import { APP_CATEGORIES, FILTER_ACTIVE_APPS, sortOptions } from "@/types/appDetails"
 
 import { useAppsSorting, useAppsSearch, useAppsFiltering } from "../hooks"
 import { usePagination } from "@/hooks"
 
 type Props = {
   currentActiveApps: XApp[]
-  newApps: UnendorsedApp[]
+  newApps: UnendorsedApp[] | XApp[]
   gracePeriodApps: UnendorsedApp[]
   endorsementLostApps: UnendorsedApp[]
   isXAppsLoading: boolean
@@ -54,14 +54,14 @@ export const AllApps = ({
   const { t } = useTranslation()
   const { isEndorsingApp } = useXNode()
 
-  const { sortOption, sortOptions, sortedApps, isSorting, onSortChange, isSorted } = useAppsSorting(
+  const { sortOption, sortedApps, isSorting, onSortChange, isSorted } = useAppsSorting(
     currentActiveApps,
     newApps,
     gracePeriodApps,
     endorsementLostApps,
   )
   const { searchQuery, handleSearchChange } = useAppsSearch()
-  const { setStatusFilter, toggleCategoryFilter, filteredApps, statusFilter, statusFilterOptions } = useAppsFiltering(
+  const { setStatusFilter, toggleCategoryFilter, filteredApps, statusFilterOptions, statusFilter } = useAppsFiltering(
     sortedApps,
     sortOption,
     searchQuery,
@@ -121,7 +121,7 @@ export const AllApps = ({
         )}
       </VStack>
     )
-  }, [t, displayAppsRestricted, isXAppsLoading, isSorting, showCreatorBanner, layout])
+  }, [t, displayAppsRestricted, isXAppsLoading, isSorting, showCreatorBanner, layout, hasMore, loadMore])
 
   const sortingMenu = () => {
     return (

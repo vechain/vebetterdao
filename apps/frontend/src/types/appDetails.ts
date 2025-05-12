@@ -32,6 +32,40 @@ export const APP_CATEGORIES = [
   { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
 ]
 
+// SORTING
+export type SortOption = "newest" | "rewards" | "impact" | "alphabetical" | "default"
+export interface SortOptionProps {
+  id: SortOption
+  label: string
+  description: string
+}
+
+// Sort options configuration
+export const sortOptions: SortOptionProps[] = [
+  {
+    id: "newest",
+    label: "Newest",
+    description: "Most recently created apps",
+  },
+  {
+    id: "alphabetical",
+    label: "Alphabetical",
+    description: "A to Z by app name",
+  },
+  {
+    id: "rewards",
+    label: "Rewards",
+    description: "Highest rewards distributed",
+  },
+  {
+    id: "impact",
+    label: "Impact",
+    description: "Highest proof of impact",
+  },
+]
+
+// FILTERING
+
 export const FILTER_ACTIVE_APPS = "Active apps"
 export const FILTER_NEW_APPS = "New apps"
 export const FILTER_GRACE_PERIOD = "In grace period"

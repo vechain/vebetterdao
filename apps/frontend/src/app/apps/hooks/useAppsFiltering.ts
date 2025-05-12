@@ -1,7 +1,13 @@
 import { useState, useMemo } from "react"
 import { AllApps, useXAppsCategories } from "@/api"
-import { SortedAppsWithStatus, SortOption } from "./useAppsSorting"
-import { FILTER_ACTIVE_APPS, FILTER_NEW_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST } from "@/types/appDetails"
+import { SortedAppsWithStatus } from "./useAppsSorting"
+import {
+  FILTER_ACTIVE_APPS,
+  FILTER_NEW_APPS,
+  FILTER_GRACE_PERIOD,
+  FILTER_ENDORSEMENT_LOST,
+  SortOption,
+} from "@/types/appDetails"
 
 /**
  * Hook for filtering apps by status, category, and search query
@@ -42,18 +48,18 @@ export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: So
     }
 
     return apps
-  }, [statusFilter, categoryFilter, sortedApp, sortOption, searchQuery])
+  }, [statusFilter, sortedApp, sortOption, searchQuery])
 
   const filteredAppsByCategory = useMemo(() => {
     if (!categoryFilter) return []
 
     return filteredAppsByStatus.filter(app => appCategories?.[app.id]?.includes(categoryFilter))
-  }, [filteredAppsByStatus, categoryFilter])
+  }, [filteredAppsByStatus, appCategories, categoryFilter])
 
   const filteredApps = useMemo(() => {
     if (!categoryFilter || !filteredAppsByCategory) return filteredAppsByStatus
     return filteredAppsByCategory
-  }, [filteredAppsByStatus, filteredAppsByCategory])
+  }, [filteredAppsByStatus, filteredAppsByCategory, categoryFilter])
 
   const toggleCategoryFilter = (categoryId: string) => {
     if (categoryFilter === categoryId) {
