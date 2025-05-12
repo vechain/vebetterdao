@@ -183,12 +183,19 @@ export const AppealSteps = () => {
     AnalyticsUtils.trackPage("Appeal")
   }, [])
 
-  // Redirect to homepage if user is not connected or has completed verification with no signals
+  // Redirect to homepage if
+  // - user is not connected
+  // - appeal is complete (verified with no signals)
   useLayoutEffect(() => {
-    if (!isConnectedUser || (isVerified && userSignaledCount === 0)) {
+    if (!isConnectedUser) {
+      router.push("/")
+      return
+    }
+
+    if (isVerified && Number(userSignaledCount) === 0) {
       router.push("/")
     }
-  }, [isConnectedUser, router])
+  }, [isConnectedUser, isVerified, userSignaledCount, router])
 
   // Return null to prevent flash of content before redirect
   if (!isConnectedUser) {
