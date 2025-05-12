@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AnalyticsUtils } from "@/utils"
@@ -45,6 +45,7 @@ export const AppealSteps = () => {
   const { data: userSignalCounter } = useUserBotSignals(connectedAccount?.address)
   const { data: userSignalEvents } = useUserSignalEvents(connectedAccount?.address as string)
   const { data: apps } = useXApps()
+  const initialRenderRef = useRef(true) // Track initial render
 
   function getAppName(appId: string): string {
     const found = apps?.allApps.find(app => app.id === appId)
@@ -189,9 +190,13 @@ export const AppealSteps = () => {
       return
     }
 
-    if (isVerified && Number(userSignaledCount) === 0) {
+    // Only redirect on initial conditions, not when they change later
+    if (initialRenderRef.current && isVerified && Number(userSignaledCount) === 0) {
       router.push("/")
     }
+
+    // Mark initial render complete
+    initialRenderRef.current = false
   }, [isConnectedUser, isVerified, userSignaledCount, router])
 
   // Return null to prevent flash of content before redirect
