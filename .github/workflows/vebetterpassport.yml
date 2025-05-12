@@ -1,7 +1,7 @@
 name: VeBetterPassport Infrastructure
 
 on:
-  push:
+  pull_request:
     paths:
       - 'terraform/vebetterpassport/**'
       - 'lambda/src/veBetterPassport/**'
@@ -111,27 +111,36 @@ jobs:
         continue-on-error: true
         env:
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+          WORKSPACE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}
         run: |
-          terraform plan \
-            -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
-            -out=vebetterpassport.tfplan \
-            -detailed-exitcode
+          if [ "$WORKSPACE" == "dev" ]; then
+            terraform plan \
+              -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}" \
+              -out=vebetterpassport.tfplan \
+              -detailed-exitcode
+          else
+            terraform plan \
+              -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
+              -out=vebetterpassport.tfplan \
+              -detailed-exitcode
+          fi
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
 
-      # - name: Check for changes
-      #   id: check_changes
-      #   run: |
-      #     if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
-      #       echo "Changes detected"
-      #       echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
-      #     else
-      #       echo "No changes detected"
-      #       echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
-      #     fi
-      #   shell: bash
-      #   continue-on-error: false
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
+            echo "Changes detected"
+            echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes detected"
+            echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+        continue-on-error: false
 
       - name: Upload Plan
-        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: vebetterpassport-plan
@@ -142,10 +151,17 @@ jobs:
       - name: Terraform Apply
         if: |
           (github.event_name == 'workflow_dispatch' && github.event.inputs.workspace == 'dev') ||
-          (github.event_name == 'push') ||
+          (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
           (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
         id: apply
         working-directory: terraform/vebetterpassport
         env:
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-        run: terraform apply -auto-approve
+          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+          WORKSPACE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}
+        run: |
+          if [ "$WORKSPACE" == "dev" ]; then
+            terraform apply -auto-approve -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}"
+          else
+            terraform apply -auto-approve -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}"
+          fi
