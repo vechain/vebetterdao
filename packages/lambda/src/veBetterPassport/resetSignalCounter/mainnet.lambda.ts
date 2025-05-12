@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
+import { APIGatewayProxyResult, Context } from "aws-lambda"
 import { FunctionFragment } from "ethers"
 
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"

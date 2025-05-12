@@ -47,14 +47,10 @@ export const AppealSteps = () => {
   const { data: userSignalEvents } = useUserSignalEvents(connectedAccount?.address as string)
   const { data: apps } = useXApps()
 
-  console.log("🔄 userSignalEvents", userSignalEvents)
-
   function getAppName(appId: string): string {
     const found = apps?.allApps.find(app => app.id === appId)
     return found ? found.name : "Unknown"
   }
-
-  console.log("🔄 apps", getAppName(userSignalEvents?.activeSignalEvents[0]?.appId))
 
   const STEPS = [
     { id: "step-1", title: t("Start"), description: t("Begin your DAO access appeal") },
@@ -173,8 +169,6 @@ export const AppealSteps = () => {
     }
   }, [connectedAccount?.address])
 
-  console.log("🔄 isVerified", isVerified)
-
   useEffect(() => {
     // Only trigger if
     // - User is verified AND,
@@ -189,9 +183,9 @@ export const AppealSteps = () => {
     AnalyticsUtils.trackPage("Appeal")
   }, [])
 
-  // Redirect to homepage if user is not connected
+  // Redirect to homepage if user is not connected or has completed verification with no signals
   useLayoutEffect(() => {
-    if (!isConnectedUser) {
+    if (!isConnectedUser || (isVerified && userSignaledCount === 0)) {
       router.push("/")
     }
   }, [isConnectedUser, router])
@@ -263,19 +257,21 @@ export const AppealSteps = () => {
               </AlertTitle>
 
               <List styleType="-" p={3}>
-                {userSignalEvents?.activeSignalEvents.map(event => (
-                  <ListItem
-                    key={event.appId}
-                    onClick={() => router.push(`/apps/${event.appId}`)}
-                    cursor="pointer"
-                    textDecoration="underline"
-                    _hover={{
-                      color: "blue.700",
-                      textDecoration: "underline",
-                    }}>
-                    {getAppName(event.appId)}
-                  </ListItem>
-                ))}
+                {userSignalEvents?.activeSignalEvents
+                  .filter((event, index, self) => self.findIndex(e => e.appId === event.appId) === index)
+                  .map(event => (
+                    <ListItem
+                      key={event.appId}
+                      onClick={() => router.push(`/apps/${event.appId}`)}
+                      cursor="pointer"
+                      textDecoration="underline"
+                      _hover={{
+                        color: "blue.700",
+                        textDecoration: "underline",
+                      }}>
+                      {getAppName(event.appId)}
+                    </ListItem>
+                  ))}
               </List>
             </Box>
           </Alert>
