@@ -70,7 +70,8 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   lifecycle {
     ignore_changes = [
       tags,
-      tags_all
+      tags_all,
+      last_modified
     ]
   }
 }
