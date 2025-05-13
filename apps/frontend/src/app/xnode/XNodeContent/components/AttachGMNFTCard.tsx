@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
+import { gmNfts } from "@/constants/gmNfts"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
@@ -37,6 +38,9 @@ export const AttachGMNFTCard = () => {
     gmRewardMultiplier,
     isLoading: isGMLoading,
   } = useGMNFTData(attachedGMTokenId ?? null)
+
+  // TODO: REMOVE IN ROUND 46
+  const gmInfo = gmNfts.find(nft => nft.level === gmLevel)
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -83,7 +87,7 @@ export const AttachGMNFTCard = () => {
           </VStack>
           <Flex border="1px solid" rounded="12px" position="relative" onClick={goToGmNftPage} cursor="pointer">
             <Image
-              src={"/images/nft-page-background.png"}
+              src={"/assets/backgrounds/nft-page-background.webp"}
               alt="gm-nft-header"
               position={"absolute"}
               rounded={"12px"}
@@ -113,11 +117,11 @@ export const AttachGMNFTCard = () => {
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
                     <Text fontSize="sm" fontWeight={600}>
-                      {gmRewardMultiplier}
+                      {gmInfo?.multiplier ?? gmRewardMultiplier}
                       {"x"}
                     </Text>
                     <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                      {t("Voting reward multiplier")}
+                      {t("GM reward weight")}
                     </Text>
                   </HStack>
                 </FeatureFlagWrapper>

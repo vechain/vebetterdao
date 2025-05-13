@@ -1,4 +1,4 @@
-import { useXApps, useXNode } from "@/api"
+import { useXApps, useXNode, useIsCreatorOfAnyApp } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -8,6 +8,7 @@ import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsDisclaimer } from "./AppsDisclaimer"
 import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
+import { useWallet } from "@vechain/vechain-kit"
 
 export type XAppInformations = {
   key?: string
@@ -20,12 +21,15 @@ export type XAppInformations = {
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
   const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
+
+  const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
 
   // New apps looking for endorsement slider
   const newApps = xApps?.newLookingForEndorsement ?? []
@@ -82,7 +86,7 @@ export const AppsPageContent = () => {
         </HStack>
       )}
 
-      <JoinB3TRAppsBanner />
+      {!isCreatorOfAnyApp && <JoinB3TRAppsBanner />}
 
       <Box mt={10}>
         <AppsDisclaimer />

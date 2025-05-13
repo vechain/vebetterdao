@@ -14,9 +14,9 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRejectEntityLink } from "@/hooks"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RejectLinkingModal = ({
   modal,
   secondaryAccount,
@@ -25,7 +25,7 @@ export const RejectLinkingModal = ({
   secondaryAccount: string
 }) => {
   const { t } = useTranslation()
-
+  const { isTxModalOpen } = useTransactionModal()
   const rejectLinking = useRejectEntityLink({})
 
   const handleDelegate = useCallback(() => {
@@ -39,26 +39,8 @@ export const RejectLinkingModal = ({
     rejectLinking.resetStatus()
   }, [modal, rejectLinking])
 
-  if (rejectLinking.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Linking rejected!")}
-        status={rejectLinking.status as TransactionModalStatus}
-        errorDescription={rejectLinking.error?.reason}
-        errorTitle={rejectLinking.error ? t("Error rejecting linking") : undefined}
-        showTryAgainButton
-        onTryAgain={() => rejectLinking.sendTransaction({ entity: secondaryAccount })}
-        pendingTitle={t("Rejecting linking...")}
-        showExplorerButton
-        txId={rejectLinking.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

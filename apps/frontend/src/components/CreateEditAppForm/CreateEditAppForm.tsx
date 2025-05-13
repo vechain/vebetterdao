@@ -306,7 +306,7 @@ export const CreateEditAppForm = ({
                   if (!value) {
                     return "Logo is required"
                   }
-                  if (value === "/images/dapp_icon_placeholder.svg") return "Please upload a logo"
+                  if (value === "/assets/icons/dapp_icon_placeholder.svg") return "Please upload a logo"
                 },
               }}
               render={({ field: { value } }) => (
@@ -344,7 +344,7 @@ export const CreateEditAppForm = ({
                   if (!value) {
                     return "Logo is required"
                   }
-                  if (value === "/images/dapp_banner_placeholder.svg") return "Please upload a banner"
+                  if (value === "/assets/icons/dapp_banner_placeholder.svg") return "Please upload a banner"
                 },
               }}
               render={({ field: { value } }) => (

@@ -10,6 +10,7 @@ type AllocationAmount = {
   treasury: string
   voteX2Earn: string
   voteXAllocations: string
+  gm: string
 }
 
 /**
@@ -24,21 +25,25 @@ export const getAllocationAmount = async (thor: Connex.Thor, roundId?: string): 
   const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmount").format("json")
   const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmount").format("json")
   const functionFragmentXAllocationsAmount = emissionsInterface.getFunction("getXAllocationAmount").format("json")
+  const functionFragmentGMRewardsAmount = emissionsInterface.getFunction("getGMAmount").format("json")
 
-  const [resTreasury, resVoteX2Earn, voteXAllocations] = await Promise.all([
+  const [resTreasury, resVoteX2Earn, voteXAllocations, resGMRewards] = await Promise.all([
     thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(roundId),
     thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentVoteX2EarnAmount)).call(roundId),
     thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentXAllocationsAmount)).call(roundId),
+    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentGMRewardsAmount)).call(roundId),
   ])
 
   if (resTreasury.vmError) return Promise.reject(new Error(resTreasury.vmError))
   if (resVoteX2Earn.vmError) return Promise.reject(new Error(resVoteX2Earn.vmError))
   if (voteXAllocations.vmError) return Promise.reject(new Error(voteXAllocations.vmError))
+  if (resGMRewards.vmError) return Promise.reject(new Error(resGMRewards.vmError))
 
   return {
     treasury: ethers.formatEther(resTreasury.decoded[0]),
     voteX2Earn: ethers.formatEther(resVoteX2Earn.decoded[0]),
     voteXAllocations: ethers.formatEther(voteXAllocations.decoded[0]),
+    gm: ethers.formatEther(resGMRewards.decoded[0]),
   }
 }
 

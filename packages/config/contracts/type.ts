@@ -69,4 +69,12 @@ export type ContractsConfig = {
   X2EARN_NODE_COOLDOWN_PERIOD: number
 
   MULTI_SIG_SIGNERS: string[]
+
+  // GM Reward Pool
+  GM_PERCENTAGE_OF_TREASURY: number
+
+  GM_MULTIPLIERS_V2: number[]
+  VOTER_REWARDS_LEVELS_V2: number[]
+
+  GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 }

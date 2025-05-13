@@ -3,6 +3,7 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlag } from "@/constants"
+import { gmNfts } from "@/constants/gmNfts"
 import {
   Box,
   Card,
@@ -40,9 +41,11 @@ export const GmNFTPageHeader = () => {
     b3trToUpgradeGMToNextLevel,
     isMaxGmLevelReached,
     isLoading,
+    b3trLeftover,
   } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
-
+  // TODO: REMOVE IN ROUND 46
+  const gmInfo = gmNfts.find(nft => nft.level === gmLevel)
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
 
@@ -137,11 +140,19 @@ export const GmNFTPageHeader = () => {
         <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
           {t("B3TR needed to upgrade your GM level")}
         </Text>
+        {b3trLeftover > 0 && (
+          <Text color="#B1F16C" fontSize={isAbove800 ? "sm" : "xs"} fontWeight={500}>
+            {t("You have {{amount}} B3TR leftover from a previous upgrade", {
+              amount: compactFormatter.format(Number(b3trLeftover)),
+            })}
+          </Text>
+        )}
       </>
     )
   }, [
     b3trBalance?.scaled,
     b3trToUpgradeGMToNextLevel,
+    b3trLeftover,
     isAbove800,
     isB3trBalanceLoading,
     isMaxGmLevelReached,
@@ -154,7 +165,7 @@ export const GmNFTPageHeader = () => {
   return (
     <Card>
       <Image
-        src={"/images/nft-page-background.png"}
+        src={"/assets/backgrounds/nft-page-background.webp"}
         alt="gm-nft-header"
         position={"absolute"}
         w="100%"
@@ -166,7 +177,7 @@ export const GmNFTPageHeader = () => {
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
         spacing={4}
-        zIndex={"2"}>
+        zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
           justify="space-between"
@@ -215,11 +226,10 @@ export const GmNFTPageHeader = () => {
             <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
-                  {gmRewardMultiplier}
-                  {"x"}
+                  {gmInfo?.multiplier ?? gmRewardMultiplier}
                 </Text>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                  {t("Voting reward multiplier")}
+                  {t("GM reward weight")}
                 </Text>
               </HStack>
             </FeatureFlagWrapper>

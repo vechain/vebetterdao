@@ -25,7 +25,7 @@ export const CreatorApplicationApproved = () => {
           {/* Left Section: Image full height when mobile */}
           <Box w={"150px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
             <Image
-              src="/images/mascot/mascot-holding-tokens.png"
+              src="/assets/mascot/mascot-holding-tokens.webp"
               alt="mascot-holding-tokens"
               position="absolute"
               bottom={{ base: 5, md: 5, lg: 0 }}

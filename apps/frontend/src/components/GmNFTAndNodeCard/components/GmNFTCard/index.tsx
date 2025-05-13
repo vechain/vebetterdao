@@ -5,7 +5,9 @@ import { FaChevronRight } from "react-icons/fa6"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
+import { gmNfts } from "@/constants/gmNfts"
 import { useDomainOrAddress } from "@/hooks"
+
 interface GmNFTCardProps {
   isGMOwned: boolean
   isGMLoading: boolean
@@ -35,6 +37,9 @@ export const GmNFTCard = ({
 }: GmNFTCardProps) => {
   const { t } = useTranslation()
   const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
+
+  // TODO: REMOVE IN ROUND 46
+  const gmInfo = gmNfts.find(nft => nft.level === gmLevel)
 
   if (!isGMOwned) {
     return (
@@ -89,11 +94,11 @@ export const GmNFTCard = ({
         <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
           <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
             <Text fontSize="xs" fontWeight={600}>
-              {gmRewardMultiplier}
+              {gmInfo?.multiplier ?? gmRewardMultiplier}
               {"x"}
             </Text>
             <Text fontSize="xs" fontWeight={400} noOfLines={1}>
-              {t("Voting reward multiplier")}
+              {t("GM reward weight")}
             </Text>
           </HStack>
         </FeatureFlagWrapper>

@@ -75,7 +75,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       <CardBody color={whiteColor} p="12px">
         {isYourRanking && (
           <Image
-            src="/images/your-ranking-bg.svg"
+            src="/assets/backgrounds/your-ranking-bg.svg"
             alt="Bg image"
             zIndex={0}
             rounded={"full"}

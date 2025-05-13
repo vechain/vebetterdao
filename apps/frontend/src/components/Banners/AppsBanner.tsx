@@ -14,7 +14,7 @@ export const AppsBanner = () => {
       position="relative"
       overflow="visible"
       objectFit="contain"
-      bgImage={"/images/cloud-background.png"}
+      bgImage={"/assets/backgrounds/cloud-background.webp"}
       bgSize="cover"
       bgPosition="center"
       bgRepeat="no-repeat"
@@ -31,8 +31,8 @@ export const AppsBanner = () => {
         position="absolute"
         bottom="0"
         right={{ base: "-5%", md: "0" }}
-        src="/images/mascot/mascot-explore-dapps@1x.webp"
-        srcSet="/images/mascot/mascot-explore-dapps@1x.webp 1x, /images/mascot/mascot-explore-dapps@2x.webp 2x"
+        src="/assets/mascot/mascot-explore-dapps@1x.webp"
+        srcSet="/assets/mascot/mascot-explore-dapps@1x.webp 1x, /assets/mascot/mascot-explore-dapps@2x.webp 2x"
         alt="mascot-explore-dapps"
         boxSize="200px"
         overflow="visible"

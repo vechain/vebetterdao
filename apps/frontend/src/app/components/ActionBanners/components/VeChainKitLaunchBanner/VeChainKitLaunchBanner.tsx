@@ -33,7 +33,7 @@ export const VeChainKitLaunchBanner = () => {
         />
       }
       backgroundColor="#B1F16C"
-      backgroundImageSrc="/images/community-green-blob.png"
+      backgroundImageSrc="/assets/backgrounds/community-green-blob.webp"
       buttonIcon={<UilBoltAlt />}
       buttonIconPosition="right"
       buttonLabel={t("Try It")}
