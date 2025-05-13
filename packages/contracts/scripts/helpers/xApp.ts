@@ -6,12 +6,16 @@ import {
   X2EarnApps,
   TokenAuction,
 } from "../../typechain-types"
-import { type TransactionClause, type TransactionBody, Clause, Address, ABIContract } from "@vechain/sdk-core"
-import { sendTx } from "./txHelper"
+import { type TransactionClause, Clause, Address, ABIContract } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 import { getContractsConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export type App = {
   admin: string
@@ -37,7 +41,7 @@ export const registerXDapps = async (contractAddress: string, accounts: TestPk[]
         [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
       )
 
-      await sendTx([clause], account)
+      await TransactionUtils.sendTx(thorClient, [clause], account.pk)
     }
   }
 }
@@ -64,7 +68,7 @@ export const endorseXApps = async (
       [apps[i], nodeId],
     )
 
-    await sendTx([clause], endorsers[i].key)
+    await TransactionUtils.sendTx(thorClient, [clause], endorsers[i].key.pk)
   }
 
   console.log("x-apps endorsed.")
@@ -115,7 +119,7 @@ export const castVotesToXDapps = async (
           console.log(
             `Casting round ${roundId} votes for ${account.key.address} with ${splits.map(split => split.weight)} votes to ${splits.map(split => split.app)}`,
           )
-          await sendTx(clauses, account.key)
+          await TransactionUtils.sendTx(thorClient, clauses, account.key.pk)
         } catch (e) {
           if (ignoreErrors) {
             console.error(`Error casting vote for account ${account.key.address}:`, e)

@@ -1,12 +1,9 @@
-import { getConfig } from "@repo/config"
 import { type TransactionClause, type TransactionBody, Transaction, Address } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
-import { TestPk } from "./seedAccounts"
 
-const thorClient = ThorClient.at(getConfig().nodeUrl)
 let chainTag: number
 
-export const getBestBlockRef = async (): Promise<string> => {
+export const getBestBlockRef = async (thorClient: ThorClient): Promise<string> => {
   const blockRef = await thorClient.blocks.getBestBlockRef()
 
   if (!blockRef) {
@@ -16,7 +13,7 @@ export const getBestBlockRef = async (): Promise<string> => {
   return blockRef
 }
 
-export const getChainTag = async (): Promise<number> => {
+export const getChainTag = async (thorClient: ThorClient): Promise<number> => {
   if (chainTag) {
     return chainTag
   }
@@ -31,7 +28,8 @@ export const getChainTag = async (): Promise<number> => {
   return chainTag
 }
 
-const buildTxBody = async (
+export const buildTxBody = async (
+  thorClient: ThorClient,
   clauses: TransactionClause[],
   senderAddress: Address,
   expiration: number,
@@ -48,12 +46,21 @@ const buildTxBody = async (
     gas = gasResult.totalGas + 200_000
   }
 
-  const body = await thorClient.transactions.buildTransactionBody(clauses, gas)
+  const body: TransactionBody = {
+    chainTag: await getChainTag(thorClient),
+    blockRef: await getBestBlockRef(thorClient),
+    expiration,
+    clauses,
+    gasPriceCoef: 0,
+    gas,
+    dependsOn: null,
+    nonce: Math.floor(Math.random() * 10000000),
+  }
 
   return body
 }
 
-const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
+const signAndSendTx = async (thorClient: ThorClient, body: TransactionBody, pk: Uint8Array) => {
   const signedTx = Transaction.of(body).sign(Buffer.from(pk))
 
   const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
@@ -68,7 +75,14 @@ const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
   }
 }
 
-export const sendTx = async (clauses: TransactionClause[], sender: TestPk, retries: number = 30) => {
+export const sendTx = async (
+  thorClient: ThorClient,
+  clauses: TransactionClause[],
+  pk: Uint8Array,
+  retries: number = 5,
+) => {
+  const signerAddress = Address.ofPrivateKey(pk)
+
   const actualRetries = Math.max(0, retries) // Ensure retries is not negative
 
   for (let attempt = 1; attempt < actualRetries + 1; attempt++) {
@@ -77,9 +91,9 @@ export const sendTx = async (clauses: TransactionClause[], sender: TestPk, retri
         console.log(`Attempt ${attempt} of ${actualRetries}: Sending transaction...`)
       }
       // Rebuild the transaction body for each attempt to get fresh gas, nonce, and blockRef.
-      const body: TransactionBody = await buildTxBody(clauses, sender.address, 32)
+      const body: TransactionBody = await buildTxBody(thorClient, clauses, signerAddress, 32)
 
-      await signAndSendTx(body, sender.pk) // This function signs the body and sends the transaction
+      await signAndSendTx(thorClient, body, pk) // This function signs the body and sends the transaction
       return // Transaction was successful, exit the function
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)

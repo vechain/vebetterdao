@@ -1,8 +1,11 @@
 import { Treasury__factory } from "../../typechain-types"
 import { type TransactionClause, Clause, Address, VTHO, ERC20_ABI, ABIContract } from "@vechain/sdk-core"
-import { sendTx } from "./txHelper"
+import { TransactionUtils } from "@repo/utils"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
+import { ThorClient } from "@vechain/sdk-network"
+import { getConfig } from "@repo/config"
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const airdropVTHO = async (accounts: Address[], amount: bigint, sourceAccount: TestPk) => {
   console.log(`Airdropping VTHO...`)
@@ -16,7 +19,7 @@ export const airdropVTHO = async (accounts: Address[], amount: bigint, sourceAcc
       clauses.push(Clause.transferVTHOToken(address, VTHO.of(amount)))
     })
 
-    await sendTx(clauses, sourceAccount)
+    await TransactionUtils.sendTx(thorClient, clauses, sourceAccount.pk)
   }
 }
 
@@ -38,7 +41,7 @@ export const transferErc20 = async (tokenAddress: string, sender: TestPk, recipi
     ]),
   )
 
-  await sendTx(clauses, sender)
+  await TransactionUtils.sendTx(thorClient, clauses, sender.pk)
 }
 
 /**
@@ -62,6 +65,6 @@ export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: Te
       )
     })
 
-    await sendTx(clauses, admin)
+    await TransactionUtils.sendTx(thorClient, clauses, admin.pk)
   }
 }

@@ -43,11 +43,15 @@ import {
   XAllocationVotingV3,
 } from "../typechain-types"
 import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
-import { sendTx } from "../scripts/helpers/txHelper"
+import { TransactionUtils } from "@repo/utils"
 import { APPS } from "../scripts/deploy/setup"
 import { ABIContract, Address, Clause, VET, type TransactionBody } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { ThorClient } from "@vechain/sdk-network"
+import { getConfig } from "@repo/config"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 describe("X-Apps - @shard15", function () {
   // We prepare the environment for 4 creators
@@ -6272,7 +6276,7 @@ describe("X-Apps - @shard17", function () {
           ),
         ]
 
-        await sendTx(clauses, accounts[i])
+        await TransactionUtils.sendTx(thorClient, clauses, accounts[i].pk)
       }
 
       const endorsers = await x2EarnApps.getEndorsers(app1Id)

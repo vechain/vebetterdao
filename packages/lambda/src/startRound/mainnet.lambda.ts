@@ -24,7 +24,8 @@ const client = new SecretsManagerClient({
  * @returns the transaction receipt of the distribution of emissions if successful and the gas result
  */
 async function distributeEmissions(thor: ThorClient) {
-  const privateKey = await getSecret(client, "start_emissions_pk", "start-emissions-pk")
+  const privateKey = Buffer.from(await getSecret(client, "start_emissions_pk", "start-emissions-pk"), "hex")
+  const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
   // Wait for the next round to start before proceeding
   await waitForRoundStart(thor)
@@ -37,7 +38,7 @@ async function distributeEmissions(thor: ThorClient) {
   )
 
   // Estimate the gas cost for the transaction
-  let gasResult = await thor.gas.estimateGas([clause], Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString())
+  let gasResult = await thor.gas.estimateGas([clause], signerAddress)
 
   // Check if the transaction was estimated to revert and handle accordingly
   if (gasResult.reverted) {
@@ -58,7 +59,7 @@ async function distributeEmissions(thor: ThorClient) {
 
   // Sign the transaction with the developer's private key
   // let signedTx = await thor.transactions.signTransaction(txBody, privateKey)
-  let signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
+  let signedTx = Transaction.of(txBody).sign(privateKey)
 
   // Send the signed transaction to the blockchain
   let tx = await thor.transactions.sendTransaction(signedTx)

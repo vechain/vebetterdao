@@ -1,7 +1,11 @@
 import { Emissions__factory, VoterRewards, VoterRewards__factory } from "../../typechain-types"
-import { type TransactionClause, type TransactionBody, Clause, Address, ABIContract } from "@vechain/sdk-core"
-import { sendTx } from "./txHelper"
+import { type TransactionClause, Clause, Address, ABIContract } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { TestPk } from "./seedAccounts"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const bootstrapEmissions = async (contractAddress: string, admin: TestPk) => {
   console.log("Bootstrapping emissions...")
@@ -16,7 +20,7 @@ export const bootstrapEmissions = async (contractAddress: string, admin: TestPk)
     ),
   )
 
-  await sendTx(clauses, admin)
+  await TransactionUtils.sendTx(thorClient, clauses, admin.pk)
 }
 
 export const startEmissions = async (contractAddress: string, acct: TestPk) => {
@@ -32,7 +36,7 @@ export const startEmissions = async (contractAddress: string, acct: TestPk) => {
     ),
   )
 
-  await sendTx(clauses, acct)
+  await TransactionUtils.sendTx(thorClient, clauses, acct.pk)
 }
 
 export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct: TestPk) => {
@@ -48,7 +52,7 @@ export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct:
     ),
   )
 
-  await sendTx(clauses, acct)
+  await TransactionUtils.sendTx(thorClient, clauses, acct.pk)
 }
 
 export const distributeEmissions = async (contractAddress: string, acct: TestPk) => {
@@ -64,5 +68,5 @@ export const distributeEmissions = async (contractAddress: string, acct: TestPk)
     ),
   )
 
-  await sendTx(clauses, acct)
+  await TransactionUtils.sendTx(thorClient, clauses, acct.pk)
 }

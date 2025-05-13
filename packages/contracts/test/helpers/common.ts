@@ -6,10 +6,14 @@ import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
 import { Clause, Units, VTHO } from "@vechain/sdk-core"
 import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
-import { sendTx } from "../../scripts/helpers/txHelper"
+import { TransactionUtils } from "@repo/utils"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
 import { endorseApp } from "./xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -27,7 +31,7 @@ export const waitForNextBlock = async () => {
   const clauses: TransactionClause[] = []
   clauses.push(Clause.transferVTHOToken(target.address, VTHO.of(1, Units.wei)))
 
-  await sendTx(clauses, source)
+  await TransactionUtils.sendTx(thorClient, clauses, source.pk)
 }
 
 export const moveBlocks = async (blocks: number) => {

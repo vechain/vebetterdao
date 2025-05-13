@@ -1,8 +1,11 @@
 import { B3TR, B3TR__factory, VOT3, VOT3__factory } from "../../typechain-types"
-import { type TransactionClause, type TransactionBody, Clause, ABIContract, Address } from "@vechain/sdk-core"
-import { sendTx } from "./txHelper"
+import { type TransactionClause, Clause, ABIContract, Address } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { SeedAccount } from "./seedAccounts"
 import { chunk } from "./chunk"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAccount[]) => {
   console.log(`Converting B3TR for VOT3...`)
@@ -31,7 +34,7 @@ export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedA
           ]),
         )
 
-        await sendTx(clauses, account.key)
+        await TransactionUtils.sendTx(thorClient, clauses, account.key.pk)
       }),
     )
   }
