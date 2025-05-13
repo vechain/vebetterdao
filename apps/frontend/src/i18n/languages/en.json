@@ -421,6 +421,7 @@
   "NEW admin address": "NEW admin address",
   "Moderator already present": "Moderator already present",
   "Delete {{address}} as moderator?": "Delete {{address}} as moderator?",
+  "Delete {{address}} as signaler?": "Delete {{address}} as signaler?",
   "Delete {{address}} as reward distributor?": "Delete {{address}} as reward distributor?",
   "The user will not be able to access the app edition mode anymore.": "The user will not be able to access the app edition mode anymore.",
   "Yes, remove": "Yes, remove",
@@ -1650,5 +1651,12 @@
   "You have already submitted your app.": "You have already submitted your app.",
   "Thank you for joining VeBetterDao!": "Thank you for joining VeBetterDao!",
   "Check submitted apps": "Check submitted apps",
-  "Done": "Done"
+  "Done": "Done",
+  "Signalers": "Signalers",
+  "These users will have the ability to bot-signal and reset signal counts for individual users.": "These users will have the ability to bot-signal and reset signal counts for individual users.",
+  "The user will not be able to bot-signal and reset signal counts for individual users anymore.": "The user will not be able to bot-signal and reset signal counts for individual users anymore.",
+  "Signaler already present": "Signaler already present",
+  "Max 3 signalers": "Max 3 signalers",
+  "Add a new signaler": "Add a new signaler",
+  "Add signaler": "Add signaler"
 }
