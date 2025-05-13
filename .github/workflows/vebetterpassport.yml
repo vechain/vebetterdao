@@ -83,7 +83,7 @@ jobs:
       - name: Terraform Init
         working-directory: terraform/vebetterpassport
         run: |
-          WORKSPACE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}"
+          WORKSPACE="${{ github.event.inputs.workspace || 'dev' }}"
           BUCKET="b3tr-terraform-state-${WORKSPACE}"
           
           terraform init -backend-config="bucket=${BUCKET}"
@@ -92,7 +92,7 @@ jobs:
         working-directory: terraform/vebetterpassport
         id: workspace
         run: |
-          WORKSPACE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}"
+          WORKSPACE="${{ github.event.inputs.workspace || 'dev' }}"
           
           if ! terraform workspace list | grep -q "$WORKSPACE"; then
             terraform workspace new "$WORKSPACE"
@@ -112,7 +112,7 @@ jobs:
         env:
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-          WORKSPACE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}
+          WORKSPACE: ${{ github.event.inputs.workspace || 'dev' }}
         run: |
           if [ "$WORKSPACE" == "dev" ]; then
             terraform plan \
@@ -158,7 +158,7 @@ jobs:
         env:
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-          WORKSPACE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}
+          WORKSPACE: ${{ github.event.inputs.workspace || 'dev' }}
         run: |
           if [ "$WORKSPACE" == "dev" ]; then
             terraform apply -auto-approve -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}"
