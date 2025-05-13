@@ -23,17 +23,8 @@ resource "terraform_data" "build_lambda" {
     EOT
     environment = {
       MAINNET_MNEMONIC = sensitive(var.MAINNET_MNEMONIC)
-      TESTNET_MNEMONIC = sensitive(var.TESTNET_MNEMONIC)
     }
   }
-}
-
-data "archive_file" "lambda_zip" {
-  depends_on = [terraform_data.build_lambda]
-  type        = "zip"
-  output_file_mode = "0666"
-  source_dir  = "${path.module}/../../${local.config.lambda_source_dir}"
-  output_path = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
 }
 
 # Lambda Function
@@ -43,8 +34,10 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
 
   function_name = local.config.lambda_function_name
   handler       = local.config.lambda_handler
-  filename      = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  filename      = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
+
+  # Set this to a static value to avoid inconsistent plan errors
+  source_code_hash = null
 
   logging_config {
     log_format = "Text"
@@ -60,9 +53,9 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
 
   environment {
     variables = {
-      RESET_SIGNALER_PK = local.minter_pk
-      MNEMONIC          = local.mnemonic
-      WALLET            = local.wallet
+      RESET_SIGNALER_PK    = local.minter_pk
+      MNEMONIC             = local.mnemonic
+      WALLET               = local.wallet
     }
   }
 
@@ -70,8 +63,7 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   lifecycle {
     ignore_changes = [
       tags,
-      tags_all,
-      last_modified
+      tags_all
     ]
   }
 }
