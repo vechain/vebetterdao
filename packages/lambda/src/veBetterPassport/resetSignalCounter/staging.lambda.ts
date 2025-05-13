@@ -42,7 +42,7 @@ const VET_DOMAINS_CONTRACT_ABI_FRAGMENT = JSON.stringify({
 const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKey: string }> => {
   const client = new SecretsManagerClient({ region: "eu-west-1" })
 
-  const privateKey = await getSecret(client, "vebetterpassport_reset_signal_testnet", "RESET_SIGNALER_PK")
+  const privateKey = await getSecret(client, "creator_nft_minter_pk", "creator-nft-minter-pk")
   const walletAddress = addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex"))
 
   return { walletAddress, privateKey }
@@ -132,7 +132,7 @@ export const handler = async (event: any, context: Context): Promise<APIGatewayP
       })
     }
 
-    const reason = `Resetting signal counter for KYC'ed wallet`
+    const reason = `Lambda operation: Resetting signal counter for verified wallet ${walletToBeUnbanned}`
     const { receipt, gasResult } = await resetSignalCounter(thorClient, walletToBeUnbanned, reason)
 
     if (!receipt) {
