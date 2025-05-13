@@ -43,6 +43,7 @@ fi
     
     # Set MNEMONIC based on environment
     if [ "$ENVIRONMENT" == "testnet" ]; then
+        
         export MNEMONIC="$TESTNET_MNEMONIC"
     else
         export MNEMONIC="$MAINNET_MNEMONIC"
