@@ -126,7 +126,7 @@ export const AllApps = ({
 
   const sortingMenu = () => {
     return (
-      <Menu closeOnSelect={true} placement="bottom-end">
+      <Menu closeOnSelect={true} placement="bottom">
         <MenuButton
           as={IconButton}
           isRound={true}
@@ -144,7 +144,7 @@ export const AllApps = ({
           icon={<UilSortAmountDown />}
           size="md"
         />
-        <MenuList minW="220px" shadow="lg" borderRadius={"24px"} p={2}>
+        <MenuList minW="100px" shadow="lg" borderRadius={"24px"} p={2}>
           {sortOptions.map(option => (
             <MenuItem
               key={option.id}
@@ -174,24 +174,47 @@ export const AllApps = ({
   }
 
   const filteringMenu = () => {
+    const activeFiltersCount = selectedCategories.length || 0
+
     return (
-      <Menu closeOnSelect={false} placement="bottom-end">
-        <MenuButton
-          as={IconButton}
-          isRound={true}
-          aria-label={t("Filters")}
-          border="1px solid #D5D5D5"
-          icon={<UilFilter />}
-          variant="black"
-          bg={selectedCategories.length > 0 || !!statusFilter ? "black" : "transparent"}
-          color={selectedCategories.length > 0 || !!statusFilter ? "white" : "black"}
-        />
-        <MenuList maxW="300px" minW="333px" shadow="lg" borderRadius={"24px"} p={3}>
+      <Menu closeOnSelect={false} placement="bottom">
+        <Box position="relative">
+          <MenuButton
+            as={IconButton}
+            isRound={true}
+            aria-label={t("Filters")}
+            border="1px solid #D5D5D5"
+            icon={<UilFilter />}
+            variant="black"
+            color={"black"}
+          />
+
+          {activeFiltersCount > 0 && (
+            <Flex
+              position="absolute"
+              top="-8px"
+              right="-8px"
+              bg="#B1F16C"
+              color="black"
+              borderRadius="full"
+              w="20px"
+              h="20px"
+              justify="center"
+              align="center"
+              fontSize="xs"
+              fontWeight="bold"
+              boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
+              {activeFiltersCount}
+            </Flex>
+          )}
+        </Box>
+
+        <MenuList maxW="300px" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
           {/* Governance Status Section */}
           <Text fontWeight="bold" mb={2}>
             {t("Status")}
           </Text>
-          <Flex flexWrap="wrap" gap={2} mb={4}>
+          <Flex flexWrap="wrap" gap={2} mb={4} flexDir="column">
             {statusFilterOptions.map(status => (
               <Button
                 key={status}
@@ -209,9 +232,11 @@ export const AllApps = ({
                 py={1}
                 fontWeight="medium">
                 {status}{" "}
-                <Badge ml={1} colorScheme={statusFilter === status ? "white" : "blackAlpha"} borderRadius="full" px={2}>
-                  {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
-                </Badge>
+                {statusFilter === status && (
+                  <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
+                    {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
+                  </Badge>
+                )}
               </Button>
             ))}
           </Flex>
@@ -228,6 +253,7 @@ export const AllApps = ({
                 key={category.id}
                 isChecked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryChange(category.id)}
+                fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}
                 colorScheme="blackAlpha">
                 <Flex align="center">{category.name}</Flex>
               </Checkbox>
