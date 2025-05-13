@@ -48,8 +48,10 @@ fi
         export MNEMONIC="$MAINNET_MNEMONIC"
     fi
     
+
     # Compile contracts from root directory
     echo "Running yarn contracts:compile..."
+    yarn install
     yarn contracts:compile
 )
 
