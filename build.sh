@@ -38,10 +38,21 @@ fi
     HISTFILESIZE=0
     
     # Export the mnemonic in a way that doesn't show up in process listing
-    export MNEMONIC="$MAINNET_MNEMONIC"
+    export TESTNET_MNEMONIC="$TESTNET_MNEMONIC"
+    export MAINNET_MNEMONIC="$MAINNET_MNEMONIC"
     
+    # Set MNEMONIC based on environment
+    if [ "$ENVIRONMENT" == "testnet" ]; then
+        
+        export MNEMONIC="$TESTNET_MNEMONIC"
+    else
+        export MNEMONIC="$MAINNET_MNEMONIC"
+    fi
+    
+
     # Compile contracts from root directory
     echo "Running yarn contracts:compile..."
+    yarn install
     yarn contracts:compile
 )
 
