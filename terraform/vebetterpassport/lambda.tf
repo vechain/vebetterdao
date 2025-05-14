@@ -29,11 +29,11 @@ resource "terraform_data" "build_lambda" {
 }
 
 data "archive_file" "lambda_zip" {
-  depends_on = [terraform_data.build_lambda]
-  type        = "zip"
+  depends_on       = [terraform_data.build_lambda]
+  type             = "zip"
   output_file_mode = "0666"
-  source_dir  = "${path.module}/../../${local.config.lambda_source_dir}"
-  output_path = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
+  source_dir       = "${path.module}/../../${local.config.lambda_source_dir}"
+  output_path      = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
 }
 
 # Lambda Function
@@ -41,9 +41,9 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   architectures = ["x86_64"]
   depends_on    = [terraform_data.build_lambda]
 
-  function_name = local.config.lambda_function_name
-  handler       = local.config.lambda_handler
-  filename      = data.archive_file.lambda_zip.output_path
+  function_name    = local.config.lambda_function_name
+  handler          = local.config.lambda_handler
+  filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   logging_config {

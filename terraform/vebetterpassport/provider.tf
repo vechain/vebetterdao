@@ -13,6 +13,7 @@ terraform {
     key                  = "b3tr-vebetterpassport.tfstate"
     region               = "eu-west-1"
     workspace_key_prefix = "workspaces"
+    encrypt              = true
   }
 }
 
