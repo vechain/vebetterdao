@@ -34,7 +34,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const [searchQuery, setSearchQuery] = useState<string>("")
 
   const { setValue, watch, register } = form
-  const selectedCategories = watch("categories") || []
+  const selectedCategories = watch("categories") ?? []
 
   // Filter categories based on search query
   const filteredCategories = APP_CATEGORIES.filter(category =>
@@ -83,7 +83,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
         {t("App Categories")}
       </Text>
 
-      <HStack spacing={3} flexWrap="wrap">
+      <HStack spacing={3} flexWrap="wrap" alignItems="flex-start">
         {selectedCategories.map(categoryId => {
           const category = getCategoryById(categoryId)
           if (!category) return null
@@ -92,6 +92,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             <Tag
               key={categoryId}
               size="lg"
+              fontSize="14px"
               borderRadius="full"
               variant="solid"
               backgroundColor={category.color}
@@ -106,7 +107,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
         {selectedCategories.length < MAX_CATEGORIES && (
           <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur={true}>
             <PopoverTrigger>
-              <Button leftIcon={<FaPlus />} variant="outline" borderRadius="full" size="md">
+              <Button leftIcon={<FaPlus />} variant="outline" fontSize="14px" borderRadius="full" size="sm">
                 {t("Add Category")}
               </Button>
             </PopoverTrigger>

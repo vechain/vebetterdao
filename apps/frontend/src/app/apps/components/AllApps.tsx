@@ -126,7 +126,15 @@ export const AllApps = ({
 
   const sortingMenu = () => {
     return (
-      <Menu closeOnSelect={true} placement="bottom">
+      <Menu
+        closeOnSelect={true}
+        placement="bottom"
+        modifiers={[
+          {
+            name: "flip",
+            enabled: false,
+          },
+        ]}>
         <MenuButton
           as={IconButton}
           isRound={true}
@@ -177,7 +185,18 @@ export const AllApps = ({
     const activeFiltersCount = selectedCategories.length || 0
 
     return (
-      <Menu closeOnSelect={false} placement="bottom">
+      <Menu
+        closeOnSelect={false}
+        placement="bottom"
+        strategy="fixed"
+        autoSelect={false}
+        isLazy
+        modifiers={[
+          {
+            name: "flip",
+            enabled: false,
+          },
+        ]}>
         <Box position="relative">
           <MenuButton
             as={IconButton}
@@ -194,8 +213,8 @@ export const AllApps = ({
               position="absolute"
               top="-8px"
               right="-8px"
-              bg="#B1F16C"
-              color="black"
+              bg="black"
+              color="white"
               borderRadius="full"
               w="20px"
               h="20px"
@@ -208,7 +227,6 @@ export const AllApps = ({
             </Flex>
           )}
         </Box>
-
         <MenuList maxW="300px" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
           {/* Governance Status Section */}
           <Text fontWeight="bold" mb={2}>
@@ -276,13 +294,12 @@ export const AllApps = ({
             <Input
               placeholder="Search apps..."
               value={searchQuery}
-              borderColor="1px solid black"
+              border="1px solid #D5D5D5"
               opacity={0.6}
               onChange={handleSearchChange}
               borderRadius={"24px"}
-              _dark={{ bg: "black" }}
-              _hover={{ borderColor: "black", opacity: 1 }}
-              _focus={{ borderColor: "black", boxShadow: "0px 0px 3px 0px rgba(0, 76, 252, 0.35)" }}
+              _hover={{ borderColor: "#D5D5D5", opacity: 0.9 }}
+              _focus={{ borderColor: "#D5D5D5", boxShadow: "0px 0px 3px 0px #D5D5D5", opacity: 0.8 }}
             />
           </InputGroup>
           <HStack spacing={2}>

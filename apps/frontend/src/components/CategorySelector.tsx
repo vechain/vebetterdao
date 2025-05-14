@@ -65,13 +65,13 @@ export const CategorySelector = <T extends FieldValues>({
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [searchQuery, setSearchQuery] = useState<string>("")
 
-  const selectedCategories: string[] = watch(fieldName) || []
+  const selectedCategories: string[] = watch(fieldName) ?? []
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
   const handleSelectCategory = (categoryId: string) => {
-    if (selectedCategories.includes(categoryId as string)) {
+    if (selectedCategories.includes(categoryId)) {
       setValue(fieldName, selectedCategories.filter(id => id !== categoryId) as PathValue<T, Path<T>>, {
         shouldDirty: true,
         shouldValidate: true,
@@ -107,7 +107,7 @@ export const CategorySelector = <T extends FieldValues>({
 
   const registerField = register(
     fieldName,
-    registerOptions || {
+    registerOptions ?? {
       required: t("No categories selected."),
     },
   )
