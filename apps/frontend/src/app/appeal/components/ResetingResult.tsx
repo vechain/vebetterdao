@@ -31,9 +31,9 @@ export const ResetingResult = ({
   return (
     <>
       {resetingStatus === RESET_STATUS.SUCCESS && (
-        <VStack align="stretch" gap={2}>
+        <VStack alignItems={"flex-start"} gap={2} mt={2}>
           <Button variant="primaryAction" w="auto" onClick={() => router.push("/")}>
-            {"Back to the home page"}
+            {"Back to Dashboard"}
           </Button>
         </VStack>
       )}

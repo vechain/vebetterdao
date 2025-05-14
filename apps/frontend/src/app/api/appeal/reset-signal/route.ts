@@ -32,15 +32,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Wallet address is required" }, { status: 400 })
     }
 
-    const isTestnetEnvironment = process.env.NEXT_PUBLIC_APP_ENV === "testnet-staging"
-
-    const apiEndpoint = isTestnetEnvironment
-      ? process.env.TESTNET_RESET_USER_SIGNAL_COUNT_DOMAIN
-      : process.env.RESET_USER_SIGNAL_COUNT_DOMAIN
-
-    const apiAuthKey = isTestnetEnvironment
-      ? process.env.TESTNET_RESET_USER_SIGNAL_COUNT_API_KEY
-      : process.env.RESET_USER_SIGNAL_COUNT_API_KEY
+    const apiEndpoint = process.env.RESET_USER_SIGNAL_COUNT_DOMAIN
+    const apiAuthKey = process.env.RESET_USER_SIGNAL_COUNT_API_KEY
 
     // Validate environment configuration
     if (!apiEndpoint || !apiAuthKey) {

@@ -25,8 +25,7 @@ const abiFragment = JSON.stringify({
   stateMutability: "view",
   type: "function",
 })
-const VET_DOMAINS_CONTRACT_ADDRESS =
-  getConfig().externalContractIntegrations?.vetDomainsContractAddress || "0xbd7832FdacCB89FAB522e5B4Afb415A999b8a201"
+const VET_DOMAINS_CONTRACT_ADDRESS = getConfig().externalContractIntegrations?.vetDomainsContractAddress
 
 /**
  * Function to check if a wallet address is verified.
@@ -39,6 +38,7 @@ const VET_DOMAINS_CONTRACT_ADDRESS =
  */
 export const getVerifiedVetDomain = async (thor: Connex.Thor, walletAddress?: string): Promise<boolean> => {
   if (!walletAddress) return Promise.reject(new Error("walletAddress is required"))
+  if (!VET_DOMAINS_CONTRACT_ADDRESS) return Promise.reject(new Error("VET_DOMAINS_CONTRACT_ADDRESS is not set"))
 
   const res = await thor.account(VET_DOMAINS_CONTRACT_ADDRESS).method(JSON.parse(abiFragment)).call(walletAddress)
 
