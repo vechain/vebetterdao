@@ -34,7 +34,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Card bg="#FFD979" borderRadius="xl">
           <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
             <Image
-              src="/images/cloud-background-orange.png"
+              src="/assets/backgrounds/cloud-background-orange.webp"
               alt="cloud-background-orange"
               position="absolute"
               right={"-50%"}

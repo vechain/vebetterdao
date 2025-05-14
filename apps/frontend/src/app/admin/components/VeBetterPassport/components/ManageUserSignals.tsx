@@ -1,6 +1,5 @@
 import { useUserBotSignals } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import {
   Button,
@@ -14,7 +13,6 @@ import {
   Input,
   InputGroup,
   Text,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
@@ -24,17 +22,13 @@ import { useTranslation } from "react-i18next"
 export const ManageUserSignals = () => {
   const [user, setUser] = useState<string>("")
   const [reason, setReason] = useState<string>("")
-  const { isOpen, onClose, onOpen } = useDisclosure()
 
   const { data: signals, isLoading: signalsLoading } = useUserBotSignals(user)
 
   const {
     sendTransaction: resetSignalsTransaction,
-    resetStatus: resetSignalsStatus,
     isTransactionPending: isResetTxLoading,
     status: resetStatus,
-    error: resetError,
-    txReceipt: resetTxReceipt,
   } = useResetUserBotSignals({
     address: user,
     reason,
@@ -43,11 +37,8 @@ export const ManageUserSignals = () => {
 
   const {
     sendTransaction: signalUserTransaction,
-    resetStatus: signalUserStatus,
     isTransactionPending: isSignalTxLoading,
     status: signalStatus,
-    error: signalError,
-    txReceipt: signalTxReceipt,
   } = useSignalBotUser({
     address: user,
     reason,
@@ -64,141 +55,92 @@ export const ManageUserSignals = () => {
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
       resetSignalsTransaction(undefined)
-      onOpen()
     },
-    [resetSignalsTransaction, onOpen],
+    [resetSignalsTransaction],
   )
 
   const handleSignalUserSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
       signalUserTransaction(undefined)
-      onOpen()
     },
-    [signalUserTransaction, onOpen],
+    [signalUserTransaction],
   )
-
-  const handleClose = useCallback(() => {
-    resetSignalsStatus()
-    signalUserStatus()
-    onClose()
-  }, [resetSignalsStatus, signalUserStatus, onClose])
 
   const isFormValid = isValidAddress && reason.trim() !== ""
   const isSignalResetEnabled = signals > 0
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
-  let successTitle = "Action Completed"
-  if (resetStatus === "success") {
-    successTitle = "Signals Reset"
-  } else if (signalStatus === "success") {
-    successTitle = "User Signaled"
-  }
-
-  let pendingTitle = "Processing action..."
-  if (resetStatus === "pending") {
-    pendingTitle = "Resetting signals..."
-  } else if (signalStatus === "pending") {
-    pendingTitle = "Signaling user..."
-  }
-
-  let errorTitle = "Error processing action"
-  if (resetError) {
-    errorTitle = "Error resetting signals"
-  } else if (signalError) {
-    errorTitle = "Error signaling user"
-  }
-
   return (
-    <>
-      <Card w={"full"}>
-        <CardHeader>
-          <Heading size="lg">{t("Manage User Signals")}</Heading>
-          <Text fontSize="sm">
-            {t(
-              "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
-            )}
-          </Text>
-        </CardHeader>
-        <CardBody>
-          <form>
-            <VStack spacing={4} alignItems={"start"}>
-              <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress}>
-                  <FormLabel>
-                    <strong>{t("User address")}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <WalletAddressInput
-                      placeholder={t("Enter the user address")}
-                      isDisabled={signalsLoading || isLoading}
-                      onAddressResolved={address => setUser(address ?? "")}
-                    />
-                  </InputGroup>
-                </FormControl>
-              </HStack>
-
-              <FormControl isRequired>
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">{t("Manage User Signals")}</Heading>
+        <Text fontSize="sm">
+          {t(
+            "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
+          )}
+        </Text>
+      </CardHeader>
+      <CardBody>
+        <form>
+          <VStack spacing={4} alignItems={"start"}>
+            <HStack spacing={4} alignItems={"start"} w={"full"}>
+              <FormControl isRequired isInvalid={!isValidAddress}>
                 <FormLabel>
-                  <strong>{t("Reason")}</strong>
+                  <strong>{t("User address")}</strong>
                 </FormLabel>
                 <InputGroup>
-                  <Input
-                    placeholder={t("Enter the reason for the action")}
-                    value={reason}
-                    onChange={e => setReason(e.target.value)}
-                    disabled={isLoading}
+                  <WalletAddressInput
+                    placeholder={t("Enter the user address")}
+                    isDisabled={signalsLoading || isLoading}
+                    onAddressResolved={address => setUser(address ?? "")}
                   />
                 </InputGroup>
               </FormControl>
+            </HStack>
 
-              {!signalsLoading && (
-                <Text>
-                  {t("Current Signals")} {signals}
-                </Text>
-              )}
+            <FormControl isRequired>
+              <FormLabel>
+                <strong>{t("Reason")}</strong>
+              </FormLabel>
+              <InputGroup>
+                <Input
+                  placeholder={t("Enter the reason for the action")}
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+                  disabled={isLoading}
+                />
+              </InputGroup>
+            </FormControl>
 
-              <HStack spacing={4}>
-                {isSignalResetEnabled && (
-                  <Button
-                    isDisabled={!isFormValid}
-                    colorScheme="red"
-                    onClick={handleResetSignalsSubmit}
-                    isLoading={isResetTxLoading || isResetPending}>
-                    {t("Reset Signals")}
-                  </Button>
-                )}
+            {!signalsLoading && (
+              <Text>
+                {t("Current Signals")} {signals}
+              </Text>
+            )}
 
+            <HStack spacing={4}>
+              {isSignalResetEnabled && (
                 <Button
                   isDisabled={!isFormValid}
-                  colorScheme="blue"
-                  onClick={handleSignalUserSubmit}
-                  isLoading={isSignalTxLoading || isSignalPending}>
-                  {t("Signal User")}
+                  colorScheme="red"
+                  onClick={handleResetSignalsSubmit}
+                  isLoading={isResetTxLoading || isResetPending}>
+                  {t("Reset Signals")}
                 </Button>
-              </HStack>
-            </VStack>
-          </form>
-        </CardBody>
-      </Card>
+              )}
 
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={
-          resetError || signalError
-            ? TransactionModalStatus.Error
-            : (resetStatus as TransactionModalStatus) || (signalStatus as TransactionModalStatus)
-        }
-        successTitle={successTitle}
-        onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
-        showTryAgainButton
-        showExplorerButton
-        txId={resetTxReceipt?.meta.txID ?? signalTxReceipt?.meta.txID}
-        pendingTitle={pendingTitle}
-        errorTitle={errorTitle}
-        errorDescription={resetError?.reason || signalError?.reason}
-      />
-    </>
+              <Button
+                isDisabled={!isFormValid}
+                colorScheme="blue"
+                onClick={handleSignalUserSubmit}
+                isLoading={isSignalTxLoading || isSignalPending}>
+                {t("Signal User")}
+              </Button>
+            </HStack>
+          </VStack>
+        </form>
+      </CardBody>
+    </Card>
   )
 }

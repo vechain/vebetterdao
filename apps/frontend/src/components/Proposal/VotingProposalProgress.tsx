@@ -40,7 +40,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
     abstain: {
       color: abstainColor,
       percentage: proposalVotes?.votes.abstain.percentagePower ?? 0,
-      icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
+      icon: <Image src={"/assets/icons/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }
 

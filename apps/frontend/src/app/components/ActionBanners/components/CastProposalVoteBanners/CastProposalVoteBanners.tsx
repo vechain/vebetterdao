@@ -27,9 +27,9 @@ export const CastProposalVoteBanners = ({ key, id, description }: Props) => {
       key={key}
       title={t("ACTIVE PROPOSAL")}
       description={proposalMetadata?.data?.title ? `"${proposalMetadata.data.title}"` : `---`}
-      logoSrc="/images/vote-icon.png"
+      logoSrc="/assets/icons/vote-icon.webp"
       backgroundColor="#FFD979"
-      backgroundImageSrc="/images/cloud-background-orange.png"
+      backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
       buttonLabel={t("Vote now")}
       onButtonClick={goToProposalPage}
       buttonVariant="primaryAction"

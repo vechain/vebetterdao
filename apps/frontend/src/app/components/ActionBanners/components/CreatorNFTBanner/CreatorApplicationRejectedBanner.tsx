@@ -19,8 +19,8 @@ export const CreatorApplicationRejectedBanner = () => {
     <GenericBanner
       title={title}
       description={description}
-      logoSrc="images/mascot/mascot-warning-head.png"
-      backgroundImageSrc="/images/cloud-background-orange.png"
+      logoSrc="/assets/mascot/mascot-warning-head.webp"
+      backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
       backgroundColor="#FFD979"
       buttonLabel={doAction}
       onButtonClick={navigateToCreatorForm}

@@ -1,5 +1,4 @@
 import { usePassportChecks } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { TogglePassportCheck } from "@/constants"
 import { useTogglePassportCheck } from "@/hooks"
 import {
@@ -13,7 +12,6 @@ import {
   HStack,
   SimpleGrid,
   Switch,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { useCallback } from "react"
@@ -72,8 +70,7 @@ type PassportCheckProps = {
 }
 
 const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) => {
-  const { isOpen, onClose, onOpen } = useDisclosure()
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useTogglePassportCheck({
+  const { sendTransaction, isTransactionPending, status } = useTogglePassportCheck({
     checkToToggle,
   })
 
@@ -81,16 +78,10 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      sendTransaction(undefined)
-      onOpen()
+      sendTransaction()
     },
-    [sendTransaction, onOpen],
+    [sendTransaction],
   )
-
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [resetStatus, onClose])
 
   return (
     <VStack>
@@ -103,19 +94,6 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         />
       </HStack>
       <Divider />
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
-        onTryAgain={handleToggle}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle={isEnabled ? `Enabling ${name}...` : `Disabling ${name}...`}
-        errorTitle={"Error toggling check"}
-        errorDescription={error?.reason}
-      />
     </VStack>
   )
 }

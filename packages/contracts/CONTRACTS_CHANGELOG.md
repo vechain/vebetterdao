@@ -6,7 +6,9 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                        |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 9 May 2025          | `Emissions` version `3`, `GalaxyMember` version `4`, `VoterRewards` version `5`                                               | Restoring the GM NFT System - Proposal Execution
 | 2 May 2025          | `X2EarnApps` version `5`                                                                                                      | Restricting to submit one app for each creator NFT received>                                   |
+| 02 May 2025         | `VeBetterPassport` version `4`                                                                                                | Added RESET_SIGNALER_ROLE and fixed arithmetic underflow when resetting signals.               |
 | 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                 |
 | 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                          |
 | 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                 |
@@ -24,6 +26,51 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                               |
 | 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                           |
 | 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                               |
+
+---
+
+## Upgrade `Emissions` to version `3`, `GalaxyMember` to version `4`, `VoterRewards` to version `5`
+
+Added new emissions pool called for GM rewards, that takes 25% of the treasury emissions each round. GM Holders will now be rewarded directly from this pool and GM multipliers are no longer taken into account for regular vote2Earn rewards.
+<br>
+Updated `XAllocationPool`, `XAllocationVoting` and `B3TRGovernor` to use versionlatest versions of `Emissions` and `VoterRewards`
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `Emissions.sol` to version `3`
+  - `GalaxyMember.sol` to version `4`
+  - `VoterRewards.sol` to version `5`
+
+### Storage Changes 📦
+
+- **`Emissions`**:
+  - Added `gmPercentage` to store percentage of the treasury that will be used for GM Holder Rewards.
+  - Added `gmEmissions` to store GM emissions for each cycle.
+
+- **`VoterRewards`**:
+  - Added `cycleToTotalGMWeight` to store total GM Weight used for rewards in the cycle.
+  - Added `cycleToVoterToGMWeight` to store total GM Weight used for rewards in the cycle.
+  - Added `cycleToIncomingGMMultipliers` to store Incoming GM Multipliers, these are the multipliers that will be used for the next cycle.
+
+### New Features 🚀
+
+- **`Emissions`**:
+  - `_calculateTreasuryAmount()` is now `_calculateTreasuryAndGMAmount()` and is used to calculate Treasury and GM Emissions for cycle. 
+  - Added `getGMAmount()` to get the GM Pool amount for cycle. 
+  - Added `gmPercentage()` to get the GM Percentage of the Treasury pool. 
+  - Updated `emissions()` to return GM pool too.
+  - Added `setGmPercentage()` to update GM Percentage of the Treasury pool.
+
+- **`Emissions`**:
+  - Added `getGMReward()` to get the GM reward for a user for a cycle. 
+  - Added `cycleToVoterToGMWeight()` to get the total GM Weight for a user in a specific cycle.
+  - Updated `cycleToTotalGMWeight()` to get the total GM Weight in a specific cycle.
+  - Added `setLevelToMultiplierNow()` to update GM Multipliers on the spot.
+
+### Bug Fixes 🐛
+
+- None.
 
 ---
 
@@ -50,6 +97,36 @@ Restriction on creators who have already submitted an app. Any creator added to 
 ### Bug Fixes 🐛
 
 - None.
+
+---
+
+## Upgrade `VeBetterPassport` to Version 4
+
+This upgrade adds a new role for signal reset functionality and improves access control for signaling functions. It also fixes an arithmetic underflow issue when resetting signals.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `VeBetterPassport.sol` to version `4`
+
+### Storage Changes 📦
+
+- None.
+
+### New Features 🚀
+
+- **`VeBetterPassport`**:
+  - Added `RESET_SIGNALER_ROLE` initialization
+  - Extended `resetUserSignalsWithReason` function to be used by the `RESET_SIGNALER_ROLE`
+  - Restricted `signalUser` function to `DEFAULT_ADMIN_ROLE`
+  - Restricted `signalUserWithReason` function to `SIGNALER_ROLE`
+  - Renamed `resetUserSignalsByAppAdminWithReason` to `resetUserSignalsByAppWithReason` to be used by `SIGNALER_ROLE`
+  - Added `initializeV4()` function to initialize the new role
+
+### Bug Fixes 🐛
+
+- **`VeBetterPassport`**:
+  - Fixed arithmetic underflow when resetting signals, which could occur when app admin resets signal count after default admin in sequence
 
 ---
 

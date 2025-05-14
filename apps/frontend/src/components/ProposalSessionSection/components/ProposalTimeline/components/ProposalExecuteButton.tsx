@@ -1,9 +1,8 @@
 import { useProposalOperationState } from "@/api/contracts/governance/hooks/useProposalOperationState"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
 import { timestampToTimeLeft } from "@/utils"
-import { Box, Button, Text, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useCallback, useEffect, useState } from "react"
 
@@ -11,15 +10,10 @@ export const ProposalExecuteButton = () => {
   const [_, setSeconds] = useState(0)
   const { proposal } = useProposalDetail()
   const executeMutation = useExecuteProposal({ proposalId: proposal.id })
-  const { isOpen, onClose, onOpen } = useDisclosure()
   const executeProposal = useCallback(() => {
-    onOpen()
-    executeMutation.sendTransaction({})
-  }, [executeMutation, onOpen])
-  const handleClose = useCallback(() => {
-    onClose()
-    executeMutation.resetStatus()
-  }, [onClose, executeMutation])
+    executeMutation.sendTransaction()
+  }, [executeMutation])
+
   const { isLoading, isOperationDone, isOperationWaiting, readyTimestamp } = useProposalOperationState(proposal.id)
 
   useEffect(() => {
@@ -48,19 +42,6 @@ export const ProposalExecuteButton = () => {
       <Button my="2" onClick={executeProposal} variant={"primaryAction"}>
         {t("Execute Proposal")}
       </Button>
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Execute proposal completed!")}
-        status={
-          executeMutation.error ? TransactionModalStatus.Error : (executeMutation.status as TransactionModalStatus)
-        }
-        errorDescription={executeMutation.error?.reason}
-        errorTitle={executeMutation.error ? t("Error executing proposal") : undefined}
-        pendingTitle={t("Executing...")}
-        showExplorerButton
-        txId={executeMutation.txReceipt?.meta.txID}
-      />
     </Box>
   )
 }

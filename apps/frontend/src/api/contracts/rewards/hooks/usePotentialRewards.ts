@@ -6,39 +6,51 @@ type PotentialRewards = {
 }
 
 /**
- * Hook to calculate the potential rewards based on the GM level and the latest voted round
- * This calculator uses the VOT3 tokens delegated to the user.
- *
- * Note: This calculator is based on rounds that have already been voted.
- * Limitation: The formula will not count the rewards of the current or upcoming rounds.
- *
+ * Simulates GM rewards for a user who may have already voted in this cycle.
+ * Avoids re-applying multiplier already used.
  */
 export const usePotentialRewards = (
-  cycleToTotal: number,
-  emissionAmount_voterRewards: number,
-  cycleToVoterToTotal?: number,
-  GMlevel?: any,
-  GMUserLevel?: any,
+  cycleToTotalGMWeight: number,
+  emissionAmount_gmRewards: number,
+  cycleToVoterToGMWeight: number,
+  GMlevel?: string,
+  GMUserLevel?: string, // level of GM NFT used already
 ): PotentialRewards => {
-  const gm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
-  const GMMultiplier = gm?.multiplier
+  const newGm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
+  const existingGm = gmNfts.find((nft: { level: any }) => nft.level === GMUserLevel)
 
-  if (!cycleToTotal || !emissionAmount_voterRewards || !cycleToVoterToTotal || !GMlevel || !GMMultiplier) {
-    return {
-      potentialRewards: 0,
-    }
+  // Check if the new and existing GM levels are valid
+  const newMultiplier = newGm?.multiplier
+  const existingMultiplier = existingGm?.multiplier
+
+  // Check if the multipliers are valid
+  if (
+    !newMultiplier ||
+    !existingMultiplier ||
+    !cycleToVoterToGMWeight ||
+    !cycleToTotalGMWeight ||
+    !emissionAmount_gmRewards ||
+    !GMlevel ||
+    !GMUserLevel
+  ) {
+    return { potentialRewards: 0 }
   }
 
-  const increase = cycleToVoterToTotal * (GMMultiplier / 100)
-  let potentialRewards
+  // Scale multipliers to mirror smart contract values
+  const scaledNewMultiplier = newMultiplier * 100
+  const scaledExistingMultiplier = existingMultiplier * 100
 
-  if (Number(GMUserLevel) === Number(GMlevel)) {
-    potentialRewards = (cycleToVoterToTotal / Number(cycleToTotal)) * emissionAmount_voterRewards
-  } else {
-    const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
-    const cycleToTotal_enhanced = Number(cycleToTotal) + increase
-    potentialRewards = (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * emissionAmount_voterRewards
-  }
+  // Determine if a user has voted more than once in the cycle
+  const totalTimeVoted = cycleToVoterToGMWeight / scaledExistingMultiplier
 
-  return { potentialRewards: potentialRewards ?? 0 }
+  // Adjust the weights based on the new multiplier, removing the old multiplier
+  const adjustedUserWeight =
+    cycleToVoterToGMWeight - scaledExistingMultiplier * totalTimeVoted + scaledNewMultiplier * totalTimeVoted
+  const adjustedTotalWeight =
+    cycleToTotalGMWeight - scaledExistingMultiplier * totalTimeVoted + scaledNewMultiplier * totalTimeVoted
+
+  // Determine the potential rewards
+  const reward = (adjustedUserWeight * emissionAmount_gmRewards) / adjustedTotalWeight
+
+  return { potentialRewards: reward }
 }

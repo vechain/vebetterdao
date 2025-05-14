@@ -8,12 +8,13 @@ import {
   useCurrentAllocationsRoundId,
 } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 type useClaimRewardsProps = {
   roundRewards: RoundReward[]
   onSuccess?: () => void
   onFailure?: () => void
-  onSuccessMessageTitle?: string
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 // const buffer = 1.01
@@ -26,7 +27,12 @@ type useClaimRewardsProps = {
  *
  * @param {useClaimRewardsProps} props - The properties for the hook.
  */
-export const useClaimRewards = ({ roundRewards, onSuccess, onFailure }: useClaimRewardsProps) => {
+export const useClaimRewards = ({
+  roundRewards,
+  onSuccess,
+  onFailure,
+  transactionModalCustomUI,
+}: useClaimRewardsProps) => {
   const { account } = useWallet()
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
@@ -53,5 +59,6 @@ export const useClaimRewards = ({ roundRewards, onSuccess, onFailure }: useClaim
     onSuccess,
     onFailure,
     refetchQueryKeys,
+    transactionModalCustomUI,
   })
 }

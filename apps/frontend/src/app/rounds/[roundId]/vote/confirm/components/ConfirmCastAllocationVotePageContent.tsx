@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
-import { ResponsiveCard, TransactionModal, TransactionModalStatus } from "@/components"
+import { ResponsiveCard } from "@/components"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
 import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -23,7 +23,7 @@ import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUser
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   roundId: string
 }
@@ -32,7 +32,7 @@ const compactFormatter = getCompactFormatter(2)
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
+  const { onClose: closeTxModal } = useTransactionModal()
   const router = useRouter()
 
   const xAppsQuery = useRoundXApps(roundId)
@@ -69,18 +69,28 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
-  const transactionModal = useDisclosure()
-
   const seeAllModal = useDisclosure()
 
-  const onSuccess = useCallback(() => router.push(`/rounds/${roundId}`), [router, roundId])
+  const onSuccess = useCallback(() => {
+    closeTxModal()
+    router.push(`/rounds/${roundId}`)
+  }, [router, roundId, closeTxModal])
 
-  const castAllocationVotes = useCastAllocationVotes({ roundId, onSuccess })
-
-  const handleClose = useCallback(() => {
-    castAllocationVotes.resetStatus()
-    transactionModal.onClose()
-  }, [castAllocationVotes, transactionModal])
+  const castAllocationVotes = useCastAllocationVotes({
+    roundId,
+    onSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Casting your vote..."),
+      },
+      success: {
+        title: t("Vote cast successfully!"),
+      },
+      error: {
+        title: t("Error casting your vote!"),
+      },
+    },
+  })
 
   const totalVotesToCast = useMemo(() => {
     return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
@@ -97,14 +107,8 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     })
 
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_CONFIRM_TX))
-    transactionModal.onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
-  }, [castAllocationVotes, transactionModal, votesAtSnapshot, votes])
-
-  const onTryAgain = useCallback(() => {
-    castAllocationVotes.resetStatus()
-    onContinue()
-  }, [castAllocationVotes, onContinue])
+  }, [castAllocationVotes, votesAtSnapshot, votes])
 
   const shouldSeeThePage = useMemo(() => {
     return {
@@ -126,26 +130,6 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   return (
     <>
       <SeeVoteDetailsModal roundId={roundId} votes={votes} isOpen={seeAllModal.isOpen} onClose={seeAllModal.onClose} />
-      <TransactionModal
-        isOpen={transactionModal.isOpen}
-        onClose={handleClose}
-        status={
-          castAllocationVotes.error
-            ? TransactionModalStatus.Error
-            : (castAllocationVotes.status as TransactionModalStatus)
-        }
-        confirmationTitle={t("Confirm Vote")}
-        successTitle={t("Vote Cast!")}
-        errorTitle={t("Error casting vote")}
-        errorDescription={castAllocationVotes.error?.reason}
-        showSocialButtons
-        socialDescriptionEncoded="%E2%9C%85%20Just%20cast%20my%20vote%20in%20the%20%23VeBetterDAO%20X%20allocation%20round%21%20%0A%0A%F0%9F%8C%B1%20Excited%20to%20be%20part%20of%20the%20decision-making%20process%20for%20sustainable%20projects.%0A%0AJoin%20us%20in%20shaping%20a%20greener%20future%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
-        onTryAgain={onTryAgain}
-        showTryAgainButton
-        showExplorerButton
-        txId={castAllocationVotes.txReceipt?.meta.txID}
-        isSuccessBeenTrack={true}
-      />
 
       <ResponsiveCard>
         <VStack w="full" spacing={8} align={"flex-start"}>

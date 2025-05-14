@@ -110,7 +110,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                       fontSize="12px"
                       spacing={1}
                       flexShrink={0}>
-                      <Image src="/images/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
+                      <Image src="/assets/icons/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
                       <Text>{t("New!")}</Text>
                     </HStack>
                   )}

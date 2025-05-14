@@ -10,20 +10,20 @@ import { AnalyticsUtils } from "@/utils"
 
 const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {
-    stepImageSrc: "/images/sign.svg",
+    stepImageSrc: "/assets/icons/sign.svg",
     stepNumber: 1,
     stepTitle: t("Creation"),
     stepDescription: t("Craft your proposal by outlining the information and functions to be executed."),
   },
   {
-    stepImageSrc: "/images/handshake.svg",
+    stepImageSrc: "/assets/icons/handshake.svg",
     stepNumber: 2,
     stepTitle: t("Look for support"),
     stepDescription: t("In order for your proposal to be voted on, it will have to have the support of the community."),
   },
 
   {
-    stepImageSrc: "/images/vote.svg",
+    stepImageSrc: "/assets/icons/vote.svg",
     stepNumber: 3,
     stepTitle: t("Voting"),
     stepDescription: t(
@@ -31,7 +31,7 @@ const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => 
     ),
   },
   {
-    stepImageSrc: "/images/arrow-right.svg",
+    stepImageSrc: "/assets/icons/arrow-right.svg",
     stepNumber: 4,
     stepTitle: t("Execution"),
     stepDescription: t("If your proposal receives enough votes, it will be executed."),

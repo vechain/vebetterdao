@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GalaxyMember, VeBetterPassport } from "../../typechain-types"
+import { B3TR, Emissions, GalaxyMember, VeBetterPassport, XAllocationVoting } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse, AddressLike } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -12,6 +12,7 @@ import { ThorClient } from "@vechain/sdk-network"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
 import { endorseApp } from "./xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 const thorClient = ThorClient.at(getConfig().nodeUrl)
 
@@ -162,8 +163,12 @@ export const waitForVotingPeriodToEnd = async (proposalId: number) => {
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForRoundToEnd = async (roundId: number | BigInt) => {
-  const { xAllocationVoting } = await getOrDeployContractInstances({})
+export const waitForRoundToEnd = async (roundId: number | BigInt, xAllocationVoting?: XAllocationVoting) => {
+  const instance = await getOrDeployContractInstances({
+    forceDeploy: false,
+  })
+
+  if (!xAllocationVoting) xAllocationVoting = instance.xAllocationVoting as XAllocationVoting
 
   if (typeof roundId === "bigint") roundId = parseInt(roundId.toString())
   if (typeof roundId !== "number") throw new Error("Invalid roundId")
@@ -227,6 +232,19 @@ export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: strin
 
   // Lock B3TR to get VOT3
   await vot3.connect(receiver).convertToVOT3(ethers.parseEther(amount))
+}
+
+export const updateGMMultipliers = async () => {
+  const config = createLocalConfig()
+  const { voterRewards, owner } = await getOrDeployContractInstances({})
+
+  for (let i = 0; i < config.VOTER_REWARDS_LEVELS_V2.length; i++) {
+    const level = config.VOTER_REWARDS_LEVELS_V2[i]
+    const multiplier = config.GM_MULTIPLIERS_V2[i]
+
+    // Update the multiplier for the level
+    await voterRewards.connect(owner).setLevelToMultiplier(level, multiplier)
+  }
 }
 
 export const createProposalAndExecuteIt = async (
@@ -411,8 +429,9 @@ export const waitForBlock = async (blockNumber: number) => {
   }
 }
 
-export const waitForNextCycle = async () => {
-  const { emissions } = await getOrDeployContractInstances({})
+export const waitForNextCycle = async (emissions?: Emissions) => {
+  const instance = await getOrDeployContractInstances({})
+  if (!emissions) emissions = instance.emissions as Emissions
 
   const blockNextCycle = await emissions.getNextCycleBlock()
 
@@ -440,8 +459,12 @@ export const voteOnApps = async (
   voters: HardhatEthersSigner[],
   votes: Array<Array<bigint>>,
   roundId: bigint,
+  xAllocationVoting?: XAllocationVoting,
+  veBetterPassport?: VeBetterPassport,
 ) => {
-  const { xAllocationVoting, veBetterPassport } = await getOrDeployContractInstances({})
+  const instance = await getOrDeployContractInstances({})
+  if (!veBetterPassport) veBetterPassport = instance.veBetterPassport as VeBetterPassport
+  if (!xAllocationVoting) xAllocationVoting = instance.xAllocationVoting as XAllocationVoting
 
   if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 

@@ -8,7 +8,7 @@ const method = "levelToMultiplier"
 
 export const getLevelMultiplierQueryKey = (level?: string) => getCallKey({ method, keyArgs: [level] })
 
-const percentageToMultiplier = (percentage: number) => 1 + percentage / 100
+const scaledWeight = (weight: number) => weight / 100
 
 export const useLevelMultiplier = (level: string, enabled = true) => {
   return useCall({
@@ -17,6 +17,6 @@ export const useLevelMultiplier = (level: string, enabled = true) => {
     method,
     args: [level],
     enabled: !!level && enabled,
-    mapResponse: res => percentageToMultiplier(Number(res.decoded[0])),
+    mapResponse: res => scaledWeight(Number(res.decoded[0])),
   })
 }

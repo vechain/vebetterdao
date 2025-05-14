@@ -1,4 +1,4 @@
-import { Heading, VStack, Text, ModalCloseButton, Button, Link } from "@chakra-ui/react"
+import { Heading, VStack, Text, Button, Link } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import errorAnimation from "./error.json"
 import { ReactNode } from "react"
@@ -11,7 +11,7 @@ export type ErrorModalContentProps = {
   title?: ReactNode
   description?: string
   showTryAgainButton?: boolean
-  onTryAgain?: () => void
+  onTryAgain?: () => Promise<void>
   showExplorerButton?: boolean
   txId?: string
 }
@@ -20,15 +20,14 @@ export const ErrorModalContent = ({
   title = "Error",
   description = "Something went wrong 😕",
   showTryAgainButton = false,
-  onTryAgain = () => {},
+  onTryAgain,
   showExplorerButton,
   txId,
 }: ErrorModalContentProps) => {
   const { t } = useTranslation()
   return (
     <ModalAnimation>
-      <ModalCloseButton top={4} right={4} />
-      <VStack align={"center"} p={6} gap={0}>
+      <VStack align={"center"} p={0} gap={0}>
         <Heading size="md" data-testid={"tx-modal-title"}>
           {title}
         </Heading>
@@ -67,7 +66,7 @@ export const ErrorModalContent = ({
             </Link>
           )}
           {showTryAgainButton && (
-            <Button variant={"outline"} onClick={onTryAgain}>
+            <Button variant={"outline"} fontWeight={700} w="full" onClick={onTryAgain}>
               {t("Try again")}
             </Button>
           )}

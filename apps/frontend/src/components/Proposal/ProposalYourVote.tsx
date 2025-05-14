@@ -31,7 +31,12 @@ const SupportMapping = {
     label: "Abstain",
     color: abstainColor,
     icon: (
-      <Image src={"/images/abstained.svg"} alt="abstained" color={abstainColor} boxSize={["20px", "20px", "16px"]} />
+      <Image
+        src={"/assets/icons/abstained.svg"}
+        alt="abstained"
+        color={abstainColor}
+        boxSize={["20px", "20px", "16px"]}
+      />
     ),
   },
 }

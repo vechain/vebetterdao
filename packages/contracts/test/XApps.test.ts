@@ -3086,7 +3086,7 @@ describe("X-Apps - @shard15", function () {
 })
 
 // Isolated tests for shard16 because of the size of the tests
-describe("X-Apps - @shard17", function () {
+describe("X-Apps - @shard17a", function () {
   // We prepare the environment for 4 creators
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
@@ -3164,107 +3164,6 @@ describe("X-Apps - @shard17", function () {
       // user without DEFAULT_ADMIN_ROLE
       expect(await x2EarnApps.hasRole(await x2EarnApps.DEFAULT_ADMIN_ROLE(), otherAccounts[0].address)).to.eql(false)
       await catchRevert(x2EarnApps.connect(otherAccounts[1]).setAppAdmin(app1Id, otherAccounts[2].address))
-    })
-  })
-
-  describe("Apps metadata", function () {
-    it("Admin should be able to update baseURI", async function () {
-      const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const newBaseURI = "ipfs://new-base-uri"
-      await x2EarnApps.connect(owner).setBaseURI(newBaseURI)
-      expect(await x2EarnApps.baseURI()).to.eql(newBaseURI)
-    })
-
-    it("Non-admin should not be able to update baseURI", async function () {
-      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(x2EarnApps.connect(otherAccounts[0]).setBaseURI("ipfs://new-base-uri"))
-    })
-
-    it("Should be able to fetch app metadata", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = await x2EarnApps.hashAppName("My app")
-      await x2EarnApps
-        .connect(owner)
-        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
-
-      const baseURI = await x2EarnApps.baseURI()
-      const appURI = await x2EarnApps.appURI(app1Id)
-
-      expect(appURI).to.eql(baseURI + "metadataURI")
-    })
-
-    it("Admin role can update app metadata", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await x2EarnApps
-        .connect(owner)
-        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
-
-      const newMetadataURI = "metadataURI2"
-      await x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)
-
-      const appURI = await x2EarnApps.appURI(app1Id)
-      expect(appURI).to.eql((await x2EarnApps.baseURI()) + newMetadataURI)
-    })
-
-    it("Admin of app can update app metadata", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).submitApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
-
-      const newMetadataURI = "metadataURI2"
-      await x2EarnApps.connect(appAdmin).updateAppMetadata(app1Id, newMetadataURI)
-
-      const appURI = await x2EarnApps.appURI(app1Id)
-      expect(appURI).to.eql((await x2EarnApps.baseURI()) + newMetadataURI)
-    })
-
-    it("Moderator can update app metadata", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const appAdmin = otherAccounts[9]
-      const appModerator = otherAccounts[10]
-      await x2EarnApps.connect(owner).submitApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
-
-      await x2EarnApps.connect(appAdmin).addAppModerator(app1Id, appModerator.address)
-      expect(await x2EarnApps.isAppModerator(app1Id, appModerator.address)).to.be.true
-
-      const newMetadataURI = "metadataURI2"
-      await x2EarnApps.connect(appModerator).updateAppMetadata(app1Id, newMetadataURI)
-
-      const appURI = await x2EarnApps.appURI(app1Id)
-      expect(appURI).to.eql((await x2EarnApps.baseURI()) + newMetadataURI)
-    })
-
-    it("Unatuhtorized users cannot update app metadata", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const appAdmin = otherAccounts[9]
-      const unauthorizedUser = otherAccounts[8]
-      const oldMetadataURI = "metadataURI"
-      await x2EarnApps.connect(owner).submitApp(otherAccounts[0].address, appAdmin.address, "My app", oldMetadataURI)
-
-      const newMetadataURI = "metadataURI2"
-      await expect(x2EarnApps.connect(unauthorizedUser).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
-
-      const appURI = await x2EarnApps.appURI(app1Id)
-      expect(appURI).to.eql((await x2EarnApps.baseURI()) + oldMetadataURI)
-    })
-
-    it("Cannot update metadata of non existing app", async function () {
-      const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      const newMetadataURI = "metadataURI2"
-
-      await expect(x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
-    })
-
-    it("Cannot get app uri of non existing app", async function () {
-      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-
-      await expect(x2EarnApps.appURI(app1Id)).to.be.rejected
     })
   })
 
@@ -4021,6 +3920,119 @@ describe("X-Apps - @shard17", function () {
       const x2EarnRewardsPoolBalanceAfter3 = await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())
       expect(x2EarnRewardsPoolBalanceAfter3).to.eql(x2EarnRewardsPoolBalanceAfter2 + teamWalletBalanceAfter2)
       expect(await b3tr.balanceOf(teamWalletAddress)).to.eql(0n)
+    })
+  })
+})
+
+describe("X-Apps - @shard17b", function () {
+  // We prepare the environment for 4 creators
+  let creator1: HardhatEthersSigner
+  let creator2: HardhatEthersSigner
+
+  beforeEach(async function () {
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[1]
+    creator2 = creators[2]
+  })
+
+  describe("Apps metadata", function () {
+    it("Admin should be able to update baseURI", async function () {
+      const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const newBaseURI = "ipfs://new-base-uri"
+      await x2EarnApps.connect(owner).setBaseURI(newBaseURI)
+      expect(await x2EarnApps.baseURI()).to.eql(newBaseURI)
+    })
+
+    it("Non-admin should not be able to update baseURI", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+      await catchRevert(x2EarnApps.connect(otherAccounts[0]).setBaseURI("ipfs://new-base-uri"))
+    })
+
+    it("Should be able to fetch app metadata", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = await x2EarnApps.hashAppName("My app")
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const baseURI = await x2EarnApps.baseURI()
+      const appURI = await x2EarnApps.appURI(app1Id)
+
+      expect(appURI).to.eql(baseURI + "metadataURI")
+    })
+
+    it("Admin role can update app metadata", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const newMetadataURI = "metadataURI2"
+      await x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)
+
+      const appURI = await x2EarnApps.appURI(app1Id)
+      expect(appURI).to.eql((await x2EarnApps.baseURI()) + newMetadataURI)
+    })
+
+    it("Admin of app can update app metadata", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      await x2EarnApps.connect(owner).submitApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      const newMetadataURI = "metadataURI2"
+      await x2EarnApps.connect(appAdmin).updateAppMetadata(app1Id, newMetadataURI)
+
+      const appURI = await x2EarnApps.appURI(app1Id)
+      expect(appURI).to.eql((await x2EarnApps.baseURI()) + newMetadataURI)
+    })
+
+    it("Moderator can update app metadata", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      const appModerator = otherAccounts[10]
+      await x2EarnApps.connect(owner).submitApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+
+      await x2EarnApps.connect(appAdmin).addAppModerator(app1Id, appModerator.address)
+      expect(await x2EarnApps.isAppModerator(app1Id, appModerator.address)).to.be.true
+
+      const newMetadataURI = "metadataURI2"
+      await x2EarnApps.connect(appModerator).updateAppMetadata(app1Id, newMetadataURI)
+
+      const appURI = await x2EarnApps.appURI(app1Id)
+      expect(appURI).to.eql((await x2EarnApps.baseURI()) + newMetadataURI)
+    })
+
+    it("Unatuhtorized users cannot update app metadata", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const appAdmin = otherAccounts[9]
+      const unauthorizedUser = otherAccounts[8]
+      const oldMetadataURI = "metadataURI"
+      await x2EarnApps.connect(owner).submitApp(otherAccounts[0].address, appAdmin.address, "My app", oldMetadataURI)
+
+      const newMetadataURI = "metadataURI2"
+      await expect(x2EarnApps.connect(unauthorizedUser).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
+
+      const appURI = await x2EarnApps.appURI(app1Id)
+      expect(appURI).to.eql((await x2EarnApps.baseURI()) + oldMetadataURI)
+    })
+
+    it("Cannot update metadata of non existing app", async function () {
+      const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const newMetadataURI = "metadataURI2"
+
+      await expect(x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
+    })
+
+    it("Cannot get app uri of non existing app", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(x2EarnApps.appURI(app1Id)).to.be.rejected
     })
   })
 
