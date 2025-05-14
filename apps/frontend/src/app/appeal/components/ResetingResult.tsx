@@ -33,7 +33,7 @@ export const ResetingResult = ({
       {resetingStatus === RESET_STATUS.SUCCESS && (
         <VStack alignItems={"flex-start"} gap={2} mt={2}>
           <Button variant="primaryAction" w="auto" onClick={() => router.push("/")}>
-            {"Back to Dashboard"}
+            {t("Back to Dashboard")}
           </Button>
         </VStack>
       )}
@@ -44,7 +44,7 @@ export const ResetingResult = ({
             <AlertIcon w={4} h={4} color="#C84968" />
             <Box lineHeight={"1.20rem"} fontSize="md" color="#C84968">
               <AlertTitle>
-                {`Unable to process request. Try refreshing or contact support.`}{" "}
+                {t("Unable to process request. Try refreshing or contact support.")}{" "}
                 <Button
                   p={0}
                   ml={2}

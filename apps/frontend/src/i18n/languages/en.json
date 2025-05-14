@@ -1670,12 +1670,13 @@
   "Start Verification": "Start Verification",
   "Warning": "Warning",
   "Error Details": "Error Details",
-  "Back To Dashboard": "Back To Dashboard",
+  "Back to Dashboard": "Back to Dashboard",
   "Show Details": "Show Details",
   "Begin your DAO access appeal": "Begin your DAO access appeal",
   "Complete KYC verification of your wallet through": "Complete KYC verification of your wallet through",
   "Your DAO participation restrictions have been successfully lifted": "Your DAO participation restrictions have been successfully lifted",
   "Start": "Start",
   "Verify": "Verify",
-  "Complete": "Complete"
+  "Complete": "Complete",
+  "Unable to process request. Try refreshing or contact support.": "Unable to process request. Try refreshing or contact support."
 }
