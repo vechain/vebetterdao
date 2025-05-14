@@ -168,6 +168,7 @@
     },
     "deploy:galactica-test": {
       "dependsOn": ["^deploy:galactica-test"]
+    },
     "deploy:hardhat": {
       "dependsOn": ["^deploy:hardhat"]
     },
