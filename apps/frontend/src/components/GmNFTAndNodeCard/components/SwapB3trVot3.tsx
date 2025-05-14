@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { ConvertModal } from "@/components/Convert/ConvertModal"
+import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { B3TRIcon } from "@/components/Icons"
 import {
   Button,
@@ -17,10 +17,11 @@ import {
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
-import { Countdown } from "@/app/components/Countdown/Countdown"
+import { CountdownVoting } from "@/app/components/Countdown"
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
+import { useDomainOrAddress } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -44,7 +45,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isSwapDisabled = isLoading || hasNoBalance
 
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
-  const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
+  const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
 
   const { isOpen: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
 
@@ -61,7 +62,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
               value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
             })}
           </Text>
-          <Countdown onOpen={onOpenSnapshot} />
+          <CountdownVoting onOpen={onOpenSnapshot} />
           <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
         </Stack>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
@@ -95,7 +96,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
               {t("Total VOT3 Balance")}
             </Text>
             <HStack>
-              <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
+              <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
               <Skeleton isLoaded={!isVot3BalanceLoading}>
                 <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
               </Skeleton>

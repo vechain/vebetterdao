@@ -13,7 +13,7 @@ import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import { useBuildTransaction } from "./useBuildTransaction"
-
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 // const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
 // const suggestedMaxGas = 565580 * buffer
@@ -32,6 +32,7 @@ type useCastAllocationVotesProps = {
   roundId: string
   onSuccess?: () => void
   onSuccessMessageTitle?: string
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
@@ -41,9 +42,13 @@ const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
  * This hook will send a vote transaction to the blockchain and wait for the txConfirmation
  * @param roundId the id of the round to cast the votes
  * @param onSuccess callback to run when the upgrade is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
+ * @param transactionModalCustomUI custom UI for the transaction modal
  */
-export const useCastAllocationVotes = ({ roundId, onSuccess }: useCastAllocationVotesProps) => {
+export const useCastAllocationVotes = ({
+  roundId,
+  onSuccess,
+  transactionModalCustomUI,
+}: useCastAllocationVotesProps) => {
   const { account } = useWallet()
 
   const buildClauses = useCallback(
@@ -82,5 +87,6 @@ export const useCastAllocationVotes = ({ roundId, onSuccess }: useCastAllocation
     clauseBuilder: buildClauses,
     refetchQueryKeys,
     onSuccess,
+    transactionModalCustomUI,
   })
 }

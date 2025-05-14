@@ -38,6 +38,10 @@
     "contracts:upgrade:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
+    "contracts:call": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @repo/contracts ts-node scripts/functionCalls/select-and-call.ts",
+    "contracts:call:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @repo/contracts ts-node scripts/functionCalls/select-and-call.ts",
+    "contracts:call:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @repo/contracts ts-node scripts/functionCalls/select-and-call.ts",
+    "contracts:call:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @repo/contracts ts-node scripts/functionCalls/select-and-call.ts",
     "contracts:start-round:testnet": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run start-round:testnet --filter=contracts",
     "contracts:start-round:testnet-staging": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run start-round --filter=contracts",
     "contracts:get-galaxy-member-owners": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-galaxy-member-owners --filter=contracts",
@@ -59,10 +63,13 @@
     "contracts:generate-docs": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-docs --filter=contracts",
     "contracts:get-app-shares": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-app-shares --filter=contracts",
     "solo-up": "make solo-up",
+    "solo-down": "make solo-down",
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
     "complete-translations": "dotenv -e .env -- turbo complete-translations",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "contracts:verify:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run verify:testnet --filter=contracts -- ",
+    "contracts:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run verify:mainnet --filter=contracts -- "
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",
@@ -73,7 +80,8 @@
     "husky": "^8.0.0",
     "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
-    "turbo": "^1.13.3"
+    "turbo": "^1.13.3",
+    "hardhat": "2.19.1"
   },
   "engines": {
     "node": "20.x.x"

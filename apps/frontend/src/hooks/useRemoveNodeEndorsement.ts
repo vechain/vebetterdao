@@ -8,7 +8,6 @@ import {
   getAppExistsQueryKey,
   getAppIsBlacklistedQueryKey,
   getEndorsersQueryKey,
-  getIsAppEligibleNowQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
@@ -42,7 +41,6 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
 
   const refetchQueryKeys = useMemo(
     () => [
-      getIsAppEligibleNowQueryKey(appId ?? ""),
       getIsAppUnendorsedQueryKey(appId ?? ""),
       getAppEndorsementScoreQueryKey(appId),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),

@@ -19,7 +19,7 @@ export const JoinCommunity = () => {
     <>
       <Box bgColor={"#B1F16C"} p={6} w={"full"} borderRadius={16} position={"relative"} overflow={"clip"}>
         <Image
-          src="/images/community-green-blob.png"
+          src="/assets/backgrounds/community-green-blob.webp"
           alt="VeBetterDAO community"
           position={"absolute"}
           transform={"rotate(-90deg)"}
@@ -28,7 +28,7 @@ export const JoinCommunity = () => {
           boxSize={"400px"}
         />
         <VStack alignItems={"flex-start"}>
-          <Image src="/images/handshake.svg" alt="Join Community" w={32} h={32} />
+          <Image src="/assets/icons/handshake.svg" alt="Join Community" w={32} h={32} />
           <Text fontSize={15} fontWeight={600}>
             {t("Seeking Guidance or Advice?")}
           </Text>

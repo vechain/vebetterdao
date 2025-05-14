@@ -5,17 +5,19 @@ import {
   TokenAuction,
   Treasury,
   VOT3,
+  VoterRewards,
   X2EarnApps,
   XAllocationVoting,
 } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
-import { endorseXApps, registerXDapps } from "../helpers/xApp"
+import { endorseXApps, registerXDapps, xDappsCreatorAccounts } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
 
-const accounts = getTestKeys(13)
+const accounts = getTestKeys(17)
+const xDappCreatorAccounts = xDappsCreatorAccounts(accounts, 8)
 
 export const APPS = [
   {
@@ -78,6 +80,16 @@ const padNodeTypes = (nodeTypes: number[], requiredLength: number) => {
   return nodeTypes
 }
 
+export const updateGMMultipliers = async (levels: number[], multipliers: number[], voterRewards: VoterRewards) => {
+  for (let i = 0; i < levels.length; i++) {
+    const level = levels[i]
+    const multiplier = multipliers[i]
+
+    // Update the multiplier for the level
+    await voterRewards.setLevelToMultiplierNow(level, multiplier)
+  }
+}
+
 export const setupLocalEnvironment = async (
   emissions: Emissions,
   treasury: Treasury,
@@ -101,7 +113,7 @@ export const setupLocalEnvironment = async (
 
   // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await registerXDapps(x2EarnAppsAddress, admin, APPS)
+  await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
 
   // Seed the first 5 accounts with some tokens
   const treasuryAddress = await treasury.getAddress()
@@ -159,7 +171,7 @@ export const setupTestEnvironment = async (
 
   // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await registerXDapps(x2EarnAppsAddress, admin, APPS)
+  await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
   console.log("x-apps added")
 
   // Creating NODE holders
@@ -213,7 +225,7 @@ export const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: 
     console.log("Team Wallet Address: ", app.teamWalletAddress)
   })
 
-  await registerXDapps(x2EarnAppsAddress, admin, APPS)
+  await registerXDapps(x2EarnAppsAddress, xDappCreatorAccounts, APPS)
   console.log("x-apps added")
 
   const end = performance.now()

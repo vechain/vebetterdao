@@ -28,8 +28,10 @@ export const useRetrieveProfilIdentity = (): Profile => {
   const domainFromAccount = vnsAccountData?.domain
   const { data: vnsProfileData } = useVechainDomain(profile)
   const domainFromProfile = vnsProfileData?.domain
-  // if i'm in the profile page, but the 'profile' is empty, then I'm in the profile page of the connected user
+
+  // if i'm in the profile page, but the 'profile/{this is empty address}' is empty, then I'm in the profile page of the connected user
   // see url be like : /profile?tab...
+  // else the profile be like /profile/{this is the address}
   if (!profile && isOnProfilePage && account?.address) {
     return {
       profile: account?.address,

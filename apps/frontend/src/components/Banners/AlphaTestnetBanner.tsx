@@ -9,7 +9,7 @@ const isTestnetPhase = ["test", "solo", "custom", "main"].includes(getConfig().n
 const MotionHStack = motion(HStack)
 export const AlphaTestnetBanner = () => {
   const { t } = useTranslation()
-  const text = t("VePassport activation from round 18")
+  const text = t("GM Rewards Pool is live from round 46")
   const textsNumber = 50
   const texts = Array.from({ length: textsNumber }, _ => text)
   const gap = 8

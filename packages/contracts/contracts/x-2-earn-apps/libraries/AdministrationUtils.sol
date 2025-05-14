@@ -24,6 +24,7 @@
 pragma solidity 0.8.20;
 
 import { IX2EarnCreator } from "../../interfaces/IX2EarnCreator.sol";
+import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 
 /**
  * @title AdministrationUtils
@@ -49,6 +50,12 @@ library AdministrationUtils {
    * @param addr The invalid address.
    */
   error X2EarnInvalidAddress(address addr);
+
+  /**
+   * @dev Thrown when an invalid rewards pool contract is provided.
+   * @param x2EarnRewardsPoolContract The invalid rewards pool contract.
+   */
+  error X2EarnInvalidRewardsPoolContract(IX2EarnRewardsPool x2EarnRewardsPoolContract);
 
   /**
    * @dev Thrown when an attempt is made to remove a non-existent reward distributor.
@@ -132,6 +139,12 @@ library AdministrationUtils {
   event RewardDistributorAddedToApp(bytes32 indexed appId, address distributorAddress);
 
   /**
+   * @dev Emitted when the rewards pool is enabled for a new app.
+   * @param appId The ID of the app.
+   */
+  event RewardsPoolEnabledForNewApp(bytes32 indexed appId);
+
+  /**
    * @dev Emitted when a moderator is removed from an app.
    * @param appId The ID of the app.
    * @param moderator The address of the removed moderator.
@@ -159,6 +172,19 @@ library AdministrationUtils {
    * @param creatorAddress The address of the creator.
    */
   event CreatorAddedToApp(bytes32 indexed appId, address creatorAddress);
+
+  /**
+   * @dev Event fired when the admin removes a creator from the app.
+   * @param appId The ID of the app.
+   * @param creator The address of the creator.
+   */
+  event CreatorRemovedFromApp(bytes32 indexed appId, address creator);
+
+  /**
+   * @dev Thrown when a creator is already associated with another app.
+   * @param creator The address of the creator.
+   */
+  error X2EarnCreatorAlreadyUsed(address creator);
 
   // ------------------------------- Getter Functions -------------------------------
   /**
@@ -348,6 +374,21 @@ library AdministrationUtils {
   }
 
   /**
+   * @dev Enable the rewards pool for a new app.
+   *
+   * @param x2EarnRewardsPoolContract the address of the X2EarnRewardsPool contract
+   * @param appId the id of the app
+   */
+  function enableRewardsPoolForNewApp(IX2EarnRewardsPool x2EarnRewardsPoolContract, bytes32 appId) external {
+    if (address(x2EarnRewardsPoolContract) == address(0)) {
+      revert X2EarnInvalidRewardsPoolContract(x2EarnRewardsPoolContract);
+    }
+
+    x2EarnRewardsPoolContract.enableRewardsPoolForNewApp(appId);
+    emit RewardsPoolEnabledForNewApp(appId);
+  }
+
+  /**
    * @dev Removes a moderator from an app.
    * @param moderators Mapping of app IDs to arrays of moderator addresses.
    * @param appId The ID of the app.
@@ -418,7 +459,7 @@ library AdministrationUtils {
     // Decrease the number of apps created by the creator
     creatorApps[creator]--;
 
-    emit ModeratorRemovedFromApp(appId, creator);
+    emit CreatorRemovedFromApp(appId, creator);
   }
 
   /**

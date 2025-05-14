@@ -6,6 +6,10 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                        |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 9 May 2025          | `Emissions` version `3`, `GalaxyMember` version `4`, `VoterRewards` version `5`                                               | Restoring the GM NFT System - Proposal Execution
+| 2 May 2025          | `X2EarnApps` version `5`                                                                                                      | Restricting to submit one app for each creator NFT received>                                   |
+| 02 May 2025         | `VeBetterPassport` version `4`                                                                                                | Added RESET_SIGNALER_ROLE and fixed arithmetic underflow when resetting signals.               |
+| 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                 |
 | 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                          |
 | 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                 |
 | 4th December 2024   | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts.                                        |
@@ -25,6 +29,107 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ---
 
+## Upgrade `Emissions` to version `3`, `GalaxyMember` to version `4`, `VoterRewards` to version `5`
+
+Added new emissions pool called for GM rewards, that takes 25% of the treasury emissions each round. GM Holders will now be rewarded directly from this pool and GM multipliers are no longer taken into account for regular vote2Earn rewards.
+<br>
+Updated `XAllocationPool`, `XAllocationVoting` and `B3TRGovernor` to use versionlatest versions of `Emissions` and `VoterRewards`
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `Emissions.sol` to version `3`
+  - `GalaxyMember.sol` to version `4`
+  - `VoterRewards.sol` to version `5`
+
+### Storage Changes 📦
+
+- **`Emissions`**:
+  - Added `gmPercentage` to store percentage of the treasury that will be used for GM Holder Rewards.
+  - Added `gmEmissions` to store GM emissions for each cycle.
+
+- **`VoterRewards`**:
+  - Added `cycleToTotalGMWeight` to store total GM Weight used for rewards in the cycle.
+  - Added `cycleToVoterToGMWeight` to store total GM Weight used for rewards in the cycle.
+  - Added `cycleToIncomingGMMultipliers` to store Incoming GM Multipliers, these are the multipliers that will be used for the next cycle.
+
+### New Features 🚀
+
+- **`Emissions`**:
+  - `_calculateTreasuryAmount()` is now `_calculateTreasuryAndGMAmount()` and is used to calculate Treasury and GM Emissions for cycle. 
+  - Added `getGMAmount()` to get the GM Pool amount for cycle. 
+  - Added `gmPercentage()` to get the GM Percentage of the Treasury pool. 
+  - Updated `emissions()` to return GM pool too.
+  - Added `setGmPercentage()` to update GM Percentage of the Treasury pool.
+
+- **`Emissions`**:
+  - Added `getGMReward()` to get the GM reward for a user for a cycle. 
+  - Added `cycleToVoterToGMWeight()` to get the total GM Weight for a user in a specific cycle.
+  - Updated `cycleToTotalGMWeight()` to get the total GM Weight in a specific cycle.
+  - Added `setLevelToMultiplierNow()` to update GM Multipliers on the spot.
+
+### Bug Fixes 🐛
+
+- None.
+
+---
+
+## Upgrade `X2EarnApps` to Version 5
+
+### Key Updates 🗂
+
+Restriction on creators who have already submitted an app. Any creator added to an xApp (via the `_addCreator` function) will be considered as someone who has already submitted an app, preventing them from creating multiple applications.
+
+### Changes 🚀
+
+- `x2EarnApps` updated to version `5`
+
+### Storage Changes 📦
+
+- None.
+
+### New Features 🚀
+
+- **`X2EarnApps`**:
+  - Added `isCreatorOfAnyApp` check based on `_creatorApps[creator]` counter.
+  - Added `CreatorNFTAlreadyUsed` error, trigger when a creator try to submit an app while having already submitted an app
+
+### Bug Fixes 🐛
+
+- None.
+
+---
+
+## Upgrade `VeBetterPassport` to Version 4
+
+This upgrade adds a new role for signal reset functionality and improves access control for signaling functions. It also fixes an arithmetic underflow issue when resetting signals.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `VeBetterPassport.sol` to version `4`
+
+### Storage Changes 📦
+
+- None.
+
+### New Features 🚀
+
+- **`VeBetterPassport`**:
+  - Added `RESET_SIGNALER_ROLE` initialization
+  - Extended `resetUserSignalsWithReason` function to be used by the `RESET_SIGNALER_ROLE`
+  - Restricted `signalUser` function to `DEFAULT_ADMIN_ROLE`
+  - Restricted `signalUserWithReason` function to `SIGNALER_ROLE`
+  - Renamed `resetUserSignalsByAppAdminWithReason` to `resetUserSignalsByAppWithReason` to be used by `SIGNALER_ROLE`
+  - Added `initializeV4()` function to initialize the new role
+
+### Bug Fixes 🐛
+
+- **`VeBetterPassport`**:
+  - Fixed arithmetic underflow when resetting signals, which could occur when app admin resets signal count after default admin in sequence
+
+---
+
 ## Upgrade `X2EarnRewardsPool` to Version 6
 
 This upgrade introduces the ability for XApps to include metadata in the reward distribution process, enabling richer and more context-specific information to be stored and emitted during events. A new function, `distributeRewardWithProofAndMetadata`, has been added for this purpose.
@@ -34,28 +139,20 @@ This upgrade introduces the ability for XApps to include metadata in the reward 
 - **Backward Compatibility Preserved**: The original `distributeRewardWithProof` function remains unchanged and continues to work as before for apps that do not wish to use metadata.
 - **New Metadata Functionality**: The `distributeRewardWithProofAndMetadata` function accepts a string intended to be a JSON representation. A dedicated event, `RewardMetadata`, is emitted to store this information, following the established internal standards of `_emitProof`.
 
----
-
 ### Changes 🚀
 
 - **Upgraded Contracts:**
   - `X2EarnRewardsPool.sol` updated to version `6`.
 
----
-
 ### Storage Changes 📦
 
 - None.
-
----
 
 ### New Features 🚀
 
 - **`X2EarnRewardsPool`:**
   - Added `distributeRewardWithProofAndMetadata()`, which accepts a string intended to be a JSON representation and emits a new event, `RewardMetadata`, containing this information.
   - Updated internal logic with `_emitMetadata`, following the `_emitProof` pattern, to emit the event with the JSON data.
-
----
 
 ### Bug Fixes 🐛
 

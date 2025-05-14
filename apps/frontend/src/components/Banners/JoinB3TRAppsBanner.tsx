@@ -19,16 +19,19 @@ export const JoinB3TRAppsBanner = () => {
       color="black"
       overflow={"hidden"}
       borderRadius={"12px"}
-      bgImage="url('/images/community-green-blob.png')"
+      bgImage="url('/assets/backgrounds/community-green-blob.webp')"
       bgPosition="center"
       bgSize="full">
-      <HStack justifyContent={"space-between"}>
-        <VStack alignItems={"flex-start"} my={"50px"} mx={"70px"} w={"50%"}>
+      <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
+        <VStack
+          alignItems={"flex-start"}
+          py={{ base: "50px", md: "70px" }}
+          px={{ base: "20px", md: "70px" }}
+          w={{ base: "full", md: "50%" }}>
           {isMobile && (
-            // TODO: double check if only robot's head is display
             <Image
-              src="/images/mascote/mascote-welcoming-left-head.png"
-              alt="mascote-welcoming-head"
+              src="/assets/mascot/mascot-welcoming-left-head.webp"
+              alt="mascot-welcoming-head"
               width="100%"
               boxSize="100px"
               objectFit="cover"
@@ -40,7 +43,7 @@ export const JoinB3TRAppsBanner = () => {
           </Heading>
           <Text color="#252525">
             {t(
-              "Do you have a sustainable application and want to become part of our ecosystem? Join our discord channel and introduce yourself and your app!",
+              "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!",
             )}
           </Text>
           <Button variant="applyButton" onClick={openGrantPage} leftIcon={<FaPlus />}>
@@ -50,8 +53,8 @@ export const JoinB3TRAppsBanner = () => {
         {!isMobile && (
           <Image
             alignSelf={"flex-end"}
-            src="/images/mascote/mascote-welcoming.png"
-            alt="mascote-welcoming"
+            src="/assets/mascot/mascot-welcoming.webp"
+            alt="mascot-welcoming"
             boxSize="200px"
             overflow={"hidden"}
             objectFit="contain"

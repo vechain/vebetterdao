@@ -2,7 +2,7 @@ import { CustomModalContent } from "@/components"
 import { ErrorModalContent } from "@/components/TransactionModal/ErrorModalContent"
 import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent"
 import { Modal, ModalOverlay, VStack, Button } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 
 import { useTranslation } from "react-i18next"
 
@@ -21,11 +21,18 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
   status,
   errorMessage,
 }) => {
+  const handleClose = useCallback(() => {
+    onClose()
+    if (status === "success") {
+      onButtonClick()
+    }
+  }, [onClose, status, onButtonClick])
+
   const { t } = useTranslation()
   const modalContent = useMemo(() => {
     if (status === "error" || errorMessage) {
       return (
-        <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+        <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
           <ModalOverlay />
           <CustomModalContent>
             <ErrorModalContent title={t("Error submitting form")} description={errorMessage} />
@@ -35,7 +42,7 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
     }
     return (
       <>
-        <SuccessModalContent title={t("Your application has been submitted")} />
+        <SuccessModalContent title={t("Your application has been submitted")} onClose={handleClose} />
         <VStack spacing={4} align="center" p={5}>
           <Button variant="primaryAction" onClick={onButtonClick}>
             {t("Go back to VeBetterDAO")}
@@ -43,9 +50,9 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
         </VStack>
       </>
     )
-  }, [status, errorMessage, isOpen, onClose, onButtonClick, t])
+  }, [status, errorMessage, isOpen, handleClose, onButtonClick, t])
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+    <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
       <CustomModalContent>{modalContent}</CustomModalContent>
     </Modal>

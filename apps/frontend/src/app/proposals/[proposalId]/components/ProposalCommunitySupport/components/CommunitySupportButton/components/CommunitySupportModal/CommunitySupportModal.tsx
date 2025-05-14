@@ -1,73 +1,72 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { SupportInstructions } from "./components/SupportInstructions"
-import { Modal, ModalBody, ModalCloseButton, ModalOverlay } from "@chakra-ui/react"
-import { CustomModalContent } from "@/components"
 import { SupportDeposit } from "./components/SupportDeposit"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { useSteps } from "@chakra-ui/react"
+import { Step, StepModal } from "@/components/StepModal"
 import { useTranslation } from "react-i18next"
+
+enum CommunitySupportStep {
+  INSTRUCTIONS = "INSTRUCTIONS",
+  DEPOSIT = "DEPOSIT",
+}
 
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { t } = useTranslation()
   const { proposal } = useProposalDetail()
-  const [step, setStep] = useState(0)
-  const depositMutation = useProposalVot3Deposit({ proposalId: proposal.id })
+  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
+    index: 0,
+    count: Object.keys(CommunitySupportStep).length,
+  })
 
   const handleClose = useCallback(() => {
-    depositMutation.resetStatus()
-    setStep(0)
+    setActiveStep(0)
     onClose()
-  }, [depositMutation, onClose])
+  }, [onClose, setActiveStep])
 
-  const goToNextStep = useCallback(() => {
-    setStep(prev => prev + 1)
-  }, [])
+  const depositMutation = useProposalVot3Deposit({
+    proposalId: proposal.id,
+    transactionModalCustomUI: {
+      waitingConfirmation: { title: t("Supporting proposal...") },
+      success: { title: t("Proposal supported!") },
+      error: { title: t("Error supporting proposal!") },
+    },
+  })
 
   const onSubmit = useCallback(
     (amount: string) => {
+      handleClose()
       depositMutation.sendTransaction({ amount, proposalId: proposal.id })
     },
-    [depositMutation, proposal.id],
+    [depositMutation, proposal.id, handleClose],
   )
 
-  const stepContent = useMemo(() => {
-    switch (step) {
-      case 0:
-        return <SupportInstructions goToNextStep={goToNextStep} />
-      case 1:
-        return <SupportDeposit onSubmit={onSubmit} />
-    }
-  }, [goToNextStep, onSubmit, step])
-
-  if (depositMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Deposit Completed!")}
-        status={
-          depositMutation.error ? TransactionModalStatus.Error : (depositMutation.status as TransactionModalStatus)
-        }
-        errorDescription={depositMutation.error?.reason}
-        errorTitle={depositMutation.error ? t("Error Depositing") : undefined}
-        pendingTitle={t("Depositing...")}
-        showSocialButtons
-        socialDescriptionEncoded={encodeURIComponent(
-          "🔄 Just supported a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
-        )}
-        showExplorerButton
-        txId={depositMutation.txReceipt?.meta.txID}
-      />
-    )
+  const steps = useMemo<Step<CommunitySupportStep>[]>(
+    () => [
+      {
+        key: CommunitySupportStep.INSTRUCTIONS,
+        content: <SupportInstructions goToNextStep={goToNext} />,
+        title: t("What is community support?"),
+      },
+      {
+        key: CommunitySupportStep.DEPOSIT,
+        content: <SupportDeposit onSubmit={onSubmit} />,
+        title: t("Support this proposal with VOT3"),
+      },
+    ],
+    [goToNext, onSubmit, t],
+  )
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size={"xl"}>
-      <ModalOverlay />
-      <CustomModalContent>
-        <ModalCloseButton />
-        <ModalBody p={8}>{stepContent}</ModalBody>
-      </CustomModalContent>
-    </Modal>
+    <StepModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      goToPrevious={goToPrevious}
+      goToNext={goToNext}
+      setActiveStep={setActiveStep}
+      steps={steps}
+      activeStep={activeStep}
+    />
   )
 }

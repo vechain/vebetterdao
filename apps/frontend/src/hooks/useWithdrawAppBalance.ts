@@ -3,7 +3,7 @@ import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getAppBalanceQueryKey } from "@/api/contracts/x2EarnRewardsPool"
+import { getAppAvailableFundsQueryKey } from "@/api/contracts/x2EarnRewardsPool"
 import { ethers } from "ethers"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import { useXApp } from "@/api"
@@ -46,7 +46,7 @@ export const useWithdrawAppBalance = ({ appId, amount, reason, onSuccess }: UseW
     ]
   }, [appId, contractAmount, amount, reason, app])
 
-  const refetchQueryKeys = useMemo(() => [getAppBalanceQueryKey(appId)], [appId])
+  const refetchQueryKeys = useMemo(() => [getAppAvailableFundsQueryKey(appId)], [appId])
 
   return useBuildTransaction({
     clauseBuilder,

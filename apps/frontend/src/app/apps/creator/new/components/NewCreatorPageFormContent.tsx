@@ -1,4 +1,4 @@
-import { Image, Stack, Text, useDisclosure, VStack, HStack, Card } from "@chakra-ui/react"
+import { Image, Stack, Text, useDisclosure, VStack, HStack, Card, Box, Heading } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -9,6 +9,8 @@ import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft
 import { SubmitCreatorFormData, SubmitCreatorForm } from "@/components/SubmitCreatorForm"
 import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
 import { CreatorApplicationModal } from "./CreatorApplicationModal"
+import { useQueryClient } from "@tanstack/react-query"
+import { creatorSubmissionQueryKey } from "@/api"
 
 export const NewCreatorPageFormContent = () => {
   const { register, reset, setValue, setError, watch, formState, control, handleSubmit, clearErrors } =
@@ -22,6 +24,14 @@ export const NewCreatorPageFormContent = () => {
         adminEmail: "",
         githubUsername: "",
         twitterUsername: "",
+        distributionStrategy: "",
+        testnetProjectUrl: "",
+        testnetAppId: "",
+        securityApiSecurityMeasures: false,
+        securityActionVerification: false,
+        securityDeviceFingerprint: false,
+        securitySecureKeyManagement: false,
+        securityAntiFarming: false,
       },
     })
 
@@ -34,7 +44,7 @@ export const NewCreatorPageFormContent = () => {
   const [submitErrorMessage, setSubmitErrorMessage] = useState("")
   const { account } = useWallet()
   const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
-
+  const queryClient = useQueryClient()
   useEffect(() => {
     //Users with Creator NFT should be redirected to the new app page
     if (hasCreatorNft) router.push("/apps/new")
@@ -45,19 +55,25 @@ export const NewCreatorPageFormContent = () => {
     router.push("/")
   }
 
-  const onSubmit = async ({ adminWalletAddress, ...formValues }: SubmitCreatorFormData) => {
+  const onSubmit = async ({ adminWalletAddress, testnetAppId, ...formValues }: SubmitCreatorFormData) => {
     try {
       const response = await fetch("/api/app/creator", {
         method: "POST",
-        body: JSON.stringify({ ...formValues, adminWalletAddress: adminWalletAddress.toLowerCase() }),
+        body: JSON.stringify({
+          ...formValues,
+          adminWalletAddress: adminWalletAddress.toLowerCase(),
+          testnetAppId: testnetAppId.toLowerCase(),
+        }),
       })
       if (!response.ok) throw new Error("Failed to submit creator application")
 
-      reset()
-      clearData()
-      signOut({ redirect: false })
       setSubmitStatus("success")
       setSubmitErrorMessage("")
+      reset() //Reset the form inputs
+      clearData() //Clear the form storage
+      signOut({ redirect: false }) //Sign out the user
+      //Refetch creator submissions query on success
+      queryClient.refetchQueries({ queryKey: creatorSubmissionQueryKey(adminWalletAddress ?? "") })
     } catch (error: unknown) {
       let errorMessage = "An error occurred while submitting the form."
       if (error instanceof Error) errorMessage = error.message
@@ -72,34 +88,37 @@ export const NewCreatorPageFormContent = () => {
     <VStack align="center" w="100%" justify="center">
       <VStack w={{ base: "100%", sm: "100%", md: "80%" }} spacing={0}>
         <HStack
-          py={{ base: 5, md: 10 }}
           justify="space-between"
+          align="center"
           bgColor="#004CFC"
           w="full"
           borderTopRadius="12px"
-          px={{ base: 7, md: 10 }}
-          bgImage={"/images/cloud-background.png"}
+          bgImage={"/assets/backgrounds/cloud-background.webp"}
           bgSize="cover"
           bgPosition="center"
-          bgRepeat="no-repeat">
-          <Stack>
-            <Text color="white" fontWeight="bold" fontSize={{ base: "lg", md: "xl" }}>
+          bgRepeat="no-repeat"
+          px={4}>
+          {/* Text Container */}
+          <Stack w="60%" minW="200px" py={2} pl={{ base: 0, md: 4 }}>
+            <Heading color="white" fontWeight="bold" fontSize={{ base: "md", md: "xl", lg: "2xl" }}>
               {t("Apply for Creator's NFT")}
-            </Text>
-            <Text color="white" fontSize={{ base: "sm", md: "20" }}>
+            </Heading>
+            <Text color="white" fontSize={{ base: "sm", md: "md", lg: "lg" }}>
               {t("Get your Creator’s NFT to be able to submit your app into the VeBetterDAO ecosystem!")}
             </Text>
           </Stack>
-          <Image
-            src="/images/creator-nft-xl.png"
-            alt="Apply for Creator's NFT"
-            borderRadius={12}
-            alignSelf={{ base: "center", md: "bottom" }}
-            objectFit="cover"
-            objectPosition={{ base: "center", md: "bottom" }}
-            w={{ base: 90, md: 120, lg: 120 }}
-            h={{ base: 90, md: 120, lg: 120 }}
-          />
+
+          {/* Image Container */}
+          <Box w="full" h="full" maxW="180px" alignSelf="flex-end" display="flex" justifyContent="flex-end">
+            <Image
+              w="full"
+              h="full"
+              src="/assets/mascot/mascot-holding-tokens.webp"
+              alt="Apply for Creator's NFT"
+              objectFit="contain"
+              objectPosition="bottom"
+            />
+          </Box>
         </HStack>
 
         <Card w="full" borderTopRadius="0px" margin={0} py={0}>
@@ -119,7 +138,7 @@ export const NewCreatorPageFormContent = () => {
           status={submitStatus}
           errorMessage={submitStatus === "error" ? submitErrorMessage : undefined}
           isOpen={isOpen}
-          onClose={navigateToHome}
+          onClose={onClose}
           onButtonClick={navigateToHome}
         />
       </VStack>

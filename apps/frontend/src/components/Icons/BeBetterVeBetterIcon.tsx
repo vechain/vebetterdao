@@ -11,7 +11,7 @@ type Props = {
  */
 export const BeBetterVeBetterIcon: React.FC<Props> = ({ veBetterProps, beBetterProps }) => (
   <VStack spacing={2} align="flex-start" w="full">
-    <Image src="/images/be_better.svg" {...beBetterProps} alt="be-better-image" />
-    <Image src="/images/logo/vebetter_dark.svg" {...veBetterProps} alt="ve-better-image" />
+    <Image src="/assets/icons/be_better.svg" {...beBetterProps} alt="be-better-image" />
+    <Image src="/assets/logos/vebetter_dark.svg" {...veBetterProps} alt="ve-better-image" />
   </VStack>
 )

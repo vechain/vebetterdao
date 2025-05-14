@@ -58,7 +58,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
       text: t("Abstained"),
       percentage: proposalVotes?.votes.abstain.percentagePower ?? 0,
       voters: proposalVotes?.votes.abstain.voters ?? 0,
-      icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
+      icon: <Image src={"/assets/icons/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }
 
@@ -80,7 +80,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
         return (
           <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
             <VStack>
-              <Image w="88px" h="88px" color="#004CFC" src="/images/vote.svg" alt="vote-icon" />
+              <Image w="88px" h="88px" color="#004CFC" src="/assets/icons/vote.svg" alt="vote-icon" />
               <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
                 {t("This proposal will be voted in")}
               </Text>

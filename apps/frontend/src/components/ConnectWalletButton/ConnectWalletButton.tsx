@@ -20,6 +20,7 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
   const notLoggedIn = !account?.address
 
   useEffect(() => {
+    if (typeof window === "undefined" || !window?.localStorage) return
     if (connection.isConnected && account?.address) {
       // Get last logged address from localStorage
       const lastLoggedAddress = localStorage.getItem("last_logged_address")

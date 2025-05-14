@@ -13,6 +13,7 @@ export type ProposalFormStoreState = {
   actions: ProposalFormAction[]
   votingStartRoundId?: number
   depositAmount?: number
+  metadataUri?: string
   setData: (data: Partial<ProposalFormStoreState>) => void
   clearData: () => void
 }
@@ -29,6 +30,7 @@ export const useProposalFormStore = create<ProposalFormStoreState>()(
         markdownDescription: GovernanceProposalTemplate,
         actions: [],
         votingStartRoundId: undefined,
+        metadataUri: undefined,
         setData: (data: Partial<ProposalFormStoreState>) =>
           set(state => ({
             ...state,
@@ -41,6 +43,7 @@ export const useProposalFormStore = create<ProposalFormStoreState>()(
             markdownDescription: GovernanceProposalTemplate,
             actions: [],
             votingStartRoundId: undefined,
+            metadataUri: undefined,
           }),
       }),
       {

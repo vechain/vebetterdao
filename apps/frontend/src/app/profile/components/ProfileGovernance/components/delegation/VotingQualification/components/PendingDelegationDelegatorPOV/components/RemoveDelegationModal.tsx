@@ -14,45 +14,30 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRemovePendingDelegationDelegatorPOV } from "@/hooks/useRemovePendingDelegationDelegatorPOV"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosureProps; delegatee: string }) => {
   const { t } = useTranslation()
-
-  const removeDelegation = useRemovePendingDelegationDelegatorPOV({})
-
-  const handleDelegate = useCallback(() => {
-    removeDelegation.sendTransaction({})
-  }, [removeDelegation])
+  const { isTxModalOpen } = useTransactionModal()
+  const { isOpen = false, onClose } = modal
 
   const handleClose = useCallback(() => {
-    modal.onClose?.()
-    removeDelegation.resetStatus()
-  }, [modal, removeDelegation])
+    onClose?.()
+  }, [onClose])
+
+  const removeDelegation = useRemovePendingDelegationDelegatorPOV({
+    onSuccess: handleClose,
+  })
+
+  const handleDelegate = useCallback(() => {
+    removeDelegation.sendTransaction()
+  }, [removeDelegation])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
-  if (removeDelegation.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Delegation request removed!")}
-        status={removeDelegation.status as TransactionModalStatus}
-        errorDescription={removeDelegation.error?.reason}
-        errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
-        showTryAgainButton
-        onTryAgain={() => removeDelegation.sendTransaction({})}
-        pendingTitle={t("Removing delegation request...")}
-        showExplorerButton
-        txId={removeDelegation.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={isOpen && !isTxModalOpen}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

@@ -198,7 +198,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 </VStack>
               ) : (
                 <Center w="full" h="full">
-                  <Image src="/images/nothing-to-show-endorsement.svg" alt="No endorsement" />
+                  <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No endorsement" />
                   <Text fontSize="14px" color="#6A6A6A">
                     {t("There is nothing to show here !")}
                   </Text>
@@ -235,7 +235,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
               </VStack>
             ) : (
               <Center w="full" h="full">
-                <Image src="/images/nothing-to-show-endorsement.svg" alt="No endorsement" />
+                <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No endorsement" />
                 <Text fontSize="14px" color="#6A6A6A">
                   {t("There is nothing to show here !")}
                 </Text>

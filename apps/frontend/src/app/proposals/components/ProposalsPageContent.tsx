@@ -55,7 +55,7 @@ export const ProposalsPageContent = () => {
     )
 
   return (
-    <VStack w={"full"}>
+    <VStack w={"full"} spacing={4}>
       <VStack w={"full"} alignContent={"flex-start"}>
         <HStack spacing={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
           <Box>

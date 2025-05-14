@@ -29,19 +29,22 @@ import {
 } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
-import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { StepModal } from "@/components/StepModal/StepModal"
+import Lottie from "react-lottie"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 export type EditAppForm = {
   name: string
   external_url: string
   description: string
+  distribution_strategy: string
   twitterUrl: string
   discordUrl: string
   telegramUrl: string
@@ -53,8 +56,12 @@ export type EditAppForm = {
   ve_world_bannerImage: string
 }
 
+enum EditAppPageStep {
+  UPLOADING = "UPLOADING",
+}
+
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
-  return urls?.find(url => url.name === name)?.url || ""
+  return urls?.find(url => url.name === name)?.url ?? ""
 }
 
 export const EditAppPageContent = () => {
@@ -64,12 +71,12 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
-  const { app } = useCurrentAppInfo()
   const router = useRouter()
-  const transactionModal = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isTxModalOpen, onClose: onTxModalClose } = useTransactionModal()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account?.address || "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
   const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({
@@ -77,9 +84,10 @@ export const EditAppPageContent = () => {
       screenshots: screenshots,
       logoImage: logo,
       bannerImage: banner,
-      name: appMetadata?.name || "",
-      external_url: appMetadata?.external_url || "",
-      description: appMetadata?.description || "",
+      name: appMetadata?.name ?? "",
+      external_url: appMetadata?.external_url ?? "",
+      description: appMetadata?.description ?? "",
+      distribution_strategy: appMetadata?.distribution_strategy ?? "",
       twitterUrl: findUrlByName(appMetadata?.social_urls, "Twitter"),
       discordUrl: findUrlByName(appMetadata?.social_urls, "Discord"),
       telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
@@ -100,21 +108,34 @@ export const EditAppPageContent = () => {
     router.push(`/apps/${appId}`)
   }, [appId, router])
 
+  useEffect(() => {
+    if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
+      goToAppPage()
+    }
+  }, [isAdminOrModerator, appId, router, permissions, goToAppPage])
+
+  const handleSuccess = useCallback(() => {
+    onClose()
+    onTxModalClose()
+    goToAppPage()
+  }, [onClose, onTxModalClose, goToAppPage])
+
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
-    onSuccess: goToAppPage,
+    onSuccess: handleSuccess,
+    onFailure: () => {
+      onClose()
+    },
   })
 
   const uploadMetadataMutation = useUploadAppMetadata()
 
-  const onSubmit = useCallback(
+  const uploadMetadata = useCallback(
     async (data: EditAppForm) => {
-      updateAppDetailsMutation.resetStatus()
-      transactionModal.onOpen()
-
       const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
         description: data.description,
+        distribution_strategy: data?.distribution_strategy ?? "",
         logo: data.logoImage,
         banner: data.bannerImage,
         external_url: data.external_url,
@@ -126,30 +147,25 @@ export const EditAppPageContent = () => {
           banner: data.ve_world_bannerImage,
         },
       })
+      return metadataUri
+    },
+    [uploadMetadataMutation, socialUrls, appMetadata?.tweets],
+  )
+
+  const onSubmit = useCallback(
+    async (data: EditAppForm) => {
+      onTxModalClose()
+      onOpen()
+
+      const metadataUri = await uploadMetadata(data)
       if (!metadataUri) return
 
       updateAppDetailsMutation.sendTransaction({
         metadataUri,
       })
     },
-    [updateAppDetailsMutation, transactionModal, uploadMetadataMutation, socialUrls, appMetadata?.tweets],
+    [updateAppDetailsMutation, onOpen, uploadMetadata, onTxModalClose],
   )
-
-  const handleClose = useCallback(() => {
-    transactionModal.onClose()
-    updateAppDetailsMutation.resetStatus()
-  }, [transactionModal, updateAppDetailsMutation])
-
-  const onTryAgain = useCallback(() => {
-    handleClose()
-    handleSubmit(onSubmit)()
-  }, [handleClose, handleSubmit, onSubmit])
-
-  useEffect(() => {
-    if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
-      router.push(`/apps/${app?.id}`)
-    }
-  }, [isAdminOrModerator, app?.id, router, permissions])
 
   // Update the form values when the app fetches the data from blockchain
   useEffect(() => {
@@ -164,12 +180,38 @@ export const EditAppPageContent = () => {
 
   return (
     <>
-      <UpdateAppMetadataTransactionModal
-        transactionModal={transactionModal}
-        handleClose={handleClose}
-        uploadMetadataMutation={uploadMetadataMutation}
-        updateAppDetailsMutation={updateAppDetailsMutation}
-        onTryAgain={onTryAgain}
+      <StepModal
+        isOpen={isOpen && !isTxModalOpen}
+        onClose={onClose}
+        disableCloseButton={true}
+        steps={[
+          {
+            key: EditAppPageStep.UPLOADING,
+            content: (
+              <ModalAnimation>
+                <VStack align={"center"} p={6}>
+                  <Lottie
+                    style={{
+                      pointerEvents: "none",
+                    }}
+                    options={{
+                      loop: true,
+                      autoplay: true,
+                      animationData: UploadingMetadataAnimation,
+                    }}
+                    height={200}
+                    width={200}
+                  />
+                </VStack>
+              </ModalAnimation>
+            ),
+            title: "Upload metadata",
+            description: "Please wait while we upload the metadata",
+          },
+        ]}
+        activeStep={0}
+        setActiveStep={() => {}}
+        goToPrevious={() => {}}
       />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
         <Stack
@@ -183,11 +225,11 @@ export const EditAppPageContent = () => {
                   required: { value: true, message: t("Name required") },
                   minLength: { value: 3, message: t("Name must be at least 3 characters") },
                 })}
-                defaultValue={appMetadata?.name || ""}
+                defaultValue={appMetadata?.name ?? ""}
                 fontSize={"28px"}
                 fontWeight={700}
               />
-              <FormErrorMessage fontSize={"12px"}>{errors?.name?.message || ""}</FormErrorMessage>
+              <FormErrorMessage fontSize={"12px"}>{errors?.name?.message ?? ""}</FormErrorMessage>
             </FormControl>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
@@ -225,7 +267,7 @@ export const EditAppPageContent = () => {
                     },
                   })}
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message || ""}</FormErrorMessage>
+                <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message ?? ""}</FormErrorMessage>
               </FormControl>
             </VStack>
 
@@ -239,11 +281,34 @@ export const EditAppPageContent = () => {
                     required: { value: true, message: t("Description required") },
                     minLength: { value: 20, message: t("Description must be at least 20 characters") },
                   })}
-                  defaultValue={appMetadata?.description || ""}
+                  defaultValue={appMetadata?.description ?? ""}
                   resize="none"
                   h="140px"
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message || ""}</FormErrorMessage>
+                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message ?? ""}</FormErrorMessage>
+              </FormControl>
+            </VStack>
+            <VStack align={"stretch"} gap={4}>
+              <Text fontSize={16} fontWeight={500}>
+                {t("Distribution Strategy")}
+              </Text>
+              <FormControl isInvalid={!!errors.distribution_strategy}>
+                <Textarea
+                  {...register("distribution_strategy", {
+                    required: {
+                      value: true,
+                      message: t("This field is required"),
+                    },
+                    minLength: {
+                      value: 20,
+                      message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
+                    },
+                  })}
+                  defaultValue={appMetadata?.distribution_strategy ?? ""}
+                  resize="none"
+                  h="140px"
+                />
+                <FormErrorMessage fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</FormErrorMessage>
               </FormControl>
             </VStack>
           </VStack>

@@ -28,6 +28,7 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 import { IX2EarnCreator } from "../interfaces/IX2EarnCreator.sol";
+import { IX2EarnRewardsPool } from "../interfaces/IX2EarnRewardsPool.sol";
 
 /**
  * @title X2EarnAppsUpgradeable
@@ -125,6 +126,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function appModerators(bytes32 appId) public view virtual returns (address[] memory);
 
   /**
+   * @dev Returns true if the creator has already been used for another app.
+   */
+  function isCreatorOfAnyApp(address creator) public view virtual returns (bool);
+
+  /**
    * @dev Function to get the metadataURI of an app.
    */
   function metadataURI(bytes32 appId) public view virtual returns (string memory);
@@ -190,4 +196,14 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Function to add a creator to the app.
    */
   function _addCreator(bytes32 appId, address creator) internal virtual;
+
+  /**
+   * @dev Function to enable the rewards pool for a new app.
+   */
+  function _enableRewardsPoolForNewApp(bytes32 appId) internal virtual;
+
+  /**
+   * @dev Function to get the X2EarnRewardsPool contract
+   */
+  function x2EarnRewardsPoolContract() public view virtual returns (IX2EarnRewardsPool);
 }

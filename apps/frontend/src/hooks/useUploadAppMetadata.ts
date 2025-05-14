@@ -4,12 +4,16 @@ import { XAppMetadata } from "@/api"
 import { base64ToBlob } from "@/utils/BlobUtils"
 import JSZip from "jszip"
 import { uploadBlobToIPFS } from "@/utils"
-
+export type UseUploadAppMetadataReturnValue = {
+  metadataUploading: boolean
+  metadataUploadError: Error | undefined
+  onMetadataUpload: (metadata: XAppMetadata, transformImages?: boolean) => Promise<string | undefined>
+}
 /**
  * Uploads app metadata to IPFS
  * @returns metadataUploading, metadataUploadError, onMetadataUpload
  */
-export const useUploadAppMetadata = () => {
+export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
   const [metadataUploading, setMetadataUploading] = useState(false)
   const [metadataUploadError, setMetadataUploadError] = useState<Error>()
 
