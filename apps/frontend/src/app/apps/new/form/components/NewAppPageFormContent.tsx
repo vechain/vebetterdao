@@ -75,6 +75,7 @@ export const NewAppPageFormContent = () => {
         app_urls: [],
         social_urls: [],
         tweets: [],
+        categories: [],
         ve_world: {
           banner: data.ve_world_banner,
         },

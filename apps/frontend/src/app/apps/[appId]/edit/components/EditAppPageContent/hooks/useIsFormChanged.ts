@@ -28,6 +28,7 @@ export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, undefined
   const isVeWorldBannerChanged = form.watch("ve_world_bannerImage") !== appMetadata?.ve_world?.banner
   const isDistributionStrategyChanged =
     form.watch("distribution_strategy") !== appMetadata?.distribution_strategy && !!form.watch("distribution_strategy")
+  const isCategoriesChanged = form.watch("categories") !== appMetadata?.categories && !!form.watch("categories")
 
   return (
     isNameChanged ||
@@ -38,6 +39,7 @@ export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, undefined
     isScreenshotsChanged ||
     isSocialUrlsChanged ||
     isVeWorldBannerChanged ||
-    isDistributionStrategyChanged
+    isDistributionStrategyChanged ||
+    isCategoriesChanged
   )
 }
