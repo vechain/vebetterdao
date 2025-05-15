@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { ConvertModal } from "@/components/Convert/ConvertModal"
+import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { B3TRIcon } from "@/components/Icons"
 import {
   Button,
@@ -96,7 +96,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
               {t("Total VOT3 Balance")}
             </Text>
             <HStack>
-              <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
+              <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
               <Skeleton isLoaded={!isVot3BalanceLoading}>
                 <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
               </Skeleton>

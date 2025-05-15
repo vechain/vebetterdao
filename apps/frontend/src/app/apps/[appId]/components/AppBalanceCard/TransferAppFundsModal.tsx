@@ -28,9 +28,11 @@ type Props = {
   onClose: () => void
   isEnablingRewardsPool?: boolean
   isPaused?: boolean
+  isAppAdmin?: boolean
+  isTreasuryAddress?: boolean
 }
 
-export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused }: Props) => {
+export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
 
   const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
@@ -82,7 +84,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Text>
                 <Button
                   mt={1}
-                  // isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                  isDisabled={!isAppAdmin}
                   onClick={() => {
                     onOpenWithdraw()
                     onClose()
@@ -138,6 +140,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Text>
                 <Button
                   mt={1}
+                  isDisabled={!isAppAdmin}
                   onClick={() => {
                     onOpenFundsManagement()
                     onClose()

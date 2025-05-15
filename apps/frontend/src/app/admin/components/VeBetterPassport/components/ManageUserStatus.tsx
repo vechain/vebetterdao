@@ -1,6 +1,5 @@
 import { useUserStatus } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
 import {
   Button,
@@ -14,7 +13,6 @@ import {
   InputGroup,
   Select,
   Text,
-  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
@@ -24,7 +22,6 @@ import { useTranslation } from "react-i18next"
 export const ManageUserStatus = () => {
   const [user, setUser] = useState<string>("")
   const [actionType, setActionType] = useState(UserStatus.NONE)
-  const { isOpen, onClose, onOpen } = useDisclosure()
 
   const userStatus = useUserStatus(user)
 
@@ -36,7 +33,7 @@ export const ManageUserStatus = () => {
   const statusConfig = useUserStatusConfig()
   const currentConfig = statusConfig[actionType]
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useWhitelistBlacklistUser({
+  const { sendTransaction, isTransactionPending, status } = useWhitelistBlacklistUser({
     address: user,
     currentStatus: userStatus,
     newStatus: actionType,
@@ -49,83 +46,61 @@ export const ManageUserStatus = () => {
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
-      sendTransaction(undefined)
-      onOpen()
+      sendTransaction()
     },
-    [sendTransaction, onOpen],
+    [sendTransaction],
   )
-
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [resetStatus, onClose])
 
   const isLoading = isTransactionPending || status === "pending"
   const isFormValid = isValidAddress
 
   return (
-    <>
-      <Card w={"full"}>
-        <CardHeader>
-          <Heading size="lg">{t("Manage User Status")}</Heading>
-          <Text fontSize="sm">
-            {t("Manage user participation by adding them to a whitelist, blacklist, or removing their status")}
-          </Text>
-        </CardHeader>
-        <CardBody>
-          <form onSubmit={handleSubmit}>
-            <VStack spacing={4} alignItems={"start"}>
-              <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress}>
-                  <FormLabel>
-                    <strong>{t("User address")}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <WalletAddressInput onAddressResolved={address => setUser(address ?? "")} isDisabled={isLoading} />
-                  </InputGroup>
-                </FormControl>
-              </HStack>
-
-              <HStack spacing={4} alignItems="center" w="full">
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">{t("Manage User Status")}</Heading>
+        <Text fontSize="sm">
+          {t("Manage user participation by adding them to a whitelist, blacklist, or removing their status")}
+        </Text>
+      </CardHeader>
+      <CardBody>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4} alignItems={"start"}>
+            <HStack spacing={4} alignItems={"start"} w={"full"}>
+              <FormControl isRequired isInvalid={!isValidAddress}>
                 <FormLabel>
-                  <strong>{t("Action")}</strong>
+                  <strong>{t("User address")}</strong>
                 </FormLabel>
-                <Select
-                  value={actionType}
-                  onChange={handleSetActionType}
-                  isDisabled={isLoading}
-                  placeholder={t("Select action")}>
-                  <option value={UserStatus.WHITELIST}>{t(UserStatus.WHITELIST as any)}</option>
-                  <option value={UserStatus.BLACKLIST}>{t(UserStatus.BLACKLIST as any)}</option>
-                  <option value={UserStatus.NONE}>{t(UserStatus.NONE as any)}</option>
-                </Select>
-              </HStack>
+                <InputGroup>
+                  <WalletAddressInput onAddressResolved={address => setUser(address ?? "")} isDisabled={isLoading} />
+                </InputGroup>
+              </FormControl>
+            </HStack>
 
-              <Button
-                isDisabled={!isFormValid || actionType === userStatus}
-                colorScheme={currentConfig.buttonColorScheme}
-                type="submit"
-                isLoading={isLoading}>
-                {currentConfig.buttonText}
-              </Button>
-            </VStack>
-          </form>
-        </CardBody>
-      </Card>
+            <HStack spacing={4} alignItems="center" w="full">
+              <FormLabel>
+                <strong>{t("Action")}</strong>
+              </FormLabel>
+              <Select
+                value={actionType}
+                onChange={handleSetActionType}
+                isDisabled={isLoading}
+                placeholder={t("Select action")}>
+                <option value={UserStatus.WHITELIST}>{t(UserStatus.WHITELIST as any)}</option>
+                <option value={UserStatus.BLACKLIST}>{t(UserStatus.BLACKLIST as any)}</option>
+                <option value={UserStatus.NONE}>{t(UserStatus.NONE as any)}</option>
+              </Select>
+            </HStack>
 
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={currentConfig.modalSuccessTitle}
-        onTryAgain={handleSubmit}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle={currentConfig.modalPendingTitle}
-        errorTitle={currentConfig.modalErrorTitle}
-        errorDescription={error?.reason}
-      />
-    </>
+            <Button
+              isDisabled={!isFormValid || actionType === userStatus}
+              colorScheme={currentConfig.buttonColorScheme}
+              type="submit"
+              isLoading={isLoading}>
+              {currentConfig.buttonText}
+            </Button>
+          </VStack>
+        </form>
+      </CardBody>
+    </Card>
   )
 }

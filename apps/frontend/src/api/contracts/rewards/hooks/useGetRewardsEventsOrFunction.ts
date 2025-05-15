@@ -1,5 +1,9 @@
-import { useRoundReward } from "./useVotingRoundReward"
 import { useRewardClaimedEvents } from "./useRewardClaimedEvents"
+
+export type ClaimedReward = {
+  claimedReward: number
+  claimedGMReward?: number
+}
 
 /**
  * useGetRewardsEventsOrFunction is a custom hook that fetches the rewards events or function for a given round and voter.
@@ -11,16 +15,14 @@ import { useRewardClaimedEvents } from "./useRewardClaimedEvents"
  * @returns {object} An object containing the status and data of the queries. Refer to the react-query documentation for more details.
  */
 export const useGetRewardsEventsOrFunction = (voter: string, cycle?: string) => {
-  const { data: votingRewardsQuery } = useRoundReward(voter, cycle ?? "")
   const { data: rewardClaimedEvents } = useRewardClaimedEvents(cycle ? Number(cycle) : 0, voter)
 
-  if (!votingRewardsQuery || !rewardClaimedEvents) return 0
+  if (!rewardClaimedEvents) return { claimedReward: 0, claimedGMReward: 0 }
 
-  // if multiple claimed rewards, we filter the one for the current cycle
-  if (Number(votingRewardsQuery.rewards) !== 0.0) {
-    return votingRewardsQuery.rewards
-  } else {
-    const claimedReward = rewardClaimedEvents[0]?.reward
-    return claimedReward
+  const claimedReward = rewardClaimedEvents[0]?.reward
+  const gmReward = rewardClaimedEvents[0]?.gmReward
+  return {
+    claimedReward: claimedReward ?? 0,
+    claimedGMReward: gmReward ?? 0,
   }
 }

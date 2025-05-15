@@ -45,7 +45,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
         overflow={"hidden"}
         position={"relative"}>
         <Image
-          src="/images/cloud-background.png"
+          src="/assets/backgrounds/cloud-background.webp"
           alt="cloud-background"
           position="absolute"
           w={"150%"}

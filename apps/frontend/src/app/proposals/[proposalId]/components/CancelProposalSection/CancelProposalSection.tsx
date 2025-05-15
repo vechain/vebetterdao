@@ -1,5 +1,4 @@
 import { ProposalState } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
   Button,
@@ -28,7 +27,6 @@ export const CancelProposalSection = () => {
   const { account } = useWallet()
   const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
-  const transactionModal = useDisclosure()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const handleCloseConfirmationModal = useCallback(() => {
@@ -41,14 +39,8 @@ export const CancelProposalSection = () => {
 
   const handleCancelProposal = useCallback(() => {
     confirmationModal.onClose()
-    transactionModal.onOpen()
-    cancelProposalMutation.sendTransaction({})
-  }, [cancelProposalMutation, confirmationModal, transactionModal])
-
-  const handleCloseTransactionModal = useCallback(() => {
-    transactionModal.onClose()
-    cancelProposalMutation.resetStatus()
-  }, [cancelProposalMutation, transactionModal])
+    cancelProposalMutation.sendTransaction()
+  }, [cancelProposalMutation, confirmationModal])
 
   const accountCanCancelProposal = useMemo(
     () => compareAddresses(proposal.proposer, account?.address || "") || permissions?.isAdminOfB3TRGovernor,
@@ -110,23 +102,6 @@ export const CancelProposalSection = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-      <TransactionModal
-        isOpen={transactionModal.isOpen}
-        onClose={handleCloseTransactionModal}
-        status={
-          cancelProposalMutation.error
-            ? TransactionModalStatus.Error
-            : (cancelProposalMutation.status as TransactionModalStatus)
-        }
-        successTitle={t("Proposal canceled!")}
-        onTryAgain={handleCancelProposal}
-        showTryAgainButton
-        showExplorerButton
-        txId={cancelProposalMutation.txReceipt?.meta.txID}
-        pendingTitle={t("Cancelling proposal...")}
-        errorTitle={t("Error cancelling proposal")}
-        errorDescription={cancelProposalMutation.error?.reason}
-      />
     </Card>
   )
 }

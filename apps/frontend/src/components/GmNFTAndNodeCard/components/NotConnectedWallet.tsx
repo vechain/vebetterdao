@@ -15,7 +15,7 @@ export const NotConnectedWallet = () => {
       color="white"
       position="relative"
       overflow={"hidden"}
-      bgImage={"/images/cloud-background.png"}
+      bgImage={"/assets/backgrounds/cloud-background.webp"}
       bgSize="cover"
       bgPosition="center"
       bgRepeat="no-repeat">

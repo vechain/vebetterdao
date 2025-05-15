@@ -125,6 +125,10 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnUnverifiedCreator(msg.sender);
     }
 
+    if(isCreatorOfAnyApp(msg.sender)) {
+      revert CreatorNFTAlreadyUsed(msg.sender);
+    }
+
     // Store the new app
     $._apps[id] = X2EarnAppsDataTypes.App(id, appName, 0);
     _setAppAdmin(id, admin);

@@ -11,6 +11,9 @@ const voterRewardsInterface = VoterRewards__factory.createInterface()
 const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
 const getReward = new abi.Function(JSON.parse(voteRewardFragment))
 
+const voterGmRewardFragment = voterRewardsInterface.getFunction("getGMReward").format("json")
+const getGMReward = new abi.Function(JSON.parse(voterGmRewardFragment))
+
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.
@@ -32,15 +35,24 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
     queryFn: async () => {
       // Get array from 1 to lastRoundId (if currentRoundId is still active)
       const rounds = Array.from({ length: lastRoundId }, (_, i) => (i + 1).toString())
-      const clauses = rounds.map(roundId => ({
+      const clausesVotingRewards = rounds.map(roundId => ({
         to: VOTER_REWARDS_CONTRACT,
         value: "0x0",
         data: getReward.encode(roundId, voter),
       }))
 
-      const res = await thor.explain(clauses).execute()
+      const clausesGMRewards = rounds.map(roundId => ({
+        to: VOTER_REWARDS_CONTRACT,
+        value: "0x0",
+        data: getGMReward.encode(roundId, voter),
+      }))
+
+      const res = await thor.explain(clausesVotingRewards).execute()
+      const resGM = await thor.explain(clausesGMRewards).execute()
 
       let total = new BigNumber(0)
+      let totalGMRewards = new BigNumber(0)
+
       const roundsRewards = res.map((r, index) => {
         const decoded = getReward.decode(r.data)
         if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
@@ -61,12 +73,28 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
         }
       })
 
-      const totalFormatted = ethers.formatEther(total.toFixed())
+      const roundsRewardsWithGm = resGM.map((r, index) => {
+        const decoded = getGMReward.decode(r.data)
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
+        const roundId = rounds[index] as string
+        const gmRewards = decoded[0] as string
+        const formattedRewardsGM = ethers.formatEther(gmRewards)
+
+        totalGMRewards = totalGMRewards.plus(gmRewards)
+        return {
+          roundId,
+          rewards: gmRewards,
+          formattedRewards: formattedRewardsGM,
+        }
+      })
+
+      const totalFormatted = ethers.formatEther(total.plus(totalGMRewards).toFixed())
 
       return {
         total: total.toFixed(),
         totalFormatted,
-        roundsRewards,
+        roundsRewards: roundsRewards,
+        roundsRewardsWithGm: roundsRewardsWithGm,
       }
     },
   })

@@ -24,9 +24,9 @@ export const DoActionBanner = () => {
       <GenericBanner
         title={t("TIME TO STEP UP! 🏃🏼‍♂️")}
         description={description}
-        logoSrc="/images/info-bell.png"
+        logoSrc="/assets/icons/info-bell.webp"
         backgroundColor="#FFD979"
-        backgroundImageSrc="/images/cloud-background-orange.png"
+        backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
         buttonLabel={t("Know more")}
         onButtonClick={doActionModal.onOpen}
         buttonVariant="outline"

@@ -1,5 +1,4 @@
 import { useAppsEligibleInNextRound, useXApps } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useSetVotingEligibility } from "@/hooks"
 import {
   VStack,
@@ -13,7 +12,6 @@ import {
   Switch,
   HStack,
   Divider,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 
@@ -49,8 +47,7 @@ export const UpdateAppsEligibility = () => {
 }
 
 const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; isEligible: boolean }) => {
-  const { isOpen, onClose, onOpen } = useDisclosure()
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useSetVotingEligibility({
+  const { sendTransaction, isTransactionPending, status } = useSetVotingEligibility({
     appId: id,
     isEligible: !isEligible,
     appName: name,
@@ -60,16 +57,10 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      sendTransaction(undefined)
-      onOpen()
+      sendTransaction()
     },
-    [sendTransaction, onOpen],
+    [sendTransaction],
   )
-
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [resetStatus, onClose])
 
   return (
     <VStack>
@@ -82,23 +73,6 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         />
       </HStack>
       <Divider />
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={
-          isEligible ? `${name} will be eligible from next round` : `${name} will not be eligible from next round`
-        }
-        onTryAgain={handleEligibilityChange}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle={
-          isEligible ? `Enabling voting eligibility for ${name}...` : `Disabling voting eligibility for ${name}...`
-        }
-        errorTitle={"Error changing eligibility"}
-        errorDescription={error?.reason}
-      />
     </VStack>
   )
 }
