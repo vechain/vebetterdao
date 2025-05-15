@@ -32,6 +32,7 @@
     "get-galaxy-member-owners": "npx hardhat run scripts/galaxyMember/getGMowners.ts --network vechain_mainnet",
     "get-galaxy-member-owners:staging": "npx hardhat run scripts/galaxyMember/getGMowners.ts --network vechain_testnet",
     "get-galaxy-member-selected-tokens": "npx hardhat run scripts/galaxyMember/getGmSelectedTokens.ts --network vechain_mainnet",
+    "get-app-shares": "npx hardhat run scripts/xApps/getAppShares.ts --network vechain_mainnet",
     "get-all-apps-from-creator": "npx hardhat run scripts/data/getAllAppsFromCreator.ts --network vechain_mainnet",
     "get-all-apps-from-creator:staging": "npx hardhat run scripts/data/getAllAppsFromCreator.ts --network vechain_testnet",
     "start-solo": "docker compose up -d",

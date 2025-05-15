@@ -1,5 +1,5 @@
 export * from "./endorsement"
-
+export * from "./useUserSignalEvents"
 export * from "./useAppAdmin"
 export * from "./useAppExists"
 export * from "./useAppIsBlacklisted"
