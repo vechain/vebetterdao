@@ -64,7 +64,7 @@ const main = async () => {
     const thor = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
 
     const bannedWallet = "0x0000000000000000000000000000000000000000"
-    const reason = "From script: reseting user signal counter"
+    const reason = "Reseting user signal counter for KYC'ed wallet"
     const result = await resetSignalCounter(thor, bannedWallet, reason)
     console.log("Signal counter reset successfully:", result)
   } catch (error) {

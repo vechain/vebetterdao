@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
+import { APIGatewayProxyResult, Context } from "aws-lambda"
 import { FunctionFragment } from "ethers"
 
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
@@ -41,10 +41,8 @@ const VET_DOMAINS_CONTRACT_ABI_FRAGMENT = JSON.stringify({
  */
 const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKey: string }> => {
   const client = new SecretsManagerClient({ region: "eu-west-1" })
-  const AWS_MINTER_PK_SECRET_ID = "TO BE ADDED"
-  const AWS_MINTER_PK_SECRET_NAME = "TO BE ADDED"
 
-  const privateKey = await getSecret(client, AWS_MINTER_PK_SECRET_ID, AWS_MINTER_PK_SECRET_NAME)
+  const privateKey = await getSecret(client, "vebetterpassport_reset_signal_mainnet", "RESET_SIGNALER_PK")
   const walletAddress = addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex"))
 
   return { walletAddress, privateKey }
@@ -100,23 +98,27 @@ export const getVerifiedVetDomain = async (thor: ThorClient, walletAddress?: str
   return res[0]
 }
 
-export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
   console.log(`Caller wallet address: ${(await getCallerWalletInfo()).walletAddress}`)
   console.log(`Interacting with contract: ${mainnetConfig.veBetterPassportContractAddress} on network: ${NODE_URL}`)
 
   try {
-    const requestBody = event.body ? JSON.parse(event.body) : null
+    const requestBody = event?.walletAddress
 
-    if (!requestBody || !requestBody.walletAddress) {
-      return buildResponse(StandardApiError.BAD_REQUEST)
+    if (!requestBody) {
+      return buildResponse(StandardApiError.BAD_REQUEST, {
+        message: `Invalid request body - walletAddress is required: ${JSON.stringify(event)}`,
+      })
     }
 
-    const walletToBeUnbanned = requestBody.walletAddress
+    const walletToBeUnbanned = requestBody
 
     if (!isValid(walletToBeUnbanned)) {
-      return buildResponse(StandardApiError.BAD_REQUEST)
+      return buildResponse(StandardApiError.BAD_REQUEST, {
+        message: "Invalid wallet address format",
+      })
     }
 
     const thorClient = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
@@ -129,7 +131,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       })
     }
 
-    const reason = `Lambda operation: Resetting signal counter for verified wallet ${walletToBeUnbanned}`
+    const reason = `Resetting signal counter for KYC'ed wallet`
     const { receipt, gasResult } = await resetSignalCounter(thorClient, walletToBeUnbanned, reason)
 
     if (!receipt) {
