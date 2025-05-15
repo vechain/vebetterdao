@@ -33,6 +33,7 @@ import { getVerifiedVetDomainQueryKey, useVerifiedVetDomain } from "./hooks/useV
 import { ResetingResult } from "./components/ResetingResult"
 import { RESET_SIGNAL_KEY_LOCAL_STORAGE_PREFIX, VET_DOMAINS_VERIFY_URL, REDIRECT_URL, RESET_STATUS } from "./constants"
 import { ResetStatus } from "./types"
+import { linkClickActions, LinkClickProperties, linkClicked } from "@/constants"
 
 export const AppealSteps = () => {
   const router = useRouter()
@@ -181,6 +182,12 @@ export const AppealSteps = () => {
     AnalyticsUtils.trackPage("Appeal")
   }, [])
 
+  useEffect(() => {
+    if (userSignaledCount >= 1 && hasSuccessfulReset) {
+      AnalyticsUtils.trackEvent("SignaledAfterKYC")
+    }
+  }, [userSignaledCount, hasSuccessfulReset])
+
   // Redirect to homepage if
   // - user is not connected
   // - appeal is complete (verified with no signals)
@@ -271,7 +278,13 @@ export const AppealSteps = () => {
                   .map(event => (
                     <ListItem
                       key={event.appId}
-                      onClick={() => router.push(`/apps/${event.appId}`)}
+                      onClick={() => {
+                        AnalyticsUtils.trackEvent(
+                          linkClicked,
+                          linkClickActions(LinkClickProperties.REDIRECT_TO_APP_PAGE),
+                        )
+                        router.push(`/apps/${event.appId}`)
+                      }}
                       cursor="pointer"
                       textDecoration="underline"
                       _hover={{
