@@ -237,11 +237,13 @@ describe("X-Apps - @shard15", function () {
           await x2EarnCreator.getAddress(),
         ],
         {
-          AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
-          EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
-          VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          version: 2,
+          libraries: {
+            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          },
         },
-        2,
       )) as X2EarnAppsV2
 
       // start new round
@@ -258,11 +260,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
-          AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
-          EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
-          VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          version: 3,
+          libraries: {
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          },
         },
-        3,
       )) as X2EarnAppsV3
 
       // start new round
@@ -281,11 +285,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV3.getAddress(),
         [await x2EarnRewardsPool.getAddress()],
         {
-          AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
-          EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
-          VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          version: 4,
+          libraries: {
+            AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
+            EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
+            VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          },
         },
-        4,
       )) as X2EarnAppsV4
       // start new round
       await startNewAllocationRound()
@@ -294,18 +300,14 @@ describe("X-Apps - @shard15", function () {
       expect(appsV3).to.eql(appsV4)
 
       // Upgrade X2EarnAppsV4 to X2EarnAppsV5
-      const x2EarnAppsV5 = (await upgradeProxy(
-        "X2EarnAppsV4",
-        "X2EarnApps",
-        await x2EarnAppsV4.getAddress(),
-        [],
-        {
+      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+        version: 5,
+        libraries: {
           AdministrationUtils: await administrationUtils.getAddress(),
           EndorsementUtils: await endorsementUtils.getAddress(),
           VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
         },
-        5,
-      )) as X2EarnApps
+      })) as X2EarnApps
       // start new round
       await startNewAllocationRound()
 
@@ -393,11 +395,13 @@ describe("X-Apps - @shard15", function () {
           await x2EarnCreator.getAddress(),
         ],
         {
-          AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
-          EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
-          VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          version: 2,
+          libraries: {
+            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          },
         },
-        2,
       )) as X2EarnAppsV2
 
       await veBetterPassport
@@ -564,11 +568,13 @@ describe("X-Apps - @shard15", function () {
           await x2EarnCreator.getAddress(),
         ],
         {
-          AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
-          EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
-          VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          version: 2,
+          libraries: {
+            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          },
         },
-        2,
       )) as X2EarnAppsV2
 
       await veBetterPassport
@@ -668,11 +674,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
-          AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
-          EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
-          VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          version: 3,
+          libraries: {
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          },
         },
-        3,
       )) as X2EarnAppsV3
 
       // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
@@ -717,11 +725,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV3.getAddress(),
         [await x2EarnRewardsPool.getAddress()],
         {
-          AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
-          EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
-          VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          version: 4,
+          libraries: {
+            AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
+            EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
+            VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          },
         },
-        4,
       )) as X2EarnAppsV4
       // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
       expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
@@ -758,18 +768,14 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
 
       // Upgrade X2EarnAppsV4 to X2EarnAppsV5
-      const x2EarnAppsV5 = (await upgradeProxy(
-        "X2EarnAppsV4",
-        "X2EarnApps",
-        await x2EarnAppsV4.getAddress(),
-        [],
-        {
+      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+        version: 5,
+        libraries: {
           AdministrationUtils: await administrationUtils.getAddress(),
           EndorsementUtils: await endorsementUtils.getAddress(),
           VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
         },
-        5,
-      )) as X2EarnApps
+      })) as X2EarnApps
 
       // New node holders should not be subject to cooldown period
       expect(await x2EarnAppsV5.checkCooldown(nodeId1)).to.eql(false)
@@ -851,15 +857,17 @@ describe("X-Apps - @shard15", function () {
             await x2EarnCreator.getAddress(),
           ],
         ],
-        [
-          undefined,
-          {
-            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
-            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
-            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
-          },
-        ],
-        [undefined, 2],
+        {
+          versions: [undefined, 2],
+          libraries: [
+            undefined,
+            {
+              AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+              EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+              VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+            },
+          ],
+        },
       )) as X2EarnAppsV2
 
       // Grant Roles
@@ -942,11 +950,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
-          AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
-          EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
-          VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          version: 3,
+          libraries: {
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          },
         },
-        3,
       )) as X2EarnAppsV3
 
       const storageSlotsAfterV3 = await getStorageSlots(
@@ -993,11 +1003,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV3.getAddress(),
         [await x2EarnRewardsPool.getAddress()],
         {
-          AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
-          EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
-          VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          version: 4,
+          libraries: {
+            AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
+            EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
+            VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
+          },
         },
-        4,
       )) as X2EarnAppsV4
 
       expect(await x2EarnAppsV4.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
@@ -1062,18 +1074,14 @@ describe("X-Apps - @shard15", function () {
       expect(addressFromSlot2).to.equal(expectedAddress2)
 
       // Upgrade to V5
-      const x2EarnAppsV5 = (await upgradeProxy(
-        "X2EarnAppsV4",
-        "X2EarnApps",
-        await x2EarnAppsV4.getAddress(),
-        [],
-        {
+      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+        version: 5,
+        libraries: {
           AdministrationUtils: await administrationUtils.getAddress(),
           EndorsementUtils: await endorsementUtils.getAddress(),
           VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
         },
-        5,
-      )) as X2EarnApps
+      })) as X2EarnApps
 
       expect(await x2EarnAppsV5.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
       expect(await x2EarnAppsV5.x2EarnCreatorContract()).to.eql(await x2EarnCreator.getAddress())
@@ -1249,8 +1257,9 @@ describe("X-Apps - @shard15", function () {
           [veBetterPassportContractAddress],
           [],
         ],
-        undefined,
-        [undefined, 2, 3, 4],
+        {
+          versions: [undefined, 2, 3, 4],
+        },
       )) as X2EarnRewardsPoolV4
 
       const xAllocationPool = (await deployAndUpgrade(
@@ -1268,8 +1277,9 @@ describe("X-Apps - @shard15", function () {
           [],
           [],
         ],
-        undefined,
-        [undefined, 2, 3],
+        {
+          versions: [undefined, 2, 3],
+        },
       )) as XAllocationPoolV3
 
       const galaxyMember = (await deployAndUpgrade(
@@ -1299,8 +1309,9 @@ describe("X-Apps - @shard15", function () {
           ],
           [],
         ],
-        undefined,
-        [undefined, 2, 3],
+        {
+          versions: [undefined, 2, 3],
+        },
       )) as GalaxyMember
 
       const emissions = (await deployAndUpgrade(
@@ -1335,8 +1346,9 @@ describe("X-Apps - @shard15", function () {
           ],
           [config.EMISSIONS_IS_NOT_ALIGNED],
         ],
-        undefined,
-        [undefined, 2],
+        {
+          versions: [undefined, 2],
+        },
       )) as Emissions
 
       const voterRewards = (await deployAndUpgrade(
@@ -1355,8 +1367,9 @@ describe("X-Apps - @shard15", function () {
           [],
           [],
         ],
-        undefined,
-        [undefined, 2, 3],
+        {
+          versions: [undefined, 2, 3],
+        },
       )) as VoterRewards
 
       const xAllocationVoting = (await deployAndUpgrade(
@@ -1382,8 +1395,9 @@ describe("X-Apps - @shard15", function () {
           [veBetterPassportContractAddress],
           [],
         ],
-        undefined,
-        [undefined, 2, 3],
+        {
+          versions: [undefined, 2, 3],
+        },
       )) as XAllocationVotingV3
 
       const veBetterPassportV1 = (await initializeProxy(
@@ -1432,16 +1446,18 @@ describe("X-Apps - @shard15", function () {
         await veBetterPassportV1.getAddress(),
         [],
         {
-          PassportChecksLogic: await passportChecksLogic.getAddress(),
-          PassportConfigurator: await passportConfigurator.getAddress(),
-          PassportEntityLogic: await passportEntityLogic.getAddress(),
-          PassportDelegationLogic: await passportDelegationLogic.getAddress(),
-          PassportPersonhoodLogic: await passportPersonhoodLogic.getAddress(),
-          PassportPoPScoreLogic: await passportPoPScoreLogic.getAddress(),
-          PassportSignalingLogic: await passportSignalingLogic.getAddress(),
-          PassportWhitelistAndBlacklistLogic: await passportWhitelistBlacklistLogic.getAddress(),
+          version: 2,
+          libraries: {
+            PassportChecksLogic: await passportChecksLogic.getAddress(),
+            PassportConfigurator: await passportConfigurator.getAddress(),
+            PassportEntityLogic: await passportEntityLogic.getAddress(),
+            PassportDelegationLogic: await passportDelegationLogic.getAddress(),
+            PassportPersonhoodLogic: await passportPersonhoodLogic.getAddress(),
+            PassportPoPScoreLogic: await passportPoPScoreLogic.getAddress(),
+            PassportSignalingLogic: await passportSignalingLogic.getAddress(),
+            PassportWhitelistAndBlacklistLogic: await passportWhitelistBlacklistLogic.getAddress(),
+          },
         },
-        2,
       )) as VeBetterPassport
 
       const governor = (await deployAndUpgrade(
@@ -1473,60 +1489,61 @@ describe("X-Apps - @shard15", function () {
           [veBetterPassportContractAddress],
           [],
         ],
-
-        [
-          {
-            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
-          },
-          {
-            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
-          },
-          {
-            GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
-            GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
-            GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
-            GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
-            GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
-            GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
-            GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
-            GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
-          },
-          {
-            GovernorClockLogicV4: await governorClockLogicLibV4.getAddress(),
-            GovernorConfiguratorV4: await governorConfiguratorLibV4.getAddress(),
-            GovernorDepositLogicV4: await governorDepositLogicLibV4.getAddress(),
-            GovernorFunctionRestrictionsLogicV4: await governorFunctionRestrictionsLogicLibV4.getAddress(),
-            GovernorProposalLogicV4: await governorProposalLogicLibV4.getAddress(),
-            GovernorQuorumLogicV4: await governorQuorumLogicLibV4.getAddress(),
-            GovernorStateLogicV4: await governorStateLogicLibV4.getAddress(),
-            GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
-          },
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
-        ],
-        [undefined, 2, 3, 4, 5],
+        {
+          versions: [undefined, 2, 3, 4, 5],
+          libraries: [
+            {
+              GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+              GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+              GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+              GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+              GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+              GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+              GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+              GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+            },
+            {
+              GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+              GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+              GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+              GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+              GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+              GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+              GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+              GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+            },
+            {
+              GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
+              GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
+              GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
+              GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
+              GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
+              GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
+              GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
+              GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
+            },
+            {
+              GovernorClockLogicV4: await governorClockLogicLibV4.getAddress(),
+              GovernorConfiguratorV4: await governorConfiguratorLibV4.getAddress(),
+              GovernorDepositLogicV4: await governorDepositLogicLibV4.getAddress(),
+              GovernorFunctionRestrictionsLogicV4: await governorFunctionRestrictionsLogicLibV4.getAddress(),
+              GovernorProposalLogicV4: await governorProposalLogicLibV4.getAddress(),
+              GovernorQuorumLogicV4: await governorQuorumLogicLibV4.getAddress(),
+              GovernorStateLogicV4: await governorStateLogicLibV4.getAddress(),
+              GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
+            },
+            {
+              GovernorClockLogic: await governorClockLogicLib.getAddress(),
+              GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+              GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+              GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+              GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+              GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+              GovernorStateLogic: await governorStateLogicLib.getAddress(),
+              GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            },
+          ],
+        },
       )) as B3TRGovernor
 
       // ------------------ Set up contracts ------------------
@@ -1652,11 +1669,13 @@ describe("X-Apps - @shard15", function () {
           await x2EarnCreator.getAddress(),
         ],
         {
-          AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
-          EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
-          VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          version: 2,
+          libraries: {
+            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+          },
         },
-        2,
       )) as X2EarnAppsV2
 
       // Grant minter and burner role to X2Earn contract
@@ -1709,30 +1728,22 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
-          AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
-          EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
-          VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          version: 3,
+          libraries: {
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          },
         },
-        3,
       )) as X2EarnAppsV3
 
       // Upgrade contracts that need new interfaces
-      ;(await upgradeProxy(
-        "X2EarnRewardsPoolV4",
-        "X2EarnRewardsPool",
-        await x2EarnRewardsPool.getAddress(),
-        [],
-        undefined,
-        4,
-      )) as X2EarnRewardsPool
-      ;(await upgradeProxy(
-        "XAllocationPoolV3",
-        "XAllocationPool",
-        await xAllocationPool.getAddress(),
-        [],
-        undefined,
-        3,
-      )) as XAllocationPool
+      ;(await upgradeProxy("X2EarnRewardsPoolV4", "X2EarnRewardsPool", await x2EarnRewardsPool.getAddress(), [], {
+        version: 4,
+      })) as X2EarnRewardsPool
+      ;(await upgradeProxy("XAllocationPoolV3", "XAllocationPool", await xAllocationPool.getAddress(), [], {
+        version: 3,
+      })) as XAllocationPool
       ;(await upgradeProxy(
         "X2EarnRewardsPoolV4",
         "X2EarnRewardsPool",
@@ -1880,11 +1891,13 @@ describe("X-Apps - @shard15", function () {
         await x2EarnAppsV3.getAddress(),
         [await x2EarnRewardsPool.getAddress()],
         {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          version: 4,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
         },
-        4,
       )) as X2EarnAppsV4
       expect(await x2EarnAppsV4.version()).to.eql("4")
     })
@@ -2131,21 +2144,22 @@ describe("X-Apps - @shard15", function () {
           ],
           [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
         ],
-
-        [
-          undefined,
-          {
-            AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
-            EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
-            VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
-          },
-          {
-            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
-            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
-            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
-          },
-        ],
-        [undefined, 2, 3],
+        {
+          versions: [undefined, 2, 3],
+          libraries: [
+            undefined,
+            {
+              AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+              EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+              VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+            },
+            {
+              AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+              EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+              VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+            },
+          ],
+        },
       )) as X2EarnAppsV3
 
       // The app was prev deployed with version 3 of x2earn app
