@@ -5,11 +5,13 @@ locals {
 
 # Data resource to fetch the secret containing multiple keys
 data "aws_secretsmanager_secret" "vebetterpassport_secret" {
-  name = local.secret_name
+  name      = local.secret_name
+  sensitive = true
 }
 
 data "aws_secretsmanager_secret_version" "vebetterpassport_secret" {
   secret_id = data.aws_secretsmanager_secret.vebetterpassport_secret.id
+  sensitive = true
 }
 
 # The secret contains multiple keys, extract all needed values
@@ -24,14 +26,17 @@ locals {
 output "minter_pk" {
   value     = local.minter_pk
   sensitive = true
+  ephemeral = true
 }
 
 output "mnemonic" {
   value     = local.mnemonic
   sensitive = true
+  ephemeral = true
 }
 
 output "wallet" {
   value     = local.wallet
   sensitive = true
+  ephemeral = true
 }
