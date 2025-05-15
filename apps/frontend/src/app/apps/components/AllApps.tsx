@@ -126,15 +126,7 @@ export const AllApps = ({
 
   const sortingMenu = () => {
     return (
-      <Menu
-        closeOnSelect={true}
-        placement="bottom"
-        modifiers={[
-          {
-            name: "flip",
-            enabled: false,
-          },
-        ]}>
+      <Menu closeOnSelect={true} placement="bottom" flip={false}>
         <MenuButton
           as={IconButton}
           isRound={true}
@@ -185,18 +177,7 @@ export const AllApps = ({
     const activeFiltersCount = selectedCategories.length || 0
 
     return (
-      <Menu
-        closeOnSelect={false}
-        placement="bottom"
-        strategy="fixed"
-        autoSelect={false}
-        isLazy
-        modifiers={[
-          {
-            name: "flip",
-            enabled: false,
-          },
-        ]}>
+      <Menu closeOnSelect={false} placement="bottom" strategy="fixed" autoSelect={false} isLazy flip={false}>
         <Box position="relative">
           <MenuButton
             as={IconButton}
