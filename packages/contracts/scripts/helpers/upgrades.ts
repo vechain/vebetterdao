@@ -3,6 +3,18 @@ import { ethers } from "hardhat"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { AddressUtils } from "@repo/utils"
 
+export type DeployUpgradeOptions = {
+  versions?: (number | undefined)[]
+  libraries?: ({ [libraryName: string]: string } | undefined)[]
+  logOutput?: boolean
+}
+
+export type UpgradeOptions = {
+  version?: number
+  libraries?: { [libraryName: string]: string }
+  logOutput?: boolean
+}
+
 export const deployProxy = async (
   contractName: string,
   args: any[],
@@ -100,26 +112,24 @@ export const upgradeProxy = async (
   newVersionContractName: string,
   proxyAddress: string,
   args: any[] = [],
-  libraries?: { [libraryName: string]: string },
-  version?: number,
-  logOutput: boolean = true,
+  options: UpgradeOptions,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(newVersionContractName, {
-    libraries: libraries,
+    libraries: options.libraries,
   })
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
   const currentImplementationContract = await ethers.getContractAt(previousVersionContractName, proxyAddress)
 
-  if (logOutput) {
+  if (options.logOutput) {
     console.log(`${newVersionContractName} impl.: ${await implementation.getAddress()}`)
   }
 
   const tx = await currentImplementationContract.upgradeToAndCall(
     await implementation.getAddress(),
-    args.length > 0 ? getInitializerData(Contract.interface, args, version) : "0x",
+    args.length > 0 ? getInitializerData(Contract.interface, args, options.version) : "0x",
   )
   await tx.wait()
   const newImplementationAddress = await getImplementationAddress(ethers.provider, proxyAddress)
@@ -134,25 +144,29 @@ export const upgradeProxy = async (
 export const deployAndUpgrade = async (
   contractNames: string[],
   args: any[][],
-  libraries?: ({ [libraryName: string]: string } | undefined)[],
-  versions?: (number | undefined)[],
-  logOutput: boolean = true,
+  options: DeployUpgradeOptions,
 ): Promise<BaseContract> => {
   if (contractNames.length === 0) throw new Error("No contracts to deploy")
 
   if (contractNames.length !== args.length) throw new Error("Contract names and arguments must have the same length")
 
-  if (libraries && contractNames.length !== libraries.length)
+  if (options.libraries && contractNames.length !== options.libraries.length)
     throw new Error("Contract names and libraries must have the same length")
 
-  if (versions && contractNames.length !== versions.length)
+  if (options.versions && contractNames.length !== options.versions.length)
     throw new Error("Contract names and versions must have the same length")
 
   // 1. Deploy proxy and first implementation
   const contractName = contractNames[0]
   const contractArgs = args[0]
 
-  let proxy = await deployProxy(contractName, contractArgs, libraries?.[0], versions?.[0], logOutput)
+  let proxy = await deployProxy(
+    contractName,
+    contractArgs,
+    options.libraries?.[0],
+    options.versions?.[0],
+    options.logOutput,
+  )
 
   // 2. Upgrade the proxy to the next versions
   for (let i = 1; i < contractNames.length; i++) {
@@ -165,9 +179,7 @@ export const deployAndUpgrade = async (
       newVersionContractName,
       await proxy.getAddress(),
       contractArgs,
-      libraries?.[i],
-      versions?.[i],
-      logOutput,
+      { version: options.versions?.[i], libraries: options.libraries?.[i], logOutput: options.logOutput },
     )
   }
 
