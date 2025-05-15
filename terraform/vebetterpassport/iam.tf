@@ -47,8 +47,6 @@ resource "aws_iam_policy" "secrets_manager_policy" {
           "cloudformation:DescribeStackResource",
           "cloudformation:DescribeStacks",
           "cloudformation:ExecuteChangeSet",
-          "docdb-elastic:GetCluster",
-          "docdb-elastic:ListClusters",
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeSubnets",
           "ec2:DescribeVpcs",
@@ -56,11 +54,6 @@ resource "aws_iam_policy" "secrets_manager_policy" {
           "kms:ListAliases",
           "kms:ListKeys",
           "lambda:ListFunctions",
-          "rds:DescribeDBClusters",
-          "rds:DescribeDBInstances",
-          "redshift:DescribeClusters",
-          "redshift-serverless:ListWorkgroups",
-          "redshift-serverless:GetNamespace",
           "tag:GetResources"
         ],
         Resource = "*"
@@ -76,26 +69,6 @@ resource "aws_iam_policy" "secrets_manager_policy" {
           "lambda:UpdateFunctionConfiguration"
         ],
         Resource = "arn:aws:lambda:*:*:function:SecretsManager*"
-      },
-      {
-        Sid    = "SARPermissions",
-        Effect = "Allow",
-        Action = [
-          "serverlessrepo:CreateCloudFormationChangeSet",
-          "serverlessrepo:GetApplication"
-        ],
-        Resource = "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
-      },
-      {
-        Sid    = "S3Permissions",
-        Effect = "Allow",
-        Action = [
-          "s3:GetObject"
-        ],
-        Resource = [
-          "arn:aws:s3:::awsserverlessrepo-changesets*",
-          "arn:aws:s3:::secrets-manager-rotation-apps-*/*"
-        ]
       }
     ]
   })
