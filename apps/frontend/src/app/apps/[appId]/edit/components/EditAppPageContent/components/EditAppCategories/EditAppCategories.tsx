@@ -73,9 +73,9 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
       setSearchQuery("")
     }
     register("categories", {
-      required: "Categories are required",
+      required: { value: true, message: t("Categories are required") },
     })
-  }, [isOpen, register])
+  }, [isOpen, register, t])
 
   return (
     <VStack align="flex-start" spacing={4} width="full">

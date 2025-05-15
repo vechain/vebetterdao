@@ -247,7 +247,7 @@ export const CreateEditAppForm = ({
             setValue={setValue}
             watch={watch}
             registerOptions={{
-              required: "App Categories are required",
+              required: { value: true, message: t("Categories are required") },
             }}
             error={errors.categories?.message}
           />
