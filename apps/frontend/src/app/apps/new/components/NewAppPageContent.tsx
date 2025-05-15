@@ -33,6 +33,10 @@ export const NewAppPageContent = () => {
   const onContinueClick = () => {
     router.push("/apps/new/form")
   }
+  const LINK_TO_DOCS = () => {
+    window.open("https://docs.vebetterdao.org/developer-guides/submit-your-app", "_blank", "noopener")
+  }
+
   return (
     <Grid
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(4, 1fr)"]}
@@ -55,7 +59,7 @@ export const NewAppPageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>
-                <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
+                <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg" onClick={LINK_TO_DOCS}>
                   {t("More info")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>
