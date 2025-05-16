@@ -29,6 +29,11 @@ type PassportLibraries = {
   passportWhitelistAndBlacklistLogicAddress: string
 }
 
+type ExternalContractIntegrations = {
+  // Vet Domains Contract: https://docs.vet.domains/Developers/Contracts/Verification/#verified-contract
+  vetDomainsContractAddress: string
+}
+
 export type AppConfig = {
   environment: EnvConfig
   basePath?: string
@@ -56,6 +61,9 @@ export type AppConfig = {
   nodeUrl: string
   indexerUrl?: string
   network: Network
+
+  // External integrations
+  externalContractIntegrations?: ExternalContractIntegrations
 }
 
 export const getConfig = (env?: EnvConfig): AppConfig => {

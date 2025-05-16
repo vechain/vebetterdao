@@ -8,7 +8,9 @@
     "prebuild": "rm -rf dist",
     "build": "yarn prebuild && find . -name '*.lambda.ts' -exec sh -c 'ENVIRONMENT=$(basename {} .lambda.ts) && FUNCTION=$(basename $(dirname {})) && yarn esbuild {} --bundle --minify --sourcemap --platform=node --outfile=dist/$ENVIRONMENT/$FUNCTION/index.js' \\;",
     "postbuild": "find dist/*/* -type d -exec sh -c 'cd {} && zip -r index.zip *' \\;",
-    "test": "yarn build && TEST_ENVIRONMENT=testnet jest "
+    "test": "yarn build && TEST_ENVIRONMENT=testnet jest",
+    "start": "npx ts-node",
+    "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.556.0",
