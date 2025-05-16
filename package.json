@@ -99,5 +99,12 @@
     "*.{json,html}": [
       "prettier --write --ignore-unknown"
     ]
+  },
+  "dependencies": {
+    "@vechain/connex": "2.2.0",
+    "@vechain/connex-driver": "2.2.0",
+    "@vechain/connex-framework": "2.2.0",
+    "@vechain/connex-repl": "2.2.0",
+    "@vechain/connex-types": "2.2.0"
   }
 }
