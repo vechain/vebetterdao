@@ -47,7 +47,9 @@ contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgra
   /// @custom:storage-location erc7201:b3tr.storage.News
   struct NewsStorage {
     IX2EarnApps x2EarnApps;
-    mapping(bytes32 appId => NewsType[]) news;
+    uint256 nextNewsId;
+    mapping(uint256 newsId => NewsType) newsById;
+    mapping(bytes32 appId => uint256[]) appNewsIds;
     mapping(bytes32 appId => uint256) lastNewsBlock;
     uint256 cooldownPeriod;
   }
@@ -123,38 +125,40 @@ contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgra
     string memory description,
     string memory image,
     string memory callToActionUrl
-  ) public onlyRoleOrAdmin(PUBLISHER_ROLE) {
+  ) public {
     NewsStorage storage $ = _getNewsStorage();
-    require(
-      $.x2EarnApps.isAppAdmin(appId, msg.sender) ||
-        $.x2EarnApps.isAppCreator(appId, msg.sender) ||
-        $.x2EarnApps.isAppModerator(appId, msg.sender),
-      "News: not a moderator, creator or admin"
-    );
-    //Check if app already published news in this week
-    require(!isUnderCooldown(appId), "News: app is in cooldown period");
-    //If not, publish news
-    _publish(appId, title, description, image, callToActionUrl);
-  }
-  /**
-   * @dev Internal function to publish news for an app
-   * @param appId The ID of the app for which the news was published
-   * @param title The title of the news
-   * @param description The description of the news
-   * @param image The image of the news
-   * @param callToActionUrl The call to action URL of the news
-   */
-  function _publish(
-    bytes32 appId,
-    string memory title,
-    string memory description,
-    string memory image,
-    string memory callToActionUrl
-  ) internal {
-    NewsStorage storage $ = _getNewsStorage();
-    $.news[appId].push(NewsType(title, description, image, callToActionUrl));
-    $.lastNewsBlock[appId] = block.number;
-    emit NewsPublished(appId, title, description, image, callToActionUrl, msg.sender);
+    bool isPublisher = hasRole(PUBLISHER_ROLE, msg.sender);
+
+    // Only check cooldown for app publishers
+    if (!isPublisher) {
+      require($.x2EarnApps.appExists(appId), "News: app does not exist");
+      require(
+        $.x2EarnApps.isAppAdmin(appId, msg.sender) ||
+          $.x2EarnApps.isAppCreator(appId, msg.sender) ||
+          $.x2EarnApps.isAppModerator(appId, msg.sender),
+        "News: not app admin, creator or moderator"
+      );
+      require(!isUnderCooldown(appId), "News: app is in cooldown period");
+
+      $.lastNewsBlock[appId] = block.number;
+    }
+    // Update global news increment counter
+    uint256 newsId = $.nextNewsId++;
+
+    NewsType memory newsItem = NewsType({
+      id: newsId,
+      title: title,
+      description: description,
+      image: image,
+      callToActionUrl: callToActionUrl,
+      timestamp: block.timestamp,
+      publisher: msg.sender
+    });
+
+    $.newsById[newsId] = newsItem;
+    $.appNewsIds[appId].push(newsId);
+
+    emit NewsPublished(newsId, appId, title, description, image, callToActionUrl, msg.sender);
   }
 
   /**
@@ -200,7 +204,45 @@ contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgra
    */
   function appNews(bytes32 appId) external view returns (NewsType[] memory) {
     NewsStorage storage $ = _getNewsStorage();
-    return $.news[appId];
+    uint256[] memory newsIds = $.appNewsIds[appId];
+
+    NewsType[] memory result = new NewsType[](newsIds.length);
+    for (uint256 i = 0; i < newsIds.length; i++) {
+      result[i] = $.newsById[newsIds[i]];
+    }
+
+    return result;
+  }
+
+  /**
+   * @dev Retrieves the news for an app by ID
+   * @param newsId The ID of the news to retrieve
+   * @return The news details
+   */
+  function getNewsById(uint256 newsId) external view returns (NewsType memory) {
+    NewsStorage storage $ = _getNewsStorage();
+    require(newsExists(newsId), "News: not found or removed");
+    return $.newsById[newsId];
+  }
+
+  /**
+   * @dev Removes a news item by ID
+   * @param newsId The ID of the news to remove
+   */
+  function removeNewsById(uint256 newsId) external onlyRoleOrAdmin(MODERATOR_ROLE) {
+    NewsStorage storage $ = _getNewsStorage();
+    require(newsExists(newsId), "News: not found or removed");
+    delete $.newsById[newsId];
+  }
+
+  /**
+   * @dev Checks if a news item exists by ID
+   * @param newsId The ID of the news to check
+   * @return True if the news item exists, false otherwise
+   */
+  function newsExists(uint256 newsId) public view returns (bool) {
+    NewsStorage storage $ = _getNewsStorage();
+    return $.newsById[newsId].publisher != address(0);
   }
 
   /**

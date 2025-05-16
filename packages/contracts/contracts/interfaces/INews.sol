@@ -10,10 +10,13 @@ import { IX2EarnApps } from "./IX2EarnApps.sol";
  */
 interface INews {
   struct NewsType {
+    uint256 id;
     string title;
     string description;
     string image;
     string callToActionUrl;
+    uint256 timestamp;
+    address publisher;
   }
 
   /// @dev Error thrown when a user is not authorized to perform an action
@@ -33,6 +36,7 @@ interface INews {
    * @param publisher The address of the user that published the news.
    */
   event NewsPublished(
+    uint256 indexed id,
     bytes32 indexed appId,
     string title,
     string description,
@@ -124,6 +128,26 @@ interface INews {
    * @return The news.
    */
   function appNews(bytes32 appId) external view returns (NewsType[] memory);
+
+  /**
+   * @dev Retrieves the news for an app by ID.
+   * @param newsId The ID of the news.
+   * @return The news.
+   */
+  function getNewsById(uint256 newsId) external view returns (NewsType memory);
+
+  /**
+   * @dev Removes a news item by ID.
+   * @param newsId The ID of the news.
+   */
+  function removeNewsById(uint256 newsId) external;
+
+  /**
+   * @dev Checks if a news item exists by ID.
+   * @param newsId The ID of the news.
+   * @return True if the news item exists, false otherwise.
+   */
+  function newsExists(uint256 newsId) external view returns (bool);
 
   /**
    * @dev Pauses all contract operations
