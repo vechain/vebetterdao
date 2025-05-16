@@ -410,7 +410,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as GalaxyMember
 
   const emissions = (await deployAndUpgrade(
-    ["EmissionsV1", "EmissionsV2"],
+    ["EmissionsV1", "EmissionsV2", "Emissions"],
     [
       [
         {
@@ -440,9 +440,10 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       [config.EMISSIONS_IS_NOT_ALIGNED],
+      [config.GM_PERCENTAGE_OF_TREASURY],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
       logOutput: true,
     },
   )) as Emissions
