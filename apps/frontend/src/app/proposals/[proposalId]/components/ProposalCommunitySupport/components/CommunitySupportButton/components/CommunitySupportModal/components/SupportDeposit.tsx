@@ -33,8 +33,8 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const depositMax = useCallback(() => {
     if (!vot3Balance) return
 
-    const scaledBalanceBN = BigNumber(vot3Balance.scaled)
-    const missingSupportBN = BigNumber(missingSupport)
+    const scaledBalanceBN = new BigNumber(vot3Balance.scaled)
+    const missingSupportBN = new BigNumber(missingSupport)
 
     if (scaledBalanceBN.gt(missingSupportBN)) {
       setAmount(missingSupportBN.toString())
@@ -47,11 +47,11 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!e.target.value) return setAmount("0")
       const input = filterAmountInput(e.target.value, { maxBalance: vot3Balance?.scaled })
-      const scaledBalanceBN = BigNumber(vot3Balance?.scaled ?? 0)
-      const missingSupportBN = BigNumber(missingSupport ?? 0)
+      const scaledBalanceBN = new BigNumber(vot3Balance?.scaled ?? 0)
+      const missingSupportBN = new BigNumber(missingSupport ?? 0)
 
-      // Get the minimum value, between the input, the scaled balance and the missing support
-      const cappedAmountBN = BigNumber.min(BigNumber(input), scaledBalanceBN, missingSupportBN)
+      // Get the minimum value, between the input, the scaled balance, and the missing support
+      const cappedAmountBN = BigNumber.min(new BigNumber(input), scaledBalanceBN, missingSupportBN)
 
       setAmount(cappedAmountBN.toString())
     },
