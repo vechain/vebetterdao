@@ -38,6 +38,7 @@ contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgra
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant PUBLISHER_ROLE = keccak256("PUBLISHER_ROLE");
+  bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
