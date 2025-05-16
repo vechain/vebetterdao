@@ -20,7 +20,7 @@ export const deployProxy = async (
   args: any[],
   libraries: { [libraryName: string]: string } = {},
   version?: number,
-  logOutput: boolean = true,
+  logOutput: boolean = false,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
@@ -53,7 +53,7 @@ export const deployProxy = async (
 export const deployProxyOnly = async (
   contractName: string,
   libraries: { [libraryName: string]: string } = {},
-  logOutput: boolean = true,
+  logOutput: boolean = false,
 ): Promise<string> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
