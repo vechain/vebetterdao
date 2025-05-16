@@ -300,10 +300,6 @@ export const EditAppPageContent = () => {
               <FormControl isInvalid={!!errors.distribution_strategy}>
                 <Textarea
                   {...register("distribution_strategy", {
-                    required: {
-                      value: true,
-                      message: t("This field is required"),
-                    },
                     minLength: {
                       value: 20,
                       message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
