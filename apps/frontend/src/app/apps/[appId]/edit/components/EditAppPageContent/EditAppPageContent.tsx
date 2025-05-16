@@ -306,6 +306,7 @@ export const EditAppPageContent = () => {
                     },
                   })}
                   defaultValue={appMetadata?.distribution_strategy ?? ""}
+                  placeholder={t("Eg. Our goal is to distribute at least X percent of the round allocation each week.")}
                   resize="none"
                   h="140px"
                 />
