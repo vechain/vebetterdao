@@ -357,7 +357,14 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
-    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPoolV5"],
+    [
+      "XAllocationPoolV1",
+      "XAllocationPoolV2",
+      "XAllocationPoolV3",
+      "XAllocationPoolV4",
+      "XAllocationPoolV5",
+      "XAllocationPool",
+    ],
     [
       [
         TEMP_ADMIN, // admin
@@ -372,15 +379,16 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       logOutput: true,
     },
   )) as XAllocationPool
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3", "GalaxyMember"],
     [
       [
         {
@@ -405,15 +413,16 @@ export async function deployAll(config: ContractsConfig) {
         config.GM_NFT_NODE_TO_FREE_LEVEL,
       ],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2, 3, 4],
       logOutput: true,
     },
   )) as GalaxyMember
 
   const emissions = (await deployAndUpgrade(
-    ["EmissionsV1", "EmissionsV2"],
+    ["EmissionsV1", "EmissionsV2", "Emissions"],
     [
       [
         {
@@ -443,15 +452,16 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       [config.EMISSIONS_IS_NOT_ALIGNED],
+      [config.GM_PERCENTAGE_OF_TREASURY],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
       logOutput: true,
     },
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
     [
       [
         TEMP_ADMIN, // admin
@@ -466,15 +476,23 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [config.VOTER_REWARDS_LEVELS_V2, config.GM_MULTIPLIERS_V2],
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
       logOutput: true,
     },
   )) as VoterRewards
 
   const xAllocationVoting = (await deployAndUpgrade(
-    ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3", "XAllocationVotingV4", "XAllocationVotingV5"],
+    [
+      "XAllocationVotingV1",
+      "XAllocationVotingV2",
+      "XAllocationVotingV3",
+      "XAllocationVotingV4",
+      "XAllocationVotingV5",
+      "XAllocationVoting",
+    ],
     [
       [
         {
@@ -497,9 +515,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       logOutput: true,
     },
   )) as XAllocationVoting
@@ -609,7 +628,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
-    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5"],
+    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernor"],
     [
       [
         {
@@ -638,7 +657,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -689,6 +708,16 @@ export async function deployAll(config: ContractsConfig) {
           GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
           GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
           GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
+        },
+        {
+          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
         },
       ],
       logOutput: true,
