@@ -39,6 +39,34 @@ export const deployProxy = async (
   return Contract.attach(await proxy.getAddress())
 }
 
+export const deployAndInitializeLatest = async (
+  contractName: string,
+  initializerCalls: { name: string; args: any[] }[],
+  libraries: { [libraryName: string]: string } = {},
+  logOutput: boolean = false,
+): Promise<BaseContract> => {
+  // Deploy implementation + proxy
+  const proxyAddress = await deployProxyOnly(contractName, libraries, logOutput)
+
+  // Attach contract instance
+  const Contract = await ethers.getContractFactory(contractName, { libraries })
+  const contractAtProxy = Contract.attach(proxyAddress)
+
+  const signer = (await ethers.getSigners())[0]
+
+  for (const { name, args } of initializerCalls) {
+    const fn = Contract.interface.getFunction(name)
+    if (!fn) throw new Error(`Function ${name} not found in contract ABI`)
+
+    const data = Contract.interface.encodeFunctionData(fn, args)
+
+    const tx = await signer.sendTransaction({ to: proxyAddress, data })
+    await tx.wait()
+  }
+
+  return contractAtProxy
+}
+
 export const deployProxyOnly = async (
   contractName: string,
   libraries: { [libraryName: string]: string } = {},
