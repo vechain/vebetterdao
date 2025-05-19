@@ -124,26 +124,27 @@ export const CategorySelector = <T extends FieldValues>({
 
       <VStack align="flex-start" spacing={4} width="full">
         <HStack spacing={3} flexWrap="wrap">
-          {selectedCategories.map(categoryId => {
-            const category = getCategoryById(categoryId)
-            if (!category) return null
+          {!!selectedCategories?.length &&
+            selectedCategories?.map(categoryId => {
+              const category = getCategoryById(categoryId)
+              if (!category) return null
 
-            return (
-              <Tag
-                key={categoryId}
-                size="lg"
-                borderRadius="full"
-                variant="solid"
-                backgroundColor={category.color}
-                color="black"
-                mb={2}>
-                <TagLabel>{category.name}</TagLabel>
-                <TagCloseButton onClick={() => handleRemoveCategory(categoryId)} />
-              </Tag>
-            )
-          })}
+              return (
+                <Tag
+                  key={categoryId}
+                  size="lg"
+                  borderRadius="full"
+                  variant="solid"
+                  backgroundColor={category.color}
+                  color="black"
+                  mb={2}>
+                  <TagLabel>{category.name}</TagLabel>
+                  <TagCloseButton onClick={() => handleRemoveCategory(categoryId)} />
+                </Tag>
+              )
+            })}
 
-          {selectedCategories.length < maxCategories && (
+          {selectedCategories?.length < maxCategories && (
             <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur={true}>
               <PopoverTrigger>
                 <Button leftIcon={<FaPlus />} variant="outline" borderRadius="full" size="md">
@@ -177,7 +178,7 @@ export const CategorySelector = <T extends FieldValues>({
                           borderRadius="md"
                           alignItems="center"
                           cursor="pointer"
-                          bg={selectedCategories.includes(category.id) ? "blue.50" : "transparent"}
+                          bg={selectedCategories?.includes(category.id) ? "blue.50" : "transparent"}
                           _hover={{ bg: "#F5F5F5" }}
                           onClick={() => handleSelectCategory(category.id)}>
                           <Box width="12px" height="12px" borderRadius="full" bg={category.color} mr={3} />
