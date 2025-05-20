@@ -58,14 +58,6 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   runtime                        = local.config.lambda_runtime
   timeout                        = local.config.lambda_timeout
 
-  environment {
-    variables = {
-      RESET_SIGNALER_PK = local.minter_pk
-      MNEMONIC          = local.mnemonic
-      WALLET            = local.wallet
-    }
-  }
-
   # Match existing deployment if source code hash matches and ignore source_code_hash changes
   lifecycle {
     ignore_changes = [
