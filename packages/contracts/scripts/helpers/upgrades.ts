@@ -2,14 +2,25 @@ import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { AddressUtils } from "@repo/utils"
-import { DeployUpgradeOptions } from "./type"
+
+export type DeployUpgradeOptions = {
+  versions?: (number | undefined)[]
+  libraries?: ({ [libraryName: string]: string } | undefined)[]
+  logOutput?: boolean
+}
+
+export type UpgradeOptions = {
+  version?: number
+  libraries?: { [libraryName: string]: string }
+  logOutput?: boolean
+}
 
 export const deployProxy = async (
   contractName: string,
   args: any[],
   libraries: { [libraryName: string]: string } = {},
-  logOutput: boolean = false,
   version?: number,
+  logOutput: boolean = false,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
@@ -101,22 +112,24 @@ export const upgradeProxy = async (
   newVersionContractName: string,
   proxyAddress: string,
   args: any[] = [],
-  options?: { version?: number; libraries?: { [libraryName: string]: string }; logOutput?: boolean },
+  options: UpgradeOptions,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(newVersionContractName, {
-    libraries: options?.libraries,
+    libraries: options.libraries,
   })
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
   const currentImplementationContract = await ethers.getContractAt(previousVersionContractName, proxyAddress)
 
-  options?.logOutput && console.log(`${newVersionContractName} impl.: ${await implementation.getAddress()}`)
+  if (options.logOutput) {
+    console.log(`${newVersionContractName} impl.: ${await implementation.getAddress()}`)
+  }
 
   const tx = await currentImplementationContract.upgradeToAndCall(
     await implementation.getAddress(),
-    args.length > 0 ? getInitializerData(Contract.interface, args, options?.version) : "0x",
+    args.length > 0 ? getInitializerData(Contract.interface, args, options.version) : "0x",
   )
   await tx.wait()
   const newImplementationAddress = await getImplementationAddress(ethers.provider, proxyAddress)
@@ -150,9 +163,9 @@ export const deployAndUpgrade = async (
   let proxy = await deployProxy(
     contractName,
     contractArgs,
-    options?.libraries?.[0],
-    options.logOutput,
+    options.libraries?.[0],
     options.versions?.[0],
+    options.logOutput,
   )
 
   // 2. Upgrade the proxy to the next versions

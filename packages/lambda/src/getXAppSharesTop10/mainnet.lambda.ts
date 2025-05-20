@@ -1,8 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
-import { clauseBuilder, FunctionFragment } from "@vechain/sdk-core"
-import { HttpClient, ThorClient } from "@vechain/sdk-network"
+import { ThorClient } from "@vechain/sdk-network"
+import { Clause, Address, ABIContract } from "@vechain/sdk-core"
 import mainnetConfig from "@repo/config/mainnet"
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts"
 import { findBlacklistedApps, getCurrentRoundId, getData, getRoundXApps, getRoundXAppShares } from "../helpers"
 import { buildResponse } from "../helpers/api/response"
 import { StandardApiError, SuccessResponseType } from "../helpers/api.types"
@@ -42,9 +42,9 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
 
   // Get app data only for top 10
   const clauses = top10AppShares.map(app =>
-    clauseBuilder.functionInteraction(
-      mainnetConfig.x2EarnAppsContractAddress,
-      X2EarnApps.createInterface().getFunction("app") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(mainnetConfig.x2EarnAppsContractAddress),
+      ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("app"),
       [app.appId],
     ),
   )
@@ -58,7 +58,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
         )
       }
 
-      const decoded = X2EarnApps.createInterface().decodeFunctionResult("app", r.data)
+      const decoded = X2EarnApps__factory.createInterface().decodeFunctionResult("app", r.data)
       const appMetadataURI = decoded[0][3]
       const appMetadata = await getData(ipfsFetchingService + appMetadataURI)
 
@@ -88,7 +88,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
 
   try {
-    const thorClient = new ThorClient(new HttpClient(nodeURL), { isPollingEnabled: false })
+    const thorClient = ThorClient.at(nodeURL, { isPollingEnabled: false })
     const top10AppsData = await getXAppSharesTop10(thorClient)
     console.log("Top 10 X-App shares:", top10AppsData)
     return buildResponse(SuccessResponseType.SUCCESS, top10AppsData)

@@ -5,30 +5,38 @@ import { createTestnetStagingConfig } from "./envs/testnetStaging"
 import { createE2EConfig } from "./envs/e2e"
 import { createTestnetConfig } from "./envs/testnet"
 import { createMainnetConfig } from "./envs/mainnet"
+import { createGalacticaTestConfig } from "./envs/galactica-test"
 
-export const EnvConfigValues = ["local", "e2e", "testnet-staging", "testnet", "mainnet"] as const
+export const AppEnv = {
+  LOCAL: "local",
+  E2E: "e2e",
+  TESTNET_STAGING: "testnet-staging",
+  TESTNET: "testnet",
+  MAINNET: "mainnet",
+  GALACTICA_TEST: "galactica-test",
+} as const
+
+export const EnvConfigValues = Object.values(AppEnv)
 export type EnvConfig = (typeof EnvConfigValues)[number]
 
 export function getContractsConfig(env: EnvConfig) {
   switch (env) {
-    case "local":
+    case AppEnv.LOCAL:
       return createLocalConfig()
-    case "e2e":
+    case AppEnv.E2E:
       return createE2EConfig()
-    case "testnet-staging":
+    case AppEnv.TESTNET_STAGING:
       return createTestnetStagingConfig()
-    case "testnet":
+    case AppEnv.TESTNET:
       return createTestnetConfig()
-    case "mainnet":
+    case AppEnv.MAINNET:
       return createMainnetConfig()
+    case AppEnv.GALACTICA_TEST:
+      return createGalacticaTestConfig()
 
     default:
       throw new Error(`Invalid ENV "${env}"`)
   }
-}
-
-export function shouldRunSimulation() {
-  return process.env.NEXT_PUBLIC_APP_ENV == "local" && process.env.RUN_SIMULATION === "true"
 }
 
 export function shouldEndorseXApps() {

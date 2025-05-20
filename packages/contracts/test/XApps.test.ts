@@ -43,11 +43,15 @@ import {
   XAllocationVotingV3,
 } from "../typechain-types"
 import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
-import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
+import { TransactionUtils } from "@repo/utils"
 import { APPS } from "../scripts/deploy/setup"
-import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { ABIContract, Address, Clause, VET, type TransactionBody } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { ThorClient } from "@vechain/sdk-network"
+import { getConfig } from "@repo/config"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 describe("X-Apps - @shard15", function () {
   // We prepare the environment for 4 creators
@@ -1590,7 +1594,7 @@ describe("X-Apps - @shard15", function () {
 
         // Add moderators
         for (let i = 0; i < 3; i++) {
-          await x2EarnAppsV1.connect(owner).addAppModerator(appId, testKeys[index + i].address)
+          await x2EarnAppsV1.connect(owner).addAppModerator(appId, testKeys[index + i].address.toString())
         }
       })
 
@@ -6265,32 +6269,30 @@ describe("X-Apps - @shard17b", function () {
       accounts.forEach(key => {
         seedAccounts.push({
           key,
-          amount: unitsUtils.parseVET("200000"),
+          amount: VET.of(200000).wei,
         })
       })
 
       // aidrop VTHO
-      await airdropVTHO(seedAccounts, accounts[2])
+      await airdropVTHO(
+        seedAccounts.map(acct => acct.key.address),
+        5000n,
+        accounts[2],
+      )
 
       for (let i = 0; i < 50; i++) {
         // Create two node holders with an endorsement score
-        await vechainNodesMock.addToken(accounts[i].address, level, false, 0, 0)
+        await vechainNodesMock.addToken(accounts[i].address.toString(), level, false, 0, 0)
 
         const clauses = [
-          clauseBuilder.functionInteraction(
-            await x2EarnApps.getAddress(),
-            coder
-              .createInterface(JSON.stringify(X2EarnApps__factory.abi))
-              .getFunction("endorseApp") as FunctionFragment,
+          Clause.callFunction(
+            Address.of(await x2EarnApps.getAddress()),
+            ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
             [app1Id],
           ),
         ]
 
-        const body: TransactionBody = await buildTxBody(clauses, accounts[i].address, 32, 10_000_000)
-
-        if (!accounts[i].pk) throw new Error("No private key")
-
-        await signAndSendTx(body, accounts[i].pk)
+        await TransactionUtils.sendTx(thorClient, clauses, accounts[i].pk)
       }
 
       const endorsers = await x2EarnApps.getEndorsers(app1Id)

@@ -9,16 +9,8 @@ import "solidity-coverage"
 import "solidity-docgen"
 import { EnvConfig } from "@repo/config/contracts"
 import "@nomicfoundation/hardhat-verify"
-
-const VECHAIN_DERIVATION_PATH = "m/44'/818'/0'/0"
-
-const getEnvMnemonic = () => {
-  const isStagingEnv = process.env.NEXT_PUBLIC_APP_ENV === "testnet-staging"
-
-  const mnemonic = isStagingEnv ? process.env.TESTNET_STAGING_MNEMONIC : process.env.MNEMONIC
-
-  return mnemonic ?? ""
-}
+import { getMnemonic } from "./scripts/helpers/env"
+import { HDKey } from "@vechain/sdk-core"
 
 const getSoloUrl = () => {
   const url = process.env.NEXT_PUBLIC_APP_ENV
@@ -63,9 +55,9 @@ const config: HardhatUserConfig = {
     vechain_solo: {
       url: getSoloUrl(),
       accounts: {
-        mnemonic: getEnvMnemonic(),
+        mnemonic: getMnemonic(),
         count: 20,
-        path: VECHAIN_DERIVATION_PATH,
+        path: HDKey.VET_DERIVATION_PATH,
       },
       gas: 10000000,
     },
@@ -73,9 +65,9 @@ const config: HardhatUserConfig = {
       url: "https://testnet.vechain.org",
       chainId: 100010,
       accounts: {
-        mnemonic: getEnvMnemonic(),
+        mnemonic: getMnemonic(),
         count: 20,
-        path: VECHAIN_DERIVATION_PATH,
+        path: HDKey.VET_DERIVATION_PATH,
       },
       gas: 10000000,
     },
@@ -83,9 +75,18 @@ const config: HardhatUserConfig = {
       url: "https://mainnet.vechain.org",
       chainId: 100009,
       accounts: {
-        mnemonic: getEnvMnemonic(),
+        mnemonic: getMnemonic(),
         count: 20,
-        path: VECHAIN_DERIVATION_PATH,
+        path: HDKey.VET_DERIVATION_PATH,
+      },
+      gas: 10000000,
+    },
+    galactica_test: {
+      url: "https://galactica.live.dev.node.vechain.org",
+      accounts: {
+        mnemonic: getMnemonic(),
+        count: 20,
+        path: HDKey.VET_DERIVATION_PATH,
       },
       gas: 10000000,
     },

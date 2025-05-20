@@ -20,16 +20,8 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import {
-  setupLocalEnvironment,
-  setupMainnetEnvironment,
-  setupTestEnvironment,
-  updateGMMultipliers,
-  APPS,
-} from "./setup"
-import { simulateRounds } from "./simulateRounds"
+import { APPS, setupEnvironment } from "./setup"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
 import {
   deployAndUpgrade,
   deployProxy,
@@ -59,6 +51,7 @@ const symbol = "GM"
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
+
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
@@ -216,6 +209,7 @@ export async function deployAll(config: ContractsConfig) {
       await b3tr.getAddress(),
     ],
     undefined,
+    undefined,
     true,
   )) as VOT3
 
@@ -228,6 +222,7 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN, // admin
       config.CONTRACTS_ADMIN_ADDRESS, // upgrader
     ],
+    undefined,
     undefined,
     true,
   )) as TimeLock
@@ -249,13 +244,14 @@ export async function deployAll(config: ContractsConfig) {
       config.TREASURY_TRANSFER_LIMIT_VTHO,
     ],
     undefined,
+    undefined,
     true,
   )) as Treasury
 
   // Deploy NodeManagement
   const nodeManagement = (await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagement"],
-    [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []], // Use deployer as upgrader initially
+    [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []],
     {
       versions: [undefined, 2],
       logOutput: true,
@@ -321,6 +317,7 @@ export async function deployAll(config: ContractsConfig) {
           VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
         },
       ],
+      logOutput: true,
     },
   )) as X2EarnApps
 
@@ -351,8 +348,8 @@ export async function deployAll(config: ContractsConfig) {
       [],
     ],
     {
-      logOutput: true,
       versions: [undefined, 2, 3, 4, 5, 6],
+      logOutput: true,
     },
   )) as X2EarnRewardsPool
 
@@ -563,6 +560,7 @@ export async function deployAll(config: ContractsConfig) {
         PassportSignalingLogicV2: await PassportSignalingLogicV2.getAddress(),
         PassportWhitelistAndBlacklistLogicV2: await PassportWhitelistAndBlacklistLogicV2.getAddress(),
       },
+      logOutput: true,
     },
   )) as VeBetterPassport
 
@@ -584,6 +582,7 @@ export async function deployAll(config: ContractsConfig) {
         PassportSignalingLogicV3: await PassportSignalingLogicV3.getAddress(),
         PassportWhitelistAndBlacklistLogicV3: await PassportWhitelistAndBlacklistLogicV3.getAddress(),
       },
+      logOutput: true,
     },
   )) as VeBetterPassport
 
@@ -605,6 +604,7 @@ export async function deployAll(config: ContractsConfig) {
         PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
         PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
       },
+      logOutput: true,
     },
   )) as VeBetterPassport
 
@@ -883,53 +883,21 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  const appEnv = process.env.NEXT_PUBLIC_APP_ENV
-  switch (network.name) {
-    case "vechain_mainnet":
-      await setupMainnetEnvironment(emissions, x2EarnApps)
-      break
-    case "vechain_testnet":
-      if (appEnv === "testnet-staging") {
-        await setupLocalEnvironment(
-          emissions,
-          treasury,
-          x2EarnApps,
-          governor,
-          xAllocationVoting,
-          b3tr,
-          vot3,
-          vechainNodesMock,
-          shouldEndorseXApps(),
-        )
-      } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
-      break
-    case "vechain_solo":
-      await setupLocalEnvironment(
-        emissions,
-        treasury,
-        x2EarnApps,
-        governor,
-        xAllocationVoting,
-        b3tr,
-        vot3,
-        vechainNodesMock,
-        shouldEndorseXApps(),
-      )
-      break
-  }
-
-  //await updateGMMultipliers(config.VOTER_REWARDS_LEVELS, config.GM_MULTIPLIERS_V2, voterRewards)
-
-  // ---------- Run Simulation ---------- //
-  if (shouldRunSimulation()) {
-    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
-  }
-
-  console.log(`appEnv: ${appEnv}`)
+  await setupEnvironment(
+    config.NEXT_PUBLIC_APP_ENV,
+    emissions,
+    treasury,
+    x2EarnApps,
+    governor,
+    xAllocationVoting,
+    b3tr,
+    vot3,
+    vechainNodesMock,
+  )
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time
-  if (appEnv === "testnet" || network.name === "mainnet") {
+  if (process.env.NEXT_PUBLIC_APP_ENV === "testnet" || network.name === "mainnet") {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -1324,7 +1292,6 @@ export async function deployAll(config: ContractsConfig) {
       passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
     },
   }
-  // close the script
 }
 
 async function deployB3trToken(admin: string, minter: string, pauser: string): Promise<B3TR> {

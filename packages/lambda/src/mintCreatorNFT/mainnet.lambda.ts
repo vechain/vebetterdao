@@ -1,7 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
-import { HttpClient, ThorClient } from "@vechain/sdk-network"
-import { FunctionFragment } from "ethers"
-import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
+import { ThorClient } from "@vechain/sdk-network"
+import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { getSecret } from "../helpers/secret"
 import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
@@ -18,18 +17,25 @@ const awsMinterPkSecretName = "mint-creator-nft-pk"
 
 const mintCreatorNFT = async (thor: ThorClient, creatorWalletAddress: string) => {
   const privateKey = await getSecret(client, awsMinterPkSecretId, awsMinterPkSecretName)
-  const clause = clauseBuilder.functionInteraction(
-    mainnetConfig.x2EarnCreatorContractAddress,
-    X2EarnCreator__factory.createInterface().getFunction("safeMint") as FunctionFragment,
+
+  const clause = Clause.callFunction(
+    Address.of(mainnetConfig.x2EarnCreatorContractAddress),
+    ABIContract.ofAbi(X2EarnCreator__factory.abi).getFunction("safeMint"),
     [creatorWalletAddress],
   )
-  const gasResult = await thor.gas.estimateGas([clause], addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")))
+
+  const gasResult = await thor.gas.estimateGas(
+    [clause],
+    Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
+  )
   if (gasResult.reverted) {
     console.error("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
     throw new Error(`Transaction reverted: ${JSON.stringify(gasResult?.revertReasons)}`)
   }
   const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
-  const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+
+  const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey))
+
   const tx = await thor.transactions.sendTransaction(signedTx)
   const receipt = await thor.transactions.waitForTransaction(tx.id)
   return { receipt, gasResult }
@@ -60,7 +66,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       return buildResponse(StandardApiError.BAD_REQUEST)
     }
 
-    const thorClient = new ThorClient(new HttpClient(nodeURL), { isPollingEnabled: false })
+    const thorClient = ThorClient.at(nodeURL, { isPollingEnabled: false })
 
     const { receipt, gasResult } = await mintCreatorNFT(thorClient, creatorWalletAddress)
 
