@@ -17,7 +17,7 @@ import {
   waitForCurrentRoundToEnd,
   waitForRoundToEnd,
 } from "./helpers"
-import { describe, it, beforeEach } from "mocha"
+import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
@@ -56,7 +56,7 @@ describe("X-Apps - @shard15", function () {
   let creator3: HardhatEthersSigner
   let creator4: HardhatEthersSigner
 
-  beforeEach(async function () {
+  before(async function () {
     const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
     creator1 = creators[0]
     creator2 = creators[1]
@@ -3097,16 +3097,6 @@ describe("X-Apps - @shard15", function () {
 
 // Isolated tests for shard16 because of the size of the tests
 describe("X-Apps - @shard17a", function () {
-  // We prepare the environment for 4 creators
-  let creator1: HardhatEthersSigner
-  let creator2: HardhatEthersSigner
-
-  beforeEach(async function () {
-    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = creators[1]
-    creator2 = creators[2]
-  })
-
   describe("Admin address", function () {
     it("Admin can update the admin address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -3939,7 +3929,7 @@ describe("X-Apps - @shard17b", function () {
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
 
-  beforeEach(async function () {
+  before(async function () {
     const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
     creator1 = creators[1]
     creator2 = creators[2]
