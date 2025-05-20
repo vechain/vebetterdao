@@ -2,7 +2,8 @@ import localConfig from "./local"
 import stagingConfig from "./testnet-staging"
 import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
-import { EnvConfig, getContractsConfig } from "./contracts"
+import galacticaTestConfig from "./galactica-test"
+import { AppEnv, EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
 import { getEnvMixPanel } from "./mixPanel"
@@ -27,6 +28,11 @@ type PassportLibraries = {
   passportPoPScoreLogicAddress: string
   passportSignalingLogicAddress: string
   passportWhitelistAndBlacklistLogicAddress: string
+}
+
+type ExternalContractIntegrations = {
+  // Vet Domains Contract: https://docs.vet.domains/Developers/Contracts/Verification/#verified-contract
+  vetDomainsContractAddress: string
 }
 
 export type AppConfig = {
@@ -55,17 +61,31 @@ export type AppConfig = {
   nodeUrl: string
   indexerUrl?: string
   network: Network
+
+  // External integrations
+  externalContractIntegrations?: ExternalContractIntegrations
 }
 
 export const getConfig = (env?: EnvConfig): AppConfig => {
   const appEnv = env || process.env.NEXT_PUBLIC_APP_ENV
   if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set or a type must be passed to getConfig()")
-  if (appEnv === "local") return localConfig
-  if (appEnv === "e2e") return localConfig
-  if (appEnv === "testnet-staging") return stagingConfig
-  if (appEnv === "testnet") return testnetConfig
-  if (appEnv === "mainnet") return mainnetConfig
-  throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
+
+  switch (appEnv) {
+    case AppEnv.LOCAL:
+      return localConfig
+    case AppEnv.E2E:
+      return localConfig
+    case AppEnv.TESTNET_STAGING:
+      return stagingConfig
+    case AppEnv.TESTNET:
+      return testnetConfig
+    case AppEnv.MAINNET:
+      return mainnetConfig
+    case AppEnv.GALACTICA_TEST:
+      return galacticaTestConfig
+    default:
+      throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
+  }
 }
 
 export { getContractsConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel }

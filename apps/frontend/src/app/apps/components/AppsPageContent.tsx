@@ -1,6 +1,6 @@
 import { useXApps, useXNode, useIsCreatorOfAnyApp } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
-import { VStack, Heading, Text, Box } from "@chakra-ui/react"
+import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
 import { AllApps } from "./AllApps"
@@ -22,6 +22,7 @@ export type XAppInformations = {
 export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
@@ -34,13 +35,15 @@ export const AppsPageContent = () => {
   const newApps = xApps?.newLookingForEndorsement ?? []
   const hasNewApps = newApps.length > 0
 
+  // New apps list for the AllApps component
+  // Note: unendorsed app are always considered new until they are endorsed : timestamp = 0 untill then
+  const newAppsEndorsedandUnendorsed = [...(xApps?.newApps ?? []), ...newApps]
+
   // Apps tabs
-  const allApps = xApps?.allApps ?? []
   const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
 
-  // TODO: Pagination, search, filters
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
       <AppsBanner />
@@ -59,16 +62,29 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
-      <VStack alignItems={"flex-start"} spacing={4} w="100%">
-        <Heading size="lg">{t("All the apps")}</Heading>
-        <AllApps
-          allApps={allApps}
-          currentActiveApps={currentActiveApps}
-          gracePeriodApps={gracePeriodApps}
-          endorsementLostApps={endorsementLostApps}
-          isXAppsLoading={appsLoading}
-        />
-      </VStack>
+      {!isAbove800 ? (
+        <VStack alignItems={"flex-start"} spacing={4} w="full">
+          <Heading size="lg">{t("Sustainability apps")}</Heading>
+          <AllApps
+            newApps={newAppsEndorsedandUnendorsed}
+            currentActiveApps={currentActiveApps}
+            gracePeriodApps={gracePeriodApps}
+            endorsementLostApps={endorsementLostApps}
+            isXAppsLoading={appsLoading}
+          />
+        </VStack>
+      ) : (
+        <HStack w="full" alignItems={"flex-start"} spacing={0}>
+          <AllApps
+            headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
+            newApps={newAppsEndorsedandUnendorsed}
+            currentActiveApps={currentActiveApps}
+            gracePeriodApps={gracePeriodApps}
+            endorsementLostApps={endorsementLostApps}
+            isXAppsLoading={appsLoading}
+          />
+        </HStack>
+      )}
 
       {!isCreatorOfAnyApp && <JoinB3TRAppsBanner />}
 

@@ -35,9 +35,9 @@ export function toIPFSURL(cid: string, fileName?: string): string {
  */
 export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<string> {
   try {
-    const form = new FormData();
-    form.append('file', blob, filename);
-    const response = await axios.post(getConfig().ipfsPinningService, form);
+    const form = new FormData()
+    form.append("file", blob, filename)
+    const response = await axios.post(getConfig().ipfsPinningService, form)
 
     // Extract the IPFS hash from the response
     const ipfsHash = response.data.IpfsHash

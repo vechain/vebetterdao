@@ -35,11 +35,13 @@ import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
+import { EditAppCategories } from "./components/EditAppCategories"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal } from "@/components/StepModal/StepModal"
 import Lottie from "react-lottie"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+
 export type EditAppForm = {
   name: string
   external_url: string
@@ -54,6 +56,7 @@ export type EditAppForm = {
   logoImage: string
   bannerImage: string
   ve_world_bannerImage: string
+  categories: string[]
 }
 
 enum EditAppPageStep {
@@ -94,6 +97,7 @@ export const EditAppPageContent = () => {
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
       ve_world_bannerImage: veWorldBanner,
+      categories: appMetadata?.categories ?? [],
     },
   })
   const {
@@ -143,6 +147,7 @@ export const EditAppPageContent = () => {
         app_urls: [],
         social_urls: socialUrls,
         tweets: appMetadata?.tweets ?? [],
+        categories: data.categories ?? [],
         ve_world: {
           banner: data.ve_world_bannerImage,
         },
@@ -295,22 +300,20 @@ export const EditAppPageContent = () => {
               <FormControl isInvalid={!!errors.distribution_strategy}>
                 <Textarea
                   {...register("distribution_strategy", {
-                    required: {
-                      value: true,
-                      message: t("This field is required"),
-                    },
                     minLength: {
                       value: 20,
                       message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
                     },
                   })}
                   defaultValue={appMetadata?.distribution_strategy ?? ""}
+                  placeholder={t("Eg. Our goal is to distribute at least X percent of the round allocation each week.")}
                   resize="none"
                   h="140px"
                 />
                 <FormErrorMessage fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</FormErrorMessage>
               </FormControl>
             </VStack>
+            <EditAppCategories form={form} />
           </VStack>
           <EditAppSocialUrls form={form} />
         </Stack>
