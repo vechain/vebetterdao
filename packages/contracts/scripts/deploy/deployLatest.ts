@@ -13,23 +13,16 @@ import {
   X2EarnRewardsPool,
   X2EarnApps,
   NodeManagement,
-  NodeManagementV1,
   VeBetterPassport,
-  VeBetterPassportV1,
   X2EarnCreator,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { APPS, setupEnvironment } from "./setup"
+import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
+import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import {
-  deployAndUpgrade,
-  deployProxy,
-  deployProxyOnly,
-  initializeProxy,
-  saveContractsToFile,
-  upgradeProxy,
-} from "../helpers"
+import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
+import { deployAndInitializeLatest, deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
   transferAdminRole,
@@ -48,10 +41,9 @@ import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
 
-export async function deployAll(config: ContractsConfig) {
+export async function deployLatest(config: ContractsConfig) {
   const start = performance.now()
   const networkConfig = network.config as HttpNetworkConfig
-
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
@@ -71,80 +63,19 @@ export async function deployAll(config: ContractsConfig) {
   // ---------------------- Deploy Libraries ----------------------
   console.log("Deploying Governance Libraries")
   const {
-    GovernorClockLogicLibV1,
-    GovernorConfiguratorLibV1,
-    GovernorDepositLogicLibV1,
-    GovernorFunctionRestrictionsLogicLibV1,
-    GovernorProposalLogicLibV1,
-    GovernorQuorumLogicLibV1,
-    GovernorVotesLogicLibV1,
-    GovernorStateLogicLibV1,
     GovernorClockLogicLib,
     GovernorConfiguratorLib,
-    GovernorDepositLogicLib,
     GovernorFunctionRestrictionsLogicLib,
-    GovernorProposalLogicLib,
     GovernorQuorumLogicLib,
+    GovernorProposalLogicLib,
     GovernorVotesLogicLib,
+    GovernorDepositLogicLib,
     GovernorStateLogicLib,
-    GovernorClockLogicLibV3,
-    GovernorConfiguratorLibV3,
-    GovernorFunctionRestrictionsLogicLibV3,
-    GovernorQuorumLogicLibV3,
-    GovernorProposalLogicLibV3,
-    GovernorVotesLogicLibV3,
-    GovernorDepositLogicLibV3,
-    GovernorStateLogicLibV3,
-    GovernorClockLogicLibV4,
-    GovernorConfiguratorLibV4,
-    GovernorFunctionRestrictionsLogicLibV4,
-    GovernorQuorumLogicLibV4,
-    GovernorProposalLogicLibV4,
-    GovernorVotesLogicLibV4,
-    GovernorDepositLogicLibV4,
-    GovernorStateLogicLibV4,
-    GovernorClockLogicLibV5,
-    GovernorConfiguratorLibV5,
-    GovernorFunctionRestrictionsLogicLibV5,
-    GovernorGovernanceLogicLibV5,
-    GovernorQuorumLogicLibV5,
-    GovernorProposalLogicLibV5,
-    GovernorVotesLogicLibV5,
-    GovernorDepositLogicLibV5,
-    GovernorStateLogicLibV5,
-  } = await governanceLibraries()
+  } = await governanceLibraries(true)
 
   console.log("Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries
   const {
-    // V1
-    PassportChecksLogicV1,
-    PassportConfiguratorV1,
-    PassportEntityLogicV1,
-    PassportDelegationLogicV1,
-    PassportPersonhoodLogicV1,
-    PassportPoPScoreLogicV1,
-    PassportSignalingLogicV1,
-    PassportWhitelistAndBlacklistLogicV1,
-    // V2
-    PassportChecksLogicV2,
-    PassportConfiguratorV2,
-    PassportEntityLogicV2,
-    PassportDelegationLogicV2,
-    PassportPersonhoodLogicV2,
-    PassportPoPScoreLogicV2,
-    PassportSignalingLogicV2,
-    PassportWhitelistAndBlacklistLogicV2,
-    // V3
-    PassportChecksLogicV3,
-    PassportConfiguratorV3,
-    PassportEntityLogicV3,
-    PassportDelegationLogicV3,
-    PassportPersonhoodLogicV3,
-    PassportPoPScoreLogicV3,
-    PassportSignalingLogicV3,
-    PassportWhitelistAndBlacklistLogicV3,
-    // V4 (latest)
     PassportChecksLogic,
     PassportConfigurator,
     PassportEntityLogic,
@@ -153,8 +84,9 @@ export async function deployAll(config: ContractsConfig) {
     PassportPoPScoreLogic,
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
-  } = await passportLibraries()
+  } = await passportLibraries(true)
 
+  console.log("Deploying X2Earn App Libraries")
   console.log("Deploying X2Earn App Libraries")
   const {
     AdministrationUtils,
@@ -209,7 +141,6 @@ export async function deployAll(config: ContractsConfig) {
       await b3tr.getAddress(),
     ],
     undefined,
-    undefined,
     true,
   )) as VOT3
 
@@ -222,7 +153,6 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN, // admin
       config.CONTRACTS_ADMIN_ADDRESS, // upgrader
     ],
-    undefined,
     undefined,
     true,
   )) as TimeLock
@@ -244,31 +174,24 @@ export async function deployAll(config: ContractsConfig) {
       config.TREASURY_TRANSFER_LIMIT_VTHO,
     ],
     undefined,
-    undefined,
     true,
   )) as Treasury
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployAndUpgrade(
-    ["NodeManagementV1", "NodeManagement"],
-    [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []],
-    {
-      versions: [undefined, 2],
-      logOutput: true,
-    },
+  const nodeManagement = (await deployAndInitializeLatest(
+    "NodeManagement",
+    [
+      {
+        name: "initialize",
+        args: [vechainNodesAddress, TEMP_ADMIN, deployer.address],
+      },
+    ],
+    {},
+    true, // logOutput
   )) as NodeManagement
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
-    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
-    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
-    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
-    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
-    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
-    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
-    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
-    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
-  })
+  const veBetterPassportContractAddressTemp = TEMP_ADMIN
 
   // Set XAllocationVoting to temp address
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
@@ -285,7 +208,7 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.XAPP_GRACE_PERIOD,
         await nodeManagement.getAddress(),
-        veBetterPassportContractAddress,
+        veBetterPassportContractAddressTemp,
         await x2EarnCreator.getAddress(),
       ],
       [config.X2EARN_NODE_COOLDOWN_PERIOD, X_ALLOCATION_ADRESS_TEMP],
@@ -297,19 +220,19 @@ export async function deployAll(config: ContractsConfig) {
       libraries: [
         undefined,
         {
-          AdministrationUtilsV2: await AdministrationUtilsV2.getAddress(),
-          EndorsementUtilsV2: await EndorsementUtilsV2.getAddress(),
-          VoteEligibilityUtilsV2: await VoteEligibilityUtilsV2.getAddress(),
+          AdministrationUtilsV2: await AdministrationUtilsV2!!.getAddress(),
+          EndorsementUtilsV2: await EndorsementUtilsV2!!.getAddress(),
+          VoteEligibilityUtilsV2: await VoteEligibilityUtilsV2!!.getAddress(),
         },
         {
-          AdministrationUtilsV3: await AdministrationUtilsV3.getAddress(),
-          EndorsementUtilsV3: await EndorsementUtilsV3.getAddress(),
-          VoteEligibilityUtilsV3: await VoteEligibilityUtilsV3.getAddress(),
+          AdministrationUtilsV3: await AdministrationUtilsV3!!.getAddress(),
+          EndorsementUtilsV3: await EndorsementUtilsV3!!.getAddress(),
+          VoteEligibilityUtilsV3: await VoteEligibilityUtilsV3!!.getAddress(),
         },
         {
-          AdministrationUtilsV4: await AdministrationUtilsV4.getAddress(),
-          EndorsementUtilsV4: await EndorsementUtilsV4.getAddress(),
-          VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4.getAddress(),
+          AdministrationUtilsV4: await AdministrationUtilsV4!!.getAddress(),
+          EndorsementUtilsV4: await EndorsementUtilsV4!!.getAddress(),
+          VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4!!.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
@@ -317,411 +240,287 @@ export async function deployAll(config: ContractsConfig) {
           VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
         },
       ],
-      logOutput: true,
     },
   )) as X2EarnApps
 
-  const x2EarnRewardsPool = (await deployAndUpgrade(
+  const x2EarnRewardsPool = (await deployAndInitializeLatest(
+    "X2EarnRewardsPool",
     [
-      "X2EarnRewardsPoolV1",
-      "X2EarnRewardsPoolV2",
-      "X2EarnRewardsPoolV3",
-      "X2EarnRewardsPoolV4",
-      "X2EarnRewardsPoolV5",
-      "X2EarnRewardsPool",
+      {
+        name: "initialize",
+        args: [
+          config.CONTRACTS_ADMIN_ADDRESS,
+          config.CONTRACTS_ADMIN_ADDRESS,
+          TEMP_ADMIN,
+          await b3tr.getAddress(),
+          await x2EarnApps.getAddress(),
+        ],
+      },
+      {
+        name: "initializeV2",
+        args: [config.CONTRACTS_ADMIN_ADDRESS, config.X_2_EARN_INITIAL_IMPACT_KEYS],
+      },
+      {
+        name: "initializeV3",
+        args: [veBetterPassportContractAddressTemp],
+      },
     ],
-    [
-      [
-        config.CONTRACTS_ADMIN_ADDRESS, // admin
-        config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-        TEMP_ADMIN, // upgrader //TODO: transferRole
-        await b3tr.getAddress(),
-        await x2EarnApps.getAddress(),
-      ],
-      [
-        config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
-        config.X_2_EARN_INITIAL_IMPACT_KEYS, // impact keys
-      ],
-      [veBetterPassportContractAddress],
-      [],
-      [],
-      [],
-    ],
-    {
-      versions: [undefined, 2, 3, 4, 5, 6],
-      logOutput: true,
-    },
+    {},
+    true,
   )) as X2EarnRewardsPool
 
-  const xAllocationPool = (await deployAndUpgrade(
+  const xAllocationPool = (await deployAndInitializeLatest(
+    "XAllocationPool",
     [
-      "XAllocationPoolV1",
-      "XAllocationPoolV2",
-      "XAllocationPoolV3",
-      "XAllocationPoolV4",
-      "XAllocationPoolV5",
-      "XAllocationPool",
+      {
+        name: "initialize",
+        args: [
+          TEMP_ADMIN, // admin
+          TEMP_ADMIN, // upgrader
+          TEMP_ADMIN, // contractsAddressManager
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          await x2EarnApps.getAddress(),
+          await x2EarnRewardsPool.getAddress(),
+        ],
+      },
     ],
-    [
-      [
-        TEMP_ADMIN, // admin
-        TEMP_ADMIN, // upgrader
-        TEMP_ADMIN, // contractsAddressManager
-        await b3tr.getAddress(),
-        await treasury.getAddress(),
-        await x2EarnApps.getAddress(),
-        await x2EarnRewardsPool.getAddress(),
-      ],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ],
-    {
-      versions: [undefined, 2, 3, 4, 5, 6],
-      logOutput: true,
-    },
+    {},
+    true,
   )) as XAllocationPool
 
-  const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3", "GalaxyMember"],
+  const galaxyMember = (await deployAndInitializeLatest(
+    "GalaxyMember",
     [
-      [
-        {
-          name: name,
-          symbol: symbol,
-          admin: TEMP_ADMIN,
-          upgrader: deployer.address,
-          pauser: config.CONTRACTS_ADMIN_ADDRESS,
-          minter: config.CONTRACTS_ADMIN_ADDRESS,
-          contractsAddressManager: TEMP_ADMIN,
-          maxLevel: config.GM_NFT_MAX_LEVEL,
-          baseTokenURI: config.GM_NFT_BASE_URI,
-          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-          b3tr: await b3tr.getAddress(),
-          treasury: await treasury.getAddress(),
-        },
-      ],
-      [
-        await vechainNodesMock.getAddress(),
-        await nodeManagement.getAddress(),
-        TEMP_ADMIN,
-        config.GM_NFT_NODE_TO_FREE_LEVEL,
-      ],
-      [],
-      [],
+      {
+        name: "initialize",
+        args: [
+          {
+            name: name,
+            symbol: symbol,
+            admin: TEMP_ADMIN,
+            upgrader: deployer.address,
+            pauser: config.CONTRACTS_ADMIN_ADDRESS,
+            minter: config.CONTRACTS_ADMIN_ADDRESS,
+            contractsAddressManager: TEMP_ADMIN,
+            maxLevel: config.GM_NFT_MAX_LEVEL,
+            baseTokenURI: config.GM_NFT_BASE_URI,
+            b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+            b3tr: await b3tr.getAddress(),
+            treasury: await treasury.getAddress(),
+          },
+        ],
+      },
+      {
+        name: "initializeV2",
+        args: [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          TEMP_ADMIN,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
+      },
     ],
-    {
-      versions: [undefined, 2, 3, 4],
-      logOutput: true,
-    },
+    {},
+    true,
   )) as GalaxyMember
 
-  const emissions = (await deployAndUpgrade(
-    ["EmissionsV1", "EmissionsV2", "Emissions"],
+  const emissions = (await deployAndInitializeLatest(
+    "Emissions",
     [
-      [
-        {
-          minter: TEMP_ADMIN,
-          admin: TEMP_ADMIN,
-          upgrader: TEMP_ADMIN,
-          contractsAddressManager: TEMP_ADMIN,
-          decaySettingsManager: TEMP_ADMIN,
-          b3trAddress: await b3tr.getAddress(),
-          destinations: [
-            await xAllocationPool.getAddress(),
-            config.VOTE_2_EARN_POOL_ADDRESS,
-            await treasury.getAddress(),
-            config.MIGRATION_ADDRESS,
-          ],
-          initialXAppAllocation: config.INITIAL_X_ALLOCATION,
-          cycleDuration: config.EMISSIONS_CYCLE_DURATION,
-          decaySettings: [
-            config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
-            config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
-            config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
-            config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
-          ],
-          treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
-          maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
-          migrationAmount: config.MIGRATION_AMOUNT,
-        },
-      ],
-      [config.EMISSIONS_IS_NOT_ALIGNED],
-      [config.GM_PERCENTAGE_OF_TREASURY],
+      {
+        name: "initialize",
+        args: [
+          {
+            minter: TEMP_ADMIN,
+            admin: TEMP_ADMIN,
+            upgrader: TEMP_ADMIN,
+            contractsAddressManager: TEMP_ADMIN,
+            decaySettingsManager: TEMP_ADMIN,
+            b3trAddress: await b3tr.getAddress(),
+            destinations: [
+              await xAllocationPool.getAddress(),
+              config.VOTE_2_EARN_POOL_ADDRESS,
+              await treasury.getAddress(),
+              config.MIGRATION_ADDRESS,
+            ],
+            initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+            cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+            decaySettings: [
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+              config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+              config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+              config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+            ],
+            treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+            maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+            migrationAmount: config.MIGRATION_AMOUNT,
+          },
+        ],
+      },
+      {
+        name: "initializeV2",
+        args: [config.EMISSIONS_IS_NOT_ALIGNED],
+      },
+      {
+        name: "initializeV3",
+        args: [config.GM_PERCENTAGE_OF_TREASURY],
+      },
     ],
-    {
-      versions: [undefined, 2, 3],
-      logOutput: true,
-    },
+    {}, // no linked libraries here
+    true,
   )) as Emissions
 
-  const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
+  const voterRewards = (await deployAndInitializeLatest(
+    "VoterRewards",
     [
-      [
-        TEMP_ADMIN, // admin
-        TEMP_ADMIN, // upgrader // TODO: transferRole
-        config.CONTRACTS_ADMIN_ADDRESS, // contractsAddressManager
-        await emissions.getAddress(),
-        await galaxyMember.getAddress(),
-        await b3tr.getAddress(),
-        config.VOTER_REWARDS_LEVELS_V2,
-        config.GM_MULTIPLIERS_V2,
-      ],
-      [],
-      [],
-      [],
-      [[], []],
+      {
+        name: "initialize",
+        args: [
+          TEMP_ADMIN, // admin
+          TEMP_ADMIN, // upgrader
+          config.CONTRACTS_ADMIN_ADDRESS, // contractsAddressManager
+          await emissions.getAddress(),
+          await galaxyMember.getAddress(),
+          await b3tr.getAddress(),
+          config.VOTER_REWARDS_LEVELS_V2,
+          config.GM_MULTIPLIERS_V2,
+        ],
+      },
+      {
+        name: "initializeV5",
+        args: [[], []],
+      },
     ],
-    {
-      versions: [undefined, 2, 3, 4, 5],
-      logOutput: true,
-    },
+    {},
+    true,
   )) as VoterRewards
 
-  const xAllocationVoting = (await deployAndUpgrade(
+  const xAllocationVoting = (await deployAndInitializeLatest(
+    "XAllocationVoting",
     [
-      "XAllocationVotingV1",
-      "XAllocationVotingV2",
-      "XAllocationVotingV3",
-      "XAllocationVotingV4",
-      "XAllocationVotingV5",
-      "XAllocationVoting",
+      {
+        name: "initialize",
+        args: [
+          {
+            vot3Token: await vot3.getAddress(),
+            quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
+            initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
+            timeLock: await timelock.getAddress(),
+            voterRewards: await voterRewards.getAddress(),
+            emissions: await emissions.getAddress(),
+            admins: [await timelock.getAddress(), TEMP_ADMIN],
+            upgrader: TEMP_ADMIN,
+            contractsAddressManager: TEMP_ADMIN,
+            x2EarnAppsAddress: await x2EarnApps.getAddress(),
+            baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+            appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+            votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+          },
+        ],
+      },
+      {
+        name: "initializeV2",
+        args: [veBetterPassportContractAddressTemp],
+      },
     ],
-    [
-      [
-        {
-          vot3Token: await vot3.getAddress(),
-          quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
-          initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
-          timeLock: await timelock.getAddress(),
-          voterRewards: await voterRewards.getAddress(),
-          emissions: await emissions.getAddress(),
-          admins: [await timelock.getAddress(), TEMP_ADMIN],
-          upgrader: TEMP_ADMIN,
-          contractsAddressManager: TEMP_ADMIN,
-          x2EarnAppsAddress: await x2EarnApps.getAddress(),
-          baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-          appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-          votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
-        },
-      ],
-      [veBetterPassportContractAddress],
-      [],
-      [],
-      [],
-      [],
-    ],
-    {
-      versions: [undefined, 2, 3, 4, 5, 6],
-      logOutput: true,
-    },
+    {},
+    true,
   )) as XAllocationVoting
 
-  const veBetterPassportV1 = (await initializeProxy(
-    veBetterPassportContractAddress,
-    "VeBetterPassportV1",
-    [
-      {
-        x2EarnApps: await x2EarnApps.getAddress(),
-        xAllocationVoting: await xAllocationVoting.getAddress(),
-        galaxyMember: await galaxyMember.getAddress(),
-        signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
-        roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
-        minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-        blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
-        whitelistThreshold: config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
-        maxEntitiesPerPassport: config.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
-        decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
-      },
-      {
-        admin: TEMP_ADMIN, // admins
-        botSignaler: config.CONTRACTS_ADMIN_ADDRESS, // botSignaler
-        upgrader: TEMP_ADMIN, // upgrader
-        settingsManager: TEMP_ADMIN, // settingsManager
-        roleGranter: config.CONTRACTS_ADMIN_ADDRESS, // roleGranter
-        blacklister: config.CONTRACTS_ADMIN_ADDRESS, // blacklister
-        whitelister: config.CONTRACTS_ADMIN_ADDRESS, // whitelistManager
-        actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // actionRegistrar
-        actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // actionScoreManager
-        resetSignaler: config.CONTRACTS_ADMIN_ADDRESS, // resetSignaler
-      },
-    ],
-    {
-      PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
-      PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
-      PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
-      PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
-      PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
-      PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
-      PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
-      PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
-    },
-  )) as VeBetterPassportV1
-
-  // @todo: Check if this is still needed
-  const veBetterPassportV2 = (await upgradeProxy(
-    "VeBetterPassportV1",
-    "VeBetterPassportV2",
-    await veBetterPassportV1.getAddress(),
-    [],
-    {
-      version: 2,
-      libraries: {
-        PassportChecksLogicV2: await PassportChecksLogicV2.getAddress(),
-        PassportConfiguratorV2: await PassportConfiguratorV2.getAddress(),
-        PassportEntityLogicV2: await PassportEntityLogicV2.getAddress(),
-        PassportDelegationLogicV2: await PassportDelegationLogicV2.getAddress(),
-        PassportPersonhoodLogicV2: await PassportPersonhoodLogicV2.getAddress(),
-        PassportPoPScoreLogicV2: await PassportPoPScoreLogicV2.getAddress(),
-        PassportSignalingLogicV2: await PassportSignalingLogicV2.getAddress(),
-        PassportWhitelistAndBlacklistLogicV2: await PassportWhitelistAndBlacklistLogicV2.getAddress(),
-      },
-      logOutput: true,
-    },
-  )) as VeBetterPassport
-
-  // @todo: Check if this is still needed
-  const veBetterPassportV3 = (await upgradeProxy(
-    "VeBetterPassportV2",
-    "VeBetterPassportV3",
-    await veBetterPassportV1.getAddress(), // Proxy address remains unchanged for transparent proxy upgrades
-    [],
-    {
-      version: 3,
-      libraries: {
-        PassportChecksLogicV3: await PassportChecksLogicV3.getAddress(),
-        PassportConfiguratorV3: await PassportConfiguratorV3.getAddress(),
-        PassportEntityLogicV3: await PassportEntityLogicV3.getAddress(),
-        PassportDelegationLogicV3: await PassportDelegationLogicV3.getAddress(),
-        PassportPersonhoodLogicV3: await PassportPersonhoodLogicV3.getAddress(),
-        PassportPoPScoreLogicV3: await PassportPoPScoreLogicV3.getAddress(),
-        PassportSignalingLogicV3: await PassportSignalingLogicV3.getAddress(),
-        PassportWhitelistAndBlacklistLogicV3: await PassportWhitelistAndBlacklistLogicV3.getAddress(),
-      },
-      logOutput: true,
-    },
-  )) as VeBetterPassport
-
-  // V4 (latest)
-  const veBetterPassport = (await upgradeProxy(
-    "VeBetterPassportV3",
+  const veBetterPassport = (await deployAndInitializeLatest(
     "VeBetterPassport",
-    await veBetterPassportV1.getAddress(), // Proxy address remains unchanged for transparent proxy upgrades
-    [config.CONTRACTS_ADMIN_ADDRESS], // Include as part of v4 initialization upgrade
-    {
-      version: 4,
-      libraries: {
-        PassportChecksLogic: await PassportChecksLogic.getAddress(),
-        PassportConfigurator: await PassportConfigurator.getAddress(),
-        PassportEntityLogic: await PassportEntityLogic.getAddress(),
-        PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
-        PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
-        PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
-        PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
-        PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
-      },
-      logOutput: true,
-    },
-  )) as VeBetterPassport
-
-  const governor = (await deployAndUpgrade(
-    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernor"],
     [
-      [
-        {
-          vot3Token: await vot3.getAddress(),
-          timelock: await timelock.getAddress(),
-          xAllocationVoting: await xAllocationVoting.getAddress(),
-          b3tr: await b3tr.getAddress(),
-          quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-          initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
-          initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
-          initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
-          voterRewards: await voterRewards.getAddress(),
-          isFunctionRestrictionEnabled: true,
-        },
-        {
-          governorAdmin: TEMP_ADMIN,
-          pauser: config.CONTRACTS_ADMIN_ADDRESS,
-          contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
-          proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
-          governorFunctionSettingsRoleAddress: TEMP_ADMIN,
-        },
-      ],
-      [],
-      [],
-      [veBetterPassportContractAddress],
-      [],
+      {
+        name: "initialize",
+        args: [
+          {
+            x2EarnApps: await x2EarnApps.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            galaxyMember: await galaxyMember.getAddress(),
+            signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD,
+            roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE,
+            minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL,
+            blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE,
+            whitelistThreshold: config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE,
+            maxEntitiesPerPassport: config.VEPASSPORT_PASSPORT_MAX_ENTITIES,
+            decayRate: config.VEPASSPORT_DECAY_RATE,
+          },
+          {
+            admin: TEMP_ADMIN,
+            botSignaler: config.CONTRACTS_ADMIN_ADDRESS,
+            upgrader: TEMP_ADMIN,
+            settingsManager: TEMP_ADMIN,
+            roleGranter: config.CONTRACTS_ADMIN_ADDRESS,
+            blacklister: config.CONTRACTS_ADMIN_ADDRESS,
+            whitelister: config.CONTRACTS_ADMIN_ADDRESS,
+            actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS,
+            actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS,
+            resetSignaler: config.CONTRACTS_ADMIN_ADDRESS,
+          },
+        ],
+      },
+      {
+        name: "initializeV4",
+        args: [config.CONTRACTS_ADMIN_ADDRESS],
+      },
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
-      libraries: [
-        {
-          GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
-          GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
-          GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
-          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
-          GovernorProposalLogicV1: await GovernorProposalLogicLibV1.getAddress(),
-          GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
-          GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
-          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
-        },
-        {
-          GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
-          GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
-          GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
-          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
-          GovernorProposalLogicV1: await GovernorProposalLogicLibV1.getAddress(),
-          GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
-          GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
-          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
-        },
-        {
-          GovernorClockLogicV3: await GovernorClockLogicLibV3.getAddress(),
-          GovernorConfiguratorV3: await GovernorConfiguratorLibV3.getAddress(),
-          GovernorDepositLogicV3: await GovernorDepositLogicLibV3.getAddress(),
-          GovernorFunctionRestrictionsLogicV3: await GovernorFunctionRestrictionsLogicLibV3.getAddress(),
-          GovernorProposalLogicV3: await GovernorProposalLogicLibV3.getAddress(),
-          GovernorQuorumLogicV3: await GovernorQuorumLogicLibV3.getAddress(),
-          GovernorStateLogicV3: await GovernorStateLogicLibV3.getAddress(),
-          GovernorVotesLogicV3: await GovernorVotesLogicLibV3.getAddress(),
-        },
-        {
-          GovernorClockLogicV4: await GovernorClockLogicLibV4.getAddress(),
-          GovernorConfiguratorV4: await GovernorConfiguratorLibV4.getAddress(),
-          GovernorDepositLogicV4: await GovernorDepositLogicLibV4.getAddress(),
-          GovernorFunctionRestrictionsLogicV4: await GovernorFunctionRestrictionsLogicLibV4.getAddress(),
-          GovernorProposalLogicV4: await GovernorProposalLogicLibV4.getAddress(),
-          GovernorQuorumLogicV4: await GovernorQuorumLogicLibV4.getAddress(),
-          GovernorStateLogicV4: await GovernorStateLogicLibV4.getAddress(),
-          GovernorVotesLogicV4: await GovernorVotesLogicLibV4.getAddress(),
-        },
-        {
-          GovernorClockLogicV5: await GovernorClockLogicLibV5.getAddress(),
-          GovernorConfiguratorV5: await GovernorConfiguratorLibV5.getAddress(),
-          GovernorDepositLogicV5: await GovernorDepositLogicLibV5.getAddress(),
-          GovernorFunctionRestrictionsLogicV5: await GovernorFunctionRestrictionsLogicLibV5.getAddress(),
-          GovernorQuorumLogicV5: await GovernorQuorumLogicLibV5.getAddress(),
-          GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
-          GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
-          GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
-        },
-        {
-          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
-          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
-        },
-      ],
-      logOutput: true,
+      PassportChecksLogic: await PassportChecksLogic.getAddress(),
+      PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportEntityLogic: await PassportEntityLogic.getAddress(),
+      PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
+      PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
+      PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
+      PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
+      PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
     },
+    true,
+  )) as VeBetterPassport
+
+  const governor = (await deployAndInitializeLatest(
+    "B3TRGovernor",
+    [
+      {
+        name: "initialize",
+        args: [
+          {
+            vot3Token: await vot3.getAddress(),
+            timelock: await timelock.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            b3tr: await b3tr.getAddress(),
+            quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+            initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+            initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+            initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+            voterRewards: await voterRewards.getAddress(),
+            isFunctionRestrictionEnabled: true,
+          },
+          {
+            governorAdmin: TEMP_ADMIN,
+            pauser: config.CONTRACTS_ADMIN_ADDRESS,
+            contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+            proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
+            governorFunctionSettingsRoleAddress: TEMP_ADMIN,
+          },
+        ],
+      },
+      {
+        name: "initializeV4",
+        args: [await veBetterPassport.getAddress()],
+      },
+    ],
+    {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+    },
+    true,
   )) as B3TRGovernor
 
   const date = new Date(performance.now() - start)
@@ -912,21 +711,53 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
-  await setupEnvironment(
-    config.NEXT_PUBLIC_APP_ENV,
-    emissions,
-    treasury,
-    x2EarnApps,
-    governor,
-    xAllocationVoting,
-    b3tr,
-    vot3,
-    vechainNodesMock,
-  )
+  const appEnv = process.env.NEXT_PUBLIC_APP_ENV
+  switch (network.name) {
+    case "vechain_mainnet":
+      await setupMainnetEnvironment(emissions, x2EarnApps)
+      break
+    case "vechain_testnet":
+      if (appEnv === "testnet-staging") {
+        await setupLocalEnvironment(
+          emissions,
+          treasury,
+          x2EarnApps,
+          governor,
+          xAllocationVoting,
+          b3tr,
+          vot3,
+          vechainNodesMock,
+          shouldEndorseXApps(),
+        )
+      } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
+      break
+    case "vechain_solo":
+      await setupLocalEnvironment(
+        emissions,
+        treasury,
+        x2EarnApps,
+        governor,
+        xAllocationVoting,
+        b3tr,
+        vot3,
+        vechainNodesMock,
+        shouldEndorseXApps(),
+      )
+      break
+  }
+
+  //await updateGMMultipliers(config.VOTER_REWARDS_LEVELS, config.GM_MULTIPLIERS_V2, voterRewards)
+
+  // ---------- Run Simulation ---------- //
+  if (shouldRunSimulation()) {
+    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
+  }
+
+  console.log(`appEnv: ${appEnv}`)
 
   // ---------- Role updates ---------- //
   // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time
-  if (process.env.NEXT_PUBLIC_APP_ENV === "testnet" || network.name === "mainnet") {
+  if (appEnv === "testnet" || network.name === "mainnet") {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -1321,6 +1152,7 @@ export async function deployAll(config: ContractsConfig) {
       passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
     },
   }
+  // close the script
 }
 
 async function deployB3trToken(admin: string, minter: string, pauser: string): Promise<B3TR> {

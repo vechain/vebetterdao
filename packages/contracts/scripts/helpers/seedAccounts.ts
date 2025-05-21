@@ -81,7 +81,7 @@ const getSeedAccountsFixed = (numAccounts: number, acctOffset: number): SeedAcco
   keys.slice(acctOffset).forEach(key => {
     seedAccounts.push({
       key,
-      amount: VET.of(200000).wei,
+      amount: VET.of(10000).wei,
     })
   })
 

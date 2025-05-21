@@ -32,6 +32,8 @@
     "contracts:deploy:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run deploy --filter=contracts",
     "contracts:deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run deploy:testnet --filter=contracts",
     "contracts:deploy:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run deploy:mainnet --filter=contracts",
+    "contracts:deploy:latest": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v NEXT_DEPLOY_LATEST_ONLY=true -e .env turbo run deploy --filter=contracts",
+    "contracts:deploy:testnet-staging:latest": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -v NEXT_DEPLOY_LATEST_ONLY=true  -e .env turbo run deploy --filter=contracts",
     "contracts:deploy:galactica-test": "dotenv -v NEXT_PUBLIC_APP_ENV=galactica-test -- turbo run deploy:galactica-test --filter=contracts",
     "contracts:select-and-deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @repo/contracts ts-node scripts/deploy/select-and-deploy.ts",
     "contracts:select-and-deploy:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @repo/contracts ts-node scripts/deploy/select-and-deploy.ts",
@@ -78,13 +80,14 @@
     "@datadog/browser-rum": "^5.23.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "dotenv-cli": "latest",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
+    "dotenv-cli": "latest",
+    "hardhat": "2.19.1",
     "husky": "^8.0.0",
     "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
-    "turbo": "^1.13.3",
-    "hardhat": "2.19.1"
+    "turbo": "^1.13.3"
   },
   "engines": {
     "node": "20.x.x"

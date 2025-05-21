@@ -17,7 +17,8 @@
     "CONTRACT_TO_UPGRADE",
     "CONTRACT_TO_DEPLOY",
     "CONTRACT_VERSION",
-    "FUNCTION_TO_CALL"
+    "FUNCTION_TO_CALL",
+    "NEXT_DEPLOY_LATEST_ONLY"
   ],
   "pipeline": {
     "install": {
