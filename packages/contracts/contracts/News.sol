@@ -199,20 +199,50 @@ contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgra
   // ---------- Getters ---------- //
 
   /**
-   * @dev Retrieves the news for an app
+   * @dev Retrieves the news for an app by ID
    * @param appId The ID of the app for which the news was published
+   * @param _resultsPerPage The number of results per page
+   * @param _page The page number
    * @return An array of NewsType objects containing the news details
    */
-  function appNews(bytes32 appId) external view returns (NewsType[] memory) {
+  function appNewsPaginated(
+    bytes32 appId,
+    uint256 _resultsPerPage,
+    uint256 _page
+  ) external view returns (NewsType[] memory) {
+    require(_page > 0 || _resultsPerPage > 0, "News: page and results per page must be greater than 0");
+
     NewsStorage storage $ = _getNewsStorage();
+
+    require($.x2EarnApps.appExists(appId), "News: app does not exist");
+
     uint256[] memory newsIds = $.appNewsIds[appId];
 
-    NewsType[] memory result = new NewsType[](newsIds.length);
-    for (uint256 i = 0; i < newsIds.length; i++) {
-      result[i] = $.newsById[newsIds[i]];
+    require(newsIds.length > 0, "News: no news found");
+
+    uint256 startIndex = _resultsPerPage * _page - _resultsPerPage;
+    uint256 endIndex = startIndex + _resultsPerPage;
+    if (endIndex >= newsIds.length) {
+      endIndex = newsIds.length;
     }
 
+    NewsType[] memory result = new NewsType[](endIndex - startIndex);
+    for (uint256 i = startIndex; i < endIndex; i++) {
+      result[i] = $.newsById[newsIds[i]];
+    }
     return result;
+  }
+
+  /**
+   * @dev Retrieves the latest news for an app
+   * @param appId The ID of the app for which the news was published
+   * @return The latest news details
+   */
+  function appLatestNews(bytes32 appId) external view returns (NewsType memory) {
+    NewsStorage storage $ = _getNewsStorage();
+    uint256[] memory newsIds = $.appNewsIds[appId];
+    require(newsIds.length > 0, "News: no news found");
+    return getNewsById(newsIds.length - 1);
   }
 
   /**
@@ -220,7 +250,7 @@ contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgra
    * @param newsId The ID of the news to retrieve
    * @return The news details
    */
-  function getNewsById(uint256 newsId) external view returns (NewsType memory) {
+  function getNewsById(uint256 newsId) public view returns (NewsType memory) {
     NewsStorage storage $ = _getNewsStorage();
     require(newsExists(newsId), "News: not found or removed");
     return $.newsById[newsId];

@@ -5,6 +5,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy } from "../scripts/helpers"
 import { getOrDeployContractInstances } from "./helpers/deploy"
 import { endorseApp } from "./helpers/xnodes"
+import { moveBlocks } from "./helpers"
 
 // Constants for reusable test data
 const TEST_NEWS = {
@@ -144,7 +145,7 @@ describe("News Contract", function () {
         .withArgs(0, appId, title, description, image, callToActionUrl, publisher.address)
 
       // Verify news was stored correctly
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       expect(newsItems.length).to.equal(1)
       expect(newsItems[0].title).to.equal(title)
       expect(newsItems[0].description).to.equal(description)
@@ -158,7 +159,7 @@ describe("News Contract", function () {
 
       await news.connect(appAdmin).publish(appId, title, description, image, callToActionUrl)
 
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       expect(newsItems.length).to.equal(1)
       expect(newsItems[0].title).to.equal(title)
       expect(newsItems[0].publisher).to.equal(appAdmin.address)
@@ -172,7 +173,7 @@ describe("News Contract", function () {
 
       await news.connect(appCreator).publish(appId, title, description, image, callToActionUrl)
 
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       expect(newsItems.length).to.equal(1)
       expect(newsItems[0].title).to.equal(title)
       expect(newsItems[0].publisher).to.equal(appCreator.address)
@@ -183,7 +184,7 @@ describe("News Contract", function () {
 
       await news.connect(appModerator).publish(appId, title, description, image, callToActionUrl)
 
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       expect(newsItems.length).to.equal(1)
       expect(newsItems[0].title).to.equal(title)
       expect(newsItems[0].publisher).to.equal(appModerator.address)
@@ -225,7 +226,7 @@ describe("News Contract", function () {
         )
 
       // Verify the news were published
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       expect(newsItems.length).to.equal(2)
     })
   })
@@ -239,9 +240,7 @@ describe("News Contract", function () {
         .publish(appId, firstNews.title, firstNews.description, firstNews.image, firstNews.callToActionUrl)
 
       // Advance some blocks to get past cooldown
-      for (let i = 0; i < cooldownPeriod; i++) {
-        await ethers.provider.send("evm_mine", [])
-      }
+      await moveBlocks(cooldownPeriod)
 
       const secondNews = TEST_NEWS.sequence[1]
       await news
@@ -250,7 +249,7 @@ describe("News Contract", function () {
     })
 
     it("Should return all news for an app", async function () {
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       expect(newsItems.length).to.equal(2)
       expect(newsItems[0].title).to.equal(TEST_NEWS.sequence[0].title)
       expect(newsItems[1].title).to.equal(TEST_NEWS.sequence[1].title)
@@ -258,19 +257,42 @@ describe("News Contract", function () {
 
     it("Should return empty array for non-existent app", async function () {
       const nonExistentAppId = ethers.keccak256(ethers.toUtf8Bytes("NonExistentApp"))
-      const newsItems = await news.appNews(nonExistentAppId)
-      expect(newsItems.length).to.equal(0)
+      await expect(news.appNewsPaginated(nonExistentAppId, 10, 1)).to.be.revertedWith("News: app does not exist")
     })
 
     it("Should retrieve news item by ID", async function () {
       // Get the news item by ID
-      const newsItems = await news.appNews(appId)
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
       const firstNewsId: bigint = newsItems[0].id
 
       // Verify we can retrieve it
       const newsItem = await news.getNewsById(Number(firstNewsId))
       expect(newsItem.title).to.equal(TEST_NEWS.sequence[0].title)
       expect(newsItem.description).to.equal(TEST_NEWS.sequence[0].description)
+    })
+
+    it("Should retrieve latest news item", async function () {
+      const newsItem = await news.appLatestNews(appId)
+      expect(newsItem.title).to.equal(TEST_NEWS.sequence[1].title)
+    })
+  })
+
+  describe.only("MODERATOR - Removing News", function () {
+    beforeEach(async function () {
+      // Publish some test news items
+      const firstNews = TEST_NEWS.sequence[0]
+      await news
+        .connect(publisher)
+        .publish(appId, firstNews.title, firstNews.description, firstNews.image, firstNews.callToActionUrl)
+    })
+
+    it("Should remove news item by ID", async function () {
+      const newsItems = await news.appNewsPaginated(appId, 10, 1)
+      const firstNewsId: bigint = newsItems[0].id
+
+      await news.removeNewsById(Number(firstNewsId))
+
+      await expect(news.getNewsById(Number(firstNewsId))).to.be.revertedWith("News: not found or removed")
     })
   })
 })

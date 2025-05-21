@@ -125,9 +125,22 @@ interface INews {
   /**
    * @dev Retrieves the news for an app.
    * @param appId The ID of the app.
+   * @param _resultsPerPage The number of results per page.
+   * @param _page The page number.
    * @return The news.
    */
-  function appNews(bytes32 appId) external view returns (NewsType[] memory);
+  function appNewsPaginated(
+    bytes32 appId,
+    uint256 _resultsPerPage,
+    uint256 _page
+  ) external view returns (NewsType[] memory);
+
+  /**
+   * @dev Retrieves the latest news for an app.
+   * @param appId The ID of the app.
+   * @return The latest news.
+   */
+  function appLatestNews(bytes32 appId) external view returns (NewsType memory);
 
   /**
    * @dev Retrieves the news for an app by ID.
