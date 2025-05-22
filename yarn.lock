@@ -8774,10 +8774,10 @@
     "@openzeppelin/contracts-upgradeable" "5.0.2"
     ethers "^6.9.0"
 
-"@vechain/vechain-kit@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-1.8.0.tgz#c6c493aa7ee211da62c2ac67da66701eeeee01f1"
-  integrity sha512-TOmx7NujkTGbup+DX3JTnfm+ufFBuOIc+opElIfGE1Gs3qoy24CB6jXbZ99Qe/H2DpHz2UhcX3zkweGiTCaQKw==
+"@vechain/vechain-kit@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-1.8.1.tgz#237aecceea5fe83c6ee230a115ea0b60da7a2b17"
+  integrity sha512-kbdxBh+dCh9kbXZ8AsEgZkinTIOGyZXKd0HBO3okZgVvMwGfutHCBZBbDSTTA4DK7hzoSD5aILtC8vaW/VOcYg==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
