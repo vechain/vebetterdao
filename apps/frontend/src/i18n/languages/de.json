@@ -1692,5 +1692,6 @@
   "Start": "Starten",
   "Verify": "Überprüfen",
   "Complete": "Abschließen",
-  "Unable to process request. Try refreshing or contact support.": "Anfrage konnte nicht verarbeitet werden. Versuchen Sie, die Seite zu aktualisieren, oder kontaktieren Sie den Support."
+  "Unable to process request. Try refreshing or contact support.": "Anfrage konnte nicht verarbeitet werden. Versuchen Sie, die Seite zu aktualisieren, oder kontaktieren Sie den Support.",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Z.B. Unser Ziel ist es, jede Woche mindestens X Prozent der Rundenallokation zu verteilen."
 }

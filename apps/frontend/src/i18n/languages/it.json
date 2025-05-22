@@ -1692,5 +1692,6 @@
   "Start": "Inizia",
   "Verify": "Verifica",
   "Complete": "Completa",
-  "Unable to process request. Try refreshing or contact support.": "Impossibile elaborare la richiesta. Prova ad aggiornare o contatta il supporto."
+  "Unable to process request. Try refreshing or contact support.": "Impossibile elaborare la richiesta. Prova ad aggiornare o contatta il supporto.",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Ad esempio: Il nostro obiettivo è distribuire almeno X percento dell'allocazione del round ogni settimana."
 }

@@ -1692,5 +1692,6 @@
   "Start": "प्रारंभ करें",
   "Verify": "सत्यापित करें",
   "Complete": "पूर्ण करें",
-  "Unable to process request. Try refreshing or contact support.": "अनुरोध संसाधित करने में असमर्थ। पुनः लोड करने का प्रयास करें या समर्थन से संपर्क करें।"
+  "Unable to process request. Try refreshing or contact support.": "अनुरोध संसाधित करने में असमर्थ। पुनः लोड करने का प्रयास करें या समर्थन से संपर्क करें।",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "उदाहरण के लिए, हमारा लक्ष्य है कि हम प्रत्येक सप्ताह राउंड आवंटन का कम से कम X प्रतिशत वितरित करें।"
 }
