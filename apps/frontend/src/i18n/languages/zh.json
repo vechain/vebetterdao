@@ -1692,5 +1692,6 @@
   "Start": "开始",
   "Verify": "验证",
   "Complete": "完成",
-  "Unable to process request. Try refreshing or contact support.": "无法处理请求。请尝试刷新或联系支持。"
+  "Unable to process request. Try refreshing or contact support.": "无法处理请求。请尝试刷新或联系支持。",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "例如，我们的目标是每周至少分配 X 百分比的轮次配额。"
 }

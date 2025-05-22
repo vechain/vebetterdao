@@ -1692,5 +1692,6 @@
   "Start": "Starta",
   "Verify": "Verifiera",
   "Complete": "Komplettera",
-  "Unable to process request. Try refreshing or contact support.": "Kunde inte behandla begäran. Försök att uppdatera eller kontakta support."
+  "Unable to process request. Try refreshing or contact support.": "Kunde inte behandla begäran. Försök att uppdatera eller kontakta support.",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Vårt mål är att dela ut minst X procent av rundans fördelning varje vecka."
 }
