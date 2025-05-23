@@ -89,7 +89,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
         allowAnalytics: true,
         termsAndConditions: [
           {
-            url: "https://vechain.org/terms-of-use/", //TODO: Update to the correct URL
+            url: "https://vebetterdao.org/terms-of-service",
             displayName: "VeBetterDAO Terms of Service",
             version: 1,
             required: true,
