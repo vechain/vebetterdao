@@ -1693,5 +1693,6 @@
   "Verify": "Vérifier",
   "Complete": "Terminer",
   "Unable to process request. Try refreshing or contact support.": "Impossible de traiter la demande. Essayez de rafraîchir ou contactez le support.",
-  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Par exemple, notre objectif est de distribuer au moins X pour cent de l'allocation de la ronde chaque semaine."
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Par exemple, notre objectif est de distribuer au moins X pour cent de l'allocation de la ronde chaque semaine.",
+  "Vote Type": "Type de vote"
 }

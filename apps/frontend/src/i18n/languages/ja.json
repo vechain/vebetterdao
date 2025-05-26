@@ -1693,5 +1693,6 @@
   "Verify": "確認",
   "Complete": "完了",
   "Unable to process request. Try refreshing or contact support.": "リクエストを処理できません。リフレッシュするかサポートに連絡してください。",
-  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "例: 私たちの目標は、毎週ラウンドの配分の少なくともXパーセントを分配することです。"
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "例: 私たちの目標は、毎週ラウンドの配分の少なくともXパーセントを分配することです。",
+  "Vote Type": "投票タイプ"
 }
