@@ -39,7 +39,6 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
       .flat()
       .filter(vote => {
         // Filter out Abstain votes with short comments
-        console.log("vote", vote)
         if (vote.support === "ABSTAIN" && (!vote.reason || vote.reason.length < 5)) {
           return false
         }
