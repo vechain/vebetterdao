@@ -50,7 +50,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       }
 
     // Publish a success message to the Slack channel
-    await publishMessage(client, "C073WL9ELUR", `:white_check_mark: Check endorsements ran successfully`)
+    await publishMessage(client, "C06BLEJE5SA", `:white_check_mark: Check endorsements ran successfully`)
 
     // Return a successful response with the transaction receipt
     return {
@@ -64,7 +64,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error checking endorsements:", error)
 
     // Publish an error message to the Slack channel
-    await publishMessage(client, "C073WL9ELUR", `:alert: Error checking endorsements: ${error}`)
+    await publishMessage(client, "C06BLEJE5SA", `:alert: Error checking endorsements: ${error}`)
 
     return {
       statusCode: 500,

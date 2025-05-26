@@ -1,11 +1,11 @@
-name: VeBetterPassport Infrastructure
+name: Lambda Infrastructure
 
 on:
   pull_request:
     paths:
-      - 'terraform/vebetterpassport/**'
-      - 'lambda/src/veBetterPassport/**'
-      - '.github/workflows/vebetterpassport.yml'
+      - 'terraform/**'
+      - 'lambda/src/**'
+      - '.github/workflows/lambda.yml'
   workflow_dispatch:
     inputs:
       workspace:
@@ -16,6 +16,32 @@ on:
         options:
           - dev
           - prod
+      lambda_name:
+        description: 'Name of the Lambda function to deploy'
+        required: true
+        type: string
+      terraform_dir:
+        description: 'Directory containing the Terraform configuration'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      workspace:
+        required: true
+        type: string
+      lambda_name:
+        required: true
+        type: string
+      terraform_dir:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_ROLE:
+        required: true
+      DEV_AWS_ACC_ROLE:
+        required: true
+      VECHAINCI_SSH_PRIVATE_KEYS:
+        required: true
 
 permissions:
   id-token: write
@@ -23,8 +49,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  vebetterpassport-plan:
-    name: VeBetterPassport Plan
+  lambda-plan:
+    name: Lambda Plan
     runs-on: ubuntu-latest
     outputs:
       plan_changes_detected: ${{ steps.check_changes.outputs.plan_changes_detected }}
@@ -57,7 +83,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.7.3
+          terraform_version: 1.10.0
           terraform_wrapper: false
     
       - name: Set up SSH agent
@@ -65,34 +91,25 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
 
-      - name: Configure Secret Masking
-        run: |
-          echo "::add-mask::${{ secrets.MAINNET_MNEMONIC }}"
-          # Add any parts of the mnemonic that might appear in logs
-          IFS=' ' read -ra WORDS <<< "${{ secrets.MAINNET_MNEMONIC }}"
-          for i in "${WORDS[@]}"; do
-            echo "::add-mask::$i"
-          done
-
       - name: Terraform Format
         id: fmt
-        working-directory: terraform/vebetterpassport
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         run: terraform fmt -check -recursive
         continue-on-error: true
 
       - name: Terraform Init
-        working-directory: terraform/vebetterpassport
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         run: |
-          WORKSPACE="${{ github.event.inputs.workspace || 'dev' }}"
+          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
           BUCKET="b3tr-terraform-state-${WORKSPACE}"
           
           terraform init -backend-config="bucket=${BUCKET}"
 
       - name: Terraform Workspace
-        working-directory: terraform/vebetterpassport
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: workspace
         run: |
-          WORKSPACE="${{ github.event.inputs.workspace || 'dev' }}"
+          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
           
           if ! terraform workspace list | grep -q "$WORKSPACE"; then
             terraform workspace new "$WORKSPACE"
@@ -101,30 +118,22 @@ jobs:
           fi
     
       - name: Terraform Validate
-        working-directory: terraform/vebetterpassport
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: validate
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform/vebetterpassport
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: plan
         continue-on-error: true
         env:
-          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-          WORKSPACE: ${{ github.event.inputs.workspace || 'dev' }}
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
+          LAMBDA_NAME: ${{ github.event.inputs.lambda_name || inputs.lambda_name }}
         run: |
-          if [ "$WORKSPACE" == "dev" ]; then
-            terraform plan \
-              -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}" \
-              -out=vebetterpassport.tfplan \
-              -detailed-exitcode
-          else
-            terraform plan \
-              -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
-              -out=vebetterpassport.tfplan \
-              -detailed-exitcode
-          fi
+          terraform plan \
+            -var="lambda_name=${LAMBDA_NAME}" \
+            -out=lambda.tfplan \
+            -detailed-exitcode
           echo "exitcode=$?" >> $GITHUB_OUTPUT
 
       - name: Check for changes
@@ -143,25 +152,19 @@ jobs:
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
-          name: vebetterpassport-plan
-          path: terraform/vebetterpassport/vebetterpassport.tfplan
+          name: lambda-plan
+          path: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}/lambda.tfplan
           retention-days: 5
-      
 
-      - name: Terraform Apply
-        if: |
-          (github.event_name == 'workflow_dispatch') ||
-          (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
-          (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
-        id: apply
-        working-directory: terraform/vebetterpassport
-        env:
-          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-          WORKSPACE: ${{ github.event.inputs.workspace || 'dev' }}
-        run: |
-          if [ "$WORKSPACE" == "dev" ]; then
-            terraform apply -auto-approve -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}"
-          else
-            terraform apply -auto-approve -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}"
-          fi
+#      - name: Terraform Apply
+#        if: |
+#          (github.event_name == 'workflow_dispatch') ||
+#          (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
+#          (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
+#        id: apply
+#        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+#        env:
+#          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
+#          LAMBDA_NAME: ${{ github.event.inputs.lambda_name || inputs.lambda_name }}
+#        run: |
+#          terraform apply -auto-approve -var="lambda_name=${LAMBDA_NAME}" 
