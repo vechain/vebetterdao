@@ -95,4 +95,25 @@ contract GovernorStorage is Initializable {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
     governorStorage.veBetterPassport = veBetterPassport;
   }
+
+  function __GovernorStorage_init_v6(
+    uint256 standardDepositThreshold,
+    uint256 standardVotingThreshold,
+    uint256 standardMinVotingDelay,
+    uint256 grantDepositThreshold,
+    uint256 grantVotingThreshold,
+    uint256 grantMinVotingDelay
+  ) internal onlyInitializing {
+    GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
+
+    governorStorage.proposalTypeDepositThresholdPercentage[
+      GovernorTypes.ProposalType.Standard
+    ] = standardDepositThreshold;
+    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Standard] = standardVotingThreshold;
+    governorStorage.proposalTypeMinVotingDelay[GovernorTypes.ProposalType.Standard] = standardMinVotingDelay;
+
+    governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Grant] = grantDepositThreshold;
+    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Grant] = grantVotingThreshold;
+    governorStorage.proposalTypeMinVotingDelay[GovernorTypes.ProposalType.Grant] = grantMinVotingDelay;
+  }
 }

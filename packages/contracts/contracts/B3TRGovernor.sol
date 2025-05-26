@@ -171,6 +171,24 @@ contract B3TRGovernor is
     __GovernorStorage_init_v4(_veBetterPassport);
   }
 
+  function initializeV6(
+    uint256 standardDepositThreshold,
+    uint256 standardVotingThreshold,
+    uint256 standardMinVotingDelay,
+    uint256 grantDepositThreshold,
+    uint256 grantVotingThreshold,
+    uint256 grantMinVotingDelay
+  ) public reinitializer(6) {
+    __GovernorStorage_init_v6(
+      standardDepositThreshold,
+      standardVotingThreshold,
+      standardMinVotingDelay,
+      grantDepositThreshold,
+      grantVotingThreshold,
+      grantMinVotingDelay
+    );
+  }
+
   /**
    * @dev Function to receive VET that will be handled by the governor (disabled if executor is a third party contract)
    */
@@ -924,6 +942,20 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Update the deposit threshold for a proposal type. This operation can only be performed through a governance proposal.
+   * Emits a {DepositThresholdSetV2} event.
+   * @param newDepositThreshold The new deposit threshold
+   * @param proposalType The proposal type
+   */
+  function setProposalTypeDepositThresholdPercentage(
+    uint256 newDepositThreshold,
+    GovernorTypes.ProposalType proposalType
+  ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setProposalTypeDepositThresholdPercentage($, proposalType, newDepositThreshold);
+  }
+
+  /**
    * @notice Update the voting threshold. This operation can only be performed through a governance proposal.
    * Emits a {VotingThresholdSet} event.
    * @param newVotingThreshold The new voting threshold
@@ -931,6 +963,20 @@ contract B3TRGovernor is
   function setVotingThreshold(uint256 newVotingThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setVotingThreshold($, newVotingThreshold);
+  }
+
+  /**
+   * @notice Update the voting threshold for a proposal type. This operation can only be performed through a governance proposal.
+   * Emits a {VotingThresholdSetV2} event.
+   * @param newVotingThreshold The new voting threshold
+   * @param proposalType The proposal type
+   */
+  function setProposalTypeVotingThreshold(
+    uint256 newVotingThreshold,
+    GovernorTypes.ProposalType proposalType
+  ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setProposalTypeVotingThreshold($, proposalType, newVotingThreshold);
   }
 
   /**
@@ -942,6 +988,20 @@ contract B3TRGovernor is
   function setMinVotingDelay(uint256 newMinVotingDelay) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setMinVotingDelay($, newMinVotingDelay);
+  }
+
+  /**
+   * @notice Update the min voting delay for a proposal type. This operation can only be performed through a governance proposal.
+   * Emits a {MinVotingDelaySetV2} event.
+   * @param newMinVotingDelay The new minimum voting delay
+   * @param proposalType The proposal type
+   */
+  function setProposalTypeMinVotingDelay(
+    uint256 newMinVotingDelay,
+    GovernorTypes.ProposalType proposalType
+  ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setProposalTypeMinVotingDelay($, proposalType, newMinVotingDelay);
   }
 
   /**
