@@ -70,6 +70,12 @@ library GovernorTypes {
     address governorFunctionSettingsRoleAddress;
   }
 
+  // ProposalType enum to distinguish between different types of proposals
+  enum ProposalType {
+    Standard,
+    Grant
+  }
+
   // Proposal vote types
   enum VoteType {
     Against,
@@ -96,6 +102,7 @@ library GovernorTypes {
     uint48 etaSeconds;
     uint256 depositAmount;
     uint256 depositThreshold;
+    ProposalType proposalType;
   }
 
   // ProposalState enum to store the state of a proposal

@@ -286,6 +286,16 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Returns the proposal type of a proposal.
+   * @param proposalId The id of the proposal
+   * @return GovernorTypes.ProposalType The proposal type
+   */
+  function proposalType(uint256 proposalId) external view returns (GovernorTypes.ProposalType) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorProposalLogic.proposalType($, proposalId);
+  }
+
+  /**
    * @notice Returns the deposit threshold
    * @return uint256 The deposit threshold
    */
@@ -696,6 +706,41 @@ contract B3TRGovernor is
   ) external whenNotPaused returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorProposalLogic.propose($, targets, values, calldatas, description, startRoundId, depositAmount);
+  }
+
+  /**
+   * @notice See {IB3TRGovernor-propose}.
+   * Callable only when contract is not paused.
+   * @param targets The list of target addresses
+   * @param values The list of values to send
+   * @param calldatas The list of call data
+   * @param description The proposal description
+   * @param startRoundId The round in which the proposal should start
+   * @param depositAmount The amount of deposit for the proposal
+   * @param proposalType The type of proposal
+   * @return uint256 The proposal id
+   */
+  function proposeWithType(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    GovernorTypes.ProposalType proposalType
+  ) external whenNotPaused returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return
+      GovernorProposalLogic.proposeWithType(
+        $,
+        targets,
+        values,
+        calldatas,
+        description,
+        startRoundId,
+        depositAmount,
+        proposalType
+      );
   }
 
   /**

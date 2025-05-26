@@ -163,6 +163,22 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   );
 
   /**
+   * @dev Emitted when a proposal is created with type information.
+   */
+  event ProposalCreatedWithType(
+    uint256 indexed proposalId,
+    address indexed proposer,
+    address[] targets,
+    uint256[] values,
+    string[] signatures,
+    bytes[] calldatas,
+    string description,
+    uint256 indexed roundIdVoteStart,
+    uint256 depositThreshold,
+    GovernorTypes.ProposalType proposalType
+  );
+
+  /**
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
@@ -335,6 +351,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
+   * @dev The type of a proposal.
+   */
+  function proposalType(uint256 proposalId) external view returns (GovernorTypes.ProposalType);
+
+  /**
+   * @notice module:core
    * @dev The account that created a proposal.
    */
   function proposalProposer(uint256 proposalId) external view returns (address);
@@ -402,7 +424,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Create a new proposal. Specify the allocation round when vote should become active.
    * The duration is specified by {IGovernor-votingPeriod}.
    *
-   * Emits a {ProposalCreated} event.
+   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
    */
   function propose(
     address[] memory targets,
@@ -411,6 +433,22 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount
+  ) external returns (uint256 proposalId);
+
+  /**
+   * @dev Create a new proposal. Specify the allocation round when vote should become active.
+   * The duration is specified by {IGovernor-votingPeriod}.
+   *
+   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
+   */
+  function proposeWithType(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    GovernorTypes.ProposalType proposalType
   ) external returns (uint256 proposalId);
 
   /**
