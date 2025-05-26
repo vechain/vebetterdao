@@ -23,6 +23,8 @@
 
 pragma solidity 0.8.20;
 
+import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
+import { GovernorTypes } from "./GovernorTypes.sol";
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
@@ -38,11 +40,32 @@ library GovernorConfigurator {
   /// @dev Emitted when the `votingThreshold` is set.
   event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
 
+  /// @dev Emitted when the `votingThreshold` for a proposal type is set.
+  event VotingThresholdSetV2(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldVotingThreshold,
+    uint256 newVotingThreshold
+  );
+
   /// @dev Emitted when the minimum delay before vote starts is set.
   event MinVotingDelaySet(uint256 oldMinMinVotingDelay, uint256 newMinVotingDelay);
 
+  /// @dev Emitted when the minimum delay before vote starts is set for a proposal type.
+  event MinVotingDelaySetV2(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldMinVotingDelay,
+    uint256 newMinVotingDelay
+  );
+
   /// @dev Emitted when the deposit threshold percentage is set.
   event DepositThresholdSet(uint256 oldDepositThreshold, uint256 newDepositThreshold);
+
+  /// @dev Emitted when the deposit threshold percentage for a proposal type is set.
+  event DepositThresholdSetV2(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldDepositThreshold,
+    uint256 newDepositThreshold
+  );
 
   /// @dev Emitted when the voter rewards contract is set.
   event VoterRewardsSet(address oldContractAddress, address newContractAddress);
@@ -160,34 +183,99 @@ library GovernorConfigurator {
     self.timelock = newTimelock;
   }
 
+  /**
+   * @notice Sets the deposit threshold percentage for a proposal type.
+   * @dev Sets a new deposit threshold percentage for a proposal type and emits a {DepositThresholdSet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newDepositThreshold The new deposit threshold percentage.
+   */
+  function setProposalTypeDepositThresholdPercentage(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newDepositThreshold
+  ) external {
+    emit DepositThresholdSetV2(
+      proposalType,
+      self.proposalTypeDepositThresholdPercentage[proposalType],
+      newDepositThreshold
+    );
+    self.proposalTypeDepositThresholdPercentage[proposalType] = newDepositThreshold;
+  }
+
+  /**
+   * @notice Sets the voting threshold for a proposal type.
+   * @dev Sets a new voting threshold for a proposal type and emits a {VotingThresholdSet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newVotingThreshold The new voting threshold.
+   */
+  function setProposalTypeVotingThreshold(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newVotingThreshold
+  ) external {
+    emit VotingThresholdSetV2(proposalType, self.proposalTypeVotingThreshold[proposalType], newVotingThreshold);
+    self.proposalTypeVotingThreshold[proposalType] = newVotingThreshold;
+  }
+
+  /**
+   * @notice Sets the min voting delay for a proposal type.
+   * @dev Sets a new min voting delay for a proposal type and emits a {MinVotingDelaySet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newMinVotingDelay The new min voting delay.
+   */
+  function setProposalTypeMinVotingDelay(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newMinVotingDelay
+  ) external {
+    emit MinVotingDelaySetV2(proposalType, self.proposalTypeMinVotingDelay[proposalType], newMinVotingDelay);
+    self.proposalTypeMinVotingDelay[proposalType] = newMinVotingDelay;
+  }
+
   /**------------------ GETTERS ------------------**/
   /**
    * @notice Returns the voting threshold.
    * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
    * @return The current voting threshold.
    */
-  function getVotingThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
-    return self.votingThreshold;
+  function getVotingThreshold(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType
+  ) internal view returns (uint256) {
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
+    return self.proposalTypeVotingThreshold[proposalType];
   }
 
   /**
    * @notice Returns the minimum delay before vote starts.
    * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
    * @return The current minimum voting delay.
    */
-  function getMinVotingDelay(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
-    return self.minVotingDelay;
+  function getMinVotingDelay(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType
+  ) internal view returns (uint256) {
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
+    return self.proposalTypeMinVotingDelay[proposalType];
   }
 
   /**
    * @notice Returns the deposit threshold percentage.
    * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
    * @return The current deposit threshold percentage.
    */
   function getDepositThresholdPercentage(
-    GovernorStorageTypes.GovernorStorage storage self
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType
   ) internal view returns (uint256) {
-    return self.depositThresholdPercentage;
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
+    return self.proposalTypeDepositThresholdPercentage[proposalType];
   }
 
   /**

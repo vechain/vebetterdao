@@ -934,7 +934,7 @@ library GovernorProposalLogic {
    * @param proposalType The type of the proposal.
    * @return True if the proposal type is valid, false otherwise.
    */
-  function isValidProposalType(GovernorTypes.ProposalType proposalType) private pure returns (bool) {
+  function isValidProposalType(GovernorTypes.ProposalType proposalType) internal pure returns (bool) {
     return proposalType == GovernorTypes.ProposalType.Standard || proposalType == GovernorTypes.ProposalType.Grant;
   }
 
