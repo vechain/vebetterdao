@@ -43,6 +43,7 @@ export async function governanceLibraries(latestOnly: boolean = false) {
   // Deploy Governor Votes Logic
   const GovernorVotesLogic = await ethers.getContractFactory("GovernorVotesLogic", {
     libraries: {
+      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
     },
   })
