@@ -10,9 +10,9 @@ data "archive_file" "lambda_zip" {
 resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   architectures = ["x86_64"]
 
-  function_name = local.config.lambda_function_name
-  handler       = local.config.lambda_handler
-  filename      = data.archive_file.lambda_zip.output_path
+  function_name    = local.config.lambda_function_name
+  handler          = local.config.lambda_handler
+  filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   logging_config {

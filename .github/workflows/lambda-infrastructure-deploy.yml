@@ -105,24 +105,6 @@ jobs:
         id: validate
         run: terraform validate
 
-      - name: Check for Lambda Build
-        id: check_build
-        run: |
-          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
-          LAMBDA_NAME="${{ github.event.inputs.lambda_name || inputs.lambda_name }}"
-          
-          if [ "$WORKSPACE" == "dev" ]; then
-            BUILD_PATH="packages/lambda/dist/staging/${LAMBDA_NAME}/index.zip"
-          else
-            BUILD_PATH="packages/lambda/dist/mainnet/${LAMBDA_NAME}/index.zip"
-          fi
-          
-          if [ ! -f "$BUILD_PATH" ]; then
-            echo "Error: Lambda build not found at $BUILD_PATH"
-            exit 1
-          fi
-          echo "Lambda build found at $BUILD_PATH"
-
       - name: Terraform Plan
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: plan
