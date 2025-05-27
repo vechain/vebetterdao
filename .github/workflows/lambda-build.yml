@@ -68,4 +68,11 @@ jobs:
           # Build lambda
           cd packages/lambda
           echo "Running yarn build..."
-          yarn build || { echo "Lambda build failed"; exit 1; } 
+          yarn build || { echo "Lambda build failed"; exit 1; }
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-build
+          path: packages/lambda/dist
+          retention-days: 1 

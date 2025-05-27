@@ -51,6 +51,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-build
+          path: packages/lambda/dist
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
