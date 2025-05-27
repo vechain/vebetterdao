@@ -132,7 +132,6 @@ jobs:
           LAMBDA_NAME: ${{ github.event.inputs.lambda_name || inputs.lambda_name }}
         run: |
           terraform plan \
-            -var="lambda_name=${LAMBDA_NAME}" \
             -out=lambda.tfplan \
             -detailed-exitcode
           echo "exitcode=$?" >> $GITHUB_OUTPUT
