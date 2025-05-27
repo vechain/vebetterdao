@@ -1,11 +1,6 @@
 name: Lambda Infrastructure
 
 on:
-  pull_request:
-    paths:
-      - 'terraform/**'
-      - 'lambda/src/**'
-      - '.github/workflows/lambda.yml'
   workflow_dispatch:
     inputs:
       workspace:
@@ -49,11 +44,9 @@ permissions:
   pull-requests: read
 
 jobs:
-  lambda-plan:
-    name: Lambda Plan
+  deploy:
+    name: Deploy Infrastructure
     runs-on: ubuntu-latest
-    outputs:
-      plan_changes_detected: ${{ steps.check_changes.outputs.plan_changes_detected }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,22 +56,6 @@ jobs:
         with:
           role-to-assume: ${{ github.event.inputs.workspace == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: eu-west-1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
-
-      - name: Install dependencies
-        run: |
-          echo "Installing project dependencies..."
-          yarn install --frozen-lockfile
-          echo "Installing esbuild globally..."
-          yarn global add esbuild
-          echo "Verify esbuild installation..."
-          esbuild --version
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -121,6 +98,24 @@ jobs:
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
         id: validate
         run: terraform validate
+
+      - name: Check for Lambda Build
+        id: check_build
+        run: |
+          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
+          LAMBDA_NAME="${{ github.event.inputs.lambda_name || inputs.lambda_name }}"
+          
+          if [ "$WORKSPACE" == "dev" ]; then
+            BUILD_PATH="packages/lambda/dist/staging/${LAMBDA_NAME}/index.zip"
+          else
+            BUILD_PATH="packages/lambda/dist/mainnet/${LAMBDA_NAME}/index.zip"
+          fi
+          
+          if [ ! -f "$BUILD_PATH" ]; then
+            echo "Error: Lambda build not found at $BUILD_PATH"
+            exit 1
+          fi
+          echo "Lambda build found at $BUILD_PATH"
 
       - name: Terraform Plan
         working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}

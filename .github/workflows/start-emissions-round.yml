@@ -1,10 +1,10 @@
-name: Start Emissions Round Infrastructure
+name: Start Emissions Round Lambda Deployment
 
 on:
   pull_request:
     paths:
       - 'terraform/start-emissions-round/**'
-      - 'lambda/src/startRound/**'
+      - 'lambda/src/startEmissionsRound/**'
       - '.github/workflows/start-emissions-round.yml'
   workflow_dispatch:
     inputs:
@@ -25,45 +25,12 @@ permissions:
 jobs:
   build:
     name: Build Lambda
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
-
-      - name: Install dependencies
-        run: |
-          echo "Installing project dependencies..."
-          yarn install --frozen-lockfile
-          echo "Installing esbuild globally..."
-          yarn global add esbuild
-          echo "Verify esbuild installation..."
-          esbuild --version
-
-      - name: Build Lambda
-        env:
-          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-        run: |
-          # Set environment variables based on workspace
-          set +x  # Disable command echoing
-          if [ "${{ github.event.inputs.workspace || 'dev' }}" == "dev" ]; then
-            export MNEMONIC="$TESTNET_MNEMONIC"
-          else
-            export MNEMONIC="$MAINNET_MNEMONIC"
-          fi
-          set -x  # Re-enable command echoing
-
-          # Build lambda
-          cd packages/lambda
-          echo "Running yarn build..."
-          yarn build || { echo "Lambda build failed"; exit 1; }
+    uses: ./.github/workflows/lambda-build.yml
+    with:
+      workspace: ${{ github.event.inputs.workspace || 'dev' }}
+    secrets:
+      TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+      MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
 
   deploy:
     name: Deploy Infrastructure

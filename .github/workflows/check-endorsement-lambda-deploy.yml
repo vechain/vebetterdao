@@ -25,45 +25,12 @@ permissions:
 jobs:
   build:
     name: Build Lambda
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
-
-      - name: Install dependencies
-        run: |
-          echo "Installing project dependencies..."
-          yarn install --frozen-lockfile
-          echo "Installing esbuild globally..."
-          yarn global add esbuild
-          echo "Verify esbuild installation..."
-          esbuild --version
-
-      - name: Build Lambda
-        env:
-          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-        run: |
-          # Set environment variables based on workspace
-          set +x  # Disable command echoing
-          if [ "${{ github.event.inputs.workspace || 'dev' }}" == "dev" ]; then
-            export MNEMONIC="$TESTNET_MNEMONIC"
-          else
-            export MNEMONIC="$MAINNET_MNEMONIC"
-          fi
-          set -x  # Re-enable command echoing
-
-          # Build lambda
-          cd packages/lambda
-          echo "Running yarn build..."
-          yarn build || { echo "Lambda build failed"; exit 1; }
+    uses: ./.github/workflows/lambda-build.yml
+    with:
+      workspace: ${{ github.event.inputs.workspace || 'dev' }}
+    secrets:
+      TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+      MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
 
   deploy:
     name: Deploy Infrastructure
@@ -76,42 +43,4 @@ jobs:
     secrets:
       AWS_ACCESS_ROLE: ${{ secrets.AWS_ACCESS_ROLE }}
       DEV_AWS_ACC_ROLE: ${{ secrets.DEV_AWS_ACC_ROLE }}
-      VECHAINCI_SSH_PRIVATE_KEYS: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
-
-#       - name: Check for changes
-#         id: check_changes
-#         run: |
-#           if [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
-#             echo "Changes detected"
-#             echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
-#           else
-#             echo "No changes detected"
-#             echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
-#           fi
-#         shell: bash
-#         continue-on-error: false
-
-#       - name: Upload Plan
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: lambda-plan
-#           path: terraform/check-endorsement/lambda.tfplan
-#           retention-days: 5
-
-#       - name: Terraform Apply
-#         if: |
-#           (github.event_name == 'workflow_dispatch') ||
-#           (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
-#           (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
-#         id: apply
-#         working-directory: terraform/check-endorsement
-#         env:
-#           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-#           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
-#           WORKSPACE: ${{ github.event.inputs.workspace || 'dev' }}
-#         run: |
-#           if [ "$WORKSPACE" == "dev" ]; then
-#             terraform apply -auto-approve -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}"
-#           else
-#             terraform apply -auto-approve -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}"
-#           fi 
+      VECHAINCI_SSH_PRIVATE_KEYS: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }} 

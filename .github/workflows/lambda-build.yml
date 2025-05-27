@@ -6,24 +6,14 @@ on:
       workspace:
         required: true
         type: string
-      lambda_name:
-        required: true
-        type: string
-      source_dir:
-        required: true
-        type: string
-      output_zip:
-        required: true
-        type: string
-      needs_contract_compile:
-        required: false
-        type: boolean
-        default: false
+        description: 'Terraform workspace to use (dev, prod)'
     secrets:
       TESTNET_MNEMONIC:
-        required: true
+        required: false
+        description: 'Required when workspace is dev'
       MAINNET_MNEMONIC:
-        required: true
+        required: false
+        description: 'Required when workspace is prod'
 
 jobs:
   build:
@@ -57,38 +47,25 @@ jobs:
           # Set environment variables based on workspace
           set +x  # Disable command echoing
           if [ "${{ inputs.workspace }}" == "dev" ]; then
+            if [ -z "$TESTNET_MNEMONIC" ]; then
+              echo "Error: TESTNET_MNEMONIC is required for dev workspace"
+              exit 1
+            fi
             export MNEMONIC="$TESTNET_MNEMONIC"
           else
+            if [ -z "$MAINNET_MNEMONIC" ]; then
+              echo "Error: MAINNET_MNEMONIC is required for prod workspace"
+              exit 1
+            fi
             export MNEMONIC="$MAINNET_MNEMONIC"
           fi
           set -x  # Re-enable command echoing
 
-          # Compile contracts if needed
-          if [ "${{ inputs.needs_contract_compile }}" == "true" ]; then
-            echo "Running yarn contracts:compile..."
-            set +x  # Disable command echoing for contract compilation
-            yarn contracts:compile || { echo "Contract compilation failed"; exit 1; }
-            set -x  # Re-enable command echoing
-          fi
+          # Compile contracts
+          echo "Running yarn contracts:compile..."
+          yarn contracts:compile || { echo "Contract compilation failed"; exit 1; }
 
           # Build lambda
           cd packages/lambda
           echo "Running yarn build..."
-          yarn build || { echo "Lambda build failed"; exit 1; }
-
-          # Create dist directory
-          mkdir -p ../../dist
-
-          # Copy the built zip to the expected location
-          if [ "${{ inputs.workspace }}" == "dev" ]; then
-            cp dist/staging/${{ inputs.source_dir }}/index.zip ../../dist/${{ inputs.output_zip }}
-          else
-            cp dist/mainnet/${{ inputs.source_dir }}/index.zip ../../dist/${{ inputs.output_zip }}
-          fi
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lambda-build
-          path: dist/${{ inputs.output_zip }}
-          retention-days: 5 
+          yarn build || { echo "Lambda build failed"; exit 1; } 
