@@ -1,10 +1,11 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
-import { ethers } from "ethers"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { formatEther } from "viem"
 
-const contractAddress = getConfig().b3trGovernorAddress
-const contractInterface = B3TRGovernor__factory.createInterface()
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "proposalTotalVotes" as const
 
 /**
  * Get the operationId of the given proposal
@@ -12,7 +13,7 @@ const contractInterface = B3TRGovernor__factory.createInterface()
  * @returns  the operationId of the given proposal
  */
 export const getProposalTotalVotesQueryKey = (proposalId: string) => {
-  getCallKey({ method: "proposalTotalVotes", keyArgs: [proposalId] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(proposalId ?? "0")] })
 }
 
 /**
@@ -21,12 +22,14 @@ export const getProposalTotalVotesQueryKey = (proposalId: string) => {
  * @returns  the operationId of the given proposal
  */
 export const useProposalTotalVotes = (proposalId?: string) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
-    method: "proposalTotalVotes",
-    args: [proposalId],
-    enabled: !!proposalId,
-    mapResponse: res => ethers.formatEther(res.decoded[0]),
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(proposalId ?? "0")],
+    queryOptions: {
+      enabled: !!proposalId,
+      select: data => formatEther(data[0]),
+    },
   })
 }

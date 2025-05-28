@@ -1,40 +1,34 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
-import { ethers } from "ethers"
+import { formatEther } from "viem"
 
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
+const address = getConfig().xAllocationVotingContractAddress
+const abi = XAllocationVoting__factory.abi
+const method = "totalVotes" as const
 
 /**
- *
- * Returns the number of votes for a given roundId
- * @param thor  the thor client
- * @param roundId  the roundId the get state for
- * @returns the state of a given roundId
+ * Returns the query key for fetching the allocation votes.
+ * @param roundId The round ID to get the votes for
+ * @returns The query key for fetching the allocation votes.
  */
-export const getAllocationVotes = async (thor: Connex.Thor, roundId?: string): Promise<string> => {
-  const functionFragment = XAllocationVoting__factory.createInterface().getFunction("totalVotes").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return ethers.formatEther(res.decoded[0])
-}
-
-export const getAllocationVotesQueryKey = (roundId?: string) => ["allocationsRound", "votes", roundId]
+export const getAllocationVotesQueryKey = (roundId?: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0)] })
 
 /**
- *  Hook to get the number of votes for a given roundId
- * @param roundId  the roundId the get the votes for
- * @returns  the number of votes for a given roundId
+ * Hook to get the number of votes for a given roundId
+ * @param roundId The roundId to get the votes for
+ * @returns the number of votes for a given roundId
  */
 export const useAllocationVotes = (roundId?: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getAllocationVotesQueryKey(roundId),
-    queryFn: async () => await getAllocationVotes(thor, roundId),
-    enabled: !!thor && !!roundId,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId || 0)],
+    queryOptions: {
+      enabled: !!roundId,
+      select: data => formatEther(data[0]),
+    },
   })
 }

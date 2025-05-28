@@ -1,24 +1,35 @@
 // Getter for obtaining appIds of a given round
 
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
+import { XAllocationVoting__factory } from "@repo/contracts"
 
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
-const xAllocationsInterface = XAllocationVoting.createInterface()
+const address = getConfig().xAllocationVotingContractAddress
+const abi = XAllocationVoting__factory.abi
+const method = "getAppIdsOfRound" as const
 
 /**
- * Get the appIds participating in allocations for a given round
- * @param thor - The thor client
- * @param roundId - The roundId
+ * Returns the query key for fetching app IDs of a round.
+ * @param roundId The round ID to get app IDs for
+ * @returns The query key for fetching app IDs of a round.
+ */
+export const getAppIdsOfRoundQueryKey = (roundId?: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0)] })
+
+/**
+ * Hook to get the appIds participating in allocations for a given round
+ * @param roundId The roundId to get app IDs for
  * @returns The appIds of the given round
  */
-export const getAppIdsOfRound = async (thor: Connex.Thor, roundId?: string): Promise<string[] | undefined> => {
-  if (!roundId) return
-
-  const functionFragment = xAllocationsInterface.getFunction("getAppIdsOfRound").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
+export const useAppIdsOfRound = (roundId?: string) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId || 0)],
+    queryOptions: {
+      enabled: !!roundId,
+      select: data => data[0] as string[],
+    },
+  })
 }

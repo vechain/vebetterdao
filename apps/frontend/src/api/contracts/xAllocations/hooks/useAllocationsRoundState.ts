@@ -1,51 +1,39 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
 
-const xAllocationInterface = XAllocationVoting__factory.createInterface()
-
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
+const address = getConfig().xAllocationVotingContractAddress
+const abi = XAllocationVoting__factory.abi
+const method = "state" as const
 
 export const RoundState = {
   0: "Active",
   1: "Failed",
   2: "Succeeded",
 }
+
 /**
- *
- * Returns the state of a given roundId
- * @param thor  the thor client
- * @param roundId  the roundId the get state for
- * @returns the state of a given roundId
+ * Returns the query key for fetching the allocations round state.
+ * @param roundId The round ID to get the state for
+ * @returns The query key for fetching the allocations round state.
  */
-export const getAllocationsRoundState = async (
-  thor: Connex.Thor,
-  roundId?: string,
-): Promise<keyof typeof RoundState> => {
-  if (!roundId) return Promise.reject(new Error("roundId is required"))
-  const fragment = xAllocationInterface.getFunction("state").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(fragment)).call(roundId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return Number(res.decoded[0]) as keyof typeof RoundState
-}
-
-export const getAllocationsRoundStateQueryKey = (roundId?: string) => ["allocationsRoundState", roundId]
+export const getAllocationsRoundStateQueryKey = (roundId?: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0)] })
 
 /**
  * Hook to get the state of a given roundId
- * @param roundId  the roundId the get state for
- * @returns  the state of a given roundId
+ * @param roundId The roundId to get state for
+ * @returns the state of a given roundId
  */
 export const useAllocationsRoundState = (roundId?: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getAllocationsRoundStateQueryKey(roundId),
-    queryFn: async () => await getAllocationsRoundState(thor, roundId),
-    enabled: !!thor && !!roundId,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId || 0)],
+    queryOptions: {
+      enabled: !!roundId,
+      select: data => Number(data[0]) as keyof typeof RoundState,
+    },
   })
 }

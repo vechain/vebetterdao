@@ -1,29 +1,32 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { UseQueryResult } from "@tanstack/react-query"
 
-const contractAddress = getConfig().x2EarnAppsContractAddress
-const contractInterface = X2EarnApps__factory.createInterface()
-const method = "appExists"
+const address = getConfig().x2EarnAppsContractAddress
+const abi = X2EarnApps__factory.abi
+const method = "appExists" as const
 
 /**
  * Get the query key for a boolean value indicating if the app exists
  * @param appId the app id
  */
-export const getAppExistsQueryKey = (appId: string) => getCallKey({ method, keyArgs: [appId] })
+export const getAppExistsQueryKey = (appId: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [appId] })
 
 /**
  * Hook to get a boolean value indicating if the app exists
  * @param appId the app id
  * @returns a boolean value, true for apps that have been included in at least one allocation round
  */
-export const useAppExists = (appId: string): UseQueryResult<boolean, Error> => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useAppExists = (appId: string) => {
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [appId],
-    enabled: !!appId,
+    args: [appId as `0x${string}`],
+    queryOptions: {
+      enabled: !!appId,
+      select: data => data[0],
+    },
   })
 }

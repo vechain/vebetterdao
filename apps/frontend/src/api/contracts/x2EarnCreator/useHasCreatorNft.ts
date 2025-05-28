@@ -1,17 +1,17 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
 
-const x2EarnCreatorContractAddress = getConfig().x2EarnCreatorContractAddress
-const x2EarnCreatorInterface = X2EarnCreator__factory.createInterface()
-const method = "balanceOf"
+const address = getConfig().x2EarnCreatorContractAddress
+const abi = X2EarnCreator__factory.abi
+const method = "balanceOf" as const
 
 /**
  * Returns the query key for fetching the creator NFT.
  * @returns The query key for fetching the creator NFT.
  */
 export const getHasCreatorNFTQueryKey = (walletAddress: string) => {
-  return getCallKey({ method, keyArgs: [walletAddress] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [walletAddress] })
 }
 
 /**
@@ -20,12 +20,15 @@ export const getHasCreatorNFTQueryKey = (walletAddress: string) => {
  * @returns True if the wallet address has the creator NFT, false otherwise.
  */
 export const useHasCreatorNFT = (walletAddress: string) => {
-  const { data: balance } = useCall({
-    contractInterface: x2EarnCreatorInterface,
-    contractAddress: x2EarnCreatorContractAddress,
+  const { data: balanceData } = useCallClause({
+    abi,
+    address,
     method,
     args: [walletAddress],
-    enabled: !!walletAddress,
+    queryOptions: {
+      enabled: !!walletAddress,
+      select: data => data[0],
+    },
   })
-  return balance > 0
+  return (balanceData ?? 0) > 0
 }

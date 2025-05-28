@@ -1,5 +1,4 @@
-import { useCurrentBlock } from "@/api/blockchain"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor, useCurrentBlock } from "@vechain/vechain-kit"
 import { useProposalsEvents } from "./useProposalsEvents"
 import { useQuery } from "@tanstack/react-query"
 import { queryClient } from "@/api/QueryProvider"
@@ -12,16 +11,18 @@ export const getActiveProposalsQueryKey = () => ["proposals", "active"]
  * @returns  the active proposals events (i.e the proposals created, not canceled, expired and not queued/executed)
  */
 export const useActiveProposals = () => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const { data: currentBlock } = useCurrentBlock()
   const proposalsEventsQuery = useProposalsEvents()
+
+  const headNumber = thor.blocks.getHeadBlock()?.number
 
   return useQuery({
     queryKey: getActiveProposalsQueryKey(),
     queryFn: async () => {
       const proposalsEvents = proposalsEventsQuery.data
       if (!thor || !proposalsEvents) return
-      const lastBlock = currentBlock?.number ?? thor.status.head.number
+      const lastBlock = currentBlock?.number ?? (headNumber || 0)
 
       const filteredProposals = []
       for (const proposal of proposalsEvents.created) {
@@ -49,6 +50,6 @@ export const useActiveProposals = () => {
 
       return filteredProposals
     },
-    enabled: !!thor && !!thor.status.head.number && !!proposalsEventsQuery.data,
+    enabled: !!thor && !!headNumber && !!proposalsEventsQuery.data,
   })
 }

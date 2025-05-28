@@ -1,17 +1,18 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
-import { ethers } from "ethers"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { formatEther } from "viem"
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-const governorInterface = B3TRGovernor__factory.createInterface()
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "votingThreshold" as const
 
 /**
  * Returns the query key for fetching the voting threshold from the governor contract.
  * @returns The query key for fetching the voting threshold.
  */
 export const getVotingThresholdQueryKey = () => {
-  getCallKey({ method: "votingThreshold", keyArgs: [] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
 }
 
 /**
@@ -19,11 +20,13 @@ export const getVotingThresholdQueryKey = () => {
  * @returns the voting threshold
  */
 export const useVotingThreshold = () => {
-  return useCall({
-    contractInterface: governorInterface,
-    contractAddress: GOVERNANCE_CONTRACT,
-    method: "votingThreshold",
+  return useCallClause({
+    abi,
+    address,
+    method,
     args: [],
-    mapResponse: res => ethers.formatEther(res.decoded[0]),
+    queryOptions: {
+      select: data => formatEther(data[0]),
+    },
   })
 }

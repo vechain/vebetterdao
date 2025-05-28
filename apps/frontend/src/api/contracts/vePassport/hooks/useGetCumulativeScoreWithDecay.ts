@@ -1,11 +1,11 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useWallet, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/vechain-kit"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "getCumulativeScoreWithDecay" as const
 
 /**
  * Returns the query key for fetching the cumulative score with decay.
@@ -14,7 +14,7 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the cumulative score with decay.
  */
 export const getGetCumulativeScoreWithDecayQueryKey = (user: string, round: number) => {
-  return getCallKey({ method: "getCumulativeScoreWithDecay", keyArgs: [user, round] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user, round] })
 }
 
 /**
@@ -24,12 +24,15 @@ export const getGetCumulativeScoreWithDecayQueryKey = (user: string, round: numb
  * @returns The cumulative score with decay.
  */
 export const useGetCumulativeScoreWithDecay = (user?: string | null, round?: number) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "getCumulativeScoreWithDecay",
-    args: [user, round],
-    enabled: !!user && !!round,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [user ?? "0x", BigInt(round ?? 0)],
+    queryOptions: {
+      enabled: !!user && !!round,
+      select: data => Number(data[0]),
+    },
   })
 }
 

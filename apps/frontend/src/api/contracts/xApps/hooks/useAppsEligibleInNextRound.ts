@@ -1,36 +1,29 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts"
+
+const address = getConfig().x2EarnAppsContractAddress
+const abi = X2EarnApps__factory.abi
+const method = "allEligibleApps" as const
 
 /**
- * Returns all apps that will be eligible in the next allocation round
- * @param thor  the thor client
- * @returns the ids of eligible apps
+ * Returns the query key for fetching apps eligible in next round.
+ * @returns The query key for fetching apps eligible in next round.
  */
-export const getAppsEligibleInNextRound = async (thor: Connex.Thor): Promise<string[]> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("allEligibleApps").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call()
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getAppsEligibleInNextRoundQueryKey = () => ["AppsEligibleInNextRound"]
+export const getAppsEligibleInNextRoundQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
 
 /**
- *  Hook to get all apps that will be eligible in the next allocation round
+ * Hook to get all apps that will be eligible in the next allocation round
  * @returns the ids of eligible apps
  */
 export const useAppsEligibleInNextRound = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getAppsEligibleInNextRoundQueryKey(),
-    queryFn: async () => await getAppsEligibleInNextRound(thor),
-    enabled: !!thor,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => data[0] as string[],
+    },
   })
 }

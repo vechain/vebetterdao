@@ -1,19 +1,23 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().x2EarnAppsContractAddress
-const contractInterface = X2EarnApps__factory.createInterface()
-const method = "checkCooldown"
+const address = getConfig().x2EarnAppsContractAddress
+const abi = X2EarnApps__factory.abi
+const method = "checkCooldown" as const
 
-export const getNodeCheckCooldownQueryKey = (nodeId: string) => getCallKey({ method, keyArgs: [nodeId] })
+export const getNodeCheckCooldownQueryKey = (nodeId: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(nodeId)] })
 
 export const useXNodeCheckCooldown = (nodeId: string) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [nodeId],
-    enabled: !!nodeId,
+    args: [BigInt(nodeId)],
+    queryOptions: {
+      enabled: !!nodeId,
+      select: data => data[0],
+    },
   })
 }

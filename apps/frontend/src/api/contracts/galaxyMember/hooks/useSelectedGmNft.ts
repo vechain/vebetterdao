@@ -1,7 +1,6 @@
 import { notFoundImage } from "@/constants"
 import { useIsGMclaimable } from "./useIsGMclaimable"
 import { NFTMetadata, useNFTImage } from "./useNFTImage"
-import { useB3trBalance } from "../../b3tr"
 import { useSelectedTokenId } from "./useSelectedTokenId"
 import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
@@ -11,8 +10,7 @@ import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
-import { useWallet } from "@vechain/vechain-kit"
-import { useB3trToUpgrade } from "."
+import { useWallet, useB3trToUpgrade, useGetB3trBalance } from "@vechain/vechain-kit"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -31,7 +29,7 @@ export const useSelectedGmNft = (profile?: string) => {
   const { account } = useWallet()
   const { isOwned: isGMOwned } = useIsGMclaimable(profile)
   const { isLoading: isGMLoading } = useNFTImage(profile)
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? "")
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? "")
   const {
     data: selectedTokenId,
     isLoading: isSelectedTokenIdLoading,
@@ -61,7 +59,7 @@ export const useSelectedGmNft = (profile?: string) => {
   } = useLevelMultiplier(gmLevel && String(Number(gmLevel) + 1))
 
   const {
-    data: b3trToUpgradeGMToNextLevel,
+    data: b3trToUpgradeGMToNextLevel = Infinity,
     isLoading: isB3trToUpgradeGMToNextLevelLoading,
     isError: isErrorB3trToUpgradeGMToNextLevel,
     error: errorB3trToUpgradeGMToNextLevel,

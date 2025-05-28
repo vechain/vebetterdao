@@ -1,37 +1,29 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "votingPeriod" as const
 
-const governorInterface = B3TRGovernor__factory.createInterface()
 /**
- * Get the votingPeriod i.e voting duration from the governor contract (in blocks)
- * @param thor  the thor client
- * @returns  the current voting period
+ * Returns the query key for fetching the voting period from the governor contract.
+ * @returns The query key for fetching the voting period.
  */
-export const getVotingPeriod = async (thor: Connex.Thor): Promise<string> => {
-  const functionFragment = governorInterface.getFunction("votingPeriod").format("json")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
+export const getVotingPeriodQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getVotingPeriodQueryKey = () => ["VOTING_PERIOD"]
 /**
- *  Hook to get the voting period from the governor contract (i.e the number of blocks for the voting period)
+ * Hook to get the voting period from the governor contract (i.e the number of blocks for the voting period)
  * @returns the voting period
  */
 export const useVotingPeriod = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getVotingPeriodQueryKey(),
-    queryFn: async () => await getVotingPeriod(thor),
-    enabled: !!thor,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => data[0],
+    },
   })
 }

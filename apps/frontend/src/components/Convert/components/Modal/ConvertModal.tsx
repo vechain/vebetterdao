@@ -4,8 +4,8 @@ import { useCallback, useMemo, useState } from "react"
 import { useConvertB3tr, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
 import { useForm } from "react-hook-form"
 import { TokenSelectionContent, SwapTokenContent, ReviewSwapContent } from "./contents"
-import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
-import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
+import { useB3trConverted, useVot3Balance } from "@/api"
+import { useGetB3trBalance, useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal, type Step } from "../../../StepModal"
@@ -35,7 +35,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
 

@@ -6,14 +6,13 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import {
   getGMLevel,
-  useB3trDonated,
   useCurrentAllocationsRoundId,
   useParticipatedInGovernance,
   useSelectedGmNft,
   useXNode,
 } from "@/api"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/vechain-kit"
+import { useB3trDonated, useWallet } from "@vechain/vechain-kit"
 import { MintNFTModal } from "./MintNFTModal"
 import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
