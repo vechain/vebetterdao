@@ -219,22 +219,6 @@ library GovernorConfigurator {
     self.proposalTypeVotingThreshold[proposalType] = newVotingThreshold;
   }
 
-  /**
-   * @notice Sets the min voting delay for a proposal type.
-   * @dev Sets a new min voting delay for a proposal type and emits a {MinVotingDelaySet} event.
-   * @param self The storage reference for the GovernorStorage.
-   * @param proposalType The proposal type.
-   * @param newMinVotingDelay The new min voting delay.
-   */
-  function setProposalTypeMinVotingDelay(
-    GovernorStorageTypes.GovernorStorage storage self,
-    GovernorTypes.ProposalType proposalType,
-    uint256 newMinVotingDelay
-  ) external {
-    emit MinVotingDelaySetV2(proposalType, self.proposalTypeMinVotingDelay[proposalType], newMinVotingDelay);
-    self.proposalTypeMinVotingDelay[proposalType] = newMinVotingDelay;
-  }
-
   /**------------------ GETTERS ------------------**/
   /**
    * @notice Returns the voting threshold.
@@ -253,15 +237,10 @@ library GovernorConfigurator {
   /**
    * @notice Returns the minimum delay before vote starts.
    * @param self The storage reference for the GovernorStorage.
-   * @param proposalType The proposal type.
    * @return The current minimum voting delay.
    */
-  function getMinVotingDelay(
-    GovernorStorageTypes.GovernorStorage storage self,
-    GovernorTypes.ProposalType proposalType
-  ) internal view returns (uint256) {
-    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
-    return self.proposalTypeMinVotingDelay[proposalType];
+  function getMinVotingDelay(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
+    return self.minVotingDelay;
   }
 
   /**
