@@ -171,18 +171,8 @@ contract B3TRGovernor is
     __GovernorStorage_init_v4(_veBetterPassport);
   }
 
-  function initializeV6(
-    uint256 standardDepositThreshold,
-    uint256 standardVotingThreshold,
-    uint256 grantDepositThreshold,
-    uint256 grantVotingThreshold
-  ) public reinitializer(6) {
-    __GovernorStorage_init_v6(
-      standardDepositThreshold,
-      standardVotingThreshold,
-      grantDepositThreshold,
-      grantVotingThreshold
-    );
+  function initializeV6(uint256 grantDepositThreshold, uint256 grantVotingThreshold) public reinitializer(6) {
+    __GovernorStorage_init_v6(grantDepositThreshold, grantVotingThreshold);
   }
 
   /**

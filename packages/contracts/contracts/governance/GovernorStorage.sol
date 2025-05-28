@@ -97,17 +97,14 @@ contract GovernorStorage is Initializable {
   }
 
   function __GovernorStorage_init_v6(
-    uint256 standardDepositThreshold,
-    uint256 standardVotingThreshold,
     uint256 grantDepositThreshold,
     uint256 grantVotingThreshold
   ) internal onlyInitializing {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
 
-    governorStorage.proposalTypeDepositThresholdPercentage[
-      GovernorTypes.ProposalType.Standard
-    ] = standardDepositThreshold;
-    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Standard] = standardVotingThreshold;
+    governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Standard] = governorStorage
+      .depositThresholdPercentage;
+    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Standard] = governorStorage.votingThreshold;
 
     governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Grant] = grantDepositThreshold;
     governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Grant] = grantVotingThreshold;
