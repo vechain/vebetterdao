@@ -40,8 +40,7 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
     }
     ignore_changes = [
       tags,
-      tags_all,
-      last_modified
+      tags_all
     ]
   }
 }
