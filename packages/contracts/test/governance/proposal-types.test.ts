@@ -68,16 +68,7 @@ describe.only("Governance (Proposal Types) - @shard4a", function () {
     expect(decodedProposalCreatedEvent?.args[6]).to.eql(description)
 
     expect(decodedProposalCreatedWithTypeEvent?.name).to.eql("ProposalCreatedWithType")
-    expect(decodedProposalCreatedWithTypeEvent?.args[1]).to.eql(proposerAddress)
-    expect(decodedProposalCreatedWithTypeEvent?.args[6]).to.eql(description)
-    expect(decodedProposalCreatedWithTypeEvent?.args[9]).to.eql(ethers.toBigInt(expectedType))
-
-    for (let i = 0; i < 9; i++) {
-      expect(decodedProposalCreatedEvent?.args[i]).to.deep.equal(
-        decodedProposalCreatedWithTypeEvent?.args[i],
-        `Argument ${i} should be identical in both events`,
-      )
-    }
+    expect(decodedProposalCreatedWithTypeEvent?.args[1]).to.eql(ethers.toBigInt(expectedType))
 
     return {
       proposalId: decodedProposalCreatedEvent?.args[0],
@@ -204,36 +195,6 @@ describe.only("Governance (Proposal Types) - @shard4a", function () {
     beforeEach(async function () {
       await bootstrapAndStartEmissions()
       await setupProposer(proposer)
-    })
-
-    it("Should emit identical events except for proposal type field", async function () {
-      const { tx, description } = await createUniqueTestProposal(proposer, true, 1)
-      const receipt = await tx.wait()
-
-      const proposalCreatedEvent = receipt?.logs[0]
-      const proposalCreatedWithTypeEvent = receipt?.logs[1]
-
-      const decodedCreated = governor.interface.parseLog({
-        topics: [...(proposalCreatedEvent?.topics as string[])],
-        data: proposalCreatedEvent ? proposalCreatedEvent.data : "",
-      })
-
-      const decodedWithType = governor.interface.parseLog({
-        topics: [...(proposalCreatedWithTypeEvent?.topics as string[])],
-        data: proposalCreatedWithTypeEvent ? proposalCreatedWithTypeEvent.data : "",
-      })
-
-      // Verify all fields are identical except the last one (proposal type)
-      expect(decodedCreated?.args.length).to.eql(9)
-      expect(decodedWithType?.args.length).to.eql(10)
-
-      // Check first 9 arguments are identical
-      for (let i = 0; i < 9; i++) {
-        expect(decodedCreated?.args[i]).to.deep.equal(decodedWithType?.args[i], `Field ${i} should be identical`)
-      }
-
-      // Check the 10th argument (proposal type) exists only in ProposalCreatedWithType
-      expect(decodedWithType?.args[9]).to.eql(ethers.toBigInt(1))
     })
 
     it("Should emit correct proposal type for different scenarios", async function () {
