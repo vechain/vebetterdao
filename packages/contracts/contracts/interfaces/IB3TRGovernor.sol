@@ -165,18 +165,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(
-    uint256 indexed proposalId,
-    address indexed proposer,
-    address[] targets,
-    uint256[] values,
-    string[] signatures,
-    bytes[] calldatas,
-    string description,
-    uint256 indexed roundIdVoteStart,
-    uint256 depositThreshold,
-    GovernorTypes.ProposalType proposalType
-  );
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
 
   /**
    * @dev Emitted when a proposal is queued.

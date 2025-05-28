@@ -102,7 +102,6 @@ library GovernorTypes {
     uint48 etaSeconds;
     uint256 depositAmount;
     uint256 depositThreshold;
-    ProposalType proposalType;
   }
 
   // ProposalState enum to store the state of a proposal

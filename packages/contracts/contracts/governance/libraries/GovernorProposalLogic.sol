@@ -63,18 +63,7 @@ library GovernorProposalLogic {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(
-    uint256 indexed proposalId,
-    address indexed proposer,
-    address[] targets,
-    uint256[] values,
-    string[] signatures,
-    bytes[] calldatas,
-    string description,
-    uint256 indexed roundIdVoteStart,
-    uint256 depositThreshold,
-    GovernorTypes.ProposalType proposalType
-  );
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
 
   /**
    * @dev Emitted when a proposal is executed.
@@ -222,7 +211,7 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 proposalId
   ) external view returns (GovernorTypes.ProposalType) {
-    return self.proposals[proposalId].proposalType;
+    return self.proposalType[proposalId];
   }
 
   /**
@@ -334,7 +323,7 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) external returns (uint256) {
     address proposer = msg.sender;
 
@@ -349,7 +338,7 @@ library GovernorProposalLogic {
       values,
       calldatas,
       proposalId,
-      proposalType
+      proposalTypeValue
     );
 
     return
@@ -363,7 +352,7 @@ library GovernorProposalLogic {
         description,
         startRoundId,
         depositAmount,
-        proposalType
+        proposalTypeValue
       );
   }
 
@@ -553,6 +542,7 @@ library GovernorProposalLogic {
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param proposalTypeValue The type of the proposal.
    * @return The proposal id.
    */
   function _propose(
@@ -565,7 +555,7 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) private returns (uint256) {
     uint256 depositThresholdAmount = GovernorDepositLogic._depositThreshold(self);
     uint32 votingPeriod = SafeCast.toUint32(self.xAllocationVoting.votingPeriod());
@@ -580,7 +570,7 @@ library GovernorProposalLogic {
       isExecutable,
       depositAmount,
       depositThresholdAmount,
-      proposalType
+      proposalTypeValue
     );
 
     if (depositAmount > 0) {
@@ -588,7 +578,6 @@ library GovernorProposalLogic {
     }
 
     _emitProposalCreatedEvents(
-      self,
       proposer,
       proposalId,
       targets,
@@ -597,7 +586,7 @@ library GovernorProposalLogic {
       description,
       startRoundId,
       depositThresholdAmount,
-      proposalType
+      proposalTypeValue
     );
 
     return proposalId;
@@ -605,13 +594,11 @@ library GovernorProposalLogic {
 
   /**
    * @dev Internal function to emit the proposal created events.
-   * @param self The storage reference for the GovernorStorage.
    * @param proposer The address of the proposer.
    * @param proposalId The id of the proposal.
    * @param targets The addresses of the contracts to call.
    */
   function _emitProposalCreatedEvents(
-    GovernorStorageTypes.GovernorStorage storage self,
     address proposer,
     uint256 proposalId,
     address[] memory targets,
@@ -620,7 +607,7 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositThresholdAmount,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) private {
     // Emit original event for backward compatibility
     emit ProposalCreated(
@@ -636,18 +623,7 @@ library GovernorProposalLogic {
     );
 
     // Emit new event with type information
-    emit ProposalCreatedWithType(
-      proposalId,
-      proposer,
-      targets,
-      values,
-      new string[](targets.length),
-      calldatas,
-      description,
-      startRoundId,
-      depositThresholdAmount,
-      proposalType
-    );
+    emit ProposalCreatedWithType(proposalId, proposalTypeValue);
   }
 
   /**
@@ -670,11 +646,11 @@ library GovernorProposalLogic {
     uint256[] memory values,
     bytes[] memory calldatas,
     uint256 proposalId,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) private view {
     //proposal type must be valid
-    if (!isValidProposalType(proposalType)) {
-      revert GovernorInvalidProposalType(proposalType);
+    if (!isValidProposalType(proposalTypeValue)) {
+      revert GovernorInvalidProposalType(proposalTypeValue);
     }
 
     // round must be in the future
@@ -716,7 +692,7 @@ library GovernorProposalLogic {
    * @param isExecutable Whether the proposal is executable.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
    * @param proposalDepositThreshold The deposit threshold for the proposal.
-   * @param proposalType The type of the proposal.
+   * @param proposalTypeValue The type of the proposal.
    */
   function _setProposal(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -727,7 +703,7 @@ library GovernorProposalLogic {
     bool isExecutable,
     uint256 depositAmount,
     uint256 proposalDepositThreshold,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) private {
     GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
 
@@ -737,7 +713,8 @@ library GovernorProposalLogic {
     proposal.isExecutable = isExecutable;
     proposal.depositAmount = depositAmount;
     proposal.depositThreshold = proposalDepositThreshold;
-    proposal.proposalType = proposalType;
+    // set the proposal type
+    self.proposalType[proposalId] = proposalTypeValue;
   }
 
   /**
@@ -931,11 +908,12 @@ library GovernorProposalLogic {
 
   /**
    * @dev Checks if the proposal type is valid.
-   * @param proposalType The type of the proposal.
+   * @param proposalTypeValue The type of the proposal.
    * @return True if the proposal type is valid, false otherwise.
    */
-  function isValidProposalType(GovernorTypes.ProposalType proposalType) internal pure returns (bool) {
-    return proposalType == GovernorTypes.ProposalType.Standard || proposalType == GovernorTypes.ProposalType.Grant;
+  function isValidProposalType(GovernorTypes.ProposalType proposalTypeValue) internal pure returns (bool) {
+    return
+      proposalTypeValue == GovernorTypes.ProposalType.Standard || proposalTypeValue == GovernorTypes.ProposalType.Grant;
   }
 
   /**

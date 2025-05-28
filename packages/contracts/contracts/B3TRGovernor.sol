@@ -174,18 +174,14 @@ contract B3TRGovernor is
   function initializeV6(
     uint256 standardDepositThreshold,
     uint256 standardVotingThreshold,
-    uint256 standardMinVotingDelay,
     uint256 grantDepositThreshold,
-    uint256 grantVotingThreshold,
-    uint256 grantMinVotingDelay
+    uint256 grantVotingThreshold
   ) public reinitializer(6) {
     __GovernorStorage_init_v6(
       standardDepositThreshold,
       standardVotingThreshold,
-      standardMinVotingDelay,
       grantDepositThreshold,
-      grantVotingThreshold,
-      grantMinVotingDelay
+      grantVotingThreshold
     );
   }
 
@@ -735,7 +731,7 @@ contract B3TRGovernor is
    * @param description The proposal description
    * @param startRoundId The round in which the proposal should start
    * @param depositAmount The amount of deposit for the proposal
-   * @param proposalType The type of proposal
+   * @param proposalTypeValue The type of proposal
    * @return uint256 The proposal id
    */
   function proposeWithType(
@@ -745,7 +741,7 @@ contract B3TRGovernor is
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) external whenNotPaused returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return
@@ -757,7 +753,7 @@ contract B3TRGovernor is
         description,
         startRoundId,
         depositAmount,
-        proposalType
+        proposalTypeValue
       );
   }
 
@@ -945,14 +941,14 @@ contract B3TRGovernor is
    * @notice Update the deposit threshold for a proposal type. This operation can only be performed through a governance proposal.
    * Emits a {DepositThresholdSetV2} event.
    * @param newDepositThreshold The new deposit threshold
-   * @param proposalType The proposal type
+   * @param proposalTypeValue The proposal type
    */
   function setProposalTypeDepositThresholdPercentage(
     uint256 newDepositThreshold,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setProposalTypeDepositThresholdPercentage($, proposalType, newDepositThreshold);
+    GovernorConfigurator.setProposalTypeDepositThresholdPercentage($, proposalTypeValue, newDepositThreshold);
   }
 
   /**
@@ -969,14 +965,14 @@ contract B3TRGovernor is
    * @notice Update the voting threshold for a proposal type. This operation can only be performed through a governance proposal.
    * Emits a {VotingThresholdSetV2} event.
    * @param newVotingThreshold The new voting threshold
-   * @param proposalType The proposal type
+   * @param proposalTypeValue The proposal type
    */
   function setProposalTypeVotingThreshold(
     uint256 newVotingThreshold,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setProposalTypeVotingThreshold($, proposalType, newVotingThreshold);
+    GovernorConfigurator.setProposalTypeVotingThreshold($, proposalTypeValue, newVotingThreshold);
   }
 
   /**
@@ -988,20 +984,6 @@ contract B3TRGovernor is
   function setMinVotingDelay(uint256 newMinVotingDelay) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setMinVotingDelay($, newMinVotingDelay);
-  }
-
-  /**
-   * @notice Update the min voting delay for a proposal type. This operation can only be performed through a governance proposal.
-   * Emits a {MinVotingDelaySetV2} event.
-   * @param newMinVotingDelay The new minimum voting delay
-   * @param proposalType The proposal type
-   */
-  function setProposalTypeMinVotingDelay(
-    uint256 newMinVotingDelay,
-    GovernorTypes.ProposalType proposalType
-  ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setProposalTypeMinVotingDelay($, proposalType, newMinVotingDelay);
   }
 
   /**
