@@ -133,7 +133,7 @@ contract GovernorStorage is Initializable {
     GovernorQuorumLogic._updateQuorumNumeratorByType(governorStorage, grantQuorum, GovernorTypes.ProposalType.Grant);
     GovernorQuorumLogic._updateQuorumNumeratorByType(
       governorStorage,
-      governorStorage.votingThreshold,
+      GovernorQuorumLogic.quorumNumerator(governorStorage),
       GovernorTypes.ProposalType.Standard
     );
   }

@@ -655,6 +655,11 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [veBetterPassportContractAddress],
       [],
+      [
+        config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, //Grant deposit threshold
+        config.B3TR_GOVERNOR_VOTING_THRESHOLD, //Grant voting threshold
+        config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, //Grant quorum percentage
+      ],
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6],

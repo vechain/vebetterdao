@@ -908,6 +908,21 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Changes the quorum numerator for a specific proposal type.
+   * This operation can only be performed through a governance proposal.
+   * Emits a {QuorumNumeratorUpdatedByType} event.
+   * @param newQuorumNumerator The new quorum numerator
+   * @param proposalTypeValue The proposal type
+   */
+  function updateQuorumNumeratorByType(
+    uint256 newQuorumNumerator,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorQuorumLogic.updateQuorumNumeratorByType($, newQuorumNumerator, proposalTypeValue);
+  }
+
+  /**
    * @notice Toggle quadratic voting for next round.
    * @dev This function toggles the state of quadratic votingstarting from the next round.
    * The state will flip between enabled and disabled each time the function is called.

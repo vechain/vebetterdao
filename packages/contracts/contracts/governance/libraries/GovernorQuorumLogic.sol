@@ -226,6 +226,14 @@ library GovernorQuorumLogic {
     _updateQuorumNumeratorByType(self, newQuorumNumerator, proposalTypeValue);
   }
 
+  /**
+   * @notice Internal function to update the quorum numerator for a specific proposal type.
+   * @dev This function should only be called from governance actions where numerators need updating.
+   * @dev New numerator must be smaller or equal to the denominator.
+   * @param self The storage structure containing the quorum numerator history.
+   * @param newQuorumNumerator The new value for the quorum numerator.
+   * @param proposalTypeValue The type of proposal.
+   */
   function _updateQuorumNumeratorByType(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 newQuorumNumerator,
@@ -242,6 +250,11 @@ library GovernorQuorumLogic {
       GovernorClockLogic.clock(self),
       SafeCast.toUint208(newQuorumNumerator)
     );
+
+    //Update also the standard quorum numerator
+    if (proposalTypeValue == GovernorTypes.ProposalType.Standard) {
+      self.quorumNumeratorHistory.push(GovernorClockLogic.clock(self), SafeCast.toUint208(newQuorumNumerator));
+    }
 
     emit QuorumNumeratorUpdatedByType(oldQuorumNumerator, newQuorumNumerator, proposalTypeValue);
   }
