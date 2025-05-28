@@ -7,9 +7,8 @@ export const JoinB3TRAppsBanner = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
 
-  // TODO : change that once the endorsement will be complete
   const openGrantPage = () => {
-    window.open("https://vechain.org/grants/", "_blank", "noopener noreferrer")
+    window.open("https://vebetterdao.org/grants", "_blank", "noopener noreferrer")
   }
 
   return (
