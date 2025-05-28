@@ -171,8 +171,12 @@ contract B3TRGovernor is
     __GovernorStorage_init_v4(_veBetterPassport);
   }
 
-  function initializeV6(uint256 grantDepositThreshold, uint256 grantVotingThreshold) public reinitializer(6) {
-    __GovernorStorage_init_v6(grantDepositThreshold, grantVotingThreshold);
+  function initializeV6(
+    uint256 grantDepositThreshold,
+    uint256 grantVotingThreshold,
+    uint256 grantQuorum
+  ) public reinitializer(6) {
+    __GovernorStorage_init_v6(grantDepositThreshold, grantVotingThreshold, grantQuorum);
   }
 
   /**
@@ -388,12 +392,36 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Returns the quorum for a timepoint, in terms of number of votes: `supply * numerator / denominator`.
+   * @param blockNumber The block number to get the quorum for
+   * @param proposalTypeValue The type of proposal
+   * @return uint256 The quorum
+   */
+  function quorumByType(
+    uint256 blockNumber,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorQuorumLogic.quorumByType($, blockNumber, proposalTypeValue);
+  }
+
+  /**
    * @notice Returns the current quorum numerator. See {quorumDenominator}.
    * @return uint256 The current quorum numerator
    */
   function quorumNumerator() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorQuorumLogic.quorumNumerator($);
+  }
+
+  /**
+   * @notice Returns the quorum numerator for a specific proposal type.
+   * @param proposalTypeValue The type of proposal
+   * @return uint256 The quorum numerator
+   */
+  function quorumNumeratorByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorQuorumLogic.quorumNumeratorByType($, proposalTypeValue);
   }
 
   /**
@@ -404,6 +432,19 @@ contract B3TRGovernor is
   function quorumNumerator(uint256 timepoint) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorQuorumLogic.quorumNumerator($, timepoint);
+  }
+
+  /**
+   * @notice Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
+   * @param timepoint The timepoint to get the quorum numerator for
+   * @return uint256 The quorum numerator at the given timepoint
+   */
+  function quorumNumeratorByType(
+    uint256 timepoint,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorQuorumLogic.quorumNumeratorByType($, timepoint, proposalTypeValue);
   }
 
   /**

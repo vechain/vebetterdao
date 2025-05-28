@@ -195,6 +195,21 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newDepositThreshold
   ) external {
+    _setProposalTypeDepositThresholdPercentage(self, proposalType, newDepositThreshold);
+  }
+
+  /**
+   * @notice Sets the deposit threshold percentage for a proposal type.
+   * @dev Sets a new deposit threshold percentage for a proposal type and emits a {DepositThresholdSet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newDepositThreshold The new deposit threshold percentage.
+   */
+  function _setProposalTypeDepositThresholdPercentage(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newDepositThreshold
+  ) internal {
     emit DepositThresholdSetV2(
       proposalType,
       self.proposalTypeDepositThresholdPercentage[proposalType],
@@ -215,6 +230,21 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newVotingThreshold
   ) external {
+    _setProposalTypeVotingThreshold(self, proposalType, newVotingThreshold);
+  }
+
+  /**
+   * @notice Sets the voting threshold for a proposal type.
+   * @dev Sets a new voting threshold for a proposal type and emits a {VotingThresholdSet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newVotingThreshold The new voting threshold.
+   */
+  function _setProposalTypeVotingThreshold(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newVotingThreshold
+  ) internal {
     emit VotingThresholdSetV2(proposalType, self.proposalTypeVotingThreshold[proposalType], newVotingThreshold);
     self.proposalTypeVotingThreshold[proposalType] = newVotingThreshold;
   }

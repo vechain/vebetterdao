@@ -27,6 +27,8 @@ import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { GovernorQuorumLogic } from "./libraries/GovernorQuorumLogic.sol";
+import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
 
 /// @title GovernorStorage
 /// @notice Contract used as storage of the B3TRGovernor contract.
@@ -98,15 +100,41 @@ contract GovernorStorage is Initializable {
 
   function __GovernorStorage_init_v6(
     uint256 grantDepositThreshold,
-    uint256 grantVotingThreshold
+    uint256 grantVotingThreshold,
+    uint256 grantQuorum
   ) internal onlyInitializing {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
 
-    governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Standard] = governorStorage
-      .depositThresholdPercentage;
-    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Standard] = governorStorage.votingThreshold;
+    // Set deposit threshold
+    GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
+      governorStorage,
+      GovernorTypes.ProposalType.Standard,
+      governorStorage.depositThresholdPercentage
+    );
+    GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
+      governorStorage,
+      GovernorTypes.ProposalType.Grant,
+      grantDepositThreshold
+    );
 
-    governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Grant] = grantDepositThreshold;
-    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Grant] = grantVotingThreshold;
+    // Set voting threshold
+    GovernorConfigurator._setProposalTypeVotingThreshold(
+      governorStorage,
+      GovernorTypes.ProposalType.Standard,
+      governorStorage.votingThreshold
+    );
+    GovernorConfigurator._setProposalTypeVotingThreshold(
+      governorStorage,
+      GovernorTypes.ProposalType.Grant,
+      grantVotingThreshold
+    );
+
+    // Set quorum
+    GovernorQuorumLogic._updateQuorumNumeratorByType(governorStorage, grantQuorum, GovernorTypes.ProposalType.Grant);
+    GovernorQuorumLogic._updateQuorumNumeratorByType(
+      governorStorage,
+      governorStorage.votingThreshold,
+      GovernorTypes.ProposalType.Standard
+    );
   }
 }
