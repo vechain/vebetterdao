@@ -1,7 +1,5 @@
 import {
-  useAccountBalance,
   useAccountLinking,
-  useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
@@ -18,7 +16,7 @@ import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSu
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useAccountBalance, useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -72,7 +70,7 @@ export const ActionBanner = () => {
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
@@ -110,7 +108,7 @@ export const ActionBanner = () => {
   }, [b3trBalance, vot3Balance])
 
   const isLowOnVtho = useMemo(() => {
-    return Number(balance?.energy.scaled) < VTHO_THRESHOLD
+    return Number(balance?.energy ?? "0") < VTHO_THRESHOLD
   }, [balance])
 
   const isBalanceLoading = useMemo(() => {
@@ -119,7 +117,7 @@ export const ActionBanner = () => {
 
   const userCanVoteInProposals = useMemo<boolean>(() => {
     const isLoading = isLoadingAccountLinking || isLoadingDelegator
-    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && isPerson
+    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && !!isPerson
     return !isLoading && isValidUser
   }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
 
@@ -201,7 +199,11 @@ export const ActionBanner = () => {
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
-        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
+        <ClaimVotingRewardsBanner
+          roundsRewardsQuery={votingRewardsQuery}
+          gmRewards={Number(gmRewards)}
+          key="claim-b3tr"
+        />,
       )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)

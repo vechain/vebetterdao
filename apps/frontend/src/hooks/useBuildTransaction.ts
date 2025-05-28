@@ -5,7 +5,7 @@ import { useTransactionModal, TransactionCustomUI } from "@/providers/Transactio
 
 export type BuildTransactionProps<ClausesParams = void> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
-  refetchQueryKeys?: (string | undefined)[][]
+  refetchQueryKeys?: Array<(string | undefined | unknown[])[]>
   onSuccess?: () => void
   invalidateCache?: boolean
   suggestedMaxGas?: number

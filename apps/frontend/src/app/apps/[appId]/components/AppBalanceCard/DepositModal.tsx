@@ -21,8 +21,8 @@ import { motion } from "framer-motion"
 import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { useB3trBalance, useXApp } from "@/api"
-import { useWallet } from "@vechain/vechain-kit"
+import { useXApp } from "@/api"
+import { useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {
@@ -59,7 +59,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const { data: app } = useXApp(appId)
 
-  const { data: availableBalanceToDeposit } = useB3trBalance(account?.address ?? "")
+  const { data: availableBalanceToDeposit } = useGetB3trBalance(account?.address ?? "")
 
   const { data: appBalance, isLoading: isAppBalanceLoading } = useAppAvailableFunds(appId)
 

@@ -1,11 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
-import { UseQueryResult } from "@tanstack/react-query"
 
-const contractAddress = getConfig().nodeManagementContractAddress
-const contractInterface = NodeManagement__factory.createInterface()
-const method = "getUserNodes"
+const address = getConfig().nodeManagementContractAddress
+const abi = NodeManagement__factory.abi
+const method = "getUserNodes" as const
 
 export type UserNode = {
   nodeId: string
@@ -22,33 +21,37 @@ export type UserNode = {
  * Get the query key for fetching user nodes
  * @param user - The address of the user to check
  */
-export const getUserNodesQueryKey = (user?: string) => getCallKey({ method, keyArgs: [user] })
+export const getUserNodesQueryKey = (user?: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [user ?? "0x"] })
 
 /**
  * Hook to get delegation details for all nodes associated with a user
  * @param user - The address of the user to check
  * @returns An array of objects containing user node details
  */
-export const useGetUserNodes = (user?: string): UseQueryResult<UserNode[], Error> => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useGetUserNodes = (user?: string) => {
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [user],
-    mapResponse: response => {
-      // Response will be an array of node structs
-      return response.decoded[0].map((node: any) => ({
-        nodeId: node.nodeId.toString(),
-        nodeLevel: Number(node.nodeLevel),
-        xNodeOwner: node.xNodeOwner,
-        isXNodeHolder: node.isXNodeHolder,
-        isXNodeDelegated: node.isXNodeDelegated,
-        isXNodeDelegator: node.isXNodeDelegator,
-        isXNodeDelegatee: node.isXNodeDelegatee,
-        delegatee: node.delegatee,
-      }))
+    args: [user ?? "0x"],
+    queryOptions: {
+      enabled: !!user,
+      select: data =>
+        data[0].map(
+          node =>
+            ({
+              nodeId: node.nodeId.toString(),
+              nodeLevel: Number(node.nodeLevel),
+              xNodeOwner: node.xNodeOwner,
+              isXNodeHolder: node.isXNodeHolder,
+              isXNodeDelegated: node.isXNodeDelegated,
+              isXNodeDelegator: node.isXNodeDelegator,
+              isXNodeDelegatee: node.isXNodeDelegatee,
+              delegatee: node.delegatee,
+            }) as UserNode,
+        ),
     },
-    enabled: !!user,
   })
 }
 

@@ -1,9 +1,9 @@
-import { useCurrentBlock } from "@/api/blockchain"
 import { useMemo } from "react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { useProposalSnapshot } from "./useProposalSnapshot"
 import { useProposalDeadline } from "./useProposalDeadline"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 
 const blockTime = getConfig().network.blockTime
 

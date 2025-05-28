@@ -1,11 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@repo/contracts"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
-// const method = "getPendingDelegationsDelegatorPOV"
-const method = "getPendingDelegations"
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "getPendingDelegations" as const
 
 /**
  * Returns the query key for fetching pending delegations.
@@ -13,7 +12,7 @@ const method = "getPendingDelegations"
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegatorPOV = (delegator: string) => {
-  return getCallKey({ method, keyArgs: ["outgoing", delegator] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [delegator ?? "0x"] })
 }
 
 /**
@@ -21,15 +20,16 @@ export const getPendingDelegationsQueryKeyDelegatorPOV = (delegator: string) => 
  * @param delegator - The delegator address.
  * @returns An array of addresses representing delegators with pending delegations for the delegator.
  */
+// TODO: check 'incoming' or 'outgoing'
 export const useGetPendingDelegationsDelegatorPOV = (delegator?: string | null) => {
-  // TODO: remove mocked data
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
+  return useCallClause({
+    abi,
+    address,
     method,
-    keyArgs: ["outgoing", delegator],
-    args: [delegator],
-    mapResponse: response => response.decoded[1] ?? null,
-    enabled: !!delegator,
+    args: [delegator ?? "0x"],
+    queryOptions: {
+      enabled: !!delegator,
+      select: data => data[0] ?? [],
+    },
   })
 }

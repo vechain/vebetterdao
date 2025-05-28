@@ -1,38 +1,31 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationVotingJson } from "@repo/contracts"
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
+import { XAllocationVoting__factory } from "@repo/contracts"
+
+const address = getConfig().xAllocationVotingContractAddress
+const abi = XAllocationVoting__factory.abi
+const method = "currentRoundId" as const
 
 /**
- *
- * Returns the current roundId of allocations voting
- * @param thor  the thor client
- * @returns the current roundId of allocations voting
+ * Returns the query key for fetching the current allocations round ID.
+ * @returns The query key for fetching the current allocations round ID.
  */
-export const getCurrentAllocationsRoundId = async (thor: Connex.Thor): Promise<string> => {
-  const currentRoundAbi = XAllocationVotingJson.abi.find(abi => abi.name === "currentRoundId")
-  if (!currentRoundAbi) throw new Error("currentRoundId function not found")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(currentRoundAbi).call()
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getCurrentAllocationsRoundIdQueryKey = () => ["currentAllocationsRoundId"]
+export const getCurrentAllocationsRoundIdQueryKey = () =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
 
 /**
  * Hook to get the current roundId of allocations voting
- * @returns  the current roundId of allocations voting
+ * @returns the current roundId of allocations voting
  */
 export const useCurrentAllocationsRoundId = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getCurrentAllocationsRoundIdQueryKey(),
-    queryFn: async () => await getCurrentAllocationsRoundId(thor),
-    enabled: !!thor,
-    staleTime: 0,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => data[0],
+      staleTime: 0,
+    },
   })
 }

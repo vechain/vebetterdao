@@ -1,4 +1,4 @@
-import { useB3trAllowance, useB3trBalance } from "@/api"
+import { useB3trAllowance } from "@/api"
 import { useB3trApprove } from "@/hooks"
 import {
   VStack,
@@ -22,14 +22,14 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-import { useWallet } from "@vechain/vechain-kit"
+import { useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const [amount, setAmount] = useState<number>(0)
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)

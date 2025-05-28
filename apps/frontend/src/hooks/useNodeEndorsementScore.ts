@@ -1,17 +1,16 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
-import { UseQueryResult } from "@tanstack/react-query"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().x2EarnAppsContractAddress
-const contractInterface = X2EarnApps__factory.createInterface()
-const method = "getNodeEndorsementScore"
+const address = getConfig().x2EarnAppsContractAddress
+const abi = X2EarnApps__factory.abi
+const method = "getNodeEndorsementScore" as const
 
 /**
  * Get the query key for the endorsement score of a node ID.
  */
 export const getEndorsersQueryKey = (nodeId: string) => {
-  getCallKey({ method, keyArgs: [nodeId] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [nodeId] })
 }
 
 /**
@@ -20,11 +19,15 @@ export const getEndorsersQueryKey = (nodeId: string) => {
  *
  * @returns the endorsement score
  */
-export const useNodeEndorsementScore = (nodeId: string): UseQueryResult<string, Error> => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useNodeEndorsementScore = (nodeId: string) => {
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [nodeId],
+    args: [BigInt(nodeId)],
+    queryOptions: {
+      enabled: !!nodeId,
+      select: data => Number(data[0]),
+    },
   })
 }

@@ -1,10 +1,10 @@
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
-const contractAddress = getConfig().veBetterPassportContractAddress
-const method = "securityMultiplier"
+const abi = VeBetterPassport__factory.abi
+const address = getConfig().veBetterPassportContractAddress
+const method = "securityMultiplier" as const
 
 export enum SecurityLevel {
   NONE = 0,
@@ -14,7 +14,7 @@ export enum SecurityLevel {
 }
 
 export const getSecurityMultiplierQueryKey = (securityLevel: SecurityLevel) => {
-  return getCallKey({ method, keyArgs: [securityLevel] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [securityLevel] })
 }
 
 /**
@@ -23,11 +23,14 @@ export const getSecurityMultiplierQueryKey = (securityLevel: SecurityLevel) => {
  * @returns the security multiplier of the app as a number
  */
 export const useSecurityMultiplier = (securityLevel: SecurityLevel) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
     args: [securityLevel],
-    enabled: !!securityLevel,
+    queryOptions: {
+      enabled: !!securityLevel,
+      select: data => Number(data[0]),
+    },
   })
 }

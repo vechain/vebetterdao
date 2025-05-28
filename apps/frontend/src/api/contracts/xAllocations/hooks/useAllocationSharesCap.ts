@@ -1,40 +1,33 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
-const XALLOCATIONVOTINGCONTRACT = getConfig().xAllocationVotingContractAddress
+const address = getConfig().xAllocationVotingContractAddress
+const abi = XAllocationVoting__factory.abi
+const method = "getRoundAppSharesCap" as const
 
 /**
- * Get the max percentage of shares that an xDapp can have in a given round
- *
- * @param thor  the thor client
- * @returns  the percentage of the total shares that an xDapp can have in a given round
+ * Returns the query key for fetching the allocation shares cap.
+ * @param roundId The round ID to get the shares cap for
+ * @returns The query key for fetching the allocation shares cap.
  */
-export const getAllocationSharesCap = async (thor: Connex.Thor, roundId: string): Promise<string> => {
-  const functionFragment = XAllocationVoting__factory.createInterface()
-    .getFunction("getRoundAppSharesCap")
-    .format("json")
-  const res = await thor.account(XALLOCATIONVOTINGCONTRACT).method(JSON.parse(functionFragment)).call(roundId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getAllocationSharesCapQueryKey = () => ["allocationRound", "appSharesCap"]
+export const getAllocationSharesCapQueryKey = (roundId: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId)] })
 
 /**
- * Get the max percetnage of shares that an xDapp can have in a given round
- *
+ * Hook to get the max percentage of shares that an xDapp can have in a given round
+ * @param roundId The round ID to get the shares cap for
  * @returns the percentage of the total shares that an xDapp can have
  */
 export const useAllocationSharesCap = (roundId: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getAllocationSharesCapQueryKey(),
-    queryFn: async () => await getAllocationSharesCap(thor, roundId),
-    enabled: !!thor,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId)],
+    queryOptions: {
+      enabled: !!roundId,
+      select: data => data[0],
+    },
   })
 }

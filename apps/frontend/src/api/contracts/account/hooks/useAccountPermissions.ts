@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 import { abi } from "thor-devkit"
 import { getBytes32Role } from "./useHasRole"
 
@@ -194,7 +194,7 @@ export const useAccountPermissions = (
     isAdmin: boolean
   }
 > => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getAccountPermissionsQueryKey(address ?? ""),
@@ -205,6 +205,15 @@ export const useAccountPermissions = (
         value: "0x0",
         data: hasRoleAbi.encode(getBytes32Role(role), address),
       }))
+
+      // const a = executeMultipleClausesCall({
+      //   thor,
+      //   calls: [
+      //     {
+      //       a
+      //     }
+      //   ]
+      // })
 
       const res = await thor.explain(clauses).execute()
 

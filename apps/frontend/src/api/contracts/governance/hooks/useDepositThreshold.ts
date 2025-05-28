@@ -1,36 +1,30 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { ethers } from "ethers"
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+import { formatEther } from "viem"
 
-const governorInterface = B3TRGovernor__factory.createInterface()
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "depositThreshold" as const
+
 /**
- * Get the current proposal threshold from the governor contract (i.e the number of votes required to create a proposal)
- * @param thor  the thor client
- * @returns  the current proposal threshold
+ * Returns the query key for fetching the deposit threshold from the governor contract.
+ * @returns The query key for fetching the deposit threshold.
  */
-export const getDepositThreshold = async (thor: Connex.Thor): Promise<string> => {
-  const functionFragment = governorInterface.getFunction("depositThreshold").format("json")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call()
+export const getDepositThresholdQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return ethers.formatEther(res.decoded[0])
-}
-
-export const getDepositThresholdQueryKey = () => ["depositThreshold"]
 /**
- *  Hook to get the proposal threshold from the governor contract (i.e the number of votes required to create a proposal)
- * @returns
+ * Hook to get the proposal threshold from the governor contract (i.e the number of votes required to create a proposal)
+ * @returns the current proposal threshold
  */
 export const useDepositThreshold = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getDepositThresholdQueryKey(),
-    queryFn: async () => await getDepositThreshold(thor),
-    enabled: !!thor,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => formatEther(data[0]),
+    },
   })
 }

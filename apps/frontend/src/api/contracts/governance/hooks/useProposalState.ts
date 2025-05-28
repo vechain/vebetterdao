@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "state" as const
 
 export enum ProposalState {
   Pending, // when the round is before the vote round and the community can support
@@ -17,26 +17,28 @@ export enum ProposalState {
   DepositNotMet, // it's the round and the community didn't supported the proposal yet
 }
 
-export const getProposalState = async (thor: Connex.Thor, proposalId: string): Promise<ProposalState> => {
-  const functionFragment = b3trGovernorInterface.getFunction("state")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(functionFragment).call(proposalId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return Number(res.decoded[0]) as ProposalState
-}
-
-export const getProposalStateQueryKey = (proposalId: string) => ["proposals", proposalId, "state"]
 /**
- *  Hook to get the proposal state from the governor contract
- * @param proposalId  the proposal id to get the state of
- * @returns  the proposal state
+ * Returns the query key for fetching the proposal state.
+ * @param proposalId The proposal ID to get the state for
+ * @returns The query key for fetching the proposal state.
+ */
+export const getProposalStateQueryKey = (proposalId: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(proposalId)] })
+
+/**
+ * Hook to get the proposal state from the governor contract
+ * @param proposalId The proposal id to get the state of
+ * @returns the proposal state
  */
 export const useProposalState = (proposalId: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getProposalStateQueryKey(proposalId),
-    queryFn: async () => await getProposalState(thor, proposalId),
-    enabled: !!thor,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(proposalId)],
+    queryOptions: {
+      enabled: !!proposalId,
+      select: data => Number(data[0]) as ProposalState,
+    },
   })
 }

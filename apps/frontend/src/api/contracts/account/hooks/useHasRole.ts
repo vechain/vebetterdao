@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { executeCallClause, useThor } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
-
-const fragment = AccessControl__factory.createInterface().getFunction("hasRole").format("json")
 
 // Roles
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -42,13 +40,23 @@ export const getBytes32Role = (role: string) =>
  * @param address  the address to check the role for
  * @returns  true if the user has the role, false otherwise
  */
-export const getHasRole = async (thor: Connex.Thor, role: string, contractAddress: string, address?: string) => {
+export const getHasRole = async (
+  thor: ReturnType<typeof useThor>,
+  role: string,
+  contractAddress: string,
+  address?: string,
+) => {
   const bytes32Role = getBytes32Role(role)
-  const res = await thor.account(contractAddress).method(JSON.parse(fragment)).call(bytes32Role, address)
 
-  if (res.reverted) throw new Error(res.revertReason)
+  const [hasRole] = await executeCallClause({
+    thor,
+    abi: AccessControl__factory.abi,
+    contractAddress,
+    method: "hasRole",
+    args: [address as `0x${string}`, bytes32Role],
+  })
 
-  return Boolean(res.decoded[0])
+  return hasRole
 }
 
 export const hasRoleQueryKey = (role: string, contractAddress: string, address?: string) => [
@@ -66,7 +74,7 @@ export const hasRoleQueryKey = (role: string, contractAddress: string, address?:
  * @returns  true if the user has the role, false otherwise
  */
 export const useHasRole = (role: string, contractAddress: string, address?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   return useQuery({
     queryKey: hasRoleQueryKey(role, contractAddress, address),
     queryFn: () => !!address && getHasRole(thor, role, contractAddress, address),

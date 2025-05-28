@@ -1,19 +1,19 @@
 import { VoterRewards__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
-import { getCallKey, useCall } from "@/hooks"
-import { ethers } from "ethers"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { formatEther } from "viem"
 
-const method = "cycleToTotal"
-const voterRewardsInterface = VoterRewards__factory.createInterface()
-const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
+const method = "cycleToTotal" as const
+const abi = VoterRewards__factory.abi
+const address = getConfig().voterRewardsContractAddress
 
 /**
  * Returns the query key for fetching the getCycleToTotal
  * * @param {string} cycle - The id of the round.
  * @returns The query key for fetching the getCycleToTotal
  */
-export const getCycleToTotal = (address?: string) => {
-  return getCallKey({ method, keyArgs: [address] })
+export const getCycleToTotal = (cycle?: string) => {
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(cycle ?? "0")] })
 }
 
 /**
@@ -23,12 +23,14 @@ export const getCycleToTotal = (address?: string) => {
  * @returns {uint256} A uint256 that represents the total reward-weighted votes in a specific cycle.
  */
 export const useCycleToTotal = (cycle?: string) => {
-  return useCall({
-    contractInterface: voterRewardsInterface,
-    contractAddress: VOTER_REWARDS_CONTRACT,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [cycle ?? ""],
-    enabled: !!cycle,
-    mapResponse: res => ethers.formatEther(res.decoded[0]),
+    args: [BigInt(cycle ?? "0")],
+    queryOptions: {
+      enabled: !!cycle,
+      select: data => formatEther(data[0]),
+    },
   })
 }

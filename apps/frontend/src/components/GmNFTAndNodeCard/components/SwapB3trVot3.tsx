@@ -1,4 +1,4 @@
-import { useB3trBalance, useVot3Balance } from "@/api"
+import { useVot3Balance } from "@/api"
 import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { B3TRIcon } from "@/components/Icons"
 import {
@@ -22,6 +22,7 @@ import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { CountdownVoting } from "@/app/components/Countdown"
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
 import { useDomainOrAddress } from "@/hooks"
+import { useGetB3trBalance } from "@vechain/vechain-kit"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -35,7 +36,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
   const [isAbove600] = useMediaQuery("(min-width: 600px)")
 
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address)
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(address)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address)
 
   const { isOpen, onClose, onOpen } = useDisclosure()

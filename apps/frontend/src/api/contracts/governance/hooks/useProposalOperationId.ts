@@ -1,10 +1,10 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().b3trGovernorAddress
-const contractInterface = B3TRGovernor__factory.createInterface()
-const method = "getTimelockId"
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "getTimelockId" as const
 
 /**
  * Get the operationId of the given proposal
@@ -12,7 +12,7 @@ const method = "getTimelockId"
  * @returns  the operationId of the given proposal
  */
 export const getProposalOperationIdQueryKey = (proposalId: string) => {
-  getCallKey({ method, keyArgs: [proposalId] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(proposalId)] })
 }
 
 /**
@@ -21,11 +21,14 @@ export const getProposalOperationIdQueryKey = (proposalId: string) => {
  * @returns  the operationId of the given proposal
  */
 export const useProposalOperationId = (proposalId?: string, enabled = true) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [proposalId],
-    enabled: !!proposalId && enabled,
+    args: [proposalId ? BigInt(proposalId) : BigInt(0)],
+    queryOptions: {
+      enabled: !!proposalId && enabled,
+      select: data => data[0],
+    },
   })
 }

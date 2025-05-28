@@ -1,4 +1,4 @@
-import { useAccountBalance, useB3trBalance, useContractVersion, useVot3Balance } from "@/api"
+import { useContractVersion, useVot3Balance } from "@/api"
 import { AddressButton } from "@/components/AddressButton"
 import { B3TRIcon, VETIcon, VOT3Icon, VTHOIcon } from "@/components"
 import { Card, CardBody, CardHeader, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
@@ -6,7 +6,7 @@ import { getConfig } from "@repo/config"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useHasRoles } from "@/api/contracts/account"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useAccountBalance, useGetB3trBalance } from "@vechain/vechain-kit"
 import { getContractByAddress } from "@/constants"
 
 // Maximum precision of 4 decimals. Must also round down
@@ -104,7 +104,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   const { account } = useWallet()
 
   //Get balances
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(address)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(address)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(address)
   const { data: accountBalance, isLoading: accountBalanceLoading } = useAccountBalance(address)
 
@@ -116,13 +116,8 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
     return vot3Balance?.scaled ?? "0"
   }, [vot3Balance])
 
-  const vetBalanceScaled = useMemo(() => {
-    return accountBalance?.balance.scaled ?? "0"
-  }, [accountBalance])
-
-  const vthoBalanceScaled = useMemo(() => {
-    return accountBalance?.energy.scaled ?? "0"
-  }, [accountBalance])
+  const vetBalanceScaled = accountBalance?.balance ?? "0"
+  const vthoBalanceScaled = accountBalance?.energy ?? "0"
 
   // Get contract version
   const { data: version } = useContractVersion(address)

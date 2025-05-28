@@ -1,5 +1,4 @@
-import { useCurrentBlock } from "@/api/blockchain"
-import { useConnex } from "@vechain/vechain-kit"
+import { useConnex, useCurrentBlock } from "@vechain/vechain-kit"
 import { useProposalsEvents } from "./useProposalsEvents"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getProposalSnapshot, getProposalSnapshotQueryKey } from "./useProposalSnapshot"

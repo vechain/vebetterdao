@@ -1,15 +1,15 @@
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
-const contractAddress = getConfig().veBetterPassportContractAddress
-const method = "appSecurity"
+const abi = VeBetterPassport__factory.abi
+const address = getConfig().veBetterPassportContractAddress
+const method = "appSecurity" as const
 
 export const APP_SECURITY_LEVELS = ["NONE", "LOW", "MEDIUM", "HIGH"]
 
 export const getAppSecurityLevelQueryKey = (appId: string) => {
-  return getCallKey({ method, keyArgs: [appId] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [appId] })
 }
 
 /**
@@ -18,11 +18,14 @@ export const getAppSecurityLevelQueryKey = (appId: string) => {
  * @returns the security level of the app as a number
  */
 export const useAppSecurityLevel = (appId: string) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [appId],
-    enabled: !!appId,
+    args: [appId as `0x${string}`],
+    queryOptions: {
+      enabled: !!appId,
+      select: data => data[0],
+    },
   })
 }

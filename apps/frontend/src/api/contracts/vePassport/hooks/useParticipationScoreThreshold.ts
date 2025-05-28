@@ -1,13 +1,13 @@
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
-const contractAddress = getConfig().veBetterPassportContractAddress
-const method = "thresholdPoPScore"
+const abi = VeBetterPassport__factory.abi
+const address = getConfig().veBetterPassportContractAddress
+const method = "thresholdPoPScore" as const
 
 export const getParticipationScoreThresholdQueryKey = () => {
-  return getCallKey({ method, keyArgs: [] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
 }
 
 /**
@@ -15,10 +15,13 @@ export const getParticipationScoreThresholdQueryKey = () => {
  * @returns the participation score threshold as a number
  */
 export const useParticipationScoreThreshold = () => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
     args: [],
+    queryOptions: {
+      select: data => Number(data[0]),
+    },
   })
 }

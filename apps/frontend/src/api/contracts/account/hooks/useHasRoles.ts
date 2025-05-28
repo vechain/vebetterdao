@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 import { getHasRole } from "./useHasRole"
 
 const hasRolesQueryKey = (roles: string[], contractAddress: string, address: string) => [
@@ -16,7 +16,7 @@ const hasRolesQueryKey = (roles: string[], contractAddress: string, address: str
  * @returns  true if the user has the role, false otherwise
  */
 export const useHasRoles = (roles: string[], contractAddress: string, address: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: hasRolesQueryKey(roles, contractAddress, address),

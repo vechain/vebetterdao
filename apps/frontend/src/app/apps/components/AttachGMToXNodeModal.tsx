@@ -1,4 +1,4 @@
-import { getGMLevel, useB3trDonated, useSelectedGmNft, useXNode } from "@/api"
+import { getGMLevel, useSelectedGmNft, useXNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { CustomModalContent } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
@@ -33,6 +33,8 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useB3trDonated } from "@vechain/vechain-kit"
+
 type Props = {
   isOpen: boolean
   onClose: () => void

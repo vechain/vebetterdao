@@ -1,10 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey, useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/vechain-kit"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "isPerson" as const
 
 /**
  * Returns the query key for fetching the isPerson status.
@@ -12,7 +12,7 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the isPerson status.
  */
 export const getIsPersonQueryKey = (user: string) => {
-  return getCallKey({ method: "isPerson", keyArgs: [user] })
+  return getCallClauseQueryKey<typeof abi>({ address, method: "isPerson", args: [user] })
 }
 
 /**
@@ -21,13 +21,16 @@ export const getIsPersonQueryKey = (user: string) => {
  * @returns The isPerson status.
  */
 export const useIsPerson = (user?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "isPerson",
-    args: [user],
-    enabled: !!user,
+  const { data } = useCallClause({
+    abi,
+    address,
+    method,
+    args: [user || ""],
+    queryOptions: {
+      enabled: !!user,
+    },
   })
+  return data?.[0]
 }
 
 /**

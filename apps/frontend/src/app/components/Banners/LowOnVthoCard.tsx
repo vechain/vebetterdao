@@ -1,8 +1,8 @@
-import { getAccountBalanceQueryKey, useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
+import { useVot3Balance } from "@/api"
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
-import { useWallet } from "@vechain/vechain-kit"
+import { getAccountBalanceQueryKey, useAccountBalance, useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
@@ -17,7 +17,7 @@ export const LowOnVthoCard: React.FC = () => {
   const queryClient = useQueryClient()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
 
   const ownsTokens = useMemo(() => {
@@ -27,12 +27,12 @@ export const LowOnVthoCard: React.FC = () => {
   }, [b3trBalance, vot3Balance])
 
   const isLowOnVtho = useMemo(() => {
-    return Number(balance?.energy.scaled) < minVtho
+    return Number(balance?.energy ?? "0") < minVtho
   }, [balance])
 
   const labels = useMemo(() => {
     if (!balance) return
-    const balanceNumber = new BigNumber(balance.energy.scaled)
+    const balanceNumber = new BigNumber(balance.energy ?? "0")
     if (balanceNumber.isZero())
       return {
         heading: "Not enough VTHO",

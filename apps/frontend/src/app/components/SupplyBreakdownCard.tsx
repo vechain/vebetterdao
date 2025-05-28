@@ -1,4 +1,4 @@
-import { useB3trBalance, useB3trTokenDetails } from "@/api"
+import { useB3trTokenDetails } from "@/api"
 import { Box, Card, CardBody, CardHeader, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
@@ -8,12 +8,13 @@ import { motion } from "framer-motion"
 import { BaseTooltip } from "../../components/BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
+import { useGetB3trBalance } from "@vechain/vechain-kit"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()
 
   const { data: b3trTokenDetails } = useB3trTokenDetails()
-  const { data: vot3ContractB3trBalance } = useB3trBalance(getConfig().vot3ContractAddress)
+  const { data: vot3ContractB3trBalance } = useGetB3trBalance(getConfig().vot3ContractAddress)
 
   const data = useMemo(() => {
     if (!b3trTokenDetails || !vot3ContractB3trBalance) return undefined
