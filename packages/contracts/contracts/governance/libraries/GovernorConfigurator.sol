@@ -325,7 +325,7 @@ library GovernorConfigurator {
   /**
    * @notice Returns the deposit threshold percentage.
    * @param self The storage reference for the GovernorStorage.
-   * @param proposalType The proposal type.
+   * @param proposalTypeValue The proposal type.
    * @return The current deposit threshold percentage.
    */
   function getDepositThresholdPercentage(

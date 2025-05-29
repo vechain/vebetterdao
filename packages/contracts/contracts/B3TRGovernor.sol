@@ -326,7 +326,7 @@ contract B3TRGovernor is
    */
   function depositThresholdPercentage() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.GovernorConfigurator.getDepositThresholdPercentage($, GovernorTypes.ProposalType.Standard);
+    return GovernorConfigurator.getDepositThresholdPercentage($, GovernorTypes.ProposalType.Standard);
   }
 
   /**
