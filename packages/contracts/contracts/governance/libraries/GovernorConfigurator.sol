@@ -203,10 +203,7 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newDepositThreshold
   ) external {
-    require(
-      GovernorProposalLogic.isValidProposalType(proposalType),
-      "GovernorConfigurator: invalid proposal type"
-    );
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     if (newDepositThreshold > 100) {
       revert GovernorDepositThresholdNotInRange(newDepositThreshold);
     }
@@ -245,10 +242,7 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newVotingThreshold
   ) external {
-    require(
-      GovernorProposalLogic.isValidProposalType(proposalType),
-      "GovernorConfigurator: invalid proposal type"
-    );
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     _setProposalTypeVotingThreshold(self, proposalType, newVotingThreshold);
   }
 
@@ -280,10 +274,7 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newDepositThresholdCap
   ) external {
-    require(
-      GovernorProposalLogic.isValidProposalType(proposalType),
-      "GovernorConfigurator: invalid proposal type"
-    );
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     _setProposalTypeDepositThresholdCap(self, proposalType, newDepositThresholdCap);
   }
 
@@ -299,7 +290,6 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newDepositThresholdCap
   ) internal {
-    
     emit DepositThresholdCapSet(
       proposalType,
       self.proposalTypeDepositThresholdCap[proposalType],
@@ -370,9 +360,7 @@ library GovernorConfigurator {
     GovernorStorageTypes.GovernorStorage storage self,
     GovernorTypes.ProposalType proposalType
   ) internal view returns (uint256) {
-    require(
-      GovernorProposalLogic.isValidProposalType(proposalType),
-      "GovernorConfigurator: invalid proposal type"
-    );
+    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     return self.proposalTypeDepositThresholdCap[proposalType];
+  }
 }
