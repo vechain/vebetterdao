@@ -26,6 +26,7 @@ pragma solidity 0.8.20;
 import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import { GovernorStateLogic } from "./GovernorStateLogic.sol";
 import { GovernorTypes } from "./GovernorTypes.sol";
+import { GovernorConfigurator } from "./GovernorConfigurator.sol";
 
 /// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
@@ -191,12 +192,48 @@ library GovernorDepositLogic {
   }
 
   /**
+   * @notice Returns the deposit threshold for a proposal type.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The type of proposal.
+   * @return uint256 The deposit threshold for the proposal type.
+   */
+  function depositThresholdByProposalType(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType
+  ) external view returns (uint256) {
+    return _depositThresholdByProposalType(self, proposalType);
+  }
+
+  /**
    * @notice Internal function to calculate the deposit threshold as a percentage of the total supply of B3TR tokens.
+   * @dev This was the original function that was used to calculate the deposit threshold. It is kept for backwards compatibility.
+   * @dev Since this was originally designed for the Standard proposal type, it is reusing the `_depositThresholdByProposalType` function with the Standard proposal type.
    * @param self The storage reference for the GovernorStorage.
    * @return uint256 The deposit threshold.
    */
   function _depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
-    // deposit threshold is a percentage of the total supply of B3TR tokens
-    return (self.depositThresholdPercentage * self.b3tr.totalSupply()) / 100;
+    return _depositThresholdByProposalType(self, GovernorTypes.ProposalType.Standard);
+  }
+
+  /**
+   * @notice Internal function to calculate the deposit threshold for a proposal type as a percentage of the total supply of B3TR tokens.
+   * @dev In case the percentage based threshold is greater than the max threshold, the max threshold is returned.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The type of proposal.
+   * @return uint256 The deposit threshold for the proposal type.
+   */
+  function _depositThresholdByProposalType(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType
+  ) internal view returns (uint256) {
+    uint256 percentageBasedThreshold = (GovernorConfigurator.getDepositThresholdPercentage(self, proposalType) *
+      self.b3tr.totalSupply()) / 100;
+    uint256 maxThreshold = GovernorConfigurator.getDepositThresholdCap(self, proposalType);
+
+    if (percentageBasedThreshold > maxThreshold) {
+      return maxThreshold;
+    }
+
+    return percentageBasedThreshold;
   }
 }

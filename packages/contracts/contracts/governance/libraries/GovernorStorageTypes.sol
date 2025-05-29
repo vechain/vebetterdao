@@ -103,5 +103,7 @@ library GovernorStorageTypes {
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeVotingThreshold;
     // mapping to store the quorum history for each proposal type
     mapping(GovernorTypes.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
+    // mapping to store the deposit threshold cap for each proposal type
+    mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
   }
 }

@@ -82,6 +82,13 @@ library GovernorConfigurator {
   /// @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
 
+  /// @dev Emitted when the deposit threshold cap for a proposal type is set.
+  event DepositThresholdCapSet(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldDepositThresholdCap,
+    uint256 newDepositThresholdCap
+  );
+
   /**------------------ SETTERS ------------------**/
 
   /**
@@ -153,6 +160,7 @@ library GovernorConfigurator {
   /**
    * @notice Sets the deposit threshold percentage.
    * @dev Sets a new deposit threshold percentage and emits a {DepositThresholdSet} event. Reverts if the threshold is not in range.
+   * @dev This function is deprecated and will be removed in a future version. Use {setProposalTypeDepositThresholdPercentage} instead.
    * @param self The storage reference for the GovernorStorage.
    * @param newDepositThreshold The new deposit threshold percentage.
    */
@@ -165,7 +173,7 @@ library GovernorConfigurator {
     }
 
     emit DepositThresholdSet(self.depositThresholdPercentage, newDepositThreshold);
-    self.depositThresholdPercentage = newDepositThreshold;
+    _setProposalTypeDepositThresholdPercentage(self, GovernorTypes.ProposalType.Standard, newDepositThreshold);
   }
 
   /**
@@ -195,6 +203,13 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newDepositThreshold
   ) external {
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalType),
+      "GovernorConfigurator: invalid proposal type"
+    );
+    if (newDepositThreshold > 100) {
+      revert GovernorDepositThresholdNotInRange(newDepositThreshold);
+    }
     _setProposalTypeDepositThresholdPercentage(self, proposalType, newDepositThreshold);
   }
 
@@ -230,6 +245,10 @@ library GovernorConfigurator {
     GovernorTypes.ProposalType proposalType,
     uint256 newVotingThreshold
   ) external {
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalType),
+      "GovernorConfigurator: invalid proposal type"
+    );
     _setProposalTypeVotingThreshold(self, proposalType, newVotingThreshold);
   }
 
@@ -247,6 +266,46 @@ library GovernorConfigurator {
   ) internal {
     emit VotingThresholdSetV2(proposalType, self.proposalTypeVotingThreshold[proposalType], newVotingThreshold);
     self.proposalTypeVotingThreshold[proposalType] = newVotingThreshold;
+  }
+
+  /**
+   * @notice Sets the deposit threshold cap for a proposal type.
+   * @dev Sets a new deposit threshold cap for a proposal type and emits a {DepositThresholdCapSet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newDepositThresholdCap The new deposit threshold cap.
+   */
+  function setProposalTypeDepositThresholdCap(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newDepositThresholdCap
+  ) external {
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalType),
+      "GovernorConfigurator: invalid proposal type"
+    );
+    _setProposalTypeDepositThresholdCap(self, proposalType, newDepositThresholdCap);
+  }
+
+  /**
+   * @notice Sets the deposit threshold cap for a proposal type.
+   * @dev Sets a new deposit threshold cap for a proposal type and emits a {DepositThresholdCapSet} event.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @param newDepositThresholdCap The new deposit threshold cap.
+   */
+  function _setProposalTypeDepositThresholdCap(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType,
+    uint256 newDepositThresholdCap
+  ) internal {
+    
+    emit DepositThresholdCapSet(
+      proposalType,
+      self.proposalTypeDepositThresholdCap[proposalType],
+      newDepositThresholdCap
+    );
+    self.proposalTypeDepositThresholdCap[proposalType] = newDepositThresholdCap;
   }
 
   /**------------------ GETTERS ------------------**/
@@ -281,10 +340,13 @@ library GovernorConfigurator {
    */
   function getDepositThresholdPercentage(
     GovernorStorageTypes.GovernorStorage storage self,
-    GovernorTypes.ProposalType proposalType
+    GovernorTypes.ProposalType proposalTypeValue
   ) internal view returns (uint256) {
-    require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
-    return self.proposalTypeDepositThresholdPercentage[proposalType];
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalTypeValue),
+      "GovernorConfigurator: invalid proposal type"
+    );
+    return self.proposalTypeDepositThresholdPercentage[proposalTypeValue];
   }
 
   /**
@@ -297,4 +359,20 @@ library GovernorConfigurator {
   ) internal view returns (IVeBetterPassport) {
     return self.veBetterPassport;
   }
+
+  /**
+   * @notice Returns the deposit threshold cap for a proposal type.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposalType The proposal type.
+   * @return The current deposit threshold cap.
+   */
+  function getDepositThresholdCap(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalType
+  ) internal view returns (uint256) {
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalType),
+      "GovernorConfigurator: invalid proposal type"
+    );
+    return self.proposalTypeDepositThresholdCap[proposalType];
 }

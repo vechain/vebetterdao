@@ -80,6 +80,8 @@ library GovernorTypes {
     uint256 grantDepositThreshold;
     uint256 grantVotingThreshold;
     uint256 grantQuorum;
+    uint256 grantDepositThresholdCap;
+    uint256 standardDepositThresholdCap;
   }
 
   // ProposalType enum to distinguish between different types of proposals

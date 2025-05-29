@@ -130,13 +130,25 @@ contract GovernorStorage is Initializable {
     // Set quorum
     GovernorQuorumLogic._updateQuorumNumeratorByType(
       governorStorage,
-      initializationDataV6.grantQuorum,
-      GovernorTypes.ProposalType.Grant
+      GovernorQuorumLogic.quorumNumerator(governorStorage),
+      GovernorTypes.ProposalType.Standard
     );
     GovernorQuorumLogic._updateQuorumNumeratorByType(
       governorStorage,
-      GovernorQuorumLogic.quorumNumerator(governorStorage),
-      GovernorTypes.ProposalType.Standard
+      initializationDataV6.grantQuorum,
+      GovernorTypes.ProposalType.Grant
+    );
+
+    // Set deposit threshold cap
+    GovernorConfigurator._setProposalTypeDepositThresholdCap(
+      governorStorage,
+      GovernorTypes.ProposalType.Standard,
+      initializationDataV6.standardDepositThresholdCap
+    );
+    GovernorConfigurator._setProposalTypeDepositThresholdCap(
+      governorStorage,
+      GovernorTypes.ProposalType.Grant,
+      initializationDataV6.grantDepositThresholdCap
     );
   }
 }

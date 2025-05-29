@@ -309,12 +309,36 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Returns the deposit threshold for a proposal type.
+   * @param proposalTypeValue The type of proposal.
+   * @return uint256 The deposit threshold for the proposal type.
+   */
+  function depositThresholdByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorDepositLogic.depositThresholdByProposalType($, proposalTypeValue);
+  }
+
+  /**
    * @notice See {Governor-depositThreshold}.
    * @return uint256 The deposit threshold percentage
    */
   function depositThresholdPercentage() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThresholdPercentage;
+    return $.GovernorConfigurator.getDepositThresholdPercentage($, GovernorTypes.ProposalType.Standard);
+  }
+
+  /**
+   * @notice Returns the deposit threshold percentage for a proposal type.
+   * @param proposalTypeValue The type of proposal.
+   * @return uint256 The deposit threshold percentage for the proposal type.
+   */
+  function depositThresholdPercentageByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorConfigurator.getDepositThresholdPercentage($, proposalTypeValue);
   }
 
   /**

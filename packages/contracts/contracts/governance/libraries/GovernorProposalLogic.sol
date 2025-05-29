@@ -557,7 +557,7 @@ library GovernorProposalLogic {
     uint256 depositAmount,
     GovernorTypes.ProposalType proposalTypeValue
   ) private returns (uint256) {
-    uint256 depositThresholdAmount = GovernorDepositLogic._depositThreshold(self);
+    uint256 depositThresholdAmount = GovernorDepositLogic._depositThresholdByProposalType(self, proposalTypeValue);
     uint32 votingPeriod = SafeCast.toUint32(self.xAllocationVoting.votingPeriod());
     bool isExecutable = targets.length > 0;
 
