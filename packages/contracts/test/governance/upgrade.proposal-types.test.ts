@@ -15,6 +15,7 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import { setupGovernanceFixture } from "./fixture.test"
 async function startNewRoundAndGetRoundId(emissions: Emissions, xAllocationVoting: XAllocationVoting) {
   // to ensure that test will work correctly before creating a proposal we wait for current round to end
   // and start a new one
@@ -313,9 +314,11 @@ describe.only("Proposal Type Storage", function () {
       governorContractAddress,
       [
         {
-          grantDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, //Grant deposit threshold
-          grantVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, //Grant voting threshold
-          grantQuorum: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
         },
       ],
       {
@@ -532,9 +535,11 @@ describe.only("Proposal Type Storage", function () {
       await governorV5.getAddress(),
       [
         {
-          grantDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
-          grantVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
-          grantQuorum: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
         },
       ],
       {
@@ -574,5 +579,68 @@ describe.only("Proposal Type Storage", function () {
     //Querying with a timepoint should return the quorum numerator at that timepoint
     //Which in this case is after the upgrade, so should be the same as the new quorum numerator
     expect(v6QuorumNumeratorByTypeLatest).to.be.equal(newQuorumNumerator)
+  })
+
+  it("Should return the correct deposit threshold for a proposal type", async () => {
+    const fixture = await setupGovernanceFixture()
+    const governor = fixture.governor
+    const b3tr = fixture.b3tr
+    const proposalStandardType = ethers.toBigInt(0)
+    const proposalGrantType = ethers.toBigInt(1)
+    const config = createLocalConfig()
+
+    // Bootstrap emissions to ensure B3TR has a non-zero total supply
+    await bootstrapAndStartEmissions()
+
+    // Get the current total supply
+    const totalSupply = await b3tr.totalSupply()
+    const expectedStandardDepositThreshold =
+      (ethers.toBigInt(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
+    const expectedGrantDepositThreshold =
+      (ethers.toBigInt(config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
+
+    //Standard threshold percentage remains the same after upgrade
+    const depositThreshold = await governor.depositThresholdByProposalType(proposalStandardType)
+    expect(depositThreshold).to.eql(expectedStandardDepositThreshold)
+
+    const depositThresholdGrant = await governor.depositThresholdByProposalType(proposalGrantType)
+    expect(depositThresholdGrant).to.eql(expectedGrantDepositThreshold)
+  })
+  it("Should return the correct deposit threshold for STANDARD proposal type using the old method", async () => {
+    const fixture = await setupGovernanceFixture()
+    const governor = fixture.governor
+    const b3tr = fixture.b3tr
+    const config = createLocalConfig()
+
+    // Bootstrap emissions to ensure B3TR has a non-zero total supply
+    await bootstrapAndStartEmissions()
+
+    // Get the current total supply
+    const totalSupply = await b3tr.totalSupply()
+
+    // Calculate expected deposit threshold: (percentage * totalSupply) / 100
+    const expectedDepositThreshold =
+      (ethers.toBigInt(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
+
+    const depositThreshold = await governor.depositThreshold()
+    expect(depositThreshold).to.eql(expectedDepositThreshold)
+  })
+  it("Should return the max cap for proposals if the percentage based threshold is greater than the max threshold", async () => {
+    const fixture = await setupGovernanceFixture()
+    const governor = fixture.governor
+    const owner = fixture.owner
+    const proposalStandardType = ethers.toBigInt(0)
+    const config = createLocalConfig()
+    const expectedThreshold = ethers.toBigInt(config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP)
+
+    // Bootstrap emissions to ensure B3TR has a non-zero total supply
+    await bootstrapAndStartEmissions()
+
+    // Set the deposit threshold percentage to 100%
+    await governor.connect(owner).setProposalTypeDepositThresholdPercentage(100, proposalStandardType)
+
+    // Get the deposit threshold
+    const depositThreshold = await governor.depositThreshold()
+    expect(depositThreshold).to.eql(expectedThreshold)
   })
 })
