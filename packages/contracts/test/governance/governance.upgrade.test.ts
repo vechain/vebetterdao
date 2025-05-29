@@ -7,29 +7,15 @@ import {
   B3TRGovernorV2,
   B3TRGovernorV3,
   B3TRGovernorV4,
-  Emissions,
-  XAllocationVoting,
 } from "../../typechain-types"
-import { bootstrapAndStartEmissions, waitForBlock, waitForCurrentRoundToEnd } from "../helpers/common"
+import { waitForBlock } from "../helpers/common"
 import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
-import { setupGovernanceFixture } from "./fixture.test"
-async function startNewRoundAndGetRoundId(emissions: Emissions, xAllocationVoting: XAllocationVoting) {
-  // to ensure that test will work correctly before creating a proposal we wait for current round to end
-  // and start a new one
-  if ((await emissions.nextCycle()) === 0n) {
-    // if emissions are not started yet, we need to bootstrap and start them
-    await bootstrapAndStartEmissions()
-  } else {
-    // otherwise we need to wait for the current round to end and start the next one
-    await waitForCurrentRoundToEnd()
-    await emissions.distribute()
-  }
-  return ((await xAllocationVoting.currentRoundId()) + 1n).toString()
-}
-describe.only("Proposal Type Storage", function () {
+import { setupProposer, startNewRoundAndGetRoundId } from "./governance.fixture.test"
+
+describe.only("Governance - Upgrades", function () {
   it("Should preserve proposal data through version upgrades and add proposal type support", async () => {
     const config = createLocalConfig()
     const {
@@ -87,13 +73,9 @@ describe.only("Proposal Type Storage", function () {
       forceDeploy: true,
     })) as DeployInstance
 
-    await bootstrapAndStartEmissions()
-
     // Setup proposer for this test
     const proposer = otherAccounts[0]
-    await b3tr.connect(minterAccount).mint(proposer, ethers.parseEther("1000"))
-    await b3tr.connect(proposer).approve(await vot3.getAddress(), ethers.parseEther("9"))
-    await vot3.connect(proposer).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })
+    await setupProposer(proposer, b3tr, vot3, minterAccount)
 
     // Get B3TR contract factory for proposal creation
     const b3trContract = await ethers.getContractFactory("B3TR")
@@ -437,8 +419,6 @@ describe.only("Proposal Type Storage", function () {
       forceDeploy: true,
     })) as DeployInstance
 
-    await bootstrapAndStartEmissions()
-
     const governorV5 = (await deployAndUpgrade(
       ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5"],
       [
@@ -579,68 +559,5 @@ describe.only("Proposal Type Storage", function () {
     //Querying with a timepoint should return the quorum numerator at that timepoint
     //Which in this case is after the upgrade, so should be the same as the new quorum numerator
     expect(v6QuorumNumeratorByTypeLatest).to.be.equal(newQuorumNumerator)
-  })
-
-  it("Should return the correct deposit threshold for a proposal type", async () => {
-    const fixture = await setupGovernanceFixture()
-    const governor = fixture.governor
-    const b3tr = fixture.b3tr
-    const proposalStandardType = ethers.toBigInt(0)
-    const proposalGrantType = ethers.toBigInt(1)
-    const config = createLocalConfig()
-
-    // Bootstrap emissions to ensure B3TR has a non-zero total supply
-    await bootstrapAndStartEmissions()
-
-    // Get the current total supply
-    const totalSupply = await b3tr.totalSupply()
-    const expectedStandardDepositThreshold =
-      (ethers.toBigInt(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
-    const expectedGrantDepositThreshold =
-      (ethers.toBigInt(config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
-
-    //Standard threshold percentage remains the same after upgrade
-    const depositThreshold = await governor.depositThresholdByProposalType(proposalStandardType)
-    expect(depositThreshold).to.eql(expectedStandardDepositThreshold)
-
-    const depositThresholdGrant = await governor.depositThresholdByProposalType(proposalGrantType)
-    expect(depositThresholdGrant).to.eql(expectedGrantDepositThreshold)
-  })
-  it("Should return the correct deposit threshold for STANDARD proposal type using the old method", async () => {
-    const fixture = await setupGovernanceFixture()
-    const governor = fixture.governor
-    const b3tr = fixture.b3tr
-    const config = createLocalConfig()
-
-    // Bootstrap emissions to ensure B3TR has a non-zero total supply
-    await bootstrapAndStartEmissions()
-
-    // Get the current total supply
-    const totalSupply = await b3tr.totalSupply()
-
-    // Calculate expected deposit threshold: (percentage * totalSupply) / 100
-    const expectedDepositThreshold =
-      (ethers.toBigInt(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
-
-    const depositThreshold = await governor.depositThreshold()
-    expect(depositThreshold).to.eql(expectedDepositThreshold)
-  })
-  it("Should return the max cap for proposals if the percentage based threshold is greater than the max threshold", async () => {
-    const fixture = await setupGovernanceFixture()
-    const governor = fixture.governor
-    const owner = fixture.owner
-    const proposalStandardType = ethers.toBigInt(0)
-    const config = createLocalConfig()
-    const expectedThreshold = ethers.toBigInt(config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP)
-
-    // Bootstrap emissions to ensure B3TR has a non-zero total supply
-    await bootstrapAndStartEmissions()
-
-    // Set the deposit threshold percentage to 100%
-    await governor.connect(owner).setProposalTypeDepositThresholdPercentage(100, proposalStandardType)
-
-    // Get the deposit threshold
-    const depositThreshold = await governor.depositThreshold()
-    expect(depositThreshold).to.eql(expectedThreshold)
   })
 })
