@@ -509,6 +509,18 @@ export async function deployLatest(config: ContractsConfig) {
         name: "initializeV4",
         args: [await veBetterPassport.getAddress()],
       },
+      {
+        name: "initializeV6",
+        args: [
+          {
+            grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+            grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+            grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+            grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+            standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          },
+        ],
+      },
     ],
     {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
