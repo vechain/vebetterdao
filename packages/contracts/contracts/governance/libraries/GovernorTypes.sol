@@ -70,6 +70,18 @@ library GovernorTypes {
     address governorFunctionSettingsRoleAddress;
   }
 
+  /**
+   * @dev Struct containing data for v6 initialization
+   * @param grantDepositThreshold The deposit threshold percentage for grant proposals
+   * @param grantVotingThreshold The voting threshold for grant proposals
+   * @param grantQuorum The quorum percentage for grant proposals
+   */
+  struct InitializationDataV6 {
+    uint256 grantDepositThreshold;
+    uint256 grantVotingThreshold;
+    uint256 grantQuorum;
+  }
+
   // ProposalType enum to distinguish between different types of proposals
   enum ProposalType {
     Standard,

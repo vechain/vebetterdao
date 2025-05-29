@@ -99,9 +99,7 @@ contract GovernorStorage is Initializable {
   }
 
   function __GovernorStorage_init_v6(
-    uint256 grantDepositThreshold,
-    uint256 grantVotingThreshold,
-    uint256 grantQuorum
+    GovernorTypes.InitializationDataV6 memory initializationDataV6
   ) internal onlyInitializing {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
 
@@ -114,7 +112,7 @@ contract GovernorStorage is Initializable {
     GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
       governorStorage,
       GovernorTypes.ProposalType.Grant,
-      grantDepositThreshold
+      initializationDataV6.grantDepositThreshold
     );
 
     // Set voting threshold
@@ -126,11 +124,15 @@ contract GovernorStorage is Initializable {
     GovernorConfigurator._setProposalTypeVotingThreshold(
       governorStorage,
       GovernorTypes.ProposalType.Grant,
-      grantVotingThreshold
+      initializationDataV6.grantVotingThreshold
     );
 
     // Set quorum
-    GovernorQuorumLogic._updateQuorumNumeratorByType(governorStorage, grantQuorum, GovernorTypes.ProposalType.Grant);
+    GovernorQuorumLogic._updateQuorumNumeratorByType(
+      governorStorage,
+      initializationDataV6.grantQuorum,
+      GovernorTypes.ProposalType.Grant
+    );
     GovernorQuorumLogic._updateQuorumNumeratorByType(
       governorStorage,
       GovernorQuorumLogic.quorumNumerator(governorStorage),

@@ -312,9 +312,11 @@ describe.only("Proposal Type Storage", function () {
       "B3TRGovernor",
       governorContractAddress,
       [
-        config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, //Grant deposit threshold
-        config.B3TR_GOVERNOR_VOTING_THRESHOLD, //Grant voting threshold
-        config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, //Grant quorum percentage
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, //Grant quorum percentage
+        },
       ],
       {
         version: 6,
@@ -529,9 +531,11 @@ describe.only("Proposal Type Storage", function () {
       "B3TRGovernor",
       await governorV5.getAddress(),
       [
-        config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
-        config.B3TR_GOVERNOR_VOTING_THRESHOLD,
-        config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+          grantVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+          grantQuorum: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+        },
       ],
       {
         version: 6,
