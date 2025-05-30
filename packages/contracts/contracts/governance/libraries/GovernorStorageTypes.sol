@@ -94,5 +94,16 @@ library GovernorStorageTypes {
 
     // ------------------------------- Passport -------------------------------
     IVeBetterPassport veBetterPassport;
+    // ------------------------------- Version 7 -------------------------------
+    // mapping to store the proposal type for each proposal
+    mapping(uint256 => GovernorTypes.ProposalType) proposalType;
+    // mapping to store the deposit threshold percentage for each proposal type
+    mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdPercentage;
+    // mapping to store the voting threshold for each proposal type
+    mapping(GovernorTypes.ProposalType => uint256) proposalTypeVotingThreshold;
+    // mapping to store the quorum history for each proposal type
+    mapping(GovernorTypes.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
+    // mapping to store the deposit threshold cap for each proposal type
+    mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
   }
 }
