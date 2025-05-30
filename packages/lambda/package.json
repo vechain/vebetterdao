@@ -8,6 +8,8 @@
     "prebuild": "rm -rf dist",
     "build": "yarn prebuild && find . -name '*.lambda.ts' -exec sh -c 'ENVIRONMENT=$(basename {} .lambda.ts) && FUNCTION=$(basename $(dirname {})) && yarn esbuild {} --bundle --minify --sourcemap --platform=node --outfile=dist/$ENVIRONMENT/$FUNCTION/index.js' \\;",
     "postbuild": "find dist/*/* -type d -exec sh -c 'cd {} && zip -r index.zip *' \\;",
+    "build:lambda": "yarn prebuild && find . -name 'lambda.ts' -exec sh -c 'FUNCTION=$(basename $(dirname {})) && ENV=${LAMBDA_ENV:-testnet-staging} && yarn esbuild {} --bundle --minify --sourcemap --platform=node --define:process.env.LAMBDA_ENV=\"\\\"$ENV\\\"\" --outfile=dist/$ENV/$FUNCTION/index.js' \\;",
+    "postbuild:lambda": "find dist/*/*/ -name 'index.js' -exec sh -c 'cd $(dirname {}) && zip -r index.zip *' \\;",
     "test": "yarn build && TEST_ENVIRONMENT=testnet jest",
     "start": "npx ts-node",
     "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts"
