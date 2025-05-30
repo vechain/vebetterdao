@@ -6,7 +6,7 @@ const address = getConfig().galaxyMemberContractAddress
 const abi = GalaxyMember__factory.abi
 const method = "getSelectedTokenId" as const
 
-export const getSelectedTokenIdQueryKey = (account?: string | null) =>
+export const getSelectedTokenIdQueryKey = (account?: string) =>
   getCallClauseQueryKey<typeof abi>({ address, method, args: [account ?? "0x"] })
 
 /**

@@ -1,12 +1,11 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { B3trContractJson } from "@repo/contracts"
+import { B3TR__factory } from "@repo/contracts"
 import { ethers } from "ethers"
+import { EnhancedClause, ThorClient } from "@vechain/vechain-kit"
 
-const b3trAbi = B3trContractJson.abi
-
-const config = getConfig()
-const B3TR_CONTRACT = config.b3trContractAddress
+const abi = B3TR__factory.abi
+const contractAddress = getConfig().b3trContractAddress
 
 /**
  * Build the clause to mint B3TR tokens for the given address and amount
@@ -16,23 +15,15 @@ const B3TR_CONTRACT = config.b3trContractAddress
  * @param decimals the decimals of the token
  * @returns the clause to mint B3TR tokens
  */
-export const buildMintB3trTx = (
-  thor: Connex.Thor,
-  address: string,
-  amount: string | number,
-): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = b3trAbi.find(e => e.name === "mint")
-  if (!functionAbi) throw new Error("Function abi not found for mint")
-
+export const buildMintB3trTx = (thor: ThorClient, address: string, amount: string | number): EnhancedClause => {
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const formattedAddress = FormattingUtils.humanAddress(address)
   const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
 
-  const clause = thor.account(B3TR_CONTRACT).method(functionAbi).asClause(address, amountWithDecimals)
+  const { clause } = thor.contracts.load(contractAddress, abi).clause.mint([address, amountWithDecimals])
 
   return {
     ...clause,
     comment: `Mint ${formattedAmount} B3TR to ${formattedAddress}`,
-    abi: functionAbi,
   }
 }

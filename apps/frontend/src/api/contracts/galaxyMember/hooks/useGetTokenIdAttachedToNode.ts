@@ -23,7 +23,7 @@ export const useGetTokenIdAttachedToNode = (nodeId?: string, enabled = true) => 
     method,
     args: [BigInt(nodeId || "0")],
     queryOptions: {
-      select: data => Number(data[0]),
+      select: data => data[0].toString(),
       enabled: !!nodeId && enabled,
     },
   })

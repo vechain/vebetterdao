@@ -3,7 +3,7 @@ import { useToast } from "@chakra-ui/react"
 
 import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useConnex, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useThor, useWallet, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 type useMintB3trProps = {
@@ -18,7 +18,7 @@ type useMintB3trProps = {
  * @returns see {@link UseSendTransactionReturnValue}
  */
 export const useDelegateVot3 = ({ address, onSuccess }: useMintB3trProps): UseSendTransactionReturnValue => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const { account } = useWallet()
   const toast = useToast()
 

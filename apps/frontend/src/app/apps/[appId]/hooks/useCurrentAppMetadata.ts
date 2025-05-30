@@ -1,4 +1,4 @@
-import { useXAppMetadata } from "@/api"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 import { useParams } from "next/navigation"
 
 /**

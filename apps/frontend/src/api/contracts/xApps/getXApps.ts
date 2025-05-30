@@ -28,6 +28,7 @@ export type XApp = {
   name: string
   metadataURI: string
   createdAtTimestamp: string
+  // TODO: migration check if this is still valid?
   isNew: boolean
 }
 

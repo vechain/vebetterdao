@@ -1,9 +1,9 @@
-import { useNodeEndorsedApp, useNodesEndorsementScore, useXAppMetadata } from "../xApps"
+import { useNodeEndorsedApp, useNodesEndorsementScore } from "../xApps"
 import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { useIpfsImage } from "@/api/ipfs"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useXAppMetadata } from "@vechain/vechain-kit"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
@@ -108,7 +108,7 @@ export const useXNode = (profile?: string): XNodeData => {
 
   const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
 
-  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(xNode?.id ?? "")
+  const { data: isXNodeOnCooldown = false } = useXNodeCheckCooldown(xNode?.id ?? "")
 
   return {
     isXNodeLoading,

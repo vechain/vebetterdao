@@ -1,7 +1,7 @@
 import { buildB3trApprovesTx } from "@/api"
 import { useCallback, useMemo } from "react"
 import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 type useB3trApproveProps = {
@@ -11,7 +11,7 @@ type useB3trApproveProps = {
 }
 
 export const useB3trApprove = ({ spender, amount, onSuccess }: useB3trApproveProps) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(() => {

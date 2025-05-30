@@ -1,11 +1,10 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
+import { VOT3__factory } from "@repo/contracts"
+import { EnhancedClause, ThorClient } from "@vechain/vechain-kit"
 
-import { Vot3ContractJson } from "@repo/contracts"
-const vot3Abi = Vot3ContractJson.abi
-
-const config = getConfig()
-const VOT3_CONTRACT = config.vot3ContractAddress
+const abi = VOT3__factory.abi
+const contractAddress = getConfig().vot3ContractAddress
 
 /**
  * Build the clause to delegate votes to the given address (used to delegate votes to the governance contract)
@@ -13,17 +12,13 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  * @param address the address to mint the tokens to
  * @returns the clause to delegate votes
  */
-export const buildDelegateVot3Tx = (thor: Connex.Thor, address: string): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = vot3Abi.find(e => e.name === "delegate")
-  if (!functionAbi) throw new Error("Function abi not found for mint")
-
-  const clause = thor.account(VOT3_CONTRACT).method(functionAbi).asClause(address)
-
+export const buildDelegateVot3Tx = (thor: ThorClient, address: string): EnhancedClause => {
   const formattedAddress = FormattingUtils.humanAddress(address)
+
+  const { clause } = thor.contracts.load(contractAddress, abi).clause.delegate(address)
 
   return {
     ...clause,
     comment: `Delegate VOT£ to ${formattedAddress}`,
-    abi: functionAbi,
   }
 }
