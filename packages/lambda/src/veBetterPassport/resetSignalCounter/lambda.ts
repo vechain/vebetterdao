@@ -53,8 +53,12 @@ const getNetworkConfig = (): NetworkConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
 
-  const TESTNET_VET_DOMAINS_ADDRESS = "0xE27C72E252D5C3B2daf871aB7628F29370438589" // Mock
-  const MAINNET_VET_DOMAINS_ADDRESS = "0xbd7832FdacCB89FAB522e5B4Afb415A999b8a201"
+  const TESTNET_VET_DOMAINS_ADDRESS = stagingConfig.externalContractIntegrations?.vetDomainsContractAddress
+  const MAINNET_VET_DOMAINS_ADDRESS = mainnetConfig.externalContractIntegrations?.vetDomainsContractAddress
+
+  if (!TESTNET_VET_DOMAINS_ADDRESS || !MAINNET_VET_DOMAINS_ADDRESS) {
+    throw new Error("VET Domains contract address is not set")
+  }
 
   switch (environment) {
     case AppEnv.MAINNET:
