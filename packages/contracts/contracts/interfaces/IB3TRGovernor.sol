@@ -223,6 +223,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event VeBetterPassportSet(address indexed oldVeBetterPassport, address indexed newVeBetterPassport);
 
   /**
+   * @dev Emitted when a proposal is created with type information.
+   */
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
+
+  /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
    */
@@ -402,7 +407,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @dev Create a new proposal. Specify the allocation round when vote should become active.
    * The duration is specified by {IGovernor-votingPeriod}.
    *
-   * Emits a {ProposalCreated} event.
+   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
    */
   function propose(
     address[] memory targets,
@@ -525,4 +530,26 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param newVeBetterPassport The new VeBetterPassport contract
    */
   function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external;
+
+  /**
+   * @notice module:core
+   * @dev The type of a proposal.
+   */
+  function proposalType(uint256 proposalId) external view returns (GovernorTypes.ProposalType);
+
+  /**
+   * @dev Create a new proposal. Specify the allocation round when vote should become active.
+   * The duration is specified by {IGovernor-votingPeriod}.
+   *
+   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
+   */
+  function proposeWithType(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    GovernorTypes.ProposalType proposalType
+  ) external returns (uint256 proposalId);
 }
