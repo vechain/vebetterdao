@@ -23,16 +23,16 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
-import { GovernorClockLogic } from "./GovernorClockLogic.sol";
-import { GovernorVotesLogic } from "./GovernorVotesLogic.sol";
-import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
+import { GovernorStorageTypesV6 } from "./GovernorStorageTypesV6.sol";
+import { GovernorClockLogicV6 } from "./GovernorClockLogicV6.sol";
+import { GovernorVotesLogicV6 } from "./GovernorVotesLogicV6.sol";
+import { GovernorProposalLogicV6 } from "./GovernorProposalLogicV6.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
-/// @title GovernorQuorumLogic
+/// @title GovernorQuorumLogicV6
 /// @notice Library for managing quorum numerators using checkpointed data structures.
-library GovernorQuorumLogic {
+library GovernorQuorumLogicV6 {
   using Checkpoints for Checkpoints.Trace208;
 
   /// @notice Error that is thrown when the new quorum numerator exceeds the denominator.
@@ -58,7 +58,7 @@ library GovernorQuorumLogic {
   /// @param timepoint The specific timepoint for which to fetch the numerator.
   /// @return The quorum numerator at the given timepoint.
   function quorumNumerator(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 timepoint
   ) public view returns (uint256) {
     uint256 length = self.quorumNumeratorHistory._checkpoints.length;
@@ -75,10 +75,10 @@ library GovernorQuorumLogic {
     return self.quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
-  /// @notice Retrieves the latest quorum numerator using the GovernorClockLogic library.
+  /// @notice Retrieves the latest quorum numerator using the GovernorClockLogicV6 library.
   /// @param self The storage structure containing the quorum numerator history.
   /// @return The latest quorum numerator.
-  function quorumNumerator(GovernorStorageTypes.GovernorStorage storage self) public view returns (uint256) {
+  function quorumNumerator(GovernorStorageTypesV6.GovernorStorage storage self) public view returns (uint256) {
     return self.quorumNumeratorHistory.latest();
   }
 
@@ -89,7 +89,7 @@ library GovernorQuorumLogic {
    * @return True if the quorum has been reached, false otherwise.
    */
   function isQuorumReached(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) external view returns (bool) {
     return quorumReached(self, proposalId);
@@ -101,7 +101,7 @@ library GovernorQuorumLogic {
    * @param timepoint The specific timepoint.
    * @return The quorum at the given timepoint.
    */
-  function quorum(GovernorStorageTypes.GovernorStorage storage self, uint256 timepoint) public view returns (uint256) {
+  function quorum(GovernorStorageTypesV6.GovernorStorage storage self, uint256 timepoint) public view returns (uint256) {
     return (self.vot3.getPastTotalSupply(timepoint) * quorumNumerator(self, timepoint)) / quorumDenominator();
   }
 
@@ -115,7 +115,7 @@ library GovernorQuorumLogic {
    * @param newQuorumNumerator The new value for the quorum numerator.
    */
   function updateQuorumNumerator(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 newQuorumNumerator
   ) external {
     uint256 denominator = quorumDenominator();
@@ -125,7 +125,7 @@ library GovernorQuorumLogic {
       revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
     }
 
-    self.quorumNumeratorHistory.push(GovernorClockLogic.clock(self), SafeCast.toUint208(newQuorumNumerator));
+    self.quorumNumeratorHistory.push(GovernorClockLogicV6.clock(self), SafeCast.toUint208(newQuorumNumerator));
 
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
   }
@@ -139,10 +139,10 @@ library GovernorQuorumLogic {
    * @return True if the quorum has been reached, false otherwise.
    */
   function quorumReached(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
     return
-      quorum(self, GovernorProposalLogic._proposalSnapshot(self, proposalId)) <= self.proposalTotalVotes[proposalId];
+      quorum(self, GovernorProposalLogicV6._proposalSnapshot(self, proposalId)) <= self.proposalTotalVotes[proposalId];
   }
 }

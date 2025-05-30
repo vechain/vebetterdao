@@ -3,11 +3,11 @@
 pragma solidity 0.8.20;
 
 /**
- * @title IVoterRewards Interface
+ * @title IVoterRewardsV6 Interface
  * @notice Interface for managing voter rewards, roles, emissions, and galaxy membership
  * @dev Handles reward distribution, vote registration, and role management for the voting system
  */
-interface IVoterRewards {
+interface IVoterRewardsV6 {
   /// @notice Thrown when access control confirmation is invalid
   error AccessControlBadConfirmation();
 

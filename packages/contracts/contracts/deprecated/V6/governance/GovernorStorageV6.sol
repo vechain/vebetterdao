@@ -23,20 +23,20 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
-import { GovernorTypes } from "./libraries/GovernorTypes.sol";
+import { GovernorStorageTypesV6 } from "./libraries/GovernorStorageTypesV6.sol";
+import { GovernorTypesV6 } from "./libraries/GovernorTypesV6.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
 
-/// @title GovernorStorage
+/// @title GovernorStorageV6
 /// @notice Contract used as storage of the B3TRGovernor contract.
 /// @dev It defines the storage layout of the B3TRGovernor contract.
-contract GovernorStorage is Initializable {
+contract GovernorStorageV6 is Initializable {
   // keccak256(abi.encode(uint256(keccak256("GovernorStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GovernorStorageLocation = 0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00;
 
   /// @dev Internal function to access the governor storage slot.
-  function getGovernorStorage() internal pure returns (GovernorStorageTypes.GovernorStorage storage $) {
+  function getGovernorStorage() internal pure returns (GovernorStorageTypesV6.GovernorStorage storage $) {
     assembly {
       $.slot := GovernorStorageLocation
     }
@@ -44,7 +44,7 @@ contract GovernorStorage is Initializable {
 
   /// @dev Initializes the governor storage
   function __GovernorStorage_init(
-    GovernorTypes.InitializationData memory initializationData,
+    GovernorTypesV6.InitializationData memory initializationData,
     string memory governorName
   ) internal onlyInitializing {
     __GovernorStorage_init_unchained(initializationData, governorName);
@@ -52,10 +52,10 @@ contract GovernorStorage is Initializable {
 
   /// @dev Part of the initialization process that configures the governor storage.
   function __GovernorStorage_init_unchained(
-    GovernorTypes.InitializationData memory initializationData,
+    GovernorTypesV6.InitializationData memory initializationData,
     string memory governorName
   ) internal onlyInitializing {
-    GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
+    GovernorStorageTypesV6.GovernorStorage storage governorStorage = getGovernorStorage();
 
     // Validate and set the governor time lock storage
     require(address(initializationData.timelock) != address(0), "B3TRGovernor: timelock address cannot be zero");
@@ -92,7 +92,7 @@ contract GovernorStorage is Initializable {
   }
 
   function __GovernorStorage_init_v4(IVeBetterPassport veBetterPassport) internal onlyInitializing {
-    GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
+    GovernorStorageTypesV6.GovernorStorage storage governorStorage = getGovernorStorage();
     governorStorage.veBetterPassport = veBetterPassport;
   }
 }

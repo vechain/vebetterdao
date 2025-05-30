@@ -23,20 +23,20 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorTypes } from "./GovernorTypes.sol";
-import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
-import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
-import { GovernorVotesLogic } from "./GovernorVotesLogic.sol";
-import { GovernorQuorumLogic } from "./GovernorQuorumLogic.sol";
-import { GovernorClockLogic } from "./GovernorClockLogic.sol";
-import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
+import { GovernorTypesV6 } from "./GovernorTypesV6.sol";
+import { GovernorStorageTypesV6 } from "./GovernorStorageTypesV6.sol";
+import { GovernorProposalLogicV6 } from "./GovernorProposalLogicV6.sol";
+import { GovernorVotesLogicV6 } from "./GovernorVotesLogicV6.sol";
+import { GovernorQuorumLogicV6 } from "./GovernorQuorumLogicV6.sol";
+import { GovernorClockLogicV6 } from "./GovernorClockLogicV6.sol";
+import { GovernorDepositLogicV6 } from "./GovernorDepositLogicV6.sol";
 
-/// @title GovernorStateLogic
+/// @title GovernorStateLogicV6
 /// @notice Library for Governor state logic, managing the state transitions and validations of governance proposals.
-library GovernorStateLogic {
+library GovernorStateLogicV6 {
   /// @notice Bitmap representing all possible proposal states.
   bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP =
-    bytes32((2 ** (uint8(type(GovernorTypes.ProposalState).max) + 1)) - 1);
+    bytes32((2 ** (uint8(type(GovernorTypesV6.ProposalState).max) + 1)) - 1);
 
   /// @dev Thrown when the `proposalId` does not exist.
   /// @param proposalId The ID of the proposal that does not exist.
@@ -48,7 +48,7 @@ library GovernorStateLogic {
   /// @param expectedStates The expected states of the proposal as a bitmap.
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
-    GovernorTypes.ProposalState current,
+    GovernorTypesV6.ProposalState current,
     bytes32 expectedStates
   );
 
@@ -61,9 +61,9 @@ library GovernorStateLogic {
    * @return The current state of the proposal.
    */
   function state(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
-  ) external view returns (GovernorTypes.ProposalState) {
+  ) external view returns (GovernorTypesV6.ProposalState) {
     return _state(self, proposalId);
   }
 
@@ -77,11 +77,11 @@ library GovernorStateLogic {
    * @return The current state of the proposal.
    */
   function validateStateBitmap(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId,
     bytes32 allowedStates
-  ) internal view returns (GovernorTypes.ProposalState) {
-    GovernorTypes.ProposalState currentState = _state(self, proposalId);
+  ) internal view returns (GovernorTypesV6.ProposalState) {
+    GovernorTypesV6.ProposalState currentState = _state(self, proposalId);
     if (encodeStateBitmap(currentState) & allowedStates == bytes32(0)) {
       revert GovernorUnexpectedProposalState(proposalId, currentState, allowedStates);
     }
@@ -93,7 +93,7 @@ library GovernorStateLogic {
    * @param proposalState The state to encode.
    * @return The encoded state bitmap.
    */
-  function encodeStateBitmap(GovernorTypes.ProposalState proposalState) internal pure returns (bytes32) {
+  function encodeStateBitmap(GovernorTypesV6.ProposalState proposalState) internal pure returns (bytes32) {
     return bytes32(1 << uint8(proposalState));
   }
 
@@ -105,20 +105,20 @@ library GovernorStateLogic {
    * @return The current state of the proposal.
    */
   function _state(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
-  ) internal view returns (GovernorTypes.ProposalState) {
+  ) internal view returns (GovernorTypesV6.ProposalState) {
     // Load the proposal into memory
-    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
+    GovernorTypesV6.ProposalCore storage proposal = self.proposals[proposalId];
     bool proposalExecuted = proposal.executed;
     bool proposalCanceled = proposal.canceled;
 
     if (proposalExecuted) {
-      return GovernorTypes.ProposalState.Executed;
+      return GovernorTypesV6.ProposalState.Executed;
     }
 
     if (proposalCanceled) {
-      return GovernorTypes.ProposalState.Canceled;
+      return GovernorTypesV6.ProposalState.Canceled;
     }
 
     if (proposal.roundIdVoteStart == 0) {
@@ -127,32 +127,32 @@ library GovernorStateLogic {
 
     // Check if the proposal is pending
     if (self.xAllocationVoting.currentRoundId() < proposal.roundIdVoteStart) {
-      return GovernorTypes.ProposalState.Pending;
+      return GovernorTypesV6.ProposalState.Pending;
     }
 
-    uint256 currentTimepoint = GovernorClockLogic.clock(self);
-    uint256 deadline = GovernorProposalLogic._proposalDeadline(self, proposalId);
+    uint256 currentTimepoint = GovernorClockLogicV6.clock(self);
+    uint256 deadline = GovernorProposalLogicV6._proposalDeadline(self, proposalId);
 
-    if (!GovernorDepositLogic.proposalDepositReached(self, proposalId)) {
-      return GovernorTypes.ProposalState.DepositNotMet;
+    if (!GovernorDepositLogicV6.proposalDepositReached(self, proposalId)) {
+      return GovernorTypesV6.ProposalState.DepositNotMet;
     }
 
     if (deadline >= currentTimepoint) {
-      return GovernorTypes.ProposalState.Active;
+      return GovernorTypesV6.ProposalState.Active;
     } else if (
-      !GovernorQuorumLogic.quorumReached(self, proposalId) || !GovernorVotesLogic.voteSucceeded(self, proposalId)
+      !GovernorQuorumLogicV6.quorumReached(self, proposalId) || !GovernorVotesLogicV6.voteSucceeded(self, proposalId)
     ) {
-      return GovernorTypes.ProposalState.Defeated;
-    } else if (GovernorProposalLogic.proposalEta(self, proposalId) == 0) {
-      return GovernorTypes.ProposalState.Succeeded;
+      return GovernorTypesV6.ProposalState.Defeated;
+    } else if (GovernorProposalLogicV6.proposalEta(self, proposalId) == 0) {
+      return GovernorTypesV6.ProposalState.Succeeded;
     } else {
       bytes32 queueid = self.timelockIds[proposalId];
       if (self.timelock.isOperationPending(queueid)) {
-        return GovernorTypes.ProposalState.Queued;
+        return GovernorTypesV6.ProposalState.Queued;
       } else if (self.timelock.isOperationDone(queueid)) {
-        return GovernorTypes.ProposalState.Executed;
+        return GovernorTypesV6.ProposalState.Executed;
       } else {
-        return GovernorTypes.ProposalState.Canceled;
+        return GovernorTypesV6.ProposalState.Canceled;
       }
     }
   }

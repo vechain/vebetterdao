@@ -5,11 +5,11 @@ pragma solidity 0.8.20;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
-import { IB3TR } from "./IB3TR.sol";
-import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
-import { IVeBetterPassport } from "./IVeBetterPassport.sol";
+import { IB3TR } from "../../../interfaces/IB3TR.sol";
+import { IVoterRewardsV6 } from "../interfaces/IVoterRewardsV6.sol";
+import { IXAllocationVotingGovernor } from "../../../interfaces/IXAllocationVotingGovernor.sol";
+import { GovernorTypesV6 } from "../governance/libraries/GovernorTypesV6.sol";
+import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
@@ -23,7 +23,7 @@ import { IVeBetterPassport } from "./IVeBetterPassport.sol";
  * - Added new state `DepositNotMet` to ProposalState enum
  * - Added depositThreshold() to get the minimum required deposit for a proposal and removed proposalThreshold
  */
-interface IB3TRGovernor is IERC165, IERC6372 {
+interface IB3TRGovernorV6 is IERC165, IERC6372 {
   /**
    * @dev Empty proposal or a mismatch between the parameters length for a proposal call.
    */
@@ -83,7 +83,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    */
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
-    GovernorTypes.ProposalState current,
+    GovernorTypesV6.ProposalState current,
     bytes32 expectedStates
   );
 
@@ -274,7 +274,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev Current state of a proposal, following Compound's convention
    */
-  function state(uint256 proposalId) external view returns (GovernorTypes.ProposalState);
+  function state(uint256 proposalId) external view returns (GovernorTypesV6.ProposalState);
 
   /**
    * @notice module:core
@@ -292,7 +292,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev Getter for the VoterRewards contract
    */
-  function voterRewards() external view returns (IVoterRewards);
+  function voterRewards() external view returns (IVoterRewardsV6);
 
   /**
    * @notice module:core

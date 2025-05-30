@@ -23,14 +23,14 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
-import { GovernorStateLogic } from "./GovernorStateLogic.sol";
-import { GovernorTypes } from "./GovernorTypes.sol";
+import { GovernorStorageTypesV6 } from "./GovernorStorageTypesV6.sol";
+import { GovernorStateLogicV6 } from "./GovernorStateLogicV6.sol";
+import { GovernorTypesV6 } from "./GovernorTypesV6.sol";
 
-/// @title GovernorDepositLogic Library
+/// @title GovernorDepositLogicV6 Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
 /// @dev This library provides functions to deposit and withdraw tokens for proposals, and to get deposit-related information.
-library GovernorDepositLogic {
+library GovernorDepositLogicV6 {
   /// @dev Emitted when a deposit is made to a proposal.
   event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
@@ -54,21 +54,21 @@ library GovernorDepositLogic {
    * @param amount The amount of tokens to deposit.
    * @param proposalId The ID of the proposal.
    */
-  function deposit(GovernorStorageTypes.GovernorStorage storage self, uint256 amount, uint256 proposalId) external {
+  function deposit(GovernorStorageTypesV6.GovernorStorage storage self, uint256 amount, uint256 proposalId) external {
     if (amount == 0) {
       revert GovernorInvalidDepositAmount();
     }
 
-    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
+    GovernorTypesV6.ProposalCore storage proposal = self.proposals[proposalId];
 
     if (proposal.roundIdVoteStart == 0) {
       revert GovernorNonexistentProposal(proposalId);
     }
 
-    GovernorStateLogic.validateStateBitmap(
+    GovernorStateLogicV6.validateStateBitmap(
       self,
       proposalId,
-      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending)
+      GovernorStateLogicV6.encodeStateBitmap(GovernorTypesV6.ProposalState.Pending)
     );
 
     proposal.depositAmount += amount;
@@ -83,14 +83,14 @@ library GovernorDepositLogic {
    * @param proposalId The ID of the proposal to withdraw deposits from.
    * @param depositer The address of the depositor.
    */
-  function withdraw(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId, address depositer) external {
+  function withdraw(GovernorStorageTypesV6.GovernorStorage storage self, uint256 proposalId, address depositer) external {
     uint256 amount = self.deposits[proposalId][depositer];
 
-    GovernorStateLogic.validateStateBitmap(
+    GovernorStateLogicV6.validateStateBitmap(
       self,
       proposalId,
-      GovernorStateLogic.ALL_PROPOSAL_STATES_BITMAP ^
-        GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Pending)
+      GovernorStateLogicV6.ALL_PROPOSAL_STATES_BITMAP ^
+        GovernorStateLogicV6.encodeStateBitmap(GovernorTypesV6.ProposalState.Pending)
     );
 
     if (amount == 0) {
@@ -113,7 +113,7 @@ library GovernorDepositLogic {
    * @param proposalId The ID of the proposal.
    */
   function depositFunds(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 amount,
     address depositor,
     uint256 proposalId
@@ -134,7 +134,7 @@ library GovernorDepositLogic {
    * @return uint256 The amount of tokens deposited by the user.
    */
   function getUserDeposit(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId,
     address user
   ) internal view returns (uint256) {
@@ -148,7 +148,7 @@ library GovernorDepositLogic {
    * @return uint256 The deposit threshold for the proposal.
    */
   function proposalDepositThreshold(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     return self.proposals[proposalId].depositThreshold;
@@ -161,7 +161,7 @@ library GovernorDepositLogic {
    * @return uint256 The total amount of deposits made to the proposal.
    */
   function getProposalDeposits(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     return self.proposals[proposalId].depositAmount;
@@ -174,10 +174,10 @@ library GovernorDepositLogic {
    * @return True if the deposit threshold has been reached, false otherwise.
    */
   function proposalDepositReached(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
-    GovernorTypes.ProposalCore storage proposal = self.proposals[proposalId];
+    GovernorTypesV6.ProposalCore storage proposal = self.proposals[proposalId];
     return proposal.depositAmount >= proposal.depositThreshold;
   }
 
@@ -186,7 +186,7 @@ library GovernorDepositLogic {
    * @param self The storage reference for the GovernorStorage.
    * @return uint256 The deposit threshold.
    */
-  function depositThreshold(GovernorStorageTypes.GovernorStorage storage self) external view returns (uint256) {
+  function depositThreshold(GovernorStorageTypesV6.GovernorStorage storage self) external view returns (uint256) {
     return _depositThreshold(self);
   }
 
@@ -195,7 +195,7 @@ library GovernorDepositLogic {
    * @param self The storage reference for the GovernorStorage.
    * @return uint256 The deposit threshold.
    */
-  function _depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
+  function _depositThreshold(GovernorStorageTypesV6.GovernorStorage storage self) internal view returns (uint256) {
     // deposit threshold is a percentage of the total supply of B3TR tokens
     return (self.depositThresholdPercentage * self.b3tr.totalSupply()) / 100;
   }

@@ -23,12 +23,12 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
+import { GovernorStorageTypesV6 } from "./GovernorStorageTypesV6.sol";
 
-/// @title GovernorFunctionRestrictionsLogic
+/// @title GovernorFunctionRestrictionsLogicV6
 /// @notice Library for managing function restrictions within the Governor contract.
 /// @dev This library provides functions to whitelist or restrict functions that can be called by proposals.
-library GovernorFunctionRestrictionsLogic {
+library GovernorFunctionRestrictionsLogicV6 {
   /// @notice Error message for when a function is restricted by the governor.
   /// @param functionSelector The function selector that is restricted.
   error GovernorRestrictedFunction(bytes4 functionSelector);
@@ -53,12 +53,12 @@ library GovernorFunctionRestrictionsLogic {
    * @param isWhitelisted Boolean indicating if the function is whitelisted for proposals.
    */
   function setWhitelistFunction(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address target,
     bytes4 functionSelector,
     bool isWhitelisted
   ) public {
-    require(target != address(0), "GovernorFunctionRestrictionsLogic: target is the zero address");
+    require(target != address(0), "GovernorFunctionRestrictionsLogicV6: target is the zero address");
     self.whitelistedFunctions[target][functionSelector] = isWhitelisted;
     emit FunctionWhitelisted(target, functionSelector, isWhitelisted);
   }
@@ -72,7 +72,7 @@ library GovernorFunctionRestrictionsLogic {
    * @param isWhitelisted Boolean indicating if the functions are whitelisted for proposals.
    */
   function setWhitelistFunctions(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address target,
     bytes4[] memory functionSelectors,
     bool isWhitelisted
@@ -88,7 +88,7 @@ library GovernorFunctionRestrictionsLogic {
    * @param self The storage reference for the GovernorStorage.
    * @param isEnabled Flag to enable or disable function restriction.
    */
-  function setIsFunctionRestrictionEnabled(GovernorStorageTypes.GovernorStorage storage self, bool isEnabled) external {
+  function setIsFunctionRestrictionEnabled(GovernorStorageTypesV6.GovernorStorage storage self, bool isEnabled) external {
     self.isFunctionRestrictionEnabled = isEnabled;
   }
 
@@ -102,7 +102,7 @@ library GovernorFunctionRestrictionsLogic {
    * @return Boolean indicating if the function is whitelisted.
    */
   function isFunctionWhitelisted(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address target,
     bytes4 functionSelector
   ) internal view returns (bool) {
@@ -117,7 +117,7 @@ library GovernorFunctionRestrictionsLogic {
    * @param calldatas Function signatures and arguments.
    */
   function checkFunctionsRestriction(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address[] memory targets,
     bytes[] memory calldatas
   ) internal view {

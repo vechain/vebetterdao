@@ -23,18 +23,16 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
-import { IVOT3 } from "../../interfaces/IVOT3.sol";
-import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { GovernorStorageTypesV6 } from "./GovernorStorageTypesV6.sol";
+import { IVoterRewardsV6 } from "../../interfaces/IVoterRewardsV6.sol";
+import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
-import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassport } from "../../../../interfaces/IVeBetterPassport.sol";
 
-/// @title GovernorConfigurator Library
+/// @title GovernorConfiguratorV6 Library
 /// @notice Library for managing the configuration of a Governor contract.
 /// @dev This library provides functions to set and get various configuration parameters and contracts used by the Governor contract.
-library GovernorConfigurator {
+library GovernorConfiguratorV6 {
   /// @dev Emitted when the `votingThreshold` is set.
   event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
 
@@ -68,7 +66,7 @@ library GovernorConfigurator {
    * @param newVeBetterPassport The new VeBetterPassport contract.
    */
   function setVeBetterPassport(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     IVeBetterPassport newVeBetterPassport
   ) external {
     emit VeBetterPassportSet(address(self.veBetterPassport), address(newVeBetterPassport));
@@ -81,7 +79,10 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @param newVotingThreshold The new voting threshold.
    */
-  function setVotingThreshold(GovernorStorageTypes.GovernorStorage storage self, uint256 newVotingThreshold) external {
+  function setVotingThreshold(
+    GovernorStorageTypesV6.GovernorStorage storage self,
+    uint256 newVotingThreshold
+  ) external {
     emit VotingThresholdSet(self.votingThreshold, newVotingThreshold);
     self.votingThreshold = newVotingThreshold;
   }
@@ -92,7 +93,7 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @param newMinVotingDelay The new minimum voting delay.
    */
-  function setMinVotingDelay(GovernorStorageTypes.GovernorStorage storage self, uint256 newMinVotingDelay) external {
+  function setMinVotingDelay(GovernorStorageTypesV6.GovernorStorage storage self, uint256 newMinVotingDelay) external {
     emit MinVotingDelaySet(self.minVotingDelay, newMinVotingDelay);
     self.minVotingDelay = newMinVotingDelay;
   }
@@ -103,8 +104,11 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @param newVoterRewards The new voter rewards contract.
    */
-  function setVoterRewards(GovernorStorageTypes.GovernorStorage storage self, IVoterRewards newVoterRewards) external {
-    require(address(newVoterRewards) != address(0), "GovernorConfigurator: voterRewards address cannot be zero");
+  function setVoterRewards(
+    GovernorStorageTypesV6.GovernorStorage storage self,
+    IVoterRewardsV6 newVoterRewards
+  ) external {
+    require(address(newVoterRewards) != address(0), "GovernorConfiguratorV6: voterRewards address cannot be zero");
     emit VoterRewardsSet(address(self.voterRewards), address(newVoterRewards));
     self.voterRewards = newVoterRewards;
   }
@@ -116,12 +120,12 @@ library GovernorConfigurator {
    * @param newXAllocationVoting The new XAllocationVotingGovernor contract.
    */
   function setXAllocationVoting(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     IXAllocationVotingGovernor newXAllocationVoting
   ) external {
     require(
       address(newXAllocationVoting) != address(0),
-      "GovernorConfigurator: xAllocationVoting address cannot be zero"
+      "GovernorConfiguratorV6: xAllocationVoting address cannot be zero"
     );
     emit XAllocationVotingSet(address(self.xAllocationVoting), address(newXAllocationVoting));
     self.xAllocationVoting = newXAllocationVoting;
@@ -134,7 +138,7 @@ library GovernorConfigurator {
    * @param newDepositThreshold The new deposit threshold percentage.
    */
   function setDepositThresholdPercentage(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 newDepositThreshold
   ) external {
     if (newDepositThreshold > 100) {
@@ -152,10 +156,10 @@ library GovernorConfigurator {
    * @param newTimelock The new timelock controller.
    */
   function updateTimelock(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     TimelockControllerUpgradeable newTimelock
   ) external {
-    require(address(newTimelock) != address(0), "GovernorConfigurator: timelock address cannot be zero");
+    require(address(newTimelock) != address(0), "GovernorConfiguratorV6: timelock address cannot be zero");
     emit TimelockChange(address(self.timelock), address(newTimelock));
     self.timelock = newTimelock;
   }
@@ -166,7 +170,7 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @return The current voting threshold.
    */
-  function getVotingThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
+  function getVotingThreshold(GovernorStorageTypesV6.GovernorStorage storage self) internal view returns (uint256) {
     return self.votingThreshold;
   }
 
@@ -175,7 +179,7 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @return The current minimum voting delay.
    */
-  function getMinVotingDelay(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
+  function getMinVotingDelay(GovernorStorageTypesV6.GovernorStorage storage self) internal view returns (uint256) {
     return self.minVotingDelay;
   }
 
@@ -185,7 +189,7 @@ library GovernorConfigurator {
    * @return The current deposit threshold percentage.
    */
   function getDepositThresholdPercentage(
-    GovernorStorageTypes.GovernorStorage storage self
+    GovernorStorageTypesV6.GovernorStorage storage self
   ) internal view returns (uint256) {
     return self.depositThresholdPercentage;
   }
@@ -196,7 +200,7 @@ library GovernorConfigurator {
    * @return The current VeBetterPassport contract.
    */
   function veBetterPassport(
-    GovernorStorageTypes.GovernorStorage storage self
+    GovernorStorageTypesV6.GovernorStorage storage self
   ) internal view returns (IVeBetterPassport) {
     return self.veBetterPassport;
   }

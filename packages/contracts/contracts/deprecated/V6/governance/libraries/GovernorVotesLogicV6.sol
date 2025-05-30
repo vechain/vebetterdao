@@ -23,20 +23,20 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
-import { GovernorTypes } from "./GovernorTypes.sol";
-import { GovernorStateLogic } from "./GovernorStateLogic.sol";
-import { GovernorConfigurator } from "./GovernorConfigurator.sol";
-import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
-import { GovernorClockLogic } from "./GovernorClockLogic.sol";
+import { GovernorStorageTypesV6 } from "./GovernorStorageTypesV6.sol";
+import { GovernorTypesV6 } from "./GovernorTypesV6.sol";
+import { GovernorStateLogicV6 } from "./GovernorStateLogicV6.sol";
+import { GovernorConfiguratorV6 } from "./GovernorConfiguratorV6.sol";
+import { GovernorProposalLogicV6 } from "./GovernorProposalLogicV6.sol";
+import { GovernorClockLogicV6 } from "./GovernorClockLogicV6.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-/// @title GovernorVotesLogic
+/// @title GovernorVotesLogicV6
 /// @notice Library for handling voting logic in the Governor contract.
 /// @dev Difference from V1: `proposalId` is passed as an argument to `registerVote` function instead of `proposalSnapshot`.
-library GovernorVotesLogic {
+library GovernorVotesLogicV6 {
   using Checkpoints for Checkpoints.Trace208;
 
   /// @dev Thrown when a vote has already been cast by the voter.
@@ -88,14 +88,14 @@ library GovernorVotesLogic {
    * @param power The voting power of the voter.
    */
   function _countVote(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId,
     address account,
     uint8 support,
     uint256 weight,
     uint256 power
   ) private {
-    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorTypesV6.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
 
     if (proposalVote.hasVoted[account]) {
       revert GovernorAlreadyCastVote(account);
@@ -105,11 +105,11 @@ library GovernorVotesLogic {
     // if quadratic voting is disabled, use the weight as the vote otherwise use the power as the vote
     uint256 vote = isQuadraticVotingDisabledForCurrentRound(self) ? weight : power;
 
-    if (support == uint8(GovernorTypes.VoteType.Against)) {
+    if (support == uint8(GovernorTypesV6.VoteType.Against)) {
       proposalVote.againstVotes += vote;
-    } else if (support == uint8(GovernorTypes.VoteType.For)) {
+    } else if (support == uint8(GovernorTypesV6.VoteType.For)) {
       proposalVote.forVotes += vote;
-    } else if (support == uint8(GovernorTypes.VoteType.Abstain)) {
+    } else if (support == uint8(GovernorTypesV6.VoteType.Abstain)) {
       proposalVote.abstainVotes += vote;
     } else {
       revert GovernorInvalidVoteType();
@@ -130,10 +130,10 @@ library GovernorVotesLogic {
    * @return True if the vote succeeded, false otherwise.
    */
   function voteSucceeded(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
-    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorTypesV6.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
     return proposalVote.forVotes > proposalVote.againstVotes;
   }
 
@@ -147,7 +147,7 @@ library GovernorVotesLogic {
    * @return The votes of the account at the given timepoint.
    */
   function getVotes(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address account,
     uint256 timepoint
   ) internal view returns (uint256) {
@@ -162,7 +162,7 @@ library GovernorVotesLogic {
    * @return The quadratic voting power of the account.
    */
   function getQuadraticVotingPower(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address account,
     uint256 timepoint
   ) external view returns (uint256) {
@@ -178,7 +178,7 @@ library GovernorVotesLogic {
    * @return True if the account has voted, false otherwise.
    */
   function hasVoted(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId,
     address account
   ) internal view returns (bool) {
@@ -194,10 +194,10 @@ library GovernorVotesLogic {
    * @return abstainVotes The number of abstain votes.
    */
   function getProposalVotes(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
-    GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorTypesV6.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
     return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
   }
 
@@ -207,7 +207,7 @@ library GovernorVotesLogic {
    * @param user The address of the user.
    * @return True if the user has voted once, false otherwise.
    */
-  function userVotedOnce(GovernorStorageTypes.GovernorStorage storage self, address user) internal view returns (bool) {
+  function userVotedOnce(GovernorStorageTypesV6.GovernorStorage storage self, address user) internal view returns (bool) {
     return self.hasVotedOnce[user];
   }
 
@@ -223,19 +223,19 @@ library GovernorVotesLogic {
    * @return The weight of the vote.
    */
   function castVote(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 proposalId,
     address voter,
     uint8 support,
     string calldata reason
   ) external returns (uint256) {
-    GovernorStateLogic.validateStateBitmap(
+    GovernorStateLogicV6.validateStateBitmap(
       self,
       proposalId,
-      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
+      GovernorStateLogicV6.encodeStateBitmap(GovernorTypesV6.ProposalState.Active)
     );
 
-    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
+    uint256 proposalSnapshot = GovernorProposalLogicV6._proposalSnapshot(self, proposalId);
 
     (bool isPerson, string memory explanation) = self.veBetterPassport.isPersonAtTimepoint(
       voter,
@@ -266,8 +266,8 @@ library GovernorVotesLogic {
    * @param self - GovernorStorage
    * @param weight - The weight of the vote.
    */
-  function _checkVotingThreshold(GovernorStorageTypes.GovernorStorage storage self, uint256 weight) private view {
-    uint256 threshold = GovernorConfigurator.getVotingThreshold(self);
+  function _checkVotingThreshold(GovernorStorageTypesV6.GovernorStorage storage self, uint256 weight) private view {
+    uint256 threshold = GovernorConfiguratorV6.getVotingThreshold(self);
     if (weight < threshold) {
       revert GovernorVotingThresholdNotMet(threshold, weight);
     }
@@ -278,14 +278,14 @@ library GovernorVotesLogic {
    * @param self - The storage reference for the GovernorStorage.
    * The state will flip between enabled and disabled each time the function is called.
    */
-  function toggleQuadraticVoting(GovernorStorageTypes.GovernorStorage storage self) external {
-    bool isQuadraticDisabled = self.quadraticVotingDisabled.upperLookupRecent(GovernorClockLogic.clock(self)) == 1; // 0: enabled, 1: disabled
+  function toggleQuadraticVoting(GovernorStorageTypesV6.GovernorStorage storage self) external {
+    bool isQuadraticDisabled = self.quadraticVotingDisabled.upperLookupRecent(GovernorClockLogicV6.clock(self)) == 1; // 0: enabled, 1: disabled
 
     // If quadratic voting is disabled, set the new status to enabled, otherwise set it to disabled.
     uint208 newStatus = isQuadraticDisabled ? 0 : 1;
 
     // Toggle the status -> 0: enabled, 1: disabled
-    self.quadraticVotingDisabled.push(GovernorClockLogic.clock(self), newStatus);
+    self.quadraticVotingDisabled.push(GovernorClockLogicV6.clock(self), newStatus);
 
     // Emit an event to log the new quadratic voting status.
     emit QuadraticVotingToggled(!isQuadraticDisabled);
@@ -299,7 +299,7 @@ library GovernorVotesLogic {
    * @return true if quadratic voting is disabled, false otherwise.
    */
   function isQuadraticVotingDisabledForRound(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     uint256 roundId
   ) external view returns (bool) {
     // Get the block number the round started.
@@ -315,7 +315,7 @@ library GovernorVotesLogic {
    * @return true if quadratic voting is disabled, false otherwise.
    */
   function isQuadraticVotingDisabledForCurrentRound(
-    GovernorStorageTypes.GovernorStorage storage self
+    GovernorStorageTypesV6.GovernorStorage storage self
   ) public view returns (bool) {
     // Get the block number the emission round started.
     uint256 roundStartBlock = self.xAllocationVoting.currentRoundSnapshot();
