@@ -112,6 +112,15 @@ export async function deployAll(config: ContractsConfig) {
     GovernorVotesLogicLibV5,
     GovernorDepositLogicLibV5,
     GovernorStateLogicLibV5,
+    GovernorClockLogicLibV6,
+    GovernorConfiguratorLibV6,
+    GovernorFunctionRestrictionsLogicLibV6,
+    GovernorGovernanceLogicLibV6,
+    GovernorQuorumLogicLibV6,
+    GovernorProposalLogicLibV6,
+    GovernorVotesLogicLibV6,
+    GovernorDepositLogicLibV6,
+    GovernorStateLogicLibV6,
   } = await governanceLibraries()
 
   console.log("Deploying VeBetter Passport Libraries")
@@ -628,7 +637,15 @@ export async function deployAll(config: ContractsConfig) {
   )) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
-    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernor"],
+    [
+      "B3TRGovernorV1",
+      "B3TRGovernorV2",
+      "B3TRGovernorV3",
+      "B3TRGovernorV4",
+      "B3TRGovernorV5",
+      "B3TRGovernorV6",
+      "B3TRGovernor",
+    ],
     [
       [
         {
@@ -655,9 +672,19 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [veBetterPassportContractAddress],
       [],
+      [],
+      [
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+        },
+      ],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -708,6 +735,16 @@ export async function deployAll(config: ContractsConfig) {
           GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
           GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
           GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
+        },
+        {
+          GovernorClockLogicV6: await GovernorClockLogicLibV6.getAddress(),
+          GovernorConfiguratorV6: await GovernorConfiguratorLibV6.getAddress(),
+          GovernorDepositLogicV6: await GovernorDepositLogicLibV6.getAddress(),
+          GovernorFunctionRestrictionsLogicV6: await GovernorFunctionRestrictionsLogicLibV6.getAddress(),
+          GovernorProposalLogicV6: await GovernorProposalLogicLibV6.getAddress(),
+          GovernorQuorumLogicV6: await GovernorQuorumLogicLibV6.getAddress(),
+          GovernorStateLogicV6: await GovernorStateLogicLibV6.getAddress(),
+          GovernorVotesLogicV6: await GovernorVotesLogicLibV6.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
