@@ -109,4 +109,24 @@ library GovernorTypes {
     Executed,
     DepositNotMet
   }
+
+  /**
+   * @dev Struct containing data for v7 initialization
+   * @param grantDepositThreshold The deposit threshold percentage for grant proposals
+   * @param grantVotingThreshold The voting threshold for grant proposals
+   * @param grantQuorum The quorum percentage for grant proposals
+   */
+  struct InitializationDataV7 {
+    uint256 grantDepositThreshold;
+    uint256 grantVotingThreshold;
+    uint256 grantQuorum;
+    uint256 grantDepositThresholdCap;
+    uint256 standardDepositThresholdCap;
+  }
+
+  // ProposalType enum to distinguish between different types of proposals
+  enum ProposalType {
+    Standard,
+    Grant
+  }
 }

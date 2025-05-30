@@ -27,6 +27,8 @@ import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { GovernorQuorumLogic } from "./libraries/GovernorQuorumLogic.sol";
+import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
 
 /// @title GovernorStorage
 /// @notice Contract used as storage of the B3TRGovernor contract.
@@ -94,5 +96,58 @@ contract GovernorStorage is Initializable {
   function __GovernorStorage_init_v4(IVeBetterPassport veBetterPassport) internal onlyInitializing {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
     governorStorage.veBetterPassport = veBetterPassport;
+  }
+  function __GovernorStorage_init_v7(
+    GovernorTypes.InitializationDataV7 memory initializationDataV7
+  ) internal onlyInitializing {
+    GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
+
+    // Set deposit threshold
+    GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
+      governorStorage,
+      GovernorTypes.ProposalType.Standard,
+      governorStorage.depositThresholdPercentage
+    );
+    GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
+      governorStorage,
+      GovernorTypes.ProposalType.Grant,
+      initializationDataV6.grantDepositThreshold
+    );
+
+    // Set voting threshold
+    GovernorConfigurator._setProposalTypeVotingThreshold(
+      governorStorage,
+      GovernorTypes.ProposalType.Standard,
+      governorStorage.votingThreshold
+    );
+    GovernorConfigurator._setProposalTypeVotingThreshold(
+      governorStorage,
+      GovernorTypes.ProposalType.Grant,
+      initializationDataV6.grantVotingThreshold
+    );
+
+    // Set quorum
+    GovernorQuorumLogic._updateQuorumNumeratorByType(
+      governorStorage,
+      GovernorQuorumLogic.quorumNumerator(governorStorage),
+      GovernorTypes.ProposalType.Standard
+    );
+    GovernorQuorumLogic._updateQuorumNumeratorByType(
+      governorStorage,
+      initializationDataV6.grantQuorum,
+      GovernorTypes.ProposalType.Grant
+    );
+
+    // Set deposit threshold cap
+    GovernorConfigurator._setProposalTypeDepositThresholdCap(
+      governorStorage,
+      GovernorTypes.ProposalType.Standard,
+      initializationDataV6.standardDepositThresholdCap
+    );
+    GovernorConfigurator._setProposalTypeDepositThresholdCap(
+      governorStorage,
+      GovernorTypes.ProposalType.Grant,
+      initializationDataV6.grantDepositThresholdCap
+    );
   }
 }
