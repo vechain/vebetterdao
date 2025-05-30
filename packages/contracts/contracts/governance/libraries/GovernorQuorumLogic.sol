@@ -199,17 +199,9 @@ library GovernorQuorumLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 newQuorumNumerator
   ) external {
-    uint256 denominator = quorumDenominator();
-    uint256 oldQuorumNumerator = quorumNumerator(self);
-
-    if (newQuorumNumerator > denominator) {
-      revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);
-    }
-
-    self.quorumNumeratorHistory.push(GovernorClockLogic.clock(self), SafeCast.toUint208(newQuorumNumerator));
-
-    emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
+    _updateQuorumNumeratorByType(self, newQuorumNumerator, GovernorTypes.ProposalType.Standard);
   }
+
   /**
    * @notice Updates the quorum numerator for a specific proposal type to a new value at a specified time, emitting an event upon success.
    * @dev This function should only be called from governance actions where numerators need updating.
