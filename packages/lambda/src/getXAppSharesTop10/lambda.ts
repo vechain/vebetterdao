@@ -1,19 +1,61 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
-import { ThorClient } from "@vechain/sdk-network"
+import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { Clause, Address, ABIContract } from "@vechain/sdk-core"
+
 import mainnetConfig from "@repo/config/mainnet"
+import testnetStagingConfig from "@repo/config/testnet-staging"
+import { AppEnv } from "@repo/config/contracts"
 import { X2EarnApps__factory } from "@repo/contracts"
+
 import { findBlacklistedApps, getCurrentRoundId, getData, getRoundXApps, getRoundXAppShares } from "../helpers"
 import { buildResponse } from "../helpers/api/response"
 import { StandardApiError, SuccessResponseType } from "../helpers/api.types"
 
-const nodeURL = mainnetConfig.nodeUrl
-const ipfsFetchingService = mainnetConfig.ipfsFetchingService.endsWith("/")
-  ? mainnetConfig.ipfsFetchingService
-  : mainnetConfig.ipfsFetchingService + "/"
+interface NetworkConfig {
+  nodeUrl: string
+  config: typeof mainnetConfig
+  ipfsFetchingService: string
+}
+
+const getNetworkConfig = (): NetworkConfig => {
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
+  const environment = process.env.LAMBDA_ENV
+
+  switch (environment) {
+    case AppEnv.MAINNET:
+      return {
+        nodeUrl: MAINNET_URL,
+        config: mainnetConfig,
+        ipfsFetchingService: mainnetConfig.ipfsFetchingService.endsWith("/")
+          ? mainnetConfig.ipfsFetchingService
+          : mainnetConfig.ipfsFetchingService + "/",
+      }
+
+    case AppEnv.TESTNET_STAGING:
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetStagingConfig,
+        ipfsFetchingService: testnetStagingConfig.ipfsFetchingService.endsWith("/")
+          ? testnetStagingConfig.ipfsFetchingService
+          : testnetStagingConfig.ipfsFetchingService + "/",
+      }
+
+    default:
+      // Fallback to testnet for any other environment
+      return {
+        nodeUrl: TESTNET_URL,
+        config: testnetStagingConfig,
+        ipfsFetchingService: testnetStagingConfig.ipfsFetchingService.endsWith("/")
+          ? testnetStagingConfig.ipfsFetchingService
+          : testnetStagingConfig.ipfsFetchingService + "/",
+      }
+  }
+}
+
+const { nodeUrl: NODE_URL, config: CONFIG, ipfsFetchingService: IPFS_FETCHING_SERVICE } = getNetworkConfig()
 
 /**
- * Retrieves the top 10 XApp shares for the previous round on mainnet.
+ * Retrieves the top 10 XApp shares for the previous round.
  *
  * @param thor - The ThorClient instance used to interact with the blockchain.
  * @returns A promise that resolves to an array of the top 10 XApp shares with their metadata.
@@ -21,17 +63,17 @@ const ipfsFetchingService = mainnetConfig.ipfsFetchingService.endsWith("/")
  */
 const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get current last round id, then infer the previous round id
-  const currentRoundId = await getCurrentRoundId(thor, mainnetConfig.xAllocationVotingContractAddress)
+  const currentRoundId = await getCurrentRoundId(thor, CONFIG.xAllocationVotingContractAddress)
   const lastRoundId = Number(currentRoundId) - 1
   console.log("Retrieve allocation shares data for round:", lastRoundId)
 
   // Get the round app ids
-  const roundAppIds = await getRoundXApps(thor, lastRoundId.toString(), mainnetConfig)
+  const roundAppIds = await getRoundXApps(thor, lastRoundId.toString(), CONFIG)
 
   // Find blacklisted apps and get the round app shares in parallel
   const [blacklistedAppIds, roundAppShares] = await Promise.all([
-    findBlacklistedApps(thor, roundAppIds, mainnetConfig.x2EarnAppsContractAddress),
-    getRoundXAppShares(thor, lastRoundId, roundAppIds, mainnetConfig.xAllocationPoolContractAddress),
+    findBlacklistedApps(thor, roundAppIds, CONFIG.x2EarnAppsContractAddress),
+    getRoundXAppShares(thor, lastRoundId, roundAppIds, CONFIG.xAllocationPoolContractAddress),
   ])
 
   // Filter out blacklisted apps, sort by percentage and get top 10
@@ -43,7 +85,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get app data only for top 10
   const clauses = top10AppShares.map(app =>
     Clause.callFunction(
-      Address.of(mainnetConfig.x2EarnAppsContractAddress),
+      Address.of(CONFIG.x2EarnAppsContractAddress),
       ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("app"),
       [app.appId],
     ),
@@ -54,13 +96,13 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
     res.map(async (r, index) => {
       if (r.reverted) {
         throw new Error(
-          `Error in contract call to X2EarnApps::app at ${mainnetConfig.x2EarnAppsContractAddress}. Clause ${index + 1} for appId ${top10AppShares[index].appId} reverted with reason ${r.vmError}`,
+          `Error in contract call to X2EarnApps::app at ${CONFIG.x2EarnAppsContractAddress}. Clause ${index + 1} for appId ${top10AppShares[index].appId} reverted with reason ${r.vmError}`,
         )
       }
 
       const decoded = X2EarnApps__factory.createInterface().decodeFunctionResult("app", r.data)
       const appMetadataURI = decoded[0][3]
-      const appMetadata = await getData(ipfsFetchingService + appMetadataURI)
+      const appMetadata = await getData(IPFS_FETCHING_SERVICE + appMetadataURI)
 
       return {
         appId: top10AppShares[index].appId,
@@ -86,9 +128,12 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
 export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
+  console.log(`Environment: ${process.env.LAMBDA_ENV}`)
+  console.log(`Network: ${NODE_URL}`)
 
   try {
-    const thorClient = ThorClient.at(nodeURL, { isPollingEnabled: false })
+    const thorClient = ThorClient.at(NODE_URL, { isPollingEnabled: false })
     const top10AppsData = await getXAppSharesTop10(thorClient)
     console.log("Top 10 X-App shares:", top10AppsData)
     return buildResponse(SuccessResponseType.SUCCESS, top10AppsData)
