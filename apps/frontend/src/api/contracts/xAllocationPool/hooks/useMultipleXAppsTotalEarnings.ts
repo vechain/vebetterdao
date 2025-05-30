@@ -1,6 +1,5 @@
 import { useQueryClient, useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
+import { getXAppRoundEarningsQueryKey, useThor } from "@vechain/vechain-kit"
 import { getXAppTotalEarningsClauses } from "./useXAppTotalEarnings"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { abi } from "thor-devkit"
@@ -32,7 +31,7 @@ const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
  * @returns  the total earnings of the xApps in the rounds
  */
 export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string[]) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const queryClient = useQueryClient()
 
   return useQuery({

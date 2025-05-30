@@ -1,10 +1,11 @@
-import { AppVotesGiven, useIpfsImage, useXAppMetadata } from "@/api"
+import { AppVotesGiven, useIpfsImage } from "@/api"
 import { notFoundImage } from "@/constants"
 import { HStack, Skeleton, Text, VStack, Image } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = {
   appVoted: AppVotesGiven

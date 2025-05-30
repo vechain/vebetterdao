@@ -1,4 +1,4 @@
-import { XApp, useXAppMetadata } from "@/api"
+import { XApp } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -20,6 +20,7 @@ import { useBreakpoints } from "@/hooks"
 import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
 import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
 import { useRouter } from "next/navigation"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {

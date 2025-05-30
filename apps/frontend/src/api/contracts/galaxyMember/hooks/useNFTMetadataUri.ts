@@ -11,7 +11,7 @@ const method = "tokenURI" as const
  * @param tokenID The token ID to get the metadata URI for
  * @returns The query key for fetching the NFT metadata URI.
  */
-export const getNFTMetadataUriQueryKey = (tokenID: string | null) =>
+export const getNFTMetadataUriQueryKey = (tokenID?: string) =>
   getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(tokenID || 0)] })
 
 /**
@@ -19,7 +19,7 @@ export const getNFTMetadataUriQueryKey = (tokenID: string | null) =>
  * @param tokenID The token ID to get the metadata URI for
  * @returns the metadata URI for the token
  */
-export const useNFTMetadataUri = (tokenID: string | null) => {
+export const useNFTMetadataUri = (tokenID?: string) => {
   return useCallClause({
     abi,
     address,

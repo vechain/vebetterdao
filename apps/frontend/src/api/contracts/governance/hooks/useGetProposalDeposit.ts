@@ -1,44 +1,34 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+// REMOVE THIS FILE, it is not used anywhere
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-
-const governorInterface = B3TRGovernor__factory.createInterface()
-
-/**
- * Retrieves the proposal deposit for a given proposal ID.
- * @param thor - The Connex.Thor instance.
- * @returns A Promise that resolves to the proposal deposit as a string.
- */
-export const getProposalDeposit = async (thor: Connex.Thor, proposalId: string): Promise<string> => {
-  const functionFragment = governorInterface.getFunction("getProposalDeposits").format("json")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return res.decoded[0]
-}
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "getProposalDeposits" as const
 
 /**
  * Generates the query key for retrieving proposal deposits.
  * @param proposalId - The ID of the proposal.
  * @returns The query key as an array.
  */
-export const getProposalDepositQueryKey = (proposalId: string) => ["proposals", proposalId, "deposits"]
+export const getProposalDepositQueryKey = (proposalId: string) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(proposalId)] })
 
 /**
  * Custom hook for fetching proposal deposits.
  * @param proposalId - The ID of the proposal.
- * @returns The result of the query.
+ * @returns The result of the query with the proposal deposit as a string.
  */
 export const useProposalDeposits = (proposalId: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getProposalDepositQueryKey(proposalId),
-    queryFn: async () => await getProposalDeposit(thor, proposalId),
-    enabled: !!thor && thor.status.head.number > 0,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(proposalId)],
+    queryOptions: {
+      enabled: !!proposalId,
+      select: data => data[0],
+    },
   })
 }

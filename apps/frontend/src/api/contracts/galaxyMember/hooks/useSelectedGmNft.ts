@@ -70,7 +70,7 @@ export const useSelectedGmNft = (profile?: string) => {
     isLoading: isLoadingMetadataUri,
     isError: isErrorMetadataUri,
     error: errorMetadataURI,
-  } = useNFTMetadataUri(selectedTokenId ?? null)
+  } = useNFTMetadataUri(selectedTokenId)
 
   const {
     data: nftMetadata,

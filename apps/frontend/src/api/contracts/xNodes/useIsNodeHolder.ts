@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, ThorClient, executeCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 
@@ -13,6 +13,16 @@ const method = "isNodeHolder" as const
  */
 export const getIsNodeHolderQueryKey = (userAddress: string) =>
   getCallClauseQueryKey<typeof abi>({ address, method, args: [userAddress] })
+
+export const getIsNodeHolder = async (thor: ThorClient, userAddress: string) => {
+  return executeCallClause({
+    thor,
+    contractAddress: address,
+    abi,
+    method,
+    args: [userAddress],
+  })
+}
 
 /**
  * Custom hook that checks if a user is a node holder (either directly or through delegation).

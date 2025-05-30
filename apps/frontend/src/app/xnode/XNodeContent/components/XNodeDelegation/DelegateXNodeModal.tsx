@@ -21,7 +21,7 @@ import {
   useSteps,
 } from "@chakra-ui/react"
 import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
-import { useWallet, useConnex, useVechainDomain } from "@vechain/vechain-kit"
+import { useWallet, useThor, useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -41,7 +41,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { account } = useWallet()
-  const { thor } = useConnex()
+  const thor = useThor()
   const { isXNodeAttachedToGM } = useXNode()
   const { isOpen = false, onClose } = modal
 
@@ -156,7 +156,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
 
                 const address = isValid(value) ? value : delegateeAddress
                 try {
-                  const hasExistingXNode = await getIsNodeHolder(thor, address ?? "")
+                  const [hasExistingXNode] = await getIsNodeHolder(thor, address ?? "")
                   if (hasExistingXNode) {
                     return t("This address already has a Node. Please choose another address.")
                   }

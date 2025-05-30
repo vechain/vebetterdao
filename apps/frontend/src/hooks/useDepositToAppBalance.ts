@@ -6,7 +6,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getAppAvailableFundsQueryKey } from "@/api/contracts/x2EarnRewardsPool"
 import { ethers } from "ethers"
 import { removingExcessDecimals } from "@/utils/MathUtils"
-import { useXApp } from "@/api"
+import { useXApp } from "@vechain/vechain-kit"
 
 const config = getConfig()
 

@@ -1,10 +1,4 @@
-import {
-  useAllocationsRound,
-  useCurrentAllocationsRoundId,
-  useHaveXAppsClaimed,
-  useRoundXApps,
-  useRoundEarnings,
-} from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useHaveXAppsClaimed, useRoundXApps } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
@@ -26,6 +20,7 @@ import {
   CardHeader,
   CardBody,
 } from "@chakra-ui/react"
+import { useMultipleXAppRoundEarnings } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -38,9 +33,12 @@ export const BulkClaimXAppsAllocations = () => {
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   // Calculate total amount that is avaialble to claim in this round
-  const totalAmounts = useRoundEarnings(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const { data: totalAmounts = [] } = useMultipleXAppRoundEarnings(
+    roundId?.toString() ?? "",
+    xApps?.map(app => app.id) ?? [],
+  )
   const total = useMemo(() => {
-    return totalAmounts.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
+    return totalAmounts.reduce((acc, cur) => acc + parseInt(cur?.amount ?? "0"), 0)
   }, [totalAmounts])
 
   // Retrieve all apps that have claimed for the round and the ones that still needs to claim
@@ -53,9 +51,12 @@ export const BulkClaimXAppsAllocations = () => {
   }, [claims, xApps])
 
   // Calculate remaining amount to claim excluding already claimed
-  const remainingAmounts = useRoundEarnings(roundId?.toString() ?? "", xAppsLeft?.map(app => app.id) ?? [])
+  const { data: remainingAmounts = [] } = useMultipleXAppRoundEarnings(
+    roundId?.toString() ?? "",
+    xAppsLeft?.map(app => app.id) ?? [],
+  )
   const amountToClaim = useMemo(() => {
-    return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
+    return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur?.amount ?? "0"), 0)
   }, [remainingAmounts])
 
   // Handle submitting the transaction

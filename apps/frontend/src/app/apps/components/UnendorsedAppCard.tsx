@@ -16,10 +16,11 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
-import { useAppEndorsementStatus, useXAppMetadata, useIpfsImage, useXNode, UnendorsedApp, XApp } from "@/api"
+import { useAppEndorsementStatus, useIpfsImage, useXNode, UnendorsedApp, XApp } from "@/api"
 import { notFoundImage } from "@/constants"
 import { useXAppStatusConfig } from "../[appId]/hooks"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = {
   xApp: XApp | UnendorsedApp

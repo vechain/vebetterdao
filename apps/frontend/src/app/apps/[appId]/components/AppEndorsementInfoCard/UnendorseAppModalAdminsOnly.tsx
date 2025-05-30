@@ -1,4 +1,4 @@
-import { useXAppMetadata } from "@/api"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 import { useIpfsImage } from "@/api/ipfs"
 import { BaseModal } from "@/components/BaseModal"
 import { useRemoveNodeEndorsement } from "@/hooks"

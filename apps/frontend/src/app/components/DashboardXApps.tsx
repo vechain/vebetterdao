@@ -1,10 +1,4 @@
-import {
-  XApp,
-  useMostVotedAppsInRound,
-  usePreviousAllocationRoundId,
-  useAppsEligibleInNextRound,
-  useXAppMetadata,
-} from "@/api"
+import { XApp, useMostVotedAppsInRound, usePreviousAllocationRoundId, useAppsEligibleInNextRound } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -26,6 +20,7 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { v4 as uuid } from "uuid"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = {
   maxApps?: number
@@ -117,9 +112,11 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
           <HStack spacing={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
               <Text fontSize={"sm"} color={"gray.500"}>
-                {appMetadata?.description.slice(0, 150) + "..." ??
-                  appMetadataError?.message ??
-                  "Error loading description"}
+                {appMetadata?.description
+                  ? appMetadata.description.slice(0, 150) + "..."
+                  : appMetadataError?.message
+                    ? appMetadataError.message
+                    : "Error loading description"}
               </Text>
             </Skeleton>
           </HStack>
