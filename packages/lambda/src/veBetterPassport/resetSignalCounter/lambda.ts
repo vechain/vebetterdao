@@ -1,7 +1,7 @@
 import { APIGatewayProxyResult, Context } from "aws-lambda"
 
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
-import { ThorClient } from "@vechain/sdk-network"
+import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 
 import { isValid } from "@repo/utils/AddressUtils"
@@ -52,8 +52,6 @@ interface SecretsConfig {
 const getNetworkConfig = (): NetworkConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
-  const TESTNET_URL = "https://testnet.vechain.org"
-  const MAINNET_URL = "https://mainnet.vechain.org"
 
   const TESTNET_VET_DOMAINS_ADDRESS = "0xE27C72E252D5C3B2daf871aB7628F29370438589" // Mock
   const MAINNET_VET_DOMAINS_ADDRESS = "0xbd7832FdacCB89FAB522e5B4Afb415A999b8a201"
