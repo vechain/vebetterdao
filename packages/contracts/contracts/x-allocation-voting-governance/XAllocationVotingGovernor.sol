@@ -137,7 +137,7 @@ abstract contract XAllocationVotingGovernor is
   function _castVoteOnBehalfOf(address voter, uint256 roundId) internal {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
-    require(_isAutovotingEnabled(voter), "XAllocationVotingGovernor: autovoting is not enabled");
+    require(_isAutoVotingEnabled(voter), "XAllocationVotingGovernor: AutoVoting is not enabled");
 
     uint256 _currentRoundSnapshot = currentRoundSnapshot();
 
@@ -394,7 +394,7 @@ abstract contract XAllocationVotingGovernor is
    */
   function voterRewards() public view virtual returns (IVoterRewards);
 
-  function _isAutovotingEnabled(address account) internal view virtual returns (bool);
+  function _isAutoVotingEnabled(address account) internal view virtual returns (bool);
 
   function _getUserVotingPreferences(address account) internal view virtual returns (bytes32[] memory);
 }

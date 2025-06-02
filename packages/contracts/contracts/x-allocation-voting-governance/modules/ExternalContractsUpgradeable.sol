@@ -96,7 +96,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   /**
    * @dev The X2EarnApps contract.
    */
-  function x2EarnApps() public view override returns (IX2EarnApps) {
+  function x2EarnApps() public view virtual override returns (IX2EarnApps) {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     return $._x2EarnApps;
   }

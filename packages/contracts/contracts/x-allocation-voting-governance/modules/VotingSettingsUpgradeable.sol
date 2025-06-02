@@ -34,8 +34,6 @@ abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingG
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.VotingSettings
   struct VotingSettingsStorage {
     uint32 _votingPeriod;
-    mapping(address => bool) _autovotingEnabled;
-    mapping(address => bytes32[]) _userVotingPreferences;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.VotingSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -49,7 +47,6 @@ abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingG
   }
 
   event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
-  event AutovotingToggled(address indexed account, bool enabled);
 
   /**
    * @dev Initialize the governance parameters.
@@ -90,48 +87,5 @@ abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingG
 
     emit VotingPeriodSet($._votingPeriod, newVotingPeriod);
     $._votingPeriod = newVotingPeriod;
-  }
-
-  function _toggleAutovoting(address account) internal virtual {
-    require(account == msg.sender, "VotingSettingsUpgradeable: not authorized");
-    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
-
-    if ($._autovotingEnabled[account]) {
-      // Reset the user's voting preferences when autovoting is disabled
-      delete $._userVotingPreferences[account];
-    }
-
-    $._autovotingEnabled[account] = !$._autovotingEnabled[account];
-
-    emit AutovotingToggled(account, $._autovotingEnabled[account]);
-  }
-
-  function _isAutovotingEnabled(address account) internal view override returns (bool) {
-    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
-    return $._autovotingEnabled[account];
-  }
-
-  function _setUserVotingPreferences(address account, bytes32[] memory apps) internal virtual {
-    require(apps.length > 0, "VotingSettingsUpgradeable: no apps to vote for");
-    require(apps.length <= 10, "VotingSettingsUpgradeable: too many apps to vote for");
-
-    // Iterate through the apps and percentages to calculate the total weight of votes cast by the voter
-    for (uint256 i; i < apps.length; i++) {
-      // app must be a valid app
-      require(x2EarnApps().appExists(apps[i]), "VotingSettingsUpgradeable: invalid app");
-
-      // Check current app against ALL previous apps
-      for (uint256 j; j < i; j++) {
-        require(apps[i] != apps[j], "VotingSettingsUpgradeable: duplicate app");
-      }
-    }
-
-    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
-    $._userVotingPreferences[account] = apps;
-  }
-
-  function _getUserVotingPreferences(address account) internal view override returns (bytes32[] memory) {
-    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
-    return $._userVotingPreferences[account];
   }
 }

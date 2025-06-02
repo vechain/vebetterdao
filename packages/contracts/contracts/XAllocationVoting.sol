@@ -32,6 +32,7 @@ import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeabl
 import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
+import "./x-allocation-voting-governance/modules/AutoVotingLogicUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -68,7 +69,8 @@ contract XAllocationVoting is
   RoundsStorageUpgradeable,
   RoundFinalizationUpgradeable,
   AccessControlUpgradeable,
-  UUPSUpgradeable
+  UUPSUpgradeable,
+  AutoVotingLogicUpgradeable
 {
   /// @notice Role identifier for the address that can start a new round
   bytes32 public constant ROUND_STARTER_ROLE = keccak256("ROUND_STARTER_ROLE");
@@ -166,7 +168,7 @@ contract XAllocationVoting is
   }
 
   function userAutovotingEnabled(address account) public view returns (bool) {
-    return _isAutovotingEnabled(account);
+    return _isAutoVotingEnabled(account);
   }
 
   function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {
@@ -248,6 +250,19 @@ contract XAllocationVoting is
   }
 
   // ---------- Getters ---------- //
+
+  /**
+   * @dev Returns the X2EarnApps contract
+   * @return IX2EarnApps The X2EarnApps contract interface
+   */
+  function x2EarnApps()
+    public
+    view
+    override(ExternalContractsUpgradeable, AutoVotingLogicUpgradeable, XAllocationVotingGovernor)
+    returns (IX2EarnApps)
+  {
+    return ExternalContractsUpgradeable.x2EarnApps();
+  }
 
   /**
    * Returns the quorum for a given round
