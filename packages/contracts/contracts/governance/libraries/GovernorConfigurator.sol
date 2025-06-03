@@ -66,12 +66,7 @@ library GovernorConfigurator {
     uint256 oldVotingThreshold,
     uint256 newVotingThreshold
   );
-  /// @dev Emitted when the minimum delay before vote starts is set for a proposal type.
-  event MinVotingDelaySetV2(
-    GovernorTypes.ProposalType proposalType,
-    uint256 oldMinVotingDelay,
-    uint256 newMinVotingDelay
-  );
+
   /// @dev Emitted when the deposit threshold percentage for a proposal type is set.
   event DepositThresholdSetV2(
     GovernorTypes.ProposalType proposalType,
