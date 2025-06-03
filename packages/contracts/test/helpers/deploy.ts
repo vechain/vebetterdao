@@ -105,6 +105,14 @@ import {
   PassportSignalingLogicV3,
   PassportPoPScoreLogicV3,
   PassportWhitelistAndBlacklistLogicV3,
+  GovernorQuorumLogicV6,
+  GovernorVotesLogicV6,
+  GovernorStateLogicV6,
+  GovernorFunctionRestrictionsLogicV6,
+  GovernorProposalLogicV6,
+  GovernorDepositLogicV6,
+  GovernorConfiguratorV6,
+  GovernorClockLogicV6,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -124,7 +132,7 @@ import {
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
 
-interface DeployInstance {
+export interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }
   vot3: VOT3
@@ -192,6 +200,15 @@ interface DeployInstance {
   governorQuorumLogicLibV5: GovernorQuorumLogicV5
   governorStateLogicLibV5: GovernorStateLogicV5
   governorVotesLogicLibV5: GovernorVotesLogicV5
+  governorClockLogicLibV6: GovernorClockLogicV6
+  governorConfiguratorLibV6: GovernorConfiguratorV6
+  governorDepositLogicLibV6: GovernorDepositLogicV6
+  governorFunctionRestrictionsLogicLibV6: GovernorFunctionRestrictionsLogicV6
+  governorProposalLogicLibV6: GovernorProposalLogicV6
+  governorQuorumLogicLibV6: GovernorQuorumLogicV6
+  governorStateLogicLibV6: GovernorStateLogicV6
+  governorVotesLogicLibV6: GovernorVotesLogicV6
+
   // Passport
   passportChecksLogic: PassportChecksLogic
   passportDelegationLogic: PassportDelegationLogic
@@ -310,6 +327,14 @@ export const getOrDeployContractInstances = async ({
     GovernorVotesLogicLibV5,
     GovernorDepositLogicLibV5,
     GovernorStateLogicLibV5,
+    GovernorClockLogicLibV6,
+    GovernorConfiguratorLibV6,
+    GovernorDepositLogicLibV6,
+    GovernorFunctionRestrictionsLogicLibV6,
+    GovernorProposalLogicLibV6,
+    GovernorQuorumLogicLibV6,
+    GovernorStateLogicLibV6,
+    GovernorVotesLogicLibV6,
   } = await governanceLibraries()
 
   // Deploy Passport Libraries
@@ -811,7 +836,15 @@ export const getOrDeployContractInstances = async ({
   )) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
-    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernor"],
+    [
+      "B3TRGovernorV1",
+      "B3TRGovernorV2",
+      "B3TRGovernorV3",
+      "B3TRGovernorV4",
+      "B3TRGovernorV5",
+      "B3TRGovernorV6",
+      "B3TRGovernor",
+    ],
     [
       [
         {
@@ -838,10 +871,19 @@ export const getOrDeployContractInstances = async ({
       [],
       [await veBetterPassport.getAddress()],
       [],
-      [], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
+      [],
+      [
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+        },
+      ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
@@ -892,6 +934,16 @@ export const getOrDeployContractInstances = async ({
           GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
           GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
           GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
+        },
+        {
+          GovernorClockLogicV6: await GovernorClockLogicLibV6.getAddress(),
+          GovernorConfiguratorV6: await GovernorConfiguratorLibV6.getAddress(),
+          GovernorDepositLogicV6: await GovernorDepositLogicLibV6.getAddress(),
+          GovernorFunctionRestrictionsLogicV6: await GovernorFunctionRestrictionsLogicLibV6.getAddress(),
+          GovernorProposalLogicV6: await GovernorProposalLogicLibV6.getAddress(),
+          GovernorQuorumLogicV6: await GovernorQuorumLogicLibV6.getAddress(),
+          GovernorStateLogicV6: await GovernorStateLogicLibV6.getAddress(),
+          GovernorVotesLogicV6: await GovernorVotesLogicLibV6.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -1080,6 +1132,14 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV5: GovernorQuorumLogicLibV5,
     governorStateLogicLibV5: GovernorStateLogicLibV5,
     governorVotesLogicLibV5: GovernorVotesLogicLibV5,
+    governorClockLogicLibV6: GovernorClockLogicLibV6,
+    governorConfiguratorLibV6: GovernorConfiguratorLibV6,
+    governorDepositLogicLibV6: GovernorDepositLogicLibV6,
+    governorFunctionRestrictionsLogicLibV6: GovernorFunctionRestrictionsLogicLibV6,
+    governorProposalLogicLibV6: GovernorProposalLogicLibV6,
+    governorQuorumLogicLibV6: GovernorQuorumLogicLibV6,
+    governorStateLogicLibV6: GovernorStateLogicLibV6,
+    governorVotesLogicLibV6: GovernorVotesLogicLibV6,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,

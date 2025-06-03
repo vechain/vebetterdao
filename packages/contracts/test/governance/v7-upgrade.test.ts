@@ -1,0 +1,608 @@
+import { describe, it } from "mocha"
+import { expect } from "chai"
+import {
+  B3TRGovernor,
+  B3TRGovernorV5,
+  B3TRGovernorV1,
+  B3TRGovernorV2,
+  B3TRGovernorV3,
+  B3TRGovernorV4,
+  B3TRGovernorV6,
+} from "../../typechain-types"
+import { waitForBlock } from "../helpers/common"
+import { ethers } from "hardhat"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { DeployInstance, getOrDeployContractInstances } from "../helpers"
+import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import { setupProposer, startNewRoundAndGetRoundId } from "./fixture.test"
+
+describe.only("Governance - Upgrades", function () {
+  it("Should preserve proposal data through version upgrades and add proposal type support", async () => {
+    const config = createLocalConfig()
+    const {
+      owner,
+      b3tr,
+      timeLock,
+      voterRewards,
+      vot3,
+      xAllocationVoting,
+      governorClockLogicLibV1,
+      governorConfiguratorLibV1,
+      governorDepositLogicLibV1,
+      governorFunctionRestrictionsLogicLibV1,
+      governorProposalLogicLibV1,
+      governorQuorumLogicLibV1,
+      governorStateLogicLibV1,
+      governorVotesLogicLibV1,
+      governorClockLogicLibV3,
+      governorConfiguratorLibV3,
+      governorDepositLogicLibV3,
+      governorFunctionRestrictionsLogicLibV3,
+      governorProposalLogicLibV3,
+      governorQuorumLogicLibV3,
+      governorStateLogicLibV3,
+      governorVotesLogicLibV3,
+      governorClockLogicLibV4,
+      governorConfiguratorLibV4,
+      governorDepositLogicLibV4,
+      governorFunctionRestrictionsLogicLibV4,
+      governorProposalLogicLibV4,
+      governorQuorumLogicLibV4,
+      governorStateLogicLibV4,
+      governorVotesLogicLibV4,
+      governorClockLogicLibV5,
+      governorConfiguratorLibV5,
+      governorDepositLogicLibV5,
+      governorFunctionRestrictionsLogicLibV5,
+      governorProposalLogicLibV5,
+      governorQuorumLogicLibV5,
+      governorStateLogicLibV5,
+      governorVotesLogicLibV5,
+      governorClockLogicLibV6,
+      governorConfiguratorLibV6,
+      governorDepositLogicLibV6,
+      governorFunctionRestrictionsLogicLibV6,
+      governorProposalLogicLibV6,
+      governorQuorumLogicLibV6,
+      governorStateLogicLibV6,
+      governorVotesLogicLibV6,
+      governorClockLogicLib,
+      governorConfiguratorLib,
+      governorDepositLogicLib,
+      governorFunctionRestrictionsLogicLib,
+      governorProposalLogicLib,
+      governorQuorumLogicLib,
+      governorStateLogicLib,
+      governorVotesLogicLib,
+      veBetterPassport,
+      minterAccount,
+      otherAccounts,
+      emissions,
+    } = (await getOrDeployContractInstances({
+      forceDeploy: true,
+    })) as DeployInstance
+
+    // Setup proposer for this test
+    const proposer = otherAccounts[0]
+    await setupProposer(proposer, b3tr, vot3, minterAccount)
+
+    // Get B3TR contract factory for proposal creation
+    const b3trContract = await ethers.getContractFactory("B3TR")
+
+    // Deploy V1 Governor Proxy
+    const governorContractAddress = await deployProxyOnly("B3TRGovernorV1", {
+      GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+      GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+      GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+      GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+      GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+      GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+      GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+      GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+    })
+
+    // Initialize V1
+    const governorV1 = (await initializeProxy(
+      governorContractAddress,
+      "B3TRGovernorV1",
+      [
+        {
+          vot3Token: await vot3.getAddress(),
+          timelock: await timeLock.getAddress(),
+          xAllocationVoting: await xAllocationVoting.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+          initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+          initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+          initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+          voterRewards: await voterRewards.getAddress(),
+          isFunctionRestrictionEnabled: true,
+        },
+        {
+          governorAdmin: owner.address,
+          pauser: owner.address,
+          contractsAddressManager: owner.address,
+          proposalExecutor: owner.address,
+          governorFunctionSettingsRoleAddress: owner.address,
+        },
+      ],
+      {
+        GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+        GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+        GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+        GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+        GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+        GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+        GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+        GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+      },
+    )) as B3TRGovernorV1
+
+    expect(await governorV1.version()).to.equal("1")
+
+    const roundIdforV1 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
+
+    const txV1 = await governorV1.connect(proposer).propose([], [], [], "descriptionV1", roundIdforV1, 0, {
+      gasLimit: 10_000_000,
+    })
+    const proposeReceiptV1 = await txV1.wait()
+    const eventV1 = proposeReceiptV1?.logs[0]
+
+    const decodedV1Logs = governorV1.interface.parseLog({
+      topics: [...(eventV1?.topics as string[])],
+      data: eventV1 ? eventV1.data : "",
+    })
+
+    const proposalIdV1 = ethers.toBigInt(decodedV1Logs?.args[0])
+
+    // Verify proposal exists and get initial data
+    const proposerV1 = await governorV1.proposalProposer(proposalIdV1)
+    const stateV1 = await governorV1.state(proposalIdV1)
+
+    expect(proposerV1).to.equal(proposer.address)
+    expect(stateV1).to.equal(ethers.toBigInt(0)) // Pending state
+
+    // Upgrade V1 -> V2
+    const governorV2 = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernorV2", governorContractAddress, [], {
+      version: 2,
+      libraries: {
+        GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+        GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+        GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+        GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+        GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+        GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+        GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+        GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+      },
+    })) as B3TRGovernorV2
+
+    const roundIdforV2 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
+
+    const txV2 = await governorV2.connect(proposer).propose([], [], [], "descriptionV2", roundIdforV2, 0, {
+      gasLimit: 10_000_000,
+    })
+    const proposeReceiptV2 = await txV2.wait()
+    const eventV2 = proposeReceiptV2?.logs[0]
+
+    const decodedV2Logs = governorV2.interface.parseLog({
+      topics: [...(eventV2?.topics as string[])],
+      data: eventV2 ? eventV2.data : "",
+    })
+
+    const proposalIdV2 = ethers.toBigInt(decodedV2Logs?.args[0])
+
+    // Verify proposal exists and get initial data
+    const proposerV2 = await governorV2.proposalProposer(proposalIdV2)
+    const stateV2 = await governorV2.state(proposalIdV2)
+
+    expect(proposerV2).to.equal(proposer.address)
+    expect(stateV2).to.equal(ethers.toBigInt(0)) // Pending state
+
+    // Upgrade V2 -> V3
+    const governorV3 = (await upgradeProxy("B3TRGovernorV2", "B3TRGovernorV3", governorContractAddress, [], {
+      version: 3,
+      libraries: {
+        GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
+        GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
+        GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
+        GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
+        GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
+        GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
+        GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
+        GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
+      },
+    })) as B3TRGovernorV3
+
+    expect(await governorV3.version()).to.equal("3")
+
+    // Verify both proposals persisted through V2 -> V3 upgrade
+    expect(await governorV3.proposalProposer(proposalIdV1)).to.equal(proposerV1)
+    expect(await governorV3.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
+    expect(await governorV3.proposalProposer(proposalIdV2)).to.equal(proposer.address)
+    expect(await governorV3.state(proposalIdV2)).to.equal(ethers.toBigInt(0))
+
+    // Upgrade V3 -> V4
+    const governorV4 = (await upgradeProxy(
+      "B3TRGovernorV3",
+      "B3TRGovernorV4",
+      governorContractAddress,
+      [await veBetterPassport.getAddress()],
+      {
+        version: 4,
+        libraries: {
+          GovernorClockLogicV4: await governorClockLogicLibV4.getAddress(),
+          GovernorConfiguratorV4: await governorConfiguratorLibV4.getAddress(),
+          GovernorDepositLogicV4: await governorDepositLogicLibV4.getAddress(),
+          GovernorFunctionRestrictionsLogicV4: await governorFunctionRestrictionsLogicLibV4.getAddress(),
+          GovernorProposalLogicV4: await governorProposalLogicLibV4.getAddress(),
+          GovernorQuorumLogicV4: await governorQuorumLogicLibV4.getAddress(),
+          GovernorStateLogicV4: await governorStateLogicLibV4.getAddress(),
+          GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
+        },
+      },
+    )) as B3TRGovernorV4
+
+    expect(await governorV4.version()).to.equal("4")
+
+    // Verify all proposals persisted through V3 -> V4 upgrade
+    expect(await governorV4.proposalProposer(proposalIdV1)).to.equal(proposerV1)
+    expect(await governorV4.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
+    expect(await governorV4.proposalProposer(proposalIdV2)).to.equal(proposer.address)
+    expect(await governorV4.state(proposalIdV2)).to.equal(ethers.toBigInt(0))
+
+    // Upgrade V4 -> V5
+    const governorV5 = (await upgradeProxy("B3TRGovernorV4", "B3TRGovernorV5", governorContractAddress, [], {
+      version: 5,
+      libraries: {
+        GovernorClockLogicV5: await governorClockLogicLibV5.getAddress(),
+        GovernorConfiguratorV5: await governorConfiguratorLibV5.getAddress(),
+        GovernorDepositLogicV5: await governorDepositLogicLibV5.getAddress(),
+        GovernorFunctionRestrictionsLogicV5: await governorFunctionRestrictionsLogicLibV5.getAddress(),
+        GovernorProposalLogicV5: await governorProposalLogicLibV5.getAddress(),
+        GovernorQuorumLogicV5: await governorQuorumLogicLibV5.getAddress(),
+        GovernorStateLogicV5: await governorStateLogicLibV5.getAddress(),
+        GovernorVotesLogicV5: await governorVotesLogicLibV5.getAddress(),
+      },
+    })) as B3TRGovernorV5
+
+    expect(await governorV5.version()).to.equal("5")
+
+    // Verify all proposals persisted through V4 -> V5 upgrade
+    expect(await governorV5.proposalProposer(proposalIdV1)).to.equal(proposerV1)
+    expect(await governorV5.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
+    expect(await governorV5.proposalProposer(proposalIdV2)).to.equal(proposer.address)
+    expect(await governorV5.state(proposalIdV2)).to.equal(ethers.toBigInt(0))
+
+    // Create another proposal in V5 (still no proposal type concept)
+    await waitForBlock(1)
+    const roundIdforV5 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
+
+    const txV5 = await governorV5.connect(proposer).propose([], [], [], "descriptionV5", roundIdforV5, 0, {
+      gasLimit: 10_000_000,
+    })
+    const proposeReceiptV5 = await txV5.wait()
+    const eventV5 = proposeReceiptV5?.logs[0]
+
+    const decodedV5Logs = governorV5.interface.parseLog({
+      topics: [...(eventV5?.topics as string[])],
+      data: eventV5 ? eventV5.data : "",
+    })
+
+    const proposalIdV5 = ethers.toBigInt(decodedV5Logs?.args[0])
+
+    // Verify proposal exists and get initial data
+    const proposerV5 = await governorV5.proposalProposer(proposalIdV5)
+    const stateV5 = await governorV5.state(proposalIdV5)
+
+    expect(proposerV5).to.equal(proposer.address)
+    expect(stateV5).to.equal(ethers.toBigInt(0)) // Pending state
+
+    // Upgrade V5 -> V6
+    const governorV6 = (await upgradeProxy("B3TRGovernorV5", "B3TRGovernorV6", governorContractAddress, [], {
+      version: 6,
+      libraries: {
+        GovernorClockLogicV6: await governorClockLogicLibV6.getAddress(),
+        GovernorConfiguratorV6: await governorConfiguratorLibV6.getAddress(),
+        GovernorDepositLogicV6: await governorDepositLogicLibV6.getAddress(),
+        GovernorFunctionRestrictionsLogicV6: await governorFunctionRestrictionsLogicLibV6.getAddress(),
+        GovernorProposalLogicV6: await governorProposalLogicLibV6.getAddress(),
+        GovernorQuorumLogicV6: await governorQuorumLogicLibV6.getAddress(),
+        GovernorStateLogicV6: await governorStateLogicLibV6.getAddress(),
+        GovernorVotesLogicV6: await governorVotesLogicLibV6.getAddress(),
+      },
+    })) as B3TRGovernorV6
+
+    expect(await governorV6.version()).to.equal("6")
+
+    // Upgrade V6 -> V7 (current version with proposal types)
+    const governorV7 = (await upgradeProxy(
+      "B3TRGovernorV6",
+      "B3TRGovernor",
+      governorContractAddress,
+      [
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+        },
+      ],
+      {
+        version: 7,
+        libraries: {
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        },
+      },
+    )) as B3TRGovernor
+
+    expect(await governorV7.version()).to.equal("7")
+
+    // Verify all proposals persisted through V6 -> V7 upgrade
+    expect(await governorV7.proposalProposer(proposalIdV1)).to.equal(proposerV1)
+    expect(await governorV7.state(proposalIdV1)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
+    expect(await governorV7.proposalProposer(proposalIdV2)).to.equal(proposer.address)
+    expect(await governorV7.state(proposalIdV2)).to.equal(ethers.toBigInt(7)) //At this stage should be a failed proposal
+    expect(await governorV7.proposalProposer(proposalIdV5)).to.equal(proposer.address)
+    expect(await governorV7.state(proposalIdV5)).to.equal(ethers.toBigInt(0))
+
+    // Test proposal type functionality - old proposals should default to Standard (0)
+    expect(await governorV7.proposalType(proposalIdV1)).to.equal(ethers.toBigInt(0)) // Standard type
+    expect(await governorV7.proposalType(proposalIdV2)).to.equal(ethers.toBigInt(0)) // Standard type
+    expect(await governorV7.proposalType(proposalIdV5)).to.equal(ethers.toBigInt(0)) // Standard type
+
+    // Create new proposals in V7 with explicit proposal types
+    await waitForBlock(1)
+    const roundIdforV7 = await startNewRoundAndGetRoundId(emissions, xAllocationVoting)
+
+    const txV7 = await governorV7.connect(proposer).propose([], [], [], "descriptionV7", roundIdforV7, 0, {
+      gasLimit: 10_000_000,
+    })
+    const proposeReceiptV7 = await txV7.wait()
+    const eventV7 = proposeReceiptV7?.logs[0]
+
+    const decodedV7Logs = governorV7.interface.parseLog({
+      topics: [...(eventV7?.topics as string[])],
+      data: eventV7 ? eventV7.data : "",
+    })
+
+    const proposalIdV7 = ethers.toBigInt(decodedV7Logs?.args[0])
+
+    // Verify proposal exists and get initial data
+    const proposerV7 = await governorV7.proposalProposer(proposalIdV7)
+    const stateV7 = await governorV7.state(proposalIdV7)
+
+    expect(proposerV7).to.equal(proposer.address)
+    expect(stateV7).to.equal(ethers.toBigInt(0)) // Pending state
+
+    // Verify new proposals have correct types
+    expect(await governorV7.proposalType(proposalIdV7)).to.equal(ethers.toBigInt(0))
+
+    // Verify all proposal data is still accessible
+    expect(await governorV7.proposalProposer(proposalIdV7)).to.equal(proposer.address)
+    expect(await governorV7.state(proposalIdV7)).to.equal(ethers.toBigInt(0))
+  })
+
+  it("Should fallback to old quorum numerator if timepoint is before the upgrade", async () => {
+    const config = createLocalConfig()
+    const {
+      owner,
+      b3tr,
+      timeLock,
+      voterRewards,
+      vot3,
+      xAllocationVoting,
+      governorClockLogicLibV1,
+      governorConfiguratorLibV1,
+      governorDepositLogicLibV1,
+      governorFunctionRestrictionsLogicLibV1,
+      governorProposalLogicLibV1,
+      governorQuorumLogicLibV1,
+      governorStateLogicLibV1,
+      governorVotesLogicLibV1,
+      governorClockLogicLibV3,
+      governorConfiguratorLibV3,
+      governorDepositLogicLibV3,
+      governorFunctionRestrictionsLogicLibV3,
+      governorProposalLogicLibV3,
+      governorQuorumLogicLibV3,
+      governorStateLogicLibV3,
+      governorVotesLogicLibV3,
+      governorClockLogicLibV4,
+      governorConfiguratorLibV4,
+      governorDepositLogicLibV4,
+      governorFunctionRestrictionsLogicLibV4,
+      governorProposalLogicLibV4,
+      governorQuorumLogicLibV4,
+      governorStateLogicLibV4,
+      governorVotesLogicLibV4,
+      governorClockLogicLibV5,
+      governorConfiguratorLibV5,
+      governorDepositLogicLibV5,
+      governorFunctionRestrictionsLogicLibV5,
+      governorProposalLogicLibV5,
+      governorQuorumLogicLibV5,
+      governorStateLogicLibV5,
+      governorVotesLogicLibV5,
+      governorClockLogicLibV6,
+      governorConfiguratorLibV6,
+      governorDepositLogicLibV6,
+      governorFunctionRestrictionsLogicLibV6,
+      governorProposalLogicLibV6,
+      governorQuorumLogicLibV6,
+      governorStateLogicLibV6,
+      governorVotesLogicLibV6,
+      governorClockLogicLib,
+      governorConfiguratorLib,
+      governorDepositLogicLib,
+      governorFunctionRestrictionsLogicLib,
+      governorProposalLogicLib,
+      governorQuorumLogicLib,
+      governorStateLogicLib,
+      governorVotesLogicLib,
+      veBetterPassport,
+    } = (await getOrDeployContractInstances({
+      forceDeploy: true,
+    })) as DeployInstance
+
+    const governorV6 = (await deployAndUpgrade(
+      ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernorV6"],
+      [
+        [
+          {
+            vot3Token: await vot3.getAddress(),
+            timelock: await timeLock.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            b3tr: await b3tr.getAddress(),
+            quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+            initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+            initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+            initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+            voterRewards: await voterRewards.getAddress(),
+            isFunctionRestrictionEnabled: true,
+          },
+          {
+            governorAdmin: owner.address,
+            pauser: owner.address,
+            contractsAddressManager: owner.address,
+            proposalExecutor: owner.address,
+            governorFunctionSettingsRoleAddress: owner.address,
+          },
+        ],
+        [],
+        [],
+        [await veBetterPassport.getAddress()],
+        [],
+        [],
+      ],
+      {
+        versions: [undefined, 2, 3, 4, 5, 6],
+        libraries: [
+          {
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+          },
+          {
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+          },
+          {
+            GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
+            GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
+            GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
+            GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
+            GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
+            GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
+            GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
+            GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
+          },
+          {
+            GovernorClockLogicV4: await governorClockLogicLibV4.getAddress(),
+            GovernorConfiguratorV4: await governorConfiguratorLibV4.getAddress(),
+            GovernorDepositLogicV4: await governorDepositLogicLibV4.getAddress(),
+            GovernorFunctionRestrictionsLogicV4: await governorFunctionRestrictionsLogicLibV4.getAddress(),
+            GovernorProposalLogicV4: await governorProposalLogicLibV4.getAddress(),
+            GovernorQuorumLogicV4: await governorQuorumLogicLibV4.getAddress(),
+            GovernorStateLogicV4: await governorStateLogicLibV4.getAddress(),
+            GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
+          },
+          {
+            GovernorClockLogicV5: await governorClockLogicLibV5.getAddress(),
+            GovernorConfiguratorV5: await governorConfiguratorLibV5.getAddress(),
+            GovernorDepositLogicV5: await governorDepositLogicLibV5.getAddress(),
+            GovernorFunctionRestrictionsLogicV5: await governorFunctionRestrictionsLogicLibV5.getAddress(),
+            GovernorProposalLogicV5: await governorProposalLogicLibV5.getAddress(),
+            GovernorQuorumLogicV5: await governorQuorumLogicLibV5.getAddress(),
+            GovernorStateLogicV5: await governorStateLogicLibV5.getAddress(),
+            GovernorVotesLogicV5: await governorVotesLogicLibV5.getAddress(),
+          },
+          {
+            GovernorClockLogicV6: await governorClockLogicLibV6.getAddress(),
+            GovernorConfiguratorV6: await governorConfiguratorLibV6.getAddress(),
+            GovernorDepositLogicV6: await governorDepositLogicLibV6.getAddress(),
+            GovernorFunctionRestrictionsLogicV6: await governorFunctionRestrictionsLogicLibV6.getAddress(),
+            GovernorProposalLogicV6: await governorProposalLogicLibV6.getAddress(),
+            GovernorQuorumLogicV6: await governorQuorumLogicLibV6.getAddress(),
+            GovernorStateLogicV6: await governorStateLogicLibV6.getAddress(),
+            GovernorVotesLogicV6: await governorVotesLogicLibV6.getAddress(),
+          },
+        ],
+      },
+    )) as B3TRGovernorV6
+
+    const v6QuorumNumerator = await governorV6["quorumNumerator()"]()
+    const v6QuorumNumeratorBlockNumber = await ethers.provider.getBlockNumber()
+    await waitForBlock(20)
+
+    const governorV7 = (await upgradeProxy(
+      "B3TRGovernorV6",
+      "B3TRGovernor",
+      await governorV6.getAddress(),
+      [
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+        },
+      ],
+      {
+        version: 7,
+        libraries: {
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        },
+      },
+    )) as B3TRGovernor
+
+    //Update standard quorum numerator
+    const proposalStandardType = ethers.toBigInt(0)
+    const newQuorumNumerator = v6QuorumNumerator + 2n
+    await governorV7.connect(owner).updateQuorumNumeratorByType(newQuorumNumerator, proposalStandardType)
+
+    const v7QuorumNumeratorLatest = await governorV7["quorumNumerator()"]()
+    const v7QuorumNumeratorByTypeAtBlock = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+      v6QuorumNumeratorBlockNumber,
+      proposalStandardType,
+    )
+    const v7QuorumNumeratorByTypeLatest = await governorV7["quorumNumeratorByType(uint8)"](proposalStandardType)
+
+    //Querying without a timepoint should return the latest quorum numerator
+    expect(v7QuorumNumeratorLatest).to.be.equal(newQuorumNumerator)
+
+    //Querying with a timepoint should return the quorum numerator at that timepoint
+    //Which in this case is before the upgrade, so should be the same as the v6 quorum numerator
+    expect(v7QuorumNumeratorByTypeAtBlock).to.be.equal(v6QuorumNumerator)
+
+    //Querying with a timepoint should return the quorum numerator at that timepoint
+    //Which in this case is after the upgrade, so should be the same as the new quorum numerator
+    expect(v7QuorumNumeratorByTypeLatest).to.be.equal(newQuorumNumerator)
+  })
+})
