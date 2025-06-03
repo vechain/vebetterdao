@@ -118,35 +118,21 @@ jobs:
             -detailed-exitcode
           echo "exitcode=$?" >> $GITHUB_OUTPUT
 
-      - name: Check for changes
-        id: check_changes
-        run: |
-          if [ "${{ steps.plan.outputs.exitcode }}" = "2" ]; then
-            echo "Changes detected"
-            echo "plan_changes_detected=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "No changes detected"
-            echo "plan_changes_detected=false" >> "$GITHUB_OUTPUT"
-          fi
-        shell: bash
-        continue-on-error: false
-
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
           name: lambda-plan
           path: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}/lambda.tfplan
           retention-days: 5
-
-#      - name: Terraform Apply
-#        if: |
-#          (github.event_name == 'workflow_dispatch') ||
-#          (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
-#          (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
-#        id: apply
-#        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
-#        env:
-#          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
-#          LAMBDA_NAME: ${{ github.event.inputs.lambda_name || inputs.lambda_name }}
-#        run: |
-#          terraform apply -auto-approve -var="lambda_name=${LAMBDA_NAME}" 
+     # If the workflow is triggered by a push to main, or an intentional workflow_dispatch, or a pull_request to dev, apply the changes
+      - name: Terraform Apply
+        if: |
+          (github.event_name == 'workflow_dispatch') ||
+          (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
+          (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
+        id: apply
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
+        run: |
+          terraform apply -auto-approve

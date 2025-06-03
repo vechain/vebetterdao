@@ -8,7 +8,7 @@ environment: "mainnet"
 lambda_function_name: "resetUserSignalsWithReason_vebetterpassport_mainnet"
 lambda_handler: "index.handler"
 lambda_runtime: "nodejs20.x"
-lambda_memory_size: 128
+lambda_memory_size: 256
 lambda_timeout: 30
 
 # Lambda Build Path

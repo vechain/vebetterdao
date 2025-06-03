@@ -1,7 +1,7 @@
 data "archive_file" "lambda_zip" {
   type             = "zip"
   output_file_mode = "0666"
-  source_dir      = "${path.module}/../../${local.config.lambda_source_dir}"
+  source_dir       = "${path.module}/../../${local.config.lambda_source_dir}"
   output_path      = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
   excludes         = ["index.zip"]
 }
@@ -9,14 +9,9 @@ data "archive_file" "lambda_zip" {
 resource "aws_lambda_function" "start_emissions_round" {
   architectures = ["x86_64"]
 
-  ephemeral_storage {
-    size = "512"
-  }
-
-  function_name = "arn:aws:lambda:${local.config.aws_region}:${local.config.aws_account_id}:function:start-emissions-round"
-  handler       = "index.handler"
-
-  filename      = data.archive_file.lambda_zip.output_path
+  function_name    = local.config.lambda_function_name
+  handler          = local.config.lambda_handler
+  filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 
   lifecycle {
@@ -31,13 +26,13 @@ resource "aws_lambda_function" "start_emissions_round" {
     log_group  = "/aws/lambda/start-emissions-round"
   }
 
-  memory_size                    = "128"
+  memory_size                    = local.config.lambda_memory_size
   package_type                   = "Zip"
   reserved_concurrent_executions = "-1"
   role                           = aws_iam_role.scheduler_lambda_execution_role.arn
-  runtime                        = "nodejs20.x"
+  runtime                        = local.config.lambda_runtime
   skip_destroy                   = "false"
-  timeout                        = "900"
+  timeout                        = local.config.lambda_timeout
 
   tracing_config {
     mode = "PassThrough"
