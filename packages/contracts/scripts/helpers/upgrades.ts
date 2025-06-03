@@ -176,7 +176,8 @@ export const deployAndUpgrade = async (
 ): Promise<BaseContract> => {
   if (contractNames.length === 0) throw new Error("No contracts to deploy")
 
-  if (contractNames.length !== args.length) throw new Error("Contract names and arguments must have the same length")
+  if (contractNames.length !== args.length)
+    throw new Error(`Contract ${contractNames} and arguments must have the same length`)
 
   if (options.libraries && contractNames.length !== options.libraries.length)
     throw new Error("Contract names and libraries must have the same length")
