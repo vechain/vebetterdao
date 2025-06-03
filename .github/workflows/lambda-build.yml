@@ -68,7 +68,11 @@ jobs:
           # Build lambda
           cd packages/lambda
           echo "Running yarn build..."
-          yarn build || { echo "Lambda build failed"; exit 1; }
+          if [ "${{ inputs.workspace }}" == "dev" ]; then
+            LAMBDA_ENV=testnet-staging yarn build:lambda || { echo "Lambda build failed"; exit 1; }
+          else
+            LAMBDA_ENV=mainnet yarn build:lambda || { echo "Lambda build failed"; exit 1; }
+          fi
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
