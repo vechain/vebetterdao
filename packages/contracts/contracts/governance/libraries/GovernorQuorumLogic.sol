@@ -71,10 +71,11 @@ library GovernorQuorumLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 timepoint
   ) public view returns (uint256) {
-    uint256 length = self.quorumNumeratorHistory._checkpoints.length;
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType.Standard;
+    uint256 length = self.proposalTypeQuorum[proposalType]._checkpoints.length;
 
     // Optimistic search, check the latest checkpoint
-    Checkpoints.Checkpoint208 storage latest = self.quorumNumeratorHistory._checkpoints[length - 1];
+    Checkpoints.Checkpoint208 storage latest = self.proposalTypeQuorum[proposalType]._checkpoints[length - 1];
     uint48 latestKey = latest._key;
     uint208 latestValue = latest._value;
     if (latestKey <= timepoint) {
@@ -82,7 +83,7 @@ library GovernorQuorumLogic {
     }
 
     // Otherwise, do the binary search
-    return self.quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
+    return self.proposalTypeQuorum[proposalType].upperLookupRecent(SafeCast.toUint48(timepoint));
   }
   /// @notice Retrieves the quorum numerator at a specific timepoint using checkpoint data.
   /// @param self The storage structure containing the quorum numerator history.
@@ -93,23 +94,15 @@ library GovernorQuorumLogic {
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
   ) public view returns (uint256) {
-    if (
-      proposalTypeValue == GovernorTypes.ProposalType.Standard &&
-      self.proposalTypeQuorum[proposalTypeValue]._checkpoints[0]._key > timepoint
-    ) {
-      // If the timepoint is before the first checkpoint
-      // we need to fallback to the old quorum numerator which is using quorumNumeratorHistory
-      return quorumNumerator(self, timepoint);
-    } else {
-      return _quorumNumeratorByType(self, timepoint, proposalTypeValue);
-    }
+    return _quorumNumeratorByType(self, timepoint, proposalTypeValue);
   }
 
   /// @notice Retrieves the latest quorum numerator using the GovernorClockLogic library.
   /// @param self The storage structure containing the quorum numerator history.
   /// @return The latest quorum numerator.
   function quorumNumerator(GovernorStorageTypes.GovernorStorage storage self) public view returns (uint256) {
-    return self.quorumNumeratorHistory.latest();
+    GovernorTypes.ProposalType proposalType = GovernorTypes.ProposalType.Standard;
+    return self.proposalTypeQuorum[proposalType].latest();
   }
 
   /**
@@ -262,12 +255,6 @@ library GovernorQuorumLogic {
       GovernorClockLogic.clock(self),
       SafeCast.toUint208(newQuorumNumerator)
     );
-
-    //Update also the standard quorum numerator
-    if (proposalTypeValue == GovernorTypes.ProposalType.Standard) {
-      self.quorumNumeratorHistory.push(GovernorClockLogic.clock(self), SafeCast.toUint208(newQuorumNumerator));
-    }
-
     emit QuorumNumeratorUpdated(oldQuorumNumerator, newQuorumNumerator);
     emit QuorumNumeratorUpdatedByType(oldQuorumNumerator, newQuorumNumerator, proposalTypeValue);
   }

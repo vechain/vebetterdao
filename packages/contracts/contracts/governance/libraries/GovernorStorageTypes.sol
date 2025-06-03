@@ -51,7 +51,8 @@ library GovernorStorageTypes {
     uint256 minVotingDelay;
     // ------------------------------- Quorum Storage -------------------------------
     // quorum numerator history
-    Checkpoints.Trace208 quorumNumeratorHistory;
+    // @dev This is deprecated since we are using proposalTypeQuorum for the quorum numerator history
+    Checkpoints.Trace208 quorumNumeratorHistory_DEPRECATED;
     // ------------------------------- Timelock Storage -------------------------------
     // Timelock contract
     TimelockControllerUpgradeable timelock;

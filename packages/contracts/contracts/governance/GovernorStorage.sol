@@ -29,6 +29,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { GovernorQuorumLogic } from "./libraries/GovernorQuorumLogic.sol";
 import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+
+using Checkpoints for Checkpoints.Trace208;
 
 /// @title GovernorStorage
 /// @notice Contract used as storage of the B3TRGovernor contract.
@@ -126,12 +131,26 @@ contract GovernorStorage is Initializable {
       initializationDataV7.grantVotingThreshold
     );
 
-    // Set quorum
-    GovernorQuorumLogic._updateQuorumNumeratorByType(
-      governorStorage,
-      GovernorQuorumLogic.quorumNumerator(governorStorage),
+    Checkpoints.Trace208 storage quorumNumeratorHistory_DEPRECATED = governorStorage.quorumNumeratorHistory_DEPRECATED;
+
+    Checkpoints.Trace208 storage proposalTypeQuorum = governorStorage.proposalTypeQuorum[
       GovernorTypes.ProposalType.Standard
-    );
+    ];
+
+    // For each checkpoint in the old structure
+    for (uint256 i = 0; i < quorumNumeratorHistory_DEPRECATED._checkpoints.length; i++) {
+      // Get the old checkpoint data
+      uint48 timepoint = quorumNumeratorHistory_DEPRECATED._checkpoints[i]._key;
+      uint208 quorumNumerator = quorumNumeratorHistory_DEPRECATED._checkpoints[i]._value;
+
+      // Push it to the new structure with the same timepoint and value
+      proposalTypeQuorum.push(
+        timepoint, // Use the same timepoint from the old checkpoint
+        quorumNumerator // Use the same value from the old checkpoint
+      );
+    }
+
+    // Set quorum for GRANT
     GovernorQuorumLogic._updateQuorumNumeratorByType(
       governorStorage,
       initializationDataV7.grantQuorum,
