@@ -12,4 +12,4 @@ lambda_memory_size: 128
 lambda_timeout: 900
 
 # Lambda Build Path
-lambda_source_dir: "packages/lambda/dist/mainnet/startRound" 
+lambda_source_dir: "packages/lambda/dist/testnet-staging/startRound" 
