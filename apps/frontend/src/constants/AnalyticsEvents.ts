@@ -76,3 +76,16 @@ export const linkClickActions = (property: LinkClickProperties) => ({
 })
 
 export const linkClicked: string = "Link Clicked"
+
+// Appeal/KYC events
+export enum SignalResetProperties {
+  SIGNAL_RESET_SUCCESS = "Signal Reset Successful",
+}
+
+export const signalResetActions = (property: SignalResetProperties) => ({
+  action: property,
+})
+
+export const signalReset: string = "Signal Reset"
+
+export const signaledAfterKYC: string = "Signaled After KYC"

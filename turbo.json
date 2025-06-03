@@ -6,18 +6,19 @@
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
     "TESTNET_STAGING_MNEMONIC",
+    "GALACTICA_TEST_MNEMONIC",
     "NEXT_PUBLIC_DATADOG_APP_TOKEN",
     "NEXT_PUBLIC_DATADOG_CLIENT_TOKEN",
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
     "IS_TEST_COVERAGE",
-    "RUN_SIMULATION",
     "ENDORSE_XAPPS",
     "DO_NOT_UPGRADE",
     "SHARD",
     "CONTRACT_TO_UPGRADE",
     "CONTRACT_TO_DEPLOY",
     "CONTRACT_VERSION",
-    "FUNCTION_TO_CALL"
+    "FUNCTION_TO_CALL",
+    "NEXT_DEPLOY_LATEST_ONLY"
   ],
   "pipeline": {
     "install": {
@@ -55,6 +56,16 @@
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
     },
+    "dev:galactica-test": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:galactica-test"]
+    },
+    "dev:simulation": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["@repo/contracts#simulation"]
+    },
     "start": {
       "cache": false,
       "dependsOn": ["^setup-contracts"]
@@ -73,6 +84,11 @@
       "cache": false,
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
+    },
+    "start:galactica-test": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:galactica-test"]
     },
     "setup-contracts": {
       "cache": false,
@@ -94,6 +110,11 @@
       "persistent": true,
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:mainnet"]
     },
+    "setup-contracts:galactica-test": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:galactica-test"]
+    },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
@@ -112,6 +133,17 @@
     "@repo/contracts#check-contracts-deployment:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/contracts#check-contracts-deployment:galactica-test": {
+      "cache": false
+    },
+    "@repo/contracts#simulation": {
+      "cache": false,
+      "dependsOn": ["^setup-contracts"]
+    },
+    "@repo/contracts#simulation-galactica": {
+      "cache": false,
+      "dependsOn": ["^setup-contracts:galactica-test"]
     },
     "clean": {
       "cache": false
@@ -134,6 +166,9 @@
     },
     "deploy:mainnet": {
       "dependsOn": ["^deploy:mainnet"]
+    },
+    "deploy:galactica-test": {
+      "dependsOn": ["^deploy:galactica-test"]
     },
     "deploy:hardhat": {
       "dependsOn": ["^deploy:hardhat"]

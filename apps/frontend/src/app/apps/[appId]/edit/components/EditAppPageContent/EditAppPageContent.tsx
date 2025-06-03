@@ -300,16 +300,13 @@ export const EditAppPageContent = () => {
               <FormControl isInvalid={!!errors.distribution_strategy}>
                 <Textarea
                   {...register("distribution_strategy", {
-                    required: {
-                      value: true,
-                      message: t("This field is required"),
-                    },
                     minLength: {
                       value: 20,
                       message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
                     },
                   })}
                   defaultValue={appMetadata?.distribution_strategy ?? ""}
+                  placeholder={t("Eg. Our goal is to distribute at least X percent of the round allocation each week.")}
                   resize="none"
                   h="140px"
                 />

@@ -1,7 +1,11 @@
 import { Emissions__factory, VoterRewards, VoterRewards__factory } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { type TransactionClause, Clause, Address, ABIContract } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { TestPk } from "./seedAccounts"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const bootstrapEmissions = async (contractAddress: string, admin: TestPk) => {
   console.log("Bootstrapping emissions...")
@@ -9,19 +13,14 @@ export const bootstrapEmissions = async (contractAddress: string, admin: TestPk)
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      coder.createInterface(JSON.stringify(Emissions__factory.abi)).getFunction("bootstrap") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(Emissions__factory.abi).getFunction("bootstrap"),
       [],
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, admin.address, 32)
-
-  if (!admin.pk) {
-    throw new Error("Account does not have a private key")
-  }
-  await signAndSendTx(body, admin.pk)
+  await TransactionUtils.sendTx(thorClient, clauses, admin.pk)
 }
 
 export const startEmissions = async (contractAddress: string, acct: TestPk) => {
@@ -30,20 +29,14 @@ export const startEmissions = async (contractAddress: string, acct: TestPk) => {
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      coder.createInterface(JSON.stringify(Emissions__factory.abi)).getFunction("start") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(Emissions__factory.abi).getFunction("start"),
       [],
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
-
-  if (!acct.pk) {
-    throw new Error("Account does not have a private key")
-  }
-
-  await signAndSendTx(body, acct.pk)
+  await TransactionUtils.sendTx(thorClient, clauses, acct.pk)
 }
 
 export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct: TestPk) => {
@@ -52,22 +45,14 @@ export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct:
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      await voterRewards.getAddress(),
-      coder
-        .createInterface(JSON.stringify(VoterRewards__factory.abi))
-        .getFunction("toggleQuadraticRewarding") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(await voterRewards.getAddress()),
+      ABIContract.ofAbi(VoterRewards__factory.abi).getFunction("toggleQuadraticRewarding"),
       [],
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
-
-  if (!acct.pk) {
-    throw new Error("Account does not have a private key")
-  }
-
-  await signAndSendTx(body, acct.pk)
+  await TransactionUtils.sendTx(thorClient, clauses, acct.pk)
 }
 
 export const distributeEmissions = async (contractAddress: string, acct: TestPk) => {
@@ -76,18 +61,12 @@ export const distributeEmissions = async (contractAddress: string, acct: TestPk)
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      coder.createInterface(JSON.stringify(Emissions__factory.abi)).getFunction("distribute") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(Emissions__factory.abi).getFunction("distribute"),
       [],
     ),
   )
 
-  const body: TransactionBody = await buildTxBody(clauses, acct.address, 32)
-
-  if (!acct.pk) {
-    throw new Error("Account does not have a private key")
-  }
-
-  await signAndSendTx(body, acct.pk)
+  await TransactionUtils.sendTx(thorClient, clauses, acct.pk)
 }

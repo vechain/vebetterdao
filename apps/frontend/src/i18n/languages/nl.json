@@ -1692,5 +1692,7 @@
   "Start": "Start",
   "Verify": "Verifieer",
   "Complete": "Voltooi",
-  "Unable to process request. Try refreshing or contact support.": "Kan het verzoek niet verwerken. Probeer te verversen of neem contact op met ondersteuning."
+  "Unable to process request. Try refreshing or contact support.": "Kan het verzoek niet verwerken. Probeer te verversen of neem contact op met ondersteuning.",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Bijvoorbeeld, ons doel is om elke week ten minste X procent van de ronde toewijzing te verdelen.",
+  "Vote Type": "Stemtype"
 }

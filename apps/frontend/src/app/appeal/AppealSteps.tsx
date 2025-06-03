@@ -33,7 +33,15 @@ import { getVerifiedVetDomainQueryKey, useVerifiedVetDomain } from "./hooks/useV
 import { ResetingResult } from "./components/ResetingResult"
 import { RESET_SIGNAL_KEY_LOCAL_STORAGE_PREFIX, VET_DOMAINS_VERIFY_URL, REDIRECT_URL, RESET_STATUS } from "./constants"
 import { ResetStatus } from "./types"
-import { linkClickActions, LinkClickProperties, linkClicked } from "@/constants"
+import {
+  linkClickActions,
+  LinkClickProperties,
+  linkClicked,
+  signalReset,
+  SignalResetProperties,
+  signalResetActions,
+  signaledAfterKYC,
+} from "@/constants"
 
 export const AppealSteps = () => {
   const router = useRouter()
@@ -133,6 +141,8 @@ export const AppealSteps = () => {
         setResetingStatus(RESET_STATUS.SUCCESS)
         setApiResponse(data.message)
         setActiveStep(3) // After successful reseting signal count
+
+        AnalyticsUtils.trackEvent(signalReset, signalResetActions(SignalResetProperties.SIGNAL_RESET_SUCCESS))
       } else {
         setResetingStatus(RESET_STATUS.ERROR)
         setApiResponse(data.message)
@@ -184,7 +194,7 @@ export const AppealSteps = () => {
 
   useEffect(() => {
     if (userSignaledCount >= 1 && hasSuccessfulReset) {
-      AnalyticsUtils.trackEvent("SignaledAfterKYC")
+      AnalyticsUtils.trackEvent(signaledAfterKYC)
     }
   }, [userSignaledCount, hasSuccessfulReset])
 

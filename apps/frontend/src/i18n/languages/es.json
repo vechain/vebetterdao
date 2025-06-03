@@ -521,7 +521,7 @@
   "Executable functions": "Funciones ejecutables",
   "Finish in": "Termina en",
   "Finished": "Finalizado",
-  "For": "Para",
+  "For": "Sí",
   "For a proposal to make it to a public vote, it must achieve community support. You can collaborate with this proposal by temporarily contributing some VOT3 tokens.": "Para que una propuesta llegue a votación pública, debe lograr el apoyo de la comunidad. Puedes colaborar con esta propuesta contribuyendo temporalmente algunos tokens VOT3.",
   "From you {{vot3}} VOT3.": "De ti {{vot3}} VOT3.",
   "From {{users}} users {{vot3}} VOT3.": "De {{users}} usuarios {{vot3}} VOT3.",
@@ -1692,5 +1692,7 @@
   "Start": "Iniciar",
   "Verify": "Verificar",
   "Complete": "Completar",
-  "Unable to process request. Try refreshing or contact support.": "No se puede procesar la solicitud. Intenta actualizar o contacta al soporte."
+  "Unable to process request. Try refreshing or contact support.": "No se puede procesar la solicitud. Intenta actualizar o contacta al soporte.",
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Por ejemplo, nuestro objetivo es distribuir al menos X por ciento de la asignación de la ronda cada semana.",
+  "Vote Type": "Tipo de Voto"
 }
