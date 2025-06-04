@@ -1,12 +1,10 @@
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@repo/contracts"
-import { getAllEvents } from "@/api/blockchain"
-import { useConnex } from "@vechain/dapp-kit-react"
-import { abi } from "thor-devkit"
+import { VoterRewards__factory } from "@repo/contracts/typechain-types"
+import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
+import { FilterCriteria } from "@vechain/sdk-network"
+import { EnvConfig } from "@repo/config/contracts"
 import { useQuery } from "@tanstack/react-query"
 import { ethers } from "ethers"
-
-const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 
 export type RewardClaimed = {
   cycle: number
@@ -17,59 +15,96 @@ export type RewardClaimed = {
 
 /**
  * Fetches all RewardClaimed events
- * @param {Connex.Thor} thor
+ * @param {ThorClient} thor - The thor client
+ * @param {EnvConfig} env - The environment config
+ * @param {object} filterOptions - Filter options for cycle and voter
  * @returns {Promise<RewardClaimed[]>}
  */
 export const getRewardClaimedEvents = async (
-  thor: Connex.Thor,
+  thor: ThorClient,
+  env: EnvConfig,
   filterOptions?: { cycle?: number; voter?: string },
 ): Promise<RewardClaimed[]> => {
-  const eventFragment = VoterRewards__factory.createInterface().getEvent("RewardClaimed").format("json")
-  const rewardClaimedEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
+  const voterRewardsContractAddress = getConfig(env).voterRewardsContractAddress
 
-  const eventFragmentV2 = VoterRewards__factory.createInterface().getEvent("RewardClaimedV2").format("json")
-  const rewardClaimedEventV2 = new abi.Event(JSON.parse(eventFragmentV2) as abi.Event.Definition)
+  const rewardClaimedEventAbi = thor.contracts
+    .load(voterRewardsContractAddress, VoterRewards__factory.abi)
+    .getEventAbi("RewardClaimed")
 
-  const topics = rewardClaimedEvent.encode({
+  const rewardClaimedV2EventAbi = thor.contracts
+    .load(voterRewardsContractAddress, VoterRewards__factory.abi)
+    .getEventAbi("RewardClaimedV2")
+
+  const rewardClaimedTopics = rewardClaimedEventAbi.encodeFilterTopicsNoNull({
     cycle: filterOptions?.cycle ?? undefined,
     voter: filterOptions?.voter ?? undefined,
   })
 
-  const filterCriteria = [
+  const rewardClaimedV2Topics = rewardClaimedV2EventAbi.encodeFilterTopicsNoNull({
+    cycle: filterOptions?.cycle ?? undefined,
+    voter: filterOptions?.voter ?? undefined,
+  })
+
+  const filterCriteria: FilterCriteria[] = [
     {
-      address: VOTER_REWARDS_CONTRACT,
-      topic0: topics[0] ?? undefined,
-      topic1: topics[1] ?? undefined,
-      topic2: topics[2] ?? undefined,
-      topic3: topics[3] ?? undefined,
-      topic4: topics[4] ?? undefined,
+      criteria: {
+        address: voterRewardsContractAddress,
+        topic0: rewardClaimedTopics[0] ?? undefined,
+        topic1: rewardClaimedTopics[1] ?? undefined,
+        topic2: rewardClaimedTopics[2] ?? undefined,
+        topic3: rewardClaimedTopics[3] ?? undefined,
+        topic4: rewardClaimedTopics[4] ?? undefined,
+      },
+      eventAbi: rewardClaimedEventAbi,
+    },
+    {
+      criteria: {
+        address: voterRewardsContractAddress,
+        topic0: rewardClaimedV2Topics[0] ?? undefined,
+        topic1: rewardClaimedV2Topics[1] ?? undefined,
+        topic2: rewardClaimedV2Topics[2] ?? undefined,
+        topic3: rewardClaimedV2Topics[3] ?? undefined,
+        topic4: rewardClaimedV2Topics[4] ?? undefined,
+      },
+      eventAbi: rewardClaimedV2EventAbi,
     },
   ]
 
-  const events = await getAllEvents({ thor, filterCriteria })
+  const events = await getAllEventLogs({
+    nodeUrl: thor.httpClient.baseURL,
+    thor,
+    from: 0,
+    to: undefined,
+    filterCriteria,
+  })
+
   const decodedRewardClaimedEvents: RewardClaimed[] = []
 
   events.forEach(event => {
+    if (!event.decodedData) {
+      throw new Error("Event data not decoded")
+    }
+
     switch (event.topics[0]) {
-      case rewardClaimedEvent.signature: {
-        const decoded = rewardClaimedEvent.decode(event.data, event.topics)
-        const rewardFormatted = Number(ethers.formatEther(decoded[2] as string))
+      case rewardClaimedTopics[0]: {
+        const [cycle, voter, reward] = event.decodedData as [bigint, string, bigint]
+        const rewardFormatted = Number(ethers.formatEther(reward))
 
         decodedRewardClaimedEvents.push({
-          cycle: decoded[0],
-          voter: decoded[1],
+          cycle: Number(cycle),
+          voter,
           reward: rewardFormatted,
         })
         break
       }
-      case rewardClaimedEventV2.signature: {
-        const decoded = rewardClaimedEventV2.decode(event.data, event.topics)
-        const rewardFormatted = Number(ethers.formatEther(decoded[2] as string))
-        const gmRewardFormatted = Number(ethers.formatEther(decoded[3] as string))
+      case rewardClaimedV2Topics[0]: {
+        const [cycle, voter, reward, gmReward] = event.decodedData as [bigint, string, bigint, bigint]
+        const rewardFormatted = Number(ethers.formatEther(reward))
+        const gmRewardFormatted = Number(ethers.formatEther(gmReward))
 
         decodedRewardClaimedEvents.push({
-          cycle: decoded[0],
-          voter: decoded[1],
+          cycle: Number(cycle),
+          voter,
           reward: rewardFormatted,
           gmReward: gmRewardFormatted,
         })
@@ -81,25 +116,27 @@ export const getRewardClaimedEvents = async (
   return decodedRewardClaimedEvents
 }
 
-export const getRewardClaimedEventsQueryKey = (cycle?: number, voter?: string) => {
-  return ["rewardClaimedEvents", cycle, voter]
+export const getRewardClaimedEventsQueryKey = (env: EnvConfig, cycle?: number, voter?: string) => {
+  return ["rewardClaimedEvents", env, cycle, voter]
 }
 
 /**
  * useRewardClaimedEvents is a custom hook that fetches the RewardClaimed events for a given cycle and voter.
  *
+ * @param {EnvConfig} env - The environment config
  * @param {number} cycle - The cycle of the rewards. If not provided, no queries will be made.
  * @param {string} voter - The address of the voter. If not provided, the rewards for all voters will be fetched.
  * @returns {object} An object containing the status and data of the queries. Refer to the react-query documentation for more details.
  */
-export const useRewardClaimedEvents = (cycle?: number, voter?: string) => {
-  const { thor } = useConnex()
+export const useRewardClaimedEvents = (env: EnvConfig, cycle?: number, voter?: string) => {
+  const thor = useThor()
 
   const result = useQuery({
-    queryKey: getRewardClaimedEventsQueryKey(cycle, voter),
+    queryKey: getRewardClaimedEventsQueryKey(env, cycle, voter),
     enabled: !!thor && !!cycle,
     queryFn: async () => {
-      return getRewardClaimedEvents(thor, { cycle, voter })
+      if (!thor) throw new Error("Thor client not available")
+      return getRewardClaimedEvents(thor, env, { cycle, voter })
     },
   })
   return result

@@ -1,13 +1,10 @@
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@repo/contracts"
-import { getAllEvents } from "@/api/blockchain"
-import { useConnex } from "@vechain/dapp-kit-react"
-import { abi } from "thor-devkit"
+import { VoterRewards__factory } from "@repo/contracts/typechain-types"
+import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
+import { FilterCriteria } from "@vechain/sdk-network"
+import { EnvConfig } from "@repo/config/contracts"
 import { useQuery } from "@tanstack/react-query"
-
 import { ethers } from "ethers"
-
-const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 
 export type VoteRegisteredEvent = {
   cycle: number
@@ -18,75 +15,90 @@ export type VoteRegisteredEvent = {
 
 /**
  * Fetches all VoteRegistered events
- * @param {Connex.Thor} thor
+ * @param {ThorClient} thor - The thor client
+ * @param {EnvConfig} env - The environment config
+ * @param {object} filterOptions - Filter options for cycle and voter
  * @returns {Promise<VoteRegisteredEvent[]>}
  */
-
 export const getVoteRegisteredEvents = async (
-  thor: Connex.Thor,
+  thor: ThorClient,
+  env: EnvConfig,
   filterOptions?: { cycle?: number; voter?: string },
 ): Promise<VoteRegisteredEvent[]> => {
-  const eventFragment = VoterRewards__factory.createInterface().getEvent("VoteRegistered").format("json")
-  const voteRegisteredEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
+  const voterRewardsContractAddress = getConfig(env).voterRewardsContractAddress
 
-  const topics = voteRegisteredEvent.encode({
+  const eventAbi = thor.contracts
+    .load(voterRewardsContractAddress, VoterRewards__factory.abi)
+    .getEventAbi("VoteRegistered")
+
+  const topics = eventAbi.encodeFilterTopicsNoNull({
     cycle: filterOptions?.cycle ?? undefined,
     voter: filterOptions?.voter ?? undefined,
   })
 
-  const filterCriteria = [
+  const filterCriteria: FilterCriteria[] = [
     {
-      address: VOTER_REWARDS_CONTRACT,
-      topic0: topics[0] ?? undefined,
-      topic1: topics[1] ?? undefined,
-      topic2: topics[2] ?? undefined,
-      topic3: topics[3] ?? undefined,
-      topic4: topics[4] ?? undefined,
+      criteria: {
+        address: voterRewardsContractAddress,
+        topic0: topics[0] ?? undefined,
+        topic1: topics[1] ?? undefined,
+        topic2: topics[2] ?? undefined,
+        topic3: topics[3] ?? undefined,
+        topic4: topics[4] ?? undefined,
+      },
+      eventAbi,
     },
   ]
 
-  const events = await getAllEvents({ thor, filterCriteria })
+  const events = await getAllEventLogs({
+    nodeUrl: thor.httpClient.baseURL,
+    thor,
+    from: 0,
+    to: undefined,
+    filterCriteria,
+  })
 
   const decodedVoteRegisteredEvents: VoteRegisteredEvent[] = []
 
   events.forEach(event => {
-    switch (event.topics[0]) {
-      case voteRegisteredEvent.signature: {
-        const decoded = voteRegisteredEvent.decode(event.data, event.topics)
-        const rewardWeightedVote = ethers.formatEther(decoded[3] as string)
-
-        decodedVoteRegisteredEvents.push({
-          cycle: decoded[0],
-          voter: decoded[1],
-          votes: decoded[2],
-          rewardWeightedVote: Number(rewardWeightedVote),
-        })
-        break
-      }
-
-      default: {
-        throw new Error("Unknown event")
-      }
+    if (!event.decodedData) {
+      throw new Error("Event data not decoded")
     }
+
+    const [cycle, voter, votes, rewardWeightedVote] = event.decodedData as [bigint, string, bigint, bigint]
+    const rewardWeightedVoteFormatted = Number(ethers.formatEther(rewardWeightedVote))
+
+    decodedVoteRegisteredEvents.push({
+      cycle: Number(cycle),
+      voter,
+      votes: Number(votes),
+      rewardWeightedVote: rewardWeightedVoteFormatted,
+    })
   })
+
   return decodedVoteRegisteredEvents
 }
 
-export const getVoteRegisteredEventsQueryKey = (filterOptions?: { cycle?: number; voter?: string }) => {
-  return ["voteRegisteredEvents", filterOptions]
+export const getVoteRegisteredEventsQueryKey = (env: EnvConfig, filterOptions?: { cycle?: number; voter?: string }) => {
+  return ["voteRegisteredEvents", env, filterOptions]
 }
 
 /**
  * Hook to get all VoteRegistered events from the Voter Rewards contract
+ * @param {EnvConfig} env - The environment config
+ * @param {object} filterOptions - Filter options for cycle and voter
  * @returns {UseQueryResult<VoteRegisteredEvent[], Error>}
  */
-
-export const useVoteRegisteredEvents = (filterOptions?: { cycle?: number; voter?: string }) => {
-  const { thor } = useConnex()
+export const useVoteRegisteredEvents = (env: EnvConfig, filterOptions?: { cycle?: number; voter?: string }) => {
+  const thor = useThor()
 
   const result = useQuery({
-    queryKey: getVoteRegisteredEventsQueryKey(filterOptions),
-    queryFn: async () => getVoteRegisteredEvents(thor, filterOptions),
+    queryKey: getVoteRegisteredEventsQueryKey(env, filterOptions),
+    enabled: !!thor,
+    queryFn: async () => {
+      if (!thor) throw new Error("Thor client not available")
+      return getVoteRegisteredEvents(thor, env, filterOptions)
+    },
   })
 
   return result

@@ -1,11 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-import { abi } from "thor-devkit"
-import { getAllEvents } from "@/api/blockchain"
+import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
+import { FilterCriteria } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { XAllocationPoolJson } from "@repo/contracts"
-
-const XALLOCATION_POLL_CONTRACT = getConfig().xAllocationPoolContractAddress
+import { XAllocationPool__factory } from "@repo/contracts/typechain-types"
+import { EnvConfig } from "@repo/config/contracts"
 
 export type AllocationRewardsClaimed = {
   appId: string
@@ -20,47 +18,65 @@ export type AllocationRewardsClaimed = {
 
 /**
  * Fetches all allocation pool events
- * @param {Connex.Thor} thor
- * @returns {Promise<{ claimedRewards: AllocationRewardsClaimed[] >}
+ * @param {ThorClient} thor - The thor client
+ * @param {EnvConfig} env - The environment config
+ * @returns {Promise<{ claimedRewards: AllocationRewardsClaimed[] }>}
  */
+export const getAllocationPoolEvents = async (thor: ThorClient, env: EnvConfig) => {
+  const xAllocationPoolContractAddress = getConfig(env).xAllocationPoolContractAddress
 
-export const getAllocationPoolEvents = async (thor: Connex.Thor) => {
-  const allocationRewardsClaimedAbi = XAllocationPoolJson.abi.find(abi => abi.name === "AllocationRewardsClaimed")
-  if (!allocationRewardsClaimedAbi) throw new Error("AllocationRewardsClaimed event not found")
-  const allocationRewardsClaimedEvent = new abi.Event(allocationRewardsClaimedAbi as abi.Event.Definition)
+  const eventAbi = thor.contracts
+    .load(xAllocationPoolContractAddress, XAllocationPool__factory.abi)
+    .getEventAbi("AllocationRewardsClaimed")
 
-  const filterCriteria = [
+  const topics = eventAbi.encodeFilterTopicsNoNull({})
+
+  const filterCriteria: FilterCriteria[] = [
     {
-      address: XALLOCATION_POLL_CONTRACT,
-      topic0: allocationRewardsClaimedEvent.signature,
+      criteria: {
+        address: xAllocationPoolContractAddress,
+        topic0: topics[0] ?? undefined,
+      },
+      eventAbi,
     },
   ]
 
-  const events = await getAllEvents({ thor, filterCriteria })
+  const events = await getAllEventLogs({
+    nodeUrl: thor.httpClient.baseURL,
+    thor,
+    from: 0,
+    to: undefined,
+    filterCriteria,
+  })
 
   const decodedAllocationRewardsClaimedEvents: AllocationRewardsClaimed[] = []
 
   events.forEach(event => {
-    switch (event.topics[0]) {
-      case allocationRewardsClaimedEvent.signature: {
-        const decoded = allocationRewardsClaimedEvent.decode(event.data, event.topics)
-        decodedAllocationRewardsClaimedEvents.push({
-          appId: decoded[0],
-          roundId: decoded[1],
-          totalAmount: decoded[2],
-          recipient: decoded[3],
-          caller: decoded[4],
-          unallocatedAmount: decoded[5],
-          teamAllocationAmount: decoded[6],
-          x2EarnRewardsPoolAmount: decoded[6],
-        })
-        break
-      }
-
-      default: {
-        throw new Error("Unknown event")
-      }
+    if (!event.decodedData) {
+      throw new Error("Event data not decoded")
     }
+
+    const [
+      appId,
+      roundId,
+      totalAmount,
+      recipient,
+      caller,
+      unallocatedAmount,
+      teamAllocationAmount,
+      x2EarnRewardsPoolAmount,
+    ] = event.decodedData as [bigint, bigint, bigint, string, string, bigint, bigint, bigint]
+
+    decodedAllocationRewardsClaimedEvents.push({
+      appId: appId.toString(),
+      roundId: roundId.toString(),
+      totalAmount: totalAmount.toString(),
+      recipient,
+      caller,
+      unallocatedAmount: unallocatedAmount.toString(),
+      teamAllocationAmount: teamAllocationAmount.toString(),
+      x2EarnRewardsPoolAmount: x2EarnRewardsPoolAmount.toString(),
+    })
   })
 
   return {
@@ -68,18 +84,22 @@ export const getAllocationPoolEvents = async (thor: Connex.Thor) => {
   }
 }
 
-export const getAllocationPoolEventsQueryKey = () => ["useAllocationPoolEvents"]
+export const getAllocationPoolEventsQueryKey = (env: EnvConfig) => ["useAllocationPoolEvents", env]
 
 /**
  * Fetches all allocation pool events
- * @returns {QueryObserverResult<{ claimedRewards: AllocationRewardsClaimed[] >}
+ * @param {EnvConfig} env - The environment config
+ * @returns {QueryObserverResult<{ claimedRewards: AllocationRewardsClaimed[] }>}
  */
-export const useAllocationPoolEvents = () => {
-  const { thor } = useConnex()
+export const useAllocationPoolEvents = (env: EnvConfig) => {
+  const thor = useThor()
 
   return useQuery({
-    queryKey: getAllocationPoolEventsQueryKey(),
-    queryFn: async () => await getAllocationPoolEvents(thor),
-    enabled: !!thor && !!thor.status.head.number,
+    queryKey: getAllocationPoolEventsQueryKey(env),
+    enabled: !!thor,
+    queryFn: async () => {
+      if (!thor) throw new Error("Thor client not available")
+      return getAllocationPoolEvents(thor, env)
+    },
   })
 }

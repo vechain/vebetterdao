@@ -1,67 +1,88 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
-import { Interface } from "ethers"
+import { useThor, getAllEventLogs } from "@vechain/vechain-kit"
+import { FilterCriteria } from "@vechain/sdk-network"
 import { useCallback, useMemo } from "react"
-import { abi } from "thor-devkit"
-import { getAllEvents } from "@/api/blockchain/getEvents"
 
-type EventName<T> = T extends (nameOrSignature: infer U) => any ? U : never
-
-export type UseEventsParams<T extends Interface, R> = {
-  contractInterface: T
+export type UseEventsParams<T> = {
   contractAddress: string
-  eventName: EventName<T["getEvent"]>
-  filterParams?: Object
-  mapResponse: (decoded: abi.Decoded, meta: { blockNumber: number; txOrigin: string; txId: string }) => R
+  contractAbi: any[]
+  eventName: string
+  filterParams?: Record<string, any>
+  mapResponse: (decoded: any[], meta: { blockNumber: number; txOrigin: string; txId: string }) => T
+  fromBlock?: number
+  toBlock?: number
 }
 
 /**
- * Custom hook for fetching contract events.
+ * Custom hook for fetching contract events using VeChain Kit.
  */
-export const useEvents = <T extends Interface, R>({
-  contractInterface,
+export const useEvents = <T>({
   contractAddress,
+  contractAbi,
   eventName,
-  filterParams,
+  filterParams = {},
   mapResponse,
-}: UseEventsParams<T, R>) => {
-  const { thor } = useConnex()
+  fromBlock = 0,
+  toBlock,
+}: UseEventsParams<T>) => {
+  const thor = useThor()
 
-  const queryFn = useCallback(async () => {
+  const queryFn = useCallback(async (): Promise<T[]> => {
     if (!thor) return []
 
-    // Get the event ABI
-    const eventFragment = contractInterface?.getEvent(eventName)?.format("json")
-    if (!eventFragment) throw new Error(`Event ${eventName} not found`)
+    // Load the contract and get the event ABI
+    const contract = thor.contracts.load(contractAddress, contractAbi)
+    const eventAbi = contract.getEventAbi(eventName)
 
-    const eventAbi = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
-    const topics = eventAbi.encode(filterParams ?? {})
+    if (!eventAbi) {
+      throw new Error(`Event ${eventName} not found in contract ABI`)
+    }
+
+    // Encode filter topics
+    const topics = eventAbi.encodeFilterTopicsNoNull(filterParams)
 
     // Construct filter criteria
-    const filterCriteria = [
+    const filterCriteria: FilterCriteria[] = [
       {
-        address: contractAddress,
-        topic0: topics[0] ?? undefined,
-        topic1: topics[1] ?? undefined,
-        topic2: topics[2] ?? undefined,
-        topic3: topics[3] ?? undefined,
-        topic4: topics[4] ?? undefined,
+        criteria: {
+          address: contractAddress,
+          topic0: topics[0] ?? undefined,
+          topic1: topics[1] ?? undefined,
+          topic2: topics[2] ?? undefined,
+          topic3: topics[3] ?? undefined,
+          topic4: topics[4] ?? undefined,
+        },
+        eventAbi,
       },
     ]
 
-    const events = await getAllEvents({ thor, filterCriteria })
+    // Fetch events using getAllEventLogs
+    const events = await getAllEventLogs({
+      nodeUrl: thor.httpClient.baseURL,
+      thor,
+      from: fromBlock,
+      to: toBlock,
+      filterCriteria,
+    })
 
+    // Map and decode the events
     return events.map(event => {
-      const decoded = eventAbi.decode(event.data, event.topics)
-      return mapResponse(decoded, {
+      if (!event.decodedData) {
+        throw new Error("Event data not decoded")
+      }
+
+      return mapResponse(event.decodedData as any[], {
         blockNumber: event.meta.blockNumber,
         txOrigin: event.meta.txOrigin,
         txId: event.meta.txID,
       })
     })
-  }, [thor, contractInterface, eventName, filterParams, contractAddress, mapResponse])
+  }, [thor, contractAddress, contractAbi, eventName, filterParams, mapResponse, fromBlock, toBlock])
 
-  const queryKey = useMemo(() => getEventsKey({ eventName, filterParams }), [eventName, filterParams])
+  const queryKey = useMemo(
+    () => getEventsKey({ eventName, filterParams, fromBlock, toBlock }),
+    [eventName, filterParams, fromBlock, toBlock],
+  )
 
   return useQuery({
     queryFn,
@@ -72,9 +93,17 @@ export const useEvents = <T extends Interface, R>({
 
 export type GetEventsKeyParams = {
   eventName: string
-  filterParams?: Object
+  filterParams?: Record<string, any>
+  fromBlock?: number
+  toBlock?: number
 }
 
-export const getEventsKey = ({ eventName, filterParams }: GetEventsKeyParams) => {
-  return [eventName, filterParams ? JSON.stringify(filterParams) : "all"]
+export const getEventsKey = ({ eventName, filterParams, fromBlock, toBlock }: GetEventsKeyParams) => {
+  return [
+    "vechain-kit-events",
+    eventName,
+    filterParams ? JSON.stringify(filterParams) : "all",
+    fromBlock ?? "genesis",
+    toBlock ?? "latest",
+  ]
 }
