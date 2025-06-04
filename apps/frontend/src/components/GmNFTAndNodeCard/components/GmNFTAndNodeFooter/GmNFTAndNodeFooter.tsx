@@ -9,7 +9,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
-import { gmNfts } from "@/constants/gmNfts"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -26,13 +25,8 @@ export const GmNFTAndNodeFooter = () => {
     isEnoughBalanceToUpgradeGM,
     isXNodeAttachedToGM,
     isMaxGmLevelReached,
-    gmLevel,
   } = useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator } = useXNode()
-
-  // TODO: REMOVE IN ROUND 46
-  const nextGMLevel = Number(gmLevel) + 1
-  const nextGMLevelInfo = gmNfts.find(nft => nft.level === nextGMLevel.toString())
 
   const { isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
 
@@ -113,7 +107,7 @@ export const GmNFTAndNodeFooter = () => {
         <Box>
           <Text as="span" fontSize={"14px"}>
             {t("You can upgrade and get {{weight}}x weight on your GM rewards for", {
-              weight: nextGMLevelInfo?.multiplier,
+              weight: nextLevelGMRewardMultiplier,
             })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">
