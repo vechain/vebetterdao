@@ -1,0 +1,380 @@
+# VeChain Connex to SDK Refactoring Rules
+
+## Overview
+
+This document provides comprehensive patterns for refactoring VeChain applications from the deprecated Connex/thor-devkit pattern to the modern VeChain SDK pattern.
+
+## 1. Import Changes
+
+### Before (Connex/thor-devkit)
+
+```typescript
+import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit" // deprecated
+import { abi } from "thor-devkit"
+```
+
+### After (VeChain SDK)
+
+```typescript
+import { useThor, ThorClient, getAllEventLogs } from "@vechain/vechain-kit"
+import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+```
+
+### Key Changes
+
+- `useConnex` → `useThor`
+- `Connex.Thor` → `ThorClient`
+- Manual ABI imports → TypeScript contract factories
+- Event handling now uses `getAllEventLogs`
+
+## 2. Hook Usage Pattern
+
+### Before
+
+```typescript
+export const useHookName = () => {
+  const { thor } = useConnex()
+  // ...
+}
+```
+
+### After
+
+```typescript
+export const useHookName = () => {
+  const thor = useThor()
+  // ...
+}
+```
+
+## 3. Contract Read Operations
+
+### Before
+
+```typescript
+const functionFragment = ContractFactory__factory.createInterface().getFunction("methodName").format("json")
+const res = await thor.account(contractAddress).method(JSON.parse(functionFragment)).call(param1, param2)
+
+if (res.vmError) {
+  throw new Error(res.vmError)
+}
+return res.decoded[0]
+```
+
+### After
+
+```typescript
+const res = await thor.contracts.load(contractAddress, ContractFactory__factory.abi).read.methodName(param1, param2)
+
+if (!res) {
+  throw new Error("Contract call failed")
+}
+return res[0] // or res directly if single return value
+```
+
+### Key Changes
+
+- No manual ABI fragment creation
+- Direct method calls via `.read.methodName()`
+- Error handling: `res.vmError` → `!res`
+- Return values: `res.decoded[0]` → `res[0]` or `res`
+
+## 4. Block Number Access
+
+### Before
+
+```typescript
+const currentBlock = thor.status.head.number
+```
+
+### After
+
+```typescript
+const currentBlock = (await thor.blocks.getBestBlockCompressed())?.number ?? 0
+```
+
+## 5. Event Handling
+
+### Before
+
+```typescript
+const functionFragment = ContractFactory__factory.createInterface().getEvent("EventName").format("json")
+const filter = thor.filter("event", JSON.parse(functionFragment)).criteria([{ address: contractAddress }])
+```
+
+### After
+
+```typescript
+const eventAbi = thor.contracts.load(contractAddress, ContractFactory__factory.abi).getEventAbi("EventName")
+
+const topics = eventAbi.encodeFilterTopicsNoNull({
+  // event parameters for filtering
+})
+
+const filterCriteria: FilterCriteria[] = [
+  {
+    criteria: {
+      address: contractAddress,
+      topic0: topics[0] ?? undefined,
+      topic1: topics[1] ?? undefined,
+      topic2: topics[2] ?? undefined,
+      topic3: topics[3] ?? undefined,
+      topic4: topics[4] ?? undefined,
+    },
+    eventAbi,
+  },
+]
+
+const events = await getAllEventLogs({
+  nodeUrl: thor.httpClient.baseURL,
+  thor,
+  from: 0,
+  to: undefined,
+  filterCriteria,
+})
+```
+
+### Event Data Processing
+
+```typescript
+// Before
+const decoded = abi.decodeEvent(event.data, event.topics)
+
+// After
+const decodedData = event.decodedData // Already decoded
+const [param1, param2, param3] = decodedData as [bigint, string, string[]]
+```
+
+### **Critical Event Handling Issue**
+
+- **Problem**: Initially had issues with `eventAbi.signature`
+- **Solution**: Use `topics[0]` from `encodeFilterTopicsNoNull()` instead of `eventAbi.signature`
+
+## 6. Transaction Simulation
+
+### Before
+
+```typescript
+const clauses = [{ to: contractAddress, value: "0x0", data: "..." }]
+const res = await thor.explain(clauses).execute()
+```
+
+### After
+
+```typescript
+const clauses = [{ to: contractAddress, value: "0x0", data: "..." }]
+const simulationResults = await thor.transactions.simulateTransaction(clauses)
+```
+
+### Key Changes
+
+- `thor.explain()` → `thor.transactions.simulateTransaction()`
+- **Critical**: Remove `revertReason` references from error handling
+- Check `r.reverted` instead of `res.vmError`
+
+### **Critical Architectural Issue**
+
+- **Problem**: `thor.explain()` doesn't exist in SDK
+- **Solution**: Replace with `thor.transactions.simulateTransaction()` for transaction simulation
+- **Error handling**: `res.vmError` → `r.reverted`, remove `revertReason` references
+
+## 7. Type Handling
+
+### BigInt Conversions
+
+```typescript
+// Always convert bigint to string for storage/display
+const proposalId = proposalIdBigInt.toString()
+const amount = amountBigInt.toString()
+
+// Convert numbers to BigInt for contract calls
+const roundId = BigInt(roundIdString)
+```
+
+### Array Return Values
+
+```typescript
+// Contract methods often return arrays, access first element
+const result = await thor.contracts.load().read.methodName()
+return result[0] // for single return value
+return result // for multiple return values
+```
+
+## 8. Query Key Functions
+
+### Pattern
+
+```typescript
+export const getMethodNameQueryKey = (param1: string, param2?: number) => ["contractName", "methodName", param1, param2]
+```
+
+## 9. Hook Enabled Conditions
+
+### Before
+
+```typescript
+enabled: !!thor && !!param1
+```
+
+### After
+
+```typescript
+enabled: !!thor && !!param1 && !!currentBlock // Include block dependency for contract reads
+```
+
+## 10. Environment Configuration
+
+### Pattern
+
+```typescript
+// getConfig() is already environment-aware, no need for env parameter
+const contractAddress = getConfig().contractAddress
+```
+
+## 11. Common Patterns
+
+### Contract Factory Usage
+
+```typescript
+const abi = ContractFactory__factory.abi
+const contract = thor.contracts.load(contractAddress, abi)
+```
+
+### Error Handling
+
+```typescript
+// Before
+if (res.vmError) throw new Error(res.vmError)
+
+// After
+if (!res) throw new Error("Contract call failed")
+```
+
+### Function Data Encoding
+
+```typescript
+// Before
+const functionFragment = ContractFactory__factory.createInterface().getFunction("methodName").format("json")
+const data = thor.account(address).method(JSON.parse(functionFragment)).asClause(param1, param2).data
+
+// After
+const data = ContractFactory__factory.createInterface().encodeFunctionData("methodName", [param1, param2])
+```
+
+### **Advanced Pattern: Direct Ethers Usage**
+
+When thor-devkit patterns don't translate directly, use ethers:
+
+```typescript
+import { ethers } from "ethers"
+
+// For function selector generation
+const functionSelector = ethers.utils.id("functionName(uint256,address)").slice(0, 10)
+
+// For manual encoding/decoding when needed
+const encoded = ethers.utils.defaultAbiCoder.encode(["uint256", "address"], [value1, value2])
+const decoded = ethers.utils.defaultAbiCoder.decode(["uint256", "address"], data)
+```
+
+## 12. React Hook Rules Compliance
+
+### **Critical Architectural Issue**: Using Hooks in queryFn
+
+```typescript
+// WRONG - React hook inside queryFn
+const query = useQuery({
+  queryFn: async () => {
+    const hasVoted = useHasVotedInRound(roundId, address) // ❌ Hook in queryFn
+    return hasVoted
+  },
+})
+```
+
+### Solution: Extract to Separate Function
+
+```typescript
+// CORRECT - Extract function outside component
+export const getHasVotedInRound = async (thor: ThorClient, roundId: string, address: string) => {
+  // Implementation here
+}
+
+const query = useQuery({
+  queryFn: async () => await getHasVotedInRound(thor, roundId, address), // ✅ Function call
+})
+```
+
+## 13. Complete Example
+
+### Before (Connex)
+
+```typescript
+import { useConnex } from "@vechain/dapp-kit-react"
+import { ContractFactory__factory } from "@repo/contracts"
+
+export const useOldPattern = (param: string) => {
+  const { thor } = useConnex()
+
+  return useQuery({
+    queryKey: ["old", param],
+    queryFn: async () => {
+      const fragment = ContractFactory__factory.createInterface().getFunction("methodName").format("json")
+      const res = await thor.account(contractAddress).method(JSON.parse(fragment)).call(param)
+
+      if (res.vmError) throw new Error(res.vmError)
+      return res.decoded[0]
+    },
+    enabled: !!thor && !!param,
+  })
+}
+```
+
+### After (VeChain SDK)
+
+```typescript
+import { useThor, ThorClient } from "@vechain/vechain-kit"
+import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+
+export const getMethodNameQueryKey = (param: string) => ["new", "methodName", param]
+
+export const getMethodName = async (thor: ThorClient, param: string) => {
+  const res = await thor.contracts.load(contractAddress, ContractFactory__factory.abi).read.methodName(param)
+
+  if (!res) throw new Error("Contract call failed")
+  return res[0]
+}
+
+export const useNewPattern = (param: string) => {
+  const thor = useThor()
+  const currentBlock = (await thor.blocks.getBestBlockCompressed())?.number ?? 0
+
+  return useQuery({
+    queryKey: getMethodNameQueryKey(param),
+    queryFn: async () => await getMethodName(thor, param),
+    enabled: !!thor && !!param && !!currentBlock,
+  })
+}
+```
+
+## 16. Migration Checklist
+
+- [ ] Update imports: `useConnex` → `useThor`
+- [ ] **Critical**: Update contract factory imports to `typechain-types` path
+- [ ] Replace manual ABI fragments with direct method calls
+- [ ] Update error handling: `res.vmError` → `!res`
+- [ ] Fix return value access: `res.decoded[0]` → `res[0]`
+- [ ] Update block number access pattern
+- [ ] Add currentBlock to enabled conditions
+- [ ] Convert BigInt values to strings where needed
+- [ ] Update event handling to use `getAllEventLogs`
+- [ ] **Critical**: Replace `thor.explain()` with `thor.transactions.simulateTransaction()`
+- [ ] **Critical**: Extract React hooks from queryFn functions
+- [ ] **User requirement**: Remove environment parameters (getConfig is env-aware)
+- [ ] Update transaction simulation error handling (remove `revertReason`)
+- [ ] Add proper TypeScript types for parameters and return values
+- [ ] **Critical**: Fix FilterCriteria to use `topics[0]` not `eventAbi.signature`
+- [ ] **User requirement**: Use local implementations instead of external dependencies
+- [ ] Fix TokenBalance imports to use `@vechain/vechain-kit`
+- [ ] Check for event index bugs in decoded data access
+- [ ] Remove unused imports (like `proposalDepositAbi`)
+- [ ] Handle multiple event types with separate FilterCriteria entries
