@@ -5,7 +5,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 type Props = {
   appVoted: AppVotesGiven

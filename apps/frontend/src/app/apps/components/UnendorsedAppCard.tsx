@@ -20,7 +20,7 @@ import { useAppEndorsementStatus, useIpfsImage, useXNode, UnendorsedApp, XApp } 
 import { notFoundImage } from "@/constants"
 import { useXAppStatusConfig } from "../[appId]/hooks"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 type Props = {
   xApp: XApp | UnendorsedApp

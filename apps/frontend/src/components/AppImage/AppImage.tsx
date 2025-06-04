@@ -1,7 +1,7 @@
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { Image, Skeleton, SkeletonProps } from "@chakra-ui/react"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 type Props = {
   appId: string

@@ -1,4 +1,3 @@
-import { useXAppMetadata } from "@vechain/vechain-kit"
 import {
   Box,
   FormControl,
@@ -19,6 +18,7 @@ import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
 import { t } from "i18next"
 import { CastAllocationVoteFormData } from "@/store"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 const estimateVotes = (value: number | string, totalVotesAvailable: number | string) => {
   return scaledDivision(Number(value) * Number(totalVotesAvailable), 100)

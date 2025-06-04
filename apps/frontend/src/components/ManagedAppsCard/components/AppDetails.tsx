@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 type Props = {
   appId: string

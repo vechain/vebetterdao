@@ -3,11 +3,12 @@ import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { useIpfsImage } from "@/api/ipfs"
 import { useTranslation } from "react-i18next"
-import { useWallet, useXAppMetadata } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
 import { useXNodeCheckCooldown } from "./useXNodeCheckCooldown"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 /**
  * Custom hook for retrieving data related to an X-Node.

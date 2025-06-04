@@ -20,7 +20,7 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { v4 as uuid } from "uuid"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 type Props = {
   maxApps?: number

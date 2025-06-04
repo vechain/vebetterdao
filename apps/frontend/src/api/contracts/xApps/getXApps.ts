@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 import { abi } from "thor-devkit"
 import dayjs from "dayjs"
+import { ThorClient } from "@vechain/sdk-network"
 
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
 const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendorsedApps").format("json")
@@ -61,7 +62,7 @@ export type GetAllApps = {
  * @param filterBlacklisted  whether to filter blacklisted xApps
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
-export const getXApps = async (thor: Connex.Thor, filterBlacklisted = false): Promise<GetAllApps> => {
+export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Promise<GetAllApps> => {
   const clauses = [
     {
       to: X2EARNAPPS_CONTRACT,

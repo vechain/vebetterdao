@@ -1,6 +1,7 @@
 "use client"
-import { useXApp } from "@vechain/vechain-kit"
+
 import { useParams } from "next/navigation"
+import { useXApp } from "@/api/contracts/xApps"
 
 /**
  * Hook that fetches the app id from the URL and returns the app info

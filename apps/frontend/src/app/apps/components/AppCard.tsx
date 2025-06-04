@@ -20,7 +20,7 @@ import { useBreakpoints } from "@/hooks"
 import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
 import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
 import { useRouter } from "next/navigation"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {

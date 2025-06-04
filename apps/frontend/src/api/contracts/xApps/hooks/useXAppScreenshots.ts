@@ -1,5 +1,5 @@
 import { useIpfsImageList } from "@/api/ipfs"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api/contracts/xApps"
 
 /**
  * Custom hook that retrieves the screenshots of an xApp.

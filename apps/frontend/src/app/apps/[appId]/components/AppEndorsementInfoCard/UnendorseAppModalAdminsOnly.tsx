@@ -1,4 +1,3 @@
-import { useXAppMetadata } from "@vechain/vechain-kit"
 import { useIpfsImage } from "@/api/ipfs"
 import { BaseModal } from "@/components/BaseModal"
 import { useRemoveNodeEndorsement } from "@/hooks"
@@ -7,6 +6,8 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useXAppMetadata } from "@/api/contracts/xApps"
+
 type Props = {
   isOpen: boolean
   onClose: () => void
