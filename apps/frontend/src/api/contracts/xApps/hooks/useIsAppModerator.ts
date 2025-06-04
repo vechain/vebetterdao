@@ -1,23 +1,26 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
 /**
  * Check if the given address is the moderator of the app
+ * @param thor - The thor client
  * @param appId  the id of the app
  * @param address  the address to check
  * @returns a boolean indicating if the address is the moderator of the app
  */
-export const getIsAppModerator = async (thor: Connex.Thor, appId: string, address: string): Promise<boolean> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("isAppModerator").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId, address)
+export const getIsAppModerator = async (thor: ThorClient, appId: string, address: string): Promise<boolean> => {
+  const res = await thor.contracts
+    .load(X2EARNAPPS_CONTRACT, X2EarnApps__factory.abi)
+    .read.isAppModerator(appId, address)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Is app moderator call failed"))
 
-  return res.decoded[0]
+  return res[0] as boolean
 }
 
 export const getIsAppModeratorQueryKey = (appId: string, address: string) => ["isAppModerator", appId, address]
@@ -29,7 +32,7 @@ export const getIsAppModeratorQueryKey = (appId: string, address: string) => ["i
  * @returns a boolean indicating if the address is the moderator of the app
  */
 export const useIsAppModerator = (appId: string, address: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getIsAppModeratorQueryKey(appId, address),

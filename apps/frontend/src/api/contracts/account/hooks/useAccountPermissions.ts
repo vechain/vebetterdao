@@ -1,12 +1,8 @@
 import { getConfig } from "@repo/config"
-import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { useThor } from "@vechain/vechain-kit"
-import { abi } from "thor-devkit"
+import { ethers } from "ethers"
 import { getBytes32Role } from "./useHasRole"
-
-const fragment = AccessControl__factory.createInterface().getFunction("hasRole").format("json")
-const hasRoleAbi = new abi.Function(JSON.parse(fragment))
 
 const config = getConfig()
 type AccountPermissionResponse = {
@@ -180,6 +176,10 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
   },
 }
 
+// hasRole function signature
+const hasRoleFunctionSignature = "hasRole(bytes32,address)"
+const hasRoleFunctionSelector = ethers.id(hasRoleFunctionSignature).slice(0, 10)
+
 export const getAccountPermissionsQueryKey = (address: string) => ["ACCOUNT_PERMISSIONS", address]
 /**
  * Get the permissions for an address
@@ -198,30 +198,25 @@ export const useAccountPermissions = (
 
   return useQuery({
     queryKey: getAccountPermissionsQueryKey(address ?? ""),
-    enabled: !!address,
+    enabled: !!address && !!thor,
     queryFn: async () => {
       const clauses = Object.entries(CLAUSES_DATA).map(([_key, { role, contractAddress }]) => ({
         to: contractAddress,
         value: "0x0",
-        data: hasRoleAbi.encode(getBytes32Role(role), address),
+        data:
+          hasRoleFunctionSelector +
+          ethers.AbiCoder.defaultAbiCoder()
+            .encode(["bytes32", "address"], [getBytes32Role(role), address])
+            .slice(2),
       }))
 
-      // const a = executeMultipleClausesCall({
-      //   thor,
-      //   calls: [
-      //     {
-      //       a
-      //     }
-      //   ]
-      // })
-
-      const res = await thor.explain(clauses).execute()
+      const res = await thor.transactions.simulateTransaction(clauses)
 
       const roles = Object.entries(CLAUSES_DATA).reduce((acc, [key], index) => {
-        if (res[index]?.reverted) throw new Error(`Reverted: ${key} with ${res[index]?.reverted}`)
+        if (res[index]?.reverted) throw new Error(`Reverted: ${key}`)
 
         const role = res[index]?.data as string
-        const decoded = hasRoleAbi.decode(role)
+        const decoded = ethers.AbiCoder.defaultAbiCoder().decode(["bool"], role)
 
         return {
           ...acc,

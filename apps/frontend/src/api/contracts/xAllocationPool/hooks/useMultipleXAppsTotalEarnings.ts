@@ -1,12 +1,7 @@
 import { useQueryClient, useQuery } from "@tanstack/react-query"
 import { getXAppRoundEarningsQueryKey, useThor } from "@vechain/vechain-kit"
 import { getXAppTotalEarningsClauses } from "./useXAppTotalEarnings"
-import { XAllocationPool__factory } from "@repo/contracts"
-import { abi } from "thor-devkit"
 import { ethers } from "ethers"
-
-const roundEarningsFragment = XAllocationPool__factory.createInterface().getFunction("roundEarnings").format("json")
-const roundEarningsAbi = new abi.Function(JSON.parse(roundEarningsFragment))
 
 export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string[]) => [
   "xApps",
@@ -49,7 +44,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
       for (const roundBatch of roundBatches) {
         const earningsPerAppClauses = appIds.map(appId => getXAppTotalEarningsClauses(roundBatch, appId)).flat()
 
-        const res = await thor.explain(earningsPerAppClauses).execute()
+        const res = await thor.transactions.simulateTransaction(earningsPerAppClauses)
         const clausesPerApp = roundBatch.length
 
         res.forEach((result, index) => {
@@ -65,8 +60,8 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
           const appId = appIds[appIndex]!
           const roundId = roundBatch[roundIndex]!
 
-          const decoded = roundEarningsAbi.decode(result.data)
-          const parsedAmount = ethers.formatEther(decoded[0])
+          const decoded = ethers.AbiCoder.defaultAbiCoder().decode(["uint256"], result.data)
+          const parsedAmount = ethers.formatEther(decoded[0] as bigint)
           const numAmount = Number(parsedAmount)
 
           // Update the cache

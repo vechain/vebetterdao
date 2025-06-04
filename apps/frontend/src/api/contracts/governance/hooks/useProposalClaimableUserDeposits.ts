@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
-import { getProposalUserDepositQueryKey, proposalDepositAbi } from "./useProposalUserDeposit"
+import { useThor } from "@vechain/vechain-kit"
+import { getProposalUserDepositQueryKey } from "./useProposalUserDeposit"
 import { queryClient } from "@/api/QueryProvider"
 import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter } from "@/store"
 
@@ -23,13 +24,15 @@ const CLAIMABLE_STATES = [
  * Processes and caches the claimable deposits.
  */
 const processDeposits = (res: any[], filteredProposals: any[], userAddress: string) => {
+  const contract = B3TRGovernor__factory.createInterface()
+
   return res
     .map((r, index) => {
       if (r.reverted) throw new Error(`Clause ${index + 1} reverted: ${r.revertReason}`)
 
-      const decoded = proposalDepositAbi.decode(r.data)
+      const decoded = contract.decodeFunctionResult("getUserDeposit", r.data)
       const proposalId = filteredProposals[index]?.proposalId as string
-      const deposit = decoded[0] as string
+      const deposit = decoded[0].toString()
 
       // Cache individual proposal deposit
       queryClient.setQueryData(getProposalUserDepositQueryKey(proposalId, userAddress), deposit)
@@ -42,16 +45,15 @@ const processDeposits = (res: any[], filteredProposals: any[], userAddress: stri
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
  *
- * This hook utilizes the `useQueries` function from `@tanstack/react-query` to manage a series
- * of concurrent queries. Each query corresponds to a single proposal and fetches the deposit
- * details that are claimable by the specified user. Deposits can only be claimed if the proposal
- * state is not pending.
+ * This hook utilizes the `useQuery` function from `@tanstack/react-query` to manage a query.
+ * The query corresponds to fetching the deposit details that are claimable by the specified user.
+ * Deposits can only be claimed if the proposal state is not pending.
  *
  * @param userAddress - The address of the user whose deposits are to be fetched.
- * @returns An array of results from the `useQueries` function, each corresponding to a proposal's deposit data.
+ * @returns Query result containing claimable deposits data.
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES)
 
@@ -63,11 +65,14 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
       const clauses = filteredProposals.map(proposal => ({
         to: GOVERNOR_CONTRACT,
         value: "0x0",
-        data: proposalDepositAbi.encode(proposal.proposalId, userAddress),
+        data: B3TRGovernor__factory.createInterface().encodeFunctionData("getUserDeposit", [
+          proposal.proposalId,
+          userAddress,
+        ]),
       }))
 
-      const res = await thor.explain(clauses).execute()
-      const claimableDeposits = processDeposits(res, filteredProposals, userAddress)
+      const simulationResults = await thor.transactions.simulateTransaction(clauses)
+      const claimableDeposits = processDeposits(simulationResults, filteredProposals, userAddress)
 
       return {
         claimableDeposits,

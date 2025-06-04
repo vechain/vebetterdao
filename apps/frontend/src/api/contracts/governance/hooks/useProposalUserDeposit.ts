@@ -1,31 +1,28 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
-import { abi } from "thor-devkit"
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-
-const governorInterface = B3TRGovernor__factory.createInterface()
-export const proposalDepositFragment = governorInterface.getFunction("getUserDeposit").format("json")
-export const proposalDepositAbi = new abi.Function(JSON.parse(proposalDepositFragment))
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
+import { EnvConfig } from "@repo/config/contracts"
 
 export const getProposalUserDeposit = async (
-  thor: Connex.Thor,
+  thor: ThorClient,
+  env: EnvConfig,
   proposalId: string,
   userAddress: string,
 ): Promise<string> => {
   if (!proposalId) return Promise.reject(new Error("proposalId is required"))
   if (!userAddress) return Promise.reject(new Error("userAddress is required"))
 
-  const res = await thor
-    .account(GOVERNANCE_CONTRACT)
-    .method(JSON.parse(proposalDepositFragment))
-    .call(proposalId, userAddress)
+  const governanceContractAddress = getConfig(env).b3trGovernorAddress
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  const res = await thor.contracts
+    .load(governanceContractAddress, B3TRGovernor__factory.abi)
+    .read.getUserDeposit(proposalId, userAddress)
 
-  return res.decoded[0]
+  if (!res) return Promise.reject(new Error("Get user deposit call failed"))
+
+  return res[0].toString()
 }
 
 export const getProposalUserDepositQueryKey = (proposalId: string, userAddress: string) => [
@@ -35,12 +32,12 @@ export const getProposalUserDepositQueryKey = (proposalId: string, userAddress: 
   userAddress,
 ]
 
-export const useProposalUserDeposit = (proposalId: string, userAddress: string) => {
-  const { thor } = useConnex()
+export const useProposalUserDeposit = (env: EnvConfig, proposalId: string, userAddress: string) => {
+  const thor = useThor()
 
   return useQuery({
     queryKey: getProposalUserDepositQueryKey(proposalId, userAddress),
-    queryFn: async () => await getProposalUserDeposit(thor, proposalId, userAddress),
+    queryFn: async () => await getProposalUserDeposit(thor, env, proposalId, userAddress),
     enabled: !!thor && !!proposalId && !!userAddress,
   })
 }

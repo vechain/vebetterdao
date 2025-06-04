@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getUserVotesInRound, getUserVotesInRoundQueryKey } from "."
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 
 /**
  * useUserVotes is a custom hook that fetches the votes of a user for all rounds up to the current one.
@@ -9,7 +9,7 @@ import { useConnex } from "@vechain/vechain-kit"
  * @returns An object containing the status and data of the queries for each round.
  */
 export const useUserVotesInAllRounds = (address?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const queryClient = useQueryClient()
 
   return useQuery({
@@ -26,6 +26,6 @@ export const useUserVotesInAllRounds = (address?: string) => {
       })
       return votesEvents
     },
-    enabled: !!thor && !!thor.status.head.number && !!address,
+    enabled: !!thor && !!address,
   })
 }

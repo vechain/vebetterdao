@@ -1,7 +1,6 @@
 import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
-import { EnvConfig } from "@repo/config/contracts"
 import { FilterCriteria } from "@vechain/sdk-network"
 
 export type ProposalVoteEvent = {
@@ -17,13 +16,12 @@ export type ProposalVoteEvent = {
 /**
  * Get the proposal vote events from the governor contract
  * @param thor - The thor client
- * @param env - The environment config
  * @param proposalId - The proposal id to get the events (optional)
  * @param voter - The voter address to filter by (optional)
  * @returns The proposal vote events
  */
-export const getProposalsVoteEvents = async (thor: ThorClient, env: EnvConfig, proposalId?: string, voter?: string) => {
-  const governanceContractAddress = getConfig(env).b3trGovernorAddress
+export const getProposalsVoteEvents = async (thor: ThorClient, proposalId?: string, voter?: string) => {
+  const governanceContractAddress = getConfig().b3trGovernorAddress
 
   const eventAbi = thor.contracts.load(governanceContractAddress, B3TRGovernor__factory.abi).getEventAbi("VoteCast")
 

@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
-
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-import { B3TRGovernorJson } from "@repo/contracts"
-const b3trGovernorAbi = B3TRGovernorJson.abi
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
+import { EnvConfig } from "@repo/config/contracts"
 
 type ProposalVotes = {
   againstVotes: string
@@ -16,22 +15,33 @@ type ProposalVotes = {
   forPercentage: number
   abstainPercentage: number
 }
+
 /**
  * Get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
- * @param thor  the thor client
- * @param proposalId  the proposal id to get the votes for
- * @returns  the proposal votes {@link ProposalVotes} with decimals scaled down
+ * @param thor - The thor client
+ * @param env - The environment config
+ * @param proposalId - The proposal id to get the votes for
+ * @returns The proposal votes {@link ProposalVotes} with decimals scaled down
  */
-export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): Promise<ProposalVotes> => {
-  const proposalVotesAbi = b3trGovernorAbi.find(abi => abi.name === "proposalVotes")
-  if (!proposalVotesAbi) throw new Error("proposalVotes function not found")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(proposalVotesAbi).call(proposalId)
+export const getProposalVotes = async (
+  thor: ThorClient,
+  env: EnvConfig,
+  proposalId: string,
+): Promise<ProposalVotes> => {
+  const governanceContractAddress = getConfig(env).b3trGovernorAddress
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  const res = await thor.contracts
+    .load(governanceContractAddress, B3TRGovernor__factory.abi)
+    .read.proposalVotes(proposalId)
+
+  if (!res) return Promise.reject(new Error("Proposal votes call failed"))
+
+  const [againstVotes, forVotes, abstainVotes] = res as [bigint, bigint, bigint]
+
   const parsed = {
-    againstVotes: ethers.formatEther(res.decoded[0]),
-    forVotes: ethers.formatEther(res.decoded[1]),
-    abstainVotes: ethers.formatEther(res.decoded[2]),
+    againstVotes: ethers.formatEther(againstVotes),
+    forVotes: ethers.formatEther(forVotes),
+    abstainVotes: ethers.formatEther(abstainVotes),
   }
 
   const totalVotes = Number(parsed.againstVotes) + Number(parsed.forVotes) + Number(parsed.abstainVotes)
@@ -45,16 +55,20 @@ export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): P
 }
 
 export const getProposalVotesQuerykey = (proposalId: string) => ["proposalVotes", proposalId]
+
 /**
  * Hook to get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
- * @returns the proposal votes {@link ProposalVotes}
+ * @param env - The environment config
+ * @param proposalId - The proposal ID
+ * @param enabled - Whether the query is enabled
+ * @returns The proposal votes {@link ProposalVotes}
  */
-export const useProposalVotes = (proposalId: string, enabled = true) => {
-  const { thor } = useConnex()
+export const useProposalVotes = (env: EnvConfig, proposalId: string, enabled = true) => {
+  const thor = useThor()
 
   return useQuery({
     queryKey: getProposalVotesQuerykey(proposalId),
-    queryFn: async () => await getProposalVotes(thor, proposalId),
+    queryFn: async () => await getProposalVotes(thor, env, proposalId),
     enabled: !!thor && enabled,
   })
 }

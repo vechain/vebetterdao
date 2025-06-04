@@ -1,29 +1,28 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { B3TRGovernorJson } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
 
-const b3trGovernorAbi = B3TRGovernorJson.abi
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 /**
  * Retrieves the deposit reached status for a proposal.
- * @param thor - The Connex.Thor instance.
+ * @param thor - The ThorClient instance.
  * @param proposalId - The ID of the proposal.
  * @returns A Promise that resolves to a boolean indicating whether the deposit is reached or not.
- * @throws An error if the proposalId is not provided or if the 'proposalDepositReached' function is not found.
+ * @throws An error if the proposalId is not provided or if the method call fails.
  */
-export const getIsDepositReached = async (thor: Connex.Thor, proposalId: string): Promise<boolean> => {
+export const getIsDepositReached = async (thor: ThorClient, proposalId: string): Promise<boolean> => {
   if (!proposalId) throw new Error("proposalId is required")
 
-  const getIsDepositReachedAbi = b3trGovernorAbi.find(abi => abi.name === "proposalDepositReached")
-  if (!getIsDepositReachedAbi) throw new Error("proposalDepositReached function not found")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(getIsDepositReachedAbi).call(proposalId)
+  const res = await thor.contracts
+    .load(GOVERNANCE_CONTRACT, B3TRGovernor__factory.abi)
+    .read.proposalDepositReached(proposalId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Proposal deposit reached call failed"))
 
-  return res.decoded[0]
+  return res[0] as boolean
 }
 
 /**
@@ -39,7 +38,7 @@ export const getIsDepositReachedQueryKey = (proposalId: string) => ["proposalDep
  * @returns The result of the query.
  */
 export const useIsDepositReached = (proposalId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getIsDepositReachedQueryKey(proposalId),

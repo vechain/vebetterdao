@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
 /**
  *  Get the moderators of the app
@@ -11,13 +12,12 @@ import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
  * @param appId  the id of the app to get the moderators for
  * @returns  the moderators of the app
  */
-export const getAppModerators = async (thor: Connex.Thor, appId: string): Promise<string[]> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("appModerators").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId)
+export const getAppModerators = async (thor: ThorClient, appId: string): Promise<string[]> => {
+  const res = await thor.contracts.load(X2EARNAPPS_CONTRACT, X2EarnApps__factory.abi).read.appModerators(appId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("App moderators call failed"))
 
-  return res.decoded[0]
+  return res[0] as string[]
 }
 
 export const getAppModeratorsQueryKey = (appId: string) => ["xApps", appId, "moderators"]
@@ -28,11 +28,11 @@ export const getAppModeratorsQueryKey = (appId: string) => ["xApps", appId, "mod
  * @returns  the moderators of the app
  */
 export const useAppModerators = (appId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getAppModeratorsQueryKey(appId),
     queryFn: async () => await getAppModerators(thor, appId),
-    enabled: !!thor,
+    enabled: !!thor && !!appId,
   })
 }

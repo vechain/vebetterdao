@@ -1,4 +1,4 @@
-import { useConnex, useCurrentBlock } from "@vechain/vechain-kit"
+import { useThor, useCurrentBlock } from "@vechain/vechain-kit"
 import { useProposalsEvents } from "./useProposalsEvents"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getProposalSnapshot, getProposalSnapshotQueryKey } from "./useProposalSnapshot"
@@ -10,7 +10,7 @@ export const getIncomingProposalsQueryKey = () => ["proposals", "incoming"]
  */
 export const useIncomingProposals = () => {
   const queryClient = useQueryClient()
-  const { thor } = useConnex()
+  const thor = useThor()
   const { data: currentBlock } = useCurrentBlock()
   const { data: proposalsEvents } = useProposalsEvents()
 
@@ -18,7 +18,7 @@ export const useIncomingProposals = () => {
     queryKey: getIncomingProposalsQueryKey(),
     queryFn: async () => {
       if (!thor || !proposalsEvents) return
-      const lastBlock = currentBlock?.number ?? thor.status.head.number
+      const lastBlock = currentBlock?.number ?? (await thor.blocks.getBestBlockCompressed())?.number ?? 0
       const filteredProposals = []
       for (const proposal of proposalsEvents.created) {
         const voteStart = await queryClient.ensureQueryData({
@@ -34,6 +34,6 @@ export const useIncomingProposals = () => {
       }
       return filteredProposals
     },
-    enabled: !!thor && !!proposalsEvents && thor.status.head.number > 0,
+    enabled: !!thor && !!proposalsEvents && !!currentBlock && currentBlock.number > 0,
   })
 }

@@ -1,4 +1,4 @@
-import { useConnex, useCurrentBlock } from "@vechain/vechain-kit"
+import { useThor, useCurrentBlock } from "@vechain/vechain-kit"
 import { useProposalsEvents } from "./useProposalsEvents"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getProposalDeadline, getProposalDeadlineQueryKey } from "./useProposalDeadline"
@@ -10,16 +10,16 @@ const getPastProposalsQueryKey = () => ["proposals", "past"]
  */
 export const usePastProposals = () => {
   const queryClient = useQueryClient()
-  const { thor } = useConnex()
+  const thor = useThor()
   const { data: currentBlock } = useCurrentBlock()
   const { data: proposalsEvents } = useProposalsEvents()
 
   return useQuery({
     queryKey: getPastProposalsQueryKey(),
     queryFn: async () => {
-      if (!thor || !proposalsEvents) return
-      const lastBlock = currentBlock?.number ?? thor.status.head.number
+      if (!thor || !proposalsEvents || !currentBlock) return []
 
+      const lastBlock = currentBlock.number
       const filteredProposals = []
 
       for (const proposal of proposalsEvents.created) {
@@ -43,6 +43,6 @@ export const usePastProposals = () => {
 
       return filteredProposals
     },
-    enabled: !!thor && !!proposalsEvents,
+    enabled: !!thor && !!proposalsEvents && !!currentBlock,
   })
 }

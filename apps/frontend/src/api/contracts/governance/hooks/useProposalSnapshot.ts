@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCurrentBlock, useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -12,13 +13,15 @@ const governorInterface = B3TRGovernor__factory.createInterface()
  * @param proposalId  the id of the proposal
  * @returns  the voteStart snapshot of the given proposal
  */
-export const getProposalSnapshot = async (thor: Connex.Thor, proposalId: string): Promise<string | number> => {
+export const getProposalSnapshot = async (thor: ThorClient, proposalId: string): Promise<string | number> => {
   const functionFragment = governorInterface.getFunction("proposalSnapshot").format("json")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
+  const res = await thor.contracts
+    .load(GOVERNANCE_CONTRACT, B3TRGovernor__factory.abi)
+    .read.proposalSnapshot(JSON.parse(functionFragment), proposalId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Proposal snapshot not found"))
 
-  return res.decoded[0]
+  return res[0].toString()
 }
 
 export const getProposalSnapshotQueryKey = (proposalId: string) => ["proposals", proposalId, "snapshot"]
@@ -29,11 +32,12 @@ export const getProposalSnapshotQueryKey = (proposalId: string) => ["proposals",
  * @returns  the voteStart snapshot of the given proposal
  */
 export const useProposalSnapshot = (proposalId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
+  const { data: currentBlock } = useCurrentBlock()
 
   return useQuery({
     queryKey: getProposalSnapshotQueryKey(proposalId),
     queryFn: async () => await getProposalSnapshot(thor, proposalId),
-    enabled: !!thor && thor.status.head.number > 0,
+    enabled: !!thor && !!currentBlock && currentBlock.number > 0,
   })
 }

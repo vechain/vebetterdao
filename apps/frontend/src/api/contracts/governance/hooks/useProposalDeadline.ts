@@ -1,39 +1,41 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor, useCurrentBlock } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
+
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
-const governorInterface = B3TRGovernor__factory.createInterface()
-
 /**
- *  Get the voteEnd block of the given proposal
- * @param thor  the thor client
- * @param proposalId  the id of the proposal
- * @returns  the voteEnd block of the given proposal
+ * Get the voteEnd block of the given proposal
+ * @param thor - The thor client
+ * @param proposalId - The id of the proposal
+ * @returns The voteEnd block of the given proposal
  */
-export const getProposalDeadline = async (thor: Connex.Thor, proposalId: string): Promise<string | number> => {
-  const functionFragment = governorInterface.getFunction("proposalDeadline").format("json")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(JSON.parse(functionFragment)).call(proposalId)
+export const getProposalDeadline = async (thor: ThorClient, proposalId: string): Promise<string | number> => {
+  const res = await thor.contracts
+    .load(GOVERNANCE_CONTRACT, B3TRGovernor__factory.abi)
+    .read.proposalDeadline(proposalId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Proposal deadline call failed"))
 
-  return res.decoded[0]
+  return res[0].toString()
 }
 
 export const getProposalDeadlineQueryKey = (proposalId: string) => ["proposals", proposalId, "deadline"]
 
 /**
- *  Hook to get the voteEnd block of the given proposal
- * @param proposalId  the id of the proposal
- * @returns  the voteEnd block of the given proposal
+ * Hook to get the voteEnd block of the given proposal
+ * @param proposalId - The id of the proposal
+ * @returns The voteEnd block of the given proposal
  */
 export const useProposalDeadline = (proposalId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
+  const { data: currentBlock } = useCurrentBlock()
 
   return useQuery({
     queryKey: getProposalDeadlineQueryKey(proposalId),
     queryFn: async () => await getProposalDeadline(thor, proposalId),
-    enabled: !!thor && thor.status.head.number > 0,
+    enabled: !!thor && !!currentBlock && currentBlock.number > 0,
   })
 }

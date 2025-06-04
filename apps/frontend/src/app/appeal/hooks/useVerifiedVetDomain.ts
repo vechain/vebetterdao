@@ -1,50 +1,54 @@
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 
 /**
  * ABI: https://docs.vet.domains/Developers/Contracts/Verification/#abi
  * Contract: https://docs.vet.domains/Developers/Contracts/Verification/#verified-contract
  */
-const abiFragment = JSON.stringify({
-  inputs: [
-    {
-      internalType: "address",
-      name: "user",
-      type: "address",
-    },
-  ],
-  name: "isVerified",
-  outputs: [
-    {
-      internalType: "bool",
-      name: "",
-      type: "bool",
-    },
-  ],
-  stateMutability: "view",
-  type: "function",
-})
+const vetDomainsAbi = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "isVerified",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const
+
 const VET_DOMAINS_CONTRACT_ADDRESS = getConfig().externalContractIntegrations?.vetDomainsContractAddress
 
 /**
  * Function to check if a wallet address is verified.
  *
- * @param {Connex.Thor} thor - The thor instance
+ * @param {ThorClient} thor - The thor instance
  * @param {string} walletAddress - The wallet address to check if it is verified
  * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the wallet is verified
  *
  * @dependency https://docs.vet.domains/Developers/Contracts/Verification/
  */
-export const getVerifiedVetDomain = async (thor: Connex.Thor, walletAddress?: string): Promise<boolean> => {
+export const getVerifiedVetDomain = async (thor: ThorClient, walletAddress?: string): Promise<boolean> => {
   if (!walletAddress) return Promise.reject(new Error("walletAddress is required"))
   if (!VET_DOMAINS_CONTRACT_ADDRESS) return Promise.reject(new Error("VET_DOMAINS_CONTRACT_ADDRESS is not set"))
 
-  const res = await thor.account(VET_DOMAINS_CONTRACT_ADDRESS).method(JSON.parse(abiFragment)).call(walletAddress)
+  const res = await thor.contracts.load(VET_DOMAINS_CONTRACT_ADDRESS, vetDomainsAbi).read.isVerified(walletAddress)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("VET domains verification call failed"))
 
-  return res.decoded[0]
+  return res[0] as boolean
 }
 
 export const getVerifiedVetDomainQueryKey = (walletAddress?: string) => ["verifiedVetDomain", walletAddress]
@@ -56,10 +60,11 @@ export const getVerifiedVetDomainQueryKey = (walletAddress?: string) => ["verifi
  * @returns The result of the useQuery hook, with the verified vet domain.
  */
 export const useVerifiedVetDomain = (walletAddress?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getVerifiedVetDomainQueryKey(walletAddress),
     queryFn: () => getVerifiedVetDomain(thor, walletAddress),
+    enabled: !!thor && !!walletAddress,
   })
 }

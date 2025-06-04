@@ -1,24 +1,25 @@
 import { compareAddresses } from "@repo/utils/AddressUtils"
-
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
+import { EnvConfig } from "@repo/config/contracts"
 
 export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS", proposalId, "VOTES"]
 
 /**
  * Custom hook that retrieves the vote event for a specific proposal.
+ * @param env - The environment config
  * @param proposalId - The ID of the proposal.
  * @returns An object containing information about the vote event.
  */
-export const useProposalVoteEvents = (proposalId: string) => {
+export const useProposalVoteEvents = (env: EnvConfig, proposalId: string) => {
   const { account } = useWallet()
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getProposalVoteEventsQueryKey(proposalId),
     queryFn: async () => {
-      const { votes } = await getProposalsVoteEvents(thor, proposalId)
+      const { votes } = await getProposalsVoteEvents(thor, env, proposalId)
       const totalVot3UsedInVotes = votes.reduce((acc, event) => acc + Number(event.weight), 0)
       const totalVotingPowerUsedInVotes = votes.reduce((acc, event) => acc + Number(event.power), 0)
       const votesWithComment = votes.filter(event => !!event.reason)

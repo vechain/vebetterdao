@@ -1,44 +1,55 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
-
-import { B3TRGovernor__factory } from "@repo/contracts"
-
-const governorInterface = B3TRGovernor__factory.createInterface()
-
-const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
+import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
+import { EnvConfig } from "@repo/config/contracts"
 
 /**
- * Get the number of votes of the given address (with deciamls removed)  - includes the delegated ones
- * @param thor  the thor client
- * @param block the block number to get the votes at
- * @param address the address to get the votes of
- * @returns the votes of the given address (with deciamls removed)  - includes the delegated ones
+ * Get the number of votes of the given address (with decimals removed) - includes the delegated ones
+ * @param thor - The thor client
+ * @param env - The environment config
+ * @param block - The block number to get the votes at
+ * @param address - The address to get the votes of
+ * @returns The votes of the given address (with decimals removed) - includes the delegated ones
  */
-export const getVotesOnBlock = async (thor: Connex.Thor, block?: number, address?: string): Promise<string> => {
+export const getVotesOnBlock = async (
+  thor: ThorClient,
+  env: EnvConfig,
+  block?: number,
+  address?: string,
+): Promise<string> => {
   if (!block) throw new Error("block is required")
   if (!address) throw new Error("address is required")
 
-  const functionFragment = governorInterface.getFunction("getVotes").format("json")
-  const res = await thor.account(GOVERNOR_CONTRACT).method(JSON.parse(functionFragment)).call(address, block)
+  const governorContractAddress = getConfig(env).b3trGovernorAddress
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  const res = await thor.contracts
+    .load(governorContractAddress, B3TRGovernor__factory.abi)
+    .read.getVotes(address, block)
 
-  return ethers.formatEther(res.decoded[0])
+  if (!res) return Promise.reject(new Error("Get votes call failed"))
+
+  return ethers.formatEther(res[0] as bigint)
 }
 
 export const getVotesOnBlockQueryKey = (block?: number, address?: string) => ["votesOnBlock", block, address]
+
 /**
- *  Hook to get the number of votes of the given address (with deciamls removed)  - includes the delegated ones
- * @returns the number of votes of the given address (with deciamls removed)  - includes the delegated ones
+ * Hook to get the number of votes of the given address (with decimals removed) - includes the delegated ones
+ * @param env - The environment config
+ * @param block - The block number to get the votes at
+ * @param address - The address to get the votes of
+ * @param enabled - Whether the query is enabled
+ * @returns The number of votes of the given address (with decimals removed) - includes the delegated ones
  */
-export const useGetVotesOnBlock = (block?: number, address?: string, enabled = true) => {
-  const { thor } = useConnex()
+export const useGetVotesOnBlock = (env: EnvConfig, block?: number, address?: string, enabled = true) => {
+  const thor = useThor()
 
   return useQuery({
     queryKey: getVotesOnBlockQueryKey(block, address),
-    queryFn: async () => await getVotesOnBlock(thor, block, address),
+    queryFn: async () => await getVotesOnBlock(thor, env, block, address),
     enabled: !!thor && !!address && !!block && enabled,
   })
 }

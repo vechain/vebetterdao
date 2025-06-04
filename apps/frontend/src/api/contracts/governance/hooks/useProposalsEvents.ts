@@ -1,19 +1,22 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 import { getProposalsEvents } from "../getProposalsEvents"
+import { EnvConfig } from "@repo/config/contracts"
 
-export const getProposalsEventsQueryKey = (proposalId = "all") => ["proposalsEvents", proposalId]
+export const getProposalsEventsQueryKey = (env: EnvConfig, proposalId = "all") => ["proposalsEvents", env, proposalId]
 
 /**
- *  Hook to get the proposals events from the governor contract (i.e the proposals created, canceled and executed)
- * @returns  the proposals events
+ * Hook to get the proposals events from the governor contract (i.e the proposals created, canceled and executed)
+ * @param env - The environment config
+ * @param proposalId - Optional proposal ID to filter events
+ * @returns The proposals events
  */
-export const useProposalsEvents = (proposalId?: string) => {
-  const { thor } = useConnex()
+export const useProposalsEvents = (env: EnvConfig, proposalId?: string) => {
+  const thor = useThor()
 
   return useQuery({
-    queryKey: getProposalsEventsQueryKey(proposalId),
-    queryFn: async () => await getProposalsEvents(thor, proposalId),
+    queryKey: getProposalsEventsQueryKey(env, proposalId),
+    queryFn: async () => await getProposalsEvents(thor, env, proposalId),
     enabled: !!thor,
   })
 }

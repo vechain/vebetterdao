@@ -1,4 +1,4 @@
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useThor } from "@vechain/vechain-kit"
 import { useQueries } from "@tanstack/react-query"
 import { getHasVotedInRoundQueryKey, getHasVotedInRound } from "./useHasVotedInRound"
 
@@ -9,7 +9,7 @@ import { getHasVotedInRoundQueryKey, getHasVotedInRound } from "./useHasVotedInR
  * @returns the latest voted roundId
  */
 export const useLatestVotingRound = (totalRounds: string, voter: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const _totalRounds = Number(totalRounds)
 
   // Creates array from totalRounds to 1

@@ -1,18 +1,15 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
-import { abi } from "thor-devkit"
+import { ethers } from "ethers"
 import dayjs from "dayjs"
 import { ThorClient } from "@vechain/sdk-network"
 
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendorsedApps").format("json")
-const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
-const allAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
-const allAppsAbi = new abi.Function(JSON.parse(allAppsFragment))
-const isBlacklistedFragment = X2EarnApps.createInterface().getFunction("isBlacklisted").format("json")
-const isBlacklistedAbi = new abi.Function(JSON.parse(isBlacklistedFragment))
-
 const NEW_APP_PERIOD_SECONDS = 604800 // Considering a new app is defined as 7 days
+
+// Function selectors for the X2EarnApps contract
+const unendorsedAppsSelector = ethers.id("unendorsedApps()").slice(0, 10)
+const allAppsSelector = ethers.id("apps()").slice(0, 10)
+const isBlacklistedSelector = ethers.id("isBlacklisted(bytes32)").slice(0, 10)
 
 /**
  * xApp type
@@ -66,27 +63,30 @@ export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Pro
   const clauses = [
     {
       to: X2EARNAPPS_CONTRACT,
-      value: 0,
-      data: allAppsAbi.encode(),
+      value: "0x0",
+      data: allAppsSelector,
     },
     {
       to: X2EARNAPPS_CONTRACT,
-      value: 0,
-      data: unendorsedAppsAbi.encode(),
+      value: "0x0",
+      data: unendorsedAppsSelector,
     },
   ]
 
-  const res = await thor.explain(clauses).execute()
+  const res = await thor.transactions.simulateTransaction(clauses)
 
-  const error = res.find(r => r.reverted)?.revertReason
-  if (error) throw new Error(error ?? "Error fetching xApps")
+  const error = res.find(r => r.reverted)
+  if (error) throw new Error("Error fetching xApps")
 
   let apps: XApp[] = []
   let unendorsedApps: UnendorsedApp[] = []
   type DecodedApp = [string, string, string, string, string, boolean]
 
   if (res[0]?.data) {
-    const appsDecoded = allAppsAbi.decode(res[0]?.data)[0] as DecodedApp[]
+    const appsDecoded = ethers.AbiCoder.defaultAbiCoder().decode(
+      ["tuple(bytes32,address,string,string,uint256,bool)[]"],
+      res[0].data,
+    )[0] as DecodedApp[]
     if (appsDecoded.length) {
       apps = appsDecoded.map(app => ({
         id: app[0],
@@ -99,7 +99,10 @@ export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Pro
     }
   }
   if (res[1]?.data) {
-    const unendorsedAppsDecoded = unendorsedAppsAbi.decode(res[1]?.data)[0] as DecodedApp[]
+    const unendorsedAppsDecoded = ethers.AbiCoder.defaultAbiCoder().decode(
+      ["tuple(bytes32,address,string,string,uint256,bool)[]"],
+      res[1].data,
+    )[0] as DecodedApp[]
     if (unendorsedAppsDecoded.length) {
       unendorsedApps = unendorsedAppsDecoded.map((app: DecodedApp) => ({
         id: app[0],
@@ -123,15 +126,15 @@ export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Pro
   if (filterBlacklisted) {
     const clauses2 = allApps.map(app => ({
       to: X2EARNAPPS_CONTRACT,
-      value: 0,
-      data: isBlacklistedAbi.encode(app.id),
+      value: "0x0",
+      data: isBlacklistedSelector + ethers.AbiCoder.defaultAbiCoder().encode(["bytes32"], [app.id]).slice(2),
     }))
-    const res2 = await thor.explain(clauses2).execute()
+    const res2 = await thor.transactions.simulateTransaction(clauses2)
 
-    const error2 = res2.find(r => r.reverted)?.revertReason
-    if (error2) throw new Error(error2 ?? "Error fetching blacklisted xApps")
+    const error2 = res2.find(r => r.reverted)
+    if (error2) throw new Error("Error fetching blacklisted xApps")
 
-    const blacklistedApps = res2.map(r => isBlacklistedAbi.decode(r.data))
+    const blacklistedApps = res2.map(r => ethers.AbiCoder.defaultAbiCoder().decode(["bool"], r.data))
     allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index]?.[0] === false)
   }
 

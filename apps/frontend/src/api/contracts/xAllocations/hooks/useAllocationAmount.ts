@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { Emissions__factory } from "@repo/contracts"
+import { Emissions__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
 
 const EMISSION_CONTRACT = getConfig().emissionsContractAddress
@@ -14,48 +15,43 @@ type AllocationAmount = {
 }
 
 /**
- *
  * Returns the allocation amount for a given roundId
- * @param thor  the thor client
- * @param roundId  the roundId the get the amount for
- * @returns the allocation amount for a given roundId see {@link AllocationAmount}
+ * @param thor - The thor client
+ * @param roundId - The roundId the get the amount for
+ * @returns The allocation amount for a given roundId see {@link AllocationAmount}
  */
-export const getAllocationAmount = async (thor: Connex.Thor, roundId?: string): Promise<AllocationAmount> => {
-  const emissionsInterface = Emissions__factory.createInterface()
-  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmount").format("json")
-  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmount").format("json")
-  const functionFragmentXAllocationsAmount = emissionsInterface.getFunction("getXAllocationAmount").format("json")
-  const functionFragmentGMRewardsAmount = emissionsInterface.getFunction("getGMAmount").format("json")
+export const getAllocationAmount = async (thor: ThorClient, roundId?: string): Promise<AllocationAmount> => {
+  const contract = thor.contracts.load(EMISSION_CONTRACT, Emissions__factory.abi)
 
   const [resTreasury, resVoteX2Earn, voteXAllocations, resGMRewards] = await Promise.all([
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(roundId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentVoteX2EarnAmount)).call(roundId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentXAllocationsAmount)).call(roundId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentGMRewardsAmount)).call(roundId),
+    contract.read.getTreasuryAmount(roundId),
+    contract.read.getVote2EarnAmount(roundId),
+    contract.read.getXAllocationAmount(roundId),
+    contract.read.getGMAmount(roundId),
   ])
 
-  if (resTreasury.vmError) return Promise.reject(new Error(resTreasury.vmError))
-  if (resVoteX2Earn.vmError) return Promise.reject(new Error(resVoteX2Earn.vmError))
-  if (voteXAllocations.vmError) return Promise.reject(new Error(voteXAllocations.vmError))
-  if (resGMRewards.vmError) return Promise.reject(new Error(resGMRewards.vmError))
+  if (!resTreasury) return Promise.reject(new Error("Treasury amount call failed"))
+  if (!resVoteX2Earn) return Promise.reject(new Error("Vote2Earn amount call failed"))
+  if (!voteXAllocations) return Promise.reject(new Error("XAllocation amount call failed"))
+  if (!resGMRewards) return Promise.reject(new Error("GM rewards amount call failed"))
 
   return {
-    treasury: ethers.formatEther(resTreasury.decoded[0]),
-    voteX2Earn: ethers.formatEther(resVoteX2Earn.decoded[0]),
-    voteXAllocations: ethers.formatEther(voteXAllocations.decoded[0]),
-    gm: ethers.formatEther(resGMRewards.decoded[0]),
+    treasury: ethers.formatEther(resTreasury[0] as bigint),
+    voteX2Earn: ethers.formatEther(resVoteX2Earn[0] as bigint),
+    voteXAllocations: ethers.formatEther(voteXAllocations[0] as bigint),
+    gm: ethers.formatEther(resGMRewards[0] as bigint),
   }
 }
 
 export const getAllocationAmountQueryKey = (roundId?: string) => ["allocationsRound", "amount", roundId]
 
 /**
- *  Hook to get the allocation amount for a given roundId
- * @param roundId  the roundId the get the amount for
- * @returns the allocation amount for a given roundId see {@link AllocationAmount}
+ * Hook to get the allocation amount for a given roundId
+ * @param roundId - The roundId the get the amount for
+ * @returns The allocation amount for a given roundId see {@link AllocationAmount}
  */
 export const useAllocationAmount = (roundId?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getAllocationAmountQueryKey(roundId),

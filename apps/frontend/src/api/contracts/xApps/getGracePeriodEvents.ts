@@ -1,7 +1,6 @@
 import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
-import { EnvConfig } from "@repo/config/contracts"
 import { FilterCriteria } from "@vechain/sdk-network"
 
 export type GracePeriodStartedEvent = {
@@ -15,16 +14,11 @@ export type GracePeriodStartedEvent = {
 /**
  * Get the grace period events from the X2EarnApps contract
  * @param thor - The thor client
- * @param env - The environment config
  * @param appId - The app id to get the events (optional)
  * @returns The grace period started events
  */
-export const getGracePeriodEvent = async (
-  thor: ThorClient,
-  env: EnvConfig,
-  appId?: string,
-): Promise<GracePeriodStartedEvent[]> => {
-  const x2EarnAppContractAddress = getConfig(env).x2EarnAppsContractAddress
+export const getGracePeriodEvent = async (thor: ThorClient, appId?: string): Promise<GracePeriodStartedEvent[]> => {
+  const x2EarnAppContractAddress = getConfig().x2EarnAppsContractAddress
 
   const eventAbi = thor.contracts
     .load(x2EarnAppContractAddress, X2EarnApps__factory.abi)

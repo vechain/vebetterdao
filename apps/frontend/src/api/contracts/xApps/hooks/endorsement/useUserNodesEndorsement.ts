@@ -1,15 +1,10 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-import { abi } from "thor-devkit"
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-const nodeToEndorsementAppFragment = X2EarnApps__factory.createInterface()
-  .getFunction("nodeToEndorsedApp")
-  .format("json")
-
-const nodeToEndorsementAppFragmentAbi = new abi.Function(JSON.parse(nodeToEndorsementAppFragment))
 
 // NOTE: one node can endorse one app
 type NodeEndorsedApp = {
@@ -25,31 +20,28 @@ type NodeEndorsedApp = {
  * @param nodeIds  the node ids to fetch the endorsed apps for
  * @returns  the endorsed apps for the nodes
  */
-export const getNodesEndorsedApps = async (thor: Connex.Thor, nodeIds: string[]): Promise<NodeEndorsedApp[]> => {
-  const clauses = nodeIds.map(nodeId => ({
-    to: X2EARNAPPS_CONTRACT,
-    value: 0,
-    data: nodeToEndorsementAppFragmentAbi.encode(nodeId),
-  }))
+export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[]): Promise<NodeEndorsedApp[]> => {
+  const contract = thor.contracts.load(X2EARNAPPS_CONTRACT, X2EarnApps__factory.abi)
+  const results: NodeEndorsedApp[] = []
 
-  const res = await thor.explain(clauses).execute()
+  for (const nodeId of nodeIds) {
+    const res = await contract.read.nodeToEndorsedApp(nodeId)
 
-  const error = res.find(r => r.reverted)?.revertReason
+    if (!res) throw new Error(`Error fetching endorsed app for node ${nodeId}`)
 
-  if (error) throw new Error(error ?? "Error fetching endorsed apps")
-
-  if (res.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
-
-  return res.map((r, index) => {
-    let decoded = nodeToEndorsementAppFragmentAbi.decode(r.data)[0]
+    let endorsedApp: string | null = res[0] as string
     // if not endorsed app, address is 0x0
-    if (decoded === "0x0000000000000000000000000000000000000000000000000000000000000000") decoded = null
-
-    return {
-      id: nodeIds[index] as string,
-      endorsedApp: decoded as string | null,
+    if (endorsedApp === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+      endorsedApp = null
     }
-  })
+
+    results.push({
+      id: nodeId,
+      endorsedApp,
+    })
+  }
+
+  return results
 }
 
 export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", ...nodeIds, "ENDORSED_APPS"]
@@ -60,7 +52,7 @@ export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", ..
  * @returns  the endorsed apps for the nodes
  */
 export const useNodesEndorsedApps = (nodeIds: string[]) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getNodesEndorsedAppsQueryKey(nodeIds),

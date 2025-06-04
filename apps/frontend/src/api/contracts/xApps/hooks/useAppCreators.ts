@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
 /**
  *  Get the creators of the app
@@ -11,13 +12,12 @@ import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
  * @param appId  the id of the app to get the creators for
  * @returns  the creators of the app
  */
-export const getAppCreators = async (thor: Connex.Thor, appId: string): Promise<string[]> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("appCreators").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId)
+export const getAppCreators = async (thor: ThorClient, appId: string): Promise<string[]> => {
+  const res = await thor.contracts.load(X2EARNAPPS_CONTRACT, X2EarnApps__factory.abi).read.appCreators(appId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("App creators call failed"))
 
-  return res.decoded[0]
+  return res[0] as string[]
 }
 
 export const getAppCreatorsQueryKey = (appId: string) => ["xApps", appId, "creators"]
@@ -28,11 +28,11 @@ export const getAppCreatorsQueryKey = (appId: string) => ["xApps", appId, "creat
  * @returns  the creators of the app
  */
 export const useAppCreators = (appId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getAppCreatorsQueryKey(appId),
     queryFn: async () => await getAppCreators(thor, appId),
-    enabled: !!thor,
+    enabled: !!thor && !!appId,
   })
 }

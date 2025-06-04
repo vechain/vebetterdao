@@ -1,28 +1,29 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor, TokenBalance } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { X2EarnRewardsPool__factory } from "@repo/contracts"
+import { X2EarnRewardsPool__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
 import { FormattingUtils } from "@repo/utils"
-import { TokenBalance } from "../../../b3tr"
 
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
 
 /**
  * Get the total balance in the x2Earn rewards pool contract for a specific xApp
  *
- * @param thor the connex instance
- * @param xAppId  the xApp id
- * @returns the available balance in the x2Earn rewards pool contract for a specific xApp
+ * @param thor - The thor client
+ * @param xAppId - The xApp id
+ * @returns The available balance in the x2Earn rewards pool contract for a specific xApp
  */
-export const getAppBalance = async (thor: Connex.Thor, xAppId: string): Promise<TokenBalance> => {
-  const functionFragment = X2EarnRewardsPool__factory.createInterface().getFunction("totalBalance").format("json")
-  const res = await thor.account(X2EARN_REWARDS_POOL_CONTRACT).method(JSON.parse(functionFragment)).call(xAppId)
+export const getAppBalance = async (thor: ThorClient, xAppId: string): Promise<TokenBalance> => {
+  const res = await thor.contracts
+    .load(X2EARN_REWARDS_POOL_CONTRACT, X2EarnRewardsPool__factory.abi)
+    .read.totalBalance(xAppId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Total balance call failed"))
 
-  const original = res.decoded[0]
-  const scaled = ethers.formatEther(original)
+  const original = res[0].toString()
+  const scaled = ethers.formatEther(res[0] as bigint)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
@@ -37,12 +38,11 @@ export const getAppBalanceQueryKey = (xAppId: string) => ["X2EarnRewardsPool", "
 /**
  * Get the balance available in the x2Earn rewards pool contract
  *
- * @param thor  the connex instance
- * @param xAppId  the xApp id
- * @returns the balance available in the x2Earn rewards pool contract
+ * @param xAppId - The xApp id
+ * @returns The balance available in the x2Earn rewards pool contract
  */
 export const useAppBalance = (xAppId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   return useQuery({
     queryKey: getAppBalanceQueryKey(xAppId),
     queryFn: async () => await getAppBalance(thor, xAppId),

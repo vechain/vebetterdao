@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
 /**
  *  Get the admin of the app
@@ -11,13 +12,12 @@ import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
  * @param appId  the id of the app
  * @returns  the admin of the app
  */
-export const getAppAdmin = async (thor: Connex.Thor, appId: string): Promise<string> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("appAdmin").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId)
+export const getAppAdmin = async (thor: ThorClient, appId: string): Promise<string> => {
+  const res = await thor.contracts.load(X2EARNAPPS_CONTRACT, X2EarnApps__factory.abi).read.appAdmin(appId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("App admin call failed"))
 
-  return res.decoded[0]
+  return res[0] as string
 }
 
 export const getAppAdminQueryKey = (appId: string) => ["xApps", appId, "admin"]
@@ -28,11 +28,11 @@ export const getAppAdminQueryKey = (appId: string) => ["xApps", appId, "admin"]
  * @returns the admin of the app
  */
 export const useAppAdmin = (appId: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getAppAdminQueryKey(appId),
     queryFn: async () => await getAppAdmin(thor, appId),
-    enabled: !!thor,
+    enabled: !!thor && !!appId,
   })
 }

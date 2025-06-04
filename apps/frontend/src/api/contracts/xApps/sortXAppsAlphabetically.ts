@@ -1,9 +1,10 @@
-import { getXAppMetadata, getXAppsMetadataBaseUri } from "@vechain/vechain-kit"
-import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
 import { GetAllApps, XApp, UnendorsedApp } from "./getXApps"
+import { getXAppMetadata } from "./getXAppMetadata"
+import { getXAppsMetadataBaseUri } from "./getXAppsMetadataBaseUri"
 
-export const sortXAppsAlphabetically = async (apps: GetAllApps | undefined, thor: Connex.Thor): Promise<GetAllApps> => {
-  const baseUri = await getXAppsMetadataBaseUri(thor, getConfig().network.type)
+export const sortXAppsAlphabetically = async (apps: GetAllApps | undefined, thor: ThorClient): Promise<GetAllApps> => {
+  const baseUri = await getXAppsMetadataBaseUri(thor)
 
   if (!apps) return {} as GetAllApps
 
@@ -12,7 +13,7 @@ export const sortXAppsAlphabetically = async (apps: GetAllApps | undefined, thor
     return Promise.all(
       apps.map(async app => {
         const uri = `${baseUri}${app.metadataURI}`
-        const metadata = await getXAppMetadata(uri, getConfig().network.type)
+        const metadata = await getXAppMetadata(uri)
         return { ...app, name: metadata?.name || app.name }
       }),
     )

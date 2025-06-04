@@ -1,7 +1,7 @@
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@repo/contracts"
-import { XApp } from "./getXApps"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 
 const address = getConfig().x2EarnAppsContractAddress
 const abi = X2EarnApps__factory.abi
@@ -35,11 +35,10 @@ export const useXAppsMetadataBaseUri = () => {
  * @param thor  the thor client
  * @returns  the baseUri of the xApps metadata
  */
-export const getXAppsMetadataBaseUri = async (thor: Connex.Thor): Promise<XApp[]> => {
-  const functionFragment = X2EarnApps__factory.createInterface().getFunction("baseURI").format("json")
-  const res = await thor.account(address).method(JSON.parse(functionFragment)).call()
+export const getXAppsMetadataBaseUri = async (thor: ThorClient): Promise<string> => {
+  const res = await thor.contracts.load(address, X2EarnApps__factory.abi).read.baseURI()
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Base URI call failed"))
 
-  return res.decoded[0]
+  return res[0] as string
 }

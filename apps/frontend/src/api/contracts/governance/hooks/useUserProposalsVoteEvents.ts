@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 
 export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 
 /**
  * Custom hook that retrieves the vote events of a specific user for all proposals.
+ * @param user - The user address to filter vote events for
  * @returns An object containing information about the vote event.
  */
 export const useUserProposalsVoteEvents = (user?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getUserProposalsVoteEventsQueryKey(user ?? undefined),
     queryFn: async () => {
-      const { votes } = await getProposalsVoteEvents(thor, undefined, user ?? undefined)
-
+      const { votes } = await getProposalsVoteEvents(thor, user ?? undefined)
       return votes
     },
     enabled: !!thor && !!user,

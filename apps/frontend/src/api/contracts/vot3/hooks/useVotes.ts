@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
+import { ThorClient } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { Vot3ContractJson } from "@repo/contracts"
+import { VOT3__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
-
-const vot3Abi = Vot3ContractJson.abi
 
 const config = getConfig()
 const VOT3_CONTRACT = config.vot3ContractAddress
 
 /**
  * Get the number of votes of the given address (includes the delegated ones)
- * @param thor  the thor client
- * @returns the votes of the given address
+ * @param thor - The thor client
+ * @param address - The address to get votes for
+ * @returns The votes of the given address
  */
 export const getVotes = async (
-  thor: Connex.Thor,
+  thor: ThorClient,
   address?: string,
 ): Promise<{
   original: string
@@ -25,14 +25,12 @@ export const getVotes = async (
 }> => {
   if (!address) throw new Error("address is required")
 
-  const getVotesAbi = vot3Abi.find(abi => abi.name === "getVotes")
-  if (!getVotesAbi) throw new Error("getVotes function not found")
-  const res = await thor.account(VOT3_CONTRACT).method(getVotesAbi).call(address)
+  const res = await thor.contracts.load(VOT3_CONTRACT, VOT3__factory.abi).read.getVotes(address)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Get votes call failed"))
 
-  const original = res.decoded[0]
-  const scaled = ethers.formatEther(original)
+  const original = res[0].toString()
+  const scaled = ethers.formatEther(res[0] as bigint)
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {
@@ -43,12 +41,14 @@ export const getVotes = async (
 }
 
 export const getVotesQueryKey = (address?: string) => ["votes", address]
+
 /**
- *  Hook to get the number of votes of the given address (includes the delegated ones)
- * @returns the number of votes of the given address (includes the delegated ones)
+ * Hook to get the number of votes of the given address (includes the delegated ones)
+ * @param address - The address to get votes for
+ * @returns The number of votes of the given address (includes the delegated ones)
  */
 export const useGetVotes = (address?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getVotesQueryKey(address),
