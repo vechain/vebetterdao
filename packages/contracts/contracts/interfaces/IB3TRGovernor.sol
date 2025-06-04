@@ -178,6 +178,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event ProposalCanceled(uint256 proposalId);
 
   /**
+   * @dev Emitted when the quorum numerator is updated.
+   */
+  event QuorumNumeratorUpdated(uint256 oldNumerator, uint256 newNumerator);
+
+  /**
    * @dev Emitted when the timelock controller used for proposal execution is modified.
    */
   event TimelockChange(address oldTimelock, address newTimelock);
