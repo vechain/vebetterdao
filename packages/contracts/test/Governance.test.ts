@@ -36,7 +36,7 @@ import {
 } from "../typechain-types"
 import { deployAndUpgrade, deployProxy, getInitializerData } from "../scripts/helpers"
 
-describe("Governor and TimeLock - @shard4", function () {
+describe.only("Governor and TimeLock - @shard4", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
@@ -83,7 +83,7 @@ describe("Governor and TimeLock - @shard4", function () {
 
       // check version
       const version = await governor.version()
-      expect(version).to.eql("6")
+      expect(version).to.eql("7")
 
       // deposit threshold is set correctly
       const depositThreshold = await governor.depositThresholdPercentage()
@@ -1053,8 +1053,8 @@ describe("Governor and TimeLock - @shard4", function () {
           slot !== "0x0000000000000000000000000000000200000000000000000000000000000002",
       ) // removing empty slots and slots that track governance proposals getting executed on the governor
 
-      // Upgrade to V6
-      const ContractV6 = await ethers.getContractFactory("B3TRGovernor", {
+      // Upgrade to V7
+      const ContractV7 = await ethers.getContractFactory("B3TRGovernor", {
         libraries: {
           GovernorClockLogic: await governorClockLogicLib.getAddress(),
           GovernorConfigurator: await governorConfiguratorLib.getAddress(),
@@ -1066,19 +1066,19 @@ describe("Governor and TimeLock - @shard4", function () {
           GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
         },
       })
-      const implementationv5 = await ContractV6.deploy()
+      const implementationv5 = await ContractV7.deploy()
       await implementationv5.waitForDeployment()
 
       // Now we can create a proposal
       const tx5 = await governorV4.upgradeToAndCall(await implementationv5.getAddress(), "0x")
       await tx5.wait()
 
-      const governorV6 = ContractV6.attach(await governorV4.getAddress()) as B3TRGovernor
+      const governorV7 = ContractV7.attach(await governorV4.getAddress()) as B3TRGovernor
 
       let storageSlotsAfter = []
 
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
-        storageSlotsAfter.push(await ethers.provider.getStorage(await governorV6.getAddress(), i))
+        storageSlotsAfter.push(await ethers.provider.getStorage(await governorV7.getAddress(), i))
       }
 
       storageSlotsAfter = storageSlotsAfter.filter(
@@ -1092,7 +1092,7 @@ describe("Governor and TimeLock - @shard4", function () {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
-      expect(await governorV6.version()).to.equal("6")
+      expect(await governorV7.version()).to.equal("7")
     })
   })
 
