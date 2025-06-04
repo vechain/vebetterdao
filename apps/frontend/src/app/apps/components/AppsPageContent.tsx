@@ -1,4 +1,4 @@
-import { useXApps, useXNode, useIsCreatorOfAnyApp } from "@/api"
+import { useXApps, useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -25,11 +25,12 @@ export const AppsPageContent = () => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
-  const { data: xApps, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
+  const { data: xAppsNotSorted, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
   const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
 
   const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
+  const { data: xApps } = useSortXappAlphabetically(xAppsNotSorted)
 
   // New apps looking for endorsement slider
   const newApps = xApps?.newLookingForEndorsement ?? []

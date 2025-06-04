@@ -30,6 +30,15 @@ const Steps: StepCardProps[] = [
 export const NewAppPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
+
+  const LINK_TO_DOCS = () => {
+    window.open(
+      "https://docs.vebetterdao.org/vebetterdao/x2earn-apps#voting-eligibility-and-endorsement-status",
+      "_blank",
+      "noopener",
+    )
+  }
+
   const onContinueClick = () => {
     router.push("/apps/new/form")
   }
@@ -55,7 +64,7 @@ export const NewAppPageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>
-                <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
+                <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorScheme="primary" size="lg">
                   {t("More info")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>

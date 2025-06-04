@@ -13,7 +13,6 @@ import {
   X2EarnRewardsPool,
   X2EarnApps,
   NodeManagement,
-  NodeManagementV1,
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
@@ -106,13 +105,37 @@ export async function deployAll(config: ContractsConfig) {
     GovernorClockLogicLibV5,
     GovernorConfiguratorLibV5,
     GovernorFunctionRestrictionsLogicLibV5,
-    GovernorGovernanceLogicLibV5,
     GovernorQuorumLogicLibV5,
     GovernorProposalLogicLibV5,
     GovernorVotesLogicLibV5,
     GovernorDepositLogicLibV5,
     GovernorStateLogicLibV5,
   } = await governanceLibraries()
+
+  if (
+    !GovernorClockLogicLibV1 ||
+    !GovernorConfiguratorLibV1 ||
+    !GovernorDepositLogicLibV1 ||
+    !GovernorFunctionRestrictionsLogicLibV1 ||
+    !GovernorProposalLogicLibV1 ||
+    !GovernorQuorumLogicLibV1 ||
+    !GovernorVotesLogicLibV1 ||
+    !GovernorStateLogicLibV1
+  ) {
+    throw new Error("Failed to deploy Governance V1 libraries")
+  }
+  if (
+    !GovernorClockLogicLib ||
+    !GovernorConfiguratorLib ||
+    !GovernorDepositLogicLib ||
+    !GovernorFunctionRestrictionsLogicLib ||
+    !GovernorProposalLogicLib ||
+    !GovernorQuorumLogicLib ||
+    !GovernorVotesLogicLib ||
+    !GovernorStateLogicLib
+  ) {
+    throw new Error("Failed to deploy Governance latest libraries")
+  }
 
   console.log("Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries
@@ -155,6 +178,55 @@ export async function deployAll(config: ContractsConfig) {
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
+  if (
+    !PassportChecksLogicV1 ||
+    !PassportConfiguratorV1 ||
+    !PassportEntityLogicV1 ||
+    !PassportDelegationLogicV1 ||
+    !PassportPersonhoodLogicV1 ||
+    !PassportPoPScoreLogicV1 ||
+    !PassportSignalingLogicV1 ||
+    !PassportWhitelistAndBlacklistLogicV1
+  ) {
+    throw new Error("Failed to deploy VeBetter Passport V1 libraries")
+  }
+  if (
+    !PassportChecksLogicV2 ||
+    !PassportConfiguratorV2 ||
+    !PassportEntityLogicV2 ||
+    !PassportDelegationLogicV2 ||
+    !PassportPersonhoodLogicV2 ||
+    !PassportPoPScoreLogicV2 ||
+    !PassportSignalingLogicV2 ||
+    !PassportWhitelistAndBlacklistLogicV2
+  ) {
+    throw new Error("Failed to deploy VeBetter Passport V2 libraries")
+  }
+  if (
+    !PassportChecksLogicV3 ||
+    !PassportConfiguratorV3 ||
+    !PassportEntityLogicV3 ||
+    !PassportDelegationLogicV3 ||
+    !PassportPersonhoodLogicV3 ||
+    !PassportPoPScoreLogicV3 ||
+    !PassportSignalingLogicV3 ||
+    !PassportWhitelistAndBlacklistLogicV3
+  ) {
+    throw new Error("Failed to deploy VeBetter Passport V3 libraries")
+  }
+  if (
+    !PassportChecksLogic ||
+    !PassportConfigurator ||
+    !PassportEntityLogic ||
+    !PassportDelegationLogic ||
+    !PassportPersonhoodLogic ||
+    !PassportPoPScoreLogic ||
+    !PassportSignalingLogic ||
+    !PassportWhitelistAndBlacklistLogic
+  ) {
+    throw new Error("Failed to deploy VeBetter Passport latest libraries")
+  }
+
   console.log("Deploying X2Earn App Libraries")
   const {
     AdministrationUtils,
@@ -170,6 +242,20 @@ export async function deployAll(config: ContractsConfig) {
     EndorsementUtilsV4,
     VoteEligibilityUtilsV4,
   } = await x2EarnLibraries()
+
+  // Verify all required libraries are deployed
+  if (!AdministrationUtilsV3 || !EndorsementUtilsV3 || !VoteEligibilityUtilsV3) {
+    throw new Error("Failed to deploy X2Earn V3 libraries")
+  }
+  if (!AdministrationUtilsV2 || !EndorsementUtilsV2 || !VoteEligibilityUtilsV2) {
+    throw new Error("Failed to deploy X2Earn V2 libraries")
+  }
+  if (!AdministrationUtilsV4 || !EndorsementUtilsV4 || !VoteEligibilityUtilsV4) {
+    throw new Error("Failed to deploy X2Earn V4 libraries")
+  }
+  if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils) {
+    throw new Error("Failed to deploy X2Earn latest libraries")
+  }
 
   let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
 
@@ -654,6 +740,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [veBetterPassportContractAddress],
+      [],
       [],
     ],
     {

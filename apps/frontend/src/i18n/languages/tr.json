@@ -1693,5 +1693,6 @@
   "Verify": "Doğrula",
   "Complete": "Tamamla",
   "Unable to process request. Try refreshing or contact support.": "İstek işlenemiyor. Yenilemeyi deneyin veya destek ile iletişime geçin.",
-  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Örneğin, amacımız her hafta tur tahsisatının en az X yüzdesini dağıtmaktır."
+  "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Örneğin, amacımız her hafta tur tahsisatının en az X yüzdesini dağıtmaktır.",
+  "Vote Type": "Oy Türü"
 }
