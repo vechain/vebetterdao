@@ -1,4 +1,4 @@
-import { useRoundAppVotes } from "@/api"
+import { useRoundAppVotes, useXAppRoundEarnings } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
@@ -7,7 +7,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useXAppMetadata, useXAppRoundEarnings } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type AppVotesData = {
   percentage: number

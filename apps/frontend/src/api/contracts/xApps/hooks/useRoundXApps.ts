@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
 import { XApp } from "../getXApps"
+import { ThorClient } from "@vechain/sdk-network"
 
 /**
  * Returns all the available xApps (apps that can be voted on for allocation)
@@ -12,21 +13,20 @@ import { XApp } from "../getXApps"
  * @param roundId  the id of the round the get state for
  * @returns  all the available xApps (apps that can be voted on for allocation) capped to 256 see {@link XApp}
  */
-export const getRoundXApps = async (thor: Connex.Thor, roundId?: string): Promise<XApp[]> => {
+export const getRoundXApps = async (thor: ThorClient, roundId?: string): Promise<XApp[]> => {
   if (!roundId) return []
-  const functionFragment = XAllocationVoting.createInterface().getFunction("getAppsOfRound").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId)
+  const res = await thor.contracts.load(XALLOCATIONVOTING_CONTRACT, XAllocationVoting.abi).read.getAppsOfRound(roundId)
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
+  if (!res) return Promise.reject(new Error("Failed to fetch xApps"))
 
-  const apps = res.decoded[0]
+  const apps = res[0] as any[]
   return apps.map((app: any) => ({
     id: app[0],
     teamWalletAddress: app[1],
     name: app[2],
     metadataURI: app[3],
     createdAtTimestamp: app[4],
-  }))
+  })) as XApp[]
 }
 
 export const getRoundXAppsQueryKey = (roundId?: string) => ["round", roundId, "getXApps"]
@@ -39,7 +39,7 @@ export const getRoundXAppsQueryKey = (roundId?: string) => ["round", roundId, "g
  *  @returns all the available xApps (apps that can be voted on for allocation) capped to 256
  */
 export const useRoundXApps = (roundId?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getRoundXAppsQueryKey(roundId),
