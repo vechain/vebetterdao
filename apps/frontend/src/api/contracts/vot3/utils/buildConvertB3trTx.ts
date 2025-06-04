@@ -1,12 +1,11 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { Vot3ContractJson } from "@repo/contracts"
+import { VOT3__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
+import { EnhancedClause, ThorClient } from "@vechain/vechain-kit"
 
-const vot3Abi = Vot3ContractJson.abi
-
-const config = getConfig()
-const VOT3_CONTRACT = config.vot3ContractAddress
+const abi = VOT3__factory.abi
+const contractAddress = getConfig().vot3ContractAddress
 
 /**
  * Build the clause to convert B3TR tokens to VOT3 for the given address and amount
@@ -15,18 +14,14 @@ const VOT3_CONTRACT = config.vot3ContractAddress
  * @param decimals the decimals of the token
  * @returns the clause to convert B3TR to VOT3
  */
-export const buildConvertB3trTx = (thor: Connex.Thor, amount: string | number): Connex.Vendor.TxMessage[0] => {
-  const functionAbi = vot3Abi.find(e => e.name === "convertToVOT3")
-  if (!functionAbi) throw new Error("Function abi not found for mint")
-
+export const buildConvertB3trTx = (thor: ThorClient, amount: string | number): EnhancedClause => {
   const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
   const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
 
-  const clause = thor.account(VOT3_CONTRACT).method(functionAbi).asClause(amountWithDecimals)
+  const { clause } = thor.contracts.load(contractAddress, abi).clause.convertToVOT3(amountWithDecimals)
 
   return {
     ...clause,
     comment: `Convert ${formattedAmount} B3TR to VOT3`,
-    abi: functionAbi,
   }
 }
