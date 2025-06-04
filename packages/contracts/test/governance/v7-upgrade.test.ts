@@ -14,7 +14,7 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
-import { setupProposer, startNewRoundAndGetRoundId } from "./fixture.test"
+import { setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
 
 describe.only("Governance - Upgrades", function () {
   it("Should preserve proposal data through version upgrades and add proposal type support", async () => {
@@ -604,5 +604,240 @@ describe.only("Governance - Upgrades", function () {
     //Querying with a timepoint should return the quorum numerator at that timepoint
     //Which in this case is after the upgrade, so should be the same as the new quorum numerator
     expect(v7QuorumNumeratorByTypeLatest).to.be.equal(newQuorumNumerator)
+  })
+
+  it("Should be able to upgrade from V6 to V7 and have the same quorum numerator for past timepoints", async () => {
+    const config = createLocalConfig()
+    const {
+      owner,
+      b3tr,
+      timeLock,
+      voterRewards,
+      vot3,
+      xAllocationVoting,
+      governorClockLogicLibV1,
+      governorConfiguratorLibV1,
+      governorDepositLogicLibV1,
+      governorFunctionRestrictionsLogicLibV1,
+      governorProposalLogicLibV1,
+      governorQuorumLogicLibV1,
+      governorStateLogicLibV1,
+      governorVotesLogicLibV1,
+      governorClockLogicLibV3,
+      governorConfiguratorLibV3,
+      governorDepositLogicLibV3,
+      governorFunctionRestrictionsLogicLibV3,
+      governorProposalLogicLibV3,
+      governorQuorumLogicLibV3,
+      governorStateLogicLibV3,
+      governorVotesLogicLibV3,
+      governorClockLogicLibV4,
+      governorConfiguratorLibV4,
+      governorDepositLogicLibV4,
+      governorFunctionRestrictionsLogicLibV4,
+      governorProposalLogicLibV4,
+      governorQuorumLogicLibV4,
+      governorStateLogicLibV4,
+      governorVotesLogicLibV4,
+      governorClockLogicLibV5,
+      governorConfiguratorLibV5,
+      governorDepositLogicLibV5,
+      governorFunctionRestrictionsLogicLibV5,
+      governorProposalLogicLibV5,
+      governorQuorumLogicLibV5,
+      governorStateLogicLibV5,
+      governorVotesLogicLibV5,
+      governorClockLogicLibV6,
+      governorConfiguratorLibV6,
+      governorDepositLogicLibV6,
+      governorFunctionRestrictionsLogicLibV6,
+      governorProposalLogicLibV6,
+      governorQuorumLogicLibV6,
+      governorStateLogicLibV6,
+      governorVotesLogicLibV6,
+      governorClockLogicLib,
+      governorConfiguratorLib,
+      governorDepositLogicLib,
+      governorFunctionRestrictionsLogicLib,
+      governorProposalLogicLib,
+      governorQuorumLogicLib,
+      governorStateLogicLib,
+      governorVotesLogicLib,
+      veBetterPassport,
+    } = (await getOrDeployContractInstances({
+      forceDeploy: true,
+    })) as DeployInstance
+
+    const governorV6 = (await deployAndUpgrade(
+      ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernorV6"],
+      [
+        [
+          {
+            vot3Token: await vot3.getAddress(),
+            timelock: await timeLock.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            b3tr: await b3tr.getAddress(),
+            quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+            initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+            initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+            initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+            voterRewards: await voterRewards.getAddress(),
+            isFunctionRestrictionEnabled: true,
+          },
+          {
+            governorAdmin: owner.address,
+            pauser: owner.address,
+            contractsAddressManager: owner.address,
+            proposalExecutor: owner.address,
+            governorFunctionSettingsRoleAddress: owner.address,
+          },
+        ],
+        [],
+        [],
+        [await veBetterPassport.getAddress()],
+        [],
+        [],
+      ],
+      {
+        versions: [undefined, 2, 3, 4, 5, 6],
+        libraries: [
+          {
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+          },
+          {
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+          },
+          {
+            GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
+            GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
+            GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
+            GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
+            GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
+            GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
+            GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
+            GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
+          },
+          {
+            GovernorClockLogicV4: await governorClockLogicLibV4.getAddress(),
+            GovernorConfiguratorV4: await governorConfiguratorLibV4.getAddress(),
+            GovernorDepositLogicV4: await governorDepositLogicLibV4.getAddress(),
+            GovernorFunctionRestrictionsLogicV4: await governorFunctionRestrictionsLogicLibV4.getAddress(),
+            GovernorProposalLogicV4: await governorProposalLogicLibV4.getAddress(),
+            GovernorQuorumLogicV4: await governorQuorumLogicLibV4.getAddress(),
+            GovernorStateLogicV4: await governorStateLogicLibV4.getAddress(),
+            GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
+          },
+          {
+            GovernorClockLogicV5: await governorClockLogicLibV5.getAddress(),
+            GovernorConfiguratorV5: await governorConfiguratorLibV5.getAddress(),
+            GovernorDepositLogicV5: await governorDepositLogicLibV5.getAddress(),
+            GovernorFunctionRestrictionsLogicV5: await governorFunctionRestrictionsLogicLibV5.getAddress(),
+            GovernorProposalLogicV5: await governorProposalLogicLibV5.getAddress(),
+            GovernorQuorumLogicV5: await governorQuorumLogicLibV5.getAddress(),
+            GovernorStateLogicV5: await governorStateLogicLibV5.getAddress(),
+            GovernorVotesLogicV5: await governorVotesLogicLibV5.getAddress(),
+          },
+          {
+            GovernorClockLogicV6: await governorClockLogicLibV6.getAddress(),
+            GovernorConfiguratorV6: await governorConfiguratorLibV6.getAddress(),
+            GovernorDepositLogicV6: await governorDepositLogicLibV6.getAddress(),
+            GovernorFunctionRestrictionsLogicV6: await governorFunctionRestrictionsLogicLibV6.getAddress(),
+            GovernorProposalLogicV6: await governorProposalLogicLibV6.getAddress(),
+            GovernorQuorumLogicV6: await governorQuorumLogicLibV6.getAddress(),
+            GovernorStateLogicV6: await governorStateLogicLibV6.getAddress(),
+            GovernorVotesLogicV6: await governorVotesLogicLibV6.getAddress(),
+          },
+        ],
+      },
+    )) as B3TRGovernorV6
+
+    //Check if the quorum numerator is the same as the config
+    const v6QuorumNumerator1 = await governorV6["quorumNumerator()"]()
+    expect(v6QuorumNumerator1).to.be.equal(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE)
+    const v6QuorumNumeratorBlockNumber1 = await ethers.provider.getBlockNumber()
+    //Set the quorum to config - 1
+    await governorV6.connect(owner).updateQuorumNumerator(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE - 1))
+    await waitForBlock(20)
+
+    //Set the quorum to config + 10
+    await governorV6.connect(owner).updateQuorumNumerator(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE + 10))
+    const v6QuorumNumerator2 = await governorV6["quorumNumerator()"]()
+    const v6QuorumNumeratorBlockNumber2 = await ethers.provider.getBlockNumber()
+    expect(v6QuorumNumerator2).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE + 10))
+    await waitForBlock(20)
+
+    //Set the quorum to config + 20
+    await governorV6.connect(owner).updateQuorumNumerator(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE + 20))
+    const v6QuorumNumerator3 = await governorV6["quorumNumerator()"]()
+    const v6QuorumNumeratorBlockNumber3 = await ethers.provider.getBlockNumber()
+    expect(v6QuorumNumerator3).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE + 20))
+    await waitForBlock(20)
+
+    const governorV7 = (await upgradeProxy(
+      "B3TRGovernorV6",
+      "B3TRGovernor",
+      await governorV6.getAddress(),
+      [
+        {
+          grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+          grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+          grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+          grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+          standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+        },
+      ],
+      {
+        version: 7,
+        libraries: {
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        },
+      },
+    )) as B3TRGovernor
+
+    //Check if the quorum after upgrade is the same as the quorum set in the last timepoint
+    const v7QuorumNumerator = await governorV7["quorumNumerator()"]()
+    expect(v7QuorumNumerator).to.be.equal(v6QuorumNumerator3)
+
+    //Check if the quorum at the timepoint where it was set to config - 1 is the same as the quorum set in the last timepoint
+    const v7QuorumNumeratorAtBlock1 = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+      v6QuorumNumeratorBlockNumber1, //Timepoint
+      STANDARD_PROPOSAL_TYPE, //Proposal type
+    )
+    expect(v7QuorumNumeratorAtBlock1).to.be.equal(v6QuorumNumerator1)
+
+    //Check if the quorum at the timepoint where it was set to config + 10 is the same as the quorum set in the last timepoint
+    const v7QuorumNumeratorAtBlock2 = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+      v6QuorumNumeratorBlockNumber2, //Timepoint
+      STANDARD_PROPOSAL_TYPE, //Proposal type
+    )
+    expect(v7QuorumNumeratorAtBlock2).to.be.equal(v6QuorumNumerator2)
+
+    //Check if the quorum at the timepoint where it was set to config + 20 is the same as the quorum set in the last timepoint
+    const v7QuorumNumeratorAtBlock3 = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+      v6QuorumNumeratorBlockNumber3, //Timepoint
+      STANDARD_PROPOSAL_TYPE, //Proposal type
+    )
+    expect(v7QuorumNumeratorAtBlock3).to.be.equal(v6QuorumNumerator3)
   })
 })
