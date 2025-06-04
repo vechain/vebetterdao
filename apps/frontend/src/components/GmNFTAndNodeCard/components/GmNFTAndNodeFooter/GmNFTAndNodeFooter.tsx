@@ -28,7 +28,7 @@ export const GmNFTAndNodeFooter = () => {
   } = useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator } = useXNode()
 
-  const { isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
+  const { isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
 
   const upgradeMessage = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
