@@ -27,6 +27,10 @@ import {
   waitForCurrentRoundToEnd,
 } from "../helpers/common"
 
+//Constants for proposal types
+export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
+export const GRANT_PROPOSAL_TYPE = ethers.toBigInt(1)
+
 interface GovernanceFixture {
   governor: B3TRGovernor
   vot3: VOT3
