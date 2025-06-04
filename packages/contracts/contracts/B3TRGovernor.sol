@@ -300,20 +300,22 @@ contract B3TRGovernor is
 
   /**
    * @notice See {Governor-depositThreshold}.
+   * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
    * @return uint256 The deposit threshold percentage
    */
   function depositThresholdPercentage() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThresholdPercentage;
+    return $.depositThresholdPercentage_DEPRECATED;
   }
 
   /**
-   * @notice See {Governor-votingThreshold}.
+   * @notice See {Governor-votingThreshold_DEPRECATED}.
+   * @dev This function is deprecated since we are using proposalTypeVotingThreshold for the voting threshold
    * @return uint256 The voting threshold
    */
   function votingThreshold() external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.votingThreshold;
+    return $.votingThreshold_DEPRECATED;
   }
 
   /**

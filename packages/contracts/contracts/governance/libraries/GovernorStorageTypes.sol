@@ -76,7 +76,8 @@ library GovernorStorageTypes {
     // mapping to track deposits made to proposals by address
     mapping(uint256 => mapping(address => uint256)) deposits;
     // percentage of the total supply of B3TR tokens that need to be deposited in VOT3 to create a proposal
-    uint256 depositThresholdPercentage;
+    // @dev This is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
+    uint256 depositThresholdPercentage_DEPRECATED;
     // ------------------------------- Voting Storage -------------------------------
     // mapping to store the votes for a proposal
     mapping(uint256 => GovernorTypes.ProposalVote) proposalVotes;
@@ -85,7 +86,8 @@ library GovernorStorageTypes {
     // mapping to store the total votes for a proposal
     mapping(uint256 => uint256) proposalTotalVotes;
     // minimum amount of tokens needed to cast a vote
-    uint256 votingThreshold;
+    // @dev This is deprecated since we are using proposalTypeVotingThreshold for the voting threshold
+    uint256 votingThreshold_DEPRECATED;
     // ------------------------------- Version 3 -------------------------------
 
     // ------------------------------- Voting Storage -------------------------------

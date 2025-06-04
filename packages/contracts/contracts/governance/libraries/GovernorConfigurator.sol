@@ -102,8 +102,8 @@ library GovernorConfigurator {
    * @param newVotingThreshold The new voting threshold.
    */
   function setVotingThreshold(GovernorStorageTypes.GovernorStorage storage self, uint256 newVotingThreshold) external {
-    emit VotingThresholdSet(self.votingThreshold, newVotingThreshold);
-    self.votingThreshold = newVotingThreshold;
+    emit VotingThresholdSet(self.votingThreshold_DEPRECATED, newVotingThreshold);
+    self.votingThreshold_DEPRECATED = newVotingThreshold;
   }
 
   /**
@@ -162,8 +162,8 @@ library GovernorConfigurator {
       revert GovernorDepositThresholdNotInRange(newDepositThreshold);
     }
 
-    emit DepositThresholdSet(self.depositThresholdPercentage, newDepositThreshold);
-    self.depositThresholdPercentage = newDepositThreshold;
+    emit DepositThresholdSet(self.depositThresholdPercentage_DEPRECATED, newDepositThreshold);
+    self.depositThresholdPercentage_DEPRECATED = newDepositThreshold;
     _setProposalTypeDepositThresholdPercentage(self, GovernorTypes.ProposalType.Standard, newDepositThreshold);
   }
 

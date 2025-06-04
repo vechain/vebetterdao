@@ -55,7 +55,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorNonexistentProposal(uint256 proposalId);
 
   /**
-   * @dev The `votingThreshold` is not met.
+   * @dev The `votingThreshold_DEPRECATED` is not met.
    */
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 

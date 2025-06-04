@@ -92,10 +92,10 @@ contract GovernorStorage is Initializable {
     governorStorage.minVotingDelay = initializationData.initialMinVotingDelay;
 
     // Set the governor deposit storage
-    governorStorage.depositThresholdPercentage = initializationData.initialDepositThreshold;
+    governorStorage.depositThresholdPercentage_DEPRECATED = initializationData.initialDepositThreshold;
 
     // Set the governor votes storage
-    governorStorage.votingThreshold = initializationData.initialVotingThreshold;
+    governorStorage.votingThreshold_DEPRECATED = initializationData.initialVotingThreshold;
   }
 
   function __GovernorStorage_init_v4(IVeBetterPassport veBetterPassport) internal onlyInitializing {
@@ -111,7 +111,7 @@ contract GovernorStorage is Initializable {
     GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
       governorStorage,
       GovernorTypes.ProposalType.Standard,
-      governorStorage.depositThresholdPercentage
+      governorStorage.depositThresholdPercentage_DEPRECATED
     );
     GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
       governorStorage,
@@ -123,7 +123,7 @@ contract GovernorStorage is Initializable {
     GovernorConfigurator._setProposalTypeVotingThreshold(
       governorStorage,
       GovernorTypes.ProposalType.Standard,
-      governorStorage.votingThreshold
+      governorStorage.votingThreshold_DEPRECATED
     );
     GovernorConfigurator._setProposalTypeVotingThreshold(
       governorStorage,
