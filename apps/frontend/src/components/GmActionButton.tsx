@@ -6,13 +6,14 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import {
   getGMLevel,
+  useB3trDonated,
   useCurrentAllocationsRoundId,
   useParticipatedInGovernance,
   useSelectedGmNft,
   useXNode,
 } from "@/api"
 import { useTranslation } from "react-i18next"
-import { useB3trDonated, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { MintNFTModal } from "./MintNFTModal"
 import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
@@ -93,7 +94,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
   //Handle Upgrade GM
   const { sendTransaction: upgradeGM } = useUpgradeGM({
-    tokenId: gmId,
+    tokenId: gmId ?? "",
     b3trToUpgrade: b3trToUpgradeGMToNextLevel,
   })
 
@@ -170,7 +171,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     }
 
     // Case 4: Can attach GM to X-Node and GM level is >= level after attach
-    if (canAttach && gmLevel >= levelAfterAttach) {
+    if (canAttach && gmLevel && Number(gmLevel) >= levelAfterAttach) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -187,7 +188,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     }
 
     // Case 5: Can attach GM to X-Node and GM level is < level after attach
-    if (canAttach && gmLevel < levelAfterAttach) {
+    if (canAttach && gmLevel && Number(gmLevel) < levelAfterAttach) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -241,8 +242,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       <MintNFTModal isOpen={isMintNftModalOpen} onClose={handleMintSuccessClose} tokenID={gmId} />
       <AttachGMToXNodeModal isOpen={isAttachGMModalOpen} onClose={onCloseAttachGMModal} />
       <UpgradeGMModal
-        gmLevel={gmLevel}
-        tokenId={gmId}
+        gmLevel={gmLevel ?? ""}
+        tokenId={gmId ?? ""}
         b3trToUpgradeGMToNextLevel={b3trToUpgradeGMToNextLevel}
         isOpen={isUpgradeGMModalOpen}
         onClose={onCloseUpgradeGMModal}

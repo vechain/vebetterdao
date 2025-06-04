@@ -1,4 +1,4 @@
-import { useXNode } from "@/api"
+import { useXNode, useB3trDonated } from "@/api"
 import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
 import { CustomModalContent } from "@/components"
 import { useDetachGMFromXNode } from "@/hooks"
@@ -21,7 +21,6 @@ import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useB3trDonated } from "@vechain/vechain-kit"
 
 type Props = {
   isOpen: boolean

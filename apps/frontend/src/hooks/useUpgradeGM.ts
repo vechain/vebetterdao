@@ -4,7 +4,6 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import {
-  getB3TrBalanceQueryKey,
   getB3trDonatedQueryKey,
   getB3trToUpgradeQueryKey,
   getLevelOfTokenQueryKey,
@@ -13,13 +12,13 @@ import {
 } from "@/api"
 import { B3TR__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
-import { useWallet } from "@vechain/vechain-kit"
+import { getB3trBalanceQueryKey, useWallet } from "@vechain/vechain-kit"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 const B3trInterface = B3TR__factory.createInterface()
 const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress
 
-type Props = { tokenId: string; b3trToUpgrade: string; onSuccess?: () => void }
+type Props = { tokenId: string; b3trToUpgrade: string | number; onSuccess?: () => void }
 
 /**
  * Hook to upgrade a Galaxy Member NFT token
@@ -53,7 +52,7 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
     () => [
       getLevelOfTokenQueryKey(tokenId),
       getB3trToUpgradeQueryKey(tokenId),
-      getB3TrBalanceQueryKey(account?.address ?? ""),
+      getB3trBalanceQueryKey(account?.address ?? ""),
       getTokensInfoByOwnerQueryKey(account?.address),
       getB3trDonatedQueryKey(tokenId),
       getNFTMetadataUriQueryKey(tokenId),
