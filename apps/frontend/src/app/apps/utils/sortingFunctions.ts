@@ -9,9 +9,10 @@ export function sortAlphabetically(apps: AllApps[]): AllApps[] {
   return [...apps].sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export function sortByRewards<T extends { id: string }>(apps: T[], rewardsMap?: Map<string, number>): T[] {
-  if (!rewardsMap || rewardsMap.size === 0) {
-    return [...apps]
-  }
-  return [...apps].sort((a, b) => (rewardsMap.get(b.id) || 0) - (rewardsMap.get(a.id) || 0))
+export function sortByRewards<T extends AllApps>(appsWithStatus: T[], positionsMap: Map<string, number>): T[] {
+  return appsWithStatus.sort((a, b) => {
+    const posA = positionsMap.get(a.id) ?? Infinity
+    const posB = positionsMap.get(b.id) ?? Infinity
+    return posA - posB
+  })
 }
