@@ -228,6 +228,39 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
 
   /**
+   * @dev Emitted when the quorum numerator for a specific proposal type is updated.
+   */
+  event QuorumNumeratorUpdatedByType(
+    uint256 oldNumerator,
+    uint256 newNumerator,
+    GovernorTypes.ProposalType proposalType
+  );
+  /**
+   * @dev Emitted when the `votingThreshold` for a proposal type is set.
+   */
+  event VotingThresholdSetV2(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldVotingThreshold,
+    uint256 newVotingThreshold
+  );
+
+  /**
+   * @dev Emitted when the deposit threshold percentage for a proposal type is set.
+   */
+  event DepositThresholdSetV2(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldDepositThreshold,
+    uint256 newDepositThreshold
+  );
+  /**
+   * @dev Emitted when the deposit threshold cap for a proposal type is set.
+   */
+  event DepositThresholdCapSet(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldDepositThresholdCap,
+    uint256 newDepositThresholdCap
+  );
+  /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
    */
