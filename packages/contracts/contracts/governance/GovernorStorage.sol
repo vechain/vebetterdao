@@ -27,11 +27,9 @@ import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
-import { GovernorQuorumLogic } from "./libraries/GovernorQuorumLogic.sol";
-import { GovernorConfigurator } from "./libraries/GovernorConfigurator.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { GovernorClockLogic } from "./libraries/GovernorClockLogic.sol";
 
 using Checkpoints for Checkpoints.Trace208;
 
@@ -102,34 +100,27 @@ contract GovernorStorage is Initializable {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
     governorStorage.veBetterPassport = veBetterPassport;
   }
+
   function __GovernorStorage_init_v7(
     GovernorTypes.InitializationDataV7 memory initializationDataV7
   ) internal onlyInitializing {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
 
-    // Set deposit threshold
-    GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
-      governorStorage,
-      GovernorTypes.ProposalType.Standard,
-      governorStorage.depositThresholdPercentage_DEPRECATED
-    );
-    GovernorConfigurator._setProposalTypeDepositThresholdPercentage(
-      governorStorage,
-      GovernorTypes.ProposalType.Grant,
-      initializationDataV7.grantDepositThreshold
-    );
+    // Set deposit threshold for Standard proposal type
+    governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Standard] = governorStorage
+      .depositThresholdPercentage_DEPRECATED;
 
-    // Set voting threshold
-    GovernorConfigurator._setProposalTypeVotingThreshold(
-      governorStorage,
-      GovernorTypes.ProposalType.Standard,
-      governorStorage.votingThreshold_DEPRECATED
-    );
-    GovernorConfigurator._setProposalTypeVotingThreshold(
-      governorStorage,
-      GovernorTypes.ProposalType.Grant,
-      initializationDataV7.grantVotingThreshold
-    );
+    // Set deposit threshold for Grant proposal type
+    governorStorage.proposalTypeDepositThresholdPercentage[GovernorTypes.ProposalType.Grant] = initializationDataV7
+      .grantDepositThreshold;
+
+    // Set voting threshold for Standard proposal type
+    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Standard] = governorStorage
+      .votingThreshold_DEPRECATED;
+
+    // Set voting threshold for Grant proposal type
+    governorStorage.proposalTypeVotingThreshold[GovernorTypes.ProposalType.Grant] = initializationDataV7
+      .grantVotingThreshold;
 
     Checkpoints.Trace208 storage quorumNumeratorHistory_DEPRECATED = governorStorage.quorumNumeratorHistory_DEPRECATED;
 
@@ -150,23 +141,18 @@ contract GovernorStorage is Initializable {
       );
     }
 
-    // Set quorum for GRANT
-    GovernorQuorumLogic._updateQuorumNumeratorByType(
-      governorStorage,
-      initializationDataV7.grantQuorum,
-      GovernorTypes.ProposalType.Grant
+    // Set quorum for GRANT - manually implement the logic from _updateQuorumNumeratorByType
+    governorStorage.proposalTypeQuorum[GovernorTypes.ProposalType.Grant].push(
+      GovernorClockLogic.clock(governorStorage),
+      SafeCast.toUint208(initializationDataV7.grantQuorum)
     );
 
-    // Set deposit threshold cap
-    GovernorConfigurator._setProposalTypeDepositThresholdCap(
-      governorStorage,
-      GovernorTypes.ProposalType.Standard,
-      initializationDataV7.standardDepositThresholdCap
-    );
-    GovernorConfigurator._setProposalTypeDepositThresholdCap(
-      governorStorage,
-      GovernorTypes.ProposalType.Grant,
-      initializationDataV7.grantDepositThresholdCap
-    );
+    // Set deposit threshold cap for Standard proposal type
+    governorStorage.proposalTypeDepositThresholdCap[GovernorTypes.ProposalType.Standard] = initializationDataV7
+      .standardDepositThresholdCap;
+
+    // Set deposit threshold cap for Grant proposal type
+    governorStorage.proposalTypeDepositThresholdCap[GovernorTypes.ProposalType.Grant] = initializationDataV7
+      .grantDepositThresholdCap;
   }
 }
