@@ -120,15 +120,11 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         control={control}
         render={({ field: { onChange, value } }) => (
           <Input
-            h="50px"
             placeholder="0"
-            fontSize={{ base: 30, md: 36 }}
-            fontWeight={700}
             type="text"
             value={value}
             onChange={e => onChange(filterAmount(e.target.value))}
-            variant="unstyled"
-            _placeholder={{ color: "black" }}
+            variant="amountInput"
           />
         )}
       />
@@ -174,16 +170,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                       </Text>
                     </HStack>
                     <HStack w="full">
-                      <Input
-                        h="50px"
-                        fontSize={{ base: 30, md: 36 }}
-                        fontWeight={700}
-                        type="text"
-                        value={value}
-                        onChange={e => onChange(e.target.value)}
-                        variant="unstyled"
-                        _placeholder={{ color: "black" }}
-                      />
+                      <Input type="text" value={value} onChange={e => onChange(e.target.value)} variant="amountInput" />
                     </HStack>
                   </VStack>
                 </HStack>

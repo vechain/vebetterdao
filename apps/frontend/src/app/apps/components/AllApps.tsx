@@ -23,6 +23,7 @@ import {
   Checkbox,
   Flex,
   MenuDivider,
+  useColorModeValue,
 } from "@chakra-ui/react"
 import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -55,6 +56,14 @@ export const AllApps = ({
 }: Props) => {
   const { t } = useTranslation()
   const { isEndorsingApp } = useXNode()
+
+  // Color mode responsive colors
+  const searchIconColor = useColorModeValue("#3B3B3B", "#E4E4E4")
+  const buttonHoverBg = useColorModeValue("#D5D5D5", "#2D2F31")
+  const activeColor = useColorModeValue("white", "black")
+  const borderColor = useColorModeValue("#D5D5D5", "#2D2F31")
+  const statusBg = useColorModeValue("white", "gray.700")
+  const statusHoverBg = useColorModeValue("blackAlpha.800", "whiteAlpha.800")
 
   const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange, isSorted } = useAppsSorting(
     currentActiveApps,
@@ -131,15 +140,15 @@ export const AllApps = ({
           as={IconButton}
           isRound={true}
           aria-label={t("Sort by")}
-          bg={isSorted ? "black" : "transparent"}
+          bg={isSorted ? "filter-unselected-text" : "transparent"}
           transition="all 0.3s ease-in-out"
-          color={isSorted ? "white" : "black"}
+          color={"filter-selected-text"}
           _hover={{
-            bg: "#D5D5D5",
-            color: "black",
+            bg: buttonHoverBg,
+            color: "filter-unselected-text",
             transition: "all 0.3s ease-in-out",
           }}
-          border="1px solid #D5D5D5"
+          border={`1px solid ${borderColor}`}
           borderRadius={"24px"}
           icon={<UilSortAmountDown />}
           size="md"
@@ -183,10 +192,15 @@ export const AllApps = ({
             as={IconButton}
             isRound={true}
             aria-label={t("Filters")}
-            border="1px solid #D5D5D5"
+            border={`1px solid ${borderColor}`}
             icon={<UilFilter />}
-            variant="black"
-            color={"black"}
+            bg={"transparent"}
+            color={"filter-unselected-text"}
+            _hover={{
+              bg: buttonHoverBg,
+              color: "filter-unselected-text",
+              transition: "all 0.3s ease-in-out",
+            }}
           />
 
           {activeFiltersCount > 0 && (
@@ -194,8 +208,8 @@ export const AllApps = ({
               position="absolute"
               top="-8px"
               right="-8px"
-              bg="black"
-              color="white"
+              bg={"filter-selected-text"}
+              color={activeColor}
               borderRadius="full"
               w="20px"
               h="20px"
@@ -219,13 +233,13 @@ export const AllApps = ({
                 key={status}
                 size="sm"
                 onClick={() => setStatusFilter(status)}
-                bg={statusFilter === status ? "black" : "white"}
-                color={statusFilter === status ? "white" : "black"}
+                bg={statusFilter === status ? "filter-unselected-text" : statusBg}
+                color={statusFilter === status ? "filter-selected-text" : "filter-selected-text"}
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={statusFilter === status ? "black" : "gray.200"}
+                borderColor={statusFilter === status ? "filter-unselected-text" : borderColor}
                 _hover={{
-                  bg: statusFilter === status ? "blackAlpha.800" : "gray.100",
+                  bg: statusFilter === status ? statusHoverBg : buttonHoverBg,
                 }}
                 px={3}
                 py={1}
@@ -270,17 +284,17 @@ export const AllApps = ({
         <HStack spacing={4} ml={headingComponent ? "auto" : 0}>
           <InputGroup w={headingComponent ? "300px" : "full"}>
             <InputLeftElement pointerEvents="none">
-              <UilSearch color="#3B3B3B" />
+              <UilSearch color={searchIconColor} />
             </InputLeftElement>
             <Input
               placeholder="Search apps..."
               value={searchQuery}
-              border="1px solid #D5D5D5"
+              border={`1px solid ${borderColor}`}
               opacity={0.6}
               onChange={handleSearchChange}
               borderRadius={"24px"}
-              _hover={{ borderColor: "#D5D5D5", opacity: 0.9 }}
-              _focus={{ borderColor: "#D5D5D5", boxShadow: "0px 0px 3px 0px #D5D5D5", opacity: 0.8 }}
+              _hover={{ borderColor: borderColor, opacity: 0.9 }}
+              _focus={{ borderColor: borderColor, boxShadow: `0px 0px 3px 0px ${borderColor}`, opacity: 0.8 }}
             />
           </InputGroup>
           <HStack spacing={2}>

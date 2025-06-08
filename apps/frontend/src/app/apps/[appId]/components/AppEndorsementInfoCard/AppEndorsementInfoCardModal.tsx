@@ -126,7 +126,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
 
             <VStack
               display={"flex"}
-              bg="#FAFAFA"
+              bg="endorsement-info-bg"
               justify={"space-between"}
               rounded={"16px"}
               p={[0, 0, 4]}
@@ -146,7 +146,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                       p={4}
                       mx={2}
                       borderRadius={"16px"}
-                      bg={"white"}
+                      bg={"profile-bg"}
                       alignItems="end">
                       <Text mb={2} maxW="full">
                         <Trans

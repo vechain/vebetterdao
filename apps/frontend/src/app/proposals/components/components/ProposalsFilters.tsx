@@ -133,13 +133,13 @@ export const ProposalsFilters = (props: Props) => {
                 py={3}
                 borderRadius={78}
                 key={filterKey}
-                bg={isSelected ? "black" : "white"}
-                color={isSelected ? "white" : "black"}
+                bg={isSelected ? "filter-selected-bg" : "filter-unselected-bg"}
+                color={isSelected ? "filter-selected-text" : "filter-unselected-text"}
                 onClick={onClick}
                 borderWidth={1}
-                borderColor={"#EFEFEF"}
+                borderColor={"filter-border"}
                 _hover={{
-                  bg: isSelected ? "#1a1a1a" : "#EFEFEF",
+                  bg: isSelected ? "filter-hover-selected" : "filter-hover-unselected",
                 }}>
                 <HStack spacing={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
@@ -147,8 +147,8 @@ export const ProposalsFilters = (props: Props) => {
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
                     <Text
-                      bg={"black"}
-                      color={"white"}
+                      bg={"filter-selected-bg"}
+                      color={"filter-selected-text"}
                       borderRadius={"50%"}
                       fontSize={12}
                       fontWeight={600}
@@ -177,7 +177,7 @@ export const ProposalsFilters = (props: Props) => {
             variant={"ghost"}
             aria-label="Clear filter"
             p={3}
-            bg={"white"}
+            bg={"create-proposal-bg"}
             borderRadius={"full"}
             borderWidth={1}
             borderColor={"#EFEFEF"}
@@ -210,13 +210,13 @@ export const ProposalsFilters = (props: Props) => {
                   py={3}
                   borderRadius={78}
                   key={optionKey}
-                  bg={isSelected ? "black" : "white"}
-                  color={isSelected ? "white" : "black"}
+                  bg={isSelected ? "filter-selected-bg" : "filter-unselected-bg"}
+                  color={isSelected ? "filter-selected-text" : "filter-unselected-text"}
                   onClick={() => handleFilterClick(optionKey as StateFilter)}
                   borderWidth={1}
                   borderColor={"#EFEFEF"}
                   _hover={{
-                    bg: isSelected ? "#1a1a1a" : "#EFEFEF",
+                    bg: isSelected ? "filter-hover-selected" : "filter-hover-unselected",
                   }}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                     {optionKey}

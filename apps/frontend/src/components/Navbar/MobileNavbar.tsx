@@ -20,6 +20,7 @@ import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
 import { ProfileButton } from "./ProfileButton"
+import { ThemeSwitcher } from "@/components/ThemeSwitcher"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -44,9 +45,7 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
             <ProfileButton onMenuClose={props.onClose} />
             <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
           </VStack>
-          {/* <Box w="full" alignSelf="flex-end">
-            <ThemeSwitcher w={"full"} withText={true} />
-          </Box> */}
+          <ThemeSwitcher w={"full"} withText={true} />
         </DrawerBody>
       </DrawerContent>
     </Drawer>
@@ -67,6 +66,7 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
       <NavbarLogo />
       <HStack>{isLargerThan500 && <NavbarBalance />}</HStack>
       <HStack gap={2}>
+        <ThemeSwitcher />
         <ConnectWalletButton />
         {!!routesToRender.length && (
           <IconButton

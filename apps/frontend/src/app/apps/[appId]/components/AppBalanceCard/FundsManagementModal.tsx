@@ -290,17 +290,11 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                         {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
                       </Text>
                       <Input
-                        h="50px"
                         placeholder="0"
-                        fontSize={{ base: 30, md: 36 }}
-                        fontWeight={700}
                         type="text"
                         value={amount}
                         onChange={e => handleAmountChange(e.target.value)}
-                        variant="unstyled"
-                        _placeholder={{
-                          color: "black",
-                        }}
+                        variant="amountInput"
                       />
                     </VStack>
                     <Text fontSize={14} fontWeight={400}>

@@ -30,10 +30,10 @@ export const AppVotedBox = ({ appVoted }: Props) => {
       w={"full"}
       borderRadius={12}
       cursor={"pointer"}
-      bg={"white"}
+      bg={"profile-bg"}
       justifyContent={"space-between"}
       _hover={{
-        bg: "gray.50",
+        bg: "info-bg-hover",
       }}
       p={{ base: 3, md: 4 }}>
       <HStack spacing={2}>

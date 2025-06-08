@@ -137,8 +137,8 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Skeleton>
                   <Skeleton isLoaded={!isLoading && !roundStateLoading}>
                     <HStack spacing={2}>
-                      <Icon as={FaClock} boxSize={4} color={"#252525"} />
-                      <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                      <Icon as={FaClock} boxSize={4} />
+                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
                         {remainingTime}
                       </Text>
                     </HStack>
@@ -150,8 +150,8 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Text>
                   <Skeleton isLoaded={!roundAppsLoading}>
                     <HStack spacing={2}>
-                      <Icon as={PiSquaresFourFill} boxSize={4} color={"#252525"} />
-                      <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                      <Icon as={PiSquaresFourFill} boxSize={4} />
+                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
                         {t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}
                       </Text>
                     </HStack>
@@ -167,9 +167,9 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                         {hasVoted ? (
                           <VOT3Icon boxSize={4} colorVariant="dark" />
                         ) : (
-                          <Icon as={MdHowToVote} boxSize={4} color={"#252525"} />
+                          <Icon as={MdHowToVote} boxSize={4} />
                         )}
-                        <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400}>
+                        <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
                           {yourVoteText}
                         </Text>
                       </HStack>

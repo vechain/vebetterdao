@@ -65,7 +65,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
       maxW="100%"
       _hover={{
         cursor: "pointer",
-        backgroundColor: "gray.50",
+        backgroundColor: "info-bg-hover",
         transition: "all 0.3s",
       }}>
       <CardBody py="16px" px="24px">
