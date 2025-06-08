@@ -3,7 +3,7 @@
 
 import { persister, queryClient } from "@/api"
 import { CacheProvider } from "@chakra-ui/next-js"
-import { ChakraProvider } from "@chakra-ui/react"
+import { ChakraProvider, ColorModeScript } from "@chakra-ui/react"
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
 
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
@@ -26,6 +26,7 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
         <ReactQueryDevtools initialIsOpen={false} />
         <ChakraProvider theme={lightTheme}>
+          <ColorModeScript initialColorMode="system" />
           <VechainKitProviderWrapper>
             <AuthSessionProvider>
               <TransactionModalProvider>{children}</TransactionModalProvider>

@@ -5,6 +5,9 @@ import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { ButtonStyle } from "./button"
 import { StepperStyle } from "./stepper"
+import { SelectStyle } from "./select"
+import { InputStyle } from "./input"
+import { ModalStyle } from "./modal"
 
 const themeConfig = {
   //@ts-ignore
@@ -17,6 +20,9 @@ const themeConfig = {
     Card: cardTheme,
     Button: ButtonStyle,
     Stepper: StepperStyle,
+    Select: SelectStyle,
+    Input: InputStyle,
+    Modal: ModalStyle,
   },
 
   // 2. Add your color mode config
@@ -33,11 +39,70 @@ const themeConfig = {
         _light: "#F7F7F7",
         _dark: "#131313",
       },
+      "info-bg": {
+        _light: "#F8F8F8",
+        _dark: "#1E1E1E",
+      },
+      "profile-bg": {
+        _light: "#FFFFFF",
+        _dark: "#2D2D2F",
+      },
+      "info-bg-hover": {
+        _light: "gray.50",
+        _dark: "gray.900",
+      },
+      "create-proposal-bg": {
+        _light: "#FFFFFF",
+        _dark: "#1A1A1A",
+      },
+      "endorsement-info-bg": {
+        _light: "#FAFAFA",
+        _dark: "#2D2D2F",
+      },
+      "your-ranking-hover": {
+        _light: "#005EFF",
+        _dark: "#005EFF",
+      },
+      "b3tr-bg": {
+        _light: "#E5EEFF",
+        _dark: "#1A2547",
+      },
+      "vot3-bg": {
+        _light: "#E3FFC4",
+        _dark: "#1A2E0F",
+      },
+      "filter-selected-bg": {
+        _light: "#000000",
+        _dark: "#E2E8F0",
+      },
+      "filter-unselected-bg": {
+        _light: "#FFFFFF",
+        _dark: "#2D3748",
+      },
+      "filter-selected-text": {
+        _light: "#FFFFFF",
+        _dark: "#000000",
+      },
+      "filter-unselected-text": {
+        _light: "#000000",
+        _dark: "#FFFFFF",
+      },
+      "filter-hover-selected": {
+        _light: "#1A1A1A",
+        _dark: "#CBD5E0",
+      },
+      "filter-hover-unselected": {
+        _light: "#EFEFEF",
+        _dark: "#A0AEC0",
+      },
+      "filter-border": {
+        _light: "#EFEFEF",
+        _dark: "#4A5568",
+      },
     },
   },
   colors: {
     //dynamic primary coor based on the light/dark
-
     green: {
       "50": "#f3f9f3",
       "100": "#cfe6d0",
