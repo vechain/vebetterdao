@@ -55,7 +55,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
     <Card
       variant={"baseWithBorder"}
       onClick={goToProposal}
-      _hover={{ bg: "info-bg-hover" }}
+      _hover={{ bg: "hover-contrast-bg" }}
       cursor={"pointer"}
       alignSelf={"flex-start"}
       w={"full"}>

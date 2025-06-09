@@ -47,10 +47,6 @@ const themeConfig = {
         _light: "#FFFFFF",
         _dark: "#2D2D2F",
       },
-      "info-bg-hover": {
-        _light: "gray.50",
-        _dark: "gray.900",
-      },
       "create-proposal-bg": {
         _light: "#FFFFFF",
         _dark: "#1A1A1A",
@@ -63,11 +59,11 @@ const themeConfig = {
         _light: "#005EFF",
         _dark: "#005EFF",
       },
-      "b3tr-bg": {
+      "b3tr-balance-bg": {
         _light: "#E5EEFF",
         _dark: "#1A2547",
       },
-      "vot3-bg": {
+      "vot3-balance-bg": {
         _light: "#E3FFC4",
         _dark: "#1A2E0F",
       },
@@ -94,6 +90,10 @@ const themeConfig = {
       "filter-hover-unselected": {
         _light: "#EFEFEF",
         _dark: "#A0AEC0",
+      },
+      "hover-contrast-bg": {
+        _light: "#D5D5D5",
+        _dark: "#2D2F31",
       },
       "filter-border": {
         _light: "#EFEFEF",

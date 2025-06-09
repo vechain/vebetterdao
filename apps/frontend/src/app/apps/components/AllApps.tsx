@@ -59,13 +59,9 @@ export const AllApps = ({
 
   // Color mode responsive colors
   const searchIconColor = useColorModeValue("#3B3B3B", "#E4E4E4")
-  const buttonHoverBg = useColorModeValue("#D5D5D5", "#2D2F31")
-  const activeColor = useColorModeValue("white", "black")
-  const borderColor = useColorModeValue("#D5D5D5", "#2D2F31")
-  const statusBg = useColorModeValue("white", "gray.700")
   const statusHoverBg = useColorModeValue("blackAlpha.800", "whiteAlpha.800")
 
-  const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange, isSorted } = useAppsSorting(
+  const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange } = useAppsSorting(
     currentActiveApps,
     newApps,
     gracePeriodApps,
@@ -140,15 +136,14 @@ export const AllApps = ({
           as={IconButton}
           isRound={true}
           aria-label={t("Sort by")}
-          bg={isSorted ? "filter-unselected-text" : "transparent"}
+          bg={"transparent"}
           transition="all 0.3s ease-in-out"
-          color={"filter-selected-text"}
+          color={"filter-unselected-text"}
           _hover={{
-            bg: buttonHoverBg,
-            color: "filter-unselected-text",
+            bg: "statusHoverBg",
             transition: "all 0.3s ease-in-out",
           }}
-          border={`1px solid ${borderColor}`}
+          border={`1px solid #252525`}
           borderRadius={"24px"}
           icon={<UilSortAmountDown />}
           size="md"
@@ -192,12 +187,12 @@ export const AllApps = ({
             as={IconButton}
             isRound={true}
             aria-label={t("Filters")}
-            border={`1px solid ${borderColor}`}
+            border={`1px solid #252525`}
             icon={<UilFilter />}
             bg={"transparent"}
             color={"filter-unselected-text"}
             _hover={{
-              bg: buttonHoverBg,
+              bg: "hover-contrast-bg",
               color: "filter-unselected-text",
               transition: "all 0.3s ease-in-out",
             }}
@@ -208,8 +203,8 @@ export const AllApps = ({
               position="absolute"
               top="-8px"
               right="-8px"
-              bg={"filter-selected-text"}
-              color={activeColor}
+              bg={"filter-unselected-text"}
+              color={"filter-selected-text"}
               borderRadius="full"
               w="20px"
               h="20px"
@@ -233,20 +228,20 @@ export const AllApps = ({
                 key={status}
                 size="sm"
                 onClick={() => setStatusFilter(status)}
-                bg={statusFilter === status ? "filter-unselected-text" : statusBg}
-                color={statusFilter === status ? "filter-selected-text" : "filter-selected-text"}
+                bg={statusFilter === status ? "filter-selected-bg" : "filter-unselected-bg"}
+                color={statusFilter === status ? "filter-selected-text" : "filter-unselected-text"}
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={statusFilter === status ? "filter-unselected-text" : borderColor}
+                borderColor={statusFilter === status ? "filter-unselected-text" : "hover-contrast-bg"}
                 _hover={{
-                  bg: statusFilter === status ? statusHoverBg : buttonHoverBg,
+                  bg: statusFilter === status ? statusHoverBg : "hover-contrast-bg",
                 }}
                 px={3}
                 py={1}
                 fontWeight="medium">
                 {status}{" "}
                 {statusFilter === status && (
-                  <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
+                  <Badge ml={1} color="black" borderRadius="full">
                     {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
                   </Badge>
                 )}
@@ -267,7 +262,7 @@ export const AllApps = ({
                 isChecked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryChange(category.id)}
                 fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}
-                colorScheme="blackAlpha">
+                colorScheme="contrast">
                 <Flex align="center">{category.name}</Flex>
               </Checkbox>
             ))}
@@ -289,12 +284,16 @@ export const AllApps = ({
             <Input
               placeholder="Search apps..."
               value={searchQuery}
-              border={`1px solid ${borderColor}`}
+              border={`1px solid #252525`}
               opacity={0.6}
               onChange={handleSearchChange}
               borderRadius={"24px"}
-              _hover={{ borderColor: borderColor, opacity: 0.9 }}
-              _focus={{ borderColor: borderColor, boxShadow: `0px 0px 3px 0px ${borderColor}`, opacity: 0.8 }}
+              _hover={{ borderColor: "hover-contrast-bg", opacity: 0.9 }}
+              _focus={{
+                borderColor: "hover-contrast-bg",
+                boxShadow: `0px 0px 3px 0px ${"hover-contrast-bg"}`,
+                opacity: 0.8,
+              }}
             />
           </InputGroup>
           <HStack spacing={2}>

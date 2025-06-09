@@ -17,6 +17,20 @@ export const SelectStyle: ComponentStyleConfig = {
           color: "gray.800",
         },
       },
+      icon: {
+        color: "gray.400",
+        _dark: {
+          color: "gray.300",
+        },
+      },
+    },
+  },
+  baseStyle: {
+    icon: {
+      color: "gray.500",
+      _dark: {
+        color: "gray.200",
+      },
     },
   },
   defaultProps: {

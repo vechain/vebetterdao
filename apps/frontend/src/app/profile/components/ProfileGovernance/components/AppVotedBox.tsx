@@ -33,7 +33,7 @@ export const AppVotedBox = ({ appVoted }: Props) => {
       bg={"profile-bg"}
       justifyContent={"space-between"}
       _hover={{
-        bg: "info-bg-hover",
+        bg: "hover-contrast-bg",
       }}
       p={{ base: 3, md: 4 }}>
       <HStack spacing={2}>

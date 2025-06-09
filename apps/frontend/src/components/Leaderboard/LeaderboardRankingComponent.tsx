@@ -63,7 +63,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       onClick={onClick}
       _hover={{
         cursor: "pointer",
-        bg: isYourRanking ? "your-ranking-hover" : "info-bg-hover",
+        bg: isYourRanking ? "your-ranking-hover" : "hover-contrast-bg",
         transition: "all 0.2s",
       }}
       boxShadow={positionStyles.boxShadow}

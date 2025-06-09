@@ -149,7 +149,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             {t("Send B3TR tokens from the connected account to the app, and use them for rewards distribution.")}
           </Text>
 
-          <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
+          <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
               <Skeleton isLoaded={!isAppBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
