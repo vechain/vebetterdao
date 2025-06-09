@@ -67,35 +67,35 @@ const themeConfig = {
         _light: "#E3FFC4",
         _dark: "#1A2E0F",
       },
-      "filter-selected-bg": {
+      "contrast-bg-strong": {
         _light: "#000000",
         _dark: "#E2E8F0",
       },
-      "filter-unselected-bg": {
+      "contrast-bg-muted": {
         _light: "#FFFFFF",
         _dark: "#2D3748",
       },
-      "filter-selected-text": {
-        _light: "#FFFFFF",
-        _dark: "#000000",
+      "contrast-bg-muted-hover": {
+        _light: "#EFEFEF",
+        _dark: "#A0AEC0",
       },
-      "filter-unselected-text": {
-        _light: "#000000",
-        _dark: "#FFFFFF",
-      },
-      "filter-hover-selected": {
+      "contrast-bg-strong-hover": {
         _light: "#1A1A1A",
         _dark: "#CBD5E0",
       },
-      "filter-hover-unselected": {
-        _light: "#EFEFEF",
-        _dark: "#A0AEC0",
+      "contrast-fg-on-strong": {
+        _light: "#FFFFFF",
+        _dark: "#000000",
+      },
+      "contrast-fg-on-muted": {
+        _light: "#000000",
+        _dark: "#FFFFFF",
       },
       "hover-contrast-bg": {
         _light: "#D5D5D5",
         _dark: "#2D2F31",
       },
-      "filter-border": {
+      "contrast-border": {
         _light: "#EFEFEF",
         _dark: "#4A5568",
       },

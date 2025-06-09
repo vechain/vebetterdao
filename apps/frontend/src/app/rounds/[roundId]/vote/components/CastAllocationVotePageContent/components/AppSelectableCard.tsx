@@ -18,7 +18,7 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
       w="full"
       p={4}
       bgColor={isSelected ? "b3tr-balance-bg" : "inherit"}
-      _hover={{ bgColor: isSelected ? "filter-unselected-bg" : "hover-contrast-bg" }}
+      _hover={{ bgColor: isSelected ? "contrast-bg-muted" : "hover-contrast-bg" }}
       borderWidth="1px"
       borderRadius="12px"
       borderColor={"gray.200"}

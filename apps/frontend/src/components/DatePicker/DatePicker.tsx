@@ -208,7 +208,7 @@ export const DatePicker = ({
       <PopoverTrigger>
         <InputGroup size={size} w="full">
           <InputLeftElement pointerEvents="none">
-            <FaCalendarAlt color="filter-unselected-text" />
+            <FaCalendarAlt color="contrast-fg-on-muted" />
           </InputLeftElement>
           <Input
             placeholder={t("Select date range")}

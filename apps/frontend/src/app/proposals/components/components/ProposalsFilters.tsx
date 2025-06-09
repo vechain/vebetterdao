@@ -133,13 +133,13 @@ export const ProposalsFilters = (props: Props) => {
                 py={3}
                 borderRadius={78}
                 key={filterKey}
-                bg={isSelected ? "filter-selected-bg" : "filter-unselected-bg"}
-                color={isSelected ? "filter-selected-text" : "filter-unselected-text"}
+                bg={isSelected ? "contrast-bg-strong" : "contrast-bg-muted"}
+                color={isSelected ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
                 onClick={onClick}
                 borderWidth={1}
-                borderColor={"filter-border"}
+                borderColor={"contrast-border"}
                 _hover={{
-                  bg: isSelected ? "filter-hover-selected" : "filter-hover-unselected",
+                  bg: isSelected ? "contrast-bg-strong-hover" : "contrast-bg-muted-hover",
                 }}>
                 <HStack spacing={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
@@ -147,8 +147,8 @@ export const ProposalsFilters = (props: Props) => {
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
                     <Text
-                      bg={"filter-selected-bg"}
-                      color={"filter-selected-text"}
+                      bg={"contrast-bg-strong"}
+                      color={"contrast-fg-on-strong"}
                       borderRadius={"50%"}
                       fontSize={12}
                       fontWeight={600}
@@ -210,13 +210,13 @@ export const ProposalsFilters = (props: Props) => {
                   py={3}
                   borderRadius={78}
                   key={optionKey}
-                  bg={isSelected ? "filter-selected-bg" : "filter-unselected-bg"}
-                  color={isSelected ? "filter-selected-text" : "filter-unselected-text"}
+                  bg={isSelected ? "contrast-bg-strong" : "contrast-bg-muted"}
+                  color={isSelected ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
                   onClick={() => handleFilterClick(optionKey as StateFilter)}
                   borderWidth={1}
                   borderColor={"#EFEFEF"}
                   _hover={{
-                    bg: isSelected ? "filter-hover-selected" : "filter-hover-unselected",
+                    bg: isSelected ? "contrast-bg-strong-hover" : "contrast-bg-muted-hover",
                   }}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                     {optionKey}

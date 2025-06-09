@@ -243,7 +243,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                     zIndex={1}>
                     <Circle
                       size="60px"
-                      bg="filter-selected-text"
+                      bg="contrast-fg-on-strong"
                       border="1px solid #D5D5D5"
                       position="absolute"
                       right="30px"

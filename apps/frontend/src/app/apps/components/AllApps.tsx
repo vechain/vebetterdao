@@ -138,7 +138,7 @@ export const AllApps = ({
           aria-label={t("Sort by")}
           bg={"transparent"}
           transition="all 0.3s ease-in-out"
-          color={"filter-unselected-text"}
+          color={"contrast-fg-on-muted"}
           _hover={{
             bg: "statusHoverBg",
             transition: "all 0.3s ease-in-out",
@@ -190,10 +190,10 @@ export const AllApps = ({
             border={`1px solid #252525`}
             icon={<UilFilter />}
             bg={"transparent"}
-            color={"filter-unselected-text"}
+            color={"contrast-fg-on-muted"}
             _hover={{
               bg: "hover-contrast-bg",
-              color: "filter-unselected-text",
+              color: "contrast-fg-on-muted",
               transition: "all 0.3s ease-in-out",
             }}
           />
@@ -203,8 +203,8 @@ export const AllApps = ({
               position="absolute"
               top="-8px"
               right="-8px"
-              bg={"filter-unselected-text"}
-              color={"filter-selected-text"}
+              bg={"contrast-fg-on-muted"}
+              color={"contrast-fg-on-strong"}
               borderRadius="full"
               w="20px"
               h="20px"
@@ -228,11 +228,11 @@ export const AllApps = ({
                 key={status}
                 size="sm"
                 onClick={() => setStatusFilter(status)}
-                bg={statusFilter === status ? "filter-selected-bg" : "filter-unselected-bg"}
-                color={statusFilter === status ? "filter-selected-text" : "filter-unselected-text"}
+                bg={statusFilter === status ? "contrast-bg-strong" : "contrast-bg-muted"}
+                color={statusFilter === status ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={statusFilter === status ? "filter-unselected-text" : "hover-contrast-bg"}
+                borderColor={statusFilter === status ? "contrast-fg-on-muted" : "hover-contrast-bg"}
                 _hover={{
                   bg: statusFilter === status ? statusHoverBg : "hover-contrast-bg",
                 }}
