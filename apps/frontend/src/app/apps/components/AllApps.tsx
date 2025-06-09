@@ -148,14 +148,21 @@ export const AllApps = ({
           icon={<UilSortAmountDown />}
           size="md"
         />
-        <MenuList minW="100px" shadow="lg" borderRadius={"24px"} p={2}>
+        <MenuList
+          minW="100px"
+          shadow="lg"
+          borderRadius={"24px"}
+          p={2}
+          bg="light-contrast-on-card-bg"
+          borderColor="contrast-border"
+          borderWidth="1px">
           {sortOptions.map(option => (
             <MenuItem
               key={option.id}
               onClick={() => onSortChange(option.id)}
               role="group"
               borderRadius={"16px"}
-              bg={sortOption === option.id && sortOption !== "default" ? "#D5D5D5" : undefined}
+              bg={sortOption === option.id && sortOption !== "default" ? "dark-contrast-on-card-bg" : undefined}
               _hover={{ bg: "#D5D5D5" }}>
               <HStack justifyContent="space-between" w="full">
                 <VStack align="flex-start" spacing={0}>
@@ -217,7 +224,15 @@ export const AllApps = ({
             </Flex>
           )}
         </Box>
-        <MenuList maxW="300px" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
+        <MenuList
+          maxW="300px"
+          minW="200px"
+          shadow="lg"
+          borderRadius={"24px"}
+          p={3}
+          bg="info-bg"
+          borderColor="#d5d5d5"
+          borderWidth="1px">
           {/* Governance Status Section */}
           <Text fontWeight="bold" mb={2}>
             {t("Status")}
@@ -228,7 +243,7 @@ export const AllApps = ({
                 key={status}
                 size="sm"
                 onClick={() => setStatusFilter(status)}
-                bg={statusFilter === status ? "contrast-bg-strong" : "contrast-bg-muted"}
+                bg={statusFilter === status ? "contrast-fg-on-muted" : "contrast-bg-muted"}
                 color={statusFilter === status ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
                 borderRadius="16px"
                 border="1px solid"
@@ -261,8 +276,7 @@ export const AllApps = ({
                 key={category.id}
                 isChecked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryChange(category.id)}
-                fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}
-                colorScheme="contrast">
+                fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}>
                 <Flex align="center">{category.name}</Flex>
               </Checkbox>
             ))}

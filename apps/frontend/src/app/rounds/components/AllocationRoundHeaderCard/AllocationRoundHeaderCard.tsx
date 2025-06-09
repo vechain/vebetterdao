@@ -137,7 +137,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Skeleton>
                   <Skeleton isLoaded={!isLoading && !roundStateLoading}>
                     <HStack spacing={2}>
-                      <Icon as={FaClock} boxSize={4} />
+                      <Icon as={FaClock} boxSize={4} color="contrast-fg-on-muted" />
                       <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
                         {remainingTime}
                       </Text>

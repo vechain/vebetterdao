@@ -162,7 +162,7 @@ const NoVoteAndActiveCheckVotingPower = ({
   return (
     <Skeleton isLoaded={!snapshotLoading}>
       <HStack spacing={2}>
-        <Icon as={MdHowToVote} boxSize={4} color={"#252525"} />
+        <Icon as={MdHowToVote} boxSize={4} color={"contrast-fg-on-muted"} />
 
         <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
           {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}

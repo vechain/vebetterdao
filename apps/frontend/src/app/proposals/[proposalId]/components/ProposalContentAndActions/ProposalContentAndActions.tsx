@@ -57,37 +57,15 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("About the proposal")}
           </Heading>
-          <Box
-            w="full"
-            sx={{
-              "& .w-md-editor-text-area .token.title .anchor": {
-                color: colorMode === "dark" ? "#FFFFFF !important" : undefined,
-              },
-              "& .w-md-editor-preview .anchor": {
-                color: colorMode === "dark" ? "#FFFFFF !important" : undefined,
-              },
-              "& .wmde-markdown a::before": {
-                color: colorMode === "dark" ? "#FFFFFF !important" : undefined,
-              },
-              "& .wmde-markdown .anchor": {
-                color: colorMode === "dark" ? "#FFFFFF !important" : undefined,
-              },
-              "& .octicon": {
-                fill: colorMode === "dark" ? "#FFFFFF !important" : undefined,
-              },
-              "& .octicon-link": {
-                fill: colorMode === "dark" ? "#FFFFFF !important" : undefined,
-              },
-            }}>
-            <MDEditor.Markdown
-              source={metadata?.data?.markdownDescription}
-              style={{
-                width: "100%",
-                wordBreak: "break-word",
-                borderRadius: "12px",
-              }}
-            />
-          </Box>
+          <MDEditor.Markdown
+            source={metadata?.data?.markdownDescription}
+            style={{
+              width: "100%",
+              wordBreak: "break-word",
+              borderRadius: "12px",
+              backgroundColor: colorMode === "dark" ? "var(--chakra-colors-contrast-bg-strong-hover)" : undefined,
+            }}
+          />
           {proposalDecodeError && (
             <Alert status="error" borderRadius={"lg"}>
               <AlertIcon />

@@ -34,20 +34,21 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
         <VStack spacing={4} align="flex-start">
           <HStack justify="space-between" w="full">
             <HStack spacing={4}>
-              <Box p={4} bg="gray.100" borderRadius="50%" lineHeight={0} pos="relative">
+              <Box p={4} bg="dark-contrast-on-card-bg" borderRadius="50%" lineHeight={0} pos="relative">
                 <Text
                   pos="absolute"
                   top="50%"
                   left="50%"
                   transform="translate(-50%, -50%)"
                   fontSize="sm"
+                  color="contrast-bg-on-muted"
                   fontWeight={600}>
                   {index + 1}
                 </Text>
               </Box>
               <Box>
                 <Heading size="md">{field.name}</Heading>
-                <Text fontSize="sm" color="gray.500">
+                <Text fontSize="sm" color="contrast-bg-strong">
                   {field.description}
                 </Text>
               </Box>
@@ -78,12 +79,12 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
                   control={control}
                   humanizeLabels={true}
                   inputProps={{
-                    bg: "white",
+                    bg: "dark-contrast-on-card-bg",
                     borderRadius: "lg",
                     isDisabled: isDisabled,
                   }}
                   selectProps={{
-                    bg: "white",
+                    bg: "dark-contrast-on-card-bg",
                     borderRadius: "lg",
                     isDisabled: isDisabled,
                   }}

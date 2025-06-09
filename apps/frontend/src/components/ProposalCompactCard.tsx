@@ -71,12 +71,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
     <Card
       variant={["filledSmall", "filledSmall", "filled"]}
       onClick={goToProposal}
-      _hover={{ bg: "#F8F8F8" }}
-      _dark={{
-        _hover: {
-          bg: "transparent",
-        },
-      }}
+      _hover={{ bg: "light-contrast-on-card-bg" }}
       cursor={"pointer"}
       alignSelf={"flex-start"}
       w={"full"}>
