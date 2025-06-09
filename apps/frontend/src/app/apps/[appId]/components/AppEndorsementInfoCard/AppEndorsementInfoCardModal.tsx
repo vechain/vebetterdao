@@ -126,7 +126,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
 
             <VStack
               display={"flex"}
-              bg="endorsement-info-bg"
+              bg="light-contrast-on-card-bg"
               justify={"space-between"}
               rounded={"16px"}
               p={[0, 0, 4]}

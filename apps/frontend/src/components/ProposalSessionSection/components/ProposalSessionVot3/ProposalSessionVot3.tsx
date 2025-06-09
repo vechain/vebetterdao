@@ -11,7 +11,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
   const { t } = useTranslation()
 
   return (
-    <HStack p="16px" rounded="12px" bg="endorsement-info-bg" justify={"space-between"}>
+    <HStack p="16px" rounded="12px" bg="light-contrast-on-card-bg" justify={"space-between"}>
       <VStack align="stretch" gap={1} flex={1}>
         <Skeleton isLoaded={!votesAtSnapshotQuery.isLoading}>
           <Text fontWeight={600}>{FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}</Text>

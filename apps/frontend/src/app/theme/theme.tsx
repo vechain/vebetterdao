@@ -43,6 +43,10 @@ const themeConfig = {
         _light: "#F8F8F8",
         _dark: "#1E1E1E",
       },
+      "dark-contrast-on-card-bg": {
+        _light: "#F8F8F8",
+        _dark: "#131313",
+      },
       "profile-bg": {
         _light: "#FFFFFF",
         _dark: "#2D2D2F",
@@ -51,7 +55,7 @@ const themeConfig = {
         _light: "#FFFFFF",
         _dark: "#1A1A1A",
       },
-      "endorsement-info-bg": {
+      "light-contrast-on-card-bg": {
         _light: "#FAFAFA",
         _dark: "#2D2D2F",
       },

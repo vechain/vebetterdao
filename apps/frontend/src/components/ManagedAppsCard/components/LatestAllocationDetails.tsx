@@ -46,7 +46,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
   return (
     <Skeleton isLoaded={!isLoading} w={"full"}>
       <HStack
-        bg={"info-bg"}
+        bg={"light-contrast-on-card-bg"}
         py={6}
         px={3}
         h="full"

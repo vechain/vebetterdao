@@ -46,7 +46,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
       px={[4, 4, "24px"]}
       borderRadius={"16px"}
       w="full"
-      bg="endorsement-info-bg">
+      bg="light-contrast-on-card-bg">
       <HStack spacing={[2, 2, 3]} align="center" flex={1}>
         <Skeleton isLoaded={!isLogoLoading}>
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"64px"} borderRadius="9px" />

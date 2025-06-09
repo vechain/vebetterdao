@@ -12,7 +12,7 @@ export const AppDetailAllocationInfo = () => {
 
   const { t } = useTranslation()
   return (
-    <Flex h={"full"} bg={"info-bg"} rounded="8px" flex={1.5} borderWidth={1}>
+    <Flex h={"full"} bg={"light-contrast-on-card-bg"} rounded="8px" flex={1.5} borderWidth={1}>
       <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"} gap={6}>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
