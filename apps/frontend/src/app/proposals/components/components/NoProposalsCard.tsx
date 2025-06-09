@@ -12,7 +12,7 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
 
   return (
     <Box
-      bg={"#FFF"}
+      bg={"create-proposal-bg"}
       borderRadius={12}
       py={{ base: 5, md: 16 }}
       px={{ base: 5, md: 14 }}
