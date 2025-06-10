@@ -129,4 +129,14 @@ library GovernorTypes {
     Standard,
     Grant
   }
+
+  // MilestoneState enum to store the status of the milestone
+  enum MilestoneState {
+    Pending,   // 0 - default
+    Validated, // 1 - marked valid by admin
+    Claimed,   // 2 - funds claimed by recipient
+    Rejected,  // 3 - admin rejects
+    Expired,   // 4 - deadline passed without action
+    Refunded   // 5 - funds returned to treasury
+  }
 }

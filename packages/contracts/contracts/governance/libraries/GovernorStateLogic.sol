@@ -96,6 +96,14 @@ library GovernorStateLogic {
   function encodeStateBitmap(GovernorTypes.ProposalState proposalState) internal pure returns (bytes32) {
     return bytes32(1 << uint8(proposalState));
   }
+  /**
+   * @dev Encodes a `MilestoneState` into a `bytes32` representation where each bit enabled corresponds to the underlying position in the `MilestoneState` enum.
+   * @param state The state to encode.
+   * @return The encoded state bitmap.
+   */
+  function encodeStateBitmap(GovernorTypes.MilestoneState state) internal pure returns (bytes32) {
+    return bytes32(1 << uint8(state));
+}
 
   /**
    * @notice Retrieves the current state of a proposal.
