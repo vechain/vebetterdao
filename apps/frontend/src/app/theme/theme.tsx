@@ -51,7 +51,7 @@ const themeConfig = {
         _light: "#FFFFFF",
         _dark: "#2D2D2F",
       },
-      "create-proposal-bg": {
+      "contrast-on-dark-bg": {
         _light: "#FFFFFF",
         _dark: "#1A1A1A",
       },

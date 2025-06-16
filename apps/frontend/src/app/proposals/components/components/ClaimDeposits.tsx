@@ -30,7 +30,7 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
 
   return (
     <Box
-      bg={"create-proposal-bg"}
+      bg={"contrast-on-dark-bg"}
       borderRadius={12}
       p={6}
       alignContent={"flex-start"}

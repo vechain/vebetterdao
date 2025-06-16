@@ -72,7 +72,7 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
           <IconButton
             onClick={openMenu}
             border={"1px solid #EEEEEE"}
-            bg={"rgba(255, 255, 255, 0.50)"}
+            bg={"light-contrast-on-card-bg"}
             rounded="6px"
             icon={<Icon as={FaBars} />}
             aria-label="Open menu"

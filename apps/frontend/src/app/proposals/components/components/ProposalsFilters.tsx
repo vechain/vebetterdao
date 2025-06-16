@@ -177,7 +177,7 @@ export const ProposalsFilters = (props: Props) => {
             variant={"ghost"}
             aria-label="Clear filter"
             p={3}
-            bg={"create-proposal-bg"}
+            bg={"contrast-on-dark-bg"}
             borderRadius={"full"}
             borderWidth={1}
             borderColor={"#EFEFEF"}
