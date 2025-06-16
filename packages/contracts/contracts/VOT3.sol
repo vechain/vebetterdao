@@ -135,6 +135,28 @@ contract VOT3 is
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "Transfer failed");
   }
 
+  /// @notice Convert B3TR tokens to VOT3 tokens on behalf of another user
+  /// @dev Allows a permitted address to convert B3TR tokens and mint VOT3 tokens for the user
+  /// @param user Address of the user whose B3TR tokens will be converted
+  /// @param amount Amount of B3TR tokens to convert
+  function convertToVOT3OnBehalf(address user, uint256 amount) external {
+    require(user != address(0), "VOT3: User address cannot be 0");
+
+    VOT3Storage storage $ = _getVOT3Storage();
+
+    // Check that the caller has sufficient allowance to spend user's B3TR tokens
+    require($.b3tr.allowance(user, address(this)) >= amount, "VOT3: Insufficient allowance");
+
+    // Mint VOT3 tokens to the user (not the caller)
+    _mint(user, amount);
+
+    // Update the user's converted B3TR balance
+    $._convertedB3TR[user] += amount;
+
+    // Transfer B3TR tokens from user to this contract using the caller's allowance
+    require($.b3tr.transferFrom(user, address(this), amount), "VOT3: Transfer failed");
+  }
+
   /// @notice Convert VOT3 previously converted back to B3TR tokens
   /// @dev Burns VOT3 tokens and transfers B3TR tokens in return
   /// @param amount Amount of VOT3 tokens to convert

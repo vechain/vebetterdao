@@ -2955,7 +2955,7 @@ describe("X-Allocation Voting - @shard14", function () {
   })
 
   describe("Autovoting", function () {
-    it.only("Can autovote for an app", async function () {
+    it("Can autovote for an app", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport, vot3, voterRewards, b3tr } =
         await getOrDeployContractInstances({
           forceDeploy: true,
