@@ -15,7 +15,5 @@ export const featureFlags: FeatureFlagConfig = {
     enabled: true,
     comingSoonText: "GM upgrades coming soon!",
   },
-  [FeatureFlag.VECHAIN_KIT]: {
-    enabled: true,
-  },
+  [FeatureFlag.VECHAIN_KIT]: { enabled: false },
 }

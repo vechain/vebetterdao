@@ -1,0 +1,40 @@
+import { useMemo } from "react"
+import { useEvents } from "@/hooks"
+import { VeBetterPassport__factory } from "@repo/contracts"
+import { getConfig } from "@repo/config"
+
+const contractInterface = VeBetterPassport__factory.createInterface()
+const contractAddress = getConfig().veBetterPassportContractAddress
+
+/**
+ * Custom hook to fetch the UserSignalsReset events.
+ * @param walletAddress - The wallet address to fetch the events for.
+ */
+export const useUserSignalsReset = (walletAddress?: string) => {
+  const filterParams = { user: walletAddress }
+
+  const rawUserSignalsResetEvents = useEvents({
+    contractAddress,
+    contractInterface,
+    eventName: "UserSignalsReset",
+    filterParams,
+    mapResponse: (decoded, meta) => ({
+      user: decoded.user,
+      blockNumber: meta.blockNumber,
+      txOrigin: meta.txOrigin,
+    }),
+  })
+
+  const isLoading = rawUserSignalsResetEvents.isLoading
+
+  const userSignalsResetEvents = useMemo(() => {
+    return rawUserSignalsResetEvents.data?.filter(event => event.user === walletAddress)
+  }, [rawUserSignalsResetEvents, walletAddress])
+
+  return {
+    isLoading,
+    data: {
+      userSignalsResetEvents,
+    },
+  }
+}

@@ -1,6 +1,6 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { clauseBuilder, FunctionFragment } from "@vechain/sdk-core"
 import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { ABIContract, Address, Clause } from "@vechain/sdk-core"
 
 /**
  * Finds the blacklisted applications from a list of application IDs.
@@ -14,11 +14,9 @@ import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 export const findBlacklistedApps = async (thor: ThorClient, appIds: string[], contractAddress: string) => {
   // Prepare the clauses to check if the xApps are blacklisted
   const clauses = appIds.map(appId =>
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      X2EarnApps.createInterface().getFunction("isBlacklisted") as FunctionFragment,
-      [appId],
-    ),
+    Clause.callFunction(Address.of(contractAddress), ABIContract.ofAbi(X2EarnApps.abi).getFunction("isBlacklisted"), [
+      appId,
+    ]),
   )
   const res = await thor.transactions.simulateTransaction(clauses)
 
@@ -27,7 +25,9 @@ export const findBlacklistedApps = async (thor: ThorClient, appIds: string[], co
   res.forEach((r, index) => {
     if (r.reverted) {
       throw new Error(
-        `Error in contract call to X2EarnApps::isBlacklisted at ${contractAddress}. Clause ${index + 1} for appId ${appIds[index]} reverted with reason ${r.vmError}`,
+        `Error in contract call to X2EarnApps::isBlacklisted at ${contractAddress}. Clause ${index + 1} for appId ${
+          appIds[index]
+        } reverted with reason ${r.vmError}`,
       )
     }
 

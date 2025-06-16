@@ -1,4 +1,10 @@
-import { XApp, useMostVotedAppsInRound, usePreviousAllocationRoundId, useXAppMetadata } from "@/api"
+import {
+  XApp,
+  useMostVotedAppsInRound,
+  usePreviousAllocationRoundId,
+  useAppsEligibleInNextRound,
+  useXAppMetadata,
+} from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -29,9 +35,15 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  // Apps are listed based on the votes they received in the previous round
+  // Apps are listed based on the votes they received in the previous round and are eligible in the next round
   const { data: previousRoundId } = usePreviousAllocationRoundId()
-  const { data: xApps } = useMostVotedAppsInRound(previousRoundId ?? "")
+  const { data: allMostVotedXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
+  const { data: eligibleAppsIds } = useAppsEligibleInNextRound()
+
+  const xApps = useMemo(() => {
+    return allMostVotedXApps?.filter(app => eligibleAppsIds?.includes(app.id)) ?? []
+  }, [allMostVotedXApps, eligibleAppsIds])
+
   const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
 
   if (!slicedXApps?.length) return null
@@ -60,7 +72,9 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <DashboardXAppCard key={`xApp-${xApp?.id ?? uuid()}`} xApp={xApp.app} />)}
+          {slicedXApps?.map(xApp => (
+            <DashboardXAppCard key={`xApp-${xApp?.id ?? uuid()}`} xApp={xApp.app} />
+          ))}
         </Grid>
       </CardBody>
     </Card>
@@ -84,7 +98,6 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
       onClick={navigateToAppDetail}
       _hover={{
         bg: nonActiveBackgroundColor,
-
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>

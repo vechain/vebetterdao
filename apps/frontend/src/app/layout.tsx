@@ -3,7 +3,7 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { Footer } from "@/components"
+import { Footer, TransactionModal } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
@@ -27,20 +27,21 @@ const datadog_app_token = getEnvDatadogApp()
 const datadog_client_token = getEnvDatadogClient()
 const datadog_env = getEnvDatadogEnv()
 
-datadogRum.init({
-  applicationId: datadog_app_token,
-  clientToken: datadog_client_token,
-  site: "datadoghq.eu",
-  service: "b3tr",
-  env: datadog_env,
-  sessionSampleRate: 100,
-  sessionReplaySampleRate: 20,
-  trackUserInteractions: true,
-  trackResources: true,
-  trackLongTasks: true,
-  defaultPrivacyLevel: "mask-user-input",
-})
-
+if (isProduction) {
+  datadogRum.init({
+    applicationId: datadog_app_token,
+    clientToken: datadog_client_token,
+    site: "datadoghq.eu",
+    service: "b3tr",
+    env: datadog_env,
+    sessionSampleRate: 100,
+    sessionReplaySampleRate: 20,
+    trackUserInteractions: true,
+    trackResources: true,
+    trackLongTasks: true,
+    defaultPrivacyLevel: "mask-user-input",
+  })
+}
 // workaround for "@iconscout/react-unicons and data-new-gr-c-s-check-loaded
 const error = console.error
 console.error = (...args: any) => {
@@ -66,11 +67,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       }}>
       <head>
         <title>{t("VeBetterDAO")}</title>
-        <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
+        <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO's governance." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="/images/favicon.png" />
-        <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
-        <meta name="msapplication-TileImage" content="/images/favicon.png" />
+        {/* Favicons */}
+        <meta name="apple-mobile-web-app-title" content="VeBetterDAO" />
 
         {/* Open Graph Metadata */}
         <meta name="title" property="og:title" content="VeBetterDAO" />
@@ -79,10 +79,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta
           name="description"
           property="og:description"
-          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
+          content="Vote for your favourite sustainability Apps in VeBetterDAO's governance."
         />
         <meta property="og:site_name" content="VeBetterDAO" />
-        <meta name="image" property="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="image" property="og:image" content={`${getConfig().basePath}/assets/images/social_image.webp`} />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -93,16 +93,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="twitter:title" content="VeBetterDAO" />
         <meta
           name="twitter:description"
-          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
+          content="Vote for your favourite sustainability Apps in VeBetterDAO's governance."
         />
-        <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="twitter:image" content={`${getConfig().basePath}/assets/images/social_image.webp`} />
         <meta name="twitter:image:alt" content="VeBetterDAO" />
       </head>
       <body>
         <Providers>
           {isProduction && <FreshDeskWidget widgetId={103000007852} />}
           <VStack minH="100vh" gap={0} align="stretch">
-            {/* <AlphaTestnetBanner /> */}
             <Navbar />
             <Flex flex={1}>
               <Container
@@ -116,6 +115,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 flexDirection={"column"}>
                 {children}
               </Container>
+              <TransactionModal />
             </Flex>
             <Footer />
           </VStack>

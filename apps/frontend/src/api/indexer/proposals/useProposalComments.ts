@@ -73,7 +73,7 @@ export const useProposalComments = ({
   proposalId,
   voter,
   support,
-  direction = "asc",
+  direction = "desc",
   size = 5,
 }: Omit<ProposalCommentsRequest, "page">) => {
   return useInfiniteQuery({

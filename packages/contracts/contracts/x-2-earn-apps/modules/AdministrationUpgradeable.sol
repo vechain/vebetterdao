@@ -338,6 +338,16 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   }
 
   /**
+   * @dev Returns true if the creator has already been used for another app.
+   *
+   * @param creator the address of the creator
+   */
+  function isCreatorOfAnyApp(address creator) public view override returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    return $._creatorApps[creator] > 0;
+  }
+
+  /**
    * @dev Returns true if an account is moderator of the app
    *
    * @param appId the hashed name of the app

@@ -1,12 +1,13 @@
-import { useQueryClient } from "@tanstack/react-query"
-import { useCallback } from "react"
-import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
 import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey } from "@/api"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -26,8 +27,8 @@ export type ProposalAction = {
  * Data required to create a proposal. Multiple actions could be provided in case we want multiple function to be executed
  */
 export type useCreateProposalProps = {
-  invalidateCache?: boolean
   onSuccess?: () => void
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 export type ReducedActions = {
@@ -45,40 +46,18 @@ type BuildClausesProps = {
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
  * @param description The description of the proposal
  * @param actions the functions we want to execute in case the proposal is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
+ * @param transactionModalCustomUI custom UI for the transaction modal
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useCreateProposal = ({ invalidateCache = true, onSuccess }: useCreateProposalProps) => {
+export const useCreateProposal = ({ onSuccess, transactionModalCustomUI }: useCreateProposalProps) => {
   const { account } = useWallet()
-  const queryClient = useQueryClient()
-
-  // Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getProposalsEventsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getProposalsEventsQueryKey(),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
-      })
-    }
-
-    onSuccess?.()
-  }, [invalidateCache, onSuccess, queryClient, account?.address])
-
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    onTxConfirmed: handleOnSuccess,
-  })
 
   const buildClauses = useCallback(
     ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
+      if (!description) throw new Error("description is required")
+      if (!actions) throw new Error("actions is required")
+      if (!startRoundId) throw new Error("startRoundId is required")
+      if (!depositAmount) throw new Error("depositAmount is required")
       if (!account?.address) throw new Error("Account is required")
 
       const clauses: EnhancedClause[] = []
@@ -125,18 +104,16 @@ export const useCreateProposal = ({ invalidateCache = true, onSuccess }: useCrea
     [account?.address],
   )
 
-  const onMutate = useCallback(
-    async (data: BuildClausesProps) => {
-      if (!data.description) throw new Error("description is required")
-      if (!data.actions) throw new Error("actions is required")
-      if (!data.startRoundId) throw new Error("startRoundId is required")
-      if (!data.depositAmount) throw new Error("depositAmount is required")
-
-      const clauses = buildClauses(data)
-      return result.sendTransaction(clauses)
-    },
-    [buildClauses, result],
-  )
-  //TODO: Refactor to use `useBuildTransaction`
-  return { ...result, sendTransaction: onMutate }
+  const refetchQueryKeys = useMemo(() => {
+    return [
+      getProposalsEventsQueryKey(),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
+    ]
+  }, [account?.address])
+  return useBuildTransaction({
+    clauseBuilder: buildClauses,
+    onSuccess,
+    refetchQueryKeys,
+    transactionModalCustomUI,
+  })
 }

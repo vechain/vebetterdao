@@ -6,6 +6,7 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
 import { useDomainOrAddress } from "@/hooks"
+
 interface GmNFTCardProps {
   isGMOwned: boolean
   isGMLoading: boolean
@@ -93,7 +94,7 @@ export const GmNFTCard = ({
               {"x"}
             </Text>
             <Text fontSize="xs" fontWeight={400} noOfLines={1}>
-              {t("Voting reward multiplier")}
+              {t("GM reward weight")}
             </Text>
           </HStack>
         </FeatureFlagWrapper>

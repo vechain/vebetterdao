@@ -7,9 +7,6 @@ export const SupportInstructions = ({ goToNextStep }: { goToNextStep: () => void
 
   return (
     <VStack gap={6} alignItems={"stretch"}>
-      <Text fontSize={"36px"} fontWeight={700}>
-        {t("What is community support?")}
-      </Text>
       <HStack gap={6}>
         <Box>
           <Handshake size={124} />

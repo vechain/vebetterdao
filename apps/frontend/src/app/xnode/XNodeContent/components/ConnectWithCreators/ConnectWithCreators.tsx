@@ -14,7 +14,7 @@ export const ConnectWithCreators = () => {
   return (
     <Box bgColor={"#B1F16C"} p={6} w={"full"} borderRadius={16} position={"relative"} overflow={"clip"}>
       <Image
-        src="/images/community-green-blob.png"
+        src="/assets/backgrounds/community-green-blob.webp"
         alt="VeBetterDAO community"
         position={"absolute"}
         transform={"rotate(-90deg)"}
@@ -22,9 +22,9 @@ export const ConnectWithCreators = () => {
         right={-32}
         boxSize={"400px"}
       />
-      <VStack alignItems={"flex-start"} zIndex={2} position={"relative"}>
+      <VStack alignItems={"flex-start"} zIndex={0} position={"relative"}>
         <HStack>
-          <Image src="/images/handshake.svg" alt="Join Community" w={32} h={32} />
+          <Image src="/assets/icons/handshake.svg" alt="Join Community" w={32} h={32} />
           <Text>{t("Connect with app creators to know more about their apps and endorse them.")}</Text>
         </HStack>
         <Link href={DISCORD_URL} isExternal w={"full"} onClick={onJoinClick}>

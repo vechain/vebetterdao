@@ -2,6 +2,7 @@
 
 import { getContractsConfig } from "@repo/config"
 import { deployAll } from "./deployAll"
+import { deployLatest } from "./deployLatest"
 import { EnvConfig } from "@repo/config/contracts"
 
 // and properly handle errors.
@@ -10,7 +11,11 @@ const execute = async () => {
     throw new Error("Missing NEXT_PUBLIC_APP_ENV")
   }
 
-  await deployAll(getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig))
+  if (process.env.NEXT_DEPLOY_LATEST_ONLY) {
+    await deployLatest(getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig))
+  } else {
+    await deployAll(getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig))
+  }
 }
 
 execute()

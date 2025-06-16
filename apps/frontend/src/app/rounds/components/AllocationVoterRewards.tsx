@@ -1,10 +1,9 @@
 import { useAllocationsRound, useAllocationsRoundState, useRoundReward } from "@/api"
-import { Box, Button, Image, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Box, Button, Image, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
 import { useClaimReward } from "@/hooks/useClaimReward"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AnalyticsUtils } from "@/utils"
@@ -31,31 +30,19 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    error: claimRewardError,
-    status: claimRewardsStatus,
-    txReceipt,
-  } = useClaimReward({ roundId })
-
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { sendTransaction } = useClaimReward({
+    roundId,
+    transactionModalCustomUI: {
+      waitingConfirmation: { title: t("Claiming rewards...") },
+      success: { title: t("Rewards claimed!") },
+      error: { title: t("Error claiming rewards!") },
+    },
+  })
 
   const handleClaim = useCallback(() => {
-    sendTransaction(undefined)
-    onOpen()
+    sendTransaction()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
-  }, [onOpen, sendTransaction])
-
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [onClose, resetStatus])
-
-  const onTryAgain = useCallback(() => {
-    resetStatus()
-    handleClaim()
-  }, [handleClaim, resetStatus])
+  }, [sendTransaction])
 
   const formattedRoundReward = useMemo(() => {
     if (!roundReward) return 0
@@ -142,61 +129,41 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   }, [formattedRoundReward, hasVoted, isFinished, remainingTime, t])
 
   return (
-    <>
-      <Box
-        borderRadius={16}
-        borderWidth={1}
-        borderColor={"#D5D5D5"}
-        py={8}
-        px={6}
-        bg={"white"}
-        w={"full"}
-        mt={{ base: 0, md: 8 }}
-        position={"relative"}
-        overflow={"clip"}>
-        <Image src="/images/voter-reward.png" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
-        <VStack alignItems={"flex-start"}>
-          <Image src="/images/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
-          <Text fontSize={24} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
-            {t("Voting rewards")}
-          </Text>
-          <Box mt={3} mb={1}>
-            {description}
-          </Box>
-          <Button
-            zIndex={2}
-            mt={2}
-            isDisabled={!canClaim}
-            isLoading={isRoundRewardLoading}
-            onClick={handleClaim}
-            variant={"primaryAction"}
-            borderRadius={"full"}
-            w={"full"}
-            leftIcon={!isFinished ? <FaRegClock /> : undefined}
-            bg={canClaim ? "primary" : "#abb0b0"}
-            textColor={canClaim ? "white" : "black"}>
-            <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
-          </Button>
-        </VStack>
-      </Box>
-
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Rewards claimed!")}
-        status={claimRewardError ? TransactionModalStatus.Error : (claimRewardsStatus as TransactionModalStatus)}
-        errorDescription={claimRewardError?.reason}
-        errorTitle={claimRewardError ? t("Error claiming") : undefined}
-        showTryAgainButton
-        onTryAgain={onTryAgain}
-        pendingTitle={t("Claiming rewards...")}
-        showSocialButtons
-        socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        isClaimingRewards
-        isSuccessBeenTrack={true}
-      />
-    </>
+    <Box
+      borderRadius={16}
+      borderWidth={1}
+      borderColor={"#D5D5D5"}
+      py={8}
+      px={6}
+      bg={"info-bg"}
+      w={"full"}
+      mt={{ base: 0, md: 8 }}
+      position={"relative"}
+      overflow={"clip"}>
+      <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
+      <VStack alignItems={"flex-start"}>
+        <Image src="/assets/icons/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
+        <Text fontSize={24} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
+          {t("Voting rewards")}
+        </Text>
+        <Box mt={3} mb={1}>
+          {description}
+        </Box>
+        <Button
+          zIndex={2}
+          mt={2}
+          isDisabled={!canClaim}
+          isLoading={isRoundRewardLoading}
+          onClick={handleClaim}
+          variant={"primaryAction"}
+          borderRadius={"full"}
+          w={"full"}
+          leftIcon={!isFinished ? <FaRegClock /> : undefined}
+          bg={canClaim ? "primary" : "#abb0b0"}
+          textColor={canClaim ? "white" : "black"}>
+          <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
+        </Button>
+      </VStack>
+    </Box>
   )
 }

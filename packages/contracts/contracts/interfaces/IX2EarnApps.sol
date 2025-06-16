@@ -84,6 +84,11 @@ interface IX2EarnApps {
   error X2EarnUnverifiedCreator(address creator);
 
   /**
+   * @dev The creator NFT is already used for another app.
+   */
+  error CreatorNFTAlreadyUsed(address creator);
+
+  /**
    * @dev Invalid start index for get apps pagination
    */
   error X2EarnInvalidStartIndex();
@@ -309,6 +314,13 @@ interface IX2EarnApps {
    * Emits a {CreatorAddedToApp} event.
    */
   function addCreator(bytes32 appId, address creator) external;
+
+  /**
+   * @dev Check if a creator has already been used for another app.
+   *
+   * @param creator the address of the creator
+   */
+  function isCreatorOfAnyApp(address creator) external returns (bool);
 
   /**
    * @dev Remove a creator from the app.

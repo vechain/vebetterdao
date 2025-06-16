@@ -1,6 +1,5 @@
 import { useXApps } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useUpdateXAppReceiverAddress } from "@/hooks"
 import {
   VStack,
@@ -14,7 +13,6 @@ import {
   Card,
   CardHeader,
   CardBody,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
@@ -23,32 +21,23 @@ import { useTranslation } from "react-i18next"
 export const UpdateReceiverAddress = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [newAddress, setNewAddress] = useState("")
-  const { isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useUpdateXAppReceiverAddress(
-    {
-      appId: appId ?? "",
-      newAddress,
-    },
-  )
+  const { sendTransaction, isTransactionPending, status } = useUpdateXAppReceiverAddress({
+    appId: appId ?? "",
+    newAddress,
+  })
   const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      sendTransaction(undefined)
-      onOpen()
+      sendTransaction()
     },
-    [sendTransaction, onOpen],
+    [sendTransaction],
   )
-
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [resetStatus, onClose])
 
   const allApps = useMemo(() => [...(xApps?.active ?? []), ...(xApps?.unendorsed ?? [])], [xApps])
 
@@ -65,82 +54,66 @@ export const UpdateReceiverAddress = () => {
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (
-    <>
-      <Card w={"full"}>
-        <CardHeader>
-          <Heading size="lg">{t("Update Team Wallet Address")}</Heading>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={8} alignItems={"start"} w="full">
-            <form
-              onSubmit={handleSubmit}
-              style={{
-                width: "100%",
-              }}>
-              <VStack spacing={4} alignItems={"start"}>
-                <FormControl isRequired>
-                  <FormLabel>
-                    <strong>{"App"}</strong>
-                  </FormLabel>
-                  <Select
-                    placeholder="Select app"
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">{t("Update Team Wallet Address")}</Heading>
+      </CardHeader>
+      <CardBody>
+        <VStack spacing={8} alignItems={"start"} w="full">
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              width: "100%",
+            }}>
+            <VStack spacing={4} alignItems={"start"}>
+              <FormControl isRequired>
+                <FormLabel>
+                  <strong>{"App"}</strong>
+                </FormLabel>
+                <Select
+                  placeholder="Select app"
+                  isDisabled={isLoading}
+                  onChange={e => setAppId(e.target.value)}
+                  value={appId}>
+                  {allApps?.map(item => {
+                    return (
+                      <option key={"Select" + item.name} value={item.id}>
+                        {item.name}
+                      </option>
+                    )
+                  })}
+                </Select>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>
+                  <strong>{"Current Address"}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <Input value={currentAddress} disabled />
+                </InputGroup>
+              </FormControl>
+
+              <FormControl isRequired isInvalid={!isValidAddress}>
+                <FormLabel>
+                  <strong>{"New Address"}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <WalletAddressInput
+                    placeholder={t("Where should the allocation tokens be sent?")}
+                    onAddressResolved={address => setNewAddress(address ?? "")}
                     isDisabled={isLoading}
-                    onChange={e => setAppId(e.target.value)}
-                    value={appId}>
-                    {allApps?.map(item => {
-                      return (
-                        <option key={"Select" + item.name} value={item.id}>
-                          {item.name}
-                        </option>
-                      )
-                    })}
-                  </Select>
-                </FormControl>
+                  />
+                </InputGroup>
+              </FormControl>
 
-                <FormControl>
-                  <FormLabel>
-                    <strong>{"Current Address"}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <Input value={currentAddress} disabled />
-                  </InputGroup>
-                </FormControl>
-
-                <FormControl isRequired isInvalid={!isValidAddress}>
-                  <FormLabel>
-                    <strong>{"New Address"}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <WalletAddressInput
-                      placeholder={t("Where should the allocation tokens be sent?")}
-                      onAddressResolved={address => setNewAddress(address ?? "")}
-                      isDisabled={isLoading}
-                    />
-                  </InputGroup>
-                </FormControl>
-
-                <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
-                  {t("Save")}
-                </Button>
-              </VStack>
-            </form>
-          </VStack>
-        </CardBody>
-      </Card>
-
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={"Treasury address updated"}
-        onTryAgain={handleSubmit}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle={`Updating team wallet address...`}
-        errorTitle={"Error updating address"}
-        errorDescription={error?.reason}
-      />
-    </>
+              <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+                {t("Save")}
+              </Button>
+            </VStack>
+          </form>
+        </VStack>
+      </CardBody>
+    </Card>
   )
 }

@@ -51,9 +51,9 @@ export const NewAppBanner = () => {
       description={description}
       titleColor="#3A5798"
       descriptionColor="#0C2D75"
-      logoSrc="/images/new-app-gold.svg"
+      logoSrc="/assets/icons/new-app-gold.svg"
       backgroundColor="#C8DDFF"
-      backgroundImageSrc="/images/cloud-background.png"
+      backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
       buttonIconPosition="right"
       buttonLabel={t("Explore")}
       onButtonClick={GOTOAPPS}

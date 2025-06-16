@@ -1,7 +1,29 @@
 import { ethers } from "hardhat"
 
-export async function x2EarnLibraries() {
+export async function x2EarnLibraries(latestOnly: boolean = false) {
   // NOTE: V1 libraries do not exist, libraries were added in V2 of X2EarnApps contract
+
+  // ---------------------- Latest ----------------------
+  // Latest version
+  const AdministrationUtils = await ethers.getContractFactory("AdministrationUtils")
+  const AdministrationUtilsLib = await AdministrationUtils.deploy()
+  await AdministrationUtilsLib.waitForDeployment()
+  // Latest version
+  const EndorsementUtils = await ethers.getContractFactory("EndorsementUtils")
+  const EndorsementUtilsLib = await EndorsementUtils.deploy()
+  await EndorsementUtilsLib.waitForDeployment()
+  // Latest version
+  const VoteEligibilityUtils = await ethers.getContractFactory("VoteEligibilityUtils")
+  const VoteEligibilityUtilsLib = await VoteEligibilityUtils.deploy()
+  await VoteEligibilityUtilsLib.waitForDeployment()
+
+  if (latestOnly) {
+    return {
+      AdministrationUtils: AdministrationUtilsLib,
+      EndorsementUtils: EndorsementUtilsLib,
+      VoteEligibilityUtils: VoteEligibilityUtilsLib,
+    }
+  }
 
   // ---------------------- Version 2 ----------------------
   // Deploy Passport Checks LogicV2
@@ -32,30 +54,31 @@ export async function x2EarnLibraries() {
   const VoteEligibilityUtilsLibV3 = await VoteEligibilityUtilsV3.deploy()
   await VoteEligibilityUtilsLibV3.waitForDeployment()
 
-  // ---------------------- Version 4  ----------------------
-  const AdministrationUtils = await ethers.getContractFactory("AdministrationUtils")
-  const AdministrationUtilsLib = await AdministrationUtils.deploy()
-  await AdministrationUtilsLib.waitForDeployment()
+  // ---------------------- Version 4 ----------------------
+  const AdministrationUtilsV4 = await ethers.getContractFactory("AdministrationUtilsV4")
+  const AdministrationUtilsLibV4 = await AdministrationUtilsV4.deploy()
+  await AdministrationUtilsLibV4.waitForDeployment()
 
-  // Latest version
-  const EndorsementUtils = await ethers.getContractFactory("EndorsementUtils")
-  const EndorsementUtilsLib = await EndorsementUtils.deploy()
-  await EndorsementUtilsLib.waitForDeployment()
+  const EndorsementUtilsV4 = await ethers.getContractFactory("EndorsementUtilsV4")
+  const EndorsementUtilsLibV4 = await EndorsementUtilsV4.deploy()
+  await EndorsementUtilsLibV4.waitForDeployment()
 
-  // Latest version
-  const VoteEligibilityUtils = await ethers.getContractFactory("VoteEligibilityUtils")
-  const VoteEligibilityUtilsLib = await VoteEligibilityUtils.deploy()
-  await VoteEligibilityUtilsLib.waitForDeployment()
+  const VoteEligibilityUtilsV4 = await ethers.getContractFactory("VoteEligibilityUtilsV4")
+  const VoteEligibilityUtilsLibV4 = await VoteEligibilityUtilsV4.deploy()
+  await VoteEligibilityUtilsLibV4.waitForDeployment()
 
   return {
+    AdministrationUtils: AdministrationUtilsLib,
+    EndorsementUtils: EndorsementUtilsLib,
+    VoteEligibilityUtils: VoteEligibilityUtilsLib,
     AdministrationUtilsV2: AdministrationUtilsLibV2,
     EndorsementUtilsV2: EndorsementUtilsLibV2,
     VoteEligibilityUtilsV2: VoteEligibilityUtilsLibV2,
     AdministrationUtilsV3: AdministrationUtilsLibV3,
     EndorsementUtilsV3: EndorsementUtilsLibV3,
     VoteEligibilityUtilsV3: VoteEligibilityUtilsLibV3,
-    AdministrationUtils: AdministrationUtilsLib,
-    EndorsementUtils: EndorsementUtilsLib,
-    VoteEligibilityUtils: VoteEligibilityUtilsLib,
+    AdministrationUtilsV4: AdministrationUtilsLibV4,
+    EndorsementUtilsV4: EndorsementUtilsLibV4,
+    VoteEligibilityUtilsV4: VoteEligibilityUtilsLibV4,
   }
 }

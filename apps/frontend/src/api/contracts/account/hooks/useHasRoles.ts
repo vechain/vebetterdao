@@ -1,7 +1,13 @@
-import { useQueries, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/vechain-kit"
-import { getHasRole, hasRoleQueryKey } from "./useHasRole"
+import { getHasRole } from "./useHasRole"
 
+const hasRolesQueryKey = (roles: string[], contractAddress: string, address: string) => [
+  "hasRoles",
+  contractAddress,
+  address,
+  roles,
+]
 /**
  *  Hook to check if the user has a list of specific roles
  * @param roles  the roles to check (will be converted to bytes32)
@@ -11,17 +17,9 @@ import { getHasRole, hasRoleQueryKey } from "./useHasRole"
  */
 export const useHasRoles = (roles: string[], contractAddress: string, address: string) => {
   const { thor } = useConnex()
-  const queryClient = useQueryClient()
 
-  return useQueries({
-    queries: roles.map(role => ({
-      queryKey: hasRoleQueryKey(role, contractAddress, address),
-      queryFn: async () => {
-        return await queryClient.ensureQueryData({
-          queryKey: hasRoleQueryKey(role, contractAddress, address),
-          queryFn: () => getHasRole(thor, role, contractAddress, address),
-        })
-      },
-    })),
+  return useQuery({
+    queryKey: hasRolesQueryKey(roles, contractAddress, address),
+    queryFn: () => Promise.all(roles.map(role => getHasRole(thor, role, contractAddress, address))),
   })
 }

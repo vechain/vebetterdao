@@ -8,19 +8,28 @@ import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
 import { UilCheckCircle, UilPen, UilPlus, UilTimes } from "@iconscout/react-unicons"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useParams } from "next/navigation"
-import { UpdateAppMetadataTransactionModal } from "../UpdateAppMetadataTransactionModal"
 import { OkHandIcon } from "@/components"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import Lottie from "react-lottie"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { StepModal } from "@/components/StepModal/StepModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+enum AppTweetsStep {
+  UPLOADING = "UPLOADING",
+}
 
 export const AppTweets = () => {
   const [editMode, setEditMode] = useState(false)
-  const newTweetModal = useDisclosure()
-  const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
-  const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
-  const [tweets, setTweets] = useState<string[]>(metadataTweets)
-  const transactionModal = useDisclosure()
+  const { isOpen: isNewTweetModalOpen, onOpen: onNewTweetModalOpen, onClose: onNewTweetModalClose } = useDisclosure()
+
   const { isAdminOrModerator } = useCurrentAppRole()
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isTxModalOpen } = useTransactionModal()
+  const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
+  const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
+  const [tweets, setTweets] = useState<string[]>(metadataTweets)
 
   useEffect(() => {
     setTweets(metadataTweets)
@@ -37,23 +46,27 @@ export const AppTweets = () => {
 
   const handleClose = useCallback(() => {
     handleCancelEdit()
-    transactionModal.onClose()
-  }, [handleCancelEdit, transactionModal])
+  }, [handleCancelEdit])
 
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
     onSuccess: () => {
-      handleCancelEdit()
+      handleClose()
+      onNewTweetModalClose()
+      updateAppDetailsMutation.resetStatus()
+    },
+    onFailure: () => {
+      handleClose()
+      onNewTweetModalClose()
       updateAppDetailsMutation.resetStatus()
     },
   })
   const uploadMetadataMutation = useUploadAppMetadata()
 
   const onSubmit = useCallback(async () => {
-    updateAppDetailsMutation.resetStatus()
-    transactionModal.onOpen()
+    onOpen()
+    if (!appMetadata) return null
 
-    if (!appMetadata) return
     const metadataUri = await uploadMetadataMutation.onMetadataUpload(
       {
         ...appMetadata,
@@ -66,11 +79,7 @@ export const AppTweets = () => {
     updateAppDetailsMutation.sendTransaction({
       metadataUri,
     })
-  }, [updateAppDetailsMutation, transactionModal, appMetadata, uploadMetadataMutation, tweets])
-
-  const onTryAgain = useCallback(() => {
-    onSubmit()
-  }, [onSubmit])
+  }, [updateAppDetailsMutation, onOpen, appMetadata, uploadMetadataMutation, tweets])
 
   if (appMetadataLoading) {
     return null
@@ -80,12 +89,38 @@ export const AppTweets = () => {
 
   return (
     <>
-      <UpdateAppMetadataTransactionModal
-        transactionModal={transactionModal}
-        handleClose={handleClose}
-        uploadMetadataMutation={uploadMetadataMutation}
-        updateAppDetailsMutation={updateAppDetailsMutation}
-        onTryAgain={onTryAgain}
+      <StepModal
+        isOpen={isOpen && !isTxModalOpen}
+        onClose={onClose}
+        disableCloseButton={true}
+        steps={[
+          {
+            key: AppTweetsStep.UPLOADING,
+            content: (
+              <ModalAnimation>
+                <VStack align={"center"} p={6}>
+                  <Lottie
+                    style={{
+                      pointerEvents: "none",
+                    }}
+                    options={{
+                      loop: true,
+                      autoplay: true,
+                      animationData: UploadingMetadataAnimation,
+                    }}
+                    height={200}
+                    width={200}
+                  />
+                </VStack>
+              </ModalAnimation>
+            ),
+            title: "Upload metadata",
+            description: "Please wait while we upload the metadata",
+          },
+        ]}
+        activeStep={0}
+        setActiveStep={() => {}}
+        goToPrevious={() => {}}
       />
       <VStack align="stretch" gap={4}>
         <HStack justify={"space-between"} flexWrap={"wrap"}>
@@ -123,12 +158,17 @@ export const AppTweets = () => {
                   <Button
                     variant="primaryAction"
                     leftIcon={<UilPlus color="#FFFFFF" fontSize="16px" />}
-                    onClick={newTweetModal.onOpen}>
+                    onClick={onNewTweetModalOpen}>
                     {t("Add X post")}
                   </Button>
                 </HStack>
               )}
-              <AddTweetModal newTweetModal={newTweetModal} />
+              <AddTweetModal
+                isOpen={isNewTweetModalOpen}
+                onClose={onNewTweetModalClose}
+                updateAppDetailsMutation={updateAppDetailsMutation}
+                uploadMetadataMutation={uploadMetadataMutation}
+              />
             </>
           )}
         </HStack>

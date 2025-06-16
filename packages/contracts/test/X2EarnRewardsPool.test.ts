@@ -7,7 +7,7 @@ import {
   getOrDeployContractInstances,
   waitForRoundToEnd,
 } from "./helpers"
-import { describe, it } from "mocha"
+import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import {
@@ -21,8 +21,19 @@ import {
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("X2EarnRewardsPool - @shard12", function () {
+  // Environment params
+  let creator1: HardhatEthersSigner
+  let creator2: HardhatEthersSigner
+
+  before(async function () {
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
+  })
+
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -174,10 +185,10 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-      await endorseApp(await x2EarnApps.hashAppName("My app"), owner)
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
-      await endorseApp(await x2EarnApps.hashAppName("My app #2"), minterAccount)
+      await x2EarnApps.connect(creator1).submitApp(owner.address, owner.address, "My app", "metadataURI")
+      await endorseApp(await x2EarnApps.hashAppName("My app"), creator1)
+      await x2EarnApps.connect(creator2).submitApp(owner.address, owner.address, "My app #2", "metadataURI")
+      await endorseApp(await x2EarnApps.hashAppName("My app #2"), creator2)
 
       await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
       await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
@@ -303,10 +314,10 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-      await endorseApp(await x2EarnApps.hashAppName("My app"), owner)
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
-      await endorseApp(await x2EarnApps.hashAppName("My app #2"), minterAccount)
+      await x2EarnApps.connect(creator1).submitApp(owner.address, owner.address, "My app", "metadataURI")
+      await endorseApp(await x2EarnApps.hashAppName("My app"), creator1)
+      await x2EarnApps.connect(creator2).submitApp(owner.address, owner.address, "My app #2", "metadataURI")
+      await endorseApp(await x2EarnApps.hashAppName("My app #2"), creator2)
 
       await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
       await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
@@ -482,10 +493,10 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-      await endorseApp(await x2EarnApps.hashAppName("My app"), owner)
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
-      await endorseApp(await x2EarnApps.hashAppName("My app #2"), minterAccount)
+      await x2EarnApps.connect(creator1).submitApp(owner.address, owner.address, "My app", "metadataURI")
+      await endorseApp(await x2EarnApps.hashAppName("My app"), creator1)
+      await x2EarnApps.connect(creator2).submitApp(owner.address, owner.address, "My app #2", "metadataURI")
+      await endorseApp(await x2EarnApps.hashAppName("My app #2"), creator2)
 
       await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
       await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
@@ -670,8 +681,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
+      await x2EarnApps.connect(creator1).submitApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.connect(creator2).submitApp(owner.address, owner.address, "My app #2", "metadataURI")
 
       await endorseApp(await x2EarnApps.hashAppName("My app"), owner)
       await endorseApp(await x2EarnApps.hashAppName("My app #2"), minterAccount)
@@ -733,8 +744,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
+      await x2EarnApps.connect(creator1).submitApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.connect(creator2).submitApp(owner.address, owner.address, "My app #2", "metadataURI")
 
       await endorseApp(await x2EarnApps.hashAppName("My app"), owner)
       await endorseApp(await x2EarnApps.hashAppName("My app #2"), otherAccount)
@@ -915,7 +926,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.connect(creator1).submitApp(owner.address, owner.address, "My app", "metadataURI")
       await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
 
       const appId1 = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1138,8 +1149,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
 
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
-      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app #2", "metadataURI")
+      await x2EarnApps.connect(creator1).submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.connect(creator2).submitApp(owner.address, owner.address, "My app #2", "metadataURI")
       const appId = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
 

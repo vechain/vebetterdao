@@ -120,7 +120,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
     functions: [
       {
         name: "Transfer B3TR from treasury",
-        icon: "/images/arrow-right.svg",
+        icon: "/assets/icons/arrow-right.svg",
         description: "Transfer treasury B3TR tokens to a recipient",
         abiDefinition: (() => {
           const transferB3trDefinition = getFunctionDefinitionFromAbi(TreasuryContractJson, "transferB3TR")
@@ -167,7 +167,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
       },
       {
         name: "Upgrade B3TR Governor contract",
-        icon: "/images/contract-upgrade.svg",
+        icon: "/assets/icons/contract-upgrade.svg",
         description: "Upgrade the B3TR Governor contract to a new version",
         abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "upgradeToAndCall"),
       },

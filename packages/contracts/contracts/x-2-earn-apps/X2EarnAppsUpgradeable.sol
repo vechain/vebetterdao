@@ -126,6 +126,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function appModerators(bytes32 appId) public view virtual returns (address[] memory);
 
   /**
+   * @dev Returns true if the creator has already been used for another app.
+   */
+  function isCreatorOfAnyApp(address creator) public view virtual returns (bool);
+
+  /**
    * @dev Function to get the metadataURI of an app.
    */
   function metadataURI(bytes32 appId) public view virtual returns (string memory);

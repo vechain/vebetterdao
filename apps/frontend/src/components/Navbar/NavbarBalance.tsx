@@ -26,17 +26,17 @@ export const NavbarBalance = () => {
       <HStack flexBasis="250px" gap={0} h={cardHeight} pl={5}>
         <HStack gap={0} align="flex-start">
           <HStack gap={1} bg="#004CFC" borderLeftRadius="full" p={padding} pr="0">
-            <Image h={iconHeight} w={iconHeight} src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h={iconHeight} w={iconHeight} src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Text color="#FFFFFF" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
           </HStack>
-          <Image h={cardHeight} src="/images/balance-ending-right.png" alt="balance-ending-right" ml="-1px" />
+          <Image h={cardHeight} src="/assets/images/balance-ending-right.webp" alt="balance-ending-right" ml="-1px" />
         </HStack>
         <HStack gap={0} align="flex-start" h={cardHeight}>
-          <Image h={cardHeight} src="/images/balance-ending-left.png" alt="balance-ending-left" />
+          <Image h={cardHeight} src="/assets/images/balance-ending-left.webp" alt="balance-ending-left" />
           <HStack gap={1} bg="#B1F16C" borderRightRadius="full" p={padding} pl="0">
-            <Image h={iconHeight} w={iconHeight} src="/images/vot3-token.png" alt="vot3-token" />
+            <Image h={iconHeight} w={iconHeight} src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
             <Text color="#000000" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>

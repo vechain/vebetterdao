@@ -15,8 +15,8 @@
   "devDependencies": {
     "@playwright/test": "^1.42.1",
     "@types/node": "^20.11.30",
-    "@vechain/sdk-core": "^1.0.0-beta.1",
-    "@vechain/sdk-network": "^1.0.0-beta.1",
+    "@vechain/sdk-core": "1.2.0-rc.2",
+    "@vechain/sdk-network": "1.2.0-rc.2",
     "@vechain/veworld-mock": "^1.0.4",
     "@vechain/veworld-mock-playwright": "^1.0.4",
     "bignumber.js": "^9.1.2",

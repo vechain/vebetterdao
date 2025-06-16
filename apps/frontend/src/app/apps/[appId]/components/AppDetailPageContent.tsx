@@ -9,6 +9,7 @@ import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppBalanceCard } from "./AppBalanceCard"
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
@@ -21,6 +22,7 @@ export const AppDetailPageContent = () => {
     threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(app?.id ?? "")
+  const isTeamWalletAddress = compareAddresses(app?.teamWalletAddress, account?.address)
 
   const appHasBeenIntoAllocationRounds = app?.createdAtTimestamp !== "0"
 
@@ -29,8 +31,8 @@ export const AppDetailPageContent = () => {
   }, [appHasBeenIntoAllocationRounds, isAppModerator, isAppAdmin])
 
   const shouldRenderBalance = useMemo(() => {
-    return appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)
-  }, [appHasBeenIntoAllocationRounds, isAppAdmin, isAppModerator])
+    return appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin || isTeamWalletAddress)
+  }, [appHasBeenIntoAllocationRounds, isAppAdmin, isAppModerator, isTeamWalletAddress])
 
   return (
     <Grid

@@ -85,7 +85,7 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
     )
   }
   const { title, amount, timestampTxs, txId } = getTransactionProps()
-  const bgColor = index % 2 === 0 ? "#FFFFFF" : "#F8F8F8"
+  const bgColor = index % 2 === 0 ? "profile-bg" : "info-bg"
 
   return (
     <HStack p={4} justify="space-between" borderRadius="md" bg={bgColor}>

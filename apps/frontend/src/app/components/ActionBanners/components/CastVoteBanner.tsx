@@ -20,9 +20,9 @@ export const CastVoteBanner = () => {
       titleColor="#3A5798"
       description={t("It’s time to make your voice heard in this round and earn exciting rewards!")}
       descriptionColor="#0C2D75"
-      logoSrc="/images/vote-icon.png"
+      logoSrc="/assets/icons/vote-icon.webp"
       backgroundColor="#B1F16C"
-      backgroundImageSrc="/images/community-green-blob.png"
+      backgroundImageSrc="/assets/backgrounds/community-green-blob.webp"
       buttonLabel={t("See round")}
       onButtonClick={handleVote}
       buttonVariant="primaryAction"

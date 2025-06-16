@@ -44,7 +44,7 @@ export const XNodePageHeader = () => {
   return (
     <Card>
       <Image
-        src={"/images/xnode-page-background.png"}
+        src={"/assets/backgrounds/xnode-page-background.webp"}
         alt="gm-nft-header"
         position={"absolute"}
         w="100%"
@@ -56,7 +56,7 @@ export const XNodePageHeader = () => {
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
         spacing={4}
-        zIndex={"2"}>
+        zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
           justify="space-between"

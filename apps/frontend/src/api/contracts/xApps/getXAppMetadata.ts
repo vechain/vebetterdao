@@ -12,6 +12,7 @@ import axios from "axios"
  * @property screenshots - The screenshots of the xApp (ipfs uri)
  * @property social_urls - The social urls of the xApp
  * @property app_urls - The app urls of the xApp
+ * @property categories - The categories of the xApp
  */
 export type XAppMetadata = {
   name: string
@@ -33,6 +34,7 @@ export type XAppMetadata = {
   ve_world: {
     banner: string
   }
+  categories: string[]
 }
 /**
   dapp-kit broke the pre-fetching

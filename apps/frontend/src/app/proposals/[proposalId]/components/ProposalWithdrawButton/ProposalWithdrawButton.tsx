@@ -1,6 +1,5 @@
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useWithdrawDeposit } from "@/hooks/useWithdrawDeposit"
-import { Button, useDisclosure } from "@chakra-ui/react"
+import { Button } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../hooks"
@@ -11,38 +10,17 @@ export const ProposalWithdrawButton = () => {
   const withdrawMutation = useWithdrawDeposit({
     proposalId: proposal.id,
   })
-  const { isOpen, onClose, onOpen } = useDisclosure()
 
-  const handleClose = useCallback(() => {
-    onClose()
-    withdrawMutation.resetStatus()
-  }, [onClose, withdrawMutation])
   const withdraw = useCallback(
     (e: React.FormEvent) => {
-      onOpen()
-      withdrawMutation.sendTransaction({})
+      withdrawMutation.sendTransaction()
       e.preventDefault()
     },
-    [onOpen, withdrawMutation],
+    [withdrawMutation],
   )
   return (
-    <>
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Deposit Withdraw Completed!")}
-        status={
-          withdrawMutation.error ? TransactionModalStatus.Error : (withdrawMutation.status as TransactionModalStatus)
-        }
-        errorDescription={withdrawMutation.error?.reason}
-        errorTitle={withdrawMutation.error ? t("Error Withdrawing") : undefined}
-        pendingTitle={t("Withdrawing...")}
-        showExplorerButton
-        txId={withdrawMutation.txReceipt?.meta.txID}
-      />
-      <Button variant="primaryAction" onClick={withdraw}>
-        {t("Claim your tokens back")}
-      </Button>
-    </>
+    <Button variant="primaryAction" onClick={withdraw}>
+      {t("Claim your tokens back")}
+    </Button>
   )
 }

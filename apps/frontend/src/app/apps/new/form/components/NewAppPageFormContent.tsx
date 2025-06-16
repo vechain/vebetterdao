@@ -1,15 +1,9 @@
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { VStack, Grid, GridItem, Heading, useDisclosure, Text, Button, Image, Box } from "@chakra-ui/react"
+import { VStack, Grid, GridItem, Heading, Text, Button, Image, Box } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
-import {
-  useSubmitNewApp,
-  useUploadAppMetadata,
-  useTransactionModalStatus,
-  useTransactionModalErrorTitle,
-} from "@/hooks"
-import { TransactionModal, TransactionModalStatus } from "@/components"
+import { useSubmitNewApp, useUploadAppMetadata } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -23,9 +17,7 @@ export const NewAppPageFormContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: submission } = useCreatorSubmission(account?.address ?? "")
-  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
-
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const { onMetadataUpload } = useUploadAppMetadata() //TODO: Add this to review modal before sending transaction
 
   const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
   const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
@@ -38,8 +30,8 @@ export const NewAppPageFormContent = () => {
       defaultValues: {
         name: latestSubmission?.appName ?? "",
         description: "",
-        logo: "/images/dapp_icon_placeholder.svg",
-        banner: "/images/dapp_banner_placeholder.svg",
+        logo: "/assets/icons/dapp_icon_placeholder.svg",
+        banner: "/assets/icons/dapp_banner_placeholder.svg",
         distributionStrategy: latestSubmission?.distributionStrategy ?? "",
         projectUrl: latestSubmission?.projectUrl ?? "",
         treasuryWalletAddress: "",
@@ -72,8 +64,6 @@ export const NewAppPageFormContent = () => {
     async (data: CreateEditAppFormData) => {
       setAppData(data)
 
-      onConfirmationOpen()
-
       const metadataUri = await onMetadataUpload({
         name: data.name,
         description: data.description,
@@ -85,6 +75,7 @@ export const NewAppPageFormContent = () => {
         app_urls: [],
         social_urls: [],
         tweets: [],
+        categories: [],
         ve_world: {
           banner: data.ve_world_banner,
         },
@@ -100,7 +91,7 @@ export const NewAppPageFormContent = () => {
         appMetadataUri: metadataUri,
       })
     },
-    [account, onConfirmationOpen, onMetadataUpload, submitAppMutation],
+    [account, onMetadataUpload, submitAppMutation],
   )
 
   const renderAppSubmissionForm = useMemo(() => {
@@ -146,7 +137,7 @@ export const NewAppPageFormContent = () => {
           </Button>
         </VStack>
         <VStack position={"relative"} w={"full"} order={[1, 1, 2]}>
-          <Image src="/images/blue-cloud-full.png" alt="Submit app success" />
+          <Image src="/assets/backgrounds/blue-cloud-full.webp" alt="Submit app success" />
           <Box w="full" h="full" position="absolute" display="flex" alignItems="center" justifyContent="center">
             <PreviewAppCard name={appData?.name} logo={appData?.logo} banner={appData?.banner} appId={appId} />
           </Box>
@@ -155,29 +146,5 @@ export const NewAppPageFormContent = () => {
     )
   }, [appData?.banner, appData?.logo, appData?.name, onVisitAppPage, appId, t])
 
-  return (
-    <>
-      <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={onConfirmationClose}
-        confirmationTitle="Submit App"
-        successTitle="App submitted"
-        status={useTransactionModalStatus([
-          { status: metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
-          { status: submitAppMutation.error || metadataUploadError ? TransactionModalStatus.Error : undefined },
-          { status: submitAppMutation.status as TransactionModalStatus },
-        ])}
-        errorDescription={metadataUploadError?.message ?? submitAppMutation.error?.reason}
-        errorTitle={useTransactionModalErrorTitle([
-          { error: metadataUploadError, title: "Error uploading metadata" },
-          { error: submitAppMutation.error, title: "Error submitting app" },
-        ])}
-        showTryAgainButton={true}
-        pendingTitle="Submitting new app..."
-        txId={submitAppMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
-      />
-      {!isSuccessSubmission ? renderAppSubmissionForm : renderAppSubmissionSuccess}
-    </>
-  )
+  return <>{!isSuccessSubmission ? renderAppSubmissionForm : renderAppSubmissionSuccess}</>
 }

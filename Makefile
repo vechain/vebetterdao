@@ -11,27 +11,6 @@ solo-down: #@ Stop Thor solo
 solo-clean: #@ Clean Thor solo
 	docker compose -f packages/contracts/docker-compose.yaml down -v --remove-orphans
 
-# Database
-DB_COMMAND=docker compose -f packages/database/docker-compose-mongo.yaml
-DB_MAKE_KEY=mkdir -p packages/database/keys; openssl rand -base64 756 > packages/database/keys/keyfile;
-DB_REMOVE_KEY=rm -f -R packages/database/keys
-DB_SETUP_COMMAND=docker compose -f packages/database/docker-compose-mongo-setup.yaml
-
-db-all: #@ Remove, clean and start all the database.
-	make db-down db-clean db-up db-setup
-db-up: #@ Start the database.
-	$(DB_COMMAND) up -d --wait
-db-clean: #@ Clean all the database data
-	$(DB_COMMAND) down -v --remove-orphans;
-db-down: #@ Stop the database.
-	$(DB_COMMAND) down
-db-keyfile-create: #@ Generate the keyfile for the database.
-	$(DB_MAKE_KEY)
-db-keyfile-remove: #@ Remove the keyfile for the database.
-	$(DB_REMOVE_KEY)
-db-setup: #@ Setup the database.
-	$(DB_SETUP_COMMAND) up --build; $(DB_SETUP_COMMAND) rm --force
-
 NAV_CONTRACTS=cd packages/contracts
 
 # Contracts

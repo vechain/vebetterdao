@@ -199,13 +199,12 @@ library PassportSignalingLogic {
   /// @notice Resets the signals of a user
   /// @param user - the user to reset the signals of
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsByAppAdminWithReason(
+  function resetUserSignalsByAppWithReason(
     PassportStorageTypes.PassportStorage storage self,
     address user,
     string memory reason
   ) external {
     bytes32 app = self.appOfSignaler[msg.sender];
-    require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
 
     _resetUserSignalsOfApp(self, user, app, reason);
   }
@@ -247,10 +246,21 @@ library PassportSignalingLogic {
 
     self.appSignalsCounter[app][user] = 0;
     self.appTotalSignalsCounter[app] -= signals;
-    self.signaledCounter[user] -= signals;
+
+    // Check against underflow since resetUserSignals() may have already set signaledCounter to 0.
+    // This prevents errors when these functions are called in sequence (resetUserSignals first, then resetUserSignalsByAppWithReason)
+    if (self.signaledCounter[user] >= signals) {
+      self.signaledCounter[user] -= signals;
+    } else {
+      self.signaledCounter[user] = 0;
+    }
 
     if (user != passport) {
-      self.signaledCounter[passport] -= signals;
+      if (self.signaledCounter[passport] >= signals) {
+        self.signaledCounter[passport] -= signals;
+      } else {
+        self.signaledCounter[passport] = 0;
+      }
       self.appSignalsCounter[app][passport] -= signals;
     }
 
@@ -296,7 +306,14 @@ library PassportSignalingLogic {
     address passport
   ) internal {
     // Remove the signals of the entity from the passport
-    self.signaledCounter[passport] -= self.signaledCounter[entity];
+    uint256 entitySignals = self.signaledCounter[entity];
+
+    // Check against underflow since signals may have been reset separately
+    if (self.signaledCounter[passport] >= entitySignals) {
+      self.signaledCounter[passport] -= entitySignals;
+    } else {
+      self.signaledCounter[passport] = 0;
+    }
 
     // Get the unique apps that the entity has interacted with
     bytes32[] memory apps = self.userInteractedApps[entity];

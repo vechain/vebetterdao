@@ -31,7 +31,7 @@ export const DelegatingBanner = () => {
       <GenericBanner
         title={t("Voting Power Delegated")}
         description={description}
-        logoSrc="/images/logo/veDelegate.svg"
+        logoSrc="/assets/logos/veDelegate.svg"
         backgroundColor="#FFD979"
         backgroundImageSrc=""
         buttonLabel={t("Learn more")}

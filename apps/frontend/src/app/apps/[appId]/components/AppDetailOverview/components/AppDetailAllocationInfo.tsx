@@ -12,11 +12,11 @@ export const AppDetailAllocationInfo = () => {
 
   const { t } = useTranslation()
   return (
-    <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" flex={1.5} borderWidth={1}>
+    <Flex h={"full"} bg={"light-contrast-on-card-bg"} rounded="8px" flex={1.5} borderWidth={1}>
       <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"} gap={6}>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
-            <Image h="36px" w="36px" src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h="36px" w="36px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Text fontSize={"36px"} fontWeight={700}>
               {compactFormatter.format(totalAllocationReceived)}
             </Text>
@@ -25,7 +25,7 @@ export const AppDetailAllocationInfo = () => {
         </VStack>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
-            <Image h="18px" w="18px" src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h="18px" w="18px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Text fontSize={"18px"} fontWeight={600}>
               {compactFormatter.format(lastRoundAllocationReceived)}
             </Text>
@@ -36,7 +36,7 @@ export const AppDetailAllocationInfo = () => {
         </VStack>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
-            <Image h="18px" w="18px" src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h="18px" w="18px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Text fontSize={"18px"} fontWeight={600}>
               {compactFormatter.format(averageAllocationReceived)}
             </Text>

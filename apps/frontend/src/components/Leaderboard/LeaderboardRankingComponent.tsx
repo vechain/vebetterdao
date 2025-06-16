@@ -63,7 +63,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       onClick={onClick}
       _hover={{
         cursor: "pointer",
-        bg: isYourRanking ? "#005EFF" : "#F7F7F7",
+        bg: isYourRanking ? "your-ranking-hover" : "hover-contrast-bg",
         transition: "all 0.2s",
       }}
       boxShadow={positionStyles.boxShadow}
@@ -75,7 +75,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       <CardBody color={whiteColor} p="12px">
         {isYourRanking && (
           <Image
-            src="/images/your-ranking-bg.svg"
+            src="/assets/backgrounds/your-ranking-bg.svg"
             alt="Bg image"
             zIndex={0}
             rounded={"full"}

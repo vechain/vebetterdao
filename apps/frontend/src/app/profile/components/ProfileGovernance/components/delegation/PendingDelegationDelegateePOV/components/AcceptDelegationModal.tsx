@@ -14,12 +14,13 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useAcceptDelegation } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
+  const { isTxModalOpen } = useTransactionModal()
   const { data: vnsData } = useVechainDomain(delegator ?? "")
   const delegatorName = vnsData?.domain
 
@@ -36,26 +37,8 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
     acceptDelegation.resetStatus()
   }, [modal, acceptDelegation])
 
-  if (acceptDelegation.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Delegation accepted!")}
-        status={acceptDelegation.status as TransactionModalStatus}
-        errorDescription={acceptDelegation.error?.reason}
-        errorTitle={acceptDelegation.error ? t("Error accepting delegation") : undefined}
-        showTryAgainButton
-        onTryAgain={() => acceptDelegation.sendTransaction({ delegator })}
-        pendingTitle={t("Accepting delegation...")}
-        showExplorerButton
-        txId={acceptDelegation.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle size={triangleSize} />

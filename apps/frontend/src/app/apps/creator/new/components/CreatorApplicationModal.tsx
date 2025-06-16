@@ -42,7 +42,7 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
     }
     return (
       <>
-        <SuccessModalContent title={t("Your application has been submitted")} />
+        <SuccessModalContent title={t("Your application has been submitted")} onClose={handleClose} />
         <VStack spacing={4} align="center" p={5}>
           <Button variant="primaryAction" onClick={onButtonClick}>
             {t("Go back to VeBetterDAO")}

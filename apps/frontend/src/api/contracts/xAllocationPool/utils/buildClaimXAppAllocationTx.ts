@@ -8,7 +8,7 @@ const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
  * Builds a transaction to claim rewards for a given set of rounds.
  *
  */
-export const buildClaimXAppAllocationTx = (roundId: string, appIds: string[]): Connex.Vendor.TxMessage => {
+export const buildClaimXAppAllocationTx = (roundId: string, appIds: string[]): EnhancedClause[] => {
   const clauses = []
 
   for (const id of appIds) {

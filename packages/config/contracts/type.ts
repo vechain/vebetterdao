@@ -1,5 +1,7 @@
+import { EnvConfig } from "."
+
 export type ContractsConfig = {
-  NEXT_PUBLIC_APP_ENV: "local" | "e2e" | "testnet-staging" | "testnet" | "mainnet"
+  NEXT_PUBLIC_APP_ENV: EnvConfig
 
   B3TR_GOVERNOR_QUORUM_PERCENTAGE: number
   TIMELOCK_MIN_DELAY: number
@@ -69,4 +71,12 @@ export type ContractsConfig = {
   X2EARN_NODE_COOLDOWN_PERIOD: number
 
   MULTI_SIG_SIGNERS: string[]
+
+  // GM Reward Pool
+  GM_PERCENTAGE_OF_TREASURY: number
+
+  GM_MULTIPLIERS_V2: number[]
+  VOTER_REWARDS_LEVELS_V2: number[]
+
+  GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 }

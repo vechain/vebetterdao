@@ -75,7 +75,7 @@ export const EndorsersItem = ({
 
   return (
     <HStack
-      bg="white"
+      bg="light-contrast-on-card-bg"
       p={"12px"}
       borderRadius={"16px"}
       boxShadow="sm"

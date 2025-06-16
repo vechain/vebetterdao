@@ -12,7 +12,7 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
 
   return (
     <Box
-      bg={"#FFF"}
+      bg={"contrast-on-dark-bg"}
       borderRadius={12}
       py={{ base: 5, md: 16 }}
       px={{ base: 5, md: 14 }}
@@ -20,7 +20,7 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
       position={"relative"}
       overflow={"clip"}>
       <Image
-        src="/images/blue-cloud-bg-card.png"
+        src="/assets/backgrounds/blue-cloud-bg-card.webp"
         position={"absolute"}
         alt="blue-cloud-bg"
         right={{ base: -140, md: 0 }}

@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 
 import { getConfig } from "@repo/config"
 import { useTranslation } from "react-i18next"
-import { EnvConfig, EnvConfigValues } from "@repo/config/contracts"
+import { EnvConfig, EnvConfigValues, AppEnv } from "@repo/config/contracts"
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
 import {
@@ -29,7 +29,7 @@ import {
 } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 
-const devEnvs: EnvConfig[] = ["local", "e2e", "testnet-staging"]
+const devEnvs: EnvConfig[] = [AppEnv.LOCAL, AppEnv.E2E, AppEnv.TESTNET_STAGING, AppEnv.GALACTICA_TEST]
 
 export const FunctionsPageContent = () => {
   const env = getConfig().environment

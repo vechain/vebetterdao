@@ -44,6 +44,7 @@ import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
 import { AddressUtils } from "@/utils"
 import { FormItem } from "../CustomFormFields"
+import { CategorySelector } from "@/components/CategorySelector"
 
 // Validate image uploads with size and type
 const validateImageUpload = async (
@@ -76,6 +77,7 @@ export type CreateEditAppFormData = {
   banner: string
   projectUrl: string
   distributionStrategy: string
+  categories: string[]
   treasuryWalletAddress: string
   adminWalletAddress: string
   ve_world_banner: string
@@ -239,6 +241,17 @@ export const CreateEditAppForm = ({
             error={errors.distributionStrategy?.message}
           />
 
+          <CategorySelector
+            fieldName="categories"
+            register={register}
+            setValue={setValue}
+            watch={watch}
+            registerOptions={{
+              required: { value: true, message: t("Categories are required") },
+            }}
+            error={errors.categories?.message}
+          />
+
           <FormControl isInvalid={!treasuryWalletAddress}>
             <FormLabel>{t("Treasury address")}</FormLabel>
             <Text fontSize="xs" color="gray.500" mb={2}>
@@ -293,7 +306,7 @@ export const CreateEditAppForm = ({
                   if (!value) {
                     return "Logo is required"
                   }
-                  if (value === "/images/dapp_icon_placeholder.svg") return "Please upload a logo"
+                  if (value === "/assets/icons/dapp_icon_placeholder.svg") return "Please upload a logo"
                 },
               }}
               render={({ field: { value } }) => (
@@ -331,7 +344,7 @@ export const CreateEditAppForm = ({
                   if (!value) {
                     return "Logo is required"
                   }
-                  if (value === "/images/dapp_banner_placeholder.svg") return "Please upload a banner"
+                  if (value === "/assets/icons/dapp_banner_placeholder.svg") return "Please upload a banner"
                 },
               }}
               render={({ field: { value } }) => (

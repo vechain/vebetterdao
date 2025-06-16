@@ -9,11 +9,9 @@ import {
   useXNodeCheckCooldown,
   XApp,
 } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useEndorseApp } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Icon } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
-import { PropsEndorsement } from "./UnendorseAppModal"
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useCallback, useMemo } from "react"
@@ -21,7 +19,7 @@ import { Trans } from "react-i18next"
 import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -30,7 +28,7 @@ type Props = {
 
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
-
+  const { isTxModalOpen } = useTransactionModal()
   const { data: endorsementScore, isLoading: isAppScoreLoading } = useAppEndorsementScore(xApp?.id ?? "")
   const { data: endorsementScoreThreshold, isLoading: isEndorsementThresholdLoading } = useEndorsementScoreThreshold()
 
@@ -46,14 +44,16 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
+  const handleSuccess = useCallback(() => {
+    onClose()
+  }, [onClose])
+
   //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
     appId: xApp?.id ?? "",
     nodeId,
     userAddress: account?.address ?? "",
-    onSuccess: () => {
-      endorseAppMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
   //TODO: Handle multiple xNodes on UI
@@ -68,46 +68,24 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     [newScore, endorsementThreshold, appScore],
   )
   const handleEndorsement = useCallback(() => {
-    endorseAppMutation.resetStatus()
-    endorseAppMutation.sendTransaction(undefined)
+    endorseAppMutation.sendTransaction()
   }, [endorseAppMutation])
 
-  const endorsementInfo: PropsEndorsement = {
-    isUnendorsing: false,
-    isEndorsing: true,
-    points: userEndorsementScore.data,
-    endorsedAppName: xApp?.name,
-    xNodeLevel: firstNode?.level,
-  }
+  //TODO: Add this to review modal before sending transaction
+  // const endorsementInfo: PropsEndorsement = {
+  //   isUnendorsing: false,
+  //   isEndorsing: true,
+  //   points: userEndorsementScore.data,
+  //   endorsedAppName: xApp?.name,
+  //   xNodeLevel: firstNode?.level,
+  // }
 
   const shouldDisplayCooldownAlert = useMemo(() => {
     return account?.address && !isXNodeOnCooldown
   }, [account, isXNodeOnCooldown])
 
-  if (endorseAppMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        successTitle={t("Endorse dApp")}
-        status={
-          endorseAppMutation.error
-            ? TransactionModalStatus.Error
-            : (endorseAppMutation.status as TransactionModalStatus)
-        }
-        errorDescription={endorseAppMutation.error?.reason}
-        errorTitle={endorseAppMutation.error ? "Error endorsing" : undefined}
-        showTryAgainButton
-        onTryAgain={handleEndorsement}
-        pendingTitle={"Endorsing app..."}
-        showExplorerButton
-        txId={endorseAppMutation.txReceipt?.meta.txID}
-        endorsementInfo={endorsementInfo}
-      />
-    )
-
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
       <VStack spacing={6} align="flex-start" w="full">
         <Heading size="lg">{t("Endorse dApp")}</Heading>
         <Text
@@ -226,7 +204,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         </Skeleton>
         {newScoreMetThreshold ? (
           <HStack spacing={4} align={"center"} w={"full"}>
-            <Icon as={UilExclamationCircle} boxSize="24px" color="#252525" />
+            <Icon as={UilExclamationCircle} boxSize="24px" />
             <Text color="black">
               {t("With your endorsement, {{appName}} gets enough score to get into the next allocation round.", {
                 appName: xApp?.name,

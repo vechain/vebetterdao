@@ -6,21 +6,21 @@ import { useTranslation } from "react-i18next"
 
 const Steps: StepCardProps[] = [
   {
-    stepImageSrc: "/images/sign.svg",
+    stepImageSrc: "/assets/icons/sign.svg",
     stepNumber: 1,
     stepTitle: "App submition",
     stepDescription:
       "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.",
   },
   {
-    stepImageSrc: "/images/handshake.svg",
+    stepImageSrc: "/assets/icons/handshake.svg",
     stepNumber: 2,
     stepTitle: "Endorsement",
     stepDescription:
       "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.",
   },
   {
-    stepImageSrc: "/images/vote.svg",
+    stepImageSrc: "/assets/icons/vote.svg",
     stepNumber: 3,
     stepTitle: "Allocation voting",
     stepDescription:
@@ -30,6 +30,15 @@ const Steps: StepCardProps[] = [
 export const NewAppPageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
+
+  const LINK_TO_DOCS = () => {
+    window.open(
+      "https://docs.vebetterdao.org/vebetterdao/x2earn-apps#voting-eligibility-and-endorsement-status",
+      "_blank",
+      "noopener",
+    )
+  }
+
   const onContinueClick = () => {
     router.push("/apps/new/form")
   }
@@ -55,7 +64,7 @@ export const NewAppPageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} spacing={4}>
-                <Button rounded="full" variant={"outline"} colorScheme="primary" size="lg">
+                <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorScheme="primary" size="lg">
                   {t("More info")}
                 </Button>
                 <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>

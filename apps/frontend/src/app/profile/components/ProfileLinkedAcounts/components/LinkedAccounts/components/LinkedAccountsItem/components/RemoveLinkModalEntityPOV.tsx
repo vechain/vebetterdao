@@ -14,13 +14,21 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRemoveEntityLink } from "@/hooks"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosureProps; entity: string }) => {
   const { t } = useTranslation()
+  const { isTxModalOpen } = useTransactionModal()
+  const { isOpen = false, onClose } = modal
 
-  const removeLinking = useRemoveEntityLink({})
+  const handleClose = useCallback(() => {
+    onClose?.()
+  }, [onClose])
+
+  const removeLinking = useRemoveEntityLink({
+    onSuccess: handleClose,
+  })
 
   const handleRemoveLink = useCallback(() => {
     removeLinking.sendTransaction({ entity })
@@ -28,31 +36,8 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
-  const handleClose = useCallback(() => {
-    modal.onClose?.()
-    removeLinking.resetStatus()
-  }, [modal, removeLinking])
-
-  if (removeLinking.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Linking rejected!")}
-        status={removeLinking.status as TransactionModalStatus}
-        errorDescription={removeLinking.error?.reason}
-        errorTitle={removeLinking.error ? t("Error removing linking") : undefined}
-        showTryAgainButton
-        onTryAgain={() => removeLinking.sendTransaction({ entity })}
-        pendingTitle={t("Removing linking...")}
-        showExplorerButton
-        txId={removeLinking.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={isOpen && !isTxModalOpen}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

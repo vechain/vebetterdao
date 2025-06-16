@@ -53,7 +53,7 @@ export const AnimatedStar = ({
         justifyContent: "center",
         alignItems: "center",
       }}>
-      <Image src="/images/nft-star.svg" alt="Animated star" />
+      <Image src="/assets/icons/nft-star.svg" alt="Animated star" />
     </motion.div>
   )
 }

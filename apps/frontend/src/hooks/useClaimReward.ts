@@ -3,13 +3,13 @@ import { buildClaimRoundReward, getB3TrBalanceQueryKey, getRoundRewardQueryKey }
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 type useClaimRewardProps = {
   roundId: string // The round id to claim the reward for.
   onSuccess?: () => void
   onFailure?: () => void
-  invalidateCache?: boolean
-  onSuccessMessageTitle?: string
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 /**
@@ -18,7 +18,7 @@ type useClaimRewardProps = {
  *
  * @param {useClaimRewardProps} params - The parameters required to claim the reward.
  */
-export const useClaimReward = ({ roundId, onSuccess, onFailure }: useClaimRewardProps) => {
+export const useClaimReward = ({ roundId, onSuccess, onFailure, transactionModalCustomUI }: useClaimRewardProps) => {
   const { account } = useWallet()
 
   const buildClauses = useCallback(() => {
@@ -40,5 +40,6 @@ export const useClaimReward = ({ roundId, onSuccess, onFailure }: useClaimReward
     onSuccess,
     onFailure,
     refetchQueryKeys,
+    transactionModalCustomUI,
   })
 }

@@ -10,7 +10,7 @@ import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import { useWallet, useConnex } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
-
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 const config = getConfig()
 
 // const buffer = 1.01
@@ -20,6 +20,7 @@ const config = getConfig()
 type useMintB3trProps = {
   amount?: string | number
   onSuccess?: () => void
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 /**
@@ -29,7 +30,7 @@ type useMintB3trProps = {
  * @param onSuccess callback to run when the upgrade is successful
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useConvertVot3 = ({ amount, onSuccess }: useMintB3trProps) => {
+export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: useMintB3trProps) => {
   const { thor } = useConnex()
   const { account } = useWallet()
 
@@ -55,5 +56,6 @@ export const useConvertVot3 = ({ amount, onSuccess }: useMintB3trProps) => {
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
+    transactionModalCustomUI,
   })
 }

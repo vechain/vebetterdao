@@ -83,9 +83,9 @@ export const ProposalOverview = () => {
                     <HStack>
                       <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
                       {compareAddresses(proposal.proposer, account?.address || "") ? (
-                        <Text color="#252525">{t("You")}</Text>
+                        <Text>{t("You")}</Text>
                       ) : (
-                        <Text color="#252525">{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
+                        <Text>{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
                       )}
                     </HStack>
                   </Skeleton>

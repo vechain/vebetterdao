@@ -49,7 +49,7 @@ export const AdminPageContent = () => {
   const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
-      <Tabs>
+      <Tabs isLazy>
         <TabList
           overflowY="hidden"
           sx={{

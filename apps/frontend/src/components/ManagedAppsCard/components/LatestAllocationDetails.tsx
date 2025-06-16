@@ -46,7 +46,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
   return (
     <Skeleton isLoaded={!isLoading} w={"full"}>
       <HStack
-        bg={`#F8F8F8`}
+        bg={"light-contrast-on-card-bg"}
         py={6}
         px={3}
         h="full"
@@ -56,7 +56,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
         alignItems={"center"}>
         <VStack align="self-start" spacing={0}>
           <HStack>
-            <Image h="24px" w="24px" src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h="24px" w="24px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Heading fontSize="24px">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
           </HStack>
           <Text fontSize={"sm"} color={"gray.500"}>

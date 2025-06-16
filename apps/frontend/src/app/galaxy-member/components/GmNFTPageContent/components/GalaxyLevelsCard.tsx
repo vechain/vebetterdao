@@ -64,7 +64,7 @@ export const GalaxyLevelsCard = () => {
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Galaxy Levels")}</Heading>
+              <Heading fontSize="lg">{t("Reward Weight")}</Heading>
               <BaseTooltip
                 text={
                   <TableContainer maxW="280px" maxH="400px" overflowY="auto">
@@ -75,7 +75,7 @@ export const GalaxyLevelsCard = () => {
                             {t("Name")}
                           </Th>
                           <Th color="white" py={2} isNumeric>
-                            {t("Multiplier")}
+                            {t("Reward Weight")}
                           </Th>
                           <Th color="white" py={2} isNumeric>
                             {t("Cost")}
@@ -104,7 +104,7 @@ export const GalaxyLevelsCard = () => {
               </BaseTooltip>
             </HStack>
             <Text fontSize="sm" color="#6A6A6A">
-              {t("Earn enough B3TR to upgrade your level and get multipliers for all your voting rewards!")}
+              {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
             </Text>
           </VStack>
           {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGmLevel)).map(gmNft => {
@@ -138,12 +138,10 @@ export const GalaxyLevelsCard = () => {
                       WebkitTextFillColor: "transparent",
                     }}>
                     {gmNft.multiplier}
-                    {"x"}
                   </Heading>
                 ) : (
                   <Text fontSize="lg" color="#6A6A6A">
                     {gmNft.multiplier}
-                    {"x"}
                   </Text>
                 )}
               </HStack>

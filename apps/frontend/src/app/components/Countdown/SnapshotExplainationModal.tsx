@@ -52,9 +52,9 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
             </Text>
 
             <VStack w={"full"} h={"full"} justifyContent={"space-between"} alignItems={"flex-start"} gap={[2, 2, 4]}>
-              <HStack w="full" justifyContent="start" p={2} bg={"#f7f7f7"} borderRadius={"9px"}>
+              <HStack w="full" justifyContent="start" p={2} bg={"info-bg"} borderRadius={"9px"}>
                 <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                  <Image boxSize={["70px", "100px"]} src="/images/b3tr-to-vot3.svg" alt="B3TR to VOT3" />
+                  <Image boxSize={["70px", "100px"]} src="/assets/tokens/b3tr-to-vot3.webp" alt="B3TR to VOT3" />
                 </Box>
                 <VStack gap={0} alignItems={"start"} p={1}>
                   {renderStep(1)}
@@ -64,9 +64,9 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                 </VStack>
               </HStack>
 
-              <HStack w="full" justifyContent="start" p={2} bg={"#f7f7f7"} borderRadius={"9px"}>
+              <HStack w="full" justifyContent="start" p={2} bg={"info-bg"} borderRadius={"9px"}>
                 <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                  <Image boxSize={["70px", "100px"]} src="/images/vote-icon.png" alt="Cast your vote" />
+                  <Image boxSize={["70px", "100px"]} src="/assets/icons/vote-icon.webp" alt="Cast your vote" />
                 </Box>
                 <VStack gap={0} alignItems={"start"} p={1}>
                   {renderStep(2)}
@@ -76,9 +76,13 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                 </VStack>
               </HStack>
 
-              <HStack w="full" justifyContent="start" p={2} bg={"#f7f7f7"} borderRadius={"9px"}>
+              <HStack w="full" justifyContent="start" p={2} bg={"info-bg"} borderRadius={"9px"}>
                 <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                  <Image boxSize={["70px", "100px"]} src="/images/claim-b3tr-icon.png" alt="Receive your rewards" />
+                  <Image
+                    boxSize={["70px", "100px"]}
+                    src="/assets/icons/claim-b3tr-icon.webp"
+                    alt="Receive your rewards"
+                  />
                 </Box>
                 <VStack gap={0} alignItems={"start"} p={1}>
                   {renderStep(3)}

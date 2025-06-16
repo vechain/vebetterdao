@@ -14,10 +14,9 @@ import {
   Select,
   Text,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { useMemo, useEffect, useCallback } from "react"
+import { useMemo, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -26,7 +25,6 @@ import { useAccessControl } from "@/hooks"
 import { CONTRACT_LIST } from "@/constants"
 import { WalletAddressInput } from "@/app/components/Input"
 import { useWallet } from "@vechain/vechain-kit"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 type UpdateRoleCardInput = {
   contract?: string
   role?: string
@@ -50,11 +48,6 @@ export const UpdateRoleCard = () => {
 
   const { t } = useTranslation()
   const { account } = useWallet()
-  const {
-    isOpen: isTransactionModalOpen,
-    onOpen: openTransactionModal,
-    onClose: closeTransactionModal,
-  } = useDisclosure()
 
   const walletAddress = watch("walletAddress")
   const selectedContractAddress = watch("contract")
@@ -100,13 +93,8 @@ export const UpdateRoleCard = () => {
   }, [userAlreadyHasRole, account?.address, walletAddress, grantRole, renounceRole, revokeRole])
 
   const handleFormSubmit = (_: any) => {
-    accessControlAction.sendTransaction(undefined)
-    openTransactionModal()
+    accessControlAction.sendTransaction()
   }
-  const handleClose = useCallback(() => {
-    accessControlAction.resetStatus()
-    closeTransactionModal()
-  }, [accessControlAction, closeTransactionModal])
 
   useEffect(() => {
     setValue("role", "") // Reset role when contract changes
@@ -120,133 +108,117 @@ export const UpdateRoleCard = () => {
   }
 
   return (
-    <>
-      <Card w={"full"}>
-        <CardHeader>
-          <Heading size="lg">{t("Update Address Role")}</Heading>
-          <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
-        </CardHeader>
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">{t("Update Address Role")}</Heading>
+        <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
+      </CardHeader>
 
-        <CardBody>
-          <form onSubmit={handleSubmit(handleFormSubmit)}>
-            <VStack spacing={4} alignItems={"start"}>
-              <FormControl isInvalid={!!errors.contract} isRequired>
-                <FormLabel>{t("Select Contract")}</FormLabel>
+      <CardBody>
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
+          <VStack spacing={4} alignItems={"start"}>
+            <FormControl isInvalid={!!errors.contract} isRequired>
+              <FormLabel>{t("Select Contract")}</FormLabel>
+              <Controller
+                name="contract"
+                control={control}
+                rules={{ required: t("This field is required") }}
+                render={({ field }) => (
+                  <Select {...field} placeholder={t("Select Contract")}>
+                    {CONTRACT_LIST.map(contract => (
+                      <option key={contract.contractAddress} value={contract.contractAddress}>
+                        {contract.name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              />
+              <FormErrorMessage>{errors.contract?.message}</FormErrorMessage>
+            </FormControl>
+
+            {selectedContractAddress && (
+              <FormControl isInvalid={!!errors.role} isRequired>
+                <FormLabel>{t("Select Role")}</FormLabel>
                 <Controller
-                  name="contract"
+                  name="role"
                   control={control}
                   rules={{ required: t("This field is required") }}
                   render={({ field }) => (
-                    <Select {...field} placeholder={t("Select Contract")}>
-                      {CONTRACT_LIST.map(contract => (
-                        <option key={contract.contractAddress} value={contract.contractAddress}>
-                          {contract.name}
+                    <Select {...field} placeholder={t("Select Role")}>
+                      {selectedContractObject?.roles.map(role => (
+                        <option key={role} value={role}>
+                          {role}
                         </option>
                       ))}
                     </Select>
                   )}
                 />
-                <FormErrorMessage>{errors.contract?.message}</FormErrorMessage>
+                <FormErrorMessage>{errors.role?.message}</FormErrorMessage>
               </FormControl>
+            )}
 
-              {selectedContractAddress && (
-                <FormControl isInvalid={!!errors.role} isRequired>
-                  <FormLabel>{t("Select Role")}</FormLabel>
-                  <Controller
-                    name="role"
-                    control={control}
-                    rules={{ required: t("This field is required") }}
-                    render={({ field }) => (
-                      <Select {...field} placeholder={t("Select Role")}>
-                        {selectedContractObject?.roles.map(role => (
-                          <option key={role} value={role}>
-                            {role}
-                          </option>
-                        ))}
-                      </Select>
-                    )}
-                  />
-                  <FormErrorMessage>{errors.role?.message}</FormErrorMessage>
-                </FormControl>
-              )}
+            <FormControl>
+              <FormLabel>{t("Wallet Address")}</FormLabel>
+              <WalletAddressInput
+                onAddressResolved={address => setValue("walletAddress", address ?? "")}
+                placeholder={t("Enter wallet address or domain to grant or revoke role")}
+              />
+            </FormControl>
 
-              <FormControl>
-                <FormLabel>{t("Wallet Address")}</FormLabel>
-                <WalletAddressInput
-                  onAddressResolved={address => setValue("walletAddress", address ?? "")}
-                  placeholder={t("Enter wallet address or domain to grant or revoke role")}
-                />
-              </FormControl>
+            {isFormValid && !hasRoleError && (
+              <VStack w="full" align="stretch" flexWrap="wrap">
+                {userAlreadyHasRole ? (
+                  <Badge
+                    textTransform="none"
+                    fontSize="sm"
+                    display="flex"
+                    alignItems="center"
+                    borderRadius="12px"
+                    p={2}
+                    colorScheme={"green"}>
+                    <HStack>
+                      <Icon as={UilCheckCircle} color="green" />
+                      <Text>
+                        {t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
+                          humanAddress: humanAddress(walletAddress),
+                          selectedRole,
+                        })}
+                      </Text>
+                    </HStack>
+                  </Badge>
+                ) : (
+                  <Badge
+                    textTransform="none"
+                    fontSize="sm"
+                    display="flex"
+                    alignItems="center"
+                    borderRadius="12px"
+                    p={2}
+                    colorScheme={"red"}>
+                    <HStack>
+                      <Icon as={UilExclamationCircle} color="red" />
+                      <Text>
+                        {t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
+                          humanAddress: humanAddress(walletAddress),
+                          selectedRole,
+                        })}
+                      </Text>
+                    </HStack>
+                  </Badge>
+                )}
+              </VStack>
+            )}
 
-              {isFormValid && !hasRoleError && (
-                <VStack w="full" align="stretch" flexWrap="wrap">
-                  {userAlreadyHasRole ? (
-                    <Badge
-                      textTransform="none"
-                      fontSize="sm"
-                      display="flex"
-                      alignItems="center"
-                      borderRadius="12px"
-                      p={2}
-                      colorScheme={"green"}>
-                      <HStack>
-                        <Icon as={UilCheckCircle} color="green" />
-                        <Text>
-                          {t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
-                            humanAddress: humanAddress(walletAddress),
-                            selectedRole,
-                          })}
-                        </Text>
-                      </HStack>
-                    </Badge>
-                  ) : (
-                    <Badge
-                      textTransform="none"
-                      fontSize="sm"
-                      display="flex"
-                      alignItems="center"
-                      borderRadius="12px"
-                      p={2}
-                      colorScheme={"red"}>
-                      <HStack>
-                        <Icon as={UilExclamationCircle} color="red" />
-                        <Text>
-                          {t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
-                            humanAddress: humanAddress(walletAddress),
-                            selectedRole,
-                          })}
-                        </Text>
-                      </HStack>
-                    </Badge>
-                  )}
-                </VStack>
-              )}
-
-              <Button
-                isLoading={accessControlAction.isTransactionPending}
-                isDisabled={!isFormValid || !!hasRoleError}
-                colorScheme={userAlreadyHasRole ? "red" : "green"}
-                type="submit">
-                {getButtonText()}
-              </Button>
-            </VStack>
-          </form>
-        </CardBody>
-      </Card>
-
-      <TransactionModal
-        isOpen={isTransactionModalOpen}
-        onClose={handleClose}
-        status={accessControlAction.status as TransactionModalStatus}
-        txId={accessControlAction?.txReceipt?.meta.txID}
-        errorDescription={accessControlAction?.error?.reason ?? "Unknown error"}
-        showSocialButtons
-        showExplorerButton
-        onTryAgain={handleSubmit(handleFormSubmit)}
-        showTryAgainButton
-        pendingTitle={t("Updating wallet address role...")}
-        errorTitle={t("Error updating role")}
-      />
-    </>
+            <Button
+              isLoading={accessControlAction.isTransactionPending}
+              isDisabled={!isFormValid || !!hasRoleError}
+              colorScheme={userAlreadyHasRole ? "red" : "green"}
+              type="submit">
+              {getButtonText()}
+            </Button>
+          </VStack>
+        </form>
+      </CardBody>
+    </Card>
   )
 }

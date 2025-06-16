@@ -74,10 +74,10 @@ export const UserSignaledBanner = () => {
             </Text>
           </>
         }
-        logoSrc="/images/info-bell.png"
+        logoSrc="/assets/icons/info-bell.webp"
         backgroundColor="#FFD979"
-        backgroundImageSrc="/images/cloud-background-orange.png"
-        buttonLabel={t("Know more")}
+        backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
+        buttonLabel={t("Appeal here")}
         onButtonClick={onOpen}
         buttonVariant="outline"
         buttonIcon={<UilInfoCircle />}

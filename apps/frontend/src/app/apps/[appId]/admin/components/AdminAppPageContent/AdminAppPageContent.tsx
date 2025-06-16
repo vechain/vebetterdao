@@ -16,11 +16,12 @@ import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT"
+import { useCurrentAppSignalers } from "../../../hooks/useCurrentAppSignalers"
+import { EditAppSignalers } from "./components/EditAppSignalers"
 
 export type AdminAppForm = {
   adminAddress: string
@@ -28,6 +29,7 @@ export type AdminAppForm = {
   moderators: string[]
   creators: string[]
   distributors: string[]
+  signalers: string[]
 }
 
 export const AdminAppPageContent = () => {
@@ -41,6 +43,7 @@ export const AdminAppPageContent = () => {
   const { moderators, isLoading: moderatorsLoading } = useCurrentAppModerators()
   const { creators, isLoading: creatorsLoading } = useCurrentAppCreators()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
+  const { activeSignalers: signalers, isLoading: signalersLoading } = useCurrentAppSignalers()
   const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
   const { appMetadata } = useCurrentAppMetadata()
 
@@ -48,17 +51,17 @@ export const AdminAppPageContent = () => {
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
 
   const updateConfirmationModal = useDisclosure()
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
-
   const onchainAddresses = useRef({
     moderators: [] as string[],
     creators: [] as string[],
     adminAddress: "",
     teamWalletAddress: "",
     distributors: [] as string[],
+    signalers: [] as string[],
   })
 
-  const isAddressesLoading = adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading
+  const isAddressesLoading =
+    adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading || signalersLoading
 
   const form = useForm<AdminAppForm>({
     defaultValues: {
@@ -67,6 +70,7 @@ export const AdminAppPageContent = () => {
       adminAddress: "",
       teamWalletAddress: "",
       distributors: [],
+      signalers: [],
     },
   })
 
@@ -79,24 +83,26 @@ export const AdminAppPageContent = () => {
       adminAddress: admin || "",
       teamWalletAddress: app?.teamWalletAddress || "",
       distributors: [...(distributors || [])],
+      signalers: [...(signalers || [])],
     }
     onchainAddresses.current = newOnchainAddresses
     // Resetting the form with the most updated values onchain
     form.reset(newOnchainAddresses)
-  }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators])
+  }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators, signalers])
 
   useEffect(() => {
     if (!isAddressesLoading && admin && app?.teamWalletAddress) {
       syncForm()
     }
-  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, isAddressesLoading])
+  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, signalers, isAddressesLoading])
 
-  const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators] = form.watch([
+  const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators, newSignalers] = form.watch([
     "adminAddress",
     "teamWalletAddress",
     "moderators",
     "distributors",
     "creators",
+    "signalers",
   ])
 
   const haveAddressesChanged = (currentAddresses: string[], newAddresses: string[]) => {
@@ -118,47 +124,41 @@ export const AdminAppPageContent = () => {
   const isModeratorsChanged = haveAddressesChanged(onchainAddresses.current.moderators, newModerators)
   const isDistributorsChanged = haveAddressesChanged(onchainAddresses.current.distributors, newDistributors)
   const isCreatorsChanged = haveAddressesChanged(onchainAddresses.current.creators, newCreators)
+  const isSignalersChanged = haveAddressesChanged(onchainAddresses.current.signalers, newSignalers)
 
   const hasUnsavedChanges =
     isAdminAddressChanged ||
     isTeamWalletAddressChanged ||
     isModeratorsChanged ||
     isDistributorsChanged ||
-    isCreatorsChanged
+    isCreatorsChanged ||
+    isSignalersChanged
   const disableSaveButton = !hasUnsavedChanges
+
+  const handleSuccess = useCallback(() => {
+    // After successful transaction, update the reference with form values
+    onchainAddresses.current = {
+      adminAddress: adminAddress,
+      moderators: [...newModerators],
+      creators: [...newCreators],
+      distributors: [...newDistributors],
+      signalers: [...newSignalers],
+      teamWalletAddress: teamWalletAddress,
+    }
+  }, [adminAddress, newModerators, newCreators, newDistributors, newSignalers, teamWalletAddress])
 
   const updateMutation = useUpdateAppAdminInfo({
     appId: app?.id || "",
-    onSuccess: () => {
-      onConfirmationClose()
-      // After successful transaction, update the reference with form values
-      onchainAddresses.current = {
-        adminAddress: adminAddress,
-        moderators: [...newModerators],
-        creators: [...newCreators],
-        distributors: [...newDistributors],
-        teamWalletAddress: teamWalletAddress,
-      }
-      updateMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
-  const handleClose = useCallback(() => {
-    onConfirmationClose()
-    updateMutation.resetStatus()
-  }, [onConfirmationClose, updateMutation])
-
   const goBack = useCallback(() => {
-    onConfirmationClose()
     router.push(`/apps/${app?.id}`)
     form.reset()
-    updateMutation.resetStatus()
-  }, [form, onConfirmationClose, router, updateMutation])
+  }, [app?.id, form, router])
 
   const onSubmit = useCallback(
     (data: AdminAppForm) => {
-      onConfirmationOpen()
-
       const moderatorsToBeAdded = getAddressesToAdd(data.moderators, onchainAddresses.current.moderators)
       const moderatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.moderators, data.moderators)
 
@@ -167,6 +167,9 @@ export const AdminAppPageContent = () => {
 
       const creatorsToBeAdded = getAddressesToAdd(data.creators, onchainAddresses.current.creators)
       const creatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.creators, data.creators)
+
+      const signalersToBeAdded = getAddressesToAdd(data.signalers, onchainAddresses.current.signalers)
+      const signalersToBeRemoved = getAddressesToRemove(onchainAddresses.current.signalers, data.signalers)
 
       updateMutation.sendTransaction({
         appId: app?.id || "",
@@ -178,9 +181,11 @@ export const AdminAppPageContent = () => {
         distributorsToBeRemoved,
         creatorsToBeAdded,
         creatorsToBeRemoved,
+        signalersToBeAdded,
+        signalersToBeRemoved,
       })
     },
-    [onConfirmationOpen, updateMutation, app?.id, isAdminAddressChanged, isTeamWalletAddressChanged],
+    [updateMutation, app?.id, isAdminAddressChanged, isTeamWalletAddressChanged],
   )
 
   const checkAddresses = useCallback(
@@ -193,11 +198,6 @@ export const AdminAppPageContent = () => {
     },
     [isAdminAddressChanged, isTeamWalletAddressChanged, onSubmit, updateConfirmationModal],
   )
-
-  const onTryAgain = useCallback(() => {
-    handleClose()
-    form.handleSubmit(onSubmit)()
-  }, [form, handleClose, onSubmit])
 
   const allowedToEditAdminInfo = useMemo(
     () => compareAddresses(account?.address || "", admin) || permissions?.isAdminOfX2EarnApps,
@@ -215,57 +215,43 @@ export const AdminAppPageContent = () => {
   }
 
   return (
-    <>
-      <Card variant="baseWithBorder" w="full">
-        <CardBody>
-          <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
-            <Heading fontSize={"36px"} fontWeight={700}>
-              {t("{{app}} settings", { app: appMetadata?.name })}
-            </Heading>
-            <EditAppCreatorNFT form={form} />
-            <Divider />
-            <EditAppModerators form={form} />
-            <Divider />
-            <EditAppAddresses
-              form={form}
-              editAdminAddress={editAdminAddress}
-              setEditAdminAddress={setEditAdminAddress}
-              editTeamWalletAddress={editTeamWalletAddress}
-              setEditTeamWalletAddress={setEditTeamWalletAddress}
-            />
-            <EditAppRewardDistributors form={form} />
-            <HStack justify={"space-between"} mt={8}>
-              <Button variant="primaryGhost" onClick={goBack}>
-                {t("Go back")}
-              </Button>
-              <Button variant="primaryAction" type="submit" isDisabled={disableSaveButton}>
-                {t("Save all changes")}
-              </Button>
-            </HStack>
-          </VStack>
-          <UpdateConfirmationModal
-            {...updateConfirmationModal}
+    <Card variant="baseWithBorder" w="full">
+      <CardBody>
+        <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
+          <Heading fontSize={"36px"} fontWeight={700}>
+            {t("{{app}} settings", { app: appMetadata?.name })}
+          </Heading>
+          <EditAppCreatorNFT form={form} />
+          <Divider />
+          <EditAppModerators form={form} />
+          <Divider />
+          <EditAppSignalers form={form} />
+          <Divider />
+          <EditAppAddresses
             form={form}
-            onSubmit={form.handleSubmit(onSubmit)}
-            isAdminAddressChanged={isAdminAddressChanged}
-            isTeamWalletAddressChanged={isTeamWalletAddressChanged}
+            editAdminAddress={editAdminAddress}
+            setEditAdminAddress={setEditAdminAddress}
+            editTeamWalletAddress={editTeamWalletAddress}
+            setEditTeamWalletAddress={setEditTeamWalletAddress}
           />
-        </CardBody>
-      </Card>
-      <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={handleClose}
-        confirmationTitle="Update app admin info"
-        successTitle="App admin info updated!"
-        status={updateMutation.status as TransactionModalStatus}
-        errorDescription={updateMutation.error?.reason}
-        errorTitle={"Error updating app admin info"}
-        showTryAgainButton={true}
-        onTryAgain={onTryAgain}
-        pendingTitle="Updating app admin info..."
-        txId={updateMutation.txReceipt?.meta.txID}
-        showExplorerButton
-      />
-    </>
+          <EditAppRewardDistributors form={form} />
+          <HStack justify={"space-between"} mt={8}>
+            <Button variant="primaryGhost" onClick={goBack}>
+              {t("Go back")}
+            </Button>
+            <Button variant="primaryAction" type="submit" isDisabled={disableSaveButton}>
+              {t("Save all changes")}
+            </Button>
+          </HStack>
+        </VStack>
+        <UpdateConfirmationModal
+          {...updateConfirmationModal}
+          form={form}
+          onSubmit={form.handleSubmit(onSubmit)}
+          isAdminAddressChanged={isAdminAddressChanged}
+          isTeamWalletAddressChanged={isTeamWalletAddressChanged}
+        />
+      </CardBody>
+    </Card>
   )
 }

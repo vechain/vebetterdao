@@ -75,9 +75,6 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
 
   return (
     <VStack gap={6} alignItems={"stretch"} as="form" onSubmit={handleSubmit}>
-      <Text fontSize={"28px"} fontWeight={700}>
-        {t("Support this proposal with VOT3")}
-      </Text>
       <Text>
         {t(
           "Show your support to this proposal by contributing with your VOT3 tokens, allowing it to be up for voting on Round {{round}}",
@@ -89,17 +86,14 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
           {t("Your contribution")}
         </Text>
         <HStack>
-          <Image h="36px" w="36px" src="/images/vot3-token.png" alt="vot3-token" />
+          <Image h="36px" w="36px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
           <Input
-            h="50px"
             placeholder="0"
-            fontSize="36px"
-            fontWeight={700}
             type="text"
             value={amount}
             onChange={handleChange}
-            variant="unstyled"
-            _placeholder={{ color: "black" }}
+            variant="amountInput"
+            data-testid={"amount-input"}
           />
           {Number(vot3Balance?.original) !== Number(amount) && (
             <Box>

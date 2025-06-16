@@ -11,4 +11,4 @@ export * from "./AnalyticsEvents"
 export * from "./featureFlag"
 export * from "./XAppsMedia"
 
-export const notFoundImage = "/images/image-not-found.png"
+export const notFoundImage = "/assets/images/image-not-found.webp"

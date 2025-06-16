@@ -95,20 +95,20 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
           <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
             <Skeleton isLoaded={!isLoading}>
-              <Heading size="md">
+              <Heading size="md" color={"#252525"}>
                 {t("Round #{{round}}", {
                   round: data?.roundId,
                 })}
               </Heading>
             </Skeleton>
-            <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
+            <Box w={1.5} h={1.5} borderRadius={"full"} bg={"#252525"} />
             <HStack spacing={2} align={"center"}>
               <Skeleton isLoaded={!isLoading}>
-                <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text color={"#252525"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
-              <Icon as={FaArrowRight} />
+              <Icon as={FaArrowRight} color={"#252525"} />
               <Skeleton isLoaded={!isLoading}>
-                <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text color={"#252525"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
             </HStack>
             <AllocationStateBadge roundId={roundId} renderIcon={isActive} />

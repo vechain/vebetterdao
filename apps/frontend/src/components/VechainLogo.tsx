@@ -4,8 +4,8 @@ import Image from "next/image"
 import React from "react"
 
 export const VechainLogo: React.FC = () => {
-  const lightModeUrl = "/images/logo/vechain.png"
-  const darkModeUrl = "/images/logo/vechain_white.png"
+  const lightModeUrl = "/assets/logos/vechain.webp"
+  const darkModeUrl = "/assets/logos/vechain_white.webp"
   const logoUrl = useColorModeValue(lightModeUrl, darkModeUrl)
 
   //Priority is set to true to prevent the logo from being lazy loaded and FOC

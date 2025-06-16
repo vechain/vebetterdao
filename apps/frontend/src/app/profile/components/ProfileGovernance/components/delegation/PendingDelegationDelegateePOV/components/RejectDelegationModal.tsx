@@ -14,12 +14,12 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRemovePendingDelegationDelegateePOV } from "@/hooks/useRemovePendingDelegationDelegateePOV"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
-
+  const { isTxModalOpen } = useTransactionModal()
   const rejectDelegation = useRemovePendingDelegationDelegateePOV({})
 
   const handleDelegate = useCallback(() => {
@@ -33,26 +33,8 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
     rejectDelegation.resetStatus()
   }, [modal, rejectDelegation])
 
-  if (rejectDelegation.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Delegation rejected!")}
-        status={rejectDelegation.status as TransactionModalStatus}
-        errorDescription={rejectDelegation.error?.reason}
-        errorTitle={rejectDelegation.error ? t("Error rejecting delegation") : undefined}
-        showTryAgainButton
-        onTryAgain={() => rejectDelegation.sendTransaction({ delegator })}
-        pendingTitle={t("Rejecting delegation...")}
-        showExplorerButton
-        txId={rejectDelegation.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

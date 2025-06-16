@@ -6,8 +6,8 @@ type Props = ImageProps & {
 }
 
 const paths = {
-  light: "/images/logo/vot3_logo.svg",
-  dark: "/images/logo/vot3_logo_dark.svg",
+  light: "/assets/logos/vot3_logo.svg",
+  dark: "/assets/logos/vot3_logo_dark.svg",
 }
 
 /**

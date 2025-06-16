@@ -23,6 +23,14 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
 /// based on the participation score, blacklisting, GM holdings and much more that can be added in the future.
+/**
+ * -------------------- Version 4 --------------------
+ * - Added RESET_SIGNALER_ROLE initialization
+ * - Extended resetUserSignalsWithReason to RESET_SIGNALER_ROLE
+ * - Restricted signalUser to DEFAULT_ADMIN_ROLE and signalUserWithReason to SIGNALER_ROLE
+ * - Renamed resetUserSignalsByAppAdminWithReason to resetUserSignalsByAppWithReason to be used by SIGNALER_ROLE
+ * - Fixed arithmetic underflow when resetting signals
+ */
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant ROLE_GRANTER = keccak256("ROLE_GRANTER");
@@ -31,6 +39,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
   bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
   bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
+  bytes32 public constant RESET_SIGNALER_ROLE = keccak256("RESET_SIGNALER_ROLE");
 
   // keccak256(abi.encode(uint256(keccak256("PassportStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant PassportStorageLocation = 0x273c9387b78d9b22e6f3371bb3aa3a918f53507e8cacc54e4831933cbb844100;
@@ -66,6 +75,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     _grantRole(WHITELISTER_ROLE, roles.whitelister);
     _grantRole(ACTION_REGISTRAR_ROLE, roles.actionRegistrar);
     _grantRole(ACTION_SCORE_MANAGER_ROLE, roles.actionScoreManager);
+  }
+
+  /// @notice Initializes the contract for version 4
+  /// @param _resetSignaler - the address of the reset signaler
+  function initializeV4(address _resetSignaler) external reinitializer(4) onlyRole(UPGRADER_ROLE) {
+    require(_resetSignaler != address(0), "VeBetterPassport: reset signaler is the zero address");
+
+    _grantRole(RESET_SIGNALER_ROLE, _resetSignaler);
   }
 
   // ---------- Modifiers ------------ //
@@ -463,7 +480,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Returns the version of the contract
   function version() external pure returns (string memory) {
-    return "3";
+    return "4";
   }
 
   // ---------- Setters ---------- //
@@ -688,7 +705,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Signals a user
-  function signalUser(address _user) external onlyRoleOrAdmin(SIGNALER_ROLE) {
+  function signalUser(address _user) external onlyRole(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.signalUser($, _user);
   }
@@ -718,7 +735,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Sets the signaling threshold
   /// @param threshold - the signaling threshold
-  function setSignalingThreshold(uint256 threshold) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+  function setSignalingThreshold(uint256 threshold) external onlyRoleOrAdmin(UPGRADER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.setSignalingThreshold($, threshold);
   }
@@ -746,7 +763,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @dev assigns the signals of a user to zero
   /// @param user - the address of the user
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsWithReason(address user, string memory reason) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function resetUserSignalsWithReason(
+    address user,
+    string memory reason
+  ) external onlyRoleOrAdmin(RESET_SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.resetUserSignals($, user, reason);
   }
@@ -754,9 +774,9 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @notice Resets the signals of a user by app admin
   /// @param user - the user to reset the signals of
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsByAppAdminWithReason(address user, string memory reason) external {
+  function resetUserSignalsByAppWithReason(address user, string memory reason) external onlyRoleOrAdmin(SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.resetUserSignalsByAppAdminWithReason($, user, reason);
+    PassportSignalingLogic.resetUserSignalsByAppWithReason($, user, reason);
   }
 
   /// @notice Sets the minimum galaxy member level

@@ -28,9 +28,11 @@ type Props = {
   onClose: () => void
   isEnablingRewardsPool?: boolean
   isPaused?: boolean
+  isAppAdmin?: boolean
+  isTreasuryAddress?: boolean
 }
 
-export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused }: Props) => {
+export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
 
   const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
@@ -72,7 +74,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
-                color="#252525"
                 justifyContent="space-between">
                 <Text fontSize={18} fontWeight={600}>
                   {t("Withdraw")}
@@ -82,7 +83,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Text>
                 <Button
                   mt={1}
-                  // isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                  isDisabled={!isAppAdmin}
                   onClick={() => {
                     onOpenWithdraw()
                     onClose()
@@ -99,7 +100,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
-                color="#252525"
                 justifyContent="space-between">
                 <Text fontSize={18} fontWeight={600}>
                   {t("Deposit")}
@@ -124,7 +124,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 spacing={4}
                 borderRadius="20px"
                 p="16px"
-                color="#252525"
                 border={"1px solid #D5D5D5"}
                 boxShadow={"none"}
                 justifyContent="space-between">
@@ -138,6 +137,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Text>
                 <Button
                   mt={1}
+                  isDisabled={!isAppAdmin}
                   onClick={() => {
                     onOpenFundsManagement()
                     onClose()

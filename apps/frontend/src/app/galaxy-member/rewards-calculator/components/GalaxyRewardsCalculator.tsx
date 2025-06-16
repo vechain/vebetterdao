@@ -5,15 +5,12 @@ import { Image, Card, HStack, Heading, Stack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import {
-  usePotentialRewards,
   useCurrentAllocationsRoundId,
-  useVoteRegisteredEvents,
-  useGetRewardsEventsOrFunction,
-  useCycleToTotal,
   useAllocationAmount,
   useParticipatedInGovernance,
-  useLatestVotingRound,
   useSelectedGmNft,
+  useGMLevelsOverview,
+  usePotentialRewardsFromIndexer,
 } from "@/api"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
 import { BaseTooltip } from "@/components"
@@ -29,39 +26,37 @@ export const GalaxyRewardsCalculator = () => {
   const usersGM = { gmLevel, gmId, b3trToUpgradeGMToNextLevel }
   const router = useRouter()
 
+  const { data: gmLevelOverview } = useGMLevelsOverview()
+
   const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
   const { data: currentRound } = useCurrentAllocationsRoundId()
-  const latestRounds = useLatestVotingRound(currentRound ?? "", account?.address ?? "")
+  let round = currentRound
 
-  const { data: emissionAmount } = useAllocationAmount(latestRounds?.roundId)
-  const { data: cycleToVoterToTotalEvents } = useVoteRegisteredEvents({
-    cycle: Number(latestRounds?.roundId),
-    voter: account?.address ?? "",
-  })
+  const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
+  if (emissionAmountCurrent?.gm == "0.0") {
+    round = (Number(currentRound) + 1).toString()
+  }
+
+  const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
+  const emissionAmount = emissionAmountCurrent?.gm == "0.0" ? emissionAmountNext : emissionAmountCurrent
+
   const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
-  const { data: cycleToTotal } = useCycleToTotal(latestRounds.roundId)
 
-  const currentReward = useGetRewardsEventsOrFunction(account?.address ?? "", latestRounds.roundId)
-  const emissionAmount_voterRewards = Number(emissionAmount?.voteX2Earn)
+  const emissionAmount_gmRewards = Number(emissionAmount?.gm) || 0
 
-  const cycleToVoterToTotal = useMemo(() => {
-    return cycleToVoterToTotalEvents?.reduce((acc, event) => acc + event.rewardWeightedVote, 0)
-  }, [cycleToVoterToTotalEvents])
-
-  const potentialRewards = usePotentialRewards(
-    cycleToTotal,
-    emissionAmount_voterRewards,
-    cycleToVoterToTotal ?? 0,
-    selectedGMLevel,
-    gmLevel,
+  const { potentialRewards, currentRewards } = usePotentialRewardsFromIndexer(
+    gmLevelOverview || [],
+    emissionAmount_gmRewards,
+    selectedGMLevel ?? "",
+    usersGM.gmLevel,
   )
 
   const estimatedRewards = useMemo(() => {
-    if (account && selectedGMLevel && cycleToVoterToTotal && cycleToTotal && emissionAmount_voterRewards) {
-      return potentialRewards
+    if (account && selectedGMLevel && emissionAmount_gmRewards) {
+      return { potentialRewards, currentRewards }
     }
     return null
-  }, [account, selectedGMLevel, cycleToVoterToTotal, cycleToTotal, emissionAmount_voterRewards, potentialRewards])
+  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards])
 
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
@@ -79,7 +74,7 @@ export const GalaxyRewardsCalculator = () => {
       variant="baseWithBorder"
       alignItems="center"
       style={{
-        backgroundImage: `url('/images/stardust.jpg')`,
+        backgroundImage: `url('/assets/backgrounds/stardust.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -101,11 +96,11 @@ export const GalaxyRewardsCalculator = () => {
           {/* ESTIMATE CARD */}
           <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
-              <Heading fontSize="x-large">{t("Estimated Rewards")}</Heading>
+              <Heading fontSize="x-large">{t("Potential Rewards")}</Heading>
               <BaseTooltip
                 text={t(
-                  "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.",
-                  { round: latestRounds?.roundId },
+                  "Rewards are estimated based on round {{round}} and the current GM distribution (levels, multipliers, and number of NFTs). Final rewards will be determined when the round ends and all votes are cast.",
+                  { round: round },
                 )}>
                 <span>
                   <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
@@ -114,7 +109,7 @@ export const GalaxyRewardsCalculator = () => {
             </HStack>
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
-              <Image boxSize="7" rounded="full" src="/images/logo/b3tr_logo.svg/" alt="b3tr" />
+              <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
               <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
                 {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
               </Text>
@@ -125,8 +120,12 @@ export const GalaxyRewardsCalculator = () => {
           {/* ACTUAL CARD */}
           <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
-              <Heading fontSize="x-large">{t("Actual Rewards")}</Heading>
-              <BaseTooltip text={t("The actual reward from the round {{round}}", { round: latestRounds?.roundId })}>
+              <Heading fontSize="x-large">{t("Estimated Expected Rewards")}</Heading>
+              <BaseTooltip
+                text={t(
+                  "The current estimated rewards for round {{round}}. Note: these are based on the current GM supply and may change as more users vote or upgrade their NFTs.",
+                  { round: round },
+                )}>
                 <span>
                   <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
                 </span>
@@ -134,10 +133,10 @@ export const GalaxyRewardsCalculator = () => {
             </HStack>
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
-              <Image boxSize="7" rounded="full" src="/images/logo/b3tr_logo.svg/" alt="b3tr" />
+              <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
 
               <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
-                {compactFormatter.format(Number(currentReward ?? 0))}
+                {compactFormatter.format(Number(estimatedRewards?.currentRewards ?? 0))}
               </Text>
             </HStack>
           </Card>

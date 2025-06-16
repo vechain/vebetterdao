@@ -9,6 +9,7 @@ type Props = {
   ariaTitle: string
   ariaDescription: string
   isDismissable?: boolean
+  customBgColor?: string
 }
 
 export const BaseBottomSheet = ({
@@ -18,6 +19,7 @@ export const BaseBottomSheet = ({
   ariaTitle = "BottomSheet",
   ariaDescription,
   isDismissable = true,
+  customBgColor,
 }: Props) => {
   const bgColor = useColorModeValue("#F9FAFB", "#1A1A1A")
   return (
@@ -48,7 +50,7 @@ export const BaseBottomSheet = ({
           aria-describedby={ariaTitle}
           style={{
             zIndex: 3,
-            backgroundColor: bgColor,
+            backgroundColor: customBgColor ?? bgColor,
             borderRadius: "10px 10px 0 0",
             position: "fixed",
             bottom: 0,
@@ -67,7 +69,7 @@ export const BaseBottomSheet = ({
           {/* Scrollable content area */}
           <div
             style={{
-              backgroundColor: bgColor,
+              backgroundColor: customBgColor ?? bgColor,
               borderRadius: "10px 10px 0 0",
               flex: 1,
               overflowY: "auto", // Only scroll if content overflows

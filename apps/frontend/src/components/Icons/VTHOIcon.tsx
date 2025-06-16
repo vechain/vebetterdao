@@ -6,8 +6,8 @@ type Props = ImageProps & {
 }
 
 const paths = {
-  light: "/images/logo/vtho_logo.png",
-  dark: "/images/logo/vtho_logo.png",
+  light: "assets/logos/vtho_logo.webp",
+  dark: "assets/logos/vtho_logo.webp",
 }
 
 export const VTHOIcon: React.FC<Props> = ({ colorVariant, ...props }) => {

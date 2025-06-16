@@ -1,7 +1,6 @@
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { Button, useDisclosure, Tooltip } from "@chakra-ui/react"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSelectGM } from "@/hooks"
 import { useSelectedGmNft } from "@/api"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
@@ -16,17 +15,10 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
   const selectGMMutation = useSelectGM({ tokenId })
   const { isXNodeAttachedToGM } = useSelectedGmNft()
 
-  const selectGMModal = useDisclosure()
   const detachGMModal = useDisclosure()
 
   const handleSelectGM = useCallback(() => {
-    selectGMMutation.sendTransaction({})
-    selectGMModal.onOpen()
-  }, [selectGMModal, selectGMMutation])
-
-  const onTryAgain = useCallback(() => {
-    selectGMMutation.resetStatus()
-    selectGMMutation.sendTransaction({})
+    selectGMMutation.sendTransaction()
   }, [selectGMMutation])
 
   return (
@@ -43,21 +35,6 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         </Button>
       </Tooltip>
 
-      <TransactionModal
-        isOpen={selectGMModal.isOpen}
-        onClose={selectGMModal.onClose}
-        successTitle={t("GM NFT selected")}
-        status={
-          selectGMMutation.error ? TransactionModalStatus.Error : (selectGMMutation.status as TransactionModalStatus)
-        }
-        errorDescription={selectGMMutation.error?.reason}
-        errorTitle={selectGMMutation.error ? "Error selecting GM NFT" : undefined}
-        showTryAgainButton
-        onTryAgain={onTryAgain}
-        pendingTitle={"Selecting GM NFT..."}
-        showExplorerButton
-        txId={selectGMMutation.txReceipt?.meta.txID}
-      />
       <DetachGMToXNodeModal isOpen={detachGMModal.isOpen} onClose={detachGMModal.onClose} />
     </>
   )

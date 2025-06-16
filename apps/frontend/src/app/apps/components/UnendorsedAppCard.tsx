@@ -65,7 +65,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
       maxW="100%"
       _hover={{
         cursor: "pointer",
-        backgroundColor: "gray.50",
+        backgroundColor: "hover-contrast-bg",
         transition: "all 0.3s",
       }}>
       <CardBody py="16px" px="24px">
@@ -110,7 +110,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                       fontSize="12px"
                       spacing={1}
                       flexShrink={0}>
-                      <Image src="/images/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
+                      <Image src="/assets/icons/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
                       <Text>{t("New!")}</Text>
                     </HStack>
                   )}

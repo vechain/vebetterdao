@@ -5,10 +5,13 @@ import {
   useCanUserVote,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
+  useHasVotedInProposals,
+  useIsCreatorOfAnyApp,
   useUserBotSignals,
   useUserDelegation,
   useVot3Balance,
   useVotingRewards,
+  useGMRewards,
   useXApps,
 } from "@/api"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -32,7 +35,6 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
-import { VeChainKitLaunchBanner } from "./components/VeChainKitLaunchBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -41,8 +43,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useFeatureFlag, useIsVeDelegated } from "@/hooks"
-import { FeatureFlag } from "@/constants"
+import { useIsVeDelegated } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -63,8 +64,11 @@ export const ActionBanner = () => {
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
+
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
+  const { original: gmRewards } = useGMRewards(currentRoundId, account?.address ?? undefined)
+
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
@@ -72,9 +76,15 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { filteredProposals, isLoading: isLoadingProposals } = useFilteredProposals([ProposalFilter.InThisRound])
+  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
+    ProposalFilter.InThisRound,
+  ])
+  const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
+    activeProposals?.map(proposal => proposal?.proposalId),
+    account?.address ?? undefined,
+  )
 
-  const hasProposals = filteredProposals?.length > 0 && !isLoadingProposals
+  const hasProposals = activeProposals?.length > 0 && !isLoadingProposals && !isLoadingHasVotedInProposals
 
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
@@ -123,7 +133,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
-
+  const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
@@ -142,7 +152,7 @@ export const ActionBanner = () => {
   // Creator NFT banners logic
   const showCreatorRejectedBanner =
     !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT
+  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
   const showCreatorUnderReviewBanner =
     !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
@@ -176,26 +186,26 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   //Custom compute proposal banners
-  const proposalsToVoteBanners = filteredProposals.map(proposal => (
-    <CastProposalVoteBanners
-      key={`cast-vote-in-proposal-${proposal?.proposalId}`}
-      id={proposal?.proposalId}
-      description={proposal?.description}
-    />
-  ))
-
-  // VeChainKit launch banner
-  const { isEnabled: isVechainKitFlagOn } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
-  const showVeChainKitLaunchBanner = !!account?.address && isVechainKitFlagOn
+  const proposalsToVoteBanners = activeProposals
+    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
+    .map(proposal => (
+      <CastProposalVoteBanners
+        key={`cast-vote-in-proposal-${proposal?.proposalId}`}
+        id={proposal?.proposalId}
+        description={proposal?.description}
+      />
+    ))
 
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
-      bannerComponents.push(<ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} key="claim-b3tr" />)
+      bannerComponents.push(
+        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
+      )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
-    if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
+
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
@@ -205,13 +215,13 @@ export const ActionBanner = () => {
     CantVoteBanner,
     showClaimB3trBanner,
     votingRewardsQuery,
+    gmRewards,
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
-    showVeChainKitLaunchBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1

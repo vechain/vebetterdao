@@ -65,9 +65,9 @@ export const LowVthoBanner = () => {
       titleColor="#8D6602"
       description={t("Get more VTHO to be able to vote and perform transactions!")}
       descriptionColor="#5F4400"
-      logoSrc="/images/lightning.png"
+      logoSrc="/assets/icons/lightning.webp"
       backgroundColor="#FFD979"
-      backgroundImageSrc="/images/cloud-background-orange.png"
+      backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
       buttonLabel={t("Get more VTHO")}
       onButtonClick={handleOnPress}
       buttonVariant="primaryAction"

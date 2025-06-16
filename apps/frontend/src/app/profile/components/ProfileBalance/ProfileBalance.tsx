@@ -20,7 +20,7 @@ export const ProfileBalance = ({ address }: Props) => {
           position: "relative",
           p: 4,
           overflow: "hidden",
-          bgImage: "url('/images/cloud-background.png')",
+          bgImage: "url('/assets/backgrounds/cloud-background.webp')",
           bgSize: "cover",
           bgPosition: "center",
           bgRepeat: "no-repeat",

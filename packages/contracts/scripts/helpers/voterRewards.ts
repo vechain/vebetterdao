@@ -1,14 +1,19 @@
 import { VoterRewards, VoterRewards__factory } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { type TransactionClause, Clause, ABIContract, Address } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const claimVoterRewards = async (
   voterRewards: VoterRewards,
   roundId: number,
   signingAcct: TestPk,
   accounts: SeedAccount[],
+  ignoreErrors: boolean = false,
 ) => {
   console.log("Claiming voter rewards...")
 
@@ -16,26 +21,32 @@ export const claimVoterRewards = async (
   const accountChunks = chunk(accounts, 50)
 
   for (const accountChunk of accountChunks) {
-    const clauses: TransactionClause[] = []
+    try {
+      const clauses: TransactionClause[] = []
 
-    accountChunk.forEach(account => {
-      clauses.push(
-        clauseBuilder.functionInteraction(
-          contractAddress,
-          coder
-            .createInterface(JSON.stringify(VoterRewards__factory.abi))
-            .getFunction("claimReward") as FunctionFragment,
-          [roundId, account.key.address],
-        ),
-      )
-    })
+      accountChunk.forEach(account => {
+        clauses.push(
+          Clause.callFunction(
+            Address.of(contractAddress),
+            ABIContract.ofAbi(VoterRewards__factory.abi).getFunction("claimReward"),
+            [roundId, account.key.address.toString()],
+          ),
+        )
+      })
 
-    const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
+      await TransactionUtils.sendTx(thorClient, clauses, signingAcct.pk)
 
-    if (!signingAcct.pk) {
-      throw new Error("Account does not have a private key")
+      console.log(`Rewards claimed for chunk starting with account ${accountChunk[0]?.key.address.toString()}`)
+    } catch (e) {
+      if (ignoreErrors) {
+        console.error(
+          `Error claiming rewards for chunk starting with account ${accountChunk[0]?.key.address.toString()}:`,
+          e,
+        )
+      } else {
+        throw e
+      }
     }
-
-    await signAndSendTx(body, signingAcct.pk)
   }
+  console.log("Finished attempting to claim voter rewards.")
 }

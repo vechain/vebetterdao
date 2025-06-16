@@ -87,6 +87,7 @@ export async function main() {
         whitelister: TEMP_ADMIN, // whitelistManager
         actionRegistrar: TEMP_ADMIN, // actionRegistrar
         actionScoreManager: TEMP_ADMIN, // actionScoreManager
+        resetSignaler: TEMP_ADMIN, // resetSignaler
       },
     ],
     libraries.VeBetterPassport,
@@ -196,6 +197,7 @@ export async function main() {
   // ACTION_REGISTRAR_ROLE
   // ACTION_SCORE_MANAGER_ROLE
   // SIGNALER_ROLE
+  // RESET_SIGNALER_ROLE
 
   console.log("================  Execution completed")
   process.exit(0)

@@ -55,7 +55,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       </Text>
       <HStack justify={"space-between"} align={"baseline"}>
         <HStack gap={2}>
-          <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
+          <Image h="20px" w="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
           <Skeleton isLoaded={votesQueryReady && quorumQueryReady}>
             <Text fontSize="24px" fontWeight={700} data-testid={"total-votes"}>
               {compactFormatter.format(Number(currentVotesQuery.data ?? 0))}
@@ -90,7 +90,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       {showQuorumNeeded ? (
         <HStack>
           <Skeleton isLoaded={quorumQueryReady}>
-            <Text color="#252525" fontWeight={600} fontSize={"14px"}>
+            <Text fontWeight={600} fontSize={"14px"}>
               {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
             </Text>
           </Skeleton>

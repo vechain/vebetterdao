@@ -16,7 +16,7 @@ import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import Lottie from "react-lottie"
-import voteAnimation from "../../../../public/animations/vote.json"
+import voteAnimation from "../../../../public/assets/animations/vote.json"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()
@@ -57,7 +57,7 @@ export const CastYourVoteCard: React.FC = () => {
       <CardBody p={6} pos="relative">
         <Image
           transform={{ rotate: "180deg" }}
-          src="/images/cast-vote-card-bg.svg"
+          src="/assets/backgrounds/cast-vote-card-bg.svg"
           alt="Rewards background"
           pos="absolute"
           right={"-18%"}

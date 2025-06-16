@@ -6,7 +6,6 @@ import {
   useXAppMetadata,
   useXNodeCheckCooldown,
 } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSwitchEndorsement } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Image } from "@chakra-ui/react"
 import { UilClock } from "@iconscout/react-unicons"
@@ -20,7 +19,7 @@ import { notFoundImage } from "@/constants"
 import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -30,7 +29,7 @@ type Props = {
 
 export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, isOpen, onClose }: Props) => {
   const { account } = useWallet()
-
+  const { isTxModalOpen } = useTransactionModal()
   //Hooks to fetch app metadata
   const { data: appToUnendorseMetadata, isLoading: isAppToUnendorseMetadataLoading } = useXAppMetadata(
     appIdToUnendorse ?? "",
@@ -57,48 +56,29 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
 
   const buttonTextSize = appToEndorseMetadata?.name && appToEndorseMetadata.name.length > 20 ? "12px" : "16px"
 
+  const handleSuccess = useCallback(() => {
+    onClose()
+  }, [onClose])
+
   //Mutation to switch endorsement
   //TODO: Multiple nodes
   const switchEndorsementMutation = useSwitchEndorsement({
     appIdToEndorse: appIdToEndorse ?? "",
     appIdToUnendorse: appIdToUnendorse ?? "",
     nodeId,
-    onSuccess: () => {
-      switchEndorsementMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
   const handleSwitchEndorsement = useCallback(() => {
-    switchEndorsementMutation.resetStatus()
-    switchEndorsementMutation.sendTransaction(undefined)
+    switchEndorsementMutation.sendTransaction()
   }, [switchEndorsementMutation])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
     return account?.address && !isXNodeOnCooldown
   }, [account, isXNodeOnCooldown])
 
-  if (switchEndorsementMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        status={
-          switchEndorsementMutation.error
-            ? TransactionModalStatus.Error
-            : (switchEndorsementMutation.status as TransactionModalStatus)
-        }
-        errorDescription={switchEndorsementMutation.error?.reason}
-        errorTitle={switchEndorsementMutation.error ? t("Error switching endorsement") : undefined}
-        showTryAgainButton
-        onTryAgain={handleSwitchEndorsement}
-        pendingTitle={t("Switching Endorsement...")}
-        showExplorerButton
-        txId={switchEndorsementMutation.txReceipt?.meta.txID}
-      />
-    )
-
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
       <VStack spacing={6} align="flex-start" w="full">
         <Heading fontSize={"24px"}>{t("Switch Your Endorsement to Another App")}</Heading>
 

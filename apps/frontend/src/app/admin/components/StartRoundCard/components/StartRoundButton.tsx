@@ -1,7 +1,6 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useDistributeEmission } from "@/hooks"
-import { VStack, Button, Text, useDisclosure } from "@chakra-ui/react"
+import { VStack, Button, Text } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -12,19 +11,12 @@ export const StartRoundButton = () => {
   const isCurrentRoundActive = useMemo(() => {
     return currentRound?.state === 0
   }, [currentRound])
-  const { isOpen, onClose, onOpen } = useDisclosure()
-  const { sendTransaction, isTransactionPending, resetStatus, status, error, txReceipt } = useDistributeEmission({})
+  const { sendTransaction, isTransactionPending, status } = useDistributeEmission({})
   const distributionLoading = isTransactionPending || status === "pending"
 
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [resetStatus, onClose])
-
   const handleSubmit = useCallback(() => {
-    onOpen()
-    sendTransaction(undefined)
-  }, [onOpen, sendTransaction])
+    sendTransaction()
+  }, [sendTransaction])
 
   if (parseInt(currentRoundId ?? "0") < 1) return null
 
@@ -55,20 +47,6 @@ export const StartRoundButton = () => {
           </Button>
         </VStack>
       </VStack>
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={"Round started!"}
-        onTryAgain={handleSubmit}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle="Starting round..."
-        errorTitle={"Error starting round"}
-        errorDescription={error?.reason}
-        data-testid={"round-start-modal-title"}
-      />
     </VStack>
   )
 }

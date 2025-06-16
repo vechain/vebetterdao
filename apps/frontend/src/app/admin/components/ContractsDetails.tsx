@@ -130,12 +130,10 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   // Get user roles
   const userHasRoles = useHasRoles(roles, address, account?.address ?? "")
   // iterate over the roles and get the data
-  const userRoles = useMemo(() => {
-    return userHasRoles.map((role, index) => ({
-      hasRole: role.data,
-      name: roles[index],
-    }))
-  }, [userHasRoles, roles])
+  const userRoles = roles.map((role, index) => ({
+    hasRole: userHasRoles.data?.[index] ?? false,
+    name: role,
+  }))
 
   return (
     <Card w="full" borderRadius={"2xl"} p={2}>

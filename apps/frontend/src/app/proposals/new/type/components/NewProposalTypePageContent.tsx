@@ -14,7 +14,7 @@ export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableC
 })[] = t => [
   {
     route: "/proposals/new/form/functions",
-    imageSrc: "/images/blockchain.svg",
+    imageSrc: "/assets/icons/blockchain.svg",
     title: t("Perform actions or changes"),
     description: t(
       "These proposals involve specific changes upon successful voting, aiming to implement concrete actions or modifications within the ecosystem.",
@@ -22,7 +22,7 @@ export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableC
   },
   {
     route: "/proposals/new/form/discussion",
-    imageSrc: "/images/people.svg",
+    imageSrc: "/assets/icons/people.svg",
     title: t("General proposal"),
     description: t(
       "If the desired outcome cannot be achieved by calling smart contract functions, then please describe what change idea you would like to propose",

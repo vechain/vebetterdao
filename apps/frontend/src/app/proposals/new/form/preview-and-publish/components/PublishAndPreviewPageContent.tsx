@@ -2,20 +2,13 @@
 
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import {
-  useCreateProposal,
-  useUploadProposalMetadata,
-  useTransactionModalErrorTitle,
-  useTransactionModalStatus,
-} from "@/hooks"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
-import { useForm } from "react-hook-form"
+import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { useDepositThreshold, useHashProposal } from "@/api"
@@ -26,19 +19,15 @@ import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/cons
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-  const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount } =
+  const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount, metadataUri } =
     useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
 
   const { data: threshold } = useDepositThreshold()
 
-  const { handleSubmit } = useForm()
-
   const goBack = useCallback(() => {
     router.back()
   }, [router])
-
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   // We call the hashProposal function to precalculate the proposal id
   // so we can redirect the user to the proposal page after the tx is confirmed
@@ -50,11 +39,27 @@ export const PublishAndPreviewPageContent = () => {
     proposalDescriptionUriHash ?? "",
   )
 
-  const onSuccess = useCallback(() => router.push(`/proposals/${expectedProposalId}`), [router, expectedProposalId])
+  const onSuccess = useCallback(() => {
+    //Redirect to the proposal page
+    router.push(`/proposals/${expectedProposalId}`)
+  }, [router, expectedProposalId])
 
-  const createProposalMutation = useCreateProposal({ onSuccess })
+  const createProposalMutation = useCreateProposal({
+    onSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Creating proposal..."),
+      },
+      success: {
+        title: t("Proposal Created!"),
+      },
+      error: {
+        title: t("Error creating proposal!"),
+      },
+    },
+  })
 
-  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadProposalMetadata()
+  const { onMetadataUpload } = useUploadProposalMetadata()
 
   const isDepositReached = useMemo(
     () => !!depositAmount && !!threshold && depositAmount >= Number(threshold),
@@ -64,14 +69,17 @@ export const PublishAndPreviewPageContent = () => {
   const onSubmit = useCallback(async () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL_SUBMITED))
     createProposalMutation.resetStatus()
-    onConfirmationOpen()
     if (!title || !shortDescription || !markdownDescription || depositAmount === undefined)
       throw new Error("Missing data")
-    const metadataUri = await onMetadataUpload({ title, shortDescription, markdownDescription })
-    if (!metadataUri) return
+    //Try to use the metadata uri from the form store, if it's not set, upload the metadata and use the uploaded uri
+    let uploadedMetadataUri = metadataUri
+    if (!uploadedMetadataUri) {
+      uploadedMetadataUri = await onMetadataUpload({ title, shortDescription, markdownDescription })
+      if (!uploadedMetadataUri) throw new Error("Failed to upload metadata")
+    }
 
     // We hash the metadata uri, which will be used by the useHashProposal hook to calculate the proposal id
-    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(metadataUri)))
+    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(uploadedMetadataUri)))
 
     if (!votingStartRoundId || !actions || !shortDescription) throw new Error("Missing data")
 
@@ -83,116 +91,82 @@ export const PublishAndPreviewPageContent = () => {
         contractAddress: action.contractAddress,
         calldata: action.calldata as string,
       })),
-      description: metadataUri,
+      description: uploadedMetadataUri,
       startRoundId: votingStartRoundId,
       depositAmount: depositAmount.toString(),
     })
   }, [
-    onConfirmationOpen,
     createProposalMutation,
     title,
     shortDescription,
     markdownDescription,
-    actions,
-    votingStartRoundId,
-    onMetadataUpload,
     depositAmount,
-  ])
-
-  const onTryAgain = useCallback(() => {
-    createProposalMutation.resetStatus()
-    handleSubmit(onSubmit)()
-  }, [createProposalMutation, handleSubmit, onSubmit])
-
-  const modalStatus = useTransactionModalStatus([
-    { status: metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
-    { status: createProposalMutation.error || metadataUploadError ? TransactionModalStatus.Error : undefined },
-    { status: createProposalMutation.status as TransactionModalStatus },
-  ])
-
-  const errorTitle = useTransactionModalErrorTitle([
-    { error: metadataUploadError, title: t("Error uploading metadata") },
-    { error: createProposalMutation.error, title: t("Error creating proposal") },
+    metadataUri,
+    votingStartRoundId,
+    actions,
+    onMetadataUpload,
   ])
 
   return (
-    <>
-      <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={onConfirmationClose}
-        confirmationTitle={t("Create a proposal")}
-        successTitle={t("Proposal created!")}
-        status={modalStatus as TransactionModalStatus}
-        errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
-        errorTitle={errorTitle}
-        showTryAgainButton={true}
-        onTryAgain={onTryAgain}
-        pendingTitle={t("Creating proposal...")}
-        txId={createProposalMutation.txReceipt?.meta.txID}
-        showExplorerButton
-        isSuccessBeenTrack={true}
-      />
-
-      <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
-        <CardBody py={8}>
-          <VStack spacing={8} align="flex-start" divider={<Divider />}>
-            <Heading size={["md", "lg"]}>{t("Check your proposal before publishing")}</Heading>
-            <MDEditor.Markdown
-              source={markdownDescription}
-              style={{
-                width: "100%",
-                wordBreak: "break-word",
-              }}
+    <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
+      <CardBody py={8}>
+        <VStack spacing={8} align="flex-start" divider={<Divider />}>
+          <Heading size={["md", "lg"]}>{t("Check your proposal before publishing")}</Heading>
+          <MDEditor.Markdown
+            source={markdownDescription}
+            style={{
+              width: "100%",
+              wordBreak: "break-word",
+            }}
+          />
+          {!!actions.length && (
+            <NewProposalForm
+              renderTitle={false}
+              renderDescription={false}
+              isDisabled={true}
+              canAddAnotherTransaction={false}
             />
-            {!!actions.length && (
-              <NewProposalForm
-                renderTitle={false}
-                renderDescription={false}
-                isDisabled={true}
-                canAddAnotherTransaction={false}
+          )}
+
+          <VStack spacing={4} align="flex-start" w="full">
+            <Heading size={["sm", "md"]}>{t("Voting session")}</Heading>
+            {votingStartRoundId && (
+              <SelectedRoundRadioCard
+                roundId={votingStartRoundId}
+                selected={false}
+                isSelectable={false}
+                cardProps={{
+                  bg: "b3tr-balance-bg",
+                }}
               />
             )}
-
-            <VStack spacing={4} align="flex-start" w="full">
-              <Heading size={["sm", "md"]}>{t("Voting session")}</Heading>
-              {votingStartRoundId && (
-                <SelectedRoundRadioCard
-                  roundId={votingStartRoundId}
-                  selected={false}
-                  isSelectable={false}
-                  cardProps={{
-                    bg: "#E5EEFF",
-                  }}
-                />
-              )}
-            </VStack>
-
-            <VStack spacing={4} align="flex-start" w="full">
-              <Heading size={["sm", "md"]}>{t("Community support")}</Heading>
-              {depositAmount !== undefined && threshold && (
-                <ProposalSupportProgressChart
-                  isDepositThresholdReached={isDepositReached}
-                  isFailedDueToDeposit={false}
-                  depositThreshold={Number(threshold)}
-                  userDeposits={Number(depositAmount)}
-                  othersDeposits={0}
-                  otherDepositsUsersCount={0}
-                  renderVotesDistributionLabel={false}
-                />
-              )}
-            </VStack>
-
-            <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
-                {t("Go back")}
-              </Button>
-              <Button data-testid="publish" variant="primaryAction" onClick={onSubmit}>
-                {t("Publish")}
-              </Button>
-            </HStack>
           </VStack>
-        </CardBody>
-      </Card>
-    </>
+
+          <VStack spacing={4} align="flex-start" w="full">
+            <Heading size={["sm", "md"]}>{t("Community support")}</Heading>
+            {depositAmount !== undefined && threshold && (
+              <ProposalSupportProgressChart
+                isDepositThresholdReached={isDepositReached}
+                isFailedDueToDeposit={false}
+                depositThreshold={Number(threshold)}
+                userDeposits={Number(depositAmount)}
+                othersDeposits={0}
+                otherDepositsUsersCount={0}
+                renderVotesDistributionLabel={false}
+              />
+            )}
+          </VStack>
+
+          <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+              {t("Go back")}
+            </Button>
+            <Button data-testid="publish" variant="primaryAction" onClick={onSubmit}>
+              {t("Publish")}
+            </Button>
+          </HStack>
+        </VStack>
+      </CardBody>
+    </Card>
   )
 }

@@ -79,7 +79,6 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
       <CardBody p={"4"}>
         <VStack align="stretch" gap={4}>
           <HStack
-            color="#252525"
             align={"center"}
             justify="space-between"
             rounded="12px"
@@ -113,8 +112,8 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                   {isGMSelected && isXNodeAttachedToSelectedGM
                     ? t("Active and attached")
                     : isGMSelected
-                      ? t("Active")
-                      : ""}
+                    ? t("Active")
+                    : ""}
                 </Text>
 
                 <Stack direction={isAbove800 ? "column" : "column-reverse"} align={"flex-start"}>
@@ -145,7 +144,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                       whiteSpace={["normal", "nowrap"]}
                       wordBreak="break-word"
                       overflowWrap="break-word">
-                      {t("Voting reward multiplier")}
+                      {t("GM reward weight")}
                     </Text>
                   </HStack>
                 </FeatureFlagWrapper>

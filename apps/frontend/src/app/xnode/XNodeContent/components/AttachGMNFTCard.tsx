@@ -76,14 +76,14 @@ export const AttachGMNFTCard = () => {
                 isXNodeAttachedToGM
                   ? "Your Node is attached to the following GM NFT"
                   : isXNodeDelegator
-                    ? "Remove the Node delegation to attach GM NFT to this node"
-                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
+                  ? "Remove the Node delegation to attach GM NFT to this node"
+                  : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
           <Flex border="1px solid" rounded="12px" position="relative" onClick={goToGmNftPage} cursor="pointer">
             <Image
-              src={"/images/nft-page-background.png"}
+              src={"/assets/backgrounds/nft-page-background.webp"}
               alt="gm-nft-header"
               position={"absolute"}
               rounded={"12px"}
@@ -117,7 +117,7 @@ export const AttachGMNFTCard = () => {
                       {"x"}
                     </Text>
                     <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                      {t("Voting reward multiplier")}
+                      {t("GM reward weight")}
                     </Text>
                   </HStack>
                 </FeatureFlagWrapper>

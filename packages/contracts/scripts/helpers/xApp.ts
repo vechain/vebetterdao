@@ -6,12 +6,16 @@ import {
   X2EarnApps,
   TokenAuction,
 } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { type TransactionClause, Clause, Address, ABIContract } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
 import { getContractsConfig } from "@repo/config"
 import { EnvConfig } from "@repo/config/contracts"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export type App = {
   admin: string
@@ -20,31 +24,25 @@ export type App = {
   metadataURI: string
 }
 
-export const registerXDapps = async (contractAddress: string, account: TestPk, apps: App[]) => {
+export const registerXDapps = async (contractAddress: string, accounts: TestPk[], apps: App[]) => {
   console.log("Adding x-apps...")
 
   const appChunks = chunk(apps, 50)
 
   for (const appChunk of appChunks) {
-    const clauses: TransactionClause[] = []
+    // For each apps
+    for (let i = 0; i < appChunk.length; i++) {
+      const app = appChunk[i]
+      const account = accounts[i % accounts.length] // Unique signer for each app
 
-    appChunk.forEach(app => {
-      clauses.push(
-        clauseBuilder.functionInteraction(
-          contractAddress,
-          coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("submitApp") as FunctionFragment,
-          [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
-        ),
+      const clause = Clause.callFunction(
+        Address.of(contractAddress),
+        ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("submitApp"),
+        [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
       )
-    })
 
-    const body: TransactionBody = await buildTxBody(clauses, account.address, 32)
-
-    if (!account.pk) {
-      throw new Error("Account does not have a private key")
+      await TransactionUtils.sendTx(thorClient, [clause], account.pk)
     }
-
-    await signAndSendTx(body, account.pk)
   }
 }
 
@@ -63,19 +61,14 @@ export const endorseXApps = async (
 
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
-    const nodeId = await vechainNodesMock.ownerToId(owner)
-    const clause = clauseBuilder.functionInteraction(
-      await x2EarnApps.getAddress(),
-      coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("endorseApp") as FunctionFragment,
+    const nodeId = await vechainNodesMock.ownerToId(owner.toString())
+    const clause = Clause.callFunction(
+      Address.of(await x2EarnApps.getAddress()),
+      ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
       [apps[i], nodeId],
     )
 
-    try {
-      const body: TransactionBody = await buildTxBody([clause], owner, 32)
-      await signAndSendTx(body, endorsers[i].key.pk)
-    } catch (e) {
-      console.log("Endorsing x-apps failed with error: ", e)
-    }
+    await TransactionUtils.sendTx(thorClient, [clause], endorsers[i].key.pk)
   }
 
   console.log("x-apps endorsed.")
@@ -87,45 +80,55 @@ export const castVotesToXDapps = async (
   accounts: SeedAccount[],
   roundId: number,
   apps: string[],
+  ignoreErrors: boolean = false,
 ) => {
   console.log("Casting votes to xDapps...")
+  if (apps.length === 0) {
+    throw new Error("No xDapps to vote for.")
+  }
+
   const chunks = chunk(accounts, 50)
   const contractAddress = await xAllocationVoting.getAddress()
 
   for (const chunk of chunks) {
     await Promise.all(
       chunk.map(async account => {
-        const clauses: TransactionClause[] = []
-        const votePower = BigInt(await vot3.balanceOf(account.key.address))
+        try {
+          const clauses: TransactionClause[] = []
+          const votePower = BigInt(await vot3.balanceOf(account.key.address.toString()))
 
-        const splits: { app: string; weight: bigint }[] = []
+          const splits: { app: string; weight: bigint }[] = []
 
-        // eslint-disable-next-line no-unused-vars
-        let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
-        if (!randomDappsToVote.length) randomDappsToVote = apps
+          // eslint-disable-next-line no-unused-vars
+          let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
+          if (!randomDappsToVote.length) randomDappsToVote = apps
 
-        // Get the vote power per xDapp rounding down
-        const votePowerPerApp = votePower / BigInt(randomDappsToVote.length)
+          // Get the vote power per xDapp rounding down
+          const votePowerPerApp = votePower / BigInt(randomDappsToVote.length)
 
-        randomDappsToVote.forEach(app => splits.push({ app: app, weight: votePowerPerApp }))
+          randomDappsToVote.forEach(app => splits.push({ app: app, weight: votePowerPerApp }))
 
-        clauses.push(
-          clauseBuilder.functionInteraction(
-            contractAddress,
-            coder
-              .createInterface(JSON.stringify(XAllocationVoting__factory.abi))
-              .getFunction("castVote") as FunctionFragment,
-            [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
-          ),
-        )
+          clauses.push(
+            Clause.callFunction(
+              Address.of(contractAddress),
+              ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("castVote"),
+              [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
+            ),
+          )
 
-        console.log(
-          `Casting votes for ${roundId} with ${splits.map(split => split.weight)} votes to ${splits.map(split => split.app)}`,
-        )
-        const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32, 250_000 * splits.length)
-
-        await signAndSendTx(body, account.key.pk)
-        console.log("Votes cast fro account", account.key.address)
+          console.log(
+            `Casting round ${roundId} votes for ${account.key.address} with ${splits.map(
+              split => split.weight,
+            )} votes to ${splits.map(split => split.app)}`,
+          )
+          await TransactionUtils.sendTx(thorClient, clauses, account.key.pk)
+        } catch (e) {
+          if (ignoreErrors) {
+            console.error(`Error casting vote for account ${account.key.address}:`, e)
+          } else {
+            throw e
+          }
+        }
       }),
     )
   }

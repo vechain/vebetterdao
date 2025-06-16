@@ -25,8 +25,14 @@ export const CreateProposalCard = () => {
   }, [account?.address, open, router])
 
   return (
-    <Box bg={"white"} borderRadius={12} p={6} alignContent={"flex-start"} borderWidth={1} borderColor={"#D5D5D5"}>
-      <Image src="/images/proposal.svg" alt="Proposal icon" boxSize={24} />
+    <Box
+      bg={"contrast-on-dark-bg"}
+      borderRadius={12}
+      p={6}
+      alignContent={"flex-start"}
+      borderWidth={1}
+      borderColor={"#D5D5D5"}>
+      <Image src="/assets/icons/proposal.svg" alt="Proposal icon" boxSize={24} />
       <Text fontSize={24} fontWeight={700} mt={4}>
         {t("Create a proposal")}
       </Text>

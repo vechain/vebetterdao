@@ -12,6 +12,7 @@ export type RewardClaimed = {
   cycle: number
   voter: string
   reward: number
+  gmReward?: number
 }
 
 /**
@@ -25,6 +26,9 @@ export const getRewardClaimedEvents = async (
 ): Promise<RewardClaimed[]> => {
   const eventFragment = VoterRewards__factory.createInterface().getEvent("RewardClaimed").format("json")
   const rewardClaimedEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
+
+  const eventFragmentV2 = VoterRewards__factory.createInterface().getEvent("RewardClaimedV2").format("json")
+  const rewardClaimedEventV2 = new abi.Event(JSON.parse(eventFragmentV2) as abi.Event.Definition)
 
   const topics = rewardClaimedEvent.encode({
     cycle: filterOptions?.cycle ?? undefined,
@@ -55,6 +59,19 @@ export const getRewardClaimedEvents = async (
           cycle: decoded[0],
           voter: decoded[1],
           reward: rewardFormatted,
+        })
+        break
+      }
+      case rewardClaimedEventV2.signature: {
+        const decoded = rewardClaimedEventV2.decode(event.data, event.topics)
+        const rewardFormatted = Number(ethers.formatEther(decoded[2] as string))
+        const gmRewardFormatted = Number(ethers.formatEther(decoded[3] as string))
+
+        decodedRewardClaimedEvents.push({
+          cycle: decoded[0],
+          voter: decoded[1],
+          reward: rewardFormatted,
+          gmReward: gmRewardFormatted,
         })
         break
       }
