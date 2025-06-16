@@ -34,7 +34,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
 
   const totalDistributed = useMemo(() => {
     if (!roundAmount) return 0
-    return Number(roundAmount.voteXAllocations)
+    return Number(roundAmount.voteX2Earn)
   }, [roundAmount])
 
   // the total baseAmount distributed in the round
