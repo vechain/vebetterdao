@@ -78,12 +78,12 @@ export const RoundInfoBottomSheet = () => {
           zIndex={3}>
           <Box>
             <Skeleton isLoaded={!isCardLoading}>
-              <Heading fontSize={"20px"} fontWeight={400}>
+              <Heading fontSize={"20px"} fontWeight={400} color="#252525">
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
             <Skeleton isLoaded={!isCardLoading}>
-              <Text fontSize={"14px"} fontWeight={400}>
+              <Text fontSize={"14px"} fontWeight={400} color="#252525">
                 {t("{{from}} to {{to}}", {
                   from: allocationRound.voteStartTimestamp?.format("MMM D"),
                   to: allocationRound.voteEndTimestamp?.format("MMM D"),
@@ -144,9 +144,9 @@ export const RoundInfoBottomSheet = () => {
             </VStack>
             <VStack
               w="full"
-              border="1px #D5D5D5 solid"
+              border="1px hover-contrast-bg solid"
               align={"flex-start"}
-              bg="#FAFAFA"
+              bg="info-bg"
               p="12px"
               borderRadius={"md"}
               spacing={4}>

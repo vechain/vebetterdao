@@ -1,7 +1,7 @@
 import { BaseModal } from "../BaseModal"
 import { motion } from "framer-motion"
 import { ReactNode } from "react"
-import { Card, CardBody, Text, useMediaQuery, Flex, Button } from "@chakra-ui/react"
+import { Text, useMediaQuery, Flex, Button } from "@chakra-ui/react"
 import { IoArrowBackOutline, IoClose } from "react-icons/io5"
 
 export type Step<T extends string> = {
@@ -60,48 +60,43 @@ export const StepModal = <T extends string>({
         w: "auto",
         p: 6,
         pt: 2,
-        bgColor: "#fff",
       }}
       modalBodyProps={{
         p: 0,
       }}
       showCloseButton={false}
       isCloseable={true}>
-      <Card p={0}>
-        <CardBody p={0}>
-          <Flex position="relative" h="60px" alignItems="center">
-            {!isFirstStep && !disableBackButton ? (
-              <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
-                <IoArrowBackOutline size={30} />
-              </Button>
-            ) : null}
+      <Flex position="relative" h="60px" alignItems="center">
+        {!isFirstStep && !disableBackButton ? (
+          <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
+            <IoArrowBackOutline size={30} />
+          </Button>
+        ) : null}
 
-            <Flex
-              justifyContent={["center", "center", "flex-start"]}
-              pl={!isFirstStep && !disableBackButton && isDesktop ? 10 : 0}
-              width="100%">
-              <Text fontSize={{ base: 18, md: 24 }} fontWeight={700}>
-                {currentStepContent.title}
-              </Text>
-            </Flex>
+        <Flex
+          justifyContent={["center", "center", "flex-start"]}
+          pl={!isFirstStep && !disableBackButton && isDesktop ? 10 : 0}
+          width="100%">
+          <Text fontSize={{ base: 18, md: 24 }} fontWeight={700}>
+            {currentStepContent.title}
+          </Text>
+        </Flex>
 
-            {isDesktop && !disableCloseButton ? (
-              <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
-                <IoClose size={30} />
-              </Button>
-            ) : null}
-          </Flex>
-          {currentStepContent?.description ? (
-            <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} px={4}>
-              {currentStepContent?.description}
-            </Text>
-          ) : null}
+        {isDesktop && !disableCloseButton ? (
+          <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
+            <IoClose size={30} />
+          </Button>
+        ) : null}
+      </Flex>
+      {currentStepContent?.description ? (
+        <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} px={4}>
+          {currentStepContent?.description}
+        </Text>
+      ) : null}
 
-          <motion.div initial="hidden" animate="visible" key={currentStepContent.key} style={{ width: "100%" }}>
-            {currentStepContent.content}
-          </motion.div>
-        </CardBody>
-      </Card>
+      <motion.div initial="hidden" animate="visible" key={currentStepContent.key} style={{ width: "100%" }}>
+        {currentStepContent.content}
+      </motion.div>
     </BaseModal>
   )
 }

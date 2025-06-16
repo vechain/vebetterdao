@@ -147,7 +147,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
             isLoaded={!roundAmountLoading}
             key={`allocation-chart-amount-${info.amount}-${info.color}`}
             w="full">
-            <HStack w="full" spacing={1} color="#252525">
+            <HStack w="full" spacing={1}>
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>
                 {compactFormatter.format(Number(info.amount))}

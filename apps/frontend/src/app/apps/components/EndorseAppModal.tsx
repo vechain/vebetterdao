@@ -204,7 +204,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         </Skeleton>
         {newScoreMetThreshold ? (
           <HStack spacing={4} align={"center"} w={"full"}>
-            <Icon as={UilExclamationCircle} boxSize="24px" color="#252525" />
+            <Icon as={UilExclamationCircle} boxSize="24px" />
             <Text color="black">
               {t("With your endorsement, {{appName}} gets enough score to get into the next allocation round.", {
                 appName: xApp?.name,

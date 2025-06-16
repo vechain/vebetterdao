@@ -107,7 +107,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
         <HStack spacing={8} align="center" w={["full", "full", "auto"]} justify={"space-between"}>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!votersLoading}>
-              <Text fontWeight={600} fontSize={"18px"} color="#252525" data-testid={"total-voters"}>
+              <Text fontWeight={600} fontSize={"18px"} data-testid={"total-voters"}>
                 {compactFormatter.format(Number(voters ?? 0))}
               </Text>
             </Skeleton>
@@ -117,7 +117,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
           </VStack>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!xAppsLoading}>
-              <Text fontWeight={600} fontSize={"18px"} color="#252525">
+              <Text fontWeight={600} fontSize={"18px"}>
                 {compactFormatter.format(Number(xApps?.length ?? 0))}
               </Text>
             </Skeleton>
@@ -127,7 +127,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
           </VStack>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!maxAmountLoading}>
-              <Text fontWeight={600} fontSize={"18px"} color="#252525">
+              <Text fontWeight={600} fontSize={"18px"}>
                 {compactFormatter.format(Number(maxAmount ?? 0))}
               </Text>
             </Skeleton>
@@ -165,7 +165,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
       <Stack direction={["column", "column", "row"]} w="full" spacing={[4, 4, 8]}>
         {baseAmountsInfo.map(info => (
           <Skeleton isLoaded={!info.isLoading} key={`distribution-chart-amount-${info.amount}-${info.color}`}>
-            <HStack w="full" spacing={1} color="#252525">
+            <HStack w="full" spacing={1}>
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>
                 {compactFormatter.format(Number(info.amount))}

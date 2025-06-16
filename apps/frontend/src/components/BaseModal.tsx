@@ -39,7 +39,7 @@ export const BaseModal = ({
 
   if (isDesktop)
     return (
-      <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered trapFocus={false} {...modalProps}>
+      <Modal variant="base" isOpen={isOpen} onClose={onClose} size="xl" isCentered trapFocus={false} {...modalProps}>
         <ModalOverlay />
         <ModalContent rounded={"2xl"} {...modalContentProps}>
           {isCloseable && showCloseButton ? <ModalCloseButton /> : null}
