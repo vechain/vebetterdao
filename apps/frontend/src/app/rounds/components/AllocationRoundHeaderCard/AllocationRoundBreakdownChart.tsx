@@ -62,15 +62,15 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
       },
       {
         amount: roundAmount?.voteXAllocations,
-        percentage: baseAmountsPercentage.voteXAllocations,
+        percentage: baseAmountsPercentage.voteXAllocations, // goes to Apps
         color: votingRewardsColor,
-        label: t("voting rewards"),
+        label: t("app rewards"),
       },
       {
         amount: roundAmount?.voteX2Earn,
-        percentage: baseAmountsPercentage.voteX2Earn,
+        percentage: baseAmountsPercentage.voteX2Earn, // goes to users voting on x2earn apps
         color: appsColor,
-        label: t("app rewards"),
+        label: t("voting rewards"),
       },
       {
         amount: roundAmount?.gm,
