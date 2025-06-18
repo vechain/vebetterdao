@@ -33,8 +33,8 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
         const connectionType = connection.isConnectedWithDappKit
           ? "DappKit"
           : connection.isConnectedWithVeChain
-            ? "VeChain"
-            : "Ecosystem"
+          ? "VeChain"
+          : "Ecosystem"
 
         AnalyticsUtils.trackEvent("Connection", {
           action: connectionType,
