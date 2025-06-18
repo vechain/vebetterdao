@@ -38,7 +38,7 @@ export default function CastAllocationVoteLayout({ children, params }: Readonly<
   const { isMobile } = useBreakpoints()
   if (isMobile)
     return (
-      <VStack spacing={8} align="flex-start" mt={4} bg="#FFF" w="100vw" p={6}>
+      <VStack spacing={8} align="flex-start" mt={4} bg={"info-bg"} w="100vw" p={6}>
         <YourVoteBalanceCard roundId={params.roundId} />
         <VStack spacing={8} align="flex-start" w="full">
           <CastAllocationVoteStepperCard />
