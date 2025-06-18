@@ -96,7 +96,7 @@ const themeConfig = {
         _dark: "#FFFFFF",
       },
       "hover-contrast-bg": {
-        _light: "#D5D5D5",
+        _light: "#F8F8F8",
         _dark: "#2D2F31",
       },
       "contrast-border": {
