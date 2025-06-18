@@ -140,7 +140,8 @@ export const AllApps = ({
           transition="all 0.3s ease-in-out"
           color={"contrast-fg-on-muted"}
           _hover={{
-            bg: "statusHoverBg",
+            bg: "hover-contrast-bg",
+            color: "contrast-fg-on-muted",
             transition: "all 0.3s ease-in-out",
           }}
           border={`1px solid #252525`}
@@ -153,7 +154,7 @@ export const AllApps = ({
           shadow="lg"
           borderRadius={"24px"}
           p={2}
-          bg="light-contrast-on-card-bg"
+          bg="info-bg"
           borderColor="contrast-border"
           borderWidth="1px">
           {sortOptions.map(option => (
@@ -162,8 +163,12 @@ export const AllApps = ({
               onClick={() => onSortChange(option.id)}
               role="group"
               borderRadius={"16px"}
-              bg={sortOption === option.id && sortOption !== "default" ? "dark-contrast-on-card-bg" : undefined}
-              _hover={{ bg: "#D5D5D5" }}>
+              bg={sortOption === option.id && sortOption !== "default" ? "info-bg" : undefined}
+              _hover={{
+                bg: "hover-contrast-bg",
+                color: "contrast-fg-on-muted",
+                transition: "all 0.3s ease-in-out",
+              }}>
               <HStack justifyContent="space-between" w="full">
                 <VStack align="flex-start" spacing={0}>
                   <Text fontWeight={sortOption === option.id && sortOption !== "default" ? "semibold" : "normal"}>
