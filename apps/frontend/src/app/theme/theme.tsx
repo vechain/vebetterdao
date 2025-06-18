@@ -103,6 +103,10 @@ const themeConfig = {
         _light: "#EFEFEF",
         _dark: "#4A5568",
       },
+      "contrast-fg-on-dark-bg": {
+        _light: "#252525",
+        _dark: "#F8F8F8",
+      },
     },
   },
   colors: {
