@@ -35,7 +35,11 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
   return (
     <Drawer size={"sm"} placement="right" {...props}>
       <DrawerOverlay />
-      <DrawerContent maxWidth={isNotMobile ? undefined : "95%"} borderTopLeftRadius={16} borderBottomLeftRadius={16}>
+      <DrawerContent
+        maxWidth={isNotMobile ? undefined : "95%"}
+        borderTopLeftRadius={16}
+        borderBottomLeftRadius={16}
+        background={"contrast-on-dark-bg"}>
         <DrawerCloseButton position={"absolute"} top={4} right={4} color={"gray.500"} _hover={{ color: "gray.700" }} />
         <DrawerHeader>
           <NavbarLogo />
