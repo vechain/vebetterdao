@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
 
-const address = getConfig().veBetterPassportContractAddress
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "getPendingDelegations" as const
 
@@ -12,7 +12,7 @@ const method = "getPendingDelegations" as const
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegatorPOV = (delegator: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [delegator ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(delegator ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -26,10 +26,10 @@ export const useGetPendingDelegationsDelegatorPOV = (delegator?: string | null) 
     abi,
     address,
     method,
-    args: [delegator ?? "0x"],
+    args: [(delegator ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!delegator,
-      select: data => data[0] ?? [],
+      select: data => (data?.[1] ? data[1] : ""),
     },
   })
 }

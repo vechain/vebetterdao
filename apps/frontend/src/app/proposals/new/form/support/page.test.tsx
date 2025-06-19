@@ -25,7 +25,7 @@ vi.spyOn(router, "useRouter").mockReturnValue({
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/support")
-const spyOnVot3Balance = vi.spyOn(apiHooks, "useVot3Balance")
+const spyOnVot3Balance = vi.spyOn(vechainKit, "useGetVot3Balance")
 const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
 
 const compactFormatter = getCompactFormatter(2)

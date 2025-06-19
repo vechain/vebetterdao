@@ -1,6 +1,10 @@
-import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
+import {
+  getProposalsEventsQueryKey,
+  getProposalUserDepositQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
+} from "@/api"
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, getVot3BalanceQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
@@ -56,7 +60,7 @@ export const useProposalVot3Deposit = ({
   const refetchQueryKeys = useMemo(
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
+      getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
       getProposalDepositQueryKey(proposalId),
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),

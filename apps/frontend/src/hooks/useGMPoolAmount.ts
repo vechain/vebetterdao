@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
 
-const address = getConfig().emissionsContractAddress
+const address = getConfig().emissionsContractAddress as `0x${string}`
 const abi = Emissions__factory.abi
 const method = "getGMAmount" as const
 
@@ -32,8 +32,8 @@ export const useGMPoolAmount = (currentRoundId?: number) => {
     },
   })
 
-  const gmAmount = gmAmountData?.[0]
-  const scaled = ethers.formatEther(gmAmount ?? 0)
+  const gmAmount = gmAmountData?.[0].$bigintString
+  const scaled = ethers.formatEther(BigInt(gmAmount ?? 0))
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {

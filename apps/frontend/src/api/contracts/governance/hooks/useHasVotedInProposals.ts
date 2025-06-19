@@ -5,7 +5,7 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
 const abi = B3TRGovernor__factory.abi
-const address = getConfig().b3trGovernorAddress
+const contractAddress = getConfig().b3trGovernorAddress as `0x${string}`
 const functionName = "hasVoted" as const
 
 /**
@@ -24,9 +24,9 @@ export const getHasVoted = async (thor: ReturnType<typeof useThor>, proposalIds:
       id =>
         ({
           abi,
-          address,
+          address: contractAddress,
           functionName,
-          args: [id, address],
+          args: [id, address as `0x${string}`],
         }) as const,
     ),
   })
@@ -55,8 +55,8 @@ export const useHasVotedInProposals = (
   const thor = useThor()
 
   return useQuery({
-    queryKey: getHasVotedQueryKey(proposalIds, address),
+    queryKey: getHasVotedQueryKey(proposalIds, userAddress),
     queryFn: async () => getHasVoted(thor, proposalIds, userAddress),
-    enabled: !!thor && !!address && !!proposalIds.length,
+    enabled: !!thor && !!userAddress && !!proposalIds.length,
   })
 }

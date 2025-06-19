@@ -1,4 +1,5 @@
-import { useWallet, useXNodes } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
+import { useXNodes } from "./useXNodes"
 
 /**
  *  Hook to get the owned or delegated xNodes for a user from the NodeManagement contract

@@ -12,7 +12,7 @@ const method = "getEntitiesLinkedToPassport" as const
  * @returns The query key for fetching entities linked to a passport.
  */
 export const getEntitiesLinkedToPassportQueryKey = (passport?: string | null) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [passport ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(passport ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -25,7 +25,7 @@ export const useGetEntitiesLinkedToPassport = (passport?: string | null) => {
     abi,
     address,
     method,
-    args: [passport ?? "0x"],
+    args: [(passport ?? "0x") as `0x${string}`],
     queryOptions: {
       select: data => data[0],
       enabled: !!passport,

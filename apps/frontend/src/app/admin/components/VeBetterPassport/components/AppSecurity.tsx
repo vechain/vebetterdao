@@ -1,4 +1,4 @@
-import { APP_SECURITY_LEVELS, useAppSecurityLevel, useXApps } from "@/api"
+import { APP_SECURITY_LEVELS, useAppSecurityLevel } from "@/api"
 import { useUpdateAppSecurityLevel } from "@/hooks"
 import {
   Button,
@@ -13,6 +13,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
+import { useXApps } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 

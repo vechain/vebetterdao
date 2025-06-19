@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 
-const address = getConfig().x2EarnAppsContractAddress
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi
 const method = "isAppAdmin" as const
 
@@ -13,7 +13,11 @@ const method = "isAppAdmin" as const
  * @returns The query key for checking if an address is app admin.
  */
 export const getIsAppAdminQueryKey = (appId: string, userAddress: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [appId as `0x${string}`, userAddress] })
+  getCallClauseQueryKey<typeof abi>({
+    address,
+    method,
+    args: [appId as `0x${string}`, (userAddress ?? "0x") as `0x${string}`],
+  })
 
 /**
  * Hook to check if the given address is the admin of the app
@@ -26,7 +30,7 @@ export const useIsAppAdmin = (appId: string, userAddress: string) => {
     abi,
     address,
     method,
-    args: [appId as `0x${string}`, userAddress],
+    args: [appId as `0x${string}`, (userAddress ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!appId && !!userAddress,
       select: data => data[0],

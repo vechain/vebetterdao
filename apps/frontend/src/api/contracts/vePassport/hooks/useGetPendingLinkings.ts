@@ -12,7 +12,7 @@ const method = "getPendingLinkings" as const
  * @returns The query key for fetching pending linkings.
  */
 export const getPendingLinkingsQueryKey = (user?: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(user ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -25,7 +25,7 @@ export const useGetPendingLinkings = (user?: string) => {
     abi,
     address,
     method,
-    args: [user ?? "0x"],
+    args: [(user ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!user,
       select: data => ({

@@ -1,4 +1,4 @@
-import { useXApps, useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically } from "@/api"
+import { useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"

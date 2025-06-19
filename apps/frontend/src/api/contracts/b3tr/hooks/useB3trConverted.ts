@@ -16,7 +16,7 @@ const method = "convertedB3trOf" as const
  * @returns {string[]} The query key.
  */
 export const getConvertedB3TRQueryKey = (userAddress?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [userAddress ?? "0x"] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
 
 /**
  * Returns the converted balance of a B3TR token for a given address.
@@ -30,15 +30,17 @@ export const useB3trConverted = (userAddress?: string) => {
     abi,
     address,
     method,
-    args: [userAddress ?? "0x"],
+    args: [(userAddress ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!userAddress,
-      select: data =>
-        ({
-          original: data[0].toString(),
-          scaled: ethers.formatEther(data[0]),
-          formatted: FormattingUtils.humanNumber(ethers.formatEther(data[0])),
-        }) as TokenBalance,
+      select: data => {
+        const scaled = ethers.formatEther(BigInt(data[0].$bigintString))
+        return {
+          original: data[0].$bigintString,
+          scaled,
+          formatted: FormattingUtils.humanNumber(scaled),
+        } as TokenBalance
+      },
     },
   })
 }

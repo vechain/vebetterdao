@@ -1,10 +1,14 @@
-import { getXAppMetadata, getXAppsMetadataBaseUri } from "@vechain/vechain-kit"
+import { getXAppMetadata } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GetAllApps, XApp, UnendorsedApp } from "./getXApps"
 
-export const sortXAppsAlphabetically = async (apps: GetAllApps | undefined, thor: Connex.Thor): Promise<GetAllApps> => {
-  const baseUri = await getXAppsMetadataBaseUri(thor, getConfig().network.type)
-
+export const sortXAppsAlphabetically = async ({
+  apps,
+  baseUri,
+}: {
+  apps: GetAllApps | undefined
+  baseUri: string
+}): Promise<GetAllApps> => {
   if (!apps) return {} as GetAllApps
 
   // Modifying the apps name with the metadata names, instead of using the name from the contract

@@ -1,5 +1,5 @@
 import { Card, CardBody, CardHeader, Heading, Stack, Button } from "@chakra-ui/react"
-import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps, useMultipleXAppsTotalEarnings } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useMultipleXAppsTotalEarnings, useXApps } from "@/api"
 import { useMemo, useState } from "react"
 import { AppAmount } from "./components/AppAmount"
 import { useTranslation } from "react-i18next"

@@ -12,7 +12,7 @@ const method = "balanceOf" as const
  * @returns The query key for fetching the GM balance.
  */
 export const getGMbalanceQueryKey = (userAddress: string | null) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [userAddress || ""] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress || "0x") as `0x${string}`] })
 
 /**
  * Hook to get the number of GM NFTs for an address
@@ -24,10 +24,10 @@ export const useGMbalance = (userAddress: string | null) => {
     abi,
     address,
     method,
-    args: [userAddress || ""],
+    args: [(userAddress || "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!userAddress,
-      select: data => Number(data[0]),
+      select: data => data[0].$bigintString,
     },
   })
 }

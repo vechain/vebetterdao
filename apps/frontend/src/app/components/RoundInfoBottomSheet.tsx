@@ -28,7 +28,7 @@ export const RoundInfoBottomSheet = () => {
   const { account } = useWallet()
 
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
-
+  console.log("currentRoundId", currentRoundId)
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
   // First active, then looking for support (pending + deposit not met)
   const sortedProposals = useMemo(() => {

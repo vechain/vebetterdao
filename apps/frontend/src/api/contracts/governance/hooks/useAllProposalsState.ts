@@ -6,7 +6,7 @@ import { getProposalStateQueryKey } from "./useProposalState"
 
 const abi = B3TRGovernor__factory.abi
 const functionName = "state" as const
-const address = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 
 export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
 

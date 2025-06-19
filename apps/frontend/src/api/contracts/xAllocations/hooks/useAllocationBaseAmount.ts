@@ -3,7 +3,7 @@ import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { formatEther } from "viem"
 
-const address = getConfig().xAllocationPoolContractAddress
+const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const abi = XAllocationPool__factory.abi
 const method = "baseAllocationAmount" as const
 
@@ -28,7 +28,7 @@ export const useAllocationBaseAmount = (roundId?: string) => {
     args: [BigInt(roundId || 0)],
     queryOptions: {
       enabled: !!roundId,
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

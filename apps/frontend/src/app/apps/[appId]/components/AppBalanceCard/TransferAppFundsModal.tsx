@@ -159,7 +159,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
       <DepositModal appId={app?.id} isOpen={isOpenDeposit} onClose={onCloseDeposit} />
       <WithdrawModal
         appId={app?.id}
-        teamWalletAddress={app?.teamWalletAddress}
+        teamWalletAddress={app?.teamWalletAddress ?? ""}
         isOpen={isOpenWithdraw}
         onClose={onCloseWithdraw}
       />

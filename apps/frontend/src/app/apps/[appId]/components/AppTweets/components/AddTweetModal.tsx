@@ -19,11 +19,12 @@ import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
 import "./tweetStyle.css"
 import { useCurrentAppMetadata } from "../../../hooks"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { StepModal } from "@/components/StepModal/StepModal"
 import { useUpdateAppMetadataReturnValue } from "@/hooks/useUpdateAppDetails"
 import { UseUploadAppMetadataReturnValue } from "@/hooks/useUploadAppMetadata"
+
 type Props = {
   onClose: () => void
   isOpen: boolean
@@ -142,7 +143,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
           content: (
             <ModalAnimation>
               <VStack align={"center"} p={6}>
-                <Lottie
+                <LazyLottie
                   style={{
                     pointerEvents: "none",
                   }}

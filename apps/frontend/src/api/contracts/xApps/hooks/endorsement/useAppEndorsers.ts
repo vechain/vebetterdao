@@ -24,7 +24,7 @@ export const useAppEndorsers = (appId?: string) => {
     args: [appId as `0x${string}`],
     queryOptions: {
       enabled: !!appId,
-      select: data => data[0],
+      select: data => [...data[0]],
     },
   })
 }

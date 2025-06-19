@@ -24,7 +24,7 @@ export const useDepositThreshold = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

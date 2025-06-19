@@ -7,7 +7,6 @@ import {
   useIsCreatorOfAnyApp,
   useUserBotSignals,
   useUserDelegation,
-  useVot3Balance,
   useVotingRewards,
   useGMRewards,
   useXApps,
@@ -16,7 +15,7 @@ import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSu
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useAccountBalance, useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
+import { useAccountBalance, useGetB3trBalance, useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -65,13 +64,16 @@ export const ActionBanner = () => {
 
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
-  const { original: gmRewards } = useGMRewards(currentRoundId, account?.address ?? undefined)
+  const { data: { original: gmRewards } = { original: "0" } } = useGMRewards(
+    currentRoundId,
+    account?.address ?? undefined,
+  )
 
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
@@ -98,7 +100,7 @@ export const ActionBanner = () => {
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
-    return userSignalCounter && userSignalCounter > 0
+    return userSignalCounter && Number(userSignalCounter || 0) > 0
   }, [userSignalCounter])
 
   const ownsTokens = useMemo(() => {

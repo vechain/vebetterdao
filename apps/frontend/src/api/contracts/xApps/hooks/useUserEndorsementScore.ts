@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const address = getConfig().x2EarnAppsContractAddress
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi
 const method = "getUsersEndorsementScore" as const
 
@@ -10,7 +10,7 @@ const method = "getUsersEndorsementScore" as const
  * Get the query key the user endorsement score
  */
 export const getUserEndorsementScore = (user?: string) => {
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [user ?? "0x"] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [(user ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -22,10 +22,10 @@ export const useUserEndorsementScore = (user?: string) => {
     abi,
     address,
     method: "getUsersEndorsementScore",
-    args: [user || ""],
+    args: [(user ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!user,
-      select: data => Number(data[0]),
+      select: data => Number(data[0].$bigintString),
     },
   })
 }

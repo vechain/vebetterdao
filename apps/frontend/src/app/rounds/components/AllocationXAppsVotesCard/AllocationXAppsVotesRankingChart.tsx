@@ -1,18 +1,10 @@
-import {
-  useAllocationAmount,
-  useAllocationBaseAmount,
-  useMaxAllocationAmount,
-  useRoundXApps,
-  useXAppsShares,
-} from "@/api"
+import { useAllocationAmount, useAllocationBaseAmount, useMaxAllocationAmount } from "@/api"
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesHorizontalChart } from "./AppVotesHorizontalChart"
-type Props = {
-  roundId: string
-}
+import { useRoundXApps, useXAppsShares } from "@vechain/vechain-kit"
 
-export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
+export const AllocationXAppsVotesRankingChart = ({ roundId }: { roundId: string }) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)

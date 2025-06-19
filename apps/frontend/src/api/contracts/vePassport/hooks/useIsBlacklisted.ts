@@ -11,7 +11,11 @@ const method = "isBlacklisted" as const
  * @returns The query key for fetching the IsBlacklisted status.
  */
 export const getIsBlacklistedQueryKey = (address?: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [address ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({
+    address: contractAddress,
+    method,
+    args: [(address ?? "0x") as `0x${string}`],
+  })
 }
 
 /**
@@ -24,7 +28,7 @@ export const useIsBlacklisted = (address?: string) => {
     abi,
     address: contractAddress,
     method,
-    args: [address ?? "0x"],
+    args: [(address ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: data => data[0],

@@ -28,7 +28,7 @@ export const useAllocationRoundSnapshot = (roundId: string) => {
     args: [BigInt(roundId)],
     queryOptions: {
       enabled: !!roundId,
-      select: data => Number(data[0]),
+      select: data => data[0].toString(),
     },
   })
 }

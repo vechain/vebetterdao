@@ -3,7 +3,7 @@ import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
 
-const address = getConfig().veBetterPassportContractAddress
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "userRoundScore" as const
 
@@ -14,7 +14,7 @@ const method = "userRoundScore" as const
  * @returns The query key for fetching the user round score.
  */
 export const getUserRoundScoreQueryKey = (user: string, round: number) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user, round] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(user ?? "0x") as `0x${string}`, BigInt(round)] })
 }
 
 /**
@@ -28,10 +28,10 @@ export const useUserRoundScore = (user?: string | null, round?: number) => {
     abi,
     address,
     method,
-    args: [user ?? "0x", BigInt(round ?? 0)],
+    args: [(user ?? "0x") as `0x${string}`, BigInt(round ?? 0)],
     queryOptions: {
       enabled: !!user && !!round,
-      select: data => Number(data[0]),
+      select: data => data[0].$bigintString,
     },
   })
 }

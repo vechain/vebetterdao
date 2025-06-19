@@ -13,7 +13,7 @@ const method = "tokenOfOwnerByIndex" as const
  * @returns The query key for fetching the token ID by account.
  */
 export const getTokenIdByAccountQueryKey = (userAddress: string | null, index: number) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [userAddress || "", BigInt(index)] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress || "0x") as `0x${string}`, BigInt(index)] })
 
 /**
  * Hook to get the token ID for an address given an index
@@ -26,10 +26,10 @@ export const useTokenIdByAccount = (userAddress: string | null, index: number) =
     abi,
     address,
     method,
-    args: [userAddress || "", BigInt(index)],
+    args: [(userAddress || "0x") as `0x${string}`, BigInt(index)],
     queryOptions: {
       enabled: !!userAddress,
-      select: data => data[0],
+      select: data => data[0].$bigintString,
     },
   })
 }

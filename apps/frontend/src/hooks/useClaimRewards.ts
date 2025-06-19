@@ -1,12 +1,6 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
-import {
-  RoundReward,
-  buildClaimRewardsTx,
-  getB3TrBalanceQueryKey,
-  getRoundRewardQueryKey,
-  useCurrentAllocationsRoundId,
-} from "@/api"
+import { useWallet, getB3trBalanceQueryKey } from "@vechain/vechain-kit"
+import { RoundReward, buildClaimRewardsTx, getRoundRewardQueryKey, useCurrentAllocationsRoundId } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
@@ -49,8 +43,8 @@ export const useClaimRewards = ({
 
   const refetchQueryKeys = useMemo(() => {
     return [
-      getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account?.address ?? undefined),
-      getB3TrBalanceQueryKey(account?.address ?? ""),
+      getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account?.address ?? ""),
+      getB3trBalanceQueryKey(account?.address ?? ""),
     ]
   }, [account?.address, lastRoundId])
 

@@ -1,60 +1,48 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@repo/contracts"
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-import { B3TRGovernorJson } from "@repo/contracts"
-const b3trGovernorAbi = B3TRGovernorJson.abi
+const address = getConfig().b3trGovernorAddress
+const abi = B3TRGovernor__factory.abi
+const method = "proposalVotes" as const
 
-type ProposalVotes = {
-  againstVotes: string
-  forVotes: string
-  abstainVotes: string
-  totalVotes: number
-  againstPercentage: number
-  forPercentage: number
-  abstainPercentage: number
-}
-/**
- * Get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
- * @param thor  the thor client
- * @param proposalId  the proposal id to get the votes for
- * @returns  the proposal votes {@link ProposalVotes} with decimals scaled down
- */
-export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): Promise<ProposalVotes> => {
-  const proposalVotesAbi = b3trGovernorAbi.find(abi => abi.name === "proposalVotes")
-  if (!proposalVotesAbi) throw new Error("proposalVotes function not found")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(proposalVotesAbi).call(proposalId)
+export const getProposalVotesQuerykey = (proposalId: string) =>
+  getCallClauseQueryKey<typeof abi>({
+    address,
+    method,
+    args: [BigInt(proposalId)],
+  })
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-  const parsed = {
-    againstVotes: ethers.formatEther(res.decoded[0]),
-    forVotes: ethers.formatEther(res.decoded[1]),
-    abstainVotes: ethers.formatEther(res.decoded[2]),
-  }
-
-  const totalVotes = Number(parsed.againstVotes) + Number(parsed.forVotes) + Number(parsed.abstainVotes)
-  return {
-    ...parsed,
-    totalVotes,
-    againstPercentage: Math.min(100, (Number(parsed.againstVotes) / totalVotes) * 100),
-    forPercentage: Math.min(100, (Number(parsed.forVotes) / totalVotes) * 100),
-    abstainPercentage: Math.min(100, (Number(parsed.abstainVotes) / totalVotes) * 100),
-  }
-}
-
-export const getProposalVotesQuerykey = (proposalId: string) => ["proposalVotes", proposalId]
 /**
  * Hook to get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
  * @returns the proposal votes {@link ProposalVotes}
  */
 export const useProposalVotes = (proposalId: string, enabled = true) => {
-  const { thor } = useConnex()
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(proposalId)],
+    queryOptions: {
+      enabled: !!proposalId && enabled,
+      select: data => {
+        const [againstVotes, forVotes, abstainVotes] = data
+        const parsed = {
+          againstVotes: ethers.formatEther(againstVotes.$bigintString),
+          forVotes: ethers.formatEther(forVotes.$bigintString),
+          abstainVotes: ethers.formatEther(abstainVotes.$bigintString),
+        }
 
-  return useQuery({
-    queryKey: getProposalVotesQuerykey(proposalId),
-    queryFn: async () => await getProposalVotes(thor, proposalId),
-    enabled: !!thor && enabled,
+        const totalVotes = Number(parsed.againstVotes) + Number(parsed.forVotes) + Number(parsed.abstainVotes)
+        return {
+          ...parsed,
+          totalVotes,
+          againstPercentage: Math.min(100, (Number(parsed.againstVotes) / totalVotes) * 100),
+          forPercentage: Math.min(100, (Number(parsed.forVotes) / totalVotes) * 100),
+          abstainPercentage: Math.min(100, (Number(parsed.abstainVotes) / totalVotes) * 100),
+        }
+      },
+    },
   })
 }

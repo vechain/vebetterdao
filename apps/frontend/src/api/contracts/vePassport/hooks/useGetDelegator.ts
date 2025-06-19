@@ -13,7 +13,7 @@ const method = "getDelegator" as const
  * @returns The query key for fetching the delegator.
  */
 export const getDelegatorQueryKey = (delegator: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [delegator ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(delegator ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -26,7 +26,7 @@ export const useGetDelegator = (delegator?: string | null) => {
     abi,
     address,
     method,
-    args: [delegator ?? "0x"],
+    args: [(delegator ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!delegator,
       select: data => {

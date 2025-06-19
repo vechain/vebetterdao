@@ -4,6 +4,7 @@ import { render, screen } from "../../../../test"
 
 import * as apiHooks from "@/api"
 import dayjs from "dayjs"
+import * as vechainKit from "@vechain/vechain-kit"
 
 test("Allocations", async () => {
   const roundId = "1"
@@ -33,8 +34,8 @@ test("Allocations", async () => {
   })
   //@ts-ignore
   vi.spyOn(apiHooks, "useUserDelegation").mockReturnValue({
-    delegator: null,
-    delegatee: null,
+    delegator: undefined,
+    delegatee: undefined,
     isLoading: false,
     isDelegator: false,
     isDelegatee: false,
@@ -155,7 +156,7 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(apiHooks, "useXAppRoundEarnings").mockReturnValue({
+  vi.spyOn(vechainKit, "useXAppRoundEarnings").mockReturnValue({
     data: {
       amount: "1",
       appId: "0x123",
@@ -178,7 +179,7 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(apiHooks, "useXAppMetadata").mockReturnValue({
+  vi.spyOn(vechainKit, "useXAppMetadata").mockReturnValue({
     data: {
       logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
       name: "",
@@ -192,6 +193,7 @@ test("Allocations", async () => {
       ve_world: {
         banner: "",
       },
+      categories: [],
     },
     isLoading: false,
     error: null,

@@ -10,7 +10,8 @@ import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
-import { useWallet, useB3trToUpgrade, useGetB3trBalance } from "@vechain/vechain-kit"
+import { useWallet, useGetB3trBalance } from "@vechain/vechain-kit"
+import { useB3trToUpgrade } from "@/hooks/useB3trToUpgrade"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.

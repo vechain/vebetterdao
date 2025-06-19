@@ -12,7 +12,11 @@ const method = "isPassport" as const
  * @returns The query key for checking if an address is a passport.
  */
 export const getIsPassportQueryKey = (address?: string | null) => {
-  return getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [address ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({
+    address: contractAddress,
+    method,
+    args: [(address ?? "0x") as `0x${string}`],
+  })
 }
 
 /**
@@ -25,7 +29,7 @@ export const useIsPassport = (address?: string | null) => {
     abi,
     address: contractAddress,
     method,
-    args: [address ?? "0x"],
+    args: [(address ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: data => data[0],

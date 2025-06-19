@@ -12,7 +12,7 @@ const method = "getPendingDelegations" as const
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegateePOV = (delegatee: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [delegatee ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(delegatee ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -25,7 +25,7 @@ export const useGetPendingDelegationsDelegateePOV = (delegatee?: string | null) 
     abi,
     address,
     method,
-    args: [delegatee ?? "0x"],
+    args: [(delegatee ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!delegatee,
       select: data => data[0],

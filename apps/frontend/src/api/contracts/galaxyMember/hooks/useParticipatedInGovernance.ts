@@ -12,7 +12,7 @@ const method = "participatedInGovernance" as const
  * @returns The query key for fetching participated in governance status.
  */
 export const getParticipatedInGovernanceQueryKey = (userAddress: string | null) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [userAddress || ""] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress || "0x") as `0x${string}`] })
 
 /**
  * Hook to get whether an address has participated in governance
@@ -24,10 +24,10 @@ export const useParticipatedInGovernance = (userAddress: string | null) => {
     abi,
     address,
     method,
-    args: [userAddress || ""],
+    args: [(userAddress || "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!userAddress,
-      select: data => Boolean(data[0]),
+      select: data => data[0],
     },
   })
 }

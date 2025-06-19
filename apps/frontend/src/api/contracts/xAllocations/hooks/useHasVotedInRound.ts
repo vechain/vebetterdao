@@ -13,7 +13,11 @@ const method = "hasVoted" as const
  * @returns The query key for fetching if a user has voted in a round.
  */
 export const getHasVotedInRoundQueryKey = (roundId?: string, userAddress?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0), userAddress || ""] })
+  getCallClauseQueryKey<typeof abi>({
+    address,
+    method,
+    args: [BigInt(roundId || 0), (userAddress || "") as `0x${string}`],
+  })
 
 /**
  * Hook to get if a user has voted in a given roundId
@@ -26,10 +30,10 @@ export const useHasVotedInRound = (roundId?: string, userAddress?: string) => {
     abi,
     address,
     method,
-    args: [BigInt(roundId || 0), userAddress || ""],
+    args: [BigInt(roundId || 0), (userAddress || "") as `0x${string}`],
     queryOptions: {
       enabled: !!roundId && !!userAddress,
-      select: data => Boolean(data[0]),
+      select: data => data[0],
     },
   })
 }

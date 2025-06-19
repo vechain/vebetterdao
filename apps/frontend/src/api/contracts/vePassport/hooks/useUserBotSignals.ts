@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const contractAddress = getConfig().veBetterPassportContractAddress
+const contractAddress = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "signaledCounter" as const
 
@@ -12,7 +12,11 @@ const method = "signaledCounter" as const
  * @returns The query key for fetching the user bot signals.
  */
 export const getUserBotSignalsQueryKey = (address?: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [address ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({
+    address: contractAddress,
+    method,
+    args: [(address ?? "0x") as `0x${string}`],
+  })
 }
 
 /**
@@ -25,10 +29,10 @@ export const useUserBotSignals = (address?: string) => {
     abi,
     address: contractAddress,
     method,
-    args: [address ?? "0x"],
+    args: [(address ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
-      select: data => Number(data[0]),
+      select: data => data[0].$bigintString,
     },
   })
 }

@@ -6,13 +6,13 @@ import { buildClause } from "@/utils/buildClause"
 import {
   getAppEndorsementScoreQueryKey,
   getAppExistsQueryKey,
-  getAppIsBlacklistedQueryKey,
+  getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
-  getXAppsQueryKey,
 } from "@/api"
+import { getXAppsQueryKey } from "@vechain/vechain-kit"
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
@@ -46,7 +46,7 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId ?? ""),
       getXAppsQueryKey(),
-      getAppIsBlacklistedQueryKey(appId ?? ""),
+      getIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
       getAppEndorsedEventsQueryKey({ appId }),
       getNodeCheckCooldownQueryKey(nodeId ?? ""),

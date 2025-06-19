@@ -19,8 +19,8 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store"
 import { VOT3Icon } from "@/components"
-import { useDepositThreshold, useVot3Balance } from "@/api"
-import { useWallet } from "@vechain/vechain-kit"
+import { useDepositThreshold } from "@/api"
+import { useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -39,7 +39,7 @@ export const NewProposalSupportPageContent = () => {
 
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: balance, isLoading: balanceLoading } = useVot3Balance(account?.address ?? undefined)
+  const { data: balance, isLoading: balanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
   const { setData, depositAmount } = useProposalFormStore()
 

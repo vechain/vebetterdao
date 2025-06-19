@@ -1,5 +1,5 @@
 import { Heading, VStack, Text, Link, Button } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import unknownAnimation from "./unknown.json"
 import { ReactNode } from "react"
 import { motion } from "framer-motion"
@@ -36,10 +36,8 @@ export const UnknownModalContent = ({
         animate={{
           scale: [1, 1.1, 1],
         }}>
-        <Lottie
-          style={{
-            pointerEvents: "none",
-          }}
+        <LazyLottie
+          style={{ pointerEvents: "none" }}
           options={{
             loop: false,
             autoplay: true,

@@ -1,8 +1,9 @@
-import { buildClaimXAppAllocationTx, getB3TrBalanceQueryKey, getHasXAppClaimedQueryKey } from "@/api"
-import { useWallet } from "@vechain/vechain-kit"
+import { buildClaimXAppAllocationTx } from "@/api"
+import { useWallet, getB3trBalanceQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useCallback, useMemo } from "react"
+import { getHasXAppClaimedQueryKey } from "@/api/contracts/xAllocationPool/hooks"
 
 type useClaimAllocationsProps = {
   roundId: string
@@ -30,10 +31,10 @@ export const useClaimXAppsAllocations = ({ roundId, appIds, onSuccess, onFailure
   const refetchQueryKeys = useMemo(() => {
     const hasAppClaimedQueryKeys = appIds.map(appId => getHasXAppClaimedQueryKey(roundId, appId))
     const b3TrBalanceQueryKeys = [
-      getB3TrBalanceQueryKey(account?.address ?? ""),
-      getB3TrBalanceQueryKey(config.x2EarnRewardsPoolContractAddress),
+      getB3trBalanceQueryKey(account?.address ?? ""),
+      getB3trBalanceQueryKey(config.x2EarnRewardsPoolContractAddress),
     ]
-    return b3TrBalanceQueryKeys.concat(hasAppClaimedQueryKeys)
+    return [...b3TrBalanceQueryKeys, ...hasAppClaimedQueryKeys]
   }, [appIds, roundId, account?.address, config])
 
   return useBuildTransaction({

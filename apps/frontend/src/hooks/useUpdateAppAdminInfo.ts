@@ -7,9 +7,9 @@ import {
   getAppAdminQueryKey,
   getAppCreatorsQueryKey,
   getAppModeratorsQueryKey,
-  getXAppsQueryKey,
   getAppRewardDistributorsQueryKey,
 } from "@/api"
+import { getXAppsQueryKey } from "@vechain/vechain-kit"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()

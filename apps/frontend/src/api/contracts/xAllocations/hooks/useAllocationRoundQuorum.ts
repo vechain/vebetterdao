@@ -3,7 +3,7 @@ import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { formatEther } from "viem"
 
-const address = getConfig().xAllocationVotingContractAddress
+const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const abi = XAllocationVoting__factory.abi
 const method = "roundQuorum" as const
 
@@ -28,7 +28,7 @@ export const useAllocationRoundQuorum = (roundId: string) => {
     args: [BigInt(roundId)],
     queryOptions: {
       enabled: !!roundId,
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

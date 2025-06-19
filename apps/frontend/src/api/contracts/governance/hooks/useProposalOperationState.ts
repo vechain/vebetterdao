@@ -73,7 +73,7 @@ export const useProposalOperationState = (proposalId?: string, enabled = true) =
       proposalOperationIdCall.isLoading ||
       proposalOperationTimestampCall.isLoading,
     operationState: proposalOperationStateCall.data?.[0],
-    readyTimestamp: proposalOperationTimestampCall.data?.[0] || 0,
+    readyTimestamp: proposalOperationTimestampCall.data?.[0] ? Number(proposalOperationTimestampCall.data?.[0]) : 0,
     isOperationWaiting,
     isOperationReady,
     isOperationDone,

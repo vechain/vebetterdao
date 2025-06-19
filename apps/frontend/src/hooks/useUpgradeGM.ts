@@ -3,17 +3,13 @@ import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
-import {
-  getB3TrBalanceQueryKey,
-  getB3trDonatedQueryKey,
-  getB3trToUpgradeQueryKey,
-  getLevelOfTokenQueryKey,
-  getNFTMetadataUriQueryKey,
-  getTokensInfoByOwnerQueryKey,
-} from "@/api"
+import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getTokensInfoByOwnerQueryKey } from "@/api"
+import { getB3trDonatedQueryKey } from "./useB3trDonated"
+import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
+
 import { B3TR__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, getB3trBalanceQueryKey } from "@vechain/vechain-kit"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 const B3trInterface = B3TR__factory.createInterface()
@@ -53,7 +49,7 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
     () => [
       getLevelOfTokenQueryKey(tokenId),
       getB3trToUpgradeQueryKey(tokenId),
-      getB3TrBalanceQueryKey(account?.address ?? ""),
+      getB3trBalanceQueryKey(account?.address ?? ""),
       getTokensInfoByOwnerQueryKey(account?.address),
       getB3trDonatedQueryKey(tokenId),
       getNFTMetadataUriQueryKey(tokenId),

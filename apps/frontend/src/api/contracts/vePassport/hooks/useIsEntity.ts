@@ -12,7 +12,11 @@ const method = "isEntity" as const
  * @returns The query key for checking if an address is an entity.
  */
 export const getIsEntityQueryKey = (address?: string | null) => {
-  return getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [address ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({
+    address: contractAddress,
+    method,
+    args: [(address ?? "0x") as `0x${string}`],
+  })
 }
 
 /**
@@ -25,7 +29,7 @@ export const useIsEntity = (address?: string | null) => {
     abi,
     address: contractAddress,
     method,
-    args: [address ?? "0x"],
+    args: [(address ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: data => data[0],

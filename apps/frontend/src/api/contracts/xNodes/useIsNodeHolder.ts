@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey, ThorClient, executeCallClause } f
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 
-const address = getConfig().nodeManagementContractAddress
+const address = getConfig().nodeManagementContractAddress as `0x${string}`
 const abi = NodeManagement__factory.abi
 const method = "isNodeHolder" as const
 
@@ -12,7 +12,7 @@ const method = "isNodeHolder" as const
  * @returns The query key for checking if an address is a node holder.
  */
 export const getIsNodeHolderQueryKey = (userAddress: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [userAddress] })
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
 
 export const getIsNodeHolder = async (thor: ThorClient, userAddress: string) => {
   return executeCallClause({
@@ -20,7 +20,7 @@ export const getIsNodeHolder = async (thor: ThorClient, userAddress: string) => 
     contractAddress: address,
     abi,
     method,
-    args: [userAddress],
+    args: [(userAddress ?? "0x") as `0x${string}`],
   })
 }
 
@@ -34,10 +34,10 @@ export const useIsNodeHolder = (userAddress: string) => {
     abi,
     address,
     method,
-    args: [userAddress],
+    args: [(userAddress ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!userAddress,
-      select: data => Boolean(data[0]),
+      select: data => data[0],
     },
   })
 }

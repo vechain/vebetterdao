@@ -28,8 +28,8 @@ export const useB3trTokenDetails = () => {
           name: data[0],
           symbol: data[1],
           decimals: data[2],
-          circulatingSupply: ethers.formatEther(data[3]),
-          totalSupply: ethers.formatEther(data[4]),
+          circulatingSupply: ethers.formatEther(data[3].$bigintString),
+          totalSupply: ethers.formatEther(data[4].$bigintString),
         }) as TokenDetails,
     },
   })

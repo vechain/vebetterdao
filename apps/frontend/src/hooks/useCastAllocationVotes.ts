@@ -3,12 +3,15 @@ import {
   getAllocationVotesQueryKey,
   getHasVotedInRoundQueryKey,
   getParticipatedInGovernanceQueryKey,
+} from "@/api"
+import { useCallback, useMemo } from "react"
+import {
+  useWallet,
+  EnhancedClause,
   getUserVotesInRoundQueryKey,
   getXAppRoundEarningsQueryKey,
   getXAppsSharesQueryKey,
-} from "@/api"
-import { useCallback, useMemo } from "react"
-import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
+} from "@vechain/vechain-kit"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
@@ -85,6 +88,7 @@ export const useCastAllocationVotes = ({
 
   return useBuildTransaction({
     clauseBuilder: buildClauses,
+    // @ts-ignore
     refetchQueryKeys,
     onSuccess,
     transactionModalCustomUI,

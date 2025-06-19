@@ -1,6 +1,6 @@
 import { getProposalsEvents, ProposalMetadata } from "@/api/contracts/governance/getProposalsEvents"
 import { getIpfsMetadata } from "@/api/ipfs"
-import { getNodeJsConnex, toIPFSURL } from "@/utils"
+import { getNodeJsThorClient, toIPFSURL } from "@/utils"
 import { ResolvingMetadata, Metadata } from "next"
 import { getConfig } from "@repo/config"
 import { ProposalPage } from "./ProposalPage"
@@ -14,13 +14,12 @@ type Props = {
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   // read route params
   const id = params.proposalId
+  const thor = await getNodeJsThorClient()
 
   // optionally access and extend (rather than replace) parent metadata
   //   const previousImages = (await parent).openGraph?.images || []
 
-  const connex = await getNodeJsConnex()
-
-  const proposalsEvents = await getProposalsEvents(connex.thor, params.proposalId)
+  const proposalsEvents = await getProposalsEvents(thor, params.proposalId)
 
   const proposal = proposalsEvents.created.find(ev => ev.proposalId === id)
   if (!proposal) throw new Error(`Proposal ${id} not found`)

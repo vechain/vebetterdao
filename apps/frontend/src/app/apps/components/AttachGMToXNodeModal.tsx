@@ -6,7 +6,7 @@ import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
-import { useAttachGMToXNode } from "@/hooks"
+import { useAttachGMToXNode, useB3trDonated } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import {
   Alert,
@@ -33,7 +33,6 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useB3trDonated } from "@vechain/vechain-kit"
 
 type Props = {
   isOpen: boolean

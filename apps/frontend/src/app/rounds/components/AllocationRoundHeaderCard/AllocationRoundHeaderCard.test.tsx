@@ -12,7 +12,7 @@ const spyOnUserAllocationRound = vi.spyOn(apiHooks, "useAllocationsRound")
 const spyOnUserAllocationRoundState = vi.spyOn(apiHooks, "useAllocationsRoundState")
 const spyOnHasVotedInRound = vi.spyOn(apiHooks, "useHasVotedInRound")
 const spyOnUserVotesInRound = vi.spyOn(apiHooks, "useUserVotesInRound")
-const spyOnRoundXApps = vi.spyOn(apiHooks, "useRoundXApps")
+const spyOnRoundXApps = vi.spyOn(vechainKit, "useRoundXApps")
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
@@ -98,6 +98,8 @@ describe("AllocationRoundHeaderCard", () => {
         state: 0,
         voteEnd: "125",
         voteStart: "120",
+        isFirstRound: false,
+        isLastRound: false,
       },
       isLoading: false,
     })

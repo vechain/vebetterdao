@@ -41,7 +41,7 @@ export const useMintNFT = ({ onFailure, onSuccess, transactionModalCustomUI }: u
   const refetchQueryKeys = useMemo(
     () => [
       getSelectedTokenIdQueryKey(account?.address),
-      getTokenIdByAccountQueryKey(account?.address ?? ""),
+      getTokenIdByAccountQueryKey(account?.address ?? "", 0),
       getGMbalanceQueryKey(account?.address ?? ""),
       getTokensInfoByOwnerQueryKey(account?.address),
     ],

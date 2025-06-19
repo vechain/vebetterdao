@@ -46,7 +46,7 @@ export const getHasRole = async (
   contractAddress: string,
   address?: string,
 ) => {
-  const bytes32Role = getBytes32Role(role)
+  const bytes32Role = getBytes32Role(role) as `0x${string}`
 
   const [hasRole] = await executeCallClause({
     thor,

@@ -31,6 +31,9 @@ export const useAllocationsRound = (roundId?: string) => {
     if (!roundInfo) return
     return {
       ...roundInfo,
+      appsIds: [...roundInfo.appsIds],
+      voteStart: roundInfo.voteStart.toString(),
+      voteEnd: roundInfo.voteEnd.toString(),
       state: currentAllocationState.data,
       isCurrent: roundId === currentAllocationId.data,
     }

@@ -1,4 +1,4 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId, useHaveXAppsClaimed, useRoundXApps } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useHaveXAppsClaimed } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardBody,
 } from "@chakra-ui/react"
-import { useMultipleXAppRoundEarnings } from "@vechain/vechain-kit"
+import { useMultipleXAppRoundEarnings, useRoundXApps } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -42,12 +42,12 @@ export const BulkClaimXAppsAllocations = () => {
   }, [totalAmounts])
 
   // Retrieve all apps that have claimed for the round and the ones that still needs to claim
-  const claims = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const { data: claims } = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
   const allClaimed = useMemo(() => {
-    return !claims.some(claim => !claim.data?.claimed)
+    return !claims?.some(claim => !claim.claimed)
   }, [claims])
   const xAppsLeft = useMemo(() => {
-    return xApps?.filter(app => !claims.find(claim => claim.data?.appId === app.id)?.data?.claimed)
+    return xApps?.filter(app => !claims?.find(claim => claim?.appId === app.id)?.claimed)
   }, [claims, xApps])
 
   // Calculate remaining amount to claim excluding already claimed

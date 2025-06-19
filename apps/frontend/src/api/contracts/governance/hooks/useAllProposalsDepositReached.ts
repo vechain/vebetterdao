@@ -6,7 +6,7 @@ import { getIsDepositReachedQueryKey } from "./useIsDepositReached"
 
 const abi = B3TRGovernor__factory.abi
 const functionName = "proposalDepositReached" as const
-const address = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 
 export const getAllProposalsDepositReachedQueryKey = () => ["PROPOSALS", "ALL", "DEPOSIT_REACHED"]
 

@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts"
 import { ethers } from "ethers"
 
-const EMISSION_CONTRACT = getConfig().emissionsContractAddress
+const abi = Emissions__factory.abi
+const address = getConfig().emissionsContractAddress as `0x${string}`
 
 type AllocationAmount = {
   treasury: string
@@ -20,30 +21,44 @@ type AllocationAmount = {
  * @param roundId  the roundId the get the amount for
  * @returns the allocation amount for a given roundId see {@link AllocationAmount}
  */
-export const getAllocationAmount = async (thor: Connex.Thor, roundId?: string): Promise<AllocationAmount> => {
-  const emissionsInterface = Emissions__factory.createInterface()
-  const functionFragmentTreasuryAmount = emissionsInterface.getFunction("getTreasuryAmount").format("json")
-  const functionFragmentVoteX2EarnAmount = emissionsInterface.getFunction("getVote2EarnAmount").format("json")
-  const functionFragmentXAllocationsAmount = emissionsInterface.getFunction("getXAllocationAmount").format("json")
-  const functionFragmentGMRewardsAmount = emissionsInterface.getFunction("getGMAmount").format("json")
+export const getAllocationAmount = async (thor: ThorClient, roundId?: string): Promise<AllocationAmount> => {
+  if (!roundId) return Promise.reject(new Error("roundId is required"))
 
-  const [resTreasury, resVoteX2Earn, voteXAllocations, resGMRewards] = await Promise.all([
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentTreasuryAmount)).call(roundId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentVoteX2EarnAmount)).call(roundId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentXAllocationsAmount)).call(roundId),
-    thor.account(EMISSION_CONTRACT).method(JSON.parse(functionFragmentGMRewardsAmount)).call(roundId),
-  ])
-
-  if (resTreasury.vmError) return Promise.reject(new Error(resTreasury.vmError))
-  if (resVoteX2Earn.vmError) return Promise.reject(new Error(resVoteX2Earn.vmError))
-  if (voteXAllocations.vmError) return Promise.reject(new Error(voteXAllocations.vmError))
-  if (resGMRewards.vmError) return Promise.reject(new Error(resGMRewards.vmError))
+  const [resTreasury, resVoteX2Earn, voteXAllocations, resGMRewards] = await executeMultipleClausesCall({
+    thor,
+    calls: [
+      {
+        address,
+        abi,
+        functionName: "getTreasuryAmount",
+        args: [BigInt(roundId)],
+      },
+      {
+        address,
+        abi,
+        functionName: "getVote2EarnAmount",
+        args: [BigInt(roundId)],
+      },
+      {
+        address,
+        abi,
+        functionName: "getXAllocationAmount",
+        args: [BigInt(roundId)],
+      },
+      {
+        address,
+        abi,
+        functionName: "getGMAmount",
+        args: [BigInt(roundId)],
+      },
+    ],
+  })
 
   return {
-    treasury: ethers.formatEther(resTreasury.decoded[0]),
-    voteX2Earn: ethers.formatEther(resVoteX2Earn.decoded[0]),
-    voteXAllocations: ethers.formatEther(voteXAllocations.decoded[0]),
-    gm: ethers.formatEther(resGMRewards.decoded[0]),
+    treasury: ethers.formatEther(resTreasury),
+    voteX2Earn: ethers.formatEther(resVoteX2Earn),
+    voteXAllocations: ethers.formatEther(voteXAllocations),
+    gm: ethers.formatEther(resGMRewards),
   }
 }
 
@@ -55,7 +70,7 @@ export const getAllocationAmountQueryKey = (roundId?: string) => ["allocationsRo
  * @returns the allocation amount for a given roundId see {@link AllocationAmount}
  */
 export const useAllocationAmount = (roundId?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getAllocationAmountQueryKey(roundId),

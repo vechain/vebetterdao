@@ -139,7 +139,7 @@ export const useProposalDetailById = (proposalId: string) => {
     const hasUserSupported = proposalDepositEvent.hasUserSupported
     const supportingUserCount = proposalDepositEvent.supportingUserCount
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
-    const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
+    const userVotingPowerOnSnapshot = ethers.formatEther(BigInt(proposalSnapshotVotingPower.data || 0))
     const userVot3OnSnapshot = proposalSnapshotVot3.data ?? "0"
     const result = {
       id: proposalId,

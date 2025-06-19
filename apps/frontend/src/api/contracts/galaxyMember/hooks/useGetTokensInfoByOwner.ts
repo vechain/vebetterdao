@@ -14,7 +14,7 @@ const method = "getTokensInfoByOwner" as const
  * @returns An array representing the query key.
  */
 export const getTokensInfoByOwnerQueryKey = (owner?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [owner || ""] })
+  getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [(owner || "0x") as `0x${string}`] })
 
 /**
  * Custom hook to fetch token information for a specific owner with infinite scrolling support.
@@ -31,7 +31,7 @@ export const useGetTokensInfoByOwner = (owner: string, size: number = 10) => {
       contractAddress: contractAddress,
       abi,
       method,
-      args: [owner, BigInt(pageParam), BigInt(size)],
+      args: [owner as `0x${string}`, BigInt(pageParam), BigInt(size)],
     })
 
     const data = res[0].map(({ tokenId, tokenURI, tokenLevel, b3trToUpgrade }) => ({

@@ -14,7 +14,7 @@ const method = "getCumulativeScoreWithDecay" as const
  * @returns The query key for fetching the cumulative score with decay.
  */
 export const getGetCumulativeScoreWithDecayQueryKey = (user: string, round: number) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user, round] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user as `0x${string}`, BigInt(round ?? 0)] })
 }
 
 /**
@@ -28,10 +28,10 @@ export const useGetCumulativeScoreWithDecay = (user?: string | null, round?: num
     abi,
     address,
     method,
-    args: [user ?? "0x", BigInt(round ?? 0)],
+    args: [(user ?? "0x") as `0x${string}`, BigInt(round ?? 0)],
     queryOptions: {
       enabled: !!user && !!round,
-      select: data => Number(data[0]),
+      select: data => data[0].$bigintString,
     },
   })
 }

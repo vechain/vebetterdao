@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const address = getConfig().x2EarnAppsContractAddress
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi
 const method = "creatorApps" as const
 
@@ -12,7 +12,7 @@ const method = "creatorApps" as const
  * @returns The query key for fetching the number of apps created by the creator
  */
 export const getAppsCountFromCreatorQueryKey = (walletAddress: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [walletAddress] })
+  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(walletAddress ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -25,10 +25,10 @@ export const useAppsCountFromCreator = (walletAddress: string) => {
     abi,
     address,
     method,
-    args: [walletAddress],
+    args: [(walletAddress ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!walletAddress,
-      select: data => Number(data[0]),
+      select: data => Number(data[0].$bigintString),
     },
   })
 }

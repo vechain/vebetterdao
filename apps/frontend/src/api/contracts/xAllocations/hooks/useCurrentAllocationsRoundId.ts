@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
-const address = getConfig().xAllocationVotingContractAddress
+const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const abi = XAllocationVoting__factory.abi
 const method = "currentRoundId" as const
 
@@ -24,7 +24,7 @@ export const useCurrentAllocationsRoundId = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => data[0].toString(),
+      select: data => data[0].$bigintString,
       staleTime: 0,
     },
   })

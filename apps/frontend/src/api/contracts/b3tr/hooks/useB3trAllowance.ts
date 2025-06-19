@@ -9,21 +9,30 @@ const address = getConfig().b3trContractAddress
 const method = "allowance" as const
 
 export const getB3TrAllowanceQueryKey = (owner?: string, spender?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [owner ?? "0x", spender ?? "0x"] })
+  getCallClauseQueryKey<typeof abi>({
+    address,
+    method,
+    args: [(owner ?? "0x") as `0x${string}`, (spender ?? "0x") as `0x${string}`],
+  })
 
 export const useB3trAllowance = (owner?: string, spender?: string) => {
   return useCallClause({
     abi,
     address,
     method,
-    args: [owner ?? "0x", spender ?? "0x"],
+    args: [(owner ?? "0x") as `0x${string}`, (spender ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!owner && !!spender,
-      select: data => ({
-        original: data[0],
-        scaled: formatEther(data[0]),
-        formatted: FormattingUtils.humanNumber(formatEther(data[0])),
-      }),
+      select: data => {
+        const original = data[0].$bigintString
+        const scaled = formatEther(BigInt(original))
+        const formatted = FormattingUtils.humanNumber(scaled)
+        return {
+          original,
+          scaled,
+          formatted,
+        }
+      },
     },
   })
 }

@@ -6,7 +6,7 @@ import { ProposalAction, ReducedActions } from "@/hooks"
 
 const abi = B3TRGovernor__factory.abi
 const method = "hashProposal" as const
-const address = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 
 export const getHashProposalQueryKey = () =>
   getCallClauseQueryKey<typeof abi>({
@@ -38,14 +38,14 @@ export const useHashProposal = (actions: ProposalAction[], descriptionHash: stri
     address,
     method,
     args: [
-      targetsAndCalldata.contractsAddress,
+      targetsAndCalldata.contractsAddress as `0x${string}`[],
       Array(actions.length).fill(0),
       targetsAndCalldata.calldatas as `0x${string}`[],
       descriptionHash as `0x${string}`,
     ],
     queryOptions: {
       enabled: !!thor && !!headNumber && headNumber > 0 && descriptionHash !== "",
-      select: data => data[0].toString(),
+      select: data => data[0].$bigintString,
     },
   })
 }

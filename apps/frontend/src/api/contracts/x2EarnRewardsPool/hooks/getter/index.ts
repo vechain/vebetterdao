@@ -1,4 +1,3 @@
-export * from "./useAppBalance"
 export * from "./useIsDistributionPaused"
 export * from "./useIsRewardsPoolEnabled"
 export * from "./useAppRewardsBalance"

@@ -1,21 +1,15 @@
 import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor, getXApps, getXAppsQueryKey } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
 
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
-import { abi } from "thor-devkit"
-import { getXAppsQueryKey } from "./useXApps"
-import { getXApps } from "../getXApps"
+import { X2EarnApps__factory } from "@repo/contracts"
 
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-
-const isAdminFragment = X2EarnApps.createInterface().getFunction("isAppAdmin").format("json")
-const isModeratorFragment = X2EarnApps.createInterface().getFunction("isAppModerator").format("json")
-const isAdminAbi = new abi.Function(JSON.parse(isAdminFragment))
-const isModeratorAbi = new abi.Function(JSON.parse(isModeratorFragment))
+const abi = X2EarnApps__factory.abi
+const contractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 
 export const getAccountAppPermissionsQueryKey = (address?: string) => ["ACCOUNT_APP_PERMISSIONS", address]
+
 type AccountAppPermissions = Record<
   string,
   {
@@ -25,59 +19,48 @@ type AccountAppPermissions = Record<
 >
 
 export const useAccountAppPermissions = (address?: string): UseQueryResult<AccountAppPermissions> => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const queryClient = useQueryClient()
 
   return useQuery({
     queryKey: getAccountAppPermissionsQueryKey(address ?? ""),
     enabled: !!address,
     queryFn: async () => {
-      const appsQuery = await queryClient.ensureQueryData({
+      const { allApps } = await queryClient.ensureQueryData({
         queryKey: getXAppsQueryKey(),
-        queryFn: async () => await getXApps(thor),
+        queryFn: async () => await getXApps(thor, getConfig().network.type),
+      })
+      const res = await executeMultipleClausesCall({
+        thor,
+        calls: allApps.flatMap(app => [
+          {
+            abi,
+            address: contractAddress,
+            functionName: "isAppAdmin",
+            args: [app.id, address],
+          } as const,
+          {
+            abi,
+            address: contractAddress,
+            functionName: "isAppModerator",
+            args: [app.id, address],
+          } as const,
+        ]),
       })
 
-      const allApps = appsQuery.allApps
-
-      const clauses = allApps
-        .map(app => [
-          {
-            to: X2EARNAPPS_CONTRACT,
-            value: "0x0",
-            data: isAdminAbi.encode(app.id, address),
-          },
-          {
-            to: X2EARNAPPS_CONTRACT,
-            value: "0x0",
-            data: isModeratorAbi.encode(app.id, address),
-          },
-        ])
-        .flat()
-
-      const res = await thor.explain(clauses).execute()
-
-      // Here we create an object where keys are app ids and values are the permissions for the given address
-      // Every app should take two slots in the res array, the first one is the isAdmin result and the second one is the isModerator result
-
-      const permissions: AccountAppPermissions = allApps.reduce((acc, app, index) => {
-        const isAdminRes = res[index * 2] as Connex.VM.Output
-        const isModeratorRes = res[index * 2 + 1] as Connex.VM.Output
-
-        if (isAdminRes?.reverted) throw new Error(`Reverted: isAdmin for ${app.id} with ${isAdminRes?.revertReason}`)
-        if (isModeratorRes?.reverted)
-          throw new Error(`Reverted: isModerator for ${app.id} with ${isModeratorRes?.revertReason}`)
-
-        const isAdminDecoded = isAdminAbi.decode(isAdminRes.data)
-        const isModeratorDecoded = isModeratorAbi.decode(isModeratorRes.data)
-
-        return {
-          ...acc,
-          [app.id]: {
-            isAdmin: Boolean(isAdminDecoded[0]),
-            isModerator: Boolean(isModeratorDecoded[0]),
-          },
+      const permissions: AccountAppPermissions = {}
+      let appIndex = 0
+      for (let i = 0; i < res.length; i += 2) {
+        const appId = allApps[appIndex]?.id
+        if (appId) {
+          permissions[appId] = {
+            isAdmin: res[i] || false,
+            isModerator: res[i + 1] || false,
+          }
         }
-      }, {} as AccountAppPermissions)
+
+        appIndex++
+      }
 
       return permissions
     },

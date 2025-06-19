@@ -1,7 +1,6 @@
-import { useRoundXApps } from "./useRoundXApps"
-import { XApp } from "../getXApps"
 import { useMemo } from "react"
-import { useXApps, useXAppsShares } from "@vechain/vechain-kit"
+import { useXAppsShares } from "@vechain/vechain-kit"
+import { useXApps, XApp, useRoundXApps } from "@/api"
 
 export type MostVotedAppsInRoundReturnType = {
   percentage: number

@@ -1,7 +1,7 @@
 import { ethers } from "ethers"
 import { useMemo } from "react"
 import { useUserVotesInAllRounds } from "./useUserVotesInAllRounds"
-import { useXApps } from "./useXApps"
+import { useXApps } from "@vechain/vechain-kit"
 
 export type AppVotesGiven = {
   appId: string

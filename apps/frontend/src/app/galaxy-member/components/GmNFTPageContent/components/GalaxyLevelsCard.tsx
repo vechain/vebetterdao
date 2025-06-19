@@ -29,7 +29,7 @@ import { useTranslation } from "react-i18next"
 const compactFormatter = getCompactFormatter(0)
 
 export const GalaxyLevelsCard = () => {
-  const { gmLevel, maxGmLevel } = useSelectedGmNft()
+  const { gmLevel, maxGmLevel = 10 } = useSelectedGmNft()
   const { t } = useTranslation()
   const [showShortened, setShowShortened] = useState(false)
   const gmNftsShortened = useMemo(() => {
@@ -132,7 +132,7 @@ export const GalaxyLevelsCard = () => {
                 {isCurrentLevel ? (
                   <Heading
                     fontSize="2xl"
-                    bg={getLevelGradient(gmLevel)}
+                    bg={getLevelGradient(Number(gmLevel))}
                     style={{
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",

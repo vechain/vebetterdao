@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const contractAddress = getConfig().veBetterPassportContractAddress
+const contractAddress = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "isWhitelisted" as const
 
@@ -11,7 +11,11 @@ const method = "isWhitelisted" as const
  * @returns The query key for fetching the isWhitelisted status.
  */
 export const getIsWhitelistedQueryKey = (address?: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [address ?? "0x"] })
+  return getCallClauseQueryKey<typeof abi>({
+    address: contractAddress,
+    method,
+    args: [(address ?? "0x") as `0x${string}`],
+  })
 }
 
 /**
@@ -24,7 +28,7 @@ export const useIsWhitelisted = (address?: string) => {
     abi,
     address: contractAddress,
     method,
-    args: [address ?? "0x"],
+    args: [(address ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: data => data[0],

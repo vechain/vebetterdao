@@ -2,7 +2,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const address = getConfig().veBetterPassportContractAddress
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "isPersonAtTimepoint" as const
 
@@ -13,7 +13,11 @@ const method = "isPersonAtTimepoint" as const
  * @returns The query key for fetching the isPerson status at a given block number.
  */
 export const getIsPersonAtTimepointQueryKey = (user: string, blockNumber: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user, Number(blockNumber)] })
+  return getCallClauseQueryKey<typeof abi>({
+    address,
+    method,
+    args: [(user ?? "0x") as `0x${string}`, Number(blockNumber)],
+  })
 }
 
 /**
@@ -27,7 +31,7 @@ export const useIsPersonAtTimepoint = (user?: string | null, blockNumber?: strin
     abi,
     address,
     method,
-    args: [user ?? "0x", Number(blockNumber ?? 0)],
+    args: [(user ?? "0x") as `0x${string}`, Number(blockNumber ?? 0)],
     queryOptions: {
       enabled: !!user && !!blockNumber,
       select: data => data[0],

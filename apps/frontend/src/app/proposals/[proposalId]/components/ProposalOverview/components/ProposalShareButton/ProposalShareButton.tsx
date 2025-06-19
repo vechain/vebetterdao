@@ -10,7 +10,6 @@ import {
   Text,
   HStack,
 } from "@chakra-ui/react"
-import Lottie from "react-lottie"
 import loadingAnimation from "./loading.json"
 import { motion } from "framer-motion"
 import { CustomModalContent } from "@/components"
@@ -21,6 +20,7 @@ import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 import { useCallback, useState } from "react"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import LazyLottie from "@/app/components/LazyLottie"
 
 const containerVariants = {
   initial: {
@@ -71,7 +71,7 @@ export const ProposalShareButton = () => {
               <ModalCloseButton top={4} right={4} />
               <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
-                  <Lottie
+                  <LazyLottie
                     style={{
                       pointerEvents: "none",
                     }}

@@ -3,7 +3,7 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { formatEther } from "viem"
 
-const address = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
 const method = "quorum" as const
 
@@ -29,7 +29,7 @@ export const useProposalQuorum = (blockNumber?: string | number, enabled = true)
     args: [BigInt(blockNumber || 0)],
     queryOptions: {
       enabled: !!blockNumber && enabled,
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

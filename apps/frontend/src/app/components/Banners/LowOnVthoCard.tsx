@@ -1,8 +1,13 @@
-import { useVot3Balance } from "@/api"
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
-import { getAccountBalanceQueryKey, useAccountBalance, useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
+import {
+  getAccountBalanceQueryKey,
+  useAccountBalance,
+  useGetB3trBalance,
+  useGetVot3Balance,
+  useWallet,
+} from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
@@ -18,7 +23,7 @@ export const LowOnVthoCard: React.FC = () => {
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
 
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false

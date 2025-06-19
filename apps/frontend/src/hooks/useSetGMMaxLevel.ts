@@ -29,7 +29,7 @@ export const useSetGMMaxLevel = ({ maxLevel, onSuccess }: Props) => {
     ]
   }, [maxLevel])
 
-  const refetchQueryKeys = getGMMaxLevelQueryKey()
+  const refetchQueryKeys = [getGMMaxLevelQueryKey()]
 
   return useBuildTransaction({
     clauseBuilder,

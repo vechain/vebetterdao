@@ -1,6 +1,5 @@
 export * from "./useHasXAppClaimed"
 export * from "./useHaveXAppsClaimed"
-export * from "./useXAppTotalEarnings"
 export * from "./useAllocationPoolEvents"
 export * from "./useMultipleXAppsTotalEarnings"
 export * from "./useIsQuadraticFundingDisabled"

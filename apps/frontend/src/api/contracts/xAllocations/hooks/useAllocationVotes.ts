@@ -28,7 +28,7 @@ export const useAllocationVotes = (roundId?: string) => {
     args: [BigInt(roundId || 0)],
     queryOptions: {
       enabled: !!roundId,
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

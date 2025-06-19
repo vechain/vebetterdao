@@ -1,15 +1,11 @@
-import { getVot3BalanceQueryKey, buildConvertVot3Tx, getVotesQueryKey, getB3TrTokenDetailsQueryKey } from "@/api"
+import { buildConvertVot3Tx, getB3TrTokenDetailsQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
-import { useWallet, getB3trBalanceQueryKey, useThor } from "@vechain/vechain-kit"
+import { useWallet, getB3trBalanceQueryKey, useThor, getVot3BalanceQueryKey } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 const config = getConfig()
-
-// const buffer = 1.01
-// Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-// const suggestedMaxGas = 131664 * buffer
 
 type useMintB3trProps = {
   amount?: string | number
@@ -39,7 +35,8 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
     () => [
       getB3trBalanceQueryKey(account?.address ?? undefined),
       getVot3BalanceQueryKey(account?.address ?? ""),
-      getVotesQueryKey(account?.address ?? undefined),
+      // TODO: migration check if this is needed cause hook not used anywhere
+      //  getVotesQueryKey(account?.address ?? undefined),
       getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
     ],

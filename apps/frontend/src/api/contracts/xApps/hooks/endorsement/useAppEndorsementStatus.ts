@@ -5,8 +5,8 @@ import {
   useAppEligibleAtRoundStart,
   useIsAppUnendorsed,
 } from "@/api"
-import { useIsBlacklisted } from "@vechain/vechain-kit"
 import { XAppStatus } from "@/types"
+import { useIsBlacklisted } from "@/api/contracts/vePassport/hooks/useIsBlacklisted"
 
 /**
  * Determine the current app endorsement status

@@ -1,5 +1,5 @@
 "use client"
-import { useXApp } from "@vechain/vechain-kit"
+import { useXApp } from "@/api"
 import { useParams } from "next/navigation"
 
 /**

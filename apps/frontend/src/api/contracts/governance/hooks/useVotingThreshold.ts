@@ -3,7 +3,7 @@ import { B3TRGovernor__factory } from "@repo/contracts"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
-const address = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
 const method = "votingThreshold" as const
 
@@ -12,7 +12,7 @@ const method = "votingThreshold" as const
  * @returns The query key for fetching the voting threshold.
  */
 export const getVotingThresholdQueryKey = () => {
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+  getCallClauseQueryKey<typeof abi>({ address, method })
 }
 
 /**
@@ -26,7 +26,7 @@ export const useVotingThreshold = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

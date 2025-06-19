@@ -1,10 +1,11 @@
 import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { SustainabilityActionsResponse, useXApps } from "@/api"
+import { SustainabilityActionsResponse } from "@/api"
 import dayjs from "dayjs"
 import { LeafIcon } from "../../../Icons/LeafIcon"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./components/ActionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useXApps } from "@vechain/vechain-kit"
 
 const compactFormatter = getCompactFormatter(2)
 

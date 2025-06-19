@@ -1,7 +1,6 @@
-import { useVot3Balance } from "@/api"
 import { filterAmountInput } from "@/utils"
 import { Box, Button, Divider, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
@@ -14,7 +13,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const { proposal } = useProposalDetail()
   const [amount, setAmount] = useState("")
   const { account } = useWallet()
-  const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
 
   const missingSupport = useMemo(
     () => proposal.depositThreshold - proposal.communityDeposits,

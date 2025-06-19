@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useThor } from "@vechain/vechain-kit"
 import { getGracePeriodEvent } from "../getGracePeriodEvents"
 
 export const getGracePeriodQueryKey = (appId = "all") => ["AppUnendorsedGracePeriodStarted", appId]
@@ -9,7 +9,7 @@ export const getGracePeriodQueryKey = (appId = "all") => ["AppUnendorsedGracePer
  * @returns the grace period events
  */
 export const useGracePeriodEvent = (appId?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   const result = useQuery({
     queryKey: getGracePeriodQueryKey(appId),

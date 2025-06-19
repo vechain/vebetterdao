@@ -27,7 +27,7 @@ export const useNodeEndorsementScore = (nodeId: string) => {
     args: [BigInt(nodeId)],
     queryOptions: {
       enabled: !!nodeId,
-      select: data => Number(data[0]),
+      select: data => data[0].toString(),
     },
   })
 }

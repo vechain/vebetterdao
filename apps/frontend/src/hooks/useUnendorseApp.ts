@@ -5,14 +5,14 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getAppEndorsementScoreQueryKey,
   getAppExistsQueryKey,
-  getAppIsBlacklistedQueryKey,
+  getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
   getUserXNodesQueryKey,
-  getXAppsQueryKey,
 } from "@/api"
+import { getXAppsQueryKey } from "@vechain/vechain-kit"
 import { buildClause } from "@/utils/buildClause"
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
@@ -49,7 +49,7 @@ export const useUnendorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId ?? ""),
       getXAppsQueryKey(),
-      getAppIsBlacklistedQueryKey(appId ?? ""),
+      getIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
       getAppEndorsedEventsQueryKey({ appId }),
       getNodeCheckCooldownQueryKey(nodeId ?? ""),

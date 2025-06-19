@@ -1,12 +1,11 @@
 import { getConfig } from "@repo/config"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { useThor } from "@vechain/vechain-kit"
-import { abi } from "thor-devkit"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getBytes32Role } from "./useHasRole"
 
-const fragment = AccessControl__factory.createInterface().getFunction("hasRole").format("json")
-const hasRoleAbi = new abi.Function(JSON.parse(fragment))
+const abi = AccessControl__factory.abi
+const method = "hasRole" as const
 
 const config = getConfig()
 type AccountPermissionResponse = {
@@ -200,32 +199,23 @@ export const useAccountPermissions = (
     queryKey: getAccountPermissionsQueryKey(address ?? ""),
     enabled: !!address,
     queryFn: async () => {
-      const clauses = Object.entries(CLAUSES_DATA).map(([_key, { role, contractAddress }]) => ({
-        to: contractAddress,
-        value: "0x0",
-        data: hasRoleAbi.encode(getBytes32Role(role), address),
-      }))
-
-      // const a = executeMultipleClausesCall({
-      //   thor,
-      //   calls: [
-      //     {
-      //       a
-      //     }
-      //   ]
-      // })
-
-      const res = await thor.explain(clauses).execute()
+      const res = await executeMultipleClausesCall({
+        thor,
+        calls: Object.values(CLAUSES_DATA).map(
+          ({ contractAddress, role }) =>
+            ({
+              abi,
+              functionName: method,
+              address: contractAddress as `0x${string}`,
+              args: [getBytes32Role(role), address],
+            }) as const,
+        ),
+      })
 
       const roles = Object.entries(CLAUSES_DATA).reduce((acc, [key], index) => {
-        if (res[index]?.reverted) throw new Error(`Reverted: ${key} with ${res[index]?.reverted}`)
-
-        const role = res[index]?.data as string
-        const decoded = hasRoleAbi.decode(role)
-
         return {
           ...acc,
-          [key]: Boolean(decoded[0]),
+          [key]: res[index],
         }
       }, {} as AccountPermissionResponse)
 

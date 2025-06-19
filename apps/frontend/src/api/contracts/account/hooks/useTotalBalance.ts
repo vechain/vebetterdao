@@ -1,8 +1,7 @@
 import { useMemo } from "react"
-import { useVot3Balance } from "../../vot3"
 import { FormattingUtils } from "@repo/utils"
 import { ethers } from "ethers"
-import { useGetB3trBalance } from "@vechain/vechain-kit"
+import { useGetB3trBalance, useGetVot3Balance } from "@vechain/vechain-kit"
 
 /**
  * return the total balance of Vot3 + B3tr
@@ -12,7 +11,7 @@ import { useGetB3trBalance } from "@vechain/vechain-kit"
 
 export const useTotalBalance = (address?: string) => {
   const { data: b3trBalance } = useGetB3trBalance(address)
-  const { data: vot3Balance } = useVot3Balance(address)
+  const { data: vot3Balance } = useGetVot3Balance(address)
 
   return useMemo(() => {
     if (!b3trBalance || !vot3Balance) {

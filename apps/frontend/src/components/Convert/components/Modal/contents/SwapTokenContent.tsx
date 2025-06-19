@@ -1,10 +1,10 @@
-import { TokenBalance } from "@/api"
 import { Text, HStack, Flex, Button } from "@chakra-ui/react"
 import { t } from "i18next"
 import { UseFormReturn } from "react-hook-form"
 import { FiInfo } from "react-icons/fi"
 import { TokenCards } from "../../TokenCards"
 import { BalanceInfo } from "../../BalanceInfo"
+import { TokenBalance } from "@vechain/vechain-kit"
 
 type Props = {
   amount: string

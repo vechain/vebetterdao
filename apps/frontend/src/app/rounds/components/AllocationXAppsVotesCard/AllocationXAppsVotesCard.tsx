@@ -13,12 +13,13 @@ import {
   Spinner,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationsRound, useRoundXApps, useXAppsShares } from "@/api"
+import { useAllocationsRound } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { useTranslation } from "react-i18next"
 import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useRoundXApps, useXAppsShares } from "@vechain/vechain-kit"
 
 type Props = {
   roundId: string

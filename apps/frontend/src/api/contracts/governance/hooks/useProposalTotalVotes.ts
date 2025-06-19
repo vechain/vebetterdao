@@ -3,7 +3,7 @@ import { B3TRGovernor__factory } from "@repo/contracts"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
-const address = getConfig().b3trGovernorAddress
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
 const method = "proposalTotalVotes" as const
 
@@ -29,7 +29,7 @@ export const useProposalTotalVotes = (proposalId?: string) => {
     args: [BigInt(proposalId ?? "0")],
     queryOptions: {
       enabled: !!proposalId,
-      select: data => formatEther(data[0]),
+      select: data => formatEther(BigInt(data[0].$bigintString)),
     },
   })
 }

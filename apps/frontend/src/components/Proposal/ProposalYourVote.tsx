@@ -156,7 +156,7 @@ const NoVoteAndActiveCheckVotingPower = ({
   const snapshotLoading = snapshotBlockloading || userSnapshotLoading
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(userSnapshot ?? 0) >= (threshold ?? 0)
+    return Number(userSnapshot ?? 0) >= Number(threshold ?? 0)
   }, [userSnapshot, threshold])
 
   return (
