@@ -148,9 +148,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
               </Heading>
             }>
             <VStack alignItems="stretch">
-              {visibleComments?.map(vote => (
-                <ProposalVoteComment key={vote.voter} vote={vote} />
-              ))}
+              {visibleComments?.map(vote => <ProposalVoteComment key={vote.voter} vote={vote} />)}
             </VStack>
           </InfiniteScroll>
         </VStack>
