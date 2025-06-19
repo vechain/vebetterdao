@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
@@ -12,11 +12,12 @@ const method = "getGMReward" as const
  * Returns the query key for fetching the GM rewards.
  * @returns The query key for fetching the GM rewards.
  */
-export const getGMRewardsQueryKey = (currentRoundId?: number, voter?: string) => {
-  return getCallClauseQueryKey<typeof abi>({
+export const getGMRewardsQueryKey = (roundId: number, userAddress: string) => {
+  return getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
-    args: [BigInt(currentRoundId ?? 0), (voter ?? "0x") as `0x${string}`],
+    args: [BigInt(roundId), userAddress as `0x${string}`],
   })
 }
 

@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVotingGovernor__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVotingGovernor__factory.abi
@@ -11,7 +11,7 @@ const method = "totalVotesQF" as const
  * @param roundId  the roundId the get the votes for
  */
 export const getAllocationVotesQfQueryKey = (roundId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 
 /**
  *  Hook to get the number of quadratic funding votes for a given roundId

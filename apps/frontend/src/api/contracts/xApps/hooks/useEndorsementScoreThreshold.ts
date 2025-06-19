@@ -9,9 +9,7 @@ const method = "endorsementScoreThreshold" as const
 /**
  * Get the query key for endorsement score threshold
  */
-export const getEndorsementScoreThreshold = () => {
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
-}
+export const getEndorsementScoreThresholdQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  *  Hook to get the endorsement score threshold

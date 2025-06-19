@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { formatEther } from "viem"
@@ -12,8 +12,9 @@ const method = "baseAllocationAmount" as const
  * @param roundId The round ID to get the base amount for
  * @returns The query key for fetching the allocation base amount.
  */
-export const getAllocationBaseAmountQueryKey = (roundId?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0)] })
+export const getAllocationBaseAmountQueryKey = (roundId?: number) => {
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId || 0)] })
+}
 
 /**
  * Hook to get the base xDapps allocation amount for a given roundId

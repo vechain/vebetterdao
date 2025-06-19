@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { formatEther } from "viem"
@@ -12,8 +12,9 @@ const method = "getMaxAppAllocation" as const
  * @param roundId The round ID to get the max allocation amount for
  * @returns The query key for fetching the max allocation amount.
  */
-export const getMaxAllocationAmountQueryKey = (roundId?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0)] })
+export const getMaxAllocationAmountQueryKey = (roundId?: number) => {
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId || 0)] })
+}
 
 /**
  * Hook to get the max xDapps allocation amount for a given roundId

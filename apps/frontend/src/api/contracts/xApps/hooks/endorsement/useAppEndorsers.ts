@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnAppsContractAddress
 const abi = X2EarnApps__factory.abi
@@ -10,7 +10,7 @@ const method = "getEndorsers" as const
  * Get the query key for the list of endorsers for an app
  */
 export const getEndorsersQueryKey = (appId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [appId] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [appId as `0x${string}`] })
 
 /**
  *  Hook to get the list of endorsers for an app

@@ -9,7 +9,7 @@ import {
   getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
-  getNodeCheckCooldownQueryKey,
+  getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
 } from "@/api"
 import { getXAppsQueryKey } from "@vechain/vechain-kit"
@@ -42,14 +42,14 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
   const refetchQueryKeys = useMemo(
     () => [
       getIsAppUnendorsedQueryKey(appId ?? ""),
-      getAppEndorsementScoreQueryKey(appId),
+      getAppEndorsementScoreQueryKey(appId ?? ""),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId ?? ""),
       getXAppsQueryKey(),
       getIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
       getAppEndorsedEventsQueryKey({ appId }),
-      getNodeCheckCooldownQueryKey(nodeId ?? ""),
+      getXNodeCheckCooldownQueryKey(nodeId ?? ""),
     ],
     [appId, nodeId],
   )

@@ -10,7 +10,7 @@ const method = "baseURI" as const
  * Returns the query key for fetching the xApps metadata base URI.
  * @returns The query key for fetching the xApps metadata base URI.
  */
-export const getXAppsMetadataBaseUriQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getXAppsMetadataBaseUriQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the baseUri of the xApps metadata

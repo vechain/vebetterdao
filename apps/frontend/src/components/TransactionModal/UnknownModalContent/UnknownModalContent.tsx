@@ -1,10 +1,10 @@
 import { Heading, VStack, Text, Link, Button } from "@chakra-ui/react"
-import LazyLottie from "@/app/components/LazyLottie"
 import unknownAnimation from "./unknown.json"
 import { ReactNode } from "react"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+import Lottie from "react-lottie"
 
 export type UnknownModalContentProps = {
   title?: ReactNode
@@ -36,7 +36,7 @@ export const UnknownModalContent = ({
         animate={{
           scale: [1, 1.1, 1],
         }}>
-        <LazyLottie
+        <Lottie
           style={{ pointerEvents: "none" }}
           options={{
             loop: false,

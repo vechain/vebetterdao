@@ -10,9 +10,7 @@ const method = "thresholdPoPScore" as const
  * Returns the query key for fetching the threshold participation score.
  * @returns The query key for fetching the threshold participation score.
  */
-export const getThresholdParticipationScoreQueryKey = () => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
-}
+export const getThresholdParticipationScoreQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the threshold participation score from the VeBetterPassport contract.

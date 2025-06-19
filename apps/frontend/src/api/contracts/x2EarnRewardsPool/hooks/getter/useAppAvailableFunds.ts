@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { ethers } from "ethers"
@@ -9,7 +9,7 @@ const address = getConfig().x2EarnRewardsPoolContractAddress
 const method = "availableFunds" as const
 
 export const getAppAvailableFundsQueryKey = (xAppId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [xAppId as `0x${string}`] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [xAppId as `0x${string}`] })
 
 /**
  * Get the available funds to withdraw in the x2Earn rewards pool contract

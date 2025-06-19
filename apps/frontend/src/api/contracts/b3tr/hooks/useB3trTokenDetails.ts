@@ -15,7 +15,7 @@ export type TokenDetails = {
   totalSupply: string
 }
 
-export const getB3TrTokenDetailsQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getB3TrTokenDetailsQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 export const useB3trTokenDetails = () => {
   return useCallClause({
     abi,

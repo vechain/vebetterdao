@@ -1,5 +1,5 @@
 import { FormattingUtils } from "@repo/utils"
-import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TR__factory } from "@repo/contracts"
 import { formatEther } from "ethers"
@@ -9,10 +9,11 @@ const address = getConfig().b3trContractAddress
 const method = "allowance" as const
 
 export const getB3TrAllowanceQueryKey = (owner?: string, spender?: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
-    args: [(owner ?? "0x") as `0x${string}`, (spender ?? "0x") as `0x${string}`],
+    args: [owner as `0x${string}`, spender as `0x${string}`],
   })
 
 export const useB3trAllowance = (owner?: string, spender?: string) => {
@@ -20,7 +21,7 @@ export const useB3trAllowance = (owner?: string, spender?: string) => {
     abi,
     address,
     method,
-    args: [(owner ?? "0x") as `0x${string}`, (spender ?? "0x") as `0x${string}`],
+    args: [owner as `0x${string}`, spender as `0x${string}`],
     queryOptions: {
       enabled: !!owner && !!spender,
       select: data => {

@@ -11,11 +11,7 @@ const method = "isQuadraticFundingDisabledForCurrentRound" as const
  *
  * @returns An array representing the query key
  */
-export const getIsQuadraticFundingDisabledQueryKey = () =>
-  getCallClauseQueryKey<typeof abi>({
-    address,
-    method,
-  })
+export const getIsQuadraticFundingDisabledQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 export const useIsQuadraticFundingDisabled = () => {
   return useCallClause({

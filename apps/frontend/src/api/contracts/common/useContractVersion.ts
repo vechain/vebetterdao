@@ -5,7 +5,7 @@ const abi = B3TRGovernor__factory.abi
 const method = "version" as const
 
 export const getVersionQueryKey = (contractAddress: string) =>
-  getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [] })
+  getCallClauseQueryKey({ abi, address: contractAddress, method })
 
 /**
  * Get the version of the contract

@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 
@@ -11,8 +11,8 @@ const method = "participatedInGovernance" as const
  * @param userAddress The user address to check governance participation
  * @returns The query key for fetching participated in governance status.
  */
-export const getParticipatedInGovernanceQueryKey = (userAddress: string | null) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress || "0x") as `0x${string}`] })
+export const getParticipatedInGovernanceQueryKey = (userAddress?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [userAddress as `0x${string}`] })
 
 /**
  * Hook to get whether an address has participated in governance
@@ -24,7 +24,7 @@ export const useParticipatedInGovernance = (userAddress: string | null) => {
     abi,
     address,
     method,
-    args: [(userAddress || "0x") as `0x${string}`],
+    args: [userAddress as `0x${string}`],
     queryOptions: {
       enabled: !!userAddress,
       select: data => data[0],

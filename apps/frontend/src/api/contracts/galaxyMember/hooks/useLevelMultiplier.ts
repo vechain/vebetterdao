@@ -1,13 +1,13 @@
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().voterRewardsContractAddress
 const abi = VoterRewards__factory.abi
 const method = "levelToMultiplier" as const
 
 export const getLevelMultiplierQueryKey = (level?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(level || "0")] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(level || "0")] })
 
 const scaledWeight = (weight: number) => weight / 100
 

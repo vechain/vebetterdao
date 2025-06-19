@@ -5,7 +5,7 @@ import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { useTranslation } from "react-i18next"
-import LazyLottie from "@/app/components/LazyLottie"
+import Lottie from "react-lottie"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
@@ -40,7 +40,7 @@ export const ErrorModalContent = ({
           animate={{
             scale: [1, 1.1, 1],
           }}>
-          <LazyLottie
+          <Lottie
             style={{
               pointerEvents: "none",
             }}

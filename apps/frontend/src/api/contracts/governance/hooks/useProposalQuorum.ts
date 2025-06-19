@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { formatEther } from "viem"
@@ -13,7 +13,7 @@ const method = "quorum" as const
  * @returns The query key for fetching the proposal quorum.
  */
 export const getProposalQuorumQueryKey = (blockNumber?: string | number) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(blockNumber || 0)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(blockNumber || 0)] })
 
 /**
  * Hook to get the quorum at a given block number (with decimals removed)

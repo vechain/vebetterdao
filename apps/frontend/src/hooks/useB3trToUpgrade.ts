@@ -1,13 +1,13 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = GalaxyMember__factory.abi
 const address = getConfig().galaxyMemberContractAddress
 const method = "getB3TRtoUpgrade" as const
 
 export const getB3trToUpgradeQueryKey = (tokenId?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(tokenId ?? 0)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(tokenId ?? 0)] })
 
 /**
  * Retrieves the amount of B3TR tokens required to upgrade a specific token.

@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
 
@@ -12,7 +12,7 @@ const method = "roundSnapshot" as const
  * @returns The query key for fetching the round snapshot.
  */
 export const getAllocationRoundSnapshotQueryKey = (roundId: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId)] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 }
 
 /**

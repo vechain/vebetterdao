@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { TimeLock__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { useProposalOperationId } from "./useProposalOperationId"
 import { useMemo } from "react"
 
@@ -14,16 +14,18 @@ export enum ProposalOperationState {
 const address = getConfig().timelockContractAddress
 const abi = TimeLock__factory.abi
 
+// TODO: migration check the key of  query
 export const getProposalOperationStateQueryKey = (operationId: string) => {
-  return getCallClauseQueryKey<typeof abi>({
+  return getCallClauseQueryKeyWithArgs({
+    abi,
     address,
-    method: "getOperationState",
+    method: "isOperation",
     args: [operationId as `0x${string}`],
   })
 }
 
-export const getProposalOperationTimestampQueryKey = (operationId: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method: "getTimestamp", args: [operationId as `0x${string}`] })
+export const getTimestampQueryKey = (operationId: string) => {
+  return getCallClauseQueryKeyWithArgs({ abi, address, method: "getTimestamp", args: [operationId as `0x${string}`] })
 }
 
 /**

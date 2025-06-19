@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
@@ -8,7 +8,8 @@ const abi = B3TRGovernor__factory.abi
 const method = "proposalVotes" as const
 
 export const getProposalVotesQuerykey = (proposalId: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
     args: [BigInt(proposalId)],

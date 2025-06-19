@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 
@@ -7,7 +7,7 @@ const address = getConfig().x2EarnRewardsPoolContractAddress
 const method = "isDistributionPaused" as const
 
 export const getIsDistributionPausedQueryKey = (xAppId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [xAppId as `0x${string}`] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [xAppId as `0x${string}`] })
 
 /**
  * Get whether the distribution is paused or not for a specific xApp

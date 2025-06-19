@@ -13,7 +13,7 @@ import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { StepModal } from "@/components/StepModal/StepModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import LazyLottie from "@/app/components/LazyLottie"
+import Lottie from "react-lottie"
 
 enum AppTweetsStep {
   UPLOADING = "UPLOADING",
@@ -100,7 +100,7 @@ export const AppTweets = () => {
             content: (
               <ModalAnimation>
                 <VStack align={"center"} p={6}>
-                  <LazyLottie
+                  <Lottie
                     style={{
                       pointerEvents: "none",
                     }}

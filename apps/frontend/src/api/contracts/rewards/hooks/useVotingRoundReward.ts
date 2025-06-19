@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
 import { ethers } from "ethers"
@@ -15,7 +15,8 @@ const method = "getReward" as const
  * @returns {Array<string>} An array of strings that forms the query key.
  */
 export const getRoundRewardQueryKey = (roundId: string, address: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address: contractAddress,
     method,
     args: [BigInt(roundId), address as `0x${string}`],

@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
@@ -10,11 +10,12 @@ const method = "isBlacklisted" as const
  * Returns the query key for fetching the IsBlacklisted status.
  * @returns The query key for fetching the IsBlacklisted status.
  */
-export const getIsBlacklistedQueryKey = (address?: string) => {
-  return getCallClauseQueryKey<typeof abi>({
+export const getIsBlacklistedQueryKey = (user: string) => {
+  return getCallClauseQueryKeyWithArgs({
+    abi,
     address: contractAddress,
     method,
-    args: [(address ?? "0x") as `0x${string}`],
+    args: [user as `0x${string}`],
   })
 }
 

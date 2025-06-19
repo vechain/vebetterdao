@@ -11,9 +11,7 @@ const method = "votingThreshold" as const
  * Returns the query key for fetching the voting threshold from the governor contract.
  * @returns The query key for fetching the voting threshold.
  */
-export const getVotingThresholdQueryKey = () => {
-  getCallClauseQueryKey<typeof abi>({ address, method })
-}
+export const getVotingThresholdQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Get the voting threhsold (i.e the minimum number of votes required for casting a vote) in the governor contract

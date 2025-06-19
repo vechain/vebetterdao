@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 
@@ -7,7 +7,8 @@ const contractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const method = "isAppModerator" as const
 
 export const getIsAppModeratorQueryKey = (appId: string, address: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address: contractAddress as `0x${string}`,
     method,
     args: [appId as `0x${string}`, address as `0x${string}`],

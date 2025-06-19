@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 
@@ -11,8 +11,8 @@ const method = "balanceOf" as const
  * @param userAddress The user address to get the balance for
  * @returns The query key for fetching the GM balance.
  */
-export const getGMbalanceQueryKey = (userAddress: string | null) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress || "0x") as `0x${string}`] })
+export const getGMbalanceQueryKey = (userAddress?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(userAddress || "0x") as `0x${string}`] })
 
 /**
  * Hook to get the number of GM NFTs for an address

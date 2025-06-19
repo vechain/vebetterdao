@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnAppsContractAddress
 const abi = X2EarnApps__factory.abi
@@ -9,8 +9,8 @@ const method = "getScore" as const
 /**
  * Get the query key the app endorsement score
  */
-export const getAppEndorsementScoreQueryKey = (appId?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [appId as `0x${string}`] })
+export const getAppEndorsementScoreQueryKey = (appId: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [appId as `0x${string}`] })
 
 /**
  *  Hook to get the endorsement score threshold

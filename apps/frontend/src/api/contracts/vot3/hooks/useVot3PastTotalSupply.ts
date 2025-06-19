@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VOT3__factory } from "@repo/contracts"
 import { ethers } from "ethers"
@@ -7,11 +7,12 @@ const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress
 const method = "getPastTotalSupply" as const
 
-export const getVot3PastTotalSupplyQueryKey = (timepoint?: number | string) =>
-  getCallClauseQueryKey<typeof abi>({
+export const getVot3PastTotalSupplyQueryKey = (timepoint: number) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
-    args: [BigInt(timepoint || 0)],
+    args: [BigInt(timepoint)],
   })
 
 /**

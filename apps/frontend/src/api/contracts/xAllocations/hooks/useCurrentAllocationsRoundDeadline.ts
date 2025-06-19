@@ -10,9 +10,7 @@ const method = "currentRoundDeadline" as const
  * Returns the query key for fetching the current round deadline.
  * @returns The query key.
  */
-export const getCurrentAllocationsRoundDeadlineQueryKey = () => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
-}
+export const getCurrentAllocationsRoundDeadlineQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the blocknumber at which current round ends.

@@ -6,7 +6,7 @@ import {
   getAppEndorsementScoreQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
-  getNodeCheckCooldownQueryKey,
+  getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
 } from "@/api"
 import { getXAppsQueryKey } from "@vechain/vechain-kit"
@@ -60,7 +60,7 @@ export const useSwitchEndorsement = ({ appIdToEndorse, appIdToUnendorse, nodeId,
       // Other queries
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getXAppsQueryKey(),
-      getNodeCheckCooldownQueryKey(nodeId),
+      getXNodeCheckCooldownQueryKey(nodeId),
     ],
     [appIdToEndorse, appIdToUnendorse, nodeId],
   )

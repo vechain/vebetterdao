@@ -10,7 +10,7 @@ const method = "votingPeriod" as const
  * Returns the query key for fetching the voting period from the governor contract.
  * @returns The query key for fetching the voting period.
  */
-export const getVotingPeriodQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getVotingPeriodQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the voting period from the governor contract (i.e the number of blocks for the voting period)

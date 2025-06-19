@@ -1,4 +1,10 @@
-import { useCallClause, getCallClauseQueryKey, ThorClient, executeCallClause } from "@vechain/vechain-kit"
+import {
+  useCallClause,
+  getCallClauseQueryKey,
+  getCallClauseQueryKeyWithArgs,
+  ThorClient,
+  executeCallClause,
+} from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 
@@ -12,7 +18,7 @@ const method = "isNodeHolder" as const
  * @returns The query key for checking if an address is a node holder.
  */
 export const getIsNodeHolderQueryKey = (userAddress: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
 
 export const getIsNodeHolder = async (thor: ThorClient, userAddress: string) => {
   return executeCallClause({

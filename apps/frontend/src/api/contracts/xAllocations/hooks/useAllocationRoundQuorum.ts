@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { formatEther } from "viem"
@@ -13,7 +13,7 @@ const method = "roundQuorum" as const
  * @returns The query key for fetching the allocation round quorum.
  */
 export const getAllocationRoundQuorumQueryKey = (roundId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 
 /**
  * Hook to get the quorum that needs to be reached for an allocation round

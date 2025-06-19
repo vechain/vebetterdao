@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 
@@ -11,7 +11,7 @@ const method = "isAppUnendorsed" as const
  * @param appId  the app id
  */
 export const getIsAppUnendorsedQueryKey = (appId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [appId] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [appId as `0x${string}`] })
 
 /**
  *  Hook to get a boolean value indicating if the app is unendorsed

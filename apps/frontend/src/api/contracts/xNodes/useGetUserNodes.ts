@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 
@@ -22,7 +22,7 @@ export type UserNode = {
  * @param user - The address of the user to check
  */
 export const getUserNodesQueryKey = (user?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [(user ?? "0x") as `0x${string}`] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(user ?? "0x") as `0x${string}`] })
 
 /**
  * Hook to get delegation details for all nodes associated with a user
@@ -41,7 +41,7 @@ export const useGetUserNodes = (user?: string) => {
         data[0].map(
           node =>
             ({
-              nodeId: node.nodeId,
+              nodeId: node.nodeId.toString(),
               nodeLevel: node.nodeLevel,
               xNodeOwner: node.xNodeOwner,
               isXNodeHolder: node.isXNodeHolder,

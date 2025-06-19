@@ -20,7 +20,7 @@ import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 import { useCallback, useState } from "react"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import LazyLottie from "@/app/components/LazyLottie"
+import Lottie from "react-lottie"
 
 const containerVariants = {
   initial: {
@@ -71,7 +71,7 @@ export const ProposalShareButton = () => {
               <ModalCloseButton top={4} right={4} />
               <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
-                  <LazyLottie
+                  <Lottie
                     style={{
                       pointerEvents: "none",
                     }}

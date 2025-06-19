@@ -11,12 +11,7 @@ const method = "isQuadraticVotingDisabledForCurrentRound" as const
  *
  * @returns An array representing the query key
  */
-export const getIsQuadraticVotingDisabledQueryKey = () =>
-  getCallClauseQueryKey<typeof abi>({
-    address,
-    method,
-    args: [],
-  })
+export const getIsQuadraticVotingDisabledQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  *  Custom hook to check if quadratic voting is disabled for the current round

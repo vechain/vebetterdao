@@ -3,7 +3,7 @@ import loadingAnimation from "./loading.json"
 import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
-import LazyLottie from "@/app/components/LazyLottie"
+import Lottie from "react-lottie"
 
 export type LoadingModalContentProps = {
   title?: ReactNode
@@ -19,7 +19,7 @@ export const LoadingModalContent = ({
   const { t } = useTranslation()
   return (
     <VStack align={"center"} textAlign={"center"} p={0} m={0}>
-      <LazyLottie
+      <Lottie
         style={{
           pointerEvents: "none",
         }}

@@ -1,5 +1,5 @@
 import { ethers } from "ethers"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
@@ -12,8 +12,8 @@ const method = "getGMAmount" as const
  * Returns the query key for fetching the GM amount.
  * @returns The query key for fetching the GM amount.
  */
-export const getGMPoolAmountQueryKey = (currentRoundId: number) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(currentRoundId)] })
+export const getGMFullPoolAmountQueryKey = (currentRoundId?: number) => {
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(currentRoundId || 0)] })
 }
 
 /**

@@ -10,7 +10,7 @@ const method = "paused" as const
  * Returns the query key for fetching the Galaxy Member paused status.
  * @returns The query key for fetching the Galaxy Member paused status.
  */
-export const getIsGMPausedQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getIsGMPausedQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to check if the GalaxyMember contract is paused

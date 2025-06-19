@@ -1,5 +1,5 @@
 // REMOVE THIS FILE, it is not used anywhere
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
@@ -13,7 +13,7 @@ const method = "getProposalDeposits" as const
  * @returns The query key as an array.
  */
 export const getProposalDepositQueryKey = (proposalId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(proposalId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(proposalId)] })
 
 /**
  * Custom hook for fetching proposal deposits.

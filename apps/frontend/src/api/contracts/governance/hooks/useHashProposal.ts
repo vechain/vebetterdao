@@ -1,4 +1,4 @@
-import { getCallClauseQueryKey, useCallClause, useThor } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, useCallClause, useThor } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
@@ -8,10 +8,17 @@ const abi = B3TRGovernor__factory.abi
 const method = "hashProposal" as const
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 
-export const getHashProposalQueryKey = () =>
-  getCallClauseQueryKey<typeof abi>({
+export const getHashProposalQueryKey = (
+  contractsAddress: `0x${string}`[],
+  values: bigint[],
+  calldatas: `0x${string}`[],
+  descriptionHash: `0x${string}`,
+) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
+    args: [contractsAddress, values, calldatas, descriptionHash],
   })
 
 /**

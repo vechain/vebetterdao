@@ -1,4 +1,4 @@
-import { useWallet, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
@@ -12,10 +12,11 @@ const method = "isPassport" as const
  * @returns The query key for checking if an address is a passport.
  */
 export const getIsPassportQueryKey = (address?: string | null) => {
-  return getCallClauseQueryKey<typeof abi>({
+  return getCallClauseQueryKeyWithArgs({
+    abi,
     address: contractAddress,
     method,
-    args: [(address ?? "0x") as `0x${string}`],
+    args: [address as `0x${string}`],
   })
 }
 

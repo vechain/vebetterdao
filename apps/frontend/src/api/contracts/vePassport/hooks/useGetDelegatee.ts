@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { ZeroAddress } from "ethers"
@@ -13,7 +13,7 @@ const method = "getDelegatee" as const
  * @returns The query key for fetching the delegatee.
  */
 export const getDelegateeQueryKey = (delegator: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(delegator ?? "0x") as `0x${string}`] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegator as `0x${string}`] })
 }
 
 /**

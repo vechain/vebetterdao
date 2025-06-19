@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 
@@ -11,7 +11,7 @@ const method = "getNodeManager" as const
  * @param nodeId The ID of the node for which the manager address is being retrieved
  */
 export const getNodeManagerQueryKey = (nodeId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(nodeId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(nodeId)] })
 
 /**
  * Hook to get the address of the user managing the node ID (endorsement) either through ownership or delegation

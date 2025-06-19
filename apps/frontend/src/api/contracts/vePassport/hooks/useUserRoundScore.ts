@@ -1,4 +1,4 @@
-import { useWallet, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
@@ -14,7 +14,7 @@ const method = "userRoundScore" as const
  * @returns The query key for fetching the user round score.
  */
 export const getUserRoundScoreQueryKey = (user: string, round: number) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(user ?? "0x") as `0x${string}`, BigInt(round)] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`, BigInt(round)] })
 }
 
 /**
@@ -28,7 +28,7 @@ export const useUserRoundScore = (user?: string | null, round?: number) => {
     abi,
     address,
     method,
-    args: [(user ?? "0x") as `0x${string}`, BigInt(round ?? 0)],
+    args: [user as `0x${string}`, BigInt(round ?? 0)],
     queryOptions: {
       enabled: !!user && !!round,
       select: data => data[0],

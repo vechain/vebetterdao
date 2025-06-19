@@ -10,7 +10,7 @@ const method = "allEligibleApps" as const
  * Returns the query key for fetching apps eligible in next round.
  * @returns The query key for fetching apps eligible in next round.
  */
-export const getAppsEligibleInNextRoundQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getAppsEligibleInNextRoundQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get all apps that will be eligible in the next allocation round

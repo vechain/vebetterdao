@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
@@ -12,11 +12,12 @@ const method = "hasVoted" as const
  * @param userAddress The user address to check if they have voted
  * @returns The query key for fetching if a user has voted in a round.
  */
-export const getHasVotedInRoundQueryKey = (roundId?: string, userAddress?: string) =>
-  getCallClauseQueryKey<typeof abi>({
+export const getHasVotedInRoundQueryKey = (roundId: string, userAddress?: string) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
-    args: [BigInt(roundId || 0), (userAddress || "") as `0x${string}`],
+    args: [BigInt(roundId), userAddress as `0x${string}`],
   })
 
 /**

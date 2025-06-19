@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 /**
  * ABI: https://docs.vet.domains/Developers/Contracts/Verification/#abi
@@ -30,10 +30,11 @@ const address = getConfig().externalContractIntegrations?.vetDomainsContractAddr
 const method = "isVerified" as const
 
 export const getVerifiedVetDomainQueryKey = (walletAddress?: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
-    args: [(walletAddress ?? "0x") as `0x${string}`],
+    args: [walletAddress as `0x${string}`],
   })
 
 /**

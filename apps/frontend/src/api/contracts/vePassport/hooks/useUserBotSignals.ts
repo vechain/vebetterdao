@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
@@ -12,10 +12,11 @@ const method = "signaledCounter" as const
  * @returns The query key for fetching the user bot signals.
  */
 export const getUserBotSignalsQueryKey = (address?: string) => {
-  return getCallClauseQueryKey<typeof abi>({
+  return getCallClauseQueryKeyWithArgs({
+    abi,
     address: contractAddress,
     method,
-    args: [(address ?? "0x") as `0x${string}`],
+    args: [address as `0x${string}`],
   })
 }
 

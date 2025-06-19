@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
@@ -23,7 +23,7 @@ export enum ProposalState {
  * @returns The query key for fetching the proposal state.
  */
 export const getProposalStateQueryKey = (proposalId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(proposalId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(proposalId)] })
 
 /**
  * Hook to get the proposal state from the governor contract

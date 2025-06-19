@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
 
@@ -17,8 +17,8 @@ export const RoundState = {
  * @param roundId The round ID to get the state for
  * @returns The query key for fetching the allocations round state.
  */
-export const getAllocationsRoundStateQueryKey = (roundId?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId || 0)] })
+export const getAllocationsRoundStateQueryKey = (roundId?: number) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId || 0)] })
 
 /**
  * Hook to get the state of a given roundId

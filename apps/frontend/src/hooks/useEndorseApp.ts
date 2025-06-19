@@ -8,7 +8,7 @@ import {
   getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
-  getNodeCheckCooldownQueryKey,
+  getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
   getUserXNodesQueryKey,
 } from "@/api"
@@ -52,7 +52,7 @@ export const useEndorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) 
       getIsBlacklistedQueryKey(appId),
       getAppExistsQueryKey(appId),
       getAppEndorsedEventsQueryKey({ appId }),
-      getNodeCheckCooldownQueryKey(nodeId),
+      getXNodeCheckCooldownQueryKey(nodeId),
     ],
     [appId, nodeId, userAddress],
   )

@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
@@ -12,7 +12,7 @@ const method = "getPendingDelegations" as const
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegateePOV = (delegatee: string) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(delegatee ?? "0x") as `0x${string}`] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegatee as `0x${string}`] })
 }
 
 /**

@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
@@ -13,10 +13,11 @@ const method = "isPersonAtTimepoint" as const
  * @returns The query key for fetching the isPerson status at a given block number.
  */
 export const getIsPersonAtTimepointQueryKey = (user: string, blockNumber: string) => {
-  return getCallClauseQueryKey<typeof abi>({
+  return getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
-    args: [(user ?? "0x") as `0x${string}`, Number(blockNumber)],
+    args: [user as `0x${string}`, Number(blockNumber)],
   })
 }
 

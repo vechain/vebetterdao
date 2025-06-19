@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
@@ -12,7 +12,7 @@ const method = "getRoundAppSharesCap" as const
  * @returns The query key for fetching the allocation shares cap.
  */
 export const getAllocationSharesCapQueryKey = (roundId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId)] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 
 /**
  * Hook to get the max percentage of shares that an xDapp can have in a given round

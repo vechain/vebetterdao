@@ -7,7 +7,7 @@ const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress
 const method = "paused" as const
 
-export const getIsVot3PausedQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method })
+export const getIsVot3PausedQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * useVot3Paused is a custom hook that uses the useQuery hook from react-query to fetch the paused status of the Vot3 contract.

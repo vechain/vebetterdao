@@ -16,7 +16,7 @@ import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import voteAnimation from "../../../../public/assets/animations/vote.json"
-import LazyLottie from "@/app/components/LazyLottie"
+import Lottie from "react-lottie"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()
@@ -99,7 +99,7 @@ export const CastYourVoteCard: React.FC = () => {
           </GridItem>
 
           <GridItem colSpan={1} order={[1, 1, 2]} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
-            <LazyLottie
+            <Lottie
               style={{
                 pointerEvents: "none",
               }}

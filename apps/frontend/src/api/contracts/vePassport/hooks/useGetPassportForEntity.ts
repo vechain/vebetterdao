@@ -1,4 +1,4 @@
-import { useWallet, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
@@ -12,7 +12,7 @@ const method = "getPassportForEntity" as const
  * @returns The query key for fetching the passport for an entity.
  */
 export const getPassportForEntityQueryKey = (entity?: string | null) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [(entity ?? "0x") as `0x${string}`] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [entity as `0x${string}`] })
 }
 
 /**

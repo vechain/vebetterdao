@@ -40,7 +40,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal } from "@/components/StepModal/StepModal"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import LazyLottie from "@/app/components/LazyLottie"
+import Lottie from "react-lottie"
 
 export type EditAppForm = {
   name: string
@@ -195,7 +195,7 @@ export const EditAppPageContent = () => {
             content: (
               <ModalAnimation>
                 <VStack align={"center"} p={6}>
-                  <LazyLottie
+                  <Lottie
                     style={{
                       pointerEvents: "none",
                     }}

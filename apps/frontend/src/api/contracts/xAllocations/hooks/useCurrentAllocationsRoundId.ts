@@ -10,8 +10,7 @@ const method = "currentRoundId" as const
  * Returns the query key for fetching the current allocations round ID.
  * @returns The query key for fetching the current allocations round ID.
  */
-export const getCurrentAllocationsRoundIdQueryKey = () =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getCurrentAllocationsRoundIdQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the current roundId of allocations voting
@@ -24,7 +23,7 @@ export const useCurrentAllocationsRoundId = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => data[0],
+      select: data => data[0].toString(),
       staleTime: 0,
     },
   })

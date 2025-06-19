@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 
@@ -13,7 +13,8 @@ const method = "isAppAdmin" as const
  * @returns The query key for checking if an address is app admin.
  */
 export const getIsAppAdminQueryKey = (appId: string, userAddress: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
     args: [appId as `0x${string}`, (userAddress ?? "0x") as `0x${string}`],

@@ -11,7 +11,7 @@ const method = "depositThreshold" as const
  * Returns the query key for fetching the deposit threshold from the governor contract.
  * @returns The query key for fetching the deposit threshold.
  */
-export const getDepositThresholdQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getDepositThresholdQueryKey = () => getCallClauseQueryKey({ abi, address: address, method })
 
 /**
  * Hook to get the proposal threshold from the governor contract (i.e the number of votes required to create a proposal)

@@ -10,7 +10,7 @@ const method = "baseURI" as const
  * Query key for the `baseURI` method on the Galaxy Member contract.
  * Using a different name to avoid conflicts with the `baseURI` property on ERC721 contracts.
  */
-export const getGMBaseUriQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getGMBaseUriQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Custom hook that retrieves the base URI for the Galaxy Member NFT.

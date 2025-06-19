@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 
@@ -12,7 +12,7 @@ const method = "tokenURI" as const
  * @returns The query key for fetching the NFT metadata URI.
  */
 export const getNFTMetadataUriQueryKey = (tokenID?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(tokenID || 0)] })
+  getCallClauseQueryKeyWithArgs({ abi, address: address, method, args: [BigInt(tokenID || 0)] })
 
 /**
  * Hook to get the metadata URI for an NFT

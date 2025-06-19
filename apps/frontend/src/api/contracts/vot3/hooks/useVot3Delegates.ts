@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VOT3__factory } from "@repo/contracts"
 
@@ -12,7 +12,7 @@ const method = "delegates" as const
  * @returns The query key for fetching vot3 delegates.
  */
 export const getVot3DelegatesQueryKey = (userAddress?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
 
 /**
  * Hook to get the address the user has delegated his votes to (if any)

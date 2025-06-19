@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { useWallet, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useWallet, useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
@@ -11,8 +11,13 @@ const method = "getQuadraticVotingPower" as const
  * @param roundId - The ID of the proposal round.
  * @returns The query key for fetching the snapshot voting power.
  */
-export const getProposalSnapshotVotingPowerQueryKey = (roundId: number) => {
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [BigInt(roundId ?? 0)] })
+export const getProposalSnapshotVotingPowerQueryKey = (userAddress: string, roundId: number) => {
+  return getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [(userAddress ?? "0x") as `0x${string}`, BigInt(roundId ?? 0)],
+  })
 }
 
 /**

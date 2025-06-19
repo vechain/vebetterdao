@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = VeBetterPassport__factory.abi
 const address = getConfig().veBetterPassportContractAddress
@@ -14,7 +14,7 @@ export enum SecurityLevel {
 }
 
 export const getSecurityMultiplierQueryKey = (securityLevel: SecurityLevel) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [securityLevel] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [securityLevel] })
 }
 
 /**

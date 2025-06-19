@@ -10,7 +10,7 @@ const method = "paused" as const
  * Returns the query key for fetching the B3TR Governor paused status.
  * @returns The query key for fetching the B3TR Governor paused status.
  */
-export const getIsB3TRGovernorPausedQueryKey = () => getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
+export const getIsB3TRGovernorPausedQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to check if the B3TRGovernor contract is paused

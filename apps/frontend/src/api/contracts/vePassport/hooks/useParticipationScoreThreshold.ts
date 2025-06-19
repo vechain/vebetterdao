@@ -6,9 +6,7 @@ const abi = VeBetterPassport__factory.abi
 const address = getConfig().veBetterPassportContractAddress
 const method = "thresholdPoPScore" as const
 
-export const getParticipationScoreThresholdQueryKey = () => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [] })
-}
+export const getParticipationScoreThresholdQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get the participation score threshold from the VeBetterPassport contract

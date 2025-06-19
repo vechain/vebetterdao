@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { getCallClauseQueryKey, useThor, executeCallClause } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, useThor, executeCallClause } from "@vechain/vechain-kit"
 import { useInfiniteQuery } from "@tanstack/react-query"
 
 const contractAddress = getConfig().galaxyMemberContractAddress
@@ -13,8 +13,13 @@ const method = "getTokensInfoByOwner" as const
  * @param size - The number of tokens to fetch per page.
  * @returns An array representing the query key.
  */
-export const getTokensInfoByOwnerQueryKey = (owner?: string) =>
-  getCallClauseQueryKey<typeof abi>({ address: contractAddress, method, args: [(owner || "0x") as `0x${string}`] })
+export const getTokensInfoByOwnerQueryKey = (owner?: string, pageParam: number = 0, size: number = 10) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
+    address: contractAddress,
+    method,
+    args: [owner as `0x${string}`, BigInt(pageParam), BigInt(size)],
+  })
 
 /**
  * Custom hook to fetch token information for a specific owner with infinite scrolling support.

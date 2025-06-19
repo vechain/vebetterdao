@@ -1,4 +1,4 @@
-import { useThor, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useThor, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
@@ -12,7 +12,8 @@ const method = "proposalDepositReached" as const
  * @returns An array representing the query key.
  */
 export const getIsDepositReachedQueryKey = (proposalId: string) =>
-  getCallClauseQueryKey<typeof abi>({
+  getCallClauseQueryKeyWithArgs({
+    abi,
     address,
     method,
     args: [BigInt(proposalId)],

@@ -6,6 +6,7 @@ import { ethers } from "ethers"
 
 const abi = Emissions__factory.abi
 const address = getConfig().emissionsContractAddress as `0x${string}`
+const methods = ["getTreasuryAmount", "getVote2EarnAmount", "getXAllocationAmount", "getGMAmount"] as const
 
 type AllocationAmount = {
   treasury: string
@@ -26,32 +27,15 @@ export const getAllocationAmount = async (thor: ThorClient, roundId?: string): P
 
   const [resTreasury, resVoteX2Earn, voteXAllocations, resGMRewards] = await executeMultipleClausesCall({
     thor,
-    calls: [
-      {
-        address,
-        abi,
-        functionName: "getTreasuryAmount",
-        args: [BigInt(roundId)],
-      },
-      {
-        address,
-        abi,
-        functionName: "getVote2EarnAmount",
-        args: [BigInt(roundId)],
-      },
-      {
-        address,
-        abi,
-        functionName: "getXAllocationAmount",
-        args: [BigInt(roundId)],
-      },
-      {
-        address,
-        abi,
-        functionName: "getGMAmount",
-        args: [BigInt(roundId)],
-      },
-    ],
+    calls: methods.map(
+      method =>
+        ({
+          abi,
+          address,
+          functionName: method,
+          args: [BigInt(roundId)],
+        }) as const,
+    ),
   })
 
   return {

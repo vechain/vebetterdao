@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { TogglePassportCheck } from "@/constants"
@@ -8,7 +8,7 @@ const abi = VeBetterPassport__factory.abi
 const method = "isCheckEnabled" as const
 
 export const getIsPassportCheckEnabledQueryKey = (checkName: TogglePassportCheck) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [checkName] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [checkName] })
 }
 
 /**

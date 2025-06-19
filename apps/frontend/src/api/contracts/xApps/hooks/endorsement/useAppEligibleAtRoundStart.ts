@@ -11,8 +11,7 @@ const method = "isEligible" as const
  * Get the query key for a boolean value indicating if the app was eligible at the start of the current allocation round
  * @param appId  the query key
  */
-export const getAppEligibleAtRoundStartQueryKey = (appId: string) =>
-  getCallClauseQueryKey<typeof abi>({ address, method, args: [appId] })
+export const getAppEligibleAtRoundStartQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get a boolean value indicating if the app was eligible at the start of the current allocation round

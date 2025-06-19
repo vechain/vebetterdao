@@ -1,4 +1,4 @@
-import { useWallet, useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
@@ -14,7 +14,7 @@ const method = "getCumulativeScoreWithDecay" as const
  * @returns The query key for fetching the cumulative score with decay.
  */
 export const getGetCumulativeScoreWithDecayQueryKey = (user: string, round: number) => {
-  return getCallClauseQueryKey<typeof abi>({ address, method, args: [user as `0x${string}`, BigInt(round ?? 0)] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`, BigInt(round ?? 0)] })
 }
 
 /**

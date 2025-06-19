@@ -50,7 +50,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account?.address ?? undefined)
 
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(data.voteStart),
+    data?.voteStart ? Number(data.voteStart) : undefined,
     account?.address ?? undefined,
   )
 
