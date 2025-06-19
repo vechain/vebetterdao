@@ -31,7 +31,7 @@ export const useUserRoundScore = (user?: string | null, round?: number) => {
     args: [(user ?? "0x") as `0x${string}`, BigInt(round ?? 0)],
     queryOptions: {
       enabled: !!user && !!round,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

@@ -29,7 +29,7 @@ export const useProposalTotalVotes = (proposalId?: string) => {
     args: [BigInt(proposalId ?? "0")],
     queryOptions: {
       enabled: !!proposalId,
-      select: data => formatEther(BigInt(data[0].$bigintString)),
+      select: data => formatEther(BigInt(data[0])),
     },
   })
 }

@@ -29,9 +29,9 @@ export const useProposalVotes = (proposalId: string, enabled = true) => {
       select: data => {
         const [againstVotes, forVotes, abstainVotes] = data
         const parsed = {
-          againstVotes: ethers.formatEther(againstVotes.$bigintString),
-          forVotes: ethers.formatEther(forVotes.$bigintString),
-          abstainVotes: ethers.formatEther(abstainVotes.$bigintString),
+          againstVotes: ethers.formatEther(againstVotes),
+          forVotes: ethers.formatEther(forVotes),
+          abstainVotes: ethers.formatEther(abstainVotes),
         }
 
         const totalVotes = Number(parsed.againstVotes) + Number(parsed.forVotes) + Number(parsed.abstainVotes)

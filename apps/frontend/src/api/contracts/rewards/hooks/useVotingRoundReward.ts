@@ -37,7 +37,7 @@ export const useRoundReward = (address: string, roundId: string) => {
     queryOptions: {
       enabled: !!address && !!roundId,
       select: data => {
-        const reward = ethers.formatEther(data[0].$bigintString)
+        const reward = ethers.formatEther(data[0])
         return {
           roundId,
           rewards: reward,

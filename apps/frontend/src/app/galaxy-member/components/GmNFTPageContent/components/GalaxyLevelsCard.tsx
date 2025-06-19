@@ -29,7 +29,7 @@ import { useTranslation } from "react-i18next"
 const compactFormatter = getCompactFormatter(0)
 
 export const GalaxyLevelsCard = () => {
-  const { gmLevel, maxGmLevel = 10 } = useSelectedGmNft()
+  const { gmLevel, maxGmLevel = 0 } = useSelectedGmNft()
   const { t } = useTranslation()
   const [showShortened, setShowShortened] = useState(false)
   const gmNftsShortened = useMemo(() => {

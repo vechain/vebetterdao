@@ -27,7 +27,7 @@ export const useGMbalance = (userAddress: string | null) => {
     args: [(userAddress || "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!userAddress,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

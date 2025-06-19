@@ -45,7 +45,7 @@ export const useHashProposal = (actions: ProposalAction[], descriptionHash: stri
     ],
     queryOptions: {
       enabled: !!thor && !!headNumber && headNumber > 0 && descriptionHash !== "",
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

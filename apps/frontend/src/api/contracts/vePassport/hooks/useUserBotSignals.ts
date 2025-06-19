@@ -32,7 +32,7 @@ export const useUserBotSignals = (address?: string) => {
     args: [(address ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!address,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

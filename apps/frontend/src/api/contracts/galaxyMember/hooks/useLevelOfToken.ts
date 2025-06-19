@@ -24,7 +24,7 @@ export const useLevelOfToken = (tokenId?: string, enabled = true) => {
     args: [BigInt(tokenId || "0")],
     queryOptions: {
       enabled: !!tokenId && enabled,
-      select: data => data[0].toString(),
+      select: data => data[0],
     },
   })
 }

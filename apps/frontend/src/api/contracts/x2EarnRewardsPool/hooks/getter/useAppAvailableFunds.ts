@@ -27,7 +27,7 @@ export const useAppAvailableFunds = (xAppId: string) => {
     queryOptions: {
       enabled: !!xAppId,
       select: data => {
-        const original = data[0].$bigintString
+        const original = data[0]
         const scaled = ethers.formatEther(original)
         const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
         return {

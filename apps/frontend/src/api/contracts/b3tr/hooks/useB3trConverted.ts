@@ -34,9 +34,9 @@ export const useB3trConverted = (userAddress?: string) => {
     queryOptions: {
       enabled: !!userAddress,
       select: data => {
-        const scaled = ethers.formatEther(BigInt(data[0].$bigintString))
+        const scaled = ethers.formatEther(BigInt(data[0]))
         return {
-          original: data[0].$bigintString,
+          original: data[0],
           scaled,
           formatted: FormattingUtils.humanNumber(scaled),
         } as TokenBalance

@@ -27,7 +27,7 @@ export const useVot3PastSupply = (timepoint?: number | string, enabled = true) =
     args: [BigInt(timepoint || 0)],
     queryOptions: {
       enabled: !!timepoint && enabled,
-      select: data => ethers.formatEther(data[0].$bigintString),
+      select: data => ethers.formatEther(data[0]),
     },
   })
 }

@@ -26,7 +26,7 @@ export const useGetVotesOnBlock = (block?: number, address?: string, enabled = t
     args: [(address ?? "") as `0x${string}`, BigInt(block ?? 0)],
     queryOptions: {
       enabled: !!address && !!block && enabled,
-      select: data => ethers.formatEther(data[0].$bigintString),
+      select: data => ethers.formatEther(data[0]),
     },
   })
 }

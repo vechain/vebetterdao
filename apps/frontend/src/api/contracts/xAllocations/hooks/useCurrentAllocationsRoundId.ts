@@ -24,7 +24,7 @@ export const useCurrentAllocationsRoundId = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => data[0].$bigintString,
+      select: data => data[0],
       staleTime: 0,
     },
   })

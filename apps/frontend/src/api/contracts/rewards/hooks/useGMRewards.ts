@@ -34,7 +34,7 @@ export const useGMRewards = (currentRoundId?: number, voter?: string) => {
     args: [BigInt(currentRoundId ?? 0), (voter ?? "0x") as `0x${string}`],
     queryOptions: {
       select: data => {
-        const original = data[0].$bigintString
+        const original = data[0]
         const scaled = formatEther(BigInt(original ?? 0))
         const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
         return {

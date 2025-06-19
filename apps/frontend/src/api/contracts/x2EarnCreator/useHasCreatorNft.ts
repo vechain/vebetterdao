@@ -27,7 +27,7 @@ export const useHasCreatorNFT = (walletAddress: string) => {
     args: [(walletAddress ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!walletAddress,
-      select: data => BigInt(data[0].$bigintString) > 0,
+      select: data => BigInt(data[0]) > 0,
     },
   })
 }

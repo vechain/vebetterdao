@@ -4,7 +4,6 @@ import { ProposalFilter } from "@/store"
 import { useMemo } from "react"
 
 export const useRoundProposals = (roundId: string) => {
-  console.log("useRoundProposals", roundId)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const currentRoundIdProposals = useFilteredProposals([ProposalFilter.InThisRound, ProposalFilter.LookingForSupport])

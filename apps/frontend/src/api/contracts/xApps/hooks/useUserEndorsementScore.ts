@@ -25,7 +25,7 @@ export const useUserEndorsementScore = (user?: string) => {
     args: [(user ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!user,
-      select: data => Number(data[0].$bigintString),
+      select: data => Number(data[0]),
     },
   })
 }

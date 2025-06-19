@@ -28,7 +28,7 @@ export const useAppsCountFromCreator = (walletAddress: string) => {
     args: [(walletAddress ?? "0x") as `0x${string}`],
     queryOptions: {
       enabled: !!walletAddress,
-      select: data => Number(data[0].$bigintString),
+      select: data => Number(data[0]),
     },
   })
 }

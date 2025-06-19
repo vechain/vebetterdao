@@ -25,7 +25,7 @@ export const useB3trDonated = (tokenId?: string, enabled = true) => {
     args: [BigInt(tokenId ?? 0)],
     queryOptions: {
       enabled: !!tokenId && enabled,
-      select: data => ethers.formatEther(BigInt(data[0].$bigintString)),
+      select: data => ethers.formatEther(BigInt(data[0])),
     },
   })
 }

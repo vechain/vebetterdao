@@ -41,7 +41,7 @@ export const useGetUserNodes = (user?: string) => {
         data[0].map(
           node =>
             ({
-              nodeId: node.nodeId.$bigintString,
+              nodeId: node.nodeId,
               nodeLevel: node.nodeLevel,
               xNodeOwner: node.xNodeOwner,
               isXNodeHolder: node.isXNodeHolder,

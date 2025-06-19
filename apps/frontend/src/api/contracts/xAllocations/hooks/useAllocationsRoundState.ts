@@ -26,7 +26,6 @@ export const getAllocationsRoundStateQueryKey = (roundId?: string) =>
  * @returns the state of a given roundId
  */
 export const useAllocationsRoundState = (roundId?: string) => {
-  console.log("aal", roundId)
   return useCallClause({
     abi,
     address,

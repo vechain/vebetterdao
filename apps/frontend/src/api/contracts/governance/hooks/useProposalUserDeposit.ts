@@ -21,7 +21,7 @@ export const useProposalUserDeposit = (proposalId: string, userAddress: string) 
     args: [BigInt(proposalId), userAddress as `0x${string}`],
     queryOptions: {
       enabled: !!proposalId && !!userAddress,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

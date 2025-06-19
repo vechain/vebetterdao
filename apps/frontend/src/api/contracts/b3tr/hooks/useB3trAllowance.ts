@@ -24,7 +24,7 @@ export const useB3trAllowance = (owner?: string, spender?: string) => {
     queryOptions: {
       enabled: !!owner && !!spender,
       select: data => {
-        const original = data[0].$bigintString
+        const original = data[0]
         const scaled = formatEther(BigInt(original))
         const formatted = FormattingUtils.humanNumber(scaled)
         return {

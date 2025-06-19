@@ -31,7 +31,7 @@ export const getUserXNodes = async (thor: ThorClient, user?: string): Promise<Us
   if (!user) throw new Error("User address is required")
   const contractAddress = getConfig().nodeManagementContractAddress as `0x${string}`
 
-  const [nodeIds, levels] = await executeMultipleClausesCall({
+  const [nodeIds = [], levels = []] = await executeMultipleClausesCall({
     thor,
     calls: [
       {

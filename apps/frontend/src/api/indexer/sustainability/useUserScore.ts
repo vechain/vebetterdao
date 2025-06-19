@@ -26,7 +26,7 @@ export const useUserScore = (user?: string) => {
   const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
     // if the user is delegated, we use the delegator's address, otherwise we use the user's address
     delegatorAddress ?? user ?? account?.address ?? "",
-    Number(roundId),
+    roundId ? Number(roundId) : undefined,
   )
 
   const scorePercentage = useMemo(

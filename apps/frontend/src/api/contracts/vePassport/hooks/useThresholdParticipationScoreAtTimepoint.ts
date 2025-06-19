@@ -29,7 +29,7 @@ export const useThresholdParticipationScoreAtTimepoint = (blockNumber: string) =
     args: [Number(blockNumber)],
     queryOptions: {
       enabled: !!blockNumber,
-      select: data => formatEther(BigInt(data[0].$bigintString)),
+      select: data => formatEther(BigInt(data[0])),
     },
   })
 }

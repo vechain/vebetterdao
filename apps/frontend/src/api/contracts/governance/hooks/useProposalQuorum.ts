@@ -29,7 +29,7 @@ export const useProposalQuorum = (blockNumber?: string | number, enabled = true)
     args: [BigInt(blockNumber || 0)],
     queryOptions: {
       enabled: !!blockNumber && enabled,
-      select: data => formatEther(BigInt(data[0].$bigintString)),
+      select: data => formatEther(BigInt(data[0])),
     },
   })
 }

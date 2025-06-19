@@ -29,7 +29,7 @@ export const useProposalSnapshotVotingPower = (roundId?: number, enabled = true)
     args: [(account?.address ?? "0x") as `0x${string}`, BigInt(roundId ?? 0)],
     queryOptions: {
       enabled: !!roundId && !!account?.address && enabled,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

@@ -55,10 +55,10 @@ export const getAllocationAmount = async (thor: ThorClient, roundId?: string): P
   })
 
   return {
-    treasury: ethers.formatEther(resTreasury),
-    voteX2Earn: ethers.formatEther(resVoteX2Earn),
-    voteXAllocations: ethers.formatEther(voteXAllocations),
-    gm: ethers.formatEther(resGMRewards),
+    treasury: ethers.formatEther(BigInt(resTreasury ?? 0)),
+    voteX2Earn: ethers.formatEther(BigInt(resVoteX2Earn ?? 0)),
+    voteXAllocations: ethers.formatEther(BigInt(voteXAllocations ?? 0)),
+    gm: ethers.formatEther(BigInt(resGMRewards ?? 0)),
   }
 }
 

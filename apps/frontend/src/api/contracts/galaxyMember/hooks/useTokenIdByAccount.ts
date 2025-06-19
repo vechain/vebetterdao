@@ -29,7 +29,7 @@ export const useTokenIdByAccount = (userAddress: string | null, index: number) =
     args: [(userAddress || "0x") as `0x${string}`, BigInt(index)],
     queryOptions: {
       enabled: !!userAddress,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

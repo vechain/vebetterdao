@@ -28,7 +28,7 @@ export const useAllocationRoundQuorum = (roundId: string) => {
     args: [BigInt(roundId)],
     queryOptions: {
       enabled: !!roundId,
-      select: data => formatEther(BigInt(data[0].$bigintString)),
+      select: data => formatEther(BigInt(data[0])),
     },
   })
 }

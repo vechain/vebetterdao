@@ -31,7 +31,7 @@ export const useGetCumulativeScoreWithDecay = (user?: string | null, round?: num
     args: [(user ?? "0x") as `0x${string}`, BigInt(round ?? 0)],
     queryOptions: {
       enabled: !!user && !!round,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }
@@ -45,7 +45,7 @@ export const useGetCurrentUserCumulativeScoreWithDecay = () => {
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: userRoundScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
     account?.address,
-    Number(roundId),
+    roundId ? Number(roundId) : undefined,
   )
   return { data: userRoundScore, isLoading: isUserRoundScoreLoading || isRoundIdLoading }
 }

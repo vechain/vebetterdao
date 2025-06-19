@@ -26,7 +26,7 @@ export const useVotingThreshold = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => formatEther(BigInt(data[0].$bigintString)),
+      select: data => formatEther(BigInt(data[0])),
     },
   })
 }

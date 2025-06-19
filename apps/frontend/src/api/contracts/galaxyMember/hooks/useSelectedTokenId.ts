@@ -24,7 +24,7 @@ export const useSelectedTokenId = (profile?: string, enabled = true) => {
     args: [(profile ?? account?.address ?? "") as `0x${string}`],
     queryOptions: {
       enabled: (!!profile || !!account?.address) && enabled,
-      select: data => data[0].$bigintString,
+      select: data => data[0],
     },
   })
 }

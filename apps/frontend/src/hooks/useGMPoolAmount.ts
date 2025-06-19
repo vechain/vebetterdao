@@ -32,7 +32,7 @@ export const useGMPoolAmount = (currentRoundId?: number) => {
     },
   })
 
-  const gmAmount = gmAmountData?.[0].$bigintString
+  const gmAmount = gmAmountData?.[0]
   const scaled = ethers.formatEther(BigInt(gmAmount ?? 0))
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
