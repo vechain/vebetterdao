@@ -1,7 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [".env"],
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": ["**/.env.*local", ".env"],
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
@@ -20,7 +19,7 @@
     "FUNCTION_TO_CALL",
     "NEXT_DEPLOY_LATEST_ONLY"
   ],
-  "pipeline": {
+  "tasks": {
     "install": {
       "dependsOn": ["@repo/contracts#install", "^compile"]
     },

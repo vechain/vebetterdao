@@ -96,7 +96,9 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
     res.map(async (r, index) => {
       if (r.reverted) {
         throw new Error(
-          `Error in contract call to X2EarnApps::app at ${CONFIG.x2EarnAppsContractAddress}. Clause ${index + 1} for appId ${top10AppShares[index].appId} reverted with reason ${r.vmError}`,
+          `Error in contract call to X2EarnApps::app at ${CONFIG.x2EarnAppsContractAddress}. Clause ${
+            index + 1
+          } for appId ${top10AppShares[index].appId} reverted with reason ${r.vmError}`,
         )
       }
 

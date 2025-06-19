@@ -34,8 +34,8 @@ export const AppVotesHorizontalChart = ({
   maxAllocation,
   maxAllocationPercentage,
   renderMaxAllocation = false,
-  //   showTotalVoters = false,
-}: Props) => {
+}: //   showTotalVoters = false,
+Props) => {
   const router = useRouter()
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
