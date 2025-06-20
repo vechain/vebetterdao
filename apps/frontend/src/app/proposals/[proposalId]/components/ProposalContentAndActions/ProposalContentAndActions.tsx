@@ -50,6 +50,11 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             style={{
               width: "100%",
               wordBreak: "break-word",
+              borderRadius: "12px",
+              backgroundColor: "contrast-on-dark-bg",
+              color: "contrast-bg-strong-hover",
+              padding: "20px",
+              border: "1px solid #D5D5D5",
             }}
           />
           {proposalDecodeError && (

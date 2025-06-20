@@ -48,7 +48,7 @@ const variants = {
   baseWithBorder: (props: StyleFunctionProps) =>
     definePartsStyle({
       container: {
-        bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+        bg: props.colorMode === "dark" ? "#1E1E1E" : "#FFF",
         borderWidth: "1px",
         borderColor: props.colorMode === "dark" ? "#2D2D2F" : "#D5D5D5",
       },

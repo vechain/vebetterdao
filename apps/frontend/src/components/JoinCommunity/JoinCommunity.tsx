@@ -29,10 +29,10 @@ export const JoinCommunity = () => {
         />
         <VStack alignItems={"flex-start"}>
           <Image src="/assets/icons/handshake.svg" alt="Join Community" w={32} h={32} />
-          <Text fontSize={15} fontWeight={600}>
+          <Text fontSize={15} fontWeight={600} color={"#1E1E1E"}>
             {t("Seeking Guidance or Advice?")}
           </Text>
-          <Text fontSize={28} fontWeight={700}>
+          <Text fontSize={28} fontWeight={700} color={"#1E1E1E"}>
             {t("Join Our Community!")}
           </Text>
           <Button variant="primaryAction" onClick={onJoinClick} mt={4}>

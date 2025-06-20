@@ -212,7 +212,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                   alignItems={"flex-start"}
                   gap={1}>
                   <VStack
-                    bg="#F8F8F8"
+                    bg="info-bg"
                     alignItems={"flex-start"}
                     borderRadius={"12px"}
                     p={"20px"}
@@ -243,7 +243,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                     zIndex={1}>
                     <Circle
                       size="60px"
-                      bg="white"
+                      bg="contrast-fg-on-strong"
                       border="1px solid #D5D5D5"
                       position="absolute"
                       right="30px"
@@ -275,7 +275,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                   </Flex>
 
                   <VStack
-                    bg="#F8F8F8"
+                    bg="info-bg"
                     alignItems={"flex-start"}
                     borderRadius={"12px"}
                     p={"20px"}
@@ -290,17 +290,11 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                         {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
                       </Text>
                       <Input
-                        h="50px"
                         placeholder="0"
-                        fontSize={{ base: 30, md: 36 }}
-                        fontWeight={700}
                         type="text"
                         value={amount}
                         onChange={e => handleAmountChange(e.target.value)}
-                        variant="unstyled"
-                        _placeholder={{
-                          color: "black",
-                        }}
+                        variant="amountInput"
                       />
                     </VStack>
                     <Text fontSize={14} fontWeight={400}>

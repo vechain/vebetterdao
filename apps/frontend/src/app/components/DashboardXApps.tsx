@@ -96,7 +96,6 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
       onClick={navigateToAppDetail}
       _hover={{
         bg: nonActiveBackgroundColor,
-
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>

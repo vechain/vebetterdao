@@ -39,6 +39,7 @@ export const Navbar: React.FC = () => {
   }, [routesToRender])
 
   const bg = useColorModeValue("#F7F7F7", "#131313")
+  const borderColor = useColorModeValue("#EEEEEE", "#2D2D2F")
   return (
     <Box
       bg={bg}
@@ -53,7 +54,7 @@ export const Navbar: React.FC = () => {
       <HStack
         justify={"space-between"}
         p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
-        borderBottom="1px solid #EEEEEE">
+        borderBottom={`1px solid ${borderColor}`}>
         {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (
