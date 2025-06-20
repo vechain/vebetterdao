@@ -11,8 +11,8 @@ export function sortAlphabetically(apps: AllApps[]): AllApps[] {
 
 export function sortByRewards<T extends AllApps>(appsWithStatus: T[], positionsMap: Map<string, number>): T[] {
   return appsWithStatus.sort((a, b) => {
-    const posA = positionsMap.get(a.id) ?? Infinity
-    const posB = positionsMap.get(b.id) ?? Infinity
+    const posA = positionsMap.get(a.id) ?? 0
+    const posB = positionsMap.get(b.id) ?? 0
     return posA - posB
   })
 }
