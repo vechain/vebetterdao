@@ -21,6 +21,7 @@ import {
   useProposalExecutedEvent,
   useProposalCanceledEvent,
   useProposalVotesIndexer,
+  useProposalDeposits,
 } from "@/api"
 import { ethers } from "ethers"
 import dayjs from "dayjs"
@@ -34,6 +35,7 @@ export const useProposalDetailById = (proposalId: string) => {
   const proposalExecutedEvent = useProposalExecutedEvent(proposalId)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account?.address || "")
+  const proposalDeposits = useProposalDeposits(proposalId)
   const proposalSnapshot = useProposalSnapshot(proposalId)
   const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
@@ -75,6 +77,7 @@ export const useProposalDetailById = (proposalId: string) => {
       proposalCanceledEvent,
       proposalDepositEvent,
       proposalUserDeposit,
+      proposalDeposits,
       isDepositReached,
       isQuorumReached,
       proposalSnapshotVotingPower,
@@ -88,6 +91,7 @@ export const useProposalDetailById = (proposalId: string) => {
       proposalCanceledEvent,
       proposalDepositEvent,
       proposalUserDeposit,
+      proposalDeposits,
       isDepositReached,
       isQuorumReached,
       proposalSnapshotVotingPower,
@@ -124,8 +128,10 @@ export const useProposalDetailById = (proposalId: string) => {
       abstainPercentage = proposalVotes.votes.abstain.percentage
     }
 
-    const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
-    const communityDeposits = proposalDepositEvent.communityDeposits
+    const depositThreshold = parseFloat(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
+    // Use authoritative smart contract data instead of frontend aggregation
+    const communityDepositsFromContract = parseFloat(ethers.formatEther(BigInt(proposalDeposits.data || 0)))
+    const communityDeposits = communityDepositsFromContract || proposalDepositEvent.communityDeposits // fallback to frontend calc
     const communityDepositPercentage = communityDeposits / depositThreshold
     const communityDepositChartPercentage = Math.min(communityDepositPercentage || 0, 1) * 100
     const userSupportLeft = Number(ethers.formatEther(BigInt(proposalUserDeposit?.data || 0)))
@@ -167,9 +173,11 @@ export const useProposalDetailById = (proposalId: string) => {
       votingEndDate,
       isVotingEndDateLoading,
       depositThreshold,
+      depositThresholdWei: proposalCreatedEvent.data?.depositThreshold,
       isDepositThresholdLoading: proposalCreatedEvent.isLoading,
       communityDeposits,
-      isCommunityDepositsLoading: proposalDepositEvent.isLoading,
+      communityDepositsWei: proposalDeposits.data,
+      isCommunityDepositsLoading: proposalDepositEvent.isLoading || proposalDeposits.isLoading,
       communityDepositPercentage,
       communityDepositChartPercentage,
       isCommunityDepositPercentageLoading: proposalDepositEvent.isLoading || proposalCreatedEvent.isLoading,
@@ -221,6 +229,7 @@ export const useProposalDetailById = (proposalId: string) => {
     proposalCreatedEvent,
     proposalUserDeposit,
     proposalDepositEvent,
+    proposalDeposits,
     proposalSnapshotVotingPower,
     proposalSnapshotVot3,
     proposalQuorum,

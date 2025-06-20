@@ -22,15 +22,19 @@ export const useProposalDepositEvent = (proposalId: string) => {
     [proposalDeposits],
   )
   const communityDeposits = useMemo(() => {
-    const deposits = proposalDeposits.reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(ethers.formatEther(BigInt(deposits || 0)))
+    const depositsWei = proposalDeposits.reduce((acc, deposit) => {
+      return acc + BigInt(deposit.amount)
+    }, BigInt(0))
+    return Number(ethers.formatEther(depositsWei))
   }, [proposalDeposits])
 
   const userSupport = useMemo(() => {
-    const deposits = proposalDeposits
+    const depositsWei = proposalDeposits
       .filter(deposit => compareAddresses(deposit.depositor, account?.address || ""))
-      .reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(ethers.formatEther(BigInt(deposits || 0)))
+      .reduce((acc, deposit) => {
+        return acc + BigInt(deposit.amount)
+      }, BigInt(0))
+    return Number(ethers.formatEther(depositsWei))
   }, [account, proposalDeposits])
 
   const othersDeposits = useMemo(
@@ -38,8 +42,10 @@ export const useProposalDepositEvent = (proposalId: string) => {
     [account, proposalDeposits],
   )
   const othersSupport = useMemo(() => {
-    const deposits = othersDeposits.reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(ethers.formatEther(BigInt(deposits || 0)))
+    const depositsWei = othersDeposits.reduce((acc, deposit) => {
+      return acc + BigInt(deposit.amount)
+    }, BigInt(0))
+    return Number(ethers.formatEther(depositsWei))
   }, [othersDeposits])
 
   const othersSupportUserCount = useMemo(() => {

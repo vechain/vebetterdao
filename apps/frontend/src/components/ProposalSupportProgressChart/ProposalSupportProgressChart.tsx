@@ -60,10 +60,10 @@ export const ProposalSupportProgressChart = ({
 
   const totalDeposits = useMemo(() => userDeposits + othersDeposits, [userDeposits, othersDeposits])
 
-  const totalDepositsPercentage = useMemo(
-    () => getSafeScaledPercentage(totalDeposits / depositThreshold),
-    [totalDeposits, depositThreshold],
-  )
+  const totalDepositsPercentage = useMemo(() => {
+    const percentage = (totalDeposits / depositThreshold) * 100
+    return percentage < 100 ? percentage.toFixed(2) : 100
+  }, [totalDeposits, depositThreshold])
 
   const userDepositsPercentage = useMemo(
     () => getSafeScaledPercentage(userDeposits / depositThreshold),
@@ -93,7 +93,7 @@ export const ProposalSupportProgressChart = ({
           </Text>
         </HStack>
         <Text fontSize={"18px"} fontWeight={400} color={"#6A6A6A"}>
-          {compactFormatter.format(totalDepositsPercentage)}
+          {totalDepositsPercentage}
           {t("%")}
         </Text>
       </HStack>
