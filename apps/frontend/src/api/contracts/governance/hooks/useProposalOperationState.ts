@@ -14,7 +14,6 @@ export enum ProposalOperationState {
 const address = getConfig().timelockContractAddress
 const abi = TimeLock__factory.abi
 
-// TODO: migration check the key of  query
 export const getProposalOperationStateQueryKey = (operationId: string) => {
   return getCallClauseQueryKeyWithArgs({
     abi,
@@ -22,10 +21,6 @@ export const getProposalOperationStateQueryKey = (operationId: string) => {
     method: "isOperation",
     args: [operationId as `0x${string}`],
   })
-}
-
-export const getTimestampQueryKey = (operationId: string) => {
-  return getCallClauseQueryKeyWithArgs({ abi, address, method: "getTimestamp", args: [operationId as `0x${string}`] })
 }
 
 /**

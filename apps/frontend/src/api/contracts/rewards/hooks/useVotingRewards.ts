@@ -9,6 +9,8 @@ import { BigNumber } from "bignumber.js"
 const abi = VoterRewards__factory.abi
 const address = getConfig().voterRewardsContractAddress as `0x${string}`
 
+const getVotingRewardsQueryKey = (voter: string, lastRound: number) => [`ALL_TO_ROUND_${lastRound}`, voter]
+
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.
  * It uses the mutli-clause reading to fetch the data in parallel for all rounds up to the current one.
@@ -24,7 +26,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   const lastRoundId = Math.max(0, currentRoundId - 1)
 
   return useQuery({
-    queryKey: getRoundRewardQueryKey(`${lastRoundId + 1}`, voter || ""),
+    queryKey: getVotingRewardsQueryKey(voter || "", lastRoundId),
     enabled: !!thor && !!voter,
     queryFn: async () => {
       // Get array from 1 to lastRoundId (if currentRoundId is still active)

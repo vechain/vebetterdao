@@ -5,6 +5,7 @@ import { FilterCriteria } from "@vechain/sdk-network"
 import { ExtractEventParams, ProposalCreatedEvent } from "./getProposalsEvents"
 
 const abi = B3TRGovernor__factory.abi
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 
 /**
  * Get the ProposalCreated events from the governor contract
@@ -14,9 +15,7 @@ const abi = B3TRGovernor__factory.abi
  * @returns An object containing the created proposals
  */
 export const getProposalsCreatedEvents = async (thor: ThorClient, proposer?: string) => {
-  const governanceContractAddress = getConfig().b3trGovernorAddress
-
-  const eventAbi = thor.contracts.load(governanceContractAddress, abi).getEventAbi("ProposalCreated")
+  const eventAbi = thor.contracts.load(address, abi).getEventAbi("ProposalCreated")
 
   const topics = eventAbi.encodeFilterTopicsNoNull({
     ...(proposer ? { proposer: proposer } : {}),
@@ -29,7 +28,7 @@ export const getProposalsCreatedEvents = async (thor: ThorClient, proposer?: str
   const filterCriteria: FilterCriteria[] = [
     {
       criteria: {
-        address: governanceContractAddress,
+        address,
         topic0: topics[0] ?? undefined,
         topic1: topics[1] ?? undefined,
         topic2: topics[2] ?? undefined,

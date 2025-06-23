@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi
@@ -25,7 +25,7 @@ export const useProposalOperationId = (proposalId?: string, enabled = true) => {
     abi,
     address,
     method,
-    args: [proposalId ? BigInt(proposalId) : BigInt(0)],
+    args: [BigInt(proposalId || "0")],
     queryOptions: {
       enabled: !!proposalId && enabled,
       select: data => data[0],

@@ -9,7 +9,6 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalDepositQueryKey } from "@/api/contracts/governance/hooks/useGetProposalDeposit"
 import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { ethers } from "ethers"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
@@ -61,7 +60,6 @@ export const useProposalVot3Deposit = ({
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
-      getProposalDepositQueryKey(proposalId),
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),
       getVot3BalanceQueryKey(account?.address ?? ""),
