@@ -20,9 +20,7 @@ export const ProposalOverviewYourSupport = () => {
           </Text>
           <HStack gap={2}>
             <Image h="20px" w="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color="#252525" fontWeight={600}>
-              {compactFormatter.format(Number(proposal.userSupport))}
-            </Text>
+            <Text fontWeight={600}>{compactFormatter.format(Number(proposal.userSupport))}</Text>
           </HStack>
         </Box>
       )

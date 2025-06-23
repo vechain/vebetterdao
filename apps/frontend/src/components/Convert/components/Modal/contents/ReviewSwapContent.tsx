@@ -22,7 +22,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
       </Text>
       <VStack w="full" mt={8}>
         {Number(b3trBalanceAfterSwap) >= 0 && (
-          <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
+          <HStack w="full" bg={"info-bg"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
               {t("Your new B3TR balance")}
             </Text>
@@ -36,7 +36,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
           </HStack>
         )}
         {Number(vot3BalanceAfterSwap) >= 0 && (
-          <HStack w="full" bg={"#F8F8F8"} borderRadius={8} p={4} justifyContent={"space-between"}>
+          <HStack w="full" bg={"info-bg"} borderRadius={8} p={4} justifyContent={"space-between"}>
             <Text fontSize={16} fontWeight={400}>
               {t("Your new VOT3 balance")}
             </Text>

@@ -22,7 +22,7 @@ export const ConnectWithCreators = () => {
         right={-32}
         boxSize={"400px"}
       />
-      <VStack alignItems={"flex-start"} zIndex={2} position={"relative"}>
+      <VStack alignItems={"flex-start"} zIndex={0} position={"relative"}>
         <HStack>
           <Image src="/assets/icons/handshake.svg" alt="Join Community" w={32} h={32} />
           <Text>{t("Connect with app creators to know more about their apps and endorse them.")}</Text>

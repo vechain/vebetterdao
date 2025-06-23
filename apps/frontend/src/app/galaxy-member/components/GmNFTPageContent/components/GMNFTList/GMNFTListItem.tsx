@@ -79,7 +79,6 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
       <CardBody p={"4"}>
         <VStack align="stretch" gap={4}>
           <HStack
-            color="#252525"
             align={"center"}
             justify="space-between"
             rounded="12px"

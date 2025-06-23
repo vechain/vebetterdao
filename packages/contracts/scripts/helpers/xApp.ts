@@ -117,7 +117,9 @@ export const castVotesToXDapps = async (
           )
 
           console.log(
-            `Casting round ${roundId} votes for ${account.key.address} with ${splits.map(split => split.weight)} votes to ${splits.map(split => split.app)}`,
+            `Casting round ${roundId} votes for ${account.key.address} with ${splits.map(
+              split => split.weight,
+            )} votes to ${splits.map(split => split.app)}`,
           )
           await TransactionUtils.sendTx(thorClient, clauses, account.key.pk)
         } catch (e) {

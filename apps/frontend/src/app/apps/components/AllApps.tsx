@@ -23,6 +23,7 @@ import {
   Checkbox,
   Flex,
   MenuDivider,
+  useColorModeValue,
 } from "@chakra-ui/react"
 import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -56,7 +57,11 @@ export const AllApps = ({
   const { t } = useTranslation()
   const { isEndorsingApp } = useXNode()
 
-  const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange, isSorted } = useAppsSorting(
+  // Color mode responsive colors
+  const searchIconColor = useColorModeValue("#3B3B3B", "#E4E4E4")
+  const statusHoverBg = useColorModeValue("blackAlpha.800", "whiteAlpha.800")
+
+  const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange } = useAppsSorting(
     currentActiveApps,
     newApps,
     gracePeriodApps,
@@ -131,28 +136,39 @@ export const AllApps = ({
           as={IconButton}
           isRound={true}
           aria-label={t("Sort by")}
-          bg={isSorted ? "black" : "transparent"}
+          bg={"transparent"}
           transition="all 0.3s ease-in-out"
-          color={isSorted ? "white" : "black"}
+          color={"contrast-fg-on-muted"}
           _hover={{
-            bg: "#D5D5D5",
-            color: "black",
+            bg: "hover-contrast-bg",
+            color: "contrast-fg-on-muted",
             transition: "all 0.3s ease-in-out",
           }}
-          border="1px solid #D5D5D5"
+          border={`1px solid #252525`}
           borderRadius={"24px"}
           icon={<UilSortAmountDown />}
           size="md"
         />
-        <MenuList minW="100px" shadow="lg" borderRadius={"24px"} p={2}>
+        <MenuList
+          minW="100px"
+          shadow="lg"
+          borderRadius={"24px"}
+          p={2}
+          bg="info-bg"
+          borderColor="contrast-border"
+          borderWidth="1px">
           {sortOptions.map(option => (
             <MenuItem
               key={option.id}
               onClick={() => onSortChange(option.id)}
               role="group"
               borderRadius={"16px"}
-              bg={sortOption === option.id && sortOption !== "default" ? "#D5D5D5" : undefined}
-              _hover={{ bg: "#D5D5D5" }}>
+              bg={sortOption === option.id && sortOption !== "default" ? "info-bg" : undefined}
+              _hover={{
+                bg: "hover-contrast-bg",
+                color: "contrast-fg-on-muted",
+                transition: "all 0.3s ease-in-out",
+              }}>
               <HStack justifyContent="space-between" w="full">
                 <VStack align="flex-start" spacing={0}>
                   <Text fontWeight={sortOption === option.id && sortOption !== "default" ? "semibold" : "normal"}>
@@ -183,10 +199,15 @@ export const AllApps = ({
             as={IconButton}
             isRound={true}
             aria-label={t("Filters")}
-            border="1px solid #D5D5D5"
+            border={`1px solid #252525`}
             icon={<UilFilter />}
-            variant="black"
-            color={"black"}
+            bg={"transparent"}
+            color={"contrast-fg-on-muted"}
+            _hover={{
+              bg: "hover-contrast-bg",
+              color: "contrast-fg-on-muted",
+              transition: "all 0.3s ease-in-out",
+            }}
           />
 
           {activeFiltersCount > 0 && (
@@ -194,8 +215,8 @@ export const AllApps = ({
               position="absolute"
               top="-8px"
               right="-8px"
-              bg="black"
-              color="white"
+              bg={"contrast-fg-on-muted"}
+              color={"contrast-fg-on-strong"}
               borderRadius="full"
               w="20px"
               h="20px"
@@ -208,7 +229,15 @@ export const AllApps = ({
             </Flex>
           )}
         </Box>
-        <MenuList maxW="300px" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
+        <MenuList
+          maxW="300px"
+          minW="200px"
+          shadow="lg"
+          borderRadius={"24px"}
+          p={3}
+          bg="info-bg"
+          borderColor="#d5d5d5"
+          borderWidth="1px">
           {/* Governance Status Section */}
           <Text fontWeight="bold" mb={2}>
             {t("Status")}
@@ -219,20 +248,20 @@ export const AllApps = ({
                 key={status}
                 size="sm"
                 onClick={() => setStatusFilter(status)}
-                bg={statusFilter === status ? "black" : "white"}
-                color={statusFilter === status ? "white" : "black"}
+                bg={statusFilter === status ? "contrast-fg-on-muted" : "contrast-bg-muted"}
+                color={statusFilter === status ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
                 borderRadius="16px"
                 border="1px solid"
-                borderColor={statusFilter === status ? "black" : "gray.200"}
+                borderColor={statusFilter === status ? "contrast-fg-on-muted" : "hover-contrast-bg"}
                 _hover={{
-                  bg: statusFilter === status ? "blackAlpha.800" : "gray.100",
+                  bg: statusFilter === status ? statusHoverBg : "hover-contrast-bg",
                 }}
                 px={3}
                 py={1}
                 fontWeight="medium">
                 {status}{" "}
                 {statusFilter === status && (
-                  <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
+                  <Badge ml={1} color="black" borderRadius="full">
                     {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
                   </Badge>
                 )}
@@ -252,8 +281,7 @@ export const AllApps = ({
                 key={category.id}
                 isChecked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryChange(category.id)}
-                fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}
-                colorScheme="blackAlpha">
+                fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}>
                 <Flex align="center">{category.name}</Flex>
               </Checkbox>
             ))}
@@ -270,17 +298,21 @@ export const AllApps = ({
         <HStack spacing={4} ml={headingComponent ? "auto" : 0}>
           <InputGroup w={headingComponent ? "300px" : "full"}>
             <InputLeftElement pointerEvents="none">
-              <UilSearch color="#3B3B3B" />
+              <UilSearch color={searchIconColor} />
             </InputLeftElement>
             <Input
               placeholder="Search apps..."
               value={searchQuery}
-              border="1px solid #D5D5D5"
+              border={`1px solid #252525`}
               opacity={0.6}
               onChange={handleSearchChange}
               borderRadius={"24px"}
-              _hover={{ borderColor: "#D5D5D5", opacity: 0.9 }}
-              _focus={{ borderColor: "#D5D5D5", boxShadow: "0px 0px 3px 0px #D5D5D5", opacity: 0.8 }}
+              _hover={{ borderColor: "hover-contrast-bg", opacity: 0.9 }}
+              _focus={{
+                borderColor: "hover-contrast-bg",
+                boxShadow: `0px 0px 3px 0px ${"hover-contrast-bg"}`,
+                opacity: 0.8,
+              }}
             />
           </InputGroup>
           <HStack spacing={2}>

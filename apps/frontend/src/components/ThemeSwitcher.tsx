@@ -5,6 +5,7 @@ import { FaMoon, FaSun } from "react-icons/fa"
 type Props = {
   withText?: boolean
 } & ButtonProps
+
 export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
   const { colorMode, toggleColorMode } = useColorMode()
   const isDark = colorMode === "dark"
@@ -15,6 +16,8 @@ export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
         data-cy="theme-switcher"
         aria-label={isDark ? "dark" : "light"}
         fontSize="18px"
+        bg="none"
+        borderRadius="full"
         icon={<Icon as={isDark ? FaSun : FaMoon} />}
         onClick={toggleColorMode}
         {...otherProps}
@@ -26,6 +29,8 @@ export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
       data-cy="theme-switcher-with-text"
       aria-label={isDark ? "dark" : "light"}
       fontSize="18px"
+      variant="unstyled"
+      borderRadius="full"
       leftIcon={<Icon as={isDark ? FaSun : FaMoon} />}
       onClick={toggleColorMode}
       {...otherProps}>

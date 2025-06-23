@@ -1,5 +1,5 @@
 import { AnalyticsUtils } from "@/utils"
-import { ButtonProps, Fade, useMediaQuery, keyframes } from "@chakra-ui/react"
+import { ButtonProps, Fade, useMediaQuery, keyframes, useColorModeValue, Box } from "@chakra-ui/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 
@@ -18,6 +18,9 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
   const { account, connection } = useWallet()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
   const notLoggedIn = !account?.address
+
+  const hoverBackground = useColorModeValue("#f8f8f8", "#2D2D2F")
+  const textColor = useColorModeValue("#1A1A1A", "#E4E4E4")
 
   useEffect(() => {
     if (typeof window === "undefined" || !window?.localStorage) return
@@ -63,23 +66,31 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
 
   return (
     <Fade in={true}>
-      <WalletButton
-        mobileVariant="icon"
-        desktopVariant="iconAndDomain"
-        buttonStyle={{
-          border: "2px solid transparent",
-          background:
-            "linear-gradient(white, white) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box",
+      <Box
+        background={`linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`}
+        border="2px solid transparent"
+        backgroundSize="300% 100%"
+        animation={`${rotateAnimation} 3s ease infinite`}
+        borderRadius={isDesktop ? "full" : "12px"}
+        padding="2px"
+        _hover={{
+          background: `linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`,
           backgroundSize: "300% 100%",
-          animation: `${rotateAnimation} 3s ease infinite`,
-          _hover: {
-            background:
-              "linear-gradient(#f8f8f8, #f8f8f8) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box",
-            backgroundSize: "300% 100%",
-          },
-          ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "12px" }),
         }}
-      />
+        transition="all 0.3s ease">
+        <WalletButton
+          mobileVariant="icon"
+          desktopVariant="iconAndDomain"
+          buttonStyle={{
+            border: "none",
+            backgroundColor: "transparent",
+            color: textColor,
+            width: "100%",
+            height: "100%",
+            ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "10px" }),
+          }}
+        />
+      </Box>
     </Fade>
   )
 }
