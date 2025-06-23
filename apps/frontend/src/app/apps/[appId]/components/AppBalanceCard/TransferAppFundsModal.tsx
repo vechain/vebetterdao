@@ -74,7 +74,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
-                color="#252525"
                 justifyContent="space-between">
                 <Text fontSize={18} fontWeight={600}>
                   {t("Withdraw")}
@@ -101,7 +100,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
-                color="#252525"
                 justifyContent="space-between">
                 <Text fontSize={18} fontWeight={600}>
                   {t("Deposit")}
@@ -126,7 +124,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 spacing={4}
                 borderRadius="20px"
                 p="16px"
-                color="#252525"
                 border={"1px solid #D5D5D5"}
                 boxShadow={"none"}
                 justifyContent="space-between">

@@ -54,7 +54,7 @@ export const ProposalOverviewTime = () => {
           </Text>
           <HStack>
             <UilClockEight />
-            <Text color="#252525">{timestampToTimeLeftCompact(proposal.votingEndDate)}</Text>
+            <Text>{timestampToTimeLeftCompact(proposal.votingEndDate)}</Text>
           </HStack>
         </Box>
       )

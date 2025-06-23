@@ -87,15 +87,12 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
         <HStack>
           <Image h="36px" w="36px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
           <Input
-            h="50px"
             placeholder="0"
-            fontSize="36px"
-            fontWeight={700}
             type="text"
             value={amount}
             onChange={handleChange}
-            variant="unstyled"
-            _placeholder={{ color: "black" }}
+            variant="amountInput"
+            data-testid={"amount-input"}
           />
           {Number(vot3Balance?.original) !== Number(amount) && (
             <Box>

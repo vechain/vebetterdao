@@ -91,7 +91,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
                 {onContinueError}
               </Text>
             ) : (
-              <Text fontSize={"16px"} fontWeight={400} color="#252525">
+              <Text fontSize={"16px"} fontWeight={400}>
                 <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
               </Text>
             )

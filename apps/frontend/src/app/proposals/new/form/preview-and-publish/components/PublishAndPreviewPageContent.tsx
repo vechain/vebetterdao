@@ -136,7 +136,7 @@ export const PublishAndPreviewPageContent = () => {
                 selected={false}
                 isSelectable={false}
                 cardProps={{
-                  bg: "#E5EEFF",
+                  bg: "b3tr-balance-bg",
                 }}
               />
             )}

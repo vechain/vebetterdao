@@ -67,7 +67,9 @@ export async function checkEndorsements(
       await publishMessage(
         secretsClient,
         "C06BLEJE5SA",
-        `${isStaging ? "[STAGING] " : ""}:alert: Failed to check endorsemets:\n${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+        `${isStaging ? "[STAGING] " : ""}:alert: Failed to check endorsemets:\n${gasResult.revertReasons}, ${
+          gasResult.vmErrors
+        }`,
       )
 
       return { receipt: null, gasResult }

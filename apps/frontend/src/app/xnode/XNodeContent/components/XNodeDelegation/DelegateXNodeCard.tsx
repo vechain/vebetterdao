@@ -25,7 +25,7 @@ export const DelegateXNodeCard = () => {
   const ownerDomain = vnsOwnerData?.domain
 
   const isOwner = compareAddresses(account?.address ?? "", xNodeOwner ?? "")
-  const displayAddress = isOwner ? delegateeDomain ?? delegatee : ownerDomain ?? xNodeOwner
+  const displayAddress = isOwner ? (delegateeDomain ?? delegatee) : (ownerDomain ?? xNodeOwner)
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
@@ -100,7 +100,7 @@ const DelegatedNodeDisplay = ({
         direction={["column", "column", "row"]}
         justify="space-between"
         alignItems={"center"}
-        bg="#F8F8F8"
+        bg="light-contrast-on-card-bg"
         rounded="xl"
         p={3}
         w="full"

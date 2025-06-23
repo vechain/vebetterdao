@@ -24,6 +24,9 @@ export const ButtonStyle: ComponentStyleConfig = {
       fontSize: "16px",
       fontWeight: 500,
       color: "rgba(0, 76, 252, 1)",
+      _dark: {
+        color: "rgba(224, 233, 254, 1)",
+      },
       _hover: {
         color: "#0038b5",
         _disabled: {

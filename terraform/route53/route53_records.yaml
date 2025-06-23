@@ -132,3 +132,10 @@ records:
     records:
       - "spfmx1.domainkey.freshemail.io"
     routing_policy: simple
+  
+  - name: "beta.governance.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "a6d34427de1f1a70.vercel-dns-013.com"
+    routing_policy: simple

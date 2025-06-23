@@ -31,7 +31,7 @@ export const ProposalOverviewCommunitySupport = () => {
           </Text>
           <HStack>
             <FaRegHeart color={supportIconColor} />
-            <Text color="#252525">{t("{{percentage}}%", { percentage: compactFormatter.format(percentage) })}</Text>
+            <Text>{t("{{percentage}}%", { percentage: compactFormatter.format(percentage) })}</Text>
           </HStack>
         </Box>
       )

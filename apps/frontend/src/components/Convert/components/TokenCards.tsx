@@ -86,15 +86,10 @@ export const TokenCards = ({
         control={control}
         render={({ field: { onChange, value } }) => (
           <Input
-            h="50px"
             placeholder="0"
-            fontSize={{ base: 30, md: 36 }}
-            fontWeight={700}
-            type="text"
             value={value}
             onChange={e => onChange(filterAmount(e.target.value))}
-            variant="unstyled"
-            _placeholder={{ color: "black" }}
+            variant="amountInput"
             data-testid={"amount-input"}
           />
         )}
