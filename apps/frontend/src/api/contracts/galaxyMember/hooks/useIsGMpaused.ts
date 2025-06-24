@@ -23,7 +23,7 @@ export const useIsGMpaused = () => {
     method,
     args: [],
     queryOptions: {
-      select: data => Boolean(data[0]),
+      select: data => data[0],
     },
   })
 }

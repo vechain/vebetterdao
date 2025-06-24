@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
-import { executeCallClause, useThor } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
+
+const abi = AccessControl__factory.abi
+const method = "hasRole" as const
 
 // Roles
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -32,39 +34,13 @@ export const ACTION_SCORE_MANAGER_ROLE = ethers.solidityPackedKeccak256(["string
 export const getBytes32Role = (role: string) =>
   role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])
 
-/**
- *  Function to check if the user has a specific role in AccessControl
- * @param thor  the thor instance
- * @param role  the role to check (will be converted to bytes32)
- * @param contractAddress  the contract address
- * @param address  the address to check the role for
- * @returns  true if the user has the role, false otherwise
- */
-export const getHasRole = async (
-  thor: ReturnType<typeof useThor>,
-  role: string,
-  contractAddress: string,
-  address?: string,
-) => {
-  const bytes32Role = getBytes32Role(role) as `0x${string}`
-
-  const [hasRole] = await executeCallClause({
-    thor,
-    abi: AccessControl__factory.abi,
-    contractAddress,
-    method: "hasRole",
-    args: [address as `0x${string}`, bytes32Role],
+export const hasRoleQueryKey = (role: string, contractAddress: string, address?: string) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
+    address: contractAddress,
+    method,
+    args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
   })
-
-  return hasRole
-}
-
-export const hasRoleQueryKey = (role: string, contractAddress: string, address?: string) => [
-  "hasRole",
-  contractAddress,
-  address,
-  role,
-]
 
 /**
  *  Hook to check if the user has a specific role
@@ -74,10 +50,14 @@ export const hasRoleQueryKey = (role: string, contractAddress: string, address?:
  * @returns  true if the user has the role, false otherwise
  */
 export const useHasRole = (role: string, contractAddress: string, address?: string) => {
-  const thor = useThor()
-  return useQuery({
-    queryKey: hasRoleQueryKey(role, contractAddress, address),
-    queryFn: () => !!address && getHasRole(thor, role, contractAddress, address),
-    enabled: !!address,
+  return useCallClause({
+    abi,
+    address: contractAddress,
+    method,
+    args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
+    queryOptions: {
+      enabled: !!address,
+      select: data => data[0],
+    },
   })
 }

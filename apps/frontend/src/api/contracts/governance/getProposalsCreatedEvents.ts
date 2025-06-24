@@ -1,6 +1,6 @@
 import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
+import { B3TRGovernor__factory } from "@repo/contracts"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { ProposalCreatedEvent } from "./getProposalsEvents"
 import { decodeEventLog } from "./getEvents"

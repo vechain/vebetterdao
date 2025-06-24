@@ -9,7 +9,7 @@ import { BigNumber } from "bignumber.js"
 const abi = VoterRewards__factory.abi
 const address = getConfig().voterRewardsContractAddress as `0x${string}`
 
-const getVotingRewardsQueryKey = (voter: string, lastRound: number) => [`ALL_TO_ROUND_${lastRound}`, voter]
+export const getVotingRewardsQueryKey = (voter: string, lastRound: number) => [`ALL_TO_ROUND_${lastRound}`, voter]
 
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.

@@ -124,11 +124,8 @@ export const useRewardClaimedEvents = (cycle?: number, voter?: string) => {
 
   const result = useQuery({
     queryKey: getRewardClaimedEventsQueryKey(cycle, voter),
-    enabled: !!thor && !!cycle,
-    queryFn: async () => {
-      if (!thor) throw new Error("Thor client not available")
-      return getRewardClaimedEvents(thor, { cycle, voter })
-    },
+    enabled: !!cycle,
+    queryFn: async () => getRewardClaimedEvents(thor, { cycle, voter }),
   })
   return result
 }

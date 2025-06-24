@@ -33,13 +33,13 @@ export const useGetTokensInfoByOwner = (owner: string, size: number = 10) => {
   const fetchTokens = async ({ pageParam = 0 }) => {
     const res = await executeCallClause({
       thor,
-      contractAddress: contractAddress,
+      contractAddress,
       abi,
       method,
       args: [owner as `0x${string}`, BigInt(pageParam), BigInt(size)],
     })
 
-    const data = res[0].map(({ tokenId, tokenURI, tokenLevel, b3trToUpgrade }) => ({
+    const data = res[0]?.map(({ tokenId, tokenURI, tokenLevel, b3trToUpgrade }) => ({
       tokenId: tokenId.toString(),
       tokenURI: tokenURI.toString(),
       tokenLevel: tokenLevel.toString(),

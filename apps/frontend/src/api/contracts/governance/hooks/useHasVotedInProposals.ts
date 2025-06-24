@@ -1,5 +1,5 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
@@ -15,7 +15,7 @@ const functionName = "hasVoted" as const
  * @param address the address to check
  * @returns if the given address has voted on the given proposal
  */
-export const getHasVoted = async (thor: ReturnType<typeof useThor>, proposalIds: string[], address?: string) => {
+export const getHasVoted = async (thor: ThorClient, proposalIds: string[], address?: string) => {
   if (!address) throw new Error("address is required")
 
   const hasVoted = await executeMultipleClausesCall({
