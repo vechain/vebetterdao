@@ -41,7 +41,8 @@ export const AppsPageContent = () => {
   const newAppsEndorsedandUnendorsed = [...(xApps?.newApps ?? []), ...newApps]
 
   // Apps tabs
-  const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
+  const currentActiveApps =
+    xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id as unknown as `0x${string}`)) ?? []
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
 

@@ -33,7 +33,7 @@ export const useHasRoles = (roles: string[], contractAddress: string, address: s
             ({
               abi,
               functionName: method,
-              address: contractAddress,
+              address: contractAddress as `0x${string}`,
               args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
             }) as const,
         ),
