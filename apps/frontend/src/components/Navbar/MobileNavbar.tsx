@@ -20,6 +20,7 @@ import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
 import { ProfileButton } from "./ProfileButton"
+import { ThemeSwitcher } from "@/components/ThemeSwitcher"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -34,7 +35,11 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
   return (
     <Drawer size={"sm"} placement="right" {...props}>
       <DrawerOverlay />
-      <DrawerContent maxWidth={isNotMobile ? undefined : "95%"} borderTopLeftRadius={16} borderBottomLeftRadius={16}>
+      <DrawerContent
+        maxWidth={isNotMobile ? undefined : "95%"}
+        borderTopLeftRadius={16}
+        borderBottomLeftRadius={16}
+        background={"contrast-on-dark-bg"}>
         <DrawerCloseButton position={"absolute"} top={4} right={4} color={"gray.500"} _hover={{ color: "gray.700" }} />
         <DrawerHeader>
           <NavbarLogo />
@@ -44,9 +49,7 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
             <ProfileButton onMenuClose={props.onClose} />
             <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
           </VStack>
-          {/* <Box w="full" alignSelf="flex-end">
-            <ThemeSwitcher w={"full"} withText={true} />
-          </Box> */}
+          <ThemeSwitcher w={"full"} withText={true} />
         </DrawerBody>
       </DrawerContent>
     </Drawer>
@@ -67,12 +70,13 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
       <NavbarLogo />
       <HStack>{isLargerThan500 && <NavbarBalance />}</HStack>
       <HStack gap={2}>
+        <ThemeSwitcher />
         <ConnectWalletButton />
         {!!routesToRender.length && (
           <IconButton
             onClick={openMenu}
             border={"1px solid #EEEEEE"}
-            bg={"rgba(255, 255, 255, 0.50)"}
+            bg={"light-contrast-on-card-bg"}
             rounded="6px"
             icon={<Icon as={FaBars} />}
             aria-label="Open menu"

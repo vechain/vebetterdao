@@ -25,7 +25,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         left={0}
         py={"16px"}
         px={"20px"}
-        bg="#FFFFFF"
+        bg="profile-bg"
         zIndex={2}
         boxShadow={"0px -8px 16px 0px #00000014"}>
         {helperText}

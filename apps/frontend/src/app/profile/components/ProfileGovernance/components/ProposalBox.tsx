@@ -34,9 +34,9 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
       w={"full"}
       borderRadius={12}
       cursor={"pointer"}
-      bg={"white"}
+      bg={"profile-bg"}
       _hover={{
-        bg: "gray.50",
+        bg: "hover-contrast-bg",
       }}
       p={{ base: 3, md: 4 }}>
       <VStack w={"full"} alignItems={"start"} spacing={2}>

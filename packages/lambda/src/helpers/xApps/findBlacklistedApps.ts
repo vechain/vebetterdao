@@ -25,7 +25,9 @@ export const findBlacklistedApps = async (thor: ThorClient, appIds: string[], co
   res.forEach((r, index) => {
     if (r.reverted) {
       throw new Error(
-        `Error in contract call to X2EarnApps::isBlacklisted at ${contractAddress}. Clause ${index + 1} for appId ${appIds[index]} reverted with reason ${r.vmError}`,
+        `Error in contract call to X2EarnApps::isBlacklisted at ${contractAddress}. Clause ${index + 1} for appId ${
+          appIds[index]
+        } reverted with reason ${r.vmError}`,
       )
     }
 
