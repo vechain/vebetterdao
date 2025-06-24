@@ -19,6 +19,7 @@ export const LoadingModalContent = ({
   const { t } = useTranslation()
   return (
     <VStack align={"center"} textAlign={"center"} p={0} m={0}>
+      {/* @ts-ignore eslint-disable-line */}
       <Lottie
         style={{
           pointerEvents: "none",

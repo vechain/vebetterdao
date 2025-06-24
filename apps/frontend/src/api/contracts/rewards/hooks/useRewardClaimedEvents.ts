@@ -4,7 +4,7 @@ import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { useQuery } from "@tanstack/react-query"
 import { ethers } from "ethers"
-import { ExtractEventParams } from "../../governance"
+import { decodeEventLog } from "../../governance"
 
 export type RewardClaimed = {
   cycle: number
@@ -66,47 +66,42 @@ export const getRewardClaimedEvents = async (
     },
   ]
 
-  const events = await getAllEventLogs({
-    nodeUrl: getConfig().nodeUrl,
-    thor,
-    filterCriteria,
-  })
+  const events = (
+    await getAllEventLogs({
+      nodeUrl: getConfig().nodeUrl,
+      thor,
+      filterCriteria,
+    })
+  ).map(event => decodeEventLog(event, abi))
 
   const decodedRewardClaimedEvents: RewardClaimed[] = []
 
-  events.forEach(event => {
-    if (!event.decodedData) {
-      throw new Error("Event data not decoded")
+  events.forEach(({ decodedData }) => {
+    if (decodedData.eventName !== "RewardClaimed" && decodedData.eventName !== "RewardClaimedV2")
+      throw new Error(`Unknown event: ${decodedData.eventName}`)
+
+    if (decodedData.eventName === "RewardClaimed") {
+      const { cycle, voter, reward } = decodedData.args
+      const rewardFormatted = Number(ethers.formatEther(reward))
+
+      decodedRewardClaimedEvents.push({
+        cycle: Number(cycle),
+        voter,
+        reward: rewardFormatted,
+      })
     }
 
-    switch (event.topics[0]) {
-      case rewardClaimedTopics[0]: {
-        const [cycle, voter, reward] = event.decodedData as unknown as ExtractEventParams<typeof abi, "RewardClaimed">
-        const rewardFormatted = Number(ethers.formatEther(reward))
+    if (decodedData.eventName === "RewardClaimedV2") {
+      const { cycle, voter, reward, gmReward } = decodedData.args
+      const rewardFormatted = Number(ethers.formatEther(reward))
+      const gmRewardFormatted = Number(ethers.formatEther(gmReward))
 
-        decodedRewardClaimedEvents.push({
-          cycle: Number(cycle),
-          voter,
-          reward: rewardFormatted,
-        })
-        break
-      }
-      case rewardClaimedV2Topics[0]: {
-        const [cycle, voter, reward, gmReward] = event.decodedData as unknown as ExtractEventParams<
-          typeof abi,
-          "RewardClaimedV2"
-        >
-        const rewardFormatted = Number(ethers.formatEther(reward))
-        const gmRewardFormatted = Number(ethers.formatEther(gmReward))
-
-        decodedRewardClaimedEvents.push({
-          cycle: Number(cycle),
-          voter,
-          reward: rewardFormatted,
-          gmReward: gmRewardFormatted,
-        })
-        break
-      }
+      decodedRewardClaimedEvents.push({
+        cycle: Number(cycle),
+        voter,
+        reward: rewardFormatted,
+        gmReward: gmRewardFormatted,
+      })
     }
   })
 

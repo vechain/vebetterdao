@@ -1,4 +1,4 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps } from "@/api"
 import {
   VStack,
   Button,
@@ -12,7 +12,6 @@ import {
   CardHeader,
   CardBody,
 } from "@chakra-ui/react"
-import { useXApps } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useCheckEndorsement } from "@/hooks/useCheckEndorsement"

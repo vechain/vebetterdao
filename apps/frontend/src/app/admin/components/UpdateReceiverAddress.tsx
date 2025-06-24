@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardBody,
 } from "@chakra-ui/react"
-import { useXApps } from "@vechain/vechain-kit"
+import { useXApps } from "@/api"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"

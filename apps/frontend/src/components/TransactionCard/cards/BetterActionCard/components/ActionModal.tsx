@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-literals */
-import { SustainabilityProof } from "@/api"
+import { SustainabilityProof, useXApps } from "@/api"
 import { VStack, HStack, Text, Card, CardBody, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
@@ -10,7 +10,6 @@ import { BaseModal } from "@/components/BaseModal"
 import { isEmpty } from "lodash"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
-import { useXApps } from "@vechain/vechain-kit"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -37,7 +36,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
       const url = new URL(proof?.proof?.link ?? "")
       const allowedHosts = ["twitter.com", "x.com"]
       return allowedHosts.includes(url.host)
-    } catch (e) {
+    } catch {
       return false
     }
   }, [proof?.proof?.link])

@@ -2,7 +2,7 @@ import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
 import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
-import { ExtractEventParams } from "./getProposalsEvents"
+import { decodeEventLog } from "./getEvents"
 
 export type ProposalVoteEvent = {
   account: string
@@ -51,27 +51,22 @@ export const getProposalsVoteEvents = async (thor: ThorClient, proposalId?: stri
     },
   ]
 
-  const events = await getAllEventLogs({
-    nodeUrl: getConfig().nodeUrl,
-    thor,
-    filterCriteria,
-  })
-
+  const events = (
+    await getAllEventLogs({
+      nodeUrl: getConfig().nodeUrl,
+      thor,
+      filterCriteria,
+    })
+  ).map(event => decodeEventLog(event, abi))
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
    */
   const decodedVoteProposalEvents: ProposalVoteEvent[] = []
 
-  //   TODO: runtime validation with zod ?
-  events.forEach(event => {
-    if (!event.decodedData) {
-      throw new Error("Event data not decoded")
-    }
+  events.forEach(({ decodedData, meta: blockMeta }) => {
+    if (decodedData.eventName !== "VoteCast") throw new Error(`Unknown event: ${decodedData.eventName}`)
 
-    const [account, proposalId, support, weight, power, reason] = event.decodedData as unknown as ExtractEventParams<
-      typeof abi,
-      "VoteCast"
-    >
+    const { voter: account, proposalId, support, weight, power, reason } = decodedData.args
 
     decodedVoteProposalEvents.push({
       account,
@@ -80,7 +75,7 @@ export const getProposalsVoteEvents = async (thor: ThorClient, proposalId?: stri
       weight: weight.toString(),
       power: power.toString(),
       reason,
-      blockMeta: event.meta,
+      blockMeta,
     })
   })
 

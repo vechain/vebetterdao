@@ -36,6 +36,7 @@ export const UnknownModalContent = ({
         animate={{
           scale: [1, 1.1, 1],
         }}>
+        {/* @ts-ignore eslint-disable-line */}
         <Lottie
           style={{ pointerEvents: "none" }}
           options={{

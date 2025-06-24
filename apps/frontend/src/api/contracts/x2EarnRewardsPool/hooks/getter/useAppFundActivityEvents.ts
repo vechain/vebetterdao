@@ -30,11 +30,11 @@ export const useAppFundActivityEvents = (appId: string) => {
     abi,
     eventName: "NewDeposit",
     filterParams,
-    mapResponse: ([amount, app], meta) => ({
-      appId: app,
-      amount: ethers.formatEther(amount),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "DEPOSIT",
     }),
   })
@@ -44,11 +44,11 @@ export const useAppFundActivityEvents = (appId: string) => {
     abi,
     eventName: "TeamWithdrawal",
     filterParams,
-    mapResponse: ([amount, app], meta) => ({
-      appId: app,
-      amount: ethers.formatEther(amount),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "WITHDRAW",
     }),
   })
@@ -58,11 +58,11 @@ export const useAppFundActivityEvents = (appId: string) => {
     abi,
     eventName: "RewardDistributed",
     filterParams,
-    mapResponse: ([amount, app], meta) => ({
-      appId: app,
-      amount: ethers.formatEther(amount),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "DISTRIBUTE_REWARDS",
     }),
   })
@@ -72,13 +72,13 @@ export const useAppFundActivityEvents = (appId: string) => {
     abi,
     eventName: "RewardsPoolBalanceUpdated",
     filterParams,
-    mapResponse: ([app, amount, availableFunds, rewardsPoolBalance], meta) => ({
-      appId: app,
-      amount: ethers.formatEther(amount),
-      availableFunds: ethers.formatEther(availableFunds),
-      rewardsPoolBalance: ethers.formatEther(rewardsPoolBalance),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
+      availableFunds: ethers.formatEther(decodedData.args.availableFunds),
+      rewardsPoolBalance: ethers.formatEther(decodedData.args.rewardsPoolBalance),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "REWARDS_POOL_UPDATED",
     }),
   })

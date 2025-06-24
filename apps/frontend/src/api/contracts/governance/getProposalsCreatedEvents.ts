@@ -2,7 +2,8 @@ import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
 import { FilterCriteria } from "@vechain/sdk-network"
-import { ExtractEventParams, ProposalCreatedEvent } from "./getProposalsEvents"
+import { ProposalCreatedEvent } from "./getProposalsEvents"
+import { decodeEventLog } from "./getEvents"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
@@ -39,33 +40,33 @@ export const getProposalsCreatedEvents = async (thor: ThorClient, proposer?: str
     },
   ]
 
-  const events = await getAllEventLogs({
-    nodeUrl: getConfig().nodeUrl,
-    thor,
-    filterCriteria,
-  })
+  const events = (
+    await getAllEventLogs({
+      nodeUrl: getConfig().nodeUrl,
+      thor,
+      filterCriteria,
+    })
+  ).map(event => decodeEventLog(event, abi))
 
   /**
    * Decode the events to get the data we are interested in (i.e the proposals)
    */
   const decodedCreateProposalEvents: ProposalCreatedEvent[] = []
 
-  events.forEach(event => {
-    if (!event.decodedData) {
-      throw new Error("Event data not decoded")
-    }
+  events.forEach(({ decodedData, meta: blockMeta }) => {
+    if (decodedData.eventName !== "ProposalCreated") throw new Error(`Unknown event: ${decodedData.eventName}`)
 
-    const [
+    const {
       proposalId,
       proposer,
       targets,
       values,
       signatures,
-      callDatas,
+      calldatas,
       description,
       roundIdVoteStart,
       depositThreshold,
-    ] = event.decodedData as unknown as ExtractEventParams<typeof abi, "ProposalCreated">
+    } = decodedData.args
 
     decodedCreateProposalEvents.push({
       proposalId: proposalId.toString(),
@@ -73,11 +74,11 @@ export const getProposalsCreatedEvents = async (thor: ThorClient, proposer?: str
       targets: [...targets],
       values: values.map(value => value.toString()),
       signatures: [...signatures],
-      callDatas: [...callDatas],
+      callDatas: [...calldatas],
       description,
       roundIdVoteStart: roundIdVoteStart.toString(),
       depositThreshold: depositThreshold.toString(),
-      blockMeta: event.meta,
+      blockMeta,
     })
   })
 

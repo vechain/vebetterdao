@@ -17,9 +17,9 @@ export const useSignalerAssignedToApp = (appId: string) => {
     abi,
     eventName: "SignalerAssignedToApp",
     filterParams,
-    mapResponse: ([signaler, app], meta) => ({
-      signaler,
-      appId: app,
+    mapResponse: ({ decodedData, meta }) => ({
+      signaler: decodedData.args.signaler,
+      appId: decodedData.args.app,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -30,9 +30,9 @@ export const useSignalerAssignedToApp = (appId: string) => {
     abi,
     eventName: "SignalerRemovedFromApp",
     filterParams,
-    mapResponse: ([signaler, app], meta) => ({
-      signaler,
-      appId: app,
+    mapResponse: ({ decodedData, meta }) => ({
+      signaler: decodedData.args.signaler,
+      appId: decodedData.args.app,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

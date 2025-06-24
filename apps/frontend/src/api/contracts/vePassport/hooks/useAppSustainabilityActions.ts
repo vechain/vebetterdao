@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react"
-import { useXApps, XApp } from "@vechain/vechain-kit"
+import { useXApps, XApp } from "@/api"
 import {
   getSustainabilityAppUsersByRound,
   SustainabilityAppUsersByRoundResponse,

@@ -1,4 +1,5 @@
 import { WalletAddressInput } from "@/app/components/Input"
+import { useXApps } from "@/api"
 import { useRegisterUserAction } from "@/hooks"
 import {
   Button,
@@ -20,7 +21,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { useXApps } from "@vechain/vechain-kit"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"

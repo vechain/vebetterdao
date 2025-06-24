@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@repo/contracts"
 import dayjs from "@/utils/dayjsConfig"
 import { ThorClient, executeMultipleClausesCall, getXApps as getXAppsKit } from "@vechain/vechain-kit"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 
 // Considering a new app is defined as 7 days
 const NEW_APP_PERIOD_SECONDS = dayjs.duration(7, "days").asSeconds()
@@ -69,9 +69,9 @@ export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Pro
         calls: allApps.map(
           app =>
             ({
-              abi: VeBetterPassport__factory.abi,
+              abi: X2EarnApps__factory.abi,
               functionName: "isBlacklisted",
-              address: getConfig().veBetterPassportContractAddress as `0x${string}`,
+              address: getConfig().x2EarnAppsContractAddress as `0x${string}`,
               args: [app.id as `0x${string}`],
             }) as const,
         ),

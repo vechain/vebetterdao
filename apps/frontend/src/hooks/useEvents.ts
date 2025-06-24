@@ -1,23 +1,30 @@
 import { useQuery } from "@tanstack/react-query"
 import { getAllEventLogs, useThor } from "@vechain/vechain-kit"
-import { FilterCriteria } from "@vechain/sdk-network"
+import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
 import { useCallback, useMemo } from "react"
-import { Abi, ExtractAbiEventNames } from "abitype"
+import { Abi } from "abitype"
 import { getConfig } from "@repo/config"
-import { ExtractEventParams } from "@/api"
+import { decodeEventLog } from "@/api"
+import { ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
 
-export type UseEventsParams<T extends Abi, K extends ExtractAbiEventNames<T>, R> = {
+export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, R> = {
   abi: T
   contractAddress: string
   eventName: K
   filterParams?: Record<string, unknown> | unknown[] | undefined
-  mapResponse: (decoded: ExtractEventParams<T, K>, meta: { blockNumber: number; txOrigin: string; txId: string }) => R
+  mapResponse: ({
+    meta,
+    decodedData,
+  }: {
+    meta: EventLogs["meta"]
+    decodedData: ReturnType<typeof viemDecodeEventLog<T, K>>
+  }) => R
 }
 
 /**
  * Custom hook for fetching contract events.
  */
-export const useEvents = <T extends Abi, K extends ExtractAbiEventNames<T>, R>({
+export const useEvents = <T extends Abi, K extends ContractEventName<T>, R>({
   abi,
   contractAddress,
   eventName,
@@ -47,16 +54,18 @@ export const useEvents = <T extends Abi, K extends ExtractAbiEventNames<T>, R>({
       },
     ]
 
-    const events = await getAllEventLogs({ thor, nodeUrl: getConfig().nodeUrl, filterCriteria })
+    const events = (await getAllEventLogs({ thor, nodeUrl: getConfig().nodeUrl, filterCriteria })).map(event =>
+      decodeEventLog(event, abi),
+    )
 
-    return events.map(event => {
-      const decoded = event.decodedData as ExtractEventParams<T, K>
-      return mapResponse(decoded, {
-        blockNumber: event.meta.blockNumber,
-        txOrigin: event.meta.txOrigin,
-        txId: event.meta.txID,
-      })
-    })
+    if (events.some(({ decodedData }) => decodedData.eventName !== eventName)) throw new Error(`Unknown event`)
+
+    return events.map(event =>
+      mapResponse({
+        meta: event.meta,
+        decodedData: event.decodedData as ReturnType<typeof viemDecodeEventLog<T, K>>,
+      }),
+    )
   }, [thor, contractAddress, abi, eventName, filterParams, mapResponse])
 
   const queryKey = useMemo(() => getEventsKey({ eventName, filterParams }), [eventName, filterParams])

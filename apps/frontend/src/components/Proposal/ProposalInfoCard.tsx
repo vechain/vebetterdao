@@ -22,12 +22,9 @@ import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
 import { ProposalStatusBadge } from "./ProposalStatusBadge"
 
-type Props = {
-  proposal: ProposalCreatedEvent
-}
+type Props = Pick<ProposalCreatedEvent, "proposalId" | "description" | "roundIdVoteStart">
 
-export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
-  const { proposalId, description, roundIdVoteStart } = proposal
+export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, roundIdVoteStart }) => {
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
 
   const router = useRouter()
@@ -121,7 +118,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
         </Stack>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
           <ProposalStatusBadge
-            proposalId={proposal.proposalId}
+            proposalId={proposalId}
             containerProps={{
               py: 1,
               px: 2,

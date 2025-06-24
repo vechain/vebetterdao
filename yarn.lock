@@ -7035,10 +7035,10 @@
     "@openzeppelin/contracts-upgradeable" "5.0.2"
     ethers "^6.9.0"
 
-"@vechain/vechain-kit@2.0.0-rc.2":
-  version "2.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.0.0-rc.2.tgz#eedd23957a95f89aa3be1f5d7717941066ae2fb9"
-  integrity sha512-WgLb1onXfTsBmUHDcHK7AVPAD5LYFkonqiAij7gtHwvJJMsDN/7krrxAVwG8bkc3BUwzinUyVLQSPsqEEAbOTg==
+"@vechain/vechain-kit@2.0.0-rc.3":
+  version "2.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.0.0-rc.3.tgz#7e9f2a1bc45b59e835bea8f94adf12c4f7e40e9d"
+  integrity sha512-YTyCliX9IwffDq2zcc+ZZ3mFB6CWbPs2K6JiOIOHwp3IgeC53+kk1FsBwBGx0f9/HyQMjW1aDaGTvkQVVN5iOw==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"

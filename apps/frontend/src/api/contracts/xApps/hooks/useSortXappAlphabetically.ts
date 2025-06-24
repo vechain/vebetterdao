@@ -9,7 +9,7 @@ export const useSortXappAlphabetically = (xAppsNotSorted: GetAllApps | undefined
   const [baseUri = ""] = data || []
 
   return useQuery({
-    queryKey: ["sortedXApps", xAppsNotSorted],
+    queryKey: ["sortedXApps", xAppsNotSorted?.allApps.map(app => app.id)],
     queryFn: () =>
       sortXAppsAlphabetically({
         apps: xAppsNotSorted,

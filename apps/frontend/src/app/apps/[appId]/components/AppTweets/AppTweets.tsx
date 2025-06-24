@@ -100,6 +100,7 @@ export const AppTweets = () => {
             content: (
               <ModalAnimation>
                 <VStack align={"center"} p={6}>
+                  {/* @ts-ignore eslint-disable-line */}
                   <Lottie
                     style={{
                       pointerEvents: "none",

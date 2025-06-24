@@ -2,7 +2,7 @@ import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 import { FilterCriteria } from "@vechain/sdk-network"
-import { ExtractEventParams } from "../governance"
+import { decodeEventLog } from "../governance"
 
 const abi = X2EarnApps__factory.abi
 
@@ -46,28 +46,26 @@ export const getGracePeriodEvent = async (thor: ThorClient, appId?: string): Pro
     },
   ]
 
-  const events = await getAllEventLogs({
-    nodeUrl: getConfig().nodeUrl,
-    thor,
-    filterCriteria,
-  })
+  const events = (
+    await getAllEventLogs({
+      nodeUrl: getConfig().nodeUrl,
+      thor,
+      filterCriteria,
+    })
+  ).map(event => decodeEventLog(event, abi))
 
-  return events.map(event => {
-    if (!event.decodedData) {
-      throw new Error("Event data not decoded")
-    }
+  return events.map(({ decodedData, meta }) => {
+    if (decodedData.eventName !== "AppUnendorsedGracePeriodStarted")
+      throw new Error(`Unknown event: ${decodedData.eventName}`)
 
-    const [appId, startBlock, endBlock] = event.decodedData as unknown as ExtractEventParams<
-      typeof abi,
-      "AppUnendorsedGracePeriodStarted"
-    >
+    const { appId, startBlock, endBlock } = decodedData.args
 
     return {
       appId: appId.toString(),
       startBlock: startBlock.toString(),
       endBlock: endBlock.toString(),
-      blockNumber: event.meta.blockNumber,
-      txOrigin: event.meta.txOrigin,
+      blockNumber: meta.blockNumber,
+      txOrigin: meta.txOrigin,
     }
   })
 }

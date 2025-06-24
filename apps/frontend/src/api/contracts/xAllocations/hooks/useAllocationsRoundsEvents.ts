@@ -21,12 +21,12 @@ export const useAllocationsRoundsEvents = () => {
     contractAddress,
     abi,
     eventName: "RoundCreated",
-    mapResponse: ([roundId, proposer, voteStart, voteEnd, appsIds], meta) => ({
-      roundId: roundId.toString(),
-      proposer,
-      voteStart: voteStart.toString(),
-      voteEnd: voteEnd.toString(),
-      appsIds: [...appsIds],
+    mapResponse: ({ decodedData, meta }) => ({
+      roundId: decodedData.args.roundId.toString(),
+      proposer: decodedData.args.proposer,
+      voteStart: decodedData.args.voteStart.toString(),
+      voteEnd: decodedData.args.voteEnd.toString(),
+      appsIds: [...decodedData.args.appsIds],
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

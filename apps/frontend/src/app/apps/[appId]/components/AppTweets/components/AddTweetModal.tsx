@@ -143,6 +143,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
           content: (
             <ModalAnimation>
               <VStack align={"center"} p={6}>
+                {/* @ts-ignore eslint-disable-line */}
                 <Lottie
                   style={{
                     pointerEvents: "none",

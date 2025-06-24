@@ -18,8 +18,8 @@ export const useUserSignalsReset = (walletAddress?: string) => {
     abi,
     eventName: "UserSignalsReset",
     filterParams,
-    mapResponse: ([user], meta) => ({
-      user,
+    mapResponse: ({ decodedData, meta }) => ({
+      user: decodedData.args.user,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

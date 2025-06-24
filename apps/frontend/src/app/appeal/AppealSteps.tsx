@@ -2,8 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useTranslation } from "react-i18next"
 
 import { AnalyticsUtils } from "@/utils"
-import { useWallet, useXApps } from "@vechain/vechain-kit"
-import { queryClient, useUserBotSignals, useUserSignalEvents } from "@/api"
+import { useWallet } from "@vechain/vechain-kit"
+import { queryClient, useUserBotSignals, useUserSignalEvents, useXApps } from "@/api"
 import {
   VStack,
   Heading,

@@ -1,4 +1,4 @@
-import { useAppsEligibleInNextRound } from "@/api"
+import { useAppsEligibleInNextRound, useXApps } from "@/api"
 import { useSetVotingEligibility } from "@/hooks"
 import {
   VStack,
@@ -13,7 +13,6 @@ import {
   HStack,
   Divider,
 } from "@chakra-ui/react"
-import { useXApps } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
 export const UpdateAppsEligibility = () => {

@@ -3,7 +3,7 @@ import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts/typechain-types"
-import { ExtractEventParams } from "../../governance"
+import { decodeEventLog } from "../../governance"
 
 const abi = XAllocationPool__factory.abi
 
@@ -40,20 +40,20 @@ export const getAllocationPoolEvents = async (thor: ThorClient) => {
     },
   ]
 
-  const events = await getAllEventLogs({
-    nodeUrl: getConfig().nodeUrl,
-    thor,
-    filterCriteria,
-  })
+  const events = (
+    await getAllEventLogs({
+      nodeUrl: getConfig().nodeUrl,
+      thor,
+      filterCriteria,
+    })
+  ).map(event => decodeEventLog(event, abi))
 
   const decodedAllocationRewardsClaimedEvents: AllocationRewardsClaimed[] = []
 
-  events.forEach(event => {
-    if (!event.decodedData) {
-      throw new Error("Event data not decoded")
-    }
+  events.forEach(({ decodedData }) => {
+    if (decodedData.eventName !== "AllocationRewardsClaimed") throw new Error(`Unknown event: ${decodedData.eventName}`)
 
-    const [
+    const {
       appId,
       roundId,
       totalAmount,
@@ -61,8 +61,8 @@ export const getAllocationPoolEvents = async (thor: ThorClient) => {
       caller,
       unallocatedAmount,
       teamAllocationAmount,
-      x2EarnRewardsPoolAmount,
-    ] = event.decodedData as unknown as ExtractEventParams<typeof abi, "AllocationRewardsClaimed">
+      rewardsAllocationAmount: x2EarnRewardsPoolAmount,
+    } = decodedData.args
 
     decodedAllocationRewardsClaimedEvents.push({
       appId: appId.toString(),

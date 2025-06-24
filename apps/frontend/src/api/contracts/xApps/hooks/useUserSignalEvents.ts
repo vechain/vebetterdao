@@ -23,10 +23,10 @@ export const useUserSignalEvents = (user: string) => {
     abi,
     eventName: "UserSignaled",
     filterParams,
-    mapResponse: ([user, _, app, reason], meta) => ({
-      user,
-      appId: app,
-      reason,
+    mapResponse: ({ decodedData, meta }) => ({
+      user: decodedData.args.user,
+      appId: decodedData.args.app,
+      reason: decodedData.args.reason,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -37,10 +37,10 @@ export const useUserSignalEvents = (user: string) => {
     abi,
     eventName: "UserSignalsResetForApp",
     filterParams,
-    mapResponse: ([user, app, reason], meta) => ({
-      user,
-      appId: app,
-      reason,
+    mapResponse: ({ decodedData, meta }) => ({
+      user: decodedData.args.user,
+      appId: decodedData.args.app,
+      reason: decodedData.args.reason,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

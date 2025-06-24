@@ -30,6 +30,7 @@ export const useProposalDeadline = (proposalId: string) => {
     args: [BigInt(proposalId)],
     queryOptions: {
       enabled: headBlock?.number > 0,
+      select: data => data[0].toString(),
     },
   })
 }

@@ -71,6 +71,7 @@ export const ProposalShareButton = () => {
               <ModalCloseButton top={4} right={4} />
               <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
+                  {/* @ts-ignore eslint-disable-line */}
                   <Lottie
                     style={{
                       pointerEvents: "none",
