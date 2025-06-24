@@ -1,6 +1,6 @@
 // Getter for obtaining appIds of a given round
 
-import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
@@ -29,7 +29,7 @@ export const useAppIdsOfRound = (roundId?: string) => {
     args: [BigInt(roundId || 0)],
     queryOptions: {
       enabled: !!roundId,
-      select: data => data[0] as string[],
+      select: data => data[0],
     },
   })
 }

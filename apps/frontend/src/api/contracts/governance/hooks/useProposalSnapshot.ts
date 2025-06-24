@@ -1,4 +1,4 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs, useThor } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 
@@ -20,16 +20,12 @@ export const getProposalSnapshotQueryKey = (proposalId: string) =>
  * @returns  the voteStart snapshot of the given proposal
  */
 export const useProposalSnapshot = (proposalId: string) => {
-  const thor = useThor()
-  const headBlock = thor.blocks.getHeadBlock() || { number: 0 }
-
   return useCallClause({
     abi,
     address,
     method,
     args: [BigInt(proposalId)],
     queryOptions: {
-      enabled: headBlock?.number > 0,
       select: data => data[0].toString(),
     },
   })

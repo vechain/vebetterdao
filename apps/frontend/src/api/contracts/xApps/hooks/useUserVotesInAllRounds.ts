@@ -11,7 +11,6 @@ import { getConfig } from "@repo/config"
 export const useUserVotesInAllRounds = (address?: string) => {
   const thor = useThor()
   const queryClient = useQueryClient()
-  const headNumber = thor.blocks.getHeadBlock()?.number
 
   return useQuery({
     queryKey: getUserVotesInRoundQueryKey("ALL", address),
@@ -27,6 +26,6 @@ export const useUserVotesInAllRounds = (address?: string) => {
       })
       return votesEvents
     },
-    enabled: !!thor && !!headNumber && !!address,
+    enabled: !!thor && !!address,
   })
 }

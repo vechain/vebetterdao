@@ -1,4 +1,4 @@
-import { getCallClauseQueryKeyWithArgs, useCallClause, useThor } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
@@ -40,9 +40,6 @@ export const getHashProposalQueryKey = (actions: ProposalAction[], descriptionHa
  * @returns The proposal id.
  */
 export const useHashProposal = (actions: ProposalAction[], descriptionHash: string) => {
-  const thor = useThor()
-  const headNumber = thor.blocks.getHeadBlock()?.number
-
   const targetsAndCalldata = transformActions(actions)
 
   return useCallClause({
@@ -56,7 +53,7 @@ export const useHashProposal = (actions: ProposalAction[], descriptionHash: stri
       descriptionHash as `0x${string}`,
     ],
     queryOptions: {
-      enabled: !!thor && !!headNumber && headNumber > 0 && descriptionHash !== "",
+      enabled: descriptionHash !== "",
       select: data => data[0].toString(),
     },
   })

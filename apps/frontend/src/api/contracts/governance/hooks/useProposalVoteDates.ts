@@ -18,7 +18,7 @@ export const useProposalVoteDates = (proposalId: string) => {
 
     const durationLeftTimestamp = endBlockFromNow * blockTime
     return dayjs().add(durationLeftTimestamp, "milliseconds").toDate().getTime()
-  }, [currentBlock, proposalSnapshot.data])
+  }, [currentBlock?.id, proposalSnapshot.data])
 
   const votingEndDate = useMemo(() => {
     if (!currentBlock || !proposalSnapshot.data) return 0
@@ -26,7 +26,7 @@ export const useProposalVoteDates = (proposalId: string) => {
 
     const durationLeftTimestamp = endBlockFromNow * blockTime
     return dayjs().add(durationLeftTimestamp, "milliseconds").toDate().getTime()
-  }, [currentBlock, proposalDeadline.data, proposalSnapshot.data])
+  }, [currentBlock?.id, proposalDeadline.data, proposalSnapshot.data])
 
   return {
     votingStartBlock: proposalSnapshot.data,
