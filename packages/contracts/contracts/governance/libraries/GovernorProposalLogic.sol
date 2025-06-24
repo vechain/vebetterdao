@@ -33,6 +33,7 @@ import { GovernorFunctionRestrictionsLogic } from "./GovernorFunctionRestriction
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
+import { GovernorMilestoneLogic } from "./GovernorMilestoneLogic.sol";  
 
 /// @title GovernorProposalLogic
 /// @notice Library for managing proposals in the Governor contract.
@@ -74,6 +75,16 @@ library GovernorProposalLogic {
    * @dev Emitted when a proposal is created with type information.
    */
   event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
+
+  /**
+   * @dev Emitted when a milestone is scheduled.
+   */
+  event MilestoneScheduled(
+    uint256 indexed proposalId,
+    uint256 indexed milestoneIndex,
+    bytes32 operationId,
+    uint256 scheduledFor
+  );
 
   /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
@@ -456,6 +467,11 @@ library GovernorProposalLogic {
     // mark as executed before calls to avoid reentrancy
     self.proposals[proposalId].executed = true;
 
+    // If this is a grant proposal, disable milestone editing
+    if (self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
+      GovernorMilestoneLogic.setMilestoneEditingPhase(self, proposalId, false);
+    }
+
     // before execute: register governance call in queue.
     if (GovernorGovernanceLogic.executor(self) != contractAddress) {
       for (uint256 i; i < targets.length; ++i) {
@@ -554,7 +570,7 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
-    GovernorTypes.ProposalType proposalTypeValue
+    GovernorTypes.ProposalType proposalTypeValue // was it ok to modify the params of an internal function ? Won't it mess up with the signature ?
   ) private returns (uint256) {
     uint256 depositThresholdAmount = GovernorDepositLogic._depositThresholdByProposalType(self, proposalTypeValue);
     uint32 votingPeriod = SafeCast.toUint32(self.xAllocationVoting.votingPeriod());
@@ -572,7 +588,24 @@ library GovernorProposalLogic {
       proposalTypeValue
     );
 
-    if (depositAmount > 0) {
+    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
+      // Milestones start as editable during community phase
+      GovernorMilestoneLogic.setMilestoneEditingPhase(self, proposalId, true);
+
+      GovernorMilestoneLogic._createMilestones(
+        self,
+        proposalId,
+        targets,
+        values,
+        calldatas,
+        description,
+        startRoundId,
+        depositAmount
+      );
+    }
+
+    // should user be able to deposit funds for a grant proposal ?
+    if (depositAmount > 0 && proposalTypeValue != GovernorTypes.ProposalType.Grant) {
       GovernorDepositLogic.depositFunds(self, depositAmount, proposer, proposalId);
     }
 
@@ -735,15 +768,64 @@ library GovernorProposalLogic {
     bytes[] memory calldatas,
     bytes32 descriptionHash
   ) private {
-    // execute
-    self.timelock.executeBatch{ value: msg.value }(
-      targets,
-      values,
-      calldatas,
-      0,
-      GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
-    );
-    // cleanup for refund
+    GovernorTypes.ProposalType typeOfProposal = self.proposalType[proposalId];
+
+    if (typeOfProposal == GovernorTypes.ProposalType.Grant) {
+      GovernorTypes.Milestones storage milestones = self.proposalMilestones[proposalId];
+      require(milestones.milestone.length > 0, "No milestones found");
+
+      // Execute the first milestone for upfront payment
+      milestones.milestone[0].status = GovernorTypes.MilestoneState.Validated;
+
+      // Queue subsequent milestones with their original targets/values/calldatas
+      for (uint256 i = 1; i < milestones.milestone.length; i++) {
+        GovernorTypes.Milestone storage currentMilestone = milestones.milestone[i];
+
+        // Generate operation ID first
+        bytes32 operationId = self.timelock.hashOperationBatch(
+          targets,
+          values,
+          calldatas,
+          0,
+          keccak256(abi.encode(proposalId, i, currentMilestone.deadline))
+        );
+
+        // Schedule the batch with the same parameters
+        self.timelock.scheduleBatch(
+          targets, 
+          values, 
+          calldatas, 
+          0, 
+          keccak256(abi.encode(proposalId, i, currentMilestone.deadline)),
+          currentMilestone.deadline - block.timestamp
+        );
+
+        // Store the operation ID
+        self.timelockIds[proposalId] = operationId;
+
+        emit MilestoneScheduled(proposalId, i, operationId, currentMilestone.deadline);
+      }
+
+      // Execute first milestone with original parameters
+      self.timelock.executeBatch(
+        targets,
+        values,
+        calldatas,
+        0,
+        GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
+      );
+    } else {
+      // Standard proposal execution
+      self.timelock.executeBatch{ value: msg.value }(
+        targets,
+        values,
+        calldatas,
+        0,
+        GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
+      );
+    }
+
+    // Cleanup
     delete self.timelockIds[proposalId];
   }
 
@@ -784,6 +866,12 @@ library GovernorProposalLogic {
    */
   function _cancel(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) private returns (uint256) {
     self.proposals[proposalId].canceled = true;
+
+    // If this is a grant proposal, disable milestone editing
+    if (self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
+      GovernorMilestoneLogic.setMilestoneEditingPhase(self, proposalId, false);
+    }
+
     emit ProposalCanceled(proposalId);
 
     return proposalId;

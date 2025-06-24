@@ -585,4 +585,22 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 depositAmount,
     GovernorTypes.ProposalType proposalType
   ) external returns (uint256 proposalId);
+
+  /**
+   * @notice Returns the milestones for a proposal.
+   * @param proposalId The id of the proposal
+   * @return GovernorTypes.Milestone[] The milestones for the proposal
+   */
+  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestone[] memory);
+
+  /**
+   * @notice Returns a milestone for a proposal.
+   * @param proposalId The id of the proposal
+   * @param milestoneIndex The index of the milestone
+   * @return GovernorTypes.Milestone The milestone
+   */
+  function getMilestone(
+    uint256 proposalId,
+    uint256 milestoneIndex
+  ) external view returns (GovernorTypes.Milestone memory);
 }

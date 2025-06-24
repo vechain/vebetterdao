@@ -38,6 +38,10 @@ library GovernorStateLogic {
   bytes32 internal constant ALL_PROPOSAL_STATES_BITMAP =
     bytes32((2 ** (uint8(type(GovernorTypes.ProposalState).max) + 1)) - 1);
 
+  /// @notice Bitmap representing all possible milestone states.
+  bytes32 internal constant ALL_MILESTONE_STATES_BITMAP =
+    bytes32((2 ** (uint8(type(GovernorTypes.MilestoneState).max) + 1)) - 1);
+
   /// @dev Thrown when the `proposalId` does not exist.
   /// @param proposalId The ID of the proposal that does not exist.
   error GovernorNonexistentProposal(uint256 proposalId);
@@ -98,12 +102,12 @@ library GovernorStateLogic {
   }
   /**
    * @dev Encodes a `MilestoneState` into a `bytes32` representation where each bit enabled corresponds to the underlying position in the `MilestoneState` enum.
-   * @param state The state to encode.
+   * @param milestoneState The state to encode.
    * @return The encoded state bitmap.
    */
-  function encodeStateBitmap(GovernorTypes.MilestoneState state) internal pure returns (bytes32) {
-    return bytes32(1 << uint8(state));
-}
+  function encodeStateBitmap(GovernorTypes.MilestoneState milestoneState) internal pure returns (bytes32) {
+    return bytes32(1 << uint8(milestoneState));
+  }
 
   /**
    * @notice Retrieves the current state of a proposal.
