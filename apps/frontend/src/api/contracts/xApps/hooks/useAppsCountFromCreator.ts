@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
-import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi

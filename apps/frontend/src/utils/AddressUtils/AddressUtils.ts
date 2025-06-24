@@ -18,7 +18,7 @@ export const compareAddresses = (address1: unknown, address2: unknown): boolean 
     address1 = HexUtils.addPrefix(address1)
     address2 = HexUtils.addPrefix(address2)
     return address.toChecksumed(address1 as string) === address.toChecksumed(address2 as string)
-  } catch (e) {
+  } catch {
     return false
   }
 }
@@ -31,7 +31,7 @@ export const isValid = (addr: string): boolean => {
   try {
     address.toChecksumed(HexUtils.addPrefix(addr))
     return true
-  } catch (e) {
+  } catch {
     return false
   }
 }

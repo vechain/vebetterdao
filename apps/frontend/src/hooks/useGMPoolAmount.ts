@@ -1,5 +1,5 @@
 import { ethers } from "ethers"
-import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"

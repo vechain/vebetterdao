@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { ethers } from "ethers"
-import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = GalaxyMember__factory.abi
 const address = getConfig().galaxyMemberContractAddress as `0x${string}`

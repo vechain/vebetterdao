@@ -1,5 +1,5 @@
 import { FormattingUtils } from "@repo/utils"
-import { getCallClauseQueryKey, getCallClauseQueryKeyWithArgs, TokenBalance, useCallClause } from "@vechain/vechain-kit"
+import { getCallClauseQueryKeyWithArgs, TokenBalance, useCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VOT3__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"

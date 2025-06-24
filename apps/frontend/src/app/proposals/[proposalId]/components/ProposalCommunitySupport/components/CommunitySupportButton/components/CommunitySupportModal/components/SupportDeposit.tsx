@@ -24,7 +24,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
 
     try {
       return `${ethers.parseEther(amount)}`
-    } catch (e) {
+    } catch {
       return "0"
     }
   }, [amount])

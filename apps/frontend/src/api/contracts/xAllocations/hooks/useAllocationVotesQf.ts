@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVotingGovernor__factory } from "@repo/contracts"
-import { useCallClause, getCallClauseQueryKey, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVotingGovernor__factory.abi
