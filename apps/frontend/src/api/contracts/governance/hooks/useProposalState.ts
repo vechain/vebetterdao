@@ -38,7 +38,7 @@ export const useProposalState = (proposalId: string) => {
     args: [BigInt(proposalId)],
     queryOptions: {
       enabled: !!proposalId,
-      select: data => Number(data[0]) as ProposalState,
+      select: data => data[0],
     },
   })
 }
