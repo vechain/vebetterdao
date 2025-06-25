@@ -20,8 +20,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { CountdownVoting } from "@/app/components/Countdown"
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
-import { useDomainOrAddress } from "@/hooks"
-import { useGetB3trBalance, useGetVot3Balance } from "@vechain/vechain-kit"
+import { useDomainOrAddress, useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {

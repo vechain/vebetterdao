@@ -22,10 +22,11 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
+import { useGetB3trBalance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
 

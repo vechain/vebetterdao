@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
 import { ethers } from "ethers"
-import { useGetB3trBalance, useGetVot3Balance } from "@vechain/vechain-kit"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 /**
  * return the total balance of Vot3 + B3tr

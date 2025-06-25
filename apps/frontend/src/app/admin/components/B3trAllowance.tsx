@@ -1,5 +1,5 @@
 import { useB3trAllowance } from "@/api"
-import { useB3trApprove } from "@/hooks"
+import { useB3trApprove, useGetB3trBalance } from "@/hooks"
 import {
   VStack,
   HStack,
@@ -22,7 +22,7 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-import { useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"

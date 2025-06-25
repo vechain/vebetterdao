@@ -1,6 +1,7 @@
 import { HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useGetB3trBalance, useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(1)
 

@@ -1,10 +1,11 @@
 import { Button, HStack, Input, Stack, Text, VStack, Image } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
-import { TokenBalance, useGetB3trBalance, useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { TokenBalance, useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon } from "@/components/Icons"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 type Props = {
   amount: string

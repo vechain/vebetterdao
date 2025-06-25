@@ -1,12 +1,13 @@
 import { filterAmountInput } from "@/utils"
 import { Box, Button, Divider, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { ethers } from "ethers"
 import { BigNumber } from "bignumber.js"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
+import { useGetVot3Balance } from "@/hooks"
 
 export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => void }) => {
   const { t } = useTranslation()

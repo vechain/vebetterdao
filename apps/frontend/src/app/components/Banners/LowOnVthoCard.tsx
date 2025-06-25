@@ -1,17 +1,12 @@
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
-import {
-  getAccountBalanceQueryKey,
-  useAccountBalance,
-  useGetB3trBalance,
-  useGetVot3Balance,
-  useWallet,
-} from "@vechain/vechain-kit"
+import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { useQueryClient } from "@tanstack/react-query"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""

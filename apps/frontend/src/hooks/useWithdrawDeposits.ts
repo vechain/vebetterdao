@@ -6,8 +6,9 @@ import {
 } from "@/api"
 
 import { useCallback, useMemo } from "react"
-import { useWallet, getVot3BalanceQueryKey } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
 /**
  * Type definition for properties accepted by the `useWithdrawDeposits` hook.

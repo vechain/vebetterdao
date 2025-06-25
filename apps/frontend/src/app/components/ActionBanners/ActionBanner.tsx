@@ -15,7 +15,7 @@ import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSu
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useAccountBalance, useGetB3trBalance, useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -40,7 +40,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useIsVeDelegated } from "@/hooks"
+import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5

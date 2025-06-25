@@ -1,9 +1,10 @@
 import { buildClaimXAppAllocationTx } from "@/api"
-import { useWallet, getB3trBalanceQueryKey } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useCallback, useMemo } from "react"
 import { getHasXAppClaimedQueryKey } from "@/api/contracts/xAllocationPool/hooks"
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 type useClaimAllocationsProps = {
   roundId: string

@@ -6,8 +6,9 @@ import { getConfig } from "@repo/config"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useHasRoles } from "@/api/contracts/account"
-import { useWallet, useAccountBalance, useGetB3trBalance, useGetVot3Balance } from "@vechain/vechain-kit"
+import { useWallet, useAccountBalance } from "@vechain/vechain-kit"
 import { getContractByAddress } from "@/constants"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)

@@ -1,11 +1,17 @@
 "use-client"
 import { useSteps } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
-import { useConvertB3tr, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
+import {
+  useConvertB3tr,
+  useConvertVot3,
+  useGetB3trBalance,
+  useGetVot3Balance,
+  useSmartAccountUpgradeRequired,
+} from "@/hooks"
 import { useForm } from "react-hook-form"
 import { TokenSelectionContent, SwapTokenContent, ReviewSwapContent } from "./contents"
 import { useB3trConverted } from "@/api"
-import { useGetB3trBalance, useGetVot3Balance, useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
+import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal, type Step } from "../../../StepModal"

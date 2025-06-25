@@ -1,8 +1,9 @@
 import { Button, useDisclosure, Text } from "@chakra-ui/react"
-import { useGetB3trBalance, useGetVot3Balance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { FaRepeat } from "react-icons/fa6"
 import { ConvertModal } from "./Modal"
 import { useTranslation } from "react-i18next"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 type Props = { isIconButton?: boolean }
 

@@ -2,10 +2,13 @@ import { buildConvertB3trTx, buildB3trApprovesTx, getB3TrTokenDetailsQueryKey, b
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
-import { getVot3BalanceQueryKey, getB3trBalanceQueryKey, useWallet, useThor } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useVot3RequireSelfDelegation } from "./vechainKitHooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+
 const config = getConfig()
 
 // const buffer = 1.01

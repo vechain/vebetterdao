@@ -8,7 +8,7 @@ import { motion } from "framer-motion"
 import { BaseTooltip } from "../../components/BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
-import { useGetB3trBalance } from "@vechain/vechain-kit"
+import { useGetB3trBalance } from "@/hooks"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()

@@ -9,7 +9,8 @@ import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
 
 import { B3TR__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
-import { useWallet, getB3trBalanceQueryKey } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 const B3trInterface = B3TR__factory.createInterface()

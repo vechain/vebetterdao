@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from "react"
-import { useWallet, getB3trBalanceQueryKey } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { RoundReward, buildClaimRewardsTx, getVotingRewardsQueryKey, useCurrentAllocationsRoundId } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 type useClaimRewardsProps = {
   roundRewards: RoundReward[]

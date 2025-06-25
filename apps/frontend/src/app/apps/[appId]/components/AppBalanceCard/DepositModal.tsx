@@ -13,7 +13,7 @@ import {
   Icon,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useDepositToAppBalance } from "@/hooks"
+import { useDepositToAppBalance, useGetB3trBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { CustomModalContent, B3TRIcon } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
@@ -21,7 +21,7 @@ import { motion } from "framer-motion"
 import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { useGetB3trBalance, useWallet, useXApp } from "@vechain/vechain-kit"
+import { useWallet, useXApp } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {

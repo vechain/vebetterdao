@@ -5,10 +5,11 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useSelectedGmNft, useParticipatedInGovernance, useXNode } from "@/api"
 import { useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
-import { useGetB3trBalance, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
+import { useGetB3trBalance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
 
