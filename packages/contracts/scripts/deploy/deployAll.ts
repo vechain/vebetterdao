@@ -12,10 +12,13 @@ import {
   Treasury,
   X2EarnRewardsPool,
   X2EarnApps,
-  NodeManagement,
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
+  TokenAuction,
+  StargateNFT,
+  StargateDelegation,
+  NodeManagement,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -42,10 +45,43 @@ import {
   validateContractRole,
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
+import { deployStargateNFTLibraries } from "./deploys/deployStargateNftLibraries"
+import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { AddressUtils } from "@repo/utils"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
+
+export const deployStargateProxyWithoutInitialization = async (
+  contractName: string,
+  libraries: { [libraryName: string]: string } = {},
+  logOutput: boolean = false,
+): Promise<string> => {
+  // Deploy the implementation contract
+  const Contract = await ethers.getContractFactory(contractName, {
+    libraries: libraries,
+  })
+  const implementation = await Contract.deploy()
+  await implementation.waitForDeployment()
+  logOutput && console.log(`${contractName} impl.: ${await implementation.getAddress()}`)
+
+  // Deploy the proxy contract without initialization
+  const proxyFactory = await ethers.getContractFactory("StargateProxy")
+  const proxy = await proxyFactory.deploy(await implementation.getAddress(), "0x")
+  await proxy.waitForDeployment()
+  logOutput && console.log(`${contractName} proxy: ${await proxy.getAddress()}`)
+
+  const newImplementationAddress = await getImplementationAddress(ethers.provider, await proxy.getAddress())
+  if (!AddressUtils.compareAddresses(newImplementationAddress, await implementation.getAddress())) {
+    throw new Error(
+      `The implementation address is not the one expected: ${newImplementationAddress} !== ${await implementation.getAddress()}`,
+    )
+  }
+
+  // Return the proxy address
+  return await proxy.getAddress()
+}
 
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
@@ -258,24 +294,128 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
+  let stargateNftAddress = "0x0000000000000000000000000000000000000000"
+  let stargateDelegateAddress = "0x0000000000000000000000000000000000000000"
+  let nodeManagementAddress = "0x0000000000000000000000000000000000000000"
 
-  let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
+  let vechainNodesMock = (await ethers.getContractAt(
+    "TokenAuction",
+    config.VECHAIN_NODES_CONTRACT_ADDRESS,
+  )) as TokenAuction
+  let stargateNftMock = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
+  let stargateDelegateMock = (await ethers.getContractAt(
+    "StargateDelegate",
+    config.STARGATE_DELEGATE_CONTRACT_ADDRESS,
+  )) as StargateDelegation
+  let nodeManagementMock = (await ethers.getContractAt(
+    "NodeManagement",
+    config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
+  )) as NodeManagement
+
   if (network.name !== "vechain_mainnet") {
     console.log("Deploying Vechain Nodes mock contracts")
 
     const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
     vechainNodesMock = await TokenAuctionLock.deploy()
     await vechainNodesMock.waitForDeployment()
+    vechainNodesAddress = await vechainNodesMock.getAddress()
 
     const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-    const clockAuctionContract = await ClockAuctionLock.deploy(await vechainNodesMock.getAddress(), TEMP_ADMIN)
+    const clockAuctionContract = await ClockAuctionLock.deploy(vechainNodesAddress, TEMP_ADMIN)
 
     await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
 
     await vechainNodesMock.addOperator(TEMP_ADMIN)
-    vechainNodesAddress = await vechainNodesMock.getAddress()
 
-    console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
+    console.log("Vechain Nodes Mock deployed at: ", vechainNodesAddress)
+
+    console.log("Deploying Stargate mock contracts")
+
+    console.log("Deploying the StargateNFT libraries...")
+    const {
+      StargateNFTClockLib,
+      StargateNFTSettingsLib,
+      StargateNFTTokenLib,
+      StargateNFTMintingLib,
+      StargateNFTVetGeneratedVthoLib,
+      StargateNFTLevelsLib,
+    } = await deployStargateNFTLibraries({ logOutput: true })
+
+    console.log("Deploying StargateNFT...")
+    stargateNftAddress = await deployStargateProxyWithoutInitialization(
+      "StargateNFT",
+      {
+        Clock: await StargateNFTClockLib.getAddress(),
+        MintingLogic: await StargateNFTMintingLib.getAddress(),
+        Settings: await StargateNFTSettingsLib.getAddress(),
+        Token: await StargateNFTTokenLib.getAddress(),
+        VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
+        Levels: await StargateNFTLevelsLib.getAddress(),
+      },
+      true,
+    )
+
+    console.log(`Deploying StargateDelegation...`)
+    stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, true)
+
+    stargateNftMock = await initializeProxy(
+      stargateNftAddress,
+      "StargateNFT",
+      [
+        {
+          tokenCollectionName: "VeChain Node Token",
+          tokenCollectionSymbol: "VNT",
+          baseTokenURI: "ipfs://mock/",
+          admin: deployer.address,
+          upgrader: deployer.address,
+          pauser: deployer.address,
+          levelOperator: deployer.address,
+          legacyNodes: vechainNodesAddress, // from TokenAuction mock
+          stargateDelegation: stargateDelegateAddress,
+          legacyLastTokenId: 0, // TODO: review
+          levelsAndSupplies: [], // TODO: review
+          vthoToken: "0x0000000000000000000000000000000000000000", // TODO: review
+        },
+      ],
+      {
+        Clock: await StargateNFTClockLib.getAddress(),
+        MintingLogic: await StargateNFTMintingLib.getAddress(),
+        Settings: await StargateNFTSettingsLib.getAddress(),
+        Token: await StargateNFTTokenLib.getAddress(),
+        VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
+        Levels: await StargateNFTLevelsLib.getAddress(),
+      },
+    )
+    console.log("StargateNFT initialized")
+
+    stargateDelegateMock = await initializeProxy(
+      stargateDelegateAddress,
+      "StargateDelegation",
+      [
+        {
+          upgrader: deployer.address,
+          admin: deployer.address,
+          stargateNFT: stargateNftAddress,
+          vthoToken: "0x0000000000000000000000000000000000000000", // TODO: review
+          vthoRewardPerBlock: [], // TODO: review
+          delegationPeriod: 0, // TODO: review
+          operator: deployer.address,
+        },
+      ],
+      {},
+    )
+    console.log("StargateDelegation initialized")
+
+    nodeManagementMock = await deployAndUpgrade(
+      ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
+      [[vechainNodesAddress, deployer.address, deployer.address], [], [stargateNftAddress]],
+      {
+        versions: [undefined, 2, 3],
+        logOutput: true,
+      },
+    )
+
+    nodeManagementAddress = await nodeManagementMock.getAddress()
   }
 
   // ---------------------- Deploy Contracts ----------------------
@@ -334,15 +474,15 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Treasury
 
-  // Deploy NodeManagement
-  const nodeManagement = (await deployAndUpgrade(
-    ["NodeManagementV1", "NodeManagement"],
-    [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []],
-    {
-      versions: [undefined, 2],
-      logOutput: true,
-    },
-  )) as NodeManagement
+  // Deploy NodeManagement - deprecating...
+  // const nodeManagement = (await deployAndUpgrade(
+  //   ["NodeManagementV1", "NodeManagement"],
+  //   [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []],
+  //   {
+  //     versions: [undefined, 2],
+  //     logOutput: true,
+  //   },
+  // )) as NodeManagement
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
@@ -370,7 +510,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [
         config.XAPP_GRACE_PERIOD,
-        await nodeManagement.getAddress(),
+        nodeManagementAddress,
         veBetterPassportContractAddress,
         await x2EarnCreator.getAddress(),
       ],
@@ -489,12 +629,7 @@ export async function deployAll(config: ContractsConfig) {
           treasury: await treasury.getAddress(),
         },
       ],
-      [
-        await vechainNodesMock.getAddress(),
-        await nodeManagement.getAddress(),
-        TEMP_ADMIN,
-        config.GM_NFT_NODE_TO_FREE_LEVEL,
-      ],
+      [vechainNodesAddress, nodeManagementAddress, TEMP_ADMIN, config.GM_NFT_NODE_TO_FREE_LEVEL],
       [],
       [],
     ],
@@ -827,7 +962,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
-    vechainNodesManagement: await nodeManagement.getAddress(),
+    vechainNodesManagement: nodeManagementAddress,
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
   }
@@ -1060,7 +1195,7 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
-    await transferUpgraderRole(nodeManagement, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    // await transferUpgraderRole(nodeManagement, deployer, config.CONTRACTS_ADMIN_ADDRESS) - deprecating...
     await transferUpgraderRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(galaxyMember, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -1078,19 +1213,19 @@ export async function deployAll(config: ContractsConfig) {
       await veBetterPassport.SETTINGS_MANAGER_ROLE(),
     )
 
-    // NodeManagement
-    await validateContractRole(
-      nodeManagement,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await nodeManagement.UPGRADER_ROLE(),
-    )
-    await validateContractRole(
-      nodeManagement,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await nodeManagement.DEFAULT_ADMIN_ROLE(),
-    )
+    // NodeManagement - deprecating...
+    // await validateContractRole(
+    //   nodeManagement,
+    //   config.CONTRACTS_ADMIN_ADDRESS,
+    //   TEMP_ADMIN,
+    //   await nodeManagement.UPGRADER_ROLE(),
+    // )
+    // await validateContractRole(
+    //   nodeManagement,
+    //   config.CONTRACTS_ADMIN_ADDRESS,
+    //   TEMP_ADMIN,
+    //   await nodeManagement.DEFAULT_ADMIN_ROLE(),
+    // )
 
     // X2EarnApps
     await validateContractRole(x2EarnApps, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await x2EarnApps.UPGRADER_ROLE())
@@ -1386,7 +1521,7 @@ export async function deployAll(config: ContractsConfig) {
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
     vechainNodesMock: vechainNodesAddress,
-    vechainNodeManagement: nodeManagement,
+    vechainNodeManagement: nodeManagementAddress,
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
     libraries: {
