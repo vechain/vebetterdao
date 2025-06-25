@@ -42,15 +42,8 @@ export const useBuildTransaction = <ClausesParams = void>({
    * It cancels and refetches the specified queries if `invalidateCache` is `true`.
    */
   const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      refetchQueryKeys?.forEach(async queryKey => {
-        await queryClient.cancelQueries({
-          queryKey,
-        })
-        await queryClient.refetchQueries({
-          queryKey,
-        })
-      })
+    if (invalidateCache && refetchQueryKeys?.length) {
+      await Promise.all(refetchQueryKeys?.map(queryKey => queryClient.invalidateQueries({ queryKey })))
     }
 
     onSuccess?.()

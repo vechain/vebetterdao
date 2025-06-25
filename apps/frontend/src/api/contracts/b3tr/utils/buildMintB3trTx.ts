@@ -20,7 +20,7 @@ export const buildMintB3trTx = (thor: ThorClient, address: string, amount: strin
   const formattedAddress = FormattingUtils.humanAddress(address)
   const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
 
-  const { clause } = thor.contracts.load(contractAddress, abi).clause.mint([address, amountWithDecimals])
+  const { clause } = thor.contracts.load(contractAddress, abi).clause.mint(address, amountWithDecimals)
 
   return {
     ...clause,

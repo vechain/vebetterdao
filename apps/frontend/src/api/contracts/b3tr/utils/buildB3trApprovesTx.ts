@@ -23,7 +23,7 @@ export const buildB3trApprovesTx = (thor: ThorClient, amount: string | number, s
   const formattedAddress = FormattingUtils.humanAddress(spender)
   const amountWithDecimals = ethers.parseEther(amount.toString()).toString()
 
-  const { clause } = thor.contracts.load(address, abi).clause.approve([spender, amountWithDecimals])
+  const { clause } = thor.contracts.load(address, abi).clause.approve(spender, amountWithDecimals)
 
   return {
     ...clause,

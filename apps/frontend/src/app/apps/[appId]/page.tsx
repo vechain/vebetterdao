@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 
   const thor = await getNodeJsThorClient()
   const contract = thor.contracts.load(address, abi)
-  const clauses = [contract.clause.unendorsedApps(), contract.clause.apps()]
+  const clauses = [contract.clause.apps(), contract.clause.unendorsedApps()]
 
   const res = await thor.transactions.executeMultipleClausesCall(clauses)
 
