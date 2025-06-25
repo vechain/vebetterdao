@@ -301,15 +301,15 @@ contract StargateDelegation is
             );
         }
 
+        // Update start block for rewards accumulation
+        $.rewardsAccumulationStartBlock[_tokenId] = clock();
+
         // Send the rewards to the owner of the NFT
         address recipient = $.stargateNFT.ownerOf(_tokenId);
         bool transferSuccess = $.vthoToken.transfer(recipient, amountToClaim);
         if (!transferSuccess) {
             revert VthoTransferFailed(recipient, amountToClaim);
         }
-
-        // Update start block for rewards accumulation
-        $.rewardsAccumulationStartBlock[_tokenId] = clock();
 
         emit DelegationRewardsClaimed(_tokenId, amountToClaim, msg.sender, recipient);
     }

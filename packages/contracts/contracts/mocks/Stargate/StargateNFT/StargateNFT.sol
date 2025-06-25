@@ -740,11 +740,16 @@ contract StargateNFT is
             revert Errors.TokenLocked();
         }
 
-        // If the token has rewards to claim, claim them
-        // (done to avoid loss of rewards when trading or burning the NFT)
+        // Claim pending rewards to avoid loss of rewards when trading or burning the NFT
+        // Base VTHO rewards
         DataTypes.StargateNFTStorage storage $ = _getStargateNFTStorage();
         if (VetGeneratedVtho.claimableRewards($, _tokenId) > 0) {
             VetGeneratedVtho.claimRewards($, _tokenId);
+        }
+
+        // Stargate Delegation rewards
+        if ($.stargateDelegation.claimableRewards(_tokenId) > 0) {
+            $.stargateDelegation.claimRewards(_tokenId);
         }
 
         return super._update(_to, _tokenId, _auth);
