@@ -209,7 +209,7 @@ export const RoundInfoBottomSheet = () => {
             {!!sortedProposals.length ? (
               <VStack spacing={4} w="full">
                 {sortedProposals.map(proposal => (
-                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
+                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
                 ))}
               </VStack>
             ) : (

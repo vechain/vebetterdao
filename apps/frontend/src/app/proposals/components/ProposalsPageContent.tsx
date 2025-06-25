@@ -95,6 +95,7 @@ export const ProposalsPageContent = () => {
               proposalId={proposal.proposalId}
               description={proposal.description}
               roundIdVoteStart={proposal.roundIdVoteStart}
+              proposalState={proposal.state}
             />
           ))}
           {sortedProposals.length === 0 && !isLoading && (

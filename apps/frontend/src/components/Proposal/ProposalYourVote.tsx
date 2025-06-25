@@ -2,7 +2,6 @@ import {
   ProposalState,
   useGetVotesOnBlock,
   useProposalSnapshot,
-  useProposalState,
   useUserSingleProposalVoteEvent,
   useVotingThreshold,
 } from "@/api"
@@ -45,13 +44,13 @@ type Props = {
   proposalId: string
   renderTitle?: boolean
   textProps?: TextProps
+  proposalState?: ProposalState
 }
-export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {} }: Props) => {
+export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {}, proposalState }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
   const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
-  const { data: proposalState } = useProposalState(proposalId)
 
   const isFinished = useMemo(() => {
     return [ProposalState.Defeated, ProposalState.Executed, ProposalState.Queued, ProposalState.Succeeded].includes(
