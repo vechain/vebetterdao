@@ -18,6 +18,7 @@ import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {IStargateNFT} from "../interfaces/IStargateNFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @title StargateDelegation
 /// @notice This contract allows a user that owns a StargateNFT to start delegating, accumulate VTHO rewards during the delegation period and exit delegation.
@@ -43,6 +44,8 @@ contract StargateDelegation is
     UUPSUpgradeable,
     IStargateDelegation
 {
+    using SafeERC20 for IERC20;
+
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
@@ -256,21 +259,22 @@ contract StargateDelegation is
             revert NFTNotDelegated(_tokenId);
         }
 
-        // If the user already requested to exit delegation, we revert
+        // If we've reached the accumulation end block (end of Stargate Simulation period), allow immediate exit
+        // even if the user already requested to exit delegation before
+        uint256 currentBlock = clock();
+        if ($.rewardsAccumulationEndBlock != 0 && currentBlock >= $.rewardsAccumulationEndBlock) {
+            $.delegationEndBlock[_tokenId] = currentBlock;
+            emit DelegationExitRequested(_tokenId, currentBlock);
+            return;
+        }
+
+        // If the user already requested to exit delegation, we revert, avoiding redundant calls
         if ($.delegationEndBlock[_tokenId] != type(uint256).max) {
             revert DelegationExitAlreadyRequested();
         }
 
-        // If we've reached the accumulation end block, allow immediate exit
-        uint256 currentBlock = clock();
-        if ($.rewardsAccumulationEndBlock != 0 && currentBlock >= $.rewardsAccumulationEndBlock) {
-            // Allow immediate exit since rewards accumulation has ended
-            $.delegationEndBlock[_tokenId] = currentBlock;
-        } else {
-            // Set the delegationEndBlock to the block after the end of the current delegationPeriod
-            $.delegationEndBlock[_tokenId] = currentDelegationPeriodEndBlock(_tokenId) + 1;
-        }
-
+        // Set the delegationEndBlock to the block after the end of the current delegationPeriod
+        $.delegationEndBlock[_tokenId] = currentDelegationPeriodEndBlock(_tokenId) + 1;
         emit DelegationExitRequested(_tokenId, $.delegationEndBlock[_tokenId]);
     }
 
@@ -304,12 +308,9 @@ contract StargateDelegation is
         // Update start block for rewards accumulation
         $.rewardsAccumulationStartBlock[_tokenId] = clock();
 
-        // Send the rewards to the owner of the NFT
+        // Send the rewards to the owner of the NFT and revert if it fails
         address recipient = $.stargateNFT.ownerOf(_tokenId);
-        bool transferSuccess = $.vthoToken.transfer(recipient, amountToClaim);
-        if (!transferSuccess) {
-            revert VthoTransferFailed(recipient, amountToClaim);
-        }
+        $.vthoToken.safeTransfer(recipient, amountToClaim);
 
         emit DelegationRewardsClaimed(_tokenId, amountToClaim, msg.sender, recipient);
     }
