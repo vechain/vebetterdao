@@ -707,36 +707,30 @@ contract B3TRGovernor is
   /**
    * @notice Returns the milestones for a grant proposal.
    * @param proposalId The id of the proposal.
-   * @return GovernorTypes.Milestone[] The milestones for the proposal
+   * @return GovernorTypes.Milestones The milestones for the proposal
    */
-  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestone[] memory) {
+  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestones memory) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorMilestoneLogic.getMilestones($, proposalId);
   }
 
-  /**
-   * @notice Sets whether milestones can be edited for a grant proposal
-   * @dev Only callable by admin
-   * @param proposalId The id of the proposal
-   * @param canEdit Whether milestones can be edited
-   */
-  function setMilestoneEditingPhase(uint256 proposalId, bool canEdit) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setMilestoneStatus(
+    uint256 proposalId,
+    uint256 milestoneIndex,
+    GovernorTypes.MilestoneState newStatus
+  ) external {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorMilestoneLogic.setMilestoneEditingPhase($, proposalId, canEdit);
+    require(msg.sender == address($.treasuryGrants), "Only TreasuryGrants can call");
+    GovernorStateLogic.validateMilestoneStateBitmap(
+      $,
+      proposalId,
+      milestoneIndex,
+      GovernorStateLogic.encodeMilestoneStateBitmap(newStatus)
+    );
+    $.proposalMilestones[proposalId].milestone[milestoneIndex].status = newStatus;
   }
 
-  /**
-   * @notice Edits the deadline of a milestone for a grant proposal.
-   * @param proposalId The id of the proposal
-   * @param milestoneIndex The index of the milestone
-   * @param newDeadline The new deadline for the milestone
-   */
-  function editMilestone(uint256 proposalId, uint256 milestoneIndex, uint256 newDeadline) external {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorMilestoneLogic.editMilestone($, proposalId, milestoneIndex, newDeadline);
-  }
-
-  /**
+  /** GovernorStorageTypes.GovernorStorage storage self = $.governor.getGovernorStorage();
    * @notice Returns the deposit threshold for a proposal type.
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold for the proposal type.
