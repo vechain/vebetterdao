@@ -690,17 +690,6 @@ contract B3TRGovernor is
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorMilestoneLogic.milestoneState($, proposalId, milestoneIndex);
   }
-
-  /**
-   * @notice Returns whether a milestone is editable for a grant proposal.
-   * @param proposalId The id of the proposal
-   * @return bool Whether the milestone is editable
-   */
-  function areMilestonesEditable(uint256 proposalId) external view returns (bool) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorMilestoneLogic.areMilestonesEditable($, proposalId);
-  }
-
   /**
    * @notice Returns a milestone for a grant proposal.
    * @param proposalId The id of the proposal

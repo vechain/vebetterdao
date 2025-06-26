@@ -64,11 +64,6 @@ library GovernorMilestoneLogic {
   event MilestoneEditingPhaseChanged(uint256 indexed proposalId, bool canEdit);
 
   /**
-   * @dev Error thrown when trying to edit a milestone that is not editable
-   */
-  error MilestoneNotEditable();
-
-  /**
    * @dev Error thrown when trying to edit a milestone with an invalid deadline
    */
   error InvalidDeadline();
@@ -111,19 +106,6 @@ library GovernorMilestoneLogic {
     return $.proposalMilestones[proposalId].milestone;
   }
 
-  /**
-   * @notice Returns whether milestones for a proposal are editable
-   * @param self The storage reference for the GovernorStorage
-   * @param proposalId The id of the proposal
-   * @return bool Whether the milestones are editable
-   */
-  function areMilestonesEditable(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId
-  ) external view returns (bool) {
-    return self.proposalMilestones[proposalId].editable;
-  }
-
   /** ------------------ SETTERS ------------------ **/
   /**
    * @dev Internal function to create milestones for a proposal.
@@ -158,7 +140,6 @@ library GovernorMilestoneLogic {
 
     GovernorTypes.Milestones storage proposalMilestones = self.proposalMilestones[proposalId];
     proposalMilestones.id = proposalId;
-    proposalMilestones.editable = true;
 
     uint256 totalAmount = 0;
     if (depositAmount > 0) {
@@ -202,43 +183,6 @@ library GovernorMilestoneLogic {
   }
 
   /**
-   * @dev Function to edit a milestone's deadline before proposal execution
-   * @param self The storage reference for the GovernorStorage
-   * @param proposalId The id of the proposal
-   * @param milestoneIndex The index of the milestone to edit
-   * @param newDeadline The new deadline for the milestone
-   * @notice the milestone are editable only during the community phae
-   * while the voting phase, milestone should not be editable ( community are alredy voting on the milestone, might be unfair to change during this phase )
-   */
-  function editMilestone(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    uint256 milestoneIndex,
-    uint256 newDeadline
-  ) external {
-    GovernorTypes.Milestones storage milestones = self.proposalMilestones[proposalId];
-    require(milestoneIndex < milestones.milestone.length, "Invalid milestone index");
-    require(msg.sender == milestones.recipient, "Caller is not the owner of the milestone");
-
-    // Check if milestone editing is enabled
-    if (!milestones.editable) {
-      revert MilestoneNotEditable();
-    }
-
-    GovernorTypes.Milestone storage milestone = milestones.milestone[milestoneIndex];
-
-    // Validate new deadline
-    if (newDeadline <= block.timestamp) {
-      revert InvalidDeadline();
-    }
-
-    uint256 oldDeadline = milestone.deadline;
-    milestone.deadline = newDeadline;
-
-    emit MilestoneDeadlineEdited(proposalId, milestoneIndex, oldDeadline, newDeadline);
-  }
-
-  /**
    * @notice Returns the state of a milestone
    * @param self The storage reference for the GovernorStorage
    * @param proposalId The id of the proposal
@@ -253,18 +197,4 @@ library GovernorMilestoneLogic {
     return self.proposalMilestones[proposalId].milestone[milestoneIndex].status;
   }
 
-  /**
-   * @notice Sets the editability of milestones for a proposal
-   * @param self The storage reference for the GovernorStorage
-   * @param proposalId The id of the proposal
-   * @param canEdit Whether the milestones can be edited
-   */
-  function setMilestoneEditingPhase(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    bool canEdit
-  ) external {
-    self.proposalMilestones[proposalId].editable = canEdit;
-    emit MilestoneEditingPhaseChanged(proposalId, canEdit);
-  }
 }

@@ -589,9 +589,7 @@ library GovernorProposalLogic {
     );
 
     if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
-      // Milestones start as editable during community phase
-      GovernorMilestoneLogic.setMilestoneEditingPhase(self, proposalId, true);
-
+      
       GovernorMilestoneLogic._createMilestones(
         self,
         proposalId,

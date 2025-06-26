@@ -147,7 +147,6 @@ library GovernorTypes {
     address recipient; // Treasury address ? multisig ? who can claim the amount in the team ? the admin only ?
     uint256 id; // Milestone id
     string projectName; // Project name
-    bool editable; // If the milestone is editable
   }
 
   // Data for a milestone within a grant proposal
