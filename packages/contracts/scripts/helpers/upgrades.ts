@@ -128,6 +128,7 @@ export const initializeProxy = async (
   const tx = await signer.sendTransaction({
     to: proxyAddress,
     data: initializerData,
+    gasLimit: 10_000_000, // Keep! Else, StargateNFT contract init tx will fail
   })
   await tx.wait()
 
