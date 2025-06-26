@@ -11,8 +11,8 @@ import {
   getIsAppUnendorsedQueryKey,
   getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
+  getXAppsQueryKey,
 } from "@/api"
-import { getXAppsQueryKey } from "@vechain/vechain-kit"
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()

@@ -1,6 +1,18 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useThor, getUserVotesInRound, getUserVotesInRoundQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
+import { getEventsKey, useEvents } from "@/hooks"
+import { XAllocationVoting__factory } from "@repo/contracts"
+
+const abi = XAllocationVoting__factory.abi
+const contractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
+const eventName = "AllocationVoteCast" as const
+
+export const getUserVotesInAllRoundsQueryKey = (address?: string) =>
+  getEventsKey({
+    eventName,
+    filterParams: {
+      voter: address,
+    },
+  })
 
 /**
  * useUserVotes is a custom hook that fetches the votes of a user for all rounds up to the current one.
@@ -9,23 +21,22 @@ import { getConfig } from "@repo/config"
  * @returns An object containing the status and data of the queries for each round.
  */
 export const useUserVotesInAllRounds = (address?: string) => {
-  const thor = useThor()
-  const queryClient = useQueryClient()
-
-  return useQuery({
-    queryKey: getUserVotesInRoundQueryKey("ALL", address),
-    queryFn: async () => {
-      const votesEvents = await getUserVotesInRound(thor, getConfig().network.type, address)
-      const foundRounds: (number | string)[] = []
-
-      votesEvents.forEach(voteEvent => {
-        if (foundRounds.includes(voteEvent.roundId)) throw new Error(`Duplicate votes for round ${voteEvent.roundId}`)
-        foundRounds.push(voteEvent.roundId)
-
-        queryClient.setQueryData(getUserVotesInRoundQueryKey(voteEvent.roundId, address), voteEvent)
-      })
-      return votesEvents
+  return useEvents({
+    abi,
+    contractAddress,
+    eventName,
+    filterParams: {
+      voter: address,
     },
-    enabled: !!thor && !!address,
+    mapResponse: data => {
+      const { voter, roundId, appsIds, voteWeights } = data.decodedData.args
+
+      return {
+        voter,
+        roundId: roundId.toString(),
+        appsIds: [...appsIds],
+        voteWeights: [...voteWeights].map(weight => weight.toString()),
+      }
+    },
   })
 }

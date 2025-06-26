@@ -1,9 +1,9 @@
-import { getB3TrTokenDetailsQueryKey, buildMintB3trTx } from "@/api"
+import { getB3TrTokenDetailsQueryKey, buildMintB3trTx, getB3trBalanceQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 
 import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, UseSendTransactionReturnValue, getB3trBalanceQueryKey, useThor } from "@vechain/vechain-kit"
+import { useWallet, UseSendTransactionReturnValue, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 type useMintB3trProps = {

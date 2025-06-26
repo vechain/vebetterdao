@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor, getXApps, getXAppsQueryKey } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+import { getXApps, getXAppsQueryKey } from "@/api"
 
 import { getConfig } from "@repo/config"
 
@@ -28,7 +29,7 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
     queryFn: async () => {
       const { allApps } = await queryClient.ensureQueryData({
         queryKey: getXAppsQueryKey(),
-        queryFn: async () => await getXApps(thor, getConfig().network.type),
+        queryFn: async () => await getXApps(thor),
       })
       const res = await executeMultipleClausesCall({
         thor,

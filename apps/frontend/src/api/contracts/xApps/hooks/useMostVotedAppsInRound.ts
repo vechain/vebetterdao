@@ -1,6 +1,5 @@
 import { useMemo } from "react"
-import { useXAppsShares } from "@vechain/vechain-kit"
-import { useXApps, XApp, useRoundXApps } from "@/api"
+import { useXApps, XApp, useRoundXApps, useXAppsShares } from "@/api"
 
 export type MostVotedAppsInRoundReturnType = {
   percentage: number

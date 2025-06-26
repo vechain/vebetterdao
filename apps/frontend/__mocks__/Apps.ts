@@ -1,8 +1,8 @@
-import { XApp } from "@vechain/vechain-kit"
+import { AllApps } from "@/api"
 
 export const address = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 
-export const APPS: (XApp & { isNew: boolean })[] = [
+export const APPS: AllApps[] = [
   {
     id: "1",
     createdAtTimestamp: "1630000000",

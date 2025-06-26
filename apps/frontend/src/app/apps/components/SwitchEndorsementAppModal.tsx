@@ -4,11 +4,12 @@ import {
   useUserEndorsementScore,
   useUserXNodes,
   useXNodeCheckCooldown,
+  useXAppMetadata,
 } from "@/api"
 import { useSwitchEndorsement } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Image } from "@chakra-ui/react"
 import { UilClock } from "@iconscout/react-unicons"
-import { useWallet, useXAppMetadata } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useCallback, useMemo } from "react"
 import { Trans } from "react-i18next"
@@ -19,6 +20,7 @@ import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 type Props = {
   isOpen: boolean
   onClose: () => void

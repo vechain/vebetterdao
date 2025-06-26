@@ -12,7 +12,7 @@ const spyOnUserAllocationRound = vi.spyOn(apiHooks, "useAllocationsRound")
 const spyOnUserAllocationRoundState = vi.spyOn(apiHooks, "useAllocationsRoundState")
 const spyOnHasVotedInRound = vi.spyOn(apiHooks, "useHasVotedInRound")
 const spyOnUserVotesInRound = vi.spyOn(apiHooks, "useUserVotesInRound")
-const spyOnRoundXApps = vi.spyOn(vechainKit, "useRoundXApps")
+const spyOnRoundXApps = vi.spyOn(apiHooks, "useRoundXApps")
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
@@ -117,7 +117,7 @@ describe("AllocationRoundHeaderCard", () => {
     spyOnUserVotesInRound.mockReturnValue({
       data: {
         voteWeights: [ethers.parseEther(totalVotesCast.toString()).toString()],
-        appsIds: [APPS[0]?.id as string],
+        appsIds: [APPS[0]?.id as `0x${string}`],
         roundId,
         voter: "0x123",
       },

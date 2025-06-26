@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { getXApps, isNewApp } from "../getXApps"
-import { useThor, useXApp as useXAppKit, useRoundXApps as useRoundXAppsKit } from "@vechain/vechain-kit"
+import { getXApps } from "../getXApps"
+import { useThor } from "@vechain/vechain-kit"
 
 /**
  * Query key for the xApps query
@@ -25,29 +25,4 @@ export const useXApps = ({ filterBlacklisted = false } = {}) => {
     queryFn: async () => await getXApps(thor, filterBlacklisted),
     enabled: !!thor,
   })
-}
-
-export const useXApp = (appId: string) => {
-  const { data: xApp, ...rest } = useXAppKit(appId)
-
-  const isNew = isNewApp(xApp)
-
-  return {
-    ...rest,
-    data: xApp
-      ? {
-          ...xApp,
-          isNew,
-        }
-      : undefined,
-  }
-}
-
-export const useRoundXApps = (roundId?: string) => {
-  const { data: xApps = [], ...rest } = useRoundXAppsKit(roundId)
-
-  return {
-    ...rest,
-    data: xApps.map(app => ({ ...app, isNew: isNewApp(app) })),
-  }
 }

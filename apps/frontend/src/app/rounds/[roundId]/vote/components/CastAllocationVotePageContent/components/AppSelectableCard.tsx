@@ -1,8 +1,7 @@
-import { XApp } from "@/api"
+import { XApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { HStack, Checkbox, Text, Box, Skeleton, Image } from "@chakra-ui/react"
-import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = {
   app: XApp

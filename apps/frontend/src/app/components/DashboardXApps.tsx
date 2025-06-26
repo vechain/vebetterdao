@@ -1,4 +1,10 @@
-import { XApp, useMostVotedAppsInRound, usePreviousAllocationRoundId, useAppsEligibleInNextRound } from "@/api"
+import {
+  XApp,
+  useMostVotedAppsInRound,
+  usePreviousAllocationRoundId,
+  useAppsEligibleInNextRound,
+  useXAppMetadata,
+} from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -20,7 +26,6 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { v4 as uuid } from "uuid"
-import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = {
   maxApps?: number

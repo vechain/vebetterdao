@@ -167,7 +167,6 @@ export const AppBalanceCard = () => {
         <>
           <AppBalanceTxsHistory appId={app.id} isOpen={isOpenRewardsPoolAccess} onClose={onCloseRewardsPoolAccess} />
           <TransferAppFundsModal
-            // TODO: migration add isNew property to useXApp in vechain-kit
             app={app}
             isOpen={isOpenDepositOrWithdraw}
             onClose={onCloseDepositOrWithdraw}

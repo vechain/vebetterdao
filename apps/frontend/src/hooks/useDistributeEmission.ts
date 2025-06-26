@@ -5,9 +5,10 @@ import {
   getAllocationAmountQueryKey,
   getAllProposalsStateQueryKey,
   getProposalClaimableUserDepositsQueryKey,
+  getRoundXAppsQueryKey,
 } from "@/api"
 import { useCallback, useMemo } from "react"
-import { useWallet, currentBlockQueryKey, getRoundXAppsQueryKey } from "@vechain/vechain-kit"
+import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { Emissions__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"

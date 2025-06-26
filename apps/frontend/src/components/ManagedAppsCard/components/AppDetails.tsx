@@ -1,3 +1,4 @@
+import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { Divider, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
@@ -5,7 +6,6 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
-import { useXAppMetadata } from "@vechain/vechain-kit"
 
 type Props = {
   appId: string

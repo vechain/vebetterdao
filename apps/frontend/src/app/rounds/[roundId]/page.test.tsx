@@ -4,7 +4,6 @@ import { render, screen } from "../../../../test"
 
 import * as apiHooks from "@/api"
 import dayjs from "dayjs"
-import * as vechainKit from "@vechain/vechain-kit"
 
 test("Allocations", async () => {
   const roundId = "1"
@@ -156,7 +155,7 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(vechainKit, "useXAppRoundEarnings").mockReturnValue({
+  vi.spyOn(apiHooks, "useXAppRoundEarnings").mockReturnValue({
     data: {
       amount: "1",
       appId: "0x123",
@@ -179,7 +178,7 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(vechainKit, "useXAppMetadata").mockReturnValue({
+  vi.spyOn(apiHooks, "useXAppMetadata").mockReturnValue({
     data: {
       logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
       name: "",

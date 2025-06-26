@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from "react"
-import { EnhancedClause, getXAppsQueryKey } from "@vechain/vechain-kit"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getXAppsQueryKey } from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 

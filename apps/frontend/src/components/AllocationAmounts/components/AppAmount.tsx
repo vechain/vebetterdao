@@ -4,7 +4,7 @@ import { notFoundImage } from "@/constants"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { B3TRIcon } from "@/components/Icons"
-import { useXAppMetadata } from "@vechain/vechain-kit"
+import { useXAppMetadata } from "@/api"
 
 type Props = {
   xAppId?: string

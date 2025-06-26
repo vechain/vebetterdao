@@ -1,8 +1,14 @@
-import { useAllocationAmount, useAllocationBaseAmount, useAllocationVoters, useMaxAllocationAmount } from "@/api"
+import {
+  useAllocationAmount,
+  useAllocationBaseAmount,
+  useAllocationVoters,
+  useMaxAllocationAmount,
+  useMultipleXAppRoundEarnings,
+  useRoundXApps,
+} from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
 import { VStack, Heading, useColorModeValue, Text, Box, Skeleton, Stack, HStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRoundXApps, useMultipleXAppRoundEarnings } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 

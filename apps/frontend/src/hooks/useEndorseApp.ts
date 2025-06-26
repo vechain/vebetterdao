@@ -11,8 +11,8 @@ import {
   getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
   getUserXNodesQueryKey,
+  getXAppsQueryKey,
 } from "@/api"
-import { getXAppsQueryKey } from "@vechain/vechain-kit"
 import { buildClause } from "@/utils/buildClause"
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 

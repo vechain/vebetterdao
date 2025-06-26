@@ -1,10 +1,15 @@
-import { XApp, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import {
+  XApp,
+  useAllocationsRound,
+  useCurrentAllocationsRoundId,
+  useXAppRoundEarnings,
+  useXAppTotalEarnings,
+} from "@/api"
 import { Card, CardBody, Box, Text, HStack, Skeleton, Grid, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useXAppRoundEarnings, useXAppTotalEarnings } from "@vechain/vechain-kit"
 
 const compactFormatter = getCompactFormatter()
 

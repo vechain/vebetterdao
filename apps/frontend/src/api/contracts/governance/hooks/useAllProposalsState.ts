@@ -8,14 +8,15 @@ const abi = B3TRGovernor__factory.abi
 const functionName = "state" as const
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 
-export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
+export const getAllProposalsStateQueryKey = (proposalsIds?: string[]) =>
+  proposalsIds ? ["PROPOSALS", "ALL", "STATE", proposalsIds] : ["PROPOSALS", "ALL", "STATE"]
 
 export const useAllProposalsState = (proposalsIds: string[]) => {
   const thor = useThor()
   const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: getAllProposalsStateQueryKey(),
+    queryKey: getAllProposalsStateQueryKey(proposalsIds),
     queryFn: async () => {
       const res = await executeMultipleClausesCall({
         thor,

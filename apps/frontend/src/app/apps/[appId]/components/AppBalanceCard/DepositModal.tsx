@@ -21,9 +21,11 @@ import { motion } from "framer-motion"
 import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useXApp } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useXApp } from "@/api"
+
 export type Props = {
   appId: string
   isOpen: boolean

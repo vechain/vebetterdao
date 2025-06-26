@@ -1,8 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { executeMultipleClausesCall, getXAppRoundEarningsQueryKey, useThor } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
+import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`

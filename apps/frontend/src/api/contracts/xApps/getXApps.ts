@@ -1,7 +1,10 @@
 import { getConfig } from "@repo/config"
 import dayjs from "@/utils/dayjsConfig"
-import { ThorClient, executeMultipleClausesCall, getXApps as getXAppsKit } from "@vechain/vechain-kit"
+import { ThorClient, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+
+const abi = X2EarnApps__factory.abi
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 
 // Considering a new app is defined as 7 days
 const NEW_APP_PERIOD_SECONDS = dayjs.duration(7, "days").asSeconds()
@@ -60,58 +63,67 @@ const hasLostEndorsement = (xApp: UnendorsedApp) => !xApp.appAvailableForAllocat
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
 export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Promise<GetAllApps> => {
-  const { active, endorsed, unendorsed, allApps } = await getXAppsKit(thor, getConfig().network.type)
+  const [active, unendorsed] = await executeMultipleClausesCall({
+    thor,
+    calls: [
+      {
+        abi,
+        functionName: "apps",
+        address,
+        args: [],
+      },
+      {
+        abi,
+        functionName: "unendorsedApps",
+        address,
+        args: [],
+      },
+    ],
+  })
 
-  // Filter blacklisted apps only if filterBlacklisted is true
-  const isAppsBlacklisted = filterBlacklisted
-    ? await executeMultipleClausesCall({
-        thor,
-        calls: allApps.map(
-          app =>
-            ({
-              abi: X2EarnApps__factory.abi,
-              functionName: "isBlacklisted",
-              address: getConfig().x2EarnAppsContractAddress as `0x${string}`,
-              args: [app.id as `0x${string}`],
-            }) as const,
-        ),
-      })
-    : allApps.map(() => false)
+  let activeApps = active.map(app => ({
+    ...app,
+    createdAtTimestamp: app.createdAtTimestamp.toString(),
+    isNew: isNewApp({ ...app, createdAtTimestamp: app.createdAtTimestamp.toString() }),
+  }))
 
-  const allAppsFiltered = allApps
-    .filter((_app, index) => isAppsBlacklisted[index] === false)
-    .map(app => ({
-      ...app,
-      isNew: isNewApp(app),
-    }))
-  const activeAppsFiltered = active
-    .filter((_app, index) => isAppsBlacklisted[index] === false)
-    .map(app => ({
-      ...app,
-      isNew: isNewApp(app),
-    }))
-  const endorsedAppsFiltered = endorsed
-    .filter((_app, index) => isAppsBlacklisted[index] === false)
-    .map(app => ({
-      ...app,
-      isNew: isNewApp(app),
-    }))
-  const unendorsedAppsFiltered = unendorsed
-    .filter((_app, index) => isAppsBlacklisted[index] === false)
-    .map(app => ({
-      ...app,
-      isNew: isNewApp(app),
-    }))
+  let unendorsedApps = unendorsed.map(app => ({
+    ...app,
+    createdAtTimestamp: app.createdAtTimestamp.toString(),
+    isNew: isNewApp({ ...app, createdAtTimestamp: app.createdAtTimestamp.toString() }),
+  }))
 
-  const othersLookingForEndorsement = unendorsedAppsFiltered.filter(xApp => !isNewLookingForEndorsement(xApp))
+  if (filterBlacklisted) {
+    const isAppsBlacklisted = await executeMultipleClausesCall({
+      thor,
+      calls: [...active, ...unendorsed].map(
+        app =>
+          ({
+            abi: X2EarnApps__factory.abi,
+            functionName: "isBlacklisted",
+            address: getConfig().x2EarnAppsContractAddress as `0x${string}`,
+            args: [app.id as `0x${string}`],
+          }) as const,
+      ),
+    })
+    activeApps = activeApps.filter((_app, index) => isAppsBlacklisted[index] === false)
+    unendorsedApps = unendorsedApps.filter((_app, index) => isAppsBlacklisted[index] === false)
+  }
+
+  const unendorsedIds = new Set(unendorsedApps.map(app => app.id))
+
+  const allApps = [...activeApps, ...unendorsedApps]
+  const endorsedApps = activeApps.filter(app => !unendorsedIds.has(app.id))
+  const othersLookingForEndorsement = unendorsedApps.filter(xApp => !isNewLookingForEndorsement(xApp))
+
   return {
-    allApps: allAppsFiltered,
-    active: activeAppsFiltered,
-    unendorsed: unendorsedAppsFiltered,
-    newLookingForEndorsement: unendorsedAppsFiltered.filter(isNewLookingForEndorsement),
+    allApps,
+    active: activeApps,
+    unendorsed: unendorsedApps,
+    newLookingForEndorsement: unendorsedApps.filter(isNewLookingForEndorsement),
     othersLookingForEndorsement,
-    endorsed: endorsedAppsFiltered,
-    newApps: allAppsFiltered.filter(xApp => xApp.isNew),
+    endorsed: endorsedApps,
+    newApps: allApps.filter(xApp => xApp.isNew),
     gracePeriod: othersLookingForEndorsement?.filter(isInGracePeriod),
     endorsementLost: othersLookingForEndorsement?.filter(hasLostEndorsement),
   }

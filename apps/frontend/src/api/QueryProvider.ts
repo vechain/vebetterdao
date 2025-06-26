@@ -14,6 +14,7 @@ export const queryClient = new QueryClient({
     queries: {
       queryKeyHashFn: hashFn,
       retry: 0,
+      retryOnMount: false,
       staleTime: 30000,
       refetchOnWindowFocus: true,
       refetchOnMount: true,

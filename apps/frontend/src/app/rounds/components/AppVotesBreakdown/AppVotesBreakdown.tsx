@@ -1,6 +1,4 @@
-// TODO: migration getXAppMetadata is not a query it is a function
-// check if it should be a query
-import { getXAppMetadata, useXApps } from "@/api"
+import { getXAppMetadata, useXApps, getXAppMetadataQueryKey } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { CastAllocationVoteFormData } from "@/store"
@@ -9,7 +7,6 @@ import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
-import { getXAppMetadataQueryKey } from "@vechain/vechain-kit"
 
 export type AppVotesBreakdownProps = {
   votes: CastAllocationVoteFormData[]
