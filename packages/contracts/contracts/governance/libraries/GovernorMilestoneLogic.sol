@@ -31,7 +31,7 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 
 /// @title GovernorMilestoneLogic
 /// @notice Library for managing milestones in the Governor contract.
-/// @dev This library provides functions to create, edit, validate, reject, and refund milestones.
+/// @dev This library provides functions to create, validate, reject, refund, send funds to TreasuryGrantsmilestones.
 library GovernorMilestoneLogic {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
@@ -58,26 +58,6 @@ library GovernorMilestoneLogic {
     uint256 deadline
   );
 
-  /**
-   * @dev Emitted when milestone editing phase is toggled
-   */
-  event MilestoneEditingPhaseChanged(uint256 indexed proposalId, bool canEdit);
-
-  /**
-   * @dev Error thrown when trying to edit a milestone with an invalid deadline
-   */
-  error InvalidDeadline();
-
-  /**
-   * @dev Emitted when a milestone deadline is edited
-   */
-  event MilestoneDeadlineEdited(
-    uint256 indexed proposalId,
-    uint256 indexed milestoneIndex,
-    uint256 oldDeadline,
-    uint256 newDeadline
-  );
-
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -97,13 +77,20 @@ library GovernorMilestoneLogic {
   /**
    * @notice Returns the milestones for a proposal.
    * @param proposalId The id of the proposal
-   * @return GovernorTypes.Milestone[] The milestones for the proposal
+   * @return GovernorTypes.Milestones The milestones for the proposal
    */
   function getMilestones(
     GovernorStorageTypes.GovernorStorage storage $,
     uint256 proposalId
-  ) external view returns (GovernorTypes.Milestone[] memory) {
-    return $.proposalMilestones[proposalId].milestone;
+  ) external view returns (GovernorTypes.Milestones memory) {
+    return $.proposalMilestones[proposalId];
+  }
+
+  function getMilestonesCount(
+    GovernorStorageTypes.GovernorStorage storage $,
+    uint256 proposalId
+  ) external view returns (uint256) {
+    return $.proposalMilestones[proposalId].minimumMilestoneCount;
   }
 
   /** ------------------ SETTERS ------------------ **/
@@ -141,6 +128,8 @@ library GovernorMilestoneLogic {
     GovernorTypes.Milestones storage proposalMilestones = self.proposalMilestones[proposalId];
     proposalMilestones.id = proposalId;
 
+    // TODO: double check that the depositAmount is ok to be included in the totalAmount of the grant
+    // Q? can user deposit funds for a grant proposal ?
     uint256 totalAmount = 0;
     if (depositAmount > 0) {
       totalAmount += depositAmount;
@@ -149,8 +138,8 @@ library GovernorMilestoneLogic {
     for (uint256 i = 0; i < milestonesData.length; i++) {
       GovernorTypes.Milestone memory milestone = milestonesData[i];
 
-      require(milestone.amount > 0, "Invalid milestone amount");
-      require(milestone.deadline > block.timestamp, "Invalid milestone deadline");
+      require(milestone.amount > 0, "GovernorMilestoneLogic: Milestone amount must be greater than 0");
+      require(milestone.deadline > block.timestamp, "GovernorMilestoneLogic: Deadline must be in the future");
 
       proposalMilestones.milestone.push(
         GovernorTypes.Milestone({
@@ -182,6 +171,29 @@ library GovernorMilestoneLogic {
     }
   }
 
+  function approveMilestones(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId,
+    uint256 milestoneIndex
+  ) internal {
+    self.governor.setMilestoneStatus(proposalId, milestoneIndex, GovernorTypes.MilestoneState.Validated);
+  }
+
+  function rejectMilestone(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) internal {
+    // for every milestones in the proposal, we set the status to Rejected
+    for (uint256 i = 0; i < self.proposalMilestones[proposalId].milestone.length; i++) {
+      self.governor.setMilestoneStatus(proposalId, i, GovernorTypes.MilestoneState.Rejected);
+    }
+  }
+
+  function setMinimumMilestoneCount(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId,
+    uint256 minimumMilestoneCount
+  ) internal {
+    self.proposalMilestones[proposalId].minimumMilestoneCount = minimumMilestoneCount;
+  }
+
   /**
    * @notice Returns the state of a milestone
    * @param self The storage reference for the GovernorStorage
@@ -196,5 +208,4 @@ library GovernorMilestoneLogic {
   ) external view returns (GovernorTypes.MilestoneState) {
     return self.proposalMilestones[proposalId].milestone[milestoneIndex].status;
   }
-
 }

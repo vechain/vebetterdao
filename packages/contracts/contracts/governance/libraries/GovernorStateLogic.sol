@@ -30,6 +30,7 @@ import { GovernorVotesLogic } from "./GovernorVotesLogic.sol";
 import { GovernorQuorumLogic } from "./GovernorQuorumLogic.sol";
 import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
+import { GovernorMilestoneLogic } from "./GovernorMilestoneLogic.sol";
 
 /// @title GovernorStateLogic
 /// @notice Library for Governor state logic, managing the state transitions and validations of governance proposals.
@@ -53,6 +54,18 @@ library GovernorStateLogic {
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
     GovernorTypes.ProposalState current,
+    bytes32 expectedStates
+  );
+
+  /// @dev Thrown when the current state of a milestone does not match the expected states.
+  /// @param proposalId The ID of the proposal.
+  /// @param milestoneIndex The index of the milestone.
+  /// @param current The current state of the milestone.
+  /// @param expectedStates The expected states of the milestone as a bitmap.
+  error GovernorUnexpectedMilestoneState(
+    uint256 proposalId,
+    uint256 milestoneIndex,
+    GovernorTypes.MilestoneState current,
     bytes32 expectedStates
   );
 
@@ -92,6 +105,20 @@ library GovernorStateLogic {
     return currentState;
   }
 
+  function validateMilestoneStateBitmap(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 proposalId,
+    uint256 milestoneIndex, // index of the milestone (1st, 2nd ...)
+    bytes32 allowedStates
+  ) internal view returns (GovernorTypes.MilestoneState) {
+    GovernorTypes.MilestoneState currentState = GovernorMilestoneLogic.milestoneState(self, proposalId, milestoneIndex);
+    if (encodeMilestoneStateBitmap(currentState) & allowedStates == bytes32(0)) {
+      revert GovernorUnexpectedMilestoneState(proposalId, milestoneIndex, currentState, allowedStates);
+    }
+
+    return currentState;
+  }
+
   /**
    * @dev Encodes a `ProposalState` into a `bytes32` representation where each bit enabled corresponds to the underlying position in the `ProposalState` enum.
    * @param proposalState The state to encode.
@@ -105,7 +132,7 @@ library GovernorStateLogic {
    * @param milestoneState The state to encode.
    * @return The encoded state bitmap.
    */
-  function encodeStateBitmap(GovernorTypes.MilestoneState milestoneState) internal pure returns (bytes32) {
+  function encodeMilestoneStateBitmap(GovernorTypes.MilestoneState milestoneState) internal pure returns (bytes32) {
     return bytes32(1 << uint8(milestoneState));
   }
 
