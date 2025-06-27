@@ -46,6 +46,9 @@ export const AppsPageContent = () => {
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
 
+  const gracePeriodIds = new Set(gracePeriodApps.map(app => app.id))
+  const activeAppsWithoutGracePeriod = currentActiveApps.filter(app => !gracePeriodIds.has(app.id))
+
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
       <AppsBanner />
@@ -69,7 +72,7 @@ export const AppsPageContent = () => {
           <Heading size="lg">{t("Sustainability apps")}</Heading>
           <AllApps
             newApps={newAppsEndorsedandUnendorsed}
-            currentActiveApps={currentActiveApps}
+            currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}
             endorsementLostApps={endorsementLostApps}
             isXAppsLoading={appsLoading}
@@ -80,7 +83,7 @@ export const AppsPageContent = () => {
           <AllApps
             headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
             newApps={newAppsEndorsedandUnendorsed}
-            currentActiveApps={currentActiveApps}
+            currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}
             endorsementLostApps={endorsementLostApps}
             isXAppsLoading={appsLoading}

@@ -69,7 +69,7 @@ export const RoundInfoBottomSheet = () => {
           left={0}
           right={0}
           bg="#B1F16C"
-          color="contrast-fg-on-strong"
+          color="#000000"
           py={5}
           px={4}
           borderTopRadius="20px"
