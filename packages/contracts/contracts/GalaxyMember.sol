@@ -37,7 +37,7 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { ITokenAuction } from "./mocks/Stargate/interfaces/ITokenAuction.sol";
-import { INodeManagement } from "./interfaces/INodeManagement.sol";
+import { INodeManagementV3 } from "./mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 
@@ -100,7 +100,7 @@ contract GalaxyMember is
     bool isPublicMintingPaused; // Flag to pause public minting
     // --------------------------- V2 Additions --------------------------- //
     ITokenAuction vechainNodes; // Vechain Nodes contract
-    INodeManagement nodeManagement; // Node Management contract
+    INodeManagementV3 nodeManagement; // Node Management contract
     mapping(uint256 => uint256) _nodeToTokenId; // Mapping from Vechain node ID to GalaxyMember Token ID. Used to track the XNode tied to the GM token ID
     mapping(uint256 => uint256) _tokenIdToNode; // Mapping from GalaxyMember Token ID to Vechain node ID. Used to track the GM token ID tied to the XNode token ID
     mapping(uint8 => uint256) _nodeToFreeUpgradeLevel; // Mapping from Vechain node level to GalaxyMember level. Used to track the GM level that can be upgraded for free for a given Vechain node level
@@ -258,7 +258,7 @@ contract GalaxyMember is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     $.vechainNodes = ITokenAuction(_vechainNodes);
-    $.nodeManagement = INodeManagement(_nodesMangaement);
+    $.nodeManagement = INodeManagementV3(_nodesMangaement);
 
     $._nextTokenId = $._nextTokenId == 0 ? 1 : $._nextTokenId;
 

@@ -28,7 +28,7 @@ import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { EndorsementUtils } from "../libraries/EndorsementUtils.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
+import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
@@ -46,7 +46,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
     mapping(bytes32 => uint256) _appScores; // The score of each app
     mapping(bytes32 => PassportTypes.APP_SECURITY) _appSecurity; // The security score of each app
-    INodeManagement _nodeManagementContract; // The token auction contract
+    INodeManagementV3 _nodeManagementContract; // The token auction contract
     IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
     mapping(uint256 => uint256) _endorsementRound; // The latest round in which a node endorsed an app
     uint256 _cooldownPeriod; // Cooldown duration in rounds for a node to endorse an app
@@ -396,7 +396,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function _setNodeManagementContract(address nodeManagementContract) internal virtual {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    $._nodeManagementContract = INodeManagement(nodeManagementContract);
+    $._nodeManagementContract = INodeManagementV3(nodeManagementContract);
   }
 
   /**
@@ -573,7 +573,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev See {IX2EarnApps-getNodeEndorsementScore}.
    */
-  function getNodeManagementContract() external view returns (INodeManagement) {
+  function getNodeManagementContract() external view returns (INodeManagementV3) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     return $._nodeManagementContract;
   }

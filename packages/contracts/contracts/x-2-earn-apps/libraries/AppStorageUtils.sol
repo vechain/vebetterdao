@@ -23,9 +23,9 @@
 
 pragma solidity 0.8.20;
 
-import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
+import { VechainNodesDataTypes } from "../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
+import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 
