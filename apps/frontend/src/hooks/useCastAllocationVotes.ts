@@ -5,9 +5,10 @@ import {
   getParticipatedInGovernanceQueryKey,
   getUserVotesInRoundQueryKey,
   getXAppRoundEarningsQueryKey,
+  getXAppsSharesQueryKey,
 } from "@/api"
 import { useCallback, useMemo } from "react"
-import { useWallet, EnhancedClause, getXAppsSharesQueryKey } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
