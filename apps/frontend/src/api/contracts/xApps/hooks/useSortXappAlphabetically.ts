@@ -5,8 +5,7 @@ import { sortXAppsAlphabetically } from "../sortXAppsAlphabetically"
 import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 
 export const useSortXappAlphabetically = (xAppsNotSorted: GetAllApps | undefined) => {
-  const { data } = useXAppsMetadataBaseUri()
-  const [baseUri = ""] = data || []
+  const { data: baseUri = "" } = useXAppsMetadataBaseUri()
 
   return useQuery({
     queryKey: ["sortedXApps", xAppsNotSorted?.allApps.map(app => app.id)],
