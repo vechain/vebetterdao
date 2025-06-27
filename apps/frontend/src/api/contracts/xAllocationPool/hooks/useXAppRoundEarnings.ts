@@ -24,7 +24,7 @@ export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
     queryOptions: {
       enabled: !!roundId && !!xAppId,
       select: data => ({
-        amount: formatEther(BigInt(data[0] || 0)),
+        amount: formatEther(data[0]),
         appId: xAppId,
       }),
     },

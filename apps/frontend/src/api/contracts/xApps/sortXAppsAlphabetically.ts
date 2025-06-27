@@ -1,6 +1,5 @@
-import { getXAppMetadata } from "@vechain/vechain-kit"
-import { getConfig } from "@repo/config"
 import { GetAllApps, XApp, UnendorsedApp } from "./getXApps"
+import { getXAppMetadata } from "./getXAppMetadata"
 
 export const sortXAppsAlphabetically = async ({
   apps,
@@ -16,7 +15,7 @@ export const sortXAppsAlphabetically = async ({
     return Promise.all(
       apps.map(async app => {
         const uri = `${baseUri}${app.metadataURI}`
-        const metadata = await getXAppMetadata(uri, getConfig().network.type)
+        const metadata = await getXAppMetadata(uri)
         return { ...app, name: metadata?.name || app.name }
       }),
     )

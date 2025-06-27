@@ -6,6 +6,7 @@ import {
   useHasVotedInRound,
   useUserVotesInRound,
   useVotingThreshold,
+  useRoundXApps,
 } from "@/api"
 import { AllocationStateBadge, VOT3Icon } from "@/components"
 import {
@@ -23,7 +24,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRoundXApps, useWallet } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"

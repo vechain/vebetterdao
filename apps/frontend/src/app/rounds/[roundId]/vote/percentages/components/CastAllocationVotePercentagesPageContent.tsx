@@ -5,10 +5,11 @@ import {
   useGetVotesOnBlock,
   useHasVotedInRound,
   useVotingThreshold,
+  useRoundXApps,
 } from "@/api"
 import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useLayoutEffect, useMemo } from "react"
-import { useRoundXApps, useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
