@@ -33,6 +33,7 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
  * Provides functionality for retrieving a subset of apps based on specified start index and count.
  */
 library AppStorageUtils {
+
   /**
    * @dev Error thrown when the specified start index for pagination is invalid.
    * This typically occurs when the start index exceeds the total number of available apps.
