@@ -18,7 +18,7 @@ import {
   TokenAuction,
   StargateNFT,
   StargateDelegation,
-  NodeManagement,
+  NodeManagementV3,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -56,7 +56,7 @@ const symbol = "GM"
 // StargateNFT initial token levels
 const BLOCKS_PER_DAY = 6 * 60 * 24
 
-const initialTokenLevels = [
+export const initialTokenLevels = [
   // Legacy normal levels
   {
     level: {
@@ -183,7 +183,7 @@ const initialTokenLevels = [
 ]
 
 // StargateDelegation initial values
-const vthoRewardPerBlock = [
+export const vthoRewardPerBlock = [
   {
     levelId: 1,
     rewardPerBlock: ethers.parseUnits("0.122399797", 18), // 0.122399797 * 10^18
@@ -467,6 +467,19 @@ export async function deployAll(config: ContractsConfig) {
   let stargateDelegateAddress = "0x0000000000000000000000000000000000000000"
   let nodeManagementAddress = "0x0000000000000000000000000000000000000000"
 
+  // If we are on hardhat, we need to deploy the VTHO token
+  let vthoAddress
+  if (network.name === "hardhat") {
+    const VTHOFactory = await ethers.getContractFactory("MyERC20")
+    const vtho = await VTHOFactory.deploy(deployer.address, deployer.address)
+    await vtho.waitForDeployment()
+
+    vthoAddress = await vtho.getAddress()
+  } else {
+    vthoAddress = "0x0000000000000000000000000000456E65726779"
+  }
+  console.log("VTHO token address: ", vthoAddress)
+
   let vechainNodesMock = (await ethers.getContractAt(
     "TokenAuction",
     config.VECHAIN_NODES_CONTRACT_ADDRESS,
@@ -477,9 +490,9 @@ export async function deployAll(config: ContractsConfig) {
     config.STARGATE_DELEGATE_CONTRACT_ADDRESS,
   )) as StargateDelegation
   let nodeManagementMock = (await ethers.getContractAt(
-    "NodeManagement",
+    "NodeManagementV3",
     config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
-  )) as NodeManagement
+  )) as NodeManagementV3
 
   if (network.name !== "vechain_mainnet") {
     console.log("Deploying Vechain Nodes mock contracts")
@@ -543,7 +556,7 @@ export async function deployAll(config: ContractsConfig) {
           stargateDelegation: stargateDelegateAddress,
           legacyLastTokenId: 13, // see setup.ts, seeding for 5 + APPS.length accounts
           levelsAndSupplies: initialTokenLevels, // TODO: review implementation
-          vthoToken: "0x0000000000000000000000000000456E65726779", // TODO: mockErc20 on hardhat
+          vthoToken: vthoAddress,
         },
       ],
       {
@@ -565,7 +578,7 @@ export async function deployAll(config: ContractsConfig) {
           upgrader: deployer.address,
           admin: deployer.address,
           stargateNFT: stargateNftAddress,
-          vthoToken: "0x0000000000000000000000000000456E65726779", // TODO: mockErc20 on hardhat
+          vthoToken: vthoAddress,
           vthoRewardPerBlock, // CHECK - as per stargate local config
           delegationPeriod: 10, // CHECK - as per stargate local config
           operator: deployer.address,
