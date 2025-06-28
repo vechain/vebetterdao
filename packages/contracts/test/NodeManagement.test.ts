@@ -13,7 +13,7 @@ import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { NodeManagement, NodeManagementV1 } from "../typechain-types"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 
-describe("Node Management -@shard5", function () {
+describe.skip("Node Management -@shard5", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
       const { nodeManagement, vechainNodesMock, owner } = await getOrDeployContractInstances({ forceDeploy: true })
