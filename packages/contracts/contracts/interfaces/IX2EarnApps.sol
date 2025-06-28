@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
-import { VechainNodesDataTypes } from "../libraries/VechainNodesDataTypes.sol";
+import { VechainNodesDataTypes } from "../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
 import { IX2EarnCreator } from "./IX2EarnCreator.sol";
 import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
 import { IX2EarnRewardsPool } from "./IX2EarnRewardsPool.sol";
@@ -639,7 +639,7 @@ interface IX2EarnApps {
    * @param nodeLevel The strength level of the node.
    * @return uint256 The endorsement score of the node level.
    */
-  function nodeLevelEndorsementScore(VechainNodesDataTypes.NodeStrengthLevel nodeLevel) external view returns (uint256);
+  function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256);
 
   /**
    * @dev Update the X2EarnCreator contract address.

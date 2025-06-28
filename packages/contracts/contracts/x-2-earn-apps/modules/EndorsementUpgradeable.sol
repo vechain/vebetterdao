@@ -24,7 +24,7 @@
 pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
+import { VechainNodesDataTypes } from "../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { EndorsementUtils } from "../libraries/EndorsementUtils.sol";
@@ -39,7 +39,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     bytes32[] _unendorsedApps; // List of apps pending endorsement
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
     mapping(bytes32 => uint256[]) _appEndorsers; // Maps each app ID to an array of node IDs that have endorsed it
-    mapping(VechainNodesDataTypes.NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
+    mapping(uint8 => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint48) _appGracePeriodStart; // The grace period elapsed by the app since endorsed
     mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in BLOCKS
@@ -210,7 +210,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @return uint256 The endorsement score of the node ID.
    */
   function nodeLevelEndorsementScore(
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel
+    uint8 nodeLevel
   ) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     return $._nodeEnodorsmentScore[nodeLevel];
@@ -566,7 +566,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
+    uint8 nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 
