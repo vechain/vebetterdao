@@ -150,24 +150,25 @@ describe.skip("Node Management -@shard5", function () {
     })
   })
 
-  describe("Admin", () => {
-    it("Admin can set vechain nodes contract address", async function () {
-      const { owner, nodeManagement } = await getOrDeployContractInstances({ forceDeploy: true })
+  // describe("Admin", () => {
+  //   it("Admin can set vechain nodes contract address", async function () {
+  //     const { owner, nodeManagement } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      const initialAddress = await nodeManagement.getVechainNodesContract()
+  //     const initialAddress = await nodeManagement.getVechainNodesContract()
 
-      await nodeManagement.connect(owner).setVechainNodesContract(owner.address)
+  //     await nodeManagement.connect(owner).setVechainNodesContract(owner.address)
 
-      const updatedAddress = await nodeManagement.getVechainNodesContract()
-      expect(updatedAddress).to.eql(owner.address)
-      expect(updatedAddress).to.not.eql(initialAddress)
-    })
-    it("Only Admin can set vechain nodes contract address", async function () {
-      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({ forceDeploy: true })
+  //     const updatedAddress = await nodeManagement.getVechainNodesContract()
+  //     expect(updatedAddress).to.eql(owner.address)
+  //     expect(updatedAddress).to.not.eql(initialAddress)
+  //   })
 
-      await expect(nodeManagement.connect(otherAccount).setVechainNodesContract(owner.address)).to.be.reverted
-    })
-  })
+  //   it("Only Admin can set vechain nodes contract address", async function () {
+  //     const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({ forceDeploy: true })
+
+  //     await expect(nodeManagement.connect(otherAccount).setVechainNodesContract(owner.address)).to.be.reverted
+  //   })
+  // })
 
   describe("Node Delegation", () => {
     it("Should allow node owner to delegate node", async function () {

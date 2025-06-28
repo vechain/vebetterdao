@@ -781,7 +781,7 @@ describe("Galaxy Member - @shard3", () => {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
-      await galaxyMemberV2.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMemberV2.setVechainNodes(await vechainNodesMock.getAddress())
 
       expect(await galaxyMemberV2.balanceOf(await owner.getAddress())).to.equal(1)
       expect(await galaxyMemberV2.balanceOf(await otherAccount.getAddress())).to.equal(1)
@@ -2486,7 +2486,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       const nodeMetadata = await addNodeToken(1, otherAccount) // Mint new Strength Economy Node (Level 1) to other account
 
@@ -2529,7 +2529,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
 
@@ -2618,7 +2618,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       const nodeMetadata1 = await addNodeToken(1, otherAccount)
@@ -2647,7 +2647,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       const nodeMetadata = await addNodeToken(1, owner)
@@ -2678,7 +2678,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       const nodeMetadata = await addNodeToken(1, owner)
@@ -2733,7 +2733,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -2808,7 +2808,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
 
@@ -2875,7 +2875,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -2906,7 +2906,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -2965,7 +2965,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -3003,7 +3003,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -3043,7 +3043,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -3077,7 +3077,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       await participateInAllocationVoting(owner, false, otherAccounts[4])
 
@@ -3132,7 +3132,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -3174,7 +3174,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       await participateInAllocationVoting(owner, false, otherAccounts[4])
 
@@ -3220,7 +3220,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -3249,7 +3249,7 @@ describe("Galaxy Member - @shard3", () => {
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+      // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
@@ -3287,7 +3287,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3327,7 +3327,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3374,7 +3374,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3417,7 +3417,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3473,7 +3473,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3537,7 +3537,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3585,7 +3585,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3639,7 +3639,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3703,7 +3703,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3768,7 +3768,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3819,7 +3819,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3870,7 +3870,7 @@ describe("Galaxy Member - @shard3", () => {
 
         const nodeHolder = otherAccounts[0]
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3916,7 +3916,7 @@ describe("Galaxy Member - @shard3", () => {
 
         if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -3965,7 +3965,7 @@ describe("Galaxy Member - @shard3", () => {
 
         if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
@@ -4013,7 +4013,7 @@ describe("Galaxy Member - @shard3", () => {
 
         if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
-        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+        // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 

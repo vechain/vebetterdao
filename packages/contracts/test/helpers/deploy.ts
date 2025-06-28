@@ -559,7 +559,7 @@ export const getOrDeployContractInstances = async ({
   // )) as NodeManagement
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3", "GalaxyMember"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3", "GalaxyMemberV4", "GalaxyMember"],
     [
       [
         {
@@ -585,9 +585,10 @@ export const getOrDeployContractInstances = async ({
       ],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
     },
   )) as GalaxyMember
 

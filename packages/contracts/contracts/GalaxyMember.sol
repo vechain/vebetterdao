@@ -62,8 +62,15 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
  * - Added checkpoints for the selected token ID of the user
  * - Added `clock()` and `CLOCK_MODE()` functions to allow for custom time tracking
  *
- * -------------------------------- VERSION 4 ---------------------------------
- *  - Added events to track the level of the token when attaching and detaching nodes
+ * --------------------------------- VERSION 4 ---------------------------------
+ * - Added events to track the level of the token when attaching and detaching nodes
+ *
+ * --------------------------------- VERSION 5 ---------------------------------
+ * - Upon StarGate launch, we updated the NodeManagement contract to V3
+ * - Deprecated usage of vechainNodes contract address in favor of nodeManagement contract address, ie
+ *   removed `setVechainNodes`
+ *   updated `getNodeLevelOf` to use nodeManagement contract
+ *   updated ownership requirements on `detachNode` - nodeManagement contract already checks idToOwner for legacy nodes
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -385,8 +392,7 @@ contract GalaxyMember is
 
     require(
       ownerOf(tokenId) == msg.sender ||
-        $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender ||
-        $.vechainNodes.idToOwner(nodeTokenId) == msg.sender,
+        $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender,
       "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
@@ -490,14 +496,6 @@ contract GalaxyMember is
     $.isPublicMintingPaused = isPaused;
   }
 
-  /// @notice Sets the Vechain Nodes contract address
-  /// @param _vechainNodes Vechain Nodes contract address
-  function setVechainNodes(address _vechainNodes) public virtual onlyRole(NODES_MANAGER_ROLE) {
-    require(_vechainNodes != address(0), "GalaxyMember: _vechainNodes cannot be the zero address");
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    $.vechainNodes = ITokenAuction(_vechainNodes);
-  }
-
   /// @notice Sets the treasury contract address
   /// @param nodeLevel Vechain node level (i.e., 1, 2, 3, 4, 5, 6, 7, 8 => Strength, Thunder, Mjolnir, VeThorX, StrengthX, ThunderX, MjolnirX)
   /// @param level new free upgrade level
@@ -591,9 +589,7 @@ contract GalaxyMember is
   function getNodeLevelOf(uint256 nodeId) public view virtual returns (uint8) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    (, uint8 nodeLevel, , , , , ) = $.vechainNodes.getMetadata(nodeId);
-
-    return nodeLevel;
+    return $.nodeManagement.getNodeLevel(nodeId);
   }
 
   /// @notice Gets the selected token ID for the user
@@ -725,7 +721,7 @@ contract GalaxyMember is
   /// @dev This function is used to identify the version of the contract and should be updated in each new version
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "4";
+    return "5";
   }
 
   struct TokenInfo {
