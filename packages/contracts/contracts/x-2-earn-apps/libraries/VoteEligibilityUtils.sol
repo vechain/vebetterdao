@@ -25,7 +25,6 @@ pragma solidity 0.8.20;
 
 import { VechainNodesDataTypes } from "../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
-import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";

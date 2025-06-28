@@ -25,7 +25,6 @@ pragma solidity 0.8.20;
 
 import { VechainNodesDataTypes } from "../../mocks/Stargate/NodeManagement/libraries/VechainNodesDataTypes.sol";
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
-import { INodeManagementV3 } from "../../mocks/Stargate/interfaces/INodeManagement/INodeManagementV3.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 
@@ -35,7 +34,6 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
  * Provides functionality for retrieving a subset of apps based on specified start index and count.
  */
 library AppStorageUtils {
-
   /**
    * @dev Error thrown when the specified start index for pagination is invalid.
    * This typically occurs when the start index exceeds the total number of available apps.
