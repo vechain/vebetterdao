@@ -402,9 +402,8 @@ export const getOrDeployContractInstances = async ({
   } else {
     vthoAddress = "0x0000000000000000000000000000456E65726779"
   }
-  console.log("VTHO token address: ", vthoAddress)
 
-  console.log("Deploying the StargateNFT libraries...")
+  // Deploy StargateNFT libraries
   const {
     StargateNFTClockLib,
     StargateNFTSettingsLib,
@@ -412,9 +411,9 @@ export const getOrDeployContractInstances = async ({
     StargateNFTMintingLib,
     StargateNFTVetGeneratedVthoLib,
     StargateNFTLevelsLib,
-  } = await deployStargateNFTLibraries({ logOutput: true })
+  } = await deployStargateNFTLibraries({ logOutput: false })
 
-  console.log("Deploying StargateNFT...")
+  // Deploy StargateNFT proxy
   const stargateNftAddress = await deployStargateProxyWithoutInitialization(
     "StargateNFT",
     {
@@ -428,9 +427,10 @@ export const getOrDeployContractInstances = async ({
     true,
   )
 
-  console.log(`Deploying StargateDelegation...`)
+  // Deploy StargateDelegation proxy
   const stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, true)
 
+  // Initialize StargateNFT proxy
   const stargateNftMock = await initializeProxy(
     stargateNftAddress,
     "StargateNFT",
@@ -459,8 +459,8 @@ export const getOrDeployContractInstances = async ({
       Levels: await StargateNFTLevelsLib.getAddress(),
     },
   )
-  console.log("StargateNFT initialized")
 
+  // Initialize StargateDelegation proxy
   const stargateDelegateMock = await initializeProxy(
     stargateDelegateAddress,
     "StargateDelegation",
@@ -477,7 +477,6 @@ export const getOrDeployContractInstances = async ({
     ],
     {},
   )
-  console.log("StargateDelegation initialized")
 
   const nodeManagementMock = await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
@@ -1127,7 +1126,7 @@ export const getOrDeployContractInstances = async ({
     galaxyMember,
     x2EarnApps,
     xAllocationVoting,
-    nodeManagementMock,
+    nodeManagement: nodeManagementMock,
     xAllocationPool,
     emissions,
     voterRewards,
