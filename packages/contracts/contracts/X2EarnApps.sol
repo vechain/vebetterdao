@@ -57,6 +57,9 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * - Restricting one app per creator holding a creator NFT.
  * A check on submitApp is added to ensure that the number of creatorApps[creator] is 0.
  * This mapping is increased when a creator is added to an app, submit an app after approved by VBD, or got endorsed.
+ *
+ * -------------------- Version 6 --------------------
+ * - Upon StarGate launch, we updated the NodeManagement contract to V3
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
@@ -125,7 +128,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "5";
+    return "6";
   }
 
   // ---------- Overrides ------------ //
