@@ -262,7 +262,7 @@ export const getOrDeployContractInstances = async ({
   config = createLocalConfig(),
   maxMintableLevel = DEFAULT_MAX_MINTABLE_LEVEL,
   bootstrapAndStartEmissions = false,
-  deployErcMocks = false,
+  deployMocks = false,
 }) => {
   if (!forceDeploy && cachedDeployInstance !== undefined) {
     return cachedDeployInstance
@@ -488,7 +488,7 @@ export const getOrDeployContractInstances = async ({
   )
 
   let myErc1155, myErc721
-  if (deployErcMocks) {
+  if (deployMocks) {
     const MyERC721 = await ethers.getContractFactory("MyERC721")
     myErc721 = await MyERC721.deploy(owner.address)
     await myErc721.waitForDeployment()
