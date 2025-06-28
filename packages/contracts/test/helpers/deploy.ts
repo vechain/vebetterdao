@@ -424,11 +424,11 @@ export const getOrDeployContractInstances = async ({
       VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
       Levels: await StargateNFTLevelsLib.getAddress(),
     },
-    true,
+    false,
   )
 
   // Deploy StargateDelegation proxy
-  const stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, true)
+  const stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, false)
 
   // Initialize StargateNFT proxy
   const stargateNftMock = await initializeProxy(
@@ -483,7 +483,7 @@ export const getOrDeployContractInstances = async ({
     [[await vechainNodesMock.getAddress(), owner.address, owner.address], [], [stargateNftAddress]],
     {
       versions: [undefined, 2, 3],
-      logOutput: true,
+      logOutput: false,
     },
   )
 
