@@ -446,6 +446,9 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV4,
     EndorsementUtilsV4,
     VoteEligibilityUtilsV4,
+    AdministrationUtilsV5,
+    EndorsementUtilsV5,
+    VoteEligibilityUtilsV5,
   } = await x2EarnLibraries()
 
   // Verify all required libraries are deployed
@@ -457,6 +460,9 @@ export async function deployAll(config: ContractsConfig) {
   }
   if (!AdministrationUtilsV4 || !EndorsementUtilsV4 || !VoteEligibilityUtilsV4) {
     throw new Error("Failed to deploy X2Earn V4 libraries")
+  }
+  if (!AdministrationUtilsV5 || !EndorsementUtilsV5 || !VoteEligibilityUtilsV5) {
+    throw new Error("Failed to deploy X2Earn V5 libraries")
   }
   if (!AdministrationUtils || !EndorsementUtils || !VoteEligibilityUtils) {
     throw new Error("Failed to deploy X2Earn latest libraries")
@@ -682,7 +688,7 @@ export async function deployAll(config: ContractsConfig) {
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnApps"],
     [
       [
         config.XAPP_BASE_URI,
@@ -699,9 +705,10 @@ export async function deployAll(config: ContractsConfig) {
       [config.X2EARN_NODE_COOLDOWN_PERIOD, X_ALLOCATION_ADRESS_TEMP],
       [X2EARNREWARDSPOOL_ADDRESS_TEMP],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       libraries: [
         undefined,
         {
@@ -718,6 +725,11 @@ export async function deployAll(config: ContractsConfig) {
           AdministrationUtilsV4: await AdministrationUtilsV4.getAddress(),
           EndorsementUtilsV4: await EndorsementUtilsV4.getAddress(),
           VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4.getAddress(),
+        },
+        {
+          AdministrationUtilsV5: await AdministrationUtilsV5.getAddress(),
+          EndorsementUtilsV5: await EndorsementUtilsV5.getAddress(),
+          VoteEligibilityUtilsV5: await VoteEligibilityUtilsV5.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),

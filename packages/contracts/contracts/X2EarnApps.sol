@@ -59,7 +59,9 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * This mapping is increased when a creator is added to an app, submit an app after approved by VBD, or got endorsed.
  *
  * -------------------- Version 6 --------------------
- * - Upon StarGate launch, we updated the NodeManagement contract to V3
+ * - Upon StarGate launch, we updated the NodeManagement contract to V3. This impacted mostly
+ *   EndorsementUtils library.
+ *   EndorsementUpgradeable module.
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,

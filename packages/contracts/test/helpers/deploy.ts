@@ -83,6 +83,9 @@ import {
   AdministrationUtilsV4,
   VoteEligibilityUtilsV4,
   EndorsementUtilsV4,
+  AdministrationUtilsV5,
+  VoteEligibilityUtilsV5,
+  EndorsementUtilsV5,
   X2EarnCreator,
   VeBetterPassportV2,
   PassportConfiguratorV2,
@@ -229,7 +232,7 @@ interface DeployInstance {
   passportSignalingLogicV3: PassportSignalingLogicV3
   passportWhitelistBlacklistLogicV3: PassportWhitelistAndBlacklistLogicV3
   passportConfigurator: any // no abi for this library, which means a typechain is not generated
-
+  // X2Earn Libraries
   administrationUtils: AdministrationUtils
   endorsementUtils: EndorsementUtils
   voteEligibilityUtils: VoteEligibilityUtils
@@ -242,6 +245,10 @@ interface DeployInstance {
   administrationUtilsV4: AdministrationUtilsV4
   endorsementUtilsV4: EndorsementUtilsV4
   voteEligibilityUtilsV4: VoteEligibilityUtilsV4
+  administrationUtilsV5: AdministrationUtilsV5
+  endorsementUtilsV5: EndorsementUtilsV5
+  voteEligibilityUtilsV5: VoteEligibilityUtilsV5
+
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -358,18 +365,26 @@ export const getOrDeployContractInstances = async ({
 
   // Deploy X2Earn AppLibraries
   const {
+    // Latest
     AdministrationUtils,
     EndorsementUtils,
     VoteEligibilityUtils,
+    // V2
     AdministrationUtilsV2,
     EndorsementUtilsV2,
     VoteEligibilityUtilsV2,
+    // V3
     AdministrationUtilsV3,
     EndorsementUtilsV3,
     VoteEligibilityUtilsV3,
+    // V4
     AdministrationUtilsV4,
     EndorsementUtilsV4,
     VoteEligibilityUtilsV4,
+    // V5
+    AdministrationUtilsV5,
+    EndorsementUtilsV5,
+    VoteEligibilityUtilsV5,
   } = await x2EarnLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
@@ -611,7 +626,7 @@ export const getOrDeployContractInstances = async ({
   const x2EarnRewardsPoolAddress = otherAccounts[11].address
 
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnAppsV5", "X2EarnApps"],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -623,9 +638,10 @@ export const getOrDeployContractInstances = async ({
       [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
       [x2EarnRewardsPoolAddress], // Setting temporary address for the x2EarnRewardsPool
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       libraries: [
         undefined,
         {
@@ -642,6 +658,11 @@ export const getOrDeployContractInstances = async ({
           AdministrationUtilsV4: await AdministrationUtilsV4.getAddress(),
           EndorsementUtilsV4: await EndorsementUtilsV4.getAddress(),
           VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4.getAddress(),
+        },
+        {
+          AdministrationUtilsV5: await AdministrationUtilsV5.getAddress(),
+          EndorsementUtilsV5: await EndorsementUtilsV5.getAddress(),
+          VoteEligibilityUtilsV5: await VoteEligibilityUtilsV5.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
@@ -1228,6 +1249,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtilsV4: AdministrationUtilsV4,
     endorsementUtilsV4: EndorsementUtilsV4,
     voteEligibilityUtilsV4: VoteEligibilityUtilsV4,
+    administrationUtilsV5: AdministrationUtilsV5,
+    endorsementUtilsV5: EndorsementUtilsV5,
+    voteEligibilityUtilsV5: VoteEligibilityUtilsV5,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,
