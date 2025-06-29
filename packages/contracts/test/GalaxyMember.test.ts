@@ -665,7 +665,7 @@ describe("Galaxy Member - @shard3", () => {
         forceDeploy: true,
       })
 
-      expect(await galaxyMember.version()).to.equal("4")
+      expect(await galaxyMember.version()).to.equal("5")
     })
 
     it("Should not have state conflict after upgrading to V3", async () => {
