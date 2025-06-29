@@ -88,6 +88,12 @@ interface INodeManagementV3 {
     function setVechainNodesContract(address vechainNodesContract) external;
 
     /**
+     * @notice Set the address of the Stargate NFT contract.
+     * @param stargateNft The new address of the Stargate NFT contract.
+     */
+    function setStargateNft(address stargateNft) external;
+
+    /**
      * @notice Delegate a node to another address.
      * @param delegatee The address to delegate the node to.
      * @param nodeId The ID of the node to delegate.
@@ -113,6 +119,20 @@ interface INodeManagementV3 {
      * @return address The address of the manager of the specified node.
      */
     function getNodeManager(uint256 nodeId) external view returns (address);
+
+    /**
+     * @notice Retrieves the address of the true owner of a node.
+     * @param nodeId The ID of the node for which the owner address is being retrieved.
+     * @return address The address of the owner of the specified node.
+     */
+    function getNodeOwner(uint256 nodeId) external view returns (address);
+
+    /**
+     * @notice Retrieves the node IDs delegated to a user.
+     * @param user The address of the user to check.
+     * @return uint256[] The node IDs delegated to the user.
+     */
+    function getNodesDelegatedTo(address user) external view returns (uint256[] memory);
 
     /**
      * @notice Check if a user is holding a specific node ID either directly or through delegation.
@@ -158,6 +178,14 @@ interface INodeManagementV3 {
     function getDirectNodesOwnership(address user) external view returns (uint256[] memory);
 
     /**
+     * @notice Checks if a user is the direct owner of a node.
+     * @param user The address of the user to check.
+     * @param nodeId The ID of the node to check.
+     * @return bool True if the user is the direct owner of the node, false otherwise.
+     */
+    function isDirectNodeOwner(address user, uint256 nodeId) external view returns (bool);
+
+    /**
      * @notice Retrieves the node level of a given node ID.
      * @param nodeId The token ID of the endorsing node.
      * @return levelId The node level of the specified token ID.
@@ -185,4 +213,30 @@ interface INodeManagementV3 {
      * @return NodeSource The source of the node.
      */
     function exists(uint256 nodeId) external view returns (bool, VechainNodesDataTypes.NodeSource);
+
+    /**
+     * @notice Retrieves the node IDs owned by a user.
+     * @param user The address of the user to check.
+     * @return uint256[] The node IDs owned by the user.
+     */
+    function getUserNodes(address user) external view returns (uint256[] memory);
+
+    /**
+     * @notice Retrieves the node IDs owned by a user.
+     * @param user The address of the user to check.
+     * @return uint256[] The node IDs owned by the user.
+     */
+    function getUserStargateNFTsInfo(address user) external view returns (VechainNodesDataTypes.Token[] memory);
+
+    /**
+     * @notice Retrieves the VeChain Nodes contract address.
+     * @return address The address of the VeChain Nodes contract.
+     */
+    function getVechainNodesContract() external view returns (address);
+
+    /**
+     * @notice Retrieves the Stargate NFT contract address.
+     * @return address The address of the Stargate NFT contract.
+     */
+    function getStargateNft() external view returns (address);
 }

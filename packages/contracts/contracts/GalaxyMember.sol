@@ -70,7 +70,7 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
  * - Deprecated usage of vechainNodes contract address in favor of nodeManagement contract address, ie
  *   removed `setVechainNodes`
  *   updated `getNodeLevelOf` to use nodeManagement contract
- *   updated ownership requirements on `detachNode` - nodeManagement contract already checks idToOwner for legacy nodes
+ *   updated ownership conditions on `detachNode` to use nodeManagement contract
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -392,7 +392,8 @@ contract GalaxyMember is
 
     require(
       ownerOf(tokenId) == msg.sender ||
-        $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender,
+        $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender ||
+        $.nodeManagement.getNodeOwner(nodeTokenId) == msg.sender,
       "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
