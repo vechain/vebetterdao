@@ -3,12 +3,25 @@
 pragma solidity 0.8.20;
 
 import {VechainNodesDataTypes} from "../../NodeManagement/libraries/VechainNodesDataTypes.sol";
+import {DataTypes} from "../../StargateNFT/libraries/DataTypes.sol";
 
 interface INodeManagementV3 {
     enum NodeSource {
         Node,
         VeChainNodes,
         StargateNFT
+    }
+
+    // Struct used to format return values for getUserNodes
+    struct NodeInfo {
+        uint256 nodeId;
+        uint8 nodeLevel;
+        address xNodeOwner;
+        bool isXNodeHolder;
+        bool isXNodeDelegated;
+        bool isXNodeDelegator;
+        bool isXNodeDelegatee;
+        address delegatee;
     }
 
     /**
@@ -219,24 +232,12 @@ interface INodeManagementV3 {
      * @param user The address of the user to check.
      * @return uint256[] The node IDs owned by the user.
      */
-    function getUserNodes(address user) external view returns (uint256[] memory);
+    function getUserNodes(address user) external view returns (NodeInfo[] memory);
 
     /**
      * @notice Retrieves the node IDs owned by a user.
      * @param user The address of the user to check.
      * @return uint256[] The node IDs owned by the user.
      */
-    function getUserStargateNFTsInfo(address user) external view returns (VechainNodesDataTypes.Token[] memory);
-
-    /**
-     * @notice Retrieves the VeChain Nodes contract address.
-     * @return address The address of the VeChain Nodes contract.
-     */
-    function getVechainNodesContract() external view returns (address);
-
-    /**
-     * @notice Retrieves the Stargate NFT contract address.
-     * @return address The address of the Stargate NFT contract.
-     */
-    function getStargateNft() external view returns (address);
+    function getUserStargateNFTsInfo(address user) external view returns (DataTypes.Token[] memory);
 }

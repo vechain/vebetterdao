@@ -59,18 +59,6 @@ contract NodeManagementV3 is INodeManagementV3, AccessControlUpgradeable, UUPSUp
 
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-    // Struct used to format return values for getUserNodes
-    struct NodeInfo {
-        uint256 nodeId;
-        uint8 nodeLevel;
-        address xNodeOwner;
-        bool isXNodeHolder;
-        bool isXNodeDelegated;
-        bool isXNodeDelegator;
-        bool isXNodeDelegatee;
-        address delegatee;
-    }
-
     /// @custom:storage-location erc7201:b3tr.storage.NodeManagement
     struct NodeManagementStorage {
         ITokenAuction vechainNodesContract; // The token auction contract

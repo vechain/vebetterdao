@@ -781,7 +781,7 @@ describe("Galaxy Member - @shard3", () => {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
-      // await galaxyMemberV2.setVechainNodes(await vechainNodesMock.getAddress())
+      await galaxyMemberV2.setVechainNodes(await vechainNodesMock.getAddress())
 
       expect(await galaxyMemberV2.balanceOf(await owner.getAddress())).to.equal(1)
       expect(await galaxyMemberV2.balanceOf(await otherAccount.getAddress())).to.equal(1)
