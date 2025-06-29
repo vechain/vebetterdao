@@ -3275,7 +3275,7 @@ describe("Galaxy Member - @shard3", () => {
   })
 
   describe("GalaxyMember Node Management Integration", () => {
-    describe.only("Node Delegation with Token Attachment", () => {
+    describe("Node Delegation with Token Attachment", () => {
       it("Should allow node manager (delegatee) to attach node to GM token, then to detach node from GM token", async () => {
         const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
           await getOrDeployContractInstances({
@@ -3298,20 +3298,20 @@ describe("Galaxy Member - @shard3", () => {
         expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(nodeId)
 
         const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
-        expect(nodeMetadata[nodeId]).to.equal(BigInt(7)) // Mjolnir X Node
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
 
-        // mint the free Earth GM
+        // Mint free Earth GM token to owner
         const gmId = 1
         await galaxyMember.connect(owner).freeMint()
         expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
 
-        // Delegate X Node created above to owner
+        // Delegate X Node to owner
         await nodeManagement.connect(nodeHolder).delegateNode(owner, nodeId)
 
         // Expect node to be delegated to owner
         expect(await nodeManagement.getNodeManager(nodeId)).to.equal(owner.address)
 
-        // Attach node to GM NFT
+        // Delegatee can attach node to their GM NFT
         await galaxyMember.connect(owner).attachNode(nodeId, gmId)
 
         // Expect node to be attached to GM NFT
@@ -3348,9 +3348,9 @@ describe("Galaxy Member - @shard3", () => {
         expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(nodeId)
 
         const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
-        expect(nodeMetadata[nodeId]).to.equal(BigInt(7)) // Mjolnir X Node
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
 
-        // mint the free Earth GM
+        // Mint free Earth GM token to owner
         const gmId = 1
         await galaxyMember.connect(owner).freeMint()
 
@@ -3362,13 +3362,13 @@ describe("Galaxy Member - @shard3", () => {
           "GalaxyMember: vechain node not owned or managed by caller",
         )
 
-        // Delegate X Node created above to owner
+        // Delegate X Node to owner
         await nodeManagement.connect(nodeHolder).delegateNode(owner, nodeId)
 
         // Expect node to be delegated to owner
         expect(await nodeManagement.getNodeManager(nodeId)).to.equal(owner.address)
 
-        // Now owner can attach node to GM NFT
+        // Now owner can attach node to their GM NFT
         await galaxyMember.connect(owner).attachNode(nodeId, gmId)
 
         // Expect node to be attached to GM NFT
@@ -3398,19 +3398,19 @@ describe("Galaxy Member - @shard3", () => {
         expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(nodeId)
 
         const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
-        expect(nodeMetadata[nodeId]).to.equal(BigInt(7)) // Mjolnir X Node
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
 
-        // mint the free Earth GM
+        // Mint free Earth GM token to owner
         const gmId = 1
         await galaxyMember.connect(owner).freeMint()
 
-        // Delegate X Node created above to owner
+        // Delegate X Node to owner
         await nodeManagement.connect(nodeHolder).delegateNode(owner, nodeId)
 
         // Expect node to be delegated to owner
         expect(await nodeManagement.getNodeManager(nodeId)).to.equal(owner.address)
 
-        // Attach node to GM NFT
+        // Delegatee can attach node to their GM NFT
         await galaxyMember.connect(owner).attachNode(nodeId, gmId)
 
         // Expect node to be attached to GM NFT
@@ -3422,7 +3422,7 @@ describe("Galaxy Member - @shard3", () => {
           "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller",
         )
 
-        // Original node holder can detach node from GM NFT, even when node is delegated to owner address
+        // Original nodeHolder can detach node from GM NFT, even when node is delegated to owner address
         await galaxyMember.connect(nodeHolder).detachNode(nodeId, gmId)
 
         // Expect node to be detached from GM NFT
@@ -3444,58 +3444,62 @@ describe("Galaxy Member - @shard3", () => {
         const nodeHolder = otherAccounts[0]
 
         // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
-
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
+        // FYI participateInAllocationVoting will also call endorseApp, where a Mjolnir X Node is minted
         await participateInAllocationVoting(owner, true, nodeHolder)
 
         // nodeHolder owns a Mjolnir X Node
-        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(1)
+        const nodeId = 1
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(nodeId)
 
-        const nodeMetadata = await vechainNodesMock.getMetadata(1)
-
+        const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
         expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
 
+        // Mint the free Earth GM token to owner
+        const gmId = 1
         await galaxyMember.connect(owner).freeMint()
+        expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
 
-        // Delegate X Node created above to owner
-        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+        // Delegate X Node to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner, nodeId)
 
         // Expect node to be delegated to owner
-        expect(await nodeManagement.getNodeManager(1)).to.equal(owner.address)
+        expect(await nodeManagement.getNodeManager(nodeId)).to.equal(owner.address)
 
-        // Attach node to GM NFT
-        await galaxyMember.connect(owner).attachNode(1, 1)
+        // Delegatee can attach node to their GM NFT
+        await galaxyMember.connect(owner).attachNode(nodeId, gmId)
 
         // Expect node to be attached to GM NFT
-        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
-        expect(await galaxyMember.levelOf(1)).to.equal(7)
+        expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(nodeId)
+        expect(await galaxyMember.levelOf(gmId)).to.equal(7) // Saturn - GM gets free upgrade when attached to a Mjolnir X Node
 
         // Remove delegation
-        await nodeManagement.connect(nodeHolder).removeNodeDelegation()
+        await nodeManagement.connect(nodeHolder).removeNodeDelegation(nodeId)
 
         // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is nodeHolder
-        expect(await galaxyMember.levelOf(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
 
         // Expect GM is still attached to the node
-        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(nodeId)
 
+        // Mint free Earth GM token to nodeHolder
         await participateInAllocationVoting(nodeHolder, false)
 
+        const gmId2 = 2
         await galaxyMember.connect(nodeHolder).freeMint()
 
         // Detach node from GM NFT of owner
-        await galaxyMember.connect(owner).detachNode(1, 1)
+        await galaxyMember.connect(owner).detachNode(nodeId, gmId)
 
         // Attach node to GM NFT of nodeHolder
-        await galaxyMember.connect(nodeHolder).attachNode(1, 2)
+        await galaxyMember.connect(nodeHolder).attachNode(nodeId, gmId2)
 
         // Expect node to be attached to GM NFT of nodeHolder
-        expect(await galaxyMember.getNodeIdAttached(2)).to.equal(1)
-
-        // Expect GM NFT level to be 7
-        expect(await galaxyMember.levelOf(2)).to.equal(7)
+        expect(await galaxyMember.getNodeIdAttached(gmId2)).to.equal(nodeId)
+        expect(await galaxyMember.levelOf(gmId2)).to.equal(7) // Saturn - GM gets free upgrade when attached to a Mjolnir X Node
       })
+
       it("Should update token level correctly when delegated node is upgraded", async () => {
         const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
           await getOrDeployContractInstances({
@@ -3508,42 +3512,51 @@ describe("Galaxy Member - @shard3", () => {
         const nodeHolder = otherAccounts[0]
 
         // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
-
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
         await participateInAllocationVoting(owner, true)
 
-        // Mint Strength Economy Node (Level 1) to nodeHolder
+        // Mint Strength Economic Node (Level 1) to nodeHolder
         await addNodeToken(1, nodeHolder)
 
-        // nodeHolder owns a Mjolnir X Node
-        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+        // owner owns a Mjolnir X Node, nodeHolder owns a Strength Economic Node
+        const nodeId = 1
+        const delegatedNodeId = 2
 
-        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+        expect(await vechainNodesMock.ownerToId(owner.address)).to.equal(nodeId)
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(delegatedNodeId)
 
-        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+        const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
+        const delegatedNodeMetadata = await vechainNodesMock.getMetadata(delegatedNodeId)
 
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+        expect(delegatedNodeMetadata[1]).to.equal(BigInt(1)) // Strength Economic Node
+
+        // Mint the free Earth GM token to owner
+        const gmId = 1
         await galaxyMember.connect(owner).freeMint()
+        expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
 
-        // Delegate X Node created above to owner
-        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+        // Delegate Strength Economic Node to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner, delegatedNodeId)
 
         // Expect node to be delegated to owner
-        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+        expect(await nodeManagement.getNodeManager(delegatedNodeId)).to.equal(owner.address)
 
         // Attach node to GM NFT
-        await galaxyMember.connect(owner).attachNode(2, 1)
+        await galaxyMember.connect(owner).attachNode(delegatedNodeId, gmId)
 
         // Expect node to be attached to GM NFT
-        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
-        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+        expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(delegatedNodeId)
+        expect(await galaxyMember.levelOf(gmId)).to.equal(2) // Moon - GM gets free upgrade when attached to a Strength Economic Node
 
-        // Upgrade node
-        await vechainNodesMock.connect(owner).upgradeTo(2, 3)
+        // Simulate node upgrade for delegated node - only contract operators can do this, node ownership is not validated
+        await vechainNodesMock.connect(owner).upgradeTo(delegatedNodeId, 3) // From Strength Economic Node (Level 1) to Mjolnir Economic Node (Level 3)
 
-        // Expect GM NFT level to be updated to 8
-        expect(await galaxyMember.levelOf(1)).to.equal(6)
+        // Expect delegatee's GM NFT level to be upgraded
+        expect(await galaxyMember.levelOf(gmId)).to.equal(6) // Jupiter - GM gets free upgrade when attached to a Mjolnir Economic Node
       })
+
       it("Should update token level correctly when delegated node is downgraded", async () => {
         const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
           await getOrDeployContractInstances({
@@ -3556,7 +3569,6 @@ describe("Galaxy Member - @shard3", () => {
         const nodeHolder = otherAccounts[0]
 
         // await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
-
         await galaxyMember.setMaxLevel(10) // Set max level to 10
 
         await participateInAllocationVoting(owner, true)
@@ -3564,36 +3576,45 @@ describe("Galaxy Member - @shard3", () => {
         // Mint Thunder Economy Node (Level 2) to nodeHolder
         await addNodeToken(2, nodeHolder)
 
-        // nodeHolder owns a Mjolnir X Node
-        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+        // owner owns a Mjolnir X Node, nodeHolder owns a Thunder Economic Node
+        const nodeId = 1
+        const delegatedNodeId = 2
 
-        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+        expect(await vechainNodesMock.ownerToId(owner.address)).to.equal(nodeId)
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(delegatedNodeId)
 
-        expect(nodeMetadata[1]).to.equal(BigInt(2)) // Thunder Economy Node
+        const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
+        const delegatedNodeMetadata = await vechainNodesMock.getMetadata(delegatedNodeId)
 
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+        expect(delegatedNodeMetadata[1]).to.equal(BigInt(2)) // Thunder Economic Node
+
+        // Mint the free Earth GM token to owner
+        const gmId = 1
         await galaxyMember.connect(owner).freeMint()
+        expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
 
-        // Delegate X Node created above to owner
-        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+        // Delegate Thunder Economic Node to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner, delegatedNodeId)
 
         // Expect node to be delegated to owner
-        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+        expect(await nodeManagement.getNodeManager(delegatedNodeId)).to.equal(owner.address)
 
         // Attach node to GM NFT
-        await galaxyMember.connect(owner).attachNode(2, 1)
+        await galaxyMember.connect(owner).attachNode(delegatedNodeId, gmId)
 
         // Expect node to be attached to GM NFT
-        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
-        expect(await galaxyMember.levelOf(1)).to.equal(4)
+        expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(delegatedNodeId)
+        expect(await galaxyMember.levelOf(gmId)).to.equal(4) // Venus - GM gets free upgrade when attached to a Thunder Economic Node
 
         // Fast forward 4 hours for node to be downgraded
         await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
 
-        // Downgrade node to Strength Economy Node (Level 1)
-        await vechainNodesMock.connect(owner).downgradeTo(2, 1)
+        // Simulate node downgrade for delegated node - only contract operators can do this, node ownership is not validated
+        await vechainNodesMock.connect(owner).downgradeTo(delegatedNodeId, 1) // From Thunder Economic Node (Level 2) to Strength Economic Node (Level 1)
 
-        // Expect GM NFT level to be updated to 2
-        expect(await galaxyMember.levelOf(1)).to.equal(2)
+        // Expect delegatee's GM NFT level to be downgraded
+        expect(await galaxyMember.levelOf(gmId)).to.equal(2) // Moon - GM gets free upgrade when attached to a Strength Economic Node
       })
     })
 
