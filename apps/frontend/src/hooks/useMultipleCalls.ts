@@ -12,12 +12,20 @@ export type UseCallResult<T = any> = {
   error: Error | null
   success: boolean
 }
+
+/**
+ * Parameters for the useMultipleCalls hook
+ */
+export type UseMultipleCallsParams<T extends Interface> = {
+  calls: UseCallParams<T>[]
+  queryKeyPrefix: string
+}
 /**
  * Custom hook for making multiple contract calls in parallel.
  * @param calls - Array of call configurations.
  * @returns Array of query results.
  */
-export const useMultipleCalls = <T extends Interface>(calls: UseCallParams<T>[]) => {
+export const useMultipleCalls = <T extends Interface>({ calls, queryKeyPrefix }: UseMultipleCallsParams<T>) => {
   const { thor } = useConnex()
 
   const createQueryFn = useCallback(
@@ -50,11 +58,11 @@ export const useMultipleCalls = <T extends Interface>(calls: UseCallParams<T>[])
   const queries = useMemo(
     () =>
       calls.map(call => ({
-        queryKey: getCallKey({ method: call.method, keyArgs: call.keyArgs || call.args }),
+        queryKey: [`${queryKeyPrefix}-${getCallKey({ method: call.method, keyArgs: call?.args || call?.keyArgs })}`],
         queryFn: createQueryFn(call),
         enabled: call.enabled ?? true,
       })),
-    [calls, createQueryFn],
+    [calls, createQueryFn, queryKeyPrefix],
   )
 
   return useQueries({
