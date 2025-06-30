@@ -7054,5 +7054,42 @@ describe("X-Apps - @shard17b", function () {
 
       await expect(x2EarnApps.connect(otherAccounts[1]).updateCooldownPeriod(0)).to.be.reverted
     })
+
+    it("Node owner with 0 endorsement points cannot endorse an app", async function () {
+      const { x2EarnApps, otherAccounts, owner, stargateNftMock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      // Create node holder with level 0 (0 endorsement score)
+      await createNodeHolder(0, otherAccounts[1]) // Node strength level 0 corresponds to an endorsement score of 0
+      const level = await stargateNftMock.getLevel(1)
+      await stargateNftMock.stake(level.id, { value: level.vetAmountRequiredToStake })
+      // Get the token ID owned by the account
+      const ownedIds = await stargateNftMock.idsOwnedBy(owner.address)
+      const nodeId = ownedIds[0]
+      expect(nodeId).is.greaterThan(0)
+
+      // Verify the node holder has 0 endorsement score
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[1].address)).to.eql(0n)
+
+      // Should revert when trying to endorse with 0 endorsement points
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "NodeNotAllowedToEndorse",
+      )
+
+      // App should still be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // App should not be eligible for voting
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
+    })
   })
 })

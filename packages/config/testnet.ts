@@ -20,6 +20,7 @@ const config: AppConfig = {
   veBetterPassportContractAddress: "0xB08939f434Ac5610D3847063bABd1F8833a66d75",
   x2EarnCreatorContractAddress: "0x2ea5424e92E9a803c5971b50350d119cdD7e196E",
   b3trMultiSigAddress: "0x15bDc96B5C490A7948dA856B4Db32408DDD89a4B",
+  stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {

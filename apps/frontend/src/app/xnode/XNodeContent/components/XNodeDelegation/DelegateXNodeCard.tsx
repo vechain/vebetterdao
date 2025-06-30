@@ -33,15 +33,15 @@ export const DelegateXNodeCard = () => {
       <CardBody>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
-            <Heading fontSize="lg">{t("Delegation")}</Heading>
+            <Heading fontSize="lg">{t("Node Management")}</Heading>
             {isXNodeDelegated ? (
               <Text fontSize="sm">
-                {isXNodeDelegator ? t("Node is currently delegated to:") : t("Node is currently delegated to you by:")}
+                {isXNodeDelegator ? t("Node is currently managed by:") : t("Node managed for:")}
               </Text>
             ) : (
               <Text fontSize="sm">
                 {t(
-                  "Delegate your Node to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
+                  "Assign a manager to help operate this node. Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT. You can revoke access anytime.",
                 )}
               </Text>
             )}
@@ -58,7 +58,7 @@ export const DelegateXNodeCard = () => {
               leftIcon={<UilArrowUpRight color="#004CFC" />}
               variant="primarySubtle"
               onClick={delegateModal.onOpen}>
-              {t("Delegate Node")}
+              {t("Add node manager")}
             </Button>
           )}
 

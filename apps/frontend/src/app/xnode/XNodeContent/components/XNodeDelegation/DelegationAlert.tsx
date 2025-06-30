@@ -30,8 +30,8 @@ export const DelegationAlert = () => {
     <Alert status="info" borderRadius="2xl">
       <AlertIcon />
       <Box lineHeight="1.20rem" fontSize="sm">
-        <AlertTitle as="span">{t("You are controlling a delegated Node")}</AlertTitle>
-        <Text>{t("Only the Node owner can revoke the delegation.")}</Text>
+        <AlertTitle as="span">{t("You have been added as a manager for this node")}</AlertTitle>
+        <Text>{t("Only the owner can remove you as a manager.")}</Text>
       </Box>
     </Alert>
   )
