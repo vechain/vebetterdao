@@ -6305,9 +6305,11 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("A user with a XNODE node delegated to them can endorse an XAPP", async function () {
-      const { x2EarnApps, otherAccounts, owner, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccounts, owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -6325,9 +6327,11 @@ describe("X-Apps - @shard17b", function () {
       await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
       await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
 
+      const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      const nodeIdOtherAccount2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address) // Other account 1 delegates node to other account 3
-      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address) // Other account 2 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 3 // HERE IS BROKEN
+      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
 
       // Endorse XAPP with both Mjolnir node holders
       await x2EarnApps.connect(otherAccounts[3]).endorseApp(app1Id, 1) // Node holder endorsement score is 50
@@ -6343,9 +6347,11 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("A user with a XNODE node delegated to them can endorse an XAPP and the delegated XNODE owner cannot", async function () {
-      const { x2EarnApps, otherAccounts, owner, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccounts, owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -6362,8 +6368,10 @@ describe("X-Apps - @shard17b", function () {
       // Create two Mjolnir node holders with an endorsement score of 50 each
       await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
 
+      const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address) // Other account 1 delegates node to other account 3
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 3 // HERE IS BROKEN
 
       await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 2)).to.be.reverted // Node owner cannot endorse XAPP as node is delegated
 
@@ -6373,9 +6381,11 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("A user with multiple nodes delegated to them can endorse multiple apps", async function () {
-      const { x2EarnApps, otherAccounts, owner, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccounts, owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -6402,10 +6412,14 @@ describe("X-Apps - @shard17b", function () {
       await createNodeHolder(7, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 100
       await createNodeHolder(7, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 100
 
+      const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      const nodeIdOtherAccount2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
+      const nodeIdOtherAccount3 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
+
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address) // Other account 1 delegates node to other account 4
-      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address) // Other account 2 delegates node to other account 4
-      await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address) // Other account 3 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // HERE IS BROKEN TOO
+      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount3) // Other account 3 delegates node to other account 4
 
       // Account 4 endorses all 3 XAPPs
       await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, 1) // Node holder endorsement score is 100 -> XAPP endorse with token Id 1
@@ -6421,9 +6435,11 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("A user with multiple nodes delegated to them can endorse the same app multiple times", async function () {
-      const { x2EarnApps, otherAccounts, owner, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccounts, owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -6442,10 +6458,14 @@ describe("X-Apps - @shard17b", function () {
       await createNodeHolder(6, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 35
       await createNodeHolder(6, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 35
 
+      const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      const nodeIdOtherAccount2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
+      const nodeIdOtherAccount3 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
+
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address) // Other account 1 delegates node to other account 4
-      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address) // Other account 2 delegates node to other account 4
-      await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address) // Other account 3 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // HERE IS BROKEN TOO
+      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount3) // Other account 3 delegates node to other account 4
 
       // Account 4 endorses all 3 XAPPs
       await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, 1) // Node holder endorsement score is 35 -> XAPP endorse with token Id 1
@@ -6506,9 +6526,11 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("A user with multiple nodes delegated to them can endorse the same app multiple times", async function () {
-      const { x2EarnApps, otherAccounts, owner, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccounts, owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -6527,10 +6549,14 @@ describe("X-Apps - @shard17b", function () {
       await createNodeHolder(6, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 35
       await createNodeHolder(6, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 35
 
+      const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      const nodeIdOtherAccount2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
+      const nodeIdOtherAccount3 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
+
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address) // Other account 1 delegates node to other account 4
-      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address) // Other account 2 delegates node to other account 4
-      await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address) // Other account 3 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // this is broken
+      await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount3) // Other account 3 delegates node to other account 4
 
       // Account 4 endorses all 3 XAPPs
       await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, 1) // Node holder endorsement score is 35 -> XAPP endorse with token Id 1
@@ -6548,9 +6574,11 @@ describe("X-Apps - @shard17b", function () {
     })
 
     it("An XAPP who was endorsed by delegated node remains endorsed by XNode when delegation is revoked", async function () {
-      const { x2EarnApps, otherAccounts, owner, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccounts, owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -6567,8 +6595,10 @@ describe("X-Apps - @shard17b", function () {
       // Create two Mjolnir node holders with an endorsement score of 50 each
       await createNodeHolder(7, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 35
 
+      const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address) // Other account 1 delegates node to other account 4
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // this is broken
 
       // Account 4 endorses all 3 XAPPs
       await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, 1) // Node holder endorsement score is 35 -> XAPP endorse with token Id 1
@@ -6579,7 +6609,7 @@ describe("X-Apps - @shard17b", function () {
       expect(await x2EarnApps.getEndorsers(app1Id)).to.eql([otherAccounts[4].address])
 
       // revoke delegation -> Ownner of the node becomes the manager again
-      await nodeManagement.connect(otherAccounts[1]).removeNodeDelegation()
+      await nodeManagement.connect(otherAccounts[1]).removeNodeDelegation(nodeIdOtherAccount1)
 
       // check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
