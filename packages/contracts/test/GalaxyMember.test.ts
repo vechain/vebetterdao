@@ -25,7 +25,14 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember, GalaxyMemberV1, GalaxyMemberV2, MockERC721Receiver } from "../typechain-types"
+import {
+  GalaxyMember,
+  GalaxyMemberV1,
+  GalaxyMemberV2,
+  GalaxyMemberV3,
+  GalaxyMemberV4,
+  MockERC721Receiver,
+} from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { endorseApp } from "./helpers/xnodes"
@@ -671,7 +678,7 @@ describe("Galaxy Member - @shard3", () => {
       expect(await galaxyMember.version()).to.equal("5")
     })
 
-    it("Should not have state conflict after upgrading to V3", async () => {
+    it("Should not have state conflict after upgrading", async () => {
       const config = createLocalConfig()
       const {
         owner,
@@ -684,6 +691,7 @@ describe("Galaxy Member - @shard3", () => {
         minterAccount,
         vechainNodesMock,
         nodeManagement,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -716,38 +724,47 @@ describe("Galaxy Member - @shard3", () => {
       ])) as GalaxyMemberV1
 
       await galaxyMember.waitForDeployment()
+      expect(await galaxyMember.MAX_LEVEL()).to.equal(5)
 
+      // Contract setup
       await galaxyMember.connect(owner).setB3trGovernorAddress(await governor.getAddress())
       await galaxyMember.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
+      // Participation in governance is a requirement for minting
       const participated = await galaxyMember.connect(owner).participatedInGovernance(owner)
       expect(participated).to.equal(true)
 
-      await galaxyMember.connect(owner).freeMint()
-      await galaxyMember.connect(owner).burn(0)
-      await galaxyMember.connect(owner).freeMint()
-      await galaxyMember.connect(owner).freeMint()
-      await galaxyMember.connect(owner).freeMint()
-      await galaxyMember.connect(owner).freeMint()
+      // Mint 4 tokens to owner
+      await galaxyMember.connect(owner).freeMint() // gmId 0
+      await galaxyMember.connect(owner).burn(0) // gmId 0
+      await galaxyMember.connect(owner).freeMint() // gmId 1
+      await galaxyMember.connect(owner).freeMint() // gmId 2
+      await galaxyMember.connect(owner).freeMint() // gmId 3
+      await galaxyMember.connect(owner).freeMint() // gmId 4
 
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(4)
 
-      // Transfer to other accounts
+      // Transfer GM NFTs to other accounts: otherAccount, otherAccounts[0], otherAccounts[1]
       await galaxyMember.connect(owner)["safeTransferFrom(address,address,uint256)"](owner, otherAccount, 1)
-
       await galaxyMember.connect(owner).transferFrom(owner.address, otherAccounts[0].address, 2)
-
       await galaxyMember.connect(owner).transferFrom(owner.address, otherAccounts[1].address, 3)
 
+      // All 4 accounts hold 1 GM NFT each
       expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1)
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1)
       expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
       expect(await galaxyMember.balanceOf(await otherAccounts[1].getAddress())).to.equal(1)
 
-      expect(await galaxyMember.ownerOf(4)).to.equal(await owner.getAddress())
       expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress())
       expect(await galaxyMember.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
       expect(await galaxyMember.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMember.ownerOf(4)).to.equal(await owner.getAddress())
+
+      // All GMs are of level 1
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Earth
+      expect(await galaxyMember.levelOf(2)).to.equal(1)
+      expect(await galaxyMember.levelOf(3)).to.equal(1)
+      expect(await galaxyMember.levelOf(4)).to.equal(1)
 
       let storageSlots = []
 
@@ -781,47 +798,55 @@ describe("Galaxy Member - @shard3", () => {
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
+        // console.log("*** storageSlots v1", storageSlots[i], "vs v2", storageSlotsAfter[i])
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
+      // Contract setup
       await galaxyMemberV2.setVechainNodes(await vechainNodesMock.getAddress())
 
+      expect(await galaxyMemberV2.MAX_LEVEL()).to.equal(5)
+      await galaxyMemberV2.setMaxLevel(10)
+      expect(await galaxyMemberV2.MAX_LEVEL()).to.equal(10)
+
+      // Check if all GM NFTs are still owned by the original owners
       expect(await galaxyMemberV2.balanceOf(await owner.getAddress())).to.equal(1)
       expect(await galaxyMemberV2.balanceOf(await otherAccount.getAddress())).to.equal(1)
       expect(await galaxyMemberV2.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
       expect(await galaxyMemberV2.balanceOf(await otherAccounts[1].getAddress())).to.equal(1)
 
-      expect(await galaxyMemberV2.ownerOf(4)).to.equal(await owner.getAddress())
       expect(await galaxyMemberV2.ownerOf(1)).to.equal(await otherAccount.getAddress())
       expect(await galaxyMemberV2.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
       expect(await galaxyMemberV2.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMemberV2.ownerOf(4)).to.equal(await owner.getAddress())
 
+      // All GMs are still of level 1
+      expect(await galaxyMemberV2.levelOf(1)).to.equal(1)
+      expect(await galaxyMemberV2.levelOf(2)).to.equal(1)
+      expect(await galaxyMemberV2.levelOf(3)).to.equal(1)
+      expect(await galaxyMemberV2.levelOf(4)).to.equal(1)
+
+      // Mint a new GM NFT to owner
       await galaxyMemberV2.connect(owner).freeMint()
 
       expect(await galaxyMemberV2.balanceOf(await owner.getAddress())).to.equal(2)
       expect(await galaxyMemberV2.ownerOf(5)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV2.levelOf(5)).to.equal(1) // Earth
 
-      expect(await galaxyMemberV2.levelOf(1)).to.equal(1)
-
-      // Let's upgrade a token minted with V1
+      // Let's upgrade gmId 1, owned by otherAccount, to level 2
       await upgradeNFTtoLevel(1, 2, galaxyMemberV2, b3tr, otherAccount, minterAccount)
+      expect(await galaxyMemberV2.levelOf(1)).to.equal(2) // Moon
 
-      expect(await galaxyMemberV2.levelOf(1)).to.equal(2)
-
-      // Mint MjolnirX
+      // Mint Mjolnir X Node to otherAccount
       await addNodeToken(7, otherAccount)
-
       expect(await vechainNodesMock.idToOwner(2)).to.equal(await otherAccount.getAddress())
-      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress())
 
-      await galaxyMember.setMaxLevel(10)
-
+      // Expect a free upgrade to level 7 when attaching a Mjolnir X Node to a GM NFT of a lower level
       expect(await galaxyMemberV2.getLevelAfterAttachingNode(1, 2)).to.equal(7)
 
+      // Attach nodeId 2 to gmId 1
       await galaxyMemberV2.connect(otherAccount).attachNode(2, 1)
-
-      expect(await galaxyMemberV2.levelOf(1)).to.equal(7)
-
+      expect(await galaxyMemberV2.levelOf(1)).to.equal(7) // Saturn
       expect(await galaxyMemberV2.tokenURI(1)).to.equal(config.GM_NFT_BASE_URI + "7.json")
 
       storageSlots = []
@@ -839,7 +864,7 @@ describe("Galaxy Member - @shard3", () => {
         await galaxyMember.getAddress(),
         [],
         { version: 3 },
-      )) as unknown as GalaxyMember
+      )) as unknown as GalaxyMemberV3
 
       storageSlotsAfter = []
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
@@ -852,57 +877,63 @@ describe("Galaxy Member - @shard3", () => {
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
+        // console.log("*** storageSlots v2", storageSlots[i], "vs v3", storageSlotsAfter[i])
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
+      // Check if all GM NFTs are still owned by the original owners
       expect(await galaxyMemberV3.balanceOf(await owner.getAddress())).to.equal(2)
       expect(await galaxyMemberV3.balanceOf(await otherAccount.getAddress())).to.equal(1)
       expect(await galaxyMemberV3.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
       expect(await galaxyMemberV3.balanceOf(await otherAccounts[1].getAddress())).to.equal(1)
 
-      expect(await galaxyMemberV3.ownerOf(4)).to.equal(await owner.getAddress())
       expect(await galaxyMemberV3.ownerOf(1)).to.equal(await otherAccount.getAddress())
       expect(await galaxyMemberV3.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
       expect(await galaxyMemberV3.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMemberV3.ownerOf(4)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV3.ownerOf(5)).to.equal(await owner.getAddress())
 
+      // Check that existing GM NFTs have the same level
+      expect(await galaxyMemberV3.levelOf(1)).to.equal(7)
+      expect(await galaxyMemberV3.levelOf(2)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(3)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(4)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(5)).to.equal(1)
+
+      // Mint a new GM NFT to owner
       await galaxyMemberV3.connect(owner).freeMint()
 
       expect(await galaxyMemberV3.balanceOf(await owner.getAddress())).to.equal(3)
-      expect(await galaxyMemberV3.ownerOf(5)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV3.ownerOf(6)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV3.levelOf(6)).to.equal(1) // Earth
 
-      expect(await galaxyMemberV3.levelOf(1)).to.equal(7)
+      // Get selected token Id at block number - since you can hold +1 GM NFT, select one to boost rewards
+      expect(
+        await galaxyMemberV3.getSelectedTokenIdAtBlock(owner.address, await ethers.provider.getBlockNumber()),
+      ).to.equal(0n)
 
-      // Get checkpointed token Id
-      const checkpointedTokenId = await galaxyMemberV3.getSelectedTokenIdAtBlock(
-        owner.address,
-        await ethers.provider.getBlockNumber(),
-      )
-      expect(checkpointedTokenId).to.equal(0n)
-
-      // admin selects users token as part of upgrade
+      // admin selects gmId 4 as part of upgrade
       await galaxyMemberV3.connect(owner).selectFor(owner.getAddress(), 4)
       expect(await galaxyMemberV3.getSelectedTokenId(owner.getAddress())).to.equal(4)
 
-      // Get checkpointed token Id
-      const checkpointedTokenId2 = await galaxyMemberV3.getSelectedTokenIdAtBlock(
-        owner.address,
-        await ethers.provider.getBlockNumber(),
-      )
-      expect(checkpointedTokenId2).to.equal(4n)
+      // Get selected gmId at block number
+      expect(
+        await galaxyMemberV3.getSelectedTokenIdAtBlock(owner.address, await ethers.provider.getBlockNumber()),
+      ).to.equal(4n)
 
+      // Transfer gmId 4 to otherAccounts[6] - upon transfer, if the `from` address had that id selected,
+      // and if they own other GM NFTs, the "first" one is selected
       await galaxyMemberV3.connect(owner).transferFrom(owner.address, otherAccounts[6].address, 4)
+      expect(await galaxyMemberV3.getSelectedTokenId(owner.getAddress())).to.equal(6n) // otherAccounts[6]
 
-      // Get checkpointed token Id
       expect(
         await galaxyMemberV3.getSelectedTokenIdAtBlock(owner.address, await ethers.provider.getBlockNumber()),
       ).to.equal(6n)
 
-      expect(await galaxyMemberV3.getSelectedTokenId(owner.getAddress())).to.equal(6n)
-
       // Check if the token is transferred
       expect(await galaxyMemberV3.ownerOf(4)).to.equal(await otherAccounts[6].getAddress())
 
-      // Get checkpointed token Id
+      // Get selected token Id at block number for the transfer recipient
       expect(
         await galaxyMemberV3.getSelectedTokenIdAtBlock(
           otherAccounts[6].address,
@@ -912,7 +943,7 @@ describe("Galaxy Member - @shard3", () => {
 
       storageSlots = []
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
-        storageSlots.push(await ethers.provider.getStorage(await galaxyMemberV2.getAddress(), i))
+        storageSlots.push(await ethers.provider.getStorage(await galaxyMemberV3.getAddress(), i))
       }
 
       storageSlots = storageSlots.filter(
@@ -921,15 +952,15 @@ describe("Galaxy Member - @shard3", () => {
 
       const galaxyMemberV4 = (await upgradeProxy(
         "GalaxyMemberV3",
-        "GalaxyMember",
+        "GalaxyMemberV4",
         await galaxyMember.getAddress(),
         [],
         { version: 4 },
-      )) as unknown as GalaxyMember
+      )) as unknown as GalaxyMemberV4
 
       storageSlotsAfter = []
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
-        storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMemberV3.getAddress(), i))
+        storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMemberV4.getAddress(), i))
       }
 
       storageSlotsAfter = storageSlotsAfter.filter(
@@ -938,25 +969,139 @@ describe("Galaxy Member - @shard3", () => {
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
+        // console.log("*** storageSlots v3", storageSlots[i], "vs v4", storageSlotsAfter[i])
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
-      // Transfer the token
+      // Check if all GM NFTs are still owned by the original owners
+      expect(await galaxyMemberV4.balanceOf(await owner.getAddress())).to.equal(2)
+      expect(await galaxyMemberV4.balanceOf(await otherAccount.getAddress())).to.equal(1)
+      expect(await galaxyMemberV4.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
+      expect(await galaxyMemberV4.balanceOf(await otherAccounts[1].getAddress())).to.equal(1)
+      expect(await galaxyMemberV4.balanceOf(await otherAccounts[6].getAddress())).to.equal(1)
+
+      expect(await galaxyMemberV3.ownerOf(1)).to.equal(await otherAccount.getAddress())
+      expect(await galaxyMemberV3.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
+      expect(await galaxyMemberV3.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMemberV4.ownerOf(4)).to.equal(await otherAccounts[6].getAddress())
+      expect(await galaxyMemberV3.ownerOf(5)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV3.ownerOf(6)).to.equal(await owner.getAddress())
+
+      // Check that existing GM NFTs have the same level
+      expect(await galaxyMemberV3.levelOf(1)).to.equal(7)
+      expect(await galaxyMemberV3.levelOf(2)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(3)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(4)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(5)).to.equal(1)
+      expect(await galaxyMemberV3.levelOf(6)).to.equal(1)
+
+      // Transfer gmId 6 to otherAccounts[6]
       await galaxyMemberV4.connect(owner).transferFrom(owner.address, otherAccounts[6].address, 6)
-      await galaxyMemberV4.connect(owner).transferFrom(owner.address, otherAccounts[6].address, 5)
 
       // Check if the token is transferred
-      expect(await galaxyMemberV4.ownerOf(4)).to.equal(await otherAccounts[6].getAddress())
+      expect(await galaxyMemberV4.ownerOf(6)).to.equal(await otherAccounts[6].getAddress())
 
-      expect(await galaxyMemberV4.getSelectedTokenId(owner.getAddress())).to.equal(0n)
+      // Check token selection
+      expect(await galaxyMemberV4.getSelectedTokenId(owner.getAddress())).to.equal(5n) // defaults to the first token
+      expect(await galaxyMemberV4.getSelectedTokenId(otherAccounts[6].getAddress())).to.equal(4n) // otherAccounts[6] had 4 selected
 
-      // Get checkpointed token Id
-      expect(
-        await galaxyMemberV4.getSelectedTokenIdAtBlock(
-          otherAccounts[6].address,
-          await ethers.provider.getBlockNumber(),
-        ),
-      ).to.equal(4n)
+      // V5 is about pointing nodeManagement to version 3, and deprecate the usage of tokenAuction contract
+      // Before the upgrade, I can correctly check the level of the vechain node
+      expect(await galaxyMemberV4.getNodeLevelOf(2)).to.equal(7)
+
+      // The node is still attached to the GM NFT, resulting on the GM NFT having level 7
+      expect(await galaxyMemberV4.getIdAttachedToNode(2)).to.equal(1)
+      expect(await galaxyMemberV4.levelOf(1)).to.equal(7)
+
+      storageSlots = []
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await galaxyMemberV4.getAddress(), i))
+      }
+
+      storageSlots = storageSlots.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      )
+
+      const galaxyMemberV5 = (await upgradeProxy(
+        "GalaxyMemberV4",
+        "GalaxyMember",
+        await galaxyMember.getAddress(),
+        [],
+        { version: 5 },
+      )) as unknown as GalaxyMember
+
+      storageSlotsAfter = []
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMemberV5.getAddress(), i))
+      }
+
+      storageSlotsAfter = storageSlotsAfter.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      )
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        // console.log("*** storageSlots v4", storageSlots[i], "vs v5", storageSlotsAfter[i])
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
+
+      // Check if all GM NFTs are still owned by the original owners
+      expect(await galaxyMemberV5.balanceOf(await owner.getAddress())).to.equal(1)
+      expect(await galaxyMemberV5.balanceOf(await otherAccount.getAddress())).to.equal(1)
+      expect(await galaxyMemberV5.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
+      expect(await galaxyMemberV5.balanceOf(await otherAccounts[1].getAddress())).to.equal(1)
+      expect(await galaxyMemberV5.balanceOf(await otherAccounts[6].getAddress())).to.equal(2)
+
+      expect(await galaxyMemberV5.ownerOf(1)).to.equal(await otherAccount.getAddress())
+      expect(await galaxyMemberV5.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
+      expect(await galaxyMemberV5.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMemberV5.ownerOf(4)).to.equal(await otherAccounts[6].getAddress())
+      expect(await galaxyMemberV5.ownerOf(5)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV5.ownerOf(6)).to.equal(await otherAccounts[6].getAddress())
+
+      // Check that existing GM NFTs have the same level
+      expect(await galaxyMemberV5.levelOf(1)).to.equal(7)
+      expect(await galaxyMemberV5.levelOf(2)).to.equal(1)
+      expect(await galaxyMemberV5.levelOf(3)).to.equal(1)
+      expect(await galaxyMemberV5.levelOf(4)).to.equal(1)
+      expect(await galaxyMemberV5.levelOf(5)).to.equal(1)
+      expect(await galaxyMemberV5.levelOf(6)).to.equal(1)
+
+      // Mint a new GM NFT to owner
+      await galaxyMemberV5.connect(owner).freeMint()
+
+      expect(await galaxyMemberV5.balanceOf(await owner.getAddress())).to.equal(2)
+      expect(await galaxyMemberV5.ownerOf(7)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV5.levelOf(7)).to.equal(1) // Earth
+
+      // Check token selection
+      expect(await galaxyMemberV5.getSelectedTokenId(owner.getAddress())).to.equal(5n)
+      expect(await galaxyMemberV5.getSelectedTokenId(otherAccounts[6].getAddress())).to.equal(4n)
+
+      // Can still check the level of the vechain node
+      expect(await galaxyMemberV5.getNodeLevelOf(2)).to.equal(7)
+
+      // The node is still attached to the GM NFT gmId1, resulting on the GM NFT having level 7
+      expect(await galaxyMemberV5.getIdAttachedToNode(2)).to.equal(1)
+      expect(await galaxyMemberV5.levelOf(1)).to.equal(7)
+
+      // Node can be delegated, and the GM will be downgraded
+      await nodeManagement.connect(otherAccount).delegateNode(otherAccounts[1].address, 2)
+      expect(await galaxyMemberV5.levelOf(1)).to.equal(2) // Moon
+
+      // For the record, otherAccounts[1] is the new delegatee/node manager, they also own GM NFT gmId3
+      expect(await nodeManagement.getNodeManager(2)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMemberV5.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+      expect(await galaxyMemberV5.levelOf(3)).to.equal(1) // Earth
+
+      // Delegatee decides to attach the delegated node to their own GM NFT (need to detach first)
+      await galaxyMemberV5.connect(otherAccounts[1]).detachNode(2, 1)
+      await galaxyMemberV5.connect(otherAccounts[1]).attachNode(2, 3)
+      expect(await galaxyMemberV5.levelOf(3)).to.equal(7) // Saturn - the node gets a free upgrade
+
+      // Node owner - otherAccount - who's nor the GM NFT owner neither the node manager - can still detach the node
+      await galaxyMemberV5.connect(otherAccount).detachNode(2, 3)
+      expect(await galaxyMemberV5.levelOf(3)).to.equal(1) // Back to Earth
     })
   })
 
