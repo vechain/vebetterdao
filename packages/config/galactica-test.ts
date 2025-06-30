@@ -15,10 +15,12 @@ const config: AppConfig = {
   galaxyMemberContractAddress: "0xe70eeaef35dc5af57d343dfb610d336be23a2a8b",
   treasuryContractAddress: "0xfb49901b799a071b6ab3e103b02b748f61a655c2",
   x2EarnAppsContractAddress: "0x601af9143e489dcc0cca50059bb6bc4a1677ff79",
+  stargateNFTContractAddress: "0xe88d4b189b58ee90751498b6033f63b497cfa97d",
   x2EarnRewardsPoolContractAddress: "0xad91368a9267e7f19955a9a2ebe414d168471fe5",
   nodeManagementContractAddress: "0x26e42706e85d1252ed407e0ec50f75f8b2b7f7c8",
   veBetterPassportContractAddress: "0xd79aaffd53e619854e4e5929a7bbd84e4b14ff44",
   x2EarnCreatorContractAddress: "0xe88d4b189b58ee90751498b6033f63b497cfa97d",
+  tokenAuctionContractAddress: "0x0000000000000000000000000000000000000000",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://galactica.live.dev.node.vechain.org",
   network: {

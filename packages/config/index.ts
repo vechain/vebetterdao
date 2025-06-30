@@ -59,6 +59,7 @@ export type AppConfig = {
   b3trGovernorLibraries: B3TRGovernorLibraries
   passportLibraries: PassportLibraries
   b3trMultiSigAddress?: string
+  stargateNFTContractAddress: string
   nodeUrl: string
   indexerUrl?: string
   network: Network

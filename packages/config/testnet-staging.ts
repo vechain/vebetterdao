@@ -16,10 +16,11 @@ const config: AppConfig = {
   treasuryContractAddress: "0xb4E3F2CDd86f8024EC596345B456959fa77B5e43",
   x2EarnAppsContractAddress: "0xF867e87F90F4207B2DD470b2E7d827747Fb8a13d",
   x2EarnRewardsPoolContractAddress: "0x8f06fA32CCbf5f074802956c2D72BC2ce67133cC",
-  tokenAuctionContractAddress: "0x0000000000000000000000000000000000000000",
+  tokenAuctionContractAddress: "0x47049ccfce2f4ee866b37abccea276ebaca570db",
   nodeManagementContractAddress: "0x4b40a81B102e4e0621c19a1f25D3F8DeddBF3506",
   veBetterPassportContractAddress: "0xD8b4c5763ac868d459fC3A62bf2cac30383992a0",
   x2EarnCreatorContractAddress: "0x7233E26045bEe08DF3C4b5e366039A567E529Bc8",
+  stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
