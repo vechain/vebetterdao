@@ -91,7 +91,7 @@ export const XNodePageHeader = () => {
             <HStack>
               {(isXNodeDelegator || isXNodeDelegatee) && (
                 <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                  <Text fontSize={isAbove800 ? "md" : "xs"}>{isXNodeDelegator ? "Delegator" : "Delegatee"}</Text>
+                  <Text fontSize={isAbove800 ? "md" : "xs"}>{isXNodeDelegator ? "Node Owner" : "Manager"}</Text>
                 </HStack>
               )}
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
