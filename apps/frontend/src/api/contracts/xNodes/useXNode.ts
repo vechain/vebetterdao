@@ -11,6 +11,7 @@ import { useXNodeCheckCooldown } from "./useXNodeCheckCooldown"
 import { useMultipleCalls } from "@/hooks/useMultipleCalls"
 import { StargateNFT__factory } from "@repo/contracts/typechain-types"
 import { getConfig } from "@repo/config"
+import { useMemo } from "react"
 
 const stargateNFTContractAddress = getConfig().stargateNFTContractAddress
 
@@ -75,42 +76,66 @@ export const useXNode = (profile?: string): XNodeData => {
   const userNodeDetails = useGetUserNodes(profile ?? account?.address ?? "")
 
   // Store raw node data
-  const allNodesWithIsLegacy = userNodeDetails?.data ?? []
+  const allNodesWithIsLegacy = useMemo(() => userNodeDetails?.data ?? [], [userNodeDetails?.data])
 
   // Separate legacy and Stargate nodes
-  const legacyNodes = allNodesWithIsLegacy.filter(node => node.isLegacyNode)
-  const stargateNodes = allNodesWithIsLegacy.filter(node => !node.isLegacyNode)
+  const legacyNodes = useMemo(() => allNodesWithIsLegacy.filter(node => node.isLegacyNode), [allNodesWithIsLegacy])
+  const stargateNodes = useMemo(() => allNodesWithIsLegacy.filter(node => !node.isLegacyNode), [allNodesWithIsLegacy])
 
   // Get tokenURI for each Stargate node
-  const stargateTokenURICalls = stargateNodes.map(node => ({
-    contractInterface: StargateNFT__factory.createInterface(),
-    contractAddress: stargateNFTContractAddress,
-    method: "tokenURI",
-    args: [node.nodeId],
-  }))
+  const stargateTokenURICalls = useMemo(
+    () =>
+      stargateNodes.map(node => ({
+        contractInterface: StargateNFT__factory.createInterface(),
+        contractAddress: stargateNFTContractAddress,
+        method: "tokenURI",
+        args: [node.nodeId],
+      })),
+    [stargateNodes],
+  )
 
-  const { data: stargateTokenURIs } = useMultipleCalls(stargateTokenURICalls as any)
+  const { data: stargateTokenURIs } = useMultipleCalls({
+    calls: stargateTokenURICalls as any,
+    queryKeyPrefix: "user-x-nodes-stargate-token-uris",
+  })
 
   // Get metadata from IPFS for each Stargate node
-  const stargateMetadatas = useIpfsMetadatas<StargateMetadata>(stargateTokenURIs?.map(uri => uri?.toString() ?? ""))
-  const stargateImagesUris = stargateMetadatas?.map(metadata => metadata?.data?.image ?? "")
+  const stargateTokenURIList = useMemo(
+    () => stargateTokenURIs?.map(uri => uri?.toString() ?? "") ?? [],
+    [stargateTokenURIs],
+  )
+  const stargateMetadatas = useIpfsMetadatas<StargateMetadata>(stargateTokenURIList, false)
+
+  // Only extract image URIs when metadata is available
+  const stargateImagesUris = useMemo(
+    () => stargateMetadatas?.map(metadata => metadata?.data?.image ?? "") ?? [],
+    [stargateMetadatas],
+  )
 
   // Get images from IPFS for each Stargate node
   const stargateImages = useIpfsImageList(stargateImagesUris)
 
   // Process legacy nodes with constant metadata
-  const legacyNodesWithMetadata = legacyNodes.map(node => ({
-    ...node,
-    name: allNodeStrengthLevelToName[String(node.nodeLevel)] ?? "Not available",
-    image: NodeStrengthLevelToImage[String(node.nodeLevel)] ?? notFoundImage,
-  }))
+  const legacyNodesWithMetadata = useMemo(
+    () =>
+      legacyNodes.map(node => ({
+        ...node,
+        name: allNodeStrengthLevelToName[String(node.nodeLevel)] ?? "Not available",
+        image: NodeStrengthLevelToImage[String(node.nodeLevel)] ?? notFoundImage,
+      })),
+    [legacyNodes],
+  )
 
   // Process Stargate nodes with IPFS metadata and images
-  const stargateNodesWithMetadata = stargateNodes.map((node, index) => ({
-    ...node,
-    name: stargateMetadatas?.[index]?.data?.name ?? "Not available",
-    image: stargateImages?.[index]?.data?.image ?? notFoundImage,
-  }))
+  const stargateNodesWithMetadata = useMemo(
+    () =>
+      stargateNodes.map((node, index) => ({
+        ...node,
+        name: stargateMetadatas?.[index]?.data?.name ?? "Not available",
+        image: stargateImages?.[index]?.data?.image ?? notFoundImage,
+      })),
+    [stargateNodes, stargateMetadatas, stargateImages],
+  )
 
   // Combine all nodes
   const allNodes = [...legacyNodesWithMetadata, ...stargateNodesWithMetadata]
@@ -152,7 +177,6 @@ export const useXNode = (profile?: string): XNodeData => {
   const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
 
   const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(xNode?.nodeId ?? "")
-
   return {
     isXNodeLoading,
     isXNodeError,
