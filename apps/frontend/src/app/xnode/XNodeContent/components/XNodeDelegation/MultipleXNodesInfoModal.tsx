@@ -1,17 +1,5 @@
 import { BaseModal } from "@/components/BaseModal"
-import {
-  VStack,
-  Heading,
-  Text,
-  Button,
-  UseDisclosureProps,
-  Box,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  HStack,
-  Image,
-} from "@chakra-ui/react"
+import { VStack, Heading, Text, Button, UseDisclosureProps, Box, HStack, Image } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useNodesEndorsementScore, useXNode } from "@/api"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -31,7 +19,7 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
         <Heading fontSize="2xl">{t("Your Nodes")}</Heading>
         <Text>
           {t(
-            "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.",
+            "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.",
           )}
         </Text>
         <VStack align="stretch" gap={4}>
@@ -58,13 +46,13 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
                       <Box bg="#FFFFFF4A" color="#fff" rounded="8px" padding="4px 8px">
                         {node.isXNodeDelegator && (
                           <Text fontSize="xs" fontWeight={400}>
-                            {t("Delegated to")} {humanAddress(node.delegatee, 4, 4)}
+                            {t("Managed by")} {humanAddress(node.delegatee, 4, 4)}
                           </Text>
                         )}
 
                         {node.isXNodeDelegatee && (
                           <Text fontSize="xs" fontWeight={400}>
-                            {t("Delegated by")} {humanAddress(node.xNodeOwner, 4, 4)}
+                            {t("Managing for")} {humanAddress(node.xNodeOwner, 4, 4)}
                           </Text>
                         )}
                       </Box>
@@ -85,14 +73,6 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
             </Box>
           ))}
         </VStack>
-        <Alert status="warning" borderRadius="2xl">
-          <AlertIcon />
-          <Box lineHeight="1.20rem" fontSize="sm">
-            <AlertTitle as="span">
-              {t("Please cancel the delegation of the other Nodes to use your preferred one.")}
-            </AlertTitle>
-          </Box>
-        </Alert>
         <Button variant="primaryGhost" onClick={modal.onClose}>
           {t("Close")}
         </Button>

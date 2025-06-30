@@ -1703,5 +1703,13 @@
   "Node managed for:": "Node managed for:",
   "Node Management": "Node Management",
   "Assign a manager to help operate this node. Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT. You can revoke access anytime.": "Assign a manager to help operate this node. Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT. You can revoke access anytime.",
-  "Add node manager": "Add node manager"
+  "Add node manager": "Add node manager",
+  "By adding a manager to your Node, another address will be able to endorse apps and upgrade GM NFTs using your Node.": "By adding a manager to your Node, another address will be able to endorse apps and upgrade GM NFTs using your Node.",
+  "The manager won't be able to transfer or sell your Node.": "The manager won't be able to transfer or sell your Node.",
+  "Who do you want to add as a manager?": "Who do you want to add as a manager?",
+  "Are you sure you want to add a manager to your Node?": "Are you sure you want to add a manager to your Node?",
+  "You're adding the following manager to your Node": "You're adding the following manager to your Node",
+  "Managed by": "Managed by",
+  "Managing for": "Managing for",
+  "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account."
 }
