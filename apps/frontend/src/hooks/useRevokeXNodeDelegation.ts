@@ -4,13 +4,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory, GalaxyMember__factory } from "@repo/contracts"
-import {
-  getIsNodeHolderQueryKey,
-  getLevelOfTokenQueryKey,
-  getUserNodesQueryKey,
-  getUserXNodesQueryKey,
-  useXNode,
-} from "@/api"
+import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, useXNode } from "@/api"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
@@ -74,7 +68,6 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserXNodesQueryKey(account?.address || ""),
       getUserNodesQueryKey(account?.address || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
