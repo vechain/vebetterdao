@@ -53,6 +53,7 @@ export type AppConfig = {
   x2EarnAppsContractAddress: string
   x2EarnCreatorContractAddress: string
   x2EarnRewardsPoolContractAddress: string
+  tokenAuctionContractAddress: string
   nodeManagementContractAddress: string
   veBetterPassportContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
