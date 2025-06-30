@@ -6330,7 +6330,7 @@ describe("X-Apps - @shard17b", function () {
       const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
       const nodeIdOtherAccount2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 3 // HERE IS BROKEN
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 3
       await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
 
       // Endorse XAPP with both Mjolnir node holders
@@ -6371,7 +6371,7 @@ describe("X-Apps - @shard17b", function () {
       const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
 
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 3 // HERE IS BROKEN
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[3].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 3
 
       await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 2)).to.be.reverted // Node owner cannot endorse XAPP as node is delegated
 
@@ -6417,7 +6417,7 @@ describe("X-Apps - @shard17b", function () {
       const nodeIdOtherAccount3 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
 
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // HERE IS BROKEN TOO
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4
       await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
       await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount3) // Other account 3 delegates node to other account 4
 
@@ -6463,7 +6463,7 @@ describe("X-Apps - @shard17b", function () {
       const nodeIdOtherAccount3 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
 
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // HERE IS BROKEN TOO
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4
       await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
       await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount3) // Other account 3 delegates node to other account 4
 
@@ -6554,7 +6554,7 @@ describe("X-Apps - @shard17b", function () {
       const nodeIdOtherAccount3 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
 
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // this is broken
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4
       await nodeManagement.connect(otherAccounts[2]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount2) // Other account 2 delegates node to other account 4
       await nodeManagement.connect(otherAccounts[3]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount3) // Other account 3 delegates node to other account 4
 
@@ -6598,7 +6598,7 @@ describe("X-Apps - @shard17b", function () {
       const nodeIdOtherAccount1 = await vechainNodesMock.ownerToId(otherAccounts[1].address)
 
       // delegate node to user
-      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4 // this is broken
+      await nodeManagement.connect(otherAccounts[1]).delegateNode(otherAccounts[4].address, nodeIdOtherAccount1) // Other account 1 delegates node to other account 4
 
       // Account 4 endorses all 3 XAPPs
       await x2EarnApps.connect(otherAccounts[4]).endorseApp(app1Id, 1) // Node holder endorsement score is 35 -> XAPP endorse with token Id 1
