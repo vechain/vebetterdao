@@ -691,7 +691,6 @@ describe("Galaxy Member - @shard3", () => {
         minterAccount,
         vechainNodesMock,
         nodeManagement,
-        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -4417,6 +4416,88 @@ describe("Galaxy Member - @shard3", () => {
       expect(await galaxyMember.getB3TRtoUpgrade(tokenId4)).to.equal(ethers.parseEther("40000")) // Level 4 -> Level 5 = 40000 (With free upgrade)
       expect(await galaxyMember.getB3TRtoUpgrade(tokenId5)).to.equal(ethers.parseEther("0")) // Level 5
       expect(await galaxyMember.getB3TRtoUpgrade(tokenId6)).to.equal(ethers.parseEther("0")) // Level 5
+    })
+  })
+
+  describe("StarGate", () => {
+    it("Should preserve GM selection and attachment after migrating node from TokenAuction to StarGate", async () => {
+      const { owner, vechainNodesMock, stargateNftMock, nodeManagement, galaxyMember, otherAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      // Setup GM MAX LEVEL
+      await galaxyMember.connect(owner).setMaxLevel(5)
+
+      // Assert no nodes are minted at t0
+      expect(await vechainNodesMock.totalSupply()).to.equal(0)
+      expect(await stargateNftMock.totalSupply()).to.equal(0)
+
+      // Mint a legacy node to owner, let it be Strength level 1
+      const nodeId = 1
+      await vechainNodesMock.connect(owner).addToken(owner.address, nodeId, false, 0, 0)
+      expect(await vechainNodesMock.ownerOf(nodeId)).to.equal(await owner.getAddress())
+
+      // Verify node level
+      const nodeMetadata = await vechainNodesMock.getMetadata(nodeId)
+      expect(nodeMetadata[1]).to.equal(1) // Level Strength
+
+      // Check contracts totalSupply again
+      expect(await vechainNodesMock.totalSupply()).to.equal(1)
+      expect(await stargateNftMock.totalSupply()).to.equal(0)
+
+      // Node management contract tells it's legacy node
+      expect(await nodeManagement.isLegacyNode(nodeId)).to.equal(true)
+
+      // Now let's mint a GM
+      await participateInAllocationVoting(owner, false, otherAccount)
+
+      // Check contracts totalSupply again, since
+      // participateInAllocationVoting mints a Mjolnir X Node to `otherAccount`
+      expect(await vechainNodesMock.totalSupply()).to.equal(2)
+      expect(await stargateNftMock.totalSupply()).to.equal(0)
+
+      const gmId = 1
+      await galaxyMember.connect(owner).freeMint()
+      expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
+
+      // The GM NFT is selected
+      expect(await galaxyMember.getSelectedTokenId(owner.address)).to.equal(gmId)
+
+      // Attach the node to the GM NFT, should get a free upgrade
+      await galaxyMember.connect(owner).attachNode(nodeId, gmId)
+      expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(nodeId)
+      expect(await galaxyMember.levelOf(gmId)).to.equal(2) // Moon
+
+      // Fast forward 4 hours so that legacy node can be destroyed
+      await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
+
+      // Migrate the node to StarGate
+      const vetRequired = (await stargateNftMock.getLevel(1))[5]
+      await stargateNftMock.connect(owner).migrateAndDelegate(nodeId, true, { value: vetRequired })
+
+      // Check contracts totalSupply again
+      expect(await vechainNodesMock.totalSupply()).to.equal(1)
+      expect(await stargateNftMock.totalSupply()).to.equal(1)
+
+      // Node management contract tells that node under test is no longer a legacy node
+      expect(await nodeManagement.isLegacyNode(nodeId)).to.equal(false)
+
+      // StarGate NFT maturity should be 0 for migrated nodes
+      // expect(await stargateNftMock.isUnderMaturityPeriod(nodeId)).to.be.false - need latest version!!
+
+      // The GM is still selected
+      expect(await galaxyMember.getSelectedTokenId(owner.address)).to.equal(gmId)
+
+      // The GM NFT is still attached to the node
+      expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(nodeId)
+
+      // The GM NFT level should be 2
+      expect(await galaxyMember.levelOf(gmId)).to.equal(2) // Moon
+
+      // The GM can be detached and the node will be downgraded
+      await galaxyMember.connect(owner).detachNode(nodeId, gmId)
+      expect(await galaxyMember.getNodeIdAttached(gmId)).to.equal(0)
+      expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
     })
   })
 })

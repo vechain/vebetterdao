@@ -107,6 +107,7 @@ import {
   PassportSignalingLogicV3,
   PassportPoPScoreLogicV3,
   PassportWhitelistAndBlacklistLogicV3,
+  StargateNFT,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -253,6 +254,9 @@ interface DeployInstance {
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
   b3trMultiSig: B3TRMultiSig
+
+  // StarGate
+  starGate: StargateNFT
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -446,7 +450,7 @@ export const getOrDeployContractInstances = async ({
   const stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, false)
 
   // Initialize StargateNFT proxy
-  const stargateNftMock = await initializeProxy(
+  const stargateNftMock = (await initializeProxy(
     stargateNftAddress,
     "StargateNFT",
     [
@@ -473,7 +477,7 @@ export const getOrDeployContractInstances = async ({
       VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
       Levels: await StargateNFTLevelsLib.getAddress(),
     },
-  )
+  )) as StargateNFT
 
   // Initialize StargateDelegation proxy
   const stargateDelegateMock = await initializeProxy(
@@ -492,6 +496,9 @@ export const getOrDeployContractInstances = async ({
     ],
     {},
   )
+
+  // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
+  await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
 
   const nodeManagementMock = await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
@@ -1255,6 +1262,7 @@ export const getOrDeployContractInstances = async ({
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,
+    stargateNftMock,
   }
   return cachedDeployInstance
 }
