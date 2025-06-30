@@ -68,7 +68,7 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodeWithIsLeg
         method: "isLegacyNode",
         args: [nodeId],
         mapResponse: res => {
-          if (!res.decoded) return { nodeId, isLegacyNode: false }
+          if (!res?.decoded) return { nodeId, isLegacyNode: true }
           return {
             nodeId,
             isLegacyNode: res.decoded[0],
@@ -78,21 +78,26 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodeWithIsLeg
     )
   }, [nodes])
 
-  const { data: nodeIdsWithIsLegacy } = useMultipleCalls(isLegacyCheckCalls)
+  const { data: nodeIdsWithIsLegacy, isLoading: isIsLegacyLoading } = useMultipleCalls({
+    calls: isLegacyCheckCalls,
+    queryKeyPrefix: "user-get-user-nodes",
+  })
 
   //Merge nodeIdsWithIsLegacy with nodes based on nodeId
   const allNodesWithIsLegacy = useMemo(() => {
     if (!nodeIdsWithIsLegacy || !nodes) return []
     return nodes.map((node: UserNode, index: number) => ({
       ...node,
-      isLegacyNode: nodeIdsWithIsLegacy[index].isLegacyNode,
+      isLegacyNode: nodeIdsWithIsLegacy?.[index]?.isLegacyNode ?? true,
     }))
   }, [nodeIdsWithIsLegacy, nodes])
 
   return {
     ...userNodes,
     data: allNodesWithIsLegacy,
-  }
+    isLoading: userNodes.isLoading || isIsLegacyLoading,
+    isError: userNodes.isError || isIsLegacyLoading,
+  } as UseQueryResult<UserNodeWithIsLegacy[], Error>
 }
 
 // For backward compatibility (if needed)
