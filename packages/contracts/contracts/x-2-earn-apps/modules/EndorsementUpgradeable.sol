@@ -66,10 +66,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Sets the value for the cooldown period.
    */
-  function __Endorsement_init_v3(
-    uint48 _cooldownPeriod,
-    address _xAllocationVotingGovernor
-  ) internal onlyInitializing {
+  function __Endorsement_init_v3(uint48 _cooldownPeriod, address _xAllocationVotingGovernor) internal onlyInitializing {
     __Endorsement_init_unchained_v3(_cooldownPeriod, _xAllocationVotingGovernor);
   }
 
@@ -155,6 +152,10 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnNodeCooldownActive();
     }
 
+    if (getNodeEndorsementScore(nodeId) == 0) {
+      revert NodeNotAllowedToEndorse();
+    }
+
     // Add the caller to the list of endorsers for the app
     $._appEndorsers[appId].push(nodeId);
     $._nodeToEndorsedApp[nodeId] = appId;
@@ -209,9 +210,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param nodeLevel The node level of the node ID.
    * @return uint256 The endorsement score of the node ID.
    */
-  function nodeLevelEndorsementScore(
-    uint8 nodeLevel
-  ) external view returns (uint256) {
+  function nodeLevelEndorsementScore(uint8 nodeLevel) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     return $._nodeEnodorsmentScore[nodeLevel];
   }
@@ -563,7 +562,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev See {IX2EarnApps-getNodeEndorsementScore}.
    */
-  function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256) {
+  function getNodeEndorsementScore(uint256 nodeId) public view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     uint8 nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);

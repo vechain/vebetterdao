@@ -139,6 +139,11 @@ interface IX2EarnApps {
   error X2EarnMaxManagersReached(bytes32 appId);
 
   /**
+   * @dev The user has a node that cannot be used to endorse
+   */
+  error NodeNotAllowedToEndorse();
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -441,7 +446,7 @@ interface IX2EarnApps {
    *
    * @param  _x2EarnRewardsPoolContract the address of the X2EarnRewardsPool contract
    */
-  function setX2EarnRewardsPoolContract(address  _x2EarnRewardsPoolContract) external;
+  function setX2EarnRewardsPoolContract(address _x2EarnRewardsPoolContract) external;
 
   /**
    * @dev Get the X2EarnRewardsPool contract address.

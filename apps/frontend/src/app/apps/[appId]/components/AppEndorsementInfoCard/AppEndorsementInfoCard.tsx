@@ -112,8 +112,8 @@ export const AppEndorsementInfoCard = ({
     !shouldRenderEndorseButton && !shouldRenderSwitchEndorsementButton ? "primaryAction" : "primarySubtle"
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return isXNodeDelegator || isXNodeOnCooldown
-  }, [isXNodeDelegator, isXNodeOnCooldown])
+    return isXNodeDelegator || isXNodeOnCooldown || xNodePoints === 0
+  }, [isXNodeDelegator, isXNodeOnCooldown, xNodePoints])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
     return account && isXNodeOnCooldown && isUserAppEndorser
