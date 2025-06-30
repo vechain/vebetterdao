@@ -20,7 +20,7 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
         <Heading fontSize="2xl">{t("Your Nodes")}</Heading>
         <Text>
           {t(
-            "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.",
+            "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.",
           )}
         </Text>
         <VStack align="stretch" gap={4}>
