@@ -21,6 +21,7 @@ import {
   GovernorStateLogicV1,
   GovernorVotesLogicV1,
   X2EarnRewardsPool,
+  MyERC20,
   MyERC721,
   MyERC1155,
   TokenAuction,
@@ -257,6 +258,7 @@ interface DeployInstance {
 
   // StarGate
   stargateNftMock: StargateNFT
+  vthoTokenMock: MyERC20
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -409,18 +411,11 @@ export const getOrDeployContractInstances = async ({
   await vechainNodesMock.addOperator(await owner.getAddress())
 
   // deploy Stargate Mocks
-
-  // If we are on hardhat, we need to deploy the VTHO token
-  let vthoAddress
-  if (network.name === "hardhat") {
-    const VTHOFactory = await ethers.getContractFactory("MyERC20")
-    const vtho = await VTHOFactory.deploy(owner.address, owner.address)
-    await vtho.waitForDeployment()
-
-    vthoAddress = await vtho.getAddress()
-  } else {
-    vthoAddress = "0x0000000000000000000000000000456E65726779"
-  }
+  // Deploy VTHO token
+  const VTHOFactory = await ethers.getContractFactory("MyERC20")
+  const vthoTokenMock = await VTHOFactory.deploy(owner.address, owner.address)
+  await vthoTokenMock.waitForDeployment()
+  const vthoAddress = await vthoTokenMock.getAddress()
 
   // Deploy StargateNFT libraries
   const {
@@ -1261,6 +1256,7 @@ export const getOrDeployContractInstances = async ({
     voteEligibilityUtilsV5: VoteEligibilityUtilsV5,
     myErc721: myErc721,
     myErc1155: myErc1155,
+    vthoTokenMock,
     vechainNodesMock,
     stargateNftMock,
   }
