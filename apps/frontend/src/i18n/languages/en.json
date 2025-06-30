@@ -1697,7 +1697,7 @@
   "Vote Type": "Vote Type",
   "Node Owne": "Node Owne",
   "Manager": "Manager",
-  "You have been added as a manager for this NFT": "You have been added as a manager for this NFT",
+  "You have been added as a manager for this node": "You have been added as a manager for this node",
   "Only the owner can remove you as a manager.": "Only the owner can remove you as a manager.",
   "Node is currently managed by:": "Node is currently managed by:",
   "Node managed for:": "Node managed for:",
