@@ -116,7 +116,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
               <b>{t("voting power")}</b>
               {t(" will be determined by the amount of VOT3 you had at the time of the snapshot.")}
             </Text>
-            <Card rounded="16px" bg="#F8F8F8" p={"24px"}>
+            <Card rounded="16px" bg="dark-contrast-on-card-bg" p={"24px"}>
               <VStack alignItems={"stretch"} gap={4}>
                 <Stack
                   spacing={[0, 0, 2]}
