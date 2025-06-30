@@ -83,9 +83,9 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
   const refetchQueryKeys = useMemo(
     () => [
       getUserNodesQueryKey(nodeData.accountAddress || ""),
-      getLevelOfTokenQueryKey(nodeData.attachedGMTokenId || ""),
-      getGetTokenIdAttachedToNodeQueryKey(nodeData.xNodeId || ""),
-      getIsNodeHolderQueryKey(nodeData.accountAddress || ""),
+      getLevelOfTokenQueryKey(attachedGMTokenId || ""),
+      getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
+      getIsNodeHolderQueryKey(account?.address || ""),
     ],
     [nodeData],
   )
