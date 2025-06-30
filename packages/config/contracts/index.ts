@@ -40,7 +40,7 @@ export function getContractsConfig(env: EnvConfig) {
 }
 
 export function shouldEndorseXApps() {
-  return process.env.ENDORSE_XAPPS === "true"
+  return true
 }
 
 export function shouldNotUpgradeContracts() {
