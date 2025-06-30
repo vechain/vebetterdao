@@ -18,6 +18,7 @@ const config: AppConfig = {
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
   x2EarnCreatorContractAddress: "0xe8e96a768ffd00417d4bd985bec9EcfC6F732a7f",
   indexerUrl: "https://b3tr.mainnet.vechain.org/api/v1",
+  tokenAuctionContractAddress: "0x0000000000000000000000000000000000000000",
   nodeManagementContractAddress: "0xB0EF9D89C6b49CbA6BBF86Bf2FDf0Eee4968c6AB",
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
