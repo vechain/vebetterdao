@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useNodesEndorsementScore, useXNode } from "@/api"
-import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 
 type Props = {
@@ -44,16 +43,10 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
               borderRadius="xl"
               backgroundImage={"/assets/backgrounds/xnode-page-background.webp"}>
               <HStack align="stretch" gap={6}>
-                <Image
-                  src={NodeStrengthLevelToImage[Number(node.nodeLevel)] as string}
-                  w="68px"
-                  h="68px"
-                  rounded="8px"
-                  alt={node.nodeId}
-                />
+                <Image src={node.image} w="68px" h="68px" rounded="8px" alt={node.nodeId} />
                 <VStack flex="1" align="flex-start" justify="center" spacing={2}>
                   <Text fontWeight={700} fontSize="md" color="#fff">
-                    {allNodeStrengthLevelToName[Number(node.nodeLevel)] as string}
+                    {node.name}
                   </Text>
                   <HStack spacing={2}>
                     {!node.isXNodeDelegated && (
