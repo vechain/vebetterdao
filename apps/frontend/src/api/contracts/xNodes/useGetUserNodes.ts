@@ -68,7 +68,7 @@ export const useGetUserNodes = (user?: string): UseQueryResult<UserNodeWithIsLeg
         method: "isLegacyNode",
         args: [nodeId],
         mapResponse: res => {
-          if (!res.decoded) return false
+          if (!res.decoded) return { nodeId, isLegacyNode: false }
           return {
             nodeId,
             isLegacyNode: res.decoded[0],
