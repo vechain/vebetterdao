@@ -163,7 +163,7 @@ describe("X-Apps - @shard15", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.version()).to.equal("5")
+      expect(await x2EarnApps.version()).to.equal("6")
     })
 
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
@@ -1074,7 +1074,7 @@ describe("X-Apps - @shard15", function () {
       expect(addressFromSlot2).to.equal(expectedAddress2)
 
       // Upgrade to V5
-      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnAppsV5", await x2EarnAppsV4.getAddress(), [], {
         version: 5,
         libraries: {
           AdministrationUtils: await administrationUtils.getAddress(),
