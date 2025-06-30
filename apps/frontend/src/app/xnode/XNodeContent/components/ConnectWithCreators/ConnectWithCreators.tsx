@@ -25,7 +25,9 @@ export const ConnectWithCreators = () => {
       <VStack alignItems={"flex-start"} zIndex={0} position={"relative"}>
         <HStack>
           <Image src="/assets/icons/handshake.svg" alt="Join Community" w={32} h={32} />
-          <Text>{t("Connect with app creators to know more about their apps and endorse them.")}</Text>
+          <Text color={"contrast-fg-on-strong"}>
+            {t("Connect with app creators to know more about their apps and endorse them.")}
+          </Text>
         </HStack>
         <Link href={DISCORD_URL} isExternal w={"full"} onClick={onJoinClick}>
           <Button w={"full"} variant={"primaryAction"}>
