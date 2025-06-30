@@ -594,6 +594,10 @@ export async function deployAll(config: ContractsConfig) {
     )
     console.log("StargateDelegation initialized")
 
+    // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
+    await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
+    await vechainNodesMock.setLeadTime(0)
+
     nodeManagementMock = await deployAndUpgrade(
       ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
       [[vechainNodesAddress, deployer.address, deployer.address], [], [stargateNftAddress]],

@@ -33,14 +33,7 @@ library Token {
     ) public view returns (uint64) {
         _requireTokenExists(_tokenId);
 
-        // Get token
-        DataTypes.Token memory token = $.tokens[_tokenId];
-
-        // Get level
-        DataTypes.Level memory tokenLevelSpec = $.levels[token.levelId];
-
-        // Return maturity period end block
-        return token.mintedAtBlock + tokenLevelSpec.maturityBlocks;
+        return $.maturityPeriodEndBlock[_tokenId];
     }
 
     /// @notice Returns true if a token is in the maturity period
@@ -52,11 +45,8 @@ library Token {
     ) external view returns (bool) {
         _requireTokenExists(_tokenId);
 
-        // Get maturity end block
-        uint64 maturityEndsAtBlock = maturityPeriodEndBlock($, _tokenId);
-
         // Token is still maturing if maturityEndsAtBlock is in the future
-        return Clock._clock() < maturityEndsAtBlock;
+        return $.maturityPeriodEndBlock[_tokenId] > Clock._clock();
     }
 
     // ------------------ Token Supply Getters ------------------ //
