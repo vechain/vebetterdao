@@ -4448,7 +4448,7 @@ describe("Galaxy Member - @shard3", () => {
       // Node management contract tells it's legacy node
       expect(await nodeManagement.isLegacyNode(nodeId)).to.equal(true)
 
-      // Now let's mint a GM
+      // Now let's simulate that owner participated in allocation voting
       await participateInAllocationVoting(owner, false, otherAccount)
 
       // Check contracts totalSupply again, since
