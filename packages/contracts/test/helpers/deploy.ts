@@ -256,7 +256,7 @@ interface DeployInstance {
   b3trMultiSig: B3TRMultiSig
 
   // StarGate
-  starGate: StargateNFT
+  stargateNftMock: StargateNFT
 }
 
 export const NFT_NAME = "GalaxyMember"
