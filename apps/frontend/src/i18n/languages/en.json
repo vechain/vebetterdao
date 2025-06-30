@@ -1708,5 +1708,8 @@
   "The manager won't be able to transfer or sell your Node.": "The manager won't be able to transfer or sell your Node.",
   "Who do you want to add as a manager?": "Who do you want to add as a manager?",
   "Are you sure you want to add a manager to your Node?": "Are you sure you want to add a manager to your Node?",
-  "You're adding the following manager to your Node": "You're adding the following manager to your Node"
+  "You're adding the following manager to your Node": "You're adding the following manager to your Node",
+  "Managed by": "Managed by",
+  "Managing for": "Managing for",
+  "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account."
 }
