@@ -32,7 +32,7 @@ export const useProposalDepositEvent = (proposalId: string) => {
   }, [proposalDeposits])
 
   const missingSupport = useMemo(() => {
-    return Number(ethers.formatEther(proposalDepositThresholdBN - communityDepositsBN))
+    return ethers.formatEther(proposalDepositThresholdBN - communityDepositsBN)
   }, [proposalDepositThresholdBN, communityDepositsBN])
 
   const communityDeposits = useMemo(() => {
