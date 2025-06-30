@@ -30,7 +30,6 @@ export const generateMockLocalConfig = () => {
     galaxyMemberContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     treasuryContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnAppsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
-    stargateNFTContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     tokenAuctionContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnRewardsPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "nodeManagementContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
