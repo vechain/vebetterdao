@@ -4456,6 +4456,7 @@ describe("Galaxy Member - @shard3", () => {
       expect(await vechainNodesMock.totalSupply()).to.equal(2)
       expect(await stargateNftMock.totalSupply()).to.equal(0)
 
+      // Mint a GM NFT to owner
       const gmId = 1
       await galaxyMember.connect(owner).freeMint()
       expect(await galaxyMember.levelOf(gmId)).to.equal(1) // Earth
