@@ -35,21 +35,32 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
   const { account } = useWallet()
   const { xNodeId, attachedGMTokenId } = useXNode()
 
+  // Memoize the node data to prevent changes during transaction
+  const nodeData = useMemo(
+    () => ({
+      xNodeId,
+      attachedGMTokenId,
+      accountAddress: account?.address,
+    }),
+    [account?.address],
+  )
+
   const clauseBuilder = useCallback(
     ({ delegatee, isAttachedToGM }: ClausesParams) => {
-      if (!account?.address) throw new Error("Account is required")
+      if (!nodeData.accountAddress) throw new Error("Account is required")
       if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
+      if (!nodeData.xNodeId) throw new Error("XNode ID is required")
 
       const clauses = []
 
-      if (isAttachedToGM) {
+      if (isAttachedToGM && nodeData.attachedGMTokenId) {
         clauses.push(
           buildClause({
             to: gmContractAddress,
             contractInterface: GmInterface,
             method: detachMethod,
-            args: [xNodeId, attachedGMTokenId],
-            comment: `detach xnode #${xNodeId} from gm #${attachedGMTokenId}`,
+            args: [nodeData.xNodeId, nodeData.attachedGMTokenId],
+            comment: `detach xnode #${nodeData.xNodeId} from gm #${nodeData.attachedGMTokenId}`,
           }),
         )
       }
@@ -59,24 +70,24 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
           to: nodeManagementContractAddress,
           contractInterface: NodeManagementInterface,
           method: delegateMethod,
-          args: [delegatee],
-          comment: `Delegate Node #${xNodeId} to ${delegatee}`,
+          args: [delegatee, nodeData.xNodeId],
+          comment: `Delegate Node #${nodeData.xNodeId} to ${delegatee}`,
         }),
       )
 
       return clauses
     },
-    [account, xNodeId, attachedGMTokenId],
+    [nodeData],
   )
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserNodesQueryKey(account?.address || ""),
+      getUserNodesQueryKey(nodeData.accountAddress || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId || ""),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
       getIsNodeHolderQueryKey(account?.address || ""),
     ],
-    [account, attachedGMTokenId, xNodeId],
+    [nodeData],
   )
 
   return useBuildTransaction<ClausesParams>({
