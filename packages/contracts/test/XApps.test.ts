@@ -35,6 +35,7 @@ import {
   X2EarnAppsV2,
   X2EarnAppsV3,
   X2EarnAppsV4,
+  X2EarnAppsV5,
   X2EarnApps__factory,
   X2EarnRewardsPool,
   X2EarnRewardsPoolV4,
@@ -501,6 +502,9 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV4,
         endorsementUtilsV4,
         voteEligibilityUtilsV4,
+        administrationUtilsV5,
+        endorsementUtilsV5,
+        voteEligibilityUtilsV5,
         administrationUtils,
         endorsementUtils,
         voteEligibilityUtils,
@@ -818,7 +822,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(false)
     })
 
-    it("Should not have state conflict after upgrading to V5", async () => {
+    it("Should not have state conflict after upgrading to V6", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
       config.X2EARN_NODE_COOLDOWN_PERIOD = 1
@@ -844,6 +848,9 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV4,
         endorsementUtilsV4,
         voteEligibilityUtilsV4,
+        administrationUtilsV5,
+        endorsementUtilsV5,
+        voteEligibilityUtilsV5,
       } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const x2EarnAppsV2 = (await deployAndUpgrade(
@@ -1077,11 +1084,11 @@ describe("X-Apps - @shard15", function () {
       const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnAppsV5", await x2EarnAppsV4.getAddress(), [], {
         version: 5,
         libraries: {
-          AdministrationUtils: await administrationUtils.getAddress(),
-          EndorsementUtils: await endorsementUtils.getAddress(),
-          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          AdministrationUtilsV5: await administrationUtilsV5.getAddress(),
+          EndorsementUtilsV5: await endorsementUtilsV5.getAddress(),
+          VoteEligibilityUtilsV5: await voteEligibilityUtilsV5.getAddress(),
         },
-      })) as X2EarnApps
+      })) as X2EarnAppsV5
 
       expect(await x2EarnAppsV5.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
       expect(await x2EarnAppsV5.x2EarnCreatorContract()).to.eql(await x2EarnCreator.getAddress())
@@ -1143,6 +1150,76 @@ describe("X-Apps - @shard15", function () {
       const addressFromSlot2UpgradeV5 = ethers.getAddress("0x" + storageSlotsAdministrationAfterV5[1].slice(26))
       const expectedAddress2UpgradeV5 = ethers.getAddress(await x2EarnRewardsPool.getAddress())
       expect(addressFromSlot2UpgradeV5).to.equal(expectedAddress2UpgradeV5)
+
+      // Upgrade to V6
+      const x2EarnAppsV6 = (await upgradeProxy("X2EarnAppsV5", "X2EarnApps", await x2EarnAppsV5.getAddress(), [], {
+        version: 6,
+        libraries: {
+          AdministrationUtils: await administrationUtils.getAddress(),
+          EndorsementUtils: await endorsementUtils.getAddress(),
+          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        },
+      })) as X2EarnApps
+
+      expect(await x2EarnAppsV6.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
+
+      // check the storage slots for each module
+      // Administion utils
+      const storageSlotsAdministrationAfterV6 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotAdministration,
+      )
+      // Vote eligibility utils
+      const storageSlotsVoteEligibilityAfterV6 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotVoteEligibility,
+      )
+      // Settings utils
+      const storageSlotsSettingsAfterV6 = await getStorageSlots(await x2EarnAppsV2.getAddress(), initialSlotSettings)
+      // Apps storage
+      const storageSlotsAppsStorageAfterV6 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotAppsStorage,
+      )
+      // Endorsement slot
+      const storageSlotsEndorsementSlotAfterV6 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialEndorsementSlot,
+      )
+
+      // Check that the storage slots are the same for the administration module
+      for (let i = 0; i < storageSlotsAdministrationAfterV6.length; i++) {
+        expect(storageSlotsAdministrationAfterV6[i]).to.equal(storageSlotsAdministrationAfterV5[i])
+      }
+      // Check that the storage slots are the same for the vote eligibility module
+      for (let i = 0; i < storageSlotsVoteEligibilityAfterV6.length; i++) {
+        expect(storageSlotsVoteEligibilityAfterV6[i]).to.equal(storageSlotsVoteEligibilityAfterV5[i])
+      }
+      // Check that the storage slots are the same for the settings module
+      for (let i = 0; i < storageSlotsSettingsAfterV6.length; i++) {
+        expect(storageSlotsSettingsAfterV6[i]).to.equal(storageSlotsSettingsAfterV5[i])
+      }
+      // Check that the storage slots are the same for the apps storage module
+      for (let i = 0; i < storageSlotsAppsStorageAfterV6.length; i++) {
+        expect(storageSlotsAppsStorageAfterV6[i]).to.equal(storageSlotsAppsStorageAfterV5[i])
+      }
+      // Check that the storage slots are the same for the endorsement slot
+      for (let i = 0; i < storageSlotsEndorsementSlotAfterV6.length; i++) {
+        expect(storageSlotsEndorsementSlotAfterV6[i]).to.equal(storageSlotsEndorsementSlotAfterV5[i])
+      }
+
+      // Check that the version is good
+      expect(await x2EarnAppsV6.version()).to.eql("6")
+
+      // The first slot is the x2earnCreator contract address
+      const addressFromSlotUpgradeV6 = ethers.getAddress("0x" + storageSlotsAdministrationAfterV6[0].slice(26))
+      const expectedAddressUpgradeV6 = ethers.getAddress(await x2EarnCreator.getAddress())
+      expect(addressFromSlotUpgradeV6).to.equal(expectedAddressUpgradeV6)
+
+      // The second slot is the x2earnRewardsPool contract address
+      const addressFromSlot2UpgradeV6 = ethers.getAddress("0x" + storageSlotsAdministrationAfterV6[1].slice(26))
+      const expectedAddress2UpgradeV6 = ethers.getAddress(await x2EarnRewardsPool.getAddress())
+      expect(addressFromSlot2UpgradeV6).to.equal(expectedAddress2UpgradeV6)
     })
 
     it.skip("Check no issues upgrading to V5 with update of libraries", async function () {
@@ -3099,7 +3176,6 @@ describe("X-Apps - @shard15", function () {
   })
 })
 
-// Isolated tests for shard16 because of the size of the tests
 describe("X-Apps - @shard17a", function () {
   describe("Admin address", function () {
     it("Admin can update the admin address of an app", async function () {
