@@ -149,6 +149,7 @@ library MintingLogic {
 
         // Clean up token state
         delete $.tokens[_tokenId];
+        delete $.maturityPeriodEndBlock[_tokenId];
 
         // Update circulating supply, update cap if token is X
         Levels._decrementLevelCirculatingSupply($, token.levelId);
@@ -203,6 +204,9 @@ library MintingLogic {
             vetAmountStaked: msg.value,
             lastVthoClaimTimestamp: Clock._timestamp()
         });
+
+        // Update the maturity period end block
+        $.maturityPeriodEndBlock[tokenId] = Clock._clock() + level.maturityBlocks;
 
         // Call the mint callback on the main contract to mint the NFT
         IStargateNFT(address(this))._safeMintCallback(msg.sender, tokenId);
@@ -271,6 +275,10 @@ library MintingLogic {
             vetAmountStaked: msg.value,
             lastVthoClaimTimestamp: Clock._timestamp()
         });
+
+        // Update the maturity period end block
+        // Note: maturity period is not applied to migrated tokens
+        $.maturityPeriodEndBlock[_tokenId] = Clock._clock();
 
         // Destroy the token in the legacy nodes contract
         $.legacyNodes.downgradeTo(_tokenId, 0);

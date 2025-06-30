@@ -33,6 +33,7 @@ library DataTypes {
         mapping(uint8 levelId => Checkpoints.Trace208) circulatingSupply; // Token levels management: Mapping level ID to circulating supply
         mapping(uint8 levelId => uint32) cap; // Token levels management: Mapping level ID to cap aka max supply
         mapping(uint256 tokenId => Token) tokens; // Token tracking: Mapping token ID to token
+        mapping(uint256 tokenId => uint64) maturityPeriodEndBlock; // Token tracking: Maturity period end block
     }
 
     struct StargateNFTInitParams {
