@@ -691,6 +691,7 @@ describe("Galaxy Member - @shard3b", () => {
         minterAccount,
         vechainNodesMock,
         nodeManagement,
+        stargateNftMock,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1021,6 +1022,14 @@ describe("Galaxy Member - @shard3b", () => {
         slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
       )
 
+      // before the upgrade, we save the mapping _nodeToFreeUpgradeLevel values (to check later)
+      const levels = await stargateNftMock.getLevels()
+      const freeUpgradeLevels = []
+      for (const level of levels) {
+        const freeUpgradeLevel = await galaxyMemberV4.getNodeToFreeLevel(level.id)
+        freeUpgradeLevels.push(freeUpgradeLevel)
+      }
+
       const galaxyMemberV5 = (await upgradeProxy(
         "GalaxyMemberV4",
         "GalaxyMember",
@@ -1101,6 +1110,40 @@ describe("Galaxy Member - @shard3b", () => {
       // Node owner - otherAccount - who's nor the GM NFT owner neither the node manager - can still detach the node
       await galaxyMemberV5.connect(otherAccount).detachNode(2, 3)
       expect(await galaxyMemberV5.levelOf(3)).to.equal(1) // Back to Earth
+
+      // after the upgrade, we check that the mapping _nodeToFreeUpgradeLevel has no corrupted values
+      for (let i = 0; i < levels.length; i++) {
+        const freeUpgradeLevel = await galaxyMemberV5.getNodeToFreeLevel(levels[i].id)
+        expect(freeUpgradeLevel).to.equal(freeUpgradeLevels[i])
+      }
+
+      // we can add a new _nodeToFreeUpgradeLevel value
+      await galaxyMemberV5.connect(owner).setNodeToFreeUpgradeLevel(9, 4)
+      expect(await galaxyMemberV5.getNodeToFreeLevel(9)).to.equal(4)
+
+      // we can remove a _nodeToFreeUpgradeLevel value
+      await galaxyMemberV5.connect(owner).setNodeToFreeUpgradeLevel(10, 6)
+      expect(await galaxyMemberV5.getNodeToFreeLevel(10)).to.equal(6)
+
+      // we can update previous _nodeToFreeUpgradeLevel value
+      await galaxyMemberV5.connect(owner).setNodeToFreeUpgradeLevel(1, 5)
+      expect(await galaxyMemberV5.getNodeToFreeLevel(1)).to.equal(5)
+
+      // validate again that we can fetch the correct values
+      for (let i = 0; i < levels.length; i++) {
+        const freeUpgradeLevel = await galaxyMemberV5.getNodeToFreeLevel(levels[i].id)
+
+        // we changed the above levels above, so adding if conditions so we can reuse the preiovious array
+        if (levels[i].id === 1n) {
+          expect(freeUpgradeLevel).to.equal(5)
+        } else if (levels[i].id === 10n) {
+          expect(freeUpgradeLevel).to.equal(6)
+        } else if (levels[i].id === 9n) {
+          expect(freeUpgradeLevel).to.equal(4)
+        } else {
+          expect(freeUpgradeLevel).to.equal(freeUpgradeLevels[i])
+        }
+      }
     })
   })
 

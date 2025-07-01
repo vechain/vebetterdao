@@ -1712,6 +1712,7 @@
   "Managed by": "Managed by",
   "Managing for": "Managing for",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.",
+  "Your Node can be currently used only by the manager": "Your Node can be currently used only by the manager",
   "STARGATE IS LIVE 🌌": "STARGATE IS LIVE 🌌",
   "Migrate your legacy node to discover the new stargate universe !": "Migrate your legacy node to discover the new stargate universe !"
 }

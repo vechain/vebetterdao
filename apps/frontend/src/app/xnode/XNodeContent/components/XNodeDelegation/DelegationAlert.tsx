@@ -15,7 +15,7 @@ export const DelegationAlert = () => {
       <Alert status="warning" borderRadius="2xl">
         <AlertIcon />
         <Box lineHeight="1.20rem" fontSize="sm">
-          <AlertTitle as="span">{t("Your Node is currently delegated to another address")}</AlertTitle>
+          <AlertTitle as="span">{t("Your Node can be currently used only by the manager")}</AlertTitle>
           <Text>
             {t(
               "You can't use your Node to endorse apps or to upgrade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.",
