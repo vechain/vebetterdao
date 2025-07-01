@@ -1,6 +1,7 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor, executeCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
+import { useQuery } from "@tanstack/react-query"
 
 const address = getConfig().nodeManagementContractAddress as `0x${string}`
 const abi = NodeManagement__factory.abi
@@ -16,13 +17,15 @@ export type UserNode = {
   isXNodeDelegatee: boolean
   delegatee: string
 }
+type UserNodeWithIsLegacy = UserNode & {
+  isLegacyNode: boolean
+}
 
 /**
  * Get the query key for fetching user nodes
  * @param user - The address of the user to check
  */
-export const getUserNodesQueryKey = (user?: string) =>
-  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(user ?? "0x") as `0x${string}`] })
+export const getUserNodesQueryKey = (user?: string) => ["userNodes", user]
 
 /**
  * Hook to get delegation details for all nodes associated with a user
@@ -30,27 +33,41 @@ export const getUserNodesQueryKey = (user?: string) =>
  * @returns An array of objects containing user node details
  */
 export const useGetUserNodes = (user?: string) => {
-  return useCallClause({
-    abi,
-    address,
-    method,
-    args: [(user ?? "0x") as `0x${string}`],
-    queryOptions: {
-      enabled: !!user,
-      select: data =>
-        data[0].map(
+  const thor = useThor()
+
+  return useQuery({
+    queryKey: getUserNodesQueryKey(user),
+    queryFn: async () => {
+      const [userNodes = []] =
+        (await executeCallClause({
+          thor,
+          abi,
+          contractAddress: address,
+          method,
+          args: [(user ?? "0x") as `0x${string}`],
+        })) || []
+
+      const isLegacyCheckCalls = await executeMultipleClausesCall({
+        thor,
+        calls: userNodes.map(
           node =>
             ({
-              nodeId: node.nodeId.toString(),
-              nodeLevel: node.nodeLevel,
-              xNodeOwner: node.xNodeOwner,
-              isXNodeHolder: node.isXNodeHolder,
-              isXNodeDelegated: node.isXNodeDelegated,
-              isXNodeDelegator: node.isXNodeDelegator,
-              isXNodeDelegatee: node.isXNodeDelegatee,
-              delegatee: node.delegatee,
-            }) as UserNode,
+              abi,
+              address,
+              functionName: "isLegacyNode",
+              args: [node.nodeId],
+            }) as const,
         ),
+      })
+
+      return userNodes.map(
+        (node, index) =>
+          ({
+            ...node,
+            nodeId: node.nodeId.toString(),
+            isLegacyNode: isLegacyCheckCalls[index] ?? true,
+          }) as UserNodeWithIsLegacy,
+      )
     },
   })
 }

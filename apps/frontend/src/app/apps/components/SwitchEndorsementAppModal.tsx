@@ -2,9 +2,9 @@ import {
   useAllocationsRound,
   useCurrentAllocationsRoundId,
   useUserEndorsementScore,
-  useUserXNodes,
   useXNodeCheckCooldown,
   useXAppMetadata,
+  useXNode,
 } from "@/api"
 import { useSwitchEndorsement } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Image } from "@chakra-ui/react"
@@ -48,9 +48,9 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
   const { data: userEndorsementScore, isLoading: isUserEndorsementScoreLoading } = useUserEndorsementScore(
     account?.address,
   )
-  const userDelegatedNodes = useUserXNodes()
+  const { xNodeId } = useXNode(account?.address ?? "")
 
-  const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
+  const nodeId = xNodeId ?? "0"
   const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(nodeId ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)

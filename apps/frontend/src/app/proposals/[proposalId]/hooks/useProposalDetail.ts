@@ -170,6 +170,7 @@ export const useProposalDetailById = (proposalId: string) => {
       votingEndDate,
       isVotingEndDateLoading,
       depositThreshold,
+      missingSupport: proposalDepositEvent.missingSupport,
       isDepositThresholdLoading: proposalCreatedEvent.isLoading,
       communityDeposits,
       isCommunityDepositsLoading: proposalDepositEvent.isLoading,

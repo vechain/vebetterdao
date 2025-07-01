@@ -10,7 +10,7 @@ import {
   getIsAppUnendorsedQueryKey,
   getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
-  getUserXNodesQueryKey,
+  getUserNodesQueryKey,
   getXAppsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
@@ -43,7 +43,7 @@ export const useUnendorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserXNodesQueryKey(userAddress ?? ""),
+      getUserNodesQueryKey(userAddress ?? ""),
       getIsAppUnendorsedQueryKey(appId ?? ""),
       getAppEndorsementScoreQueryKey(appId ?? ""),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),

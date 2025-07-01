@@ -36,13 +36,13 @@ export const ProposalWithdrawDeposit = () => {
                   <Flex position="relative" top="7px" display={"inline-flex"}>
                     <FaRegHeart color={"#004CFC"} size={"36"} />
                   </Flex>
-                  <Text fontSize={"28px"} color={"#252525"} fontWeight={700}>
+                  <Text fontSize={"28px"} color={"contrast-fg-on-dark-bg"} fontWeight={700}>
                     {compactFormatter.format(Number(proposal.communityDeposits))}
                   </Text>
-                  <Text fontSize={"20px"} fontWeight={500} color={"#252525"}>
+                  <Text fontSize={"20px"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
                     {t("/")}
                   </Text>
-                  <Text fontSize={"20px"} fontWeight={500} color={"#252525"}>
+                  <Text fontSize={"20px"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
                     {compactFormatter.format(Number(proposal.depositThreshold))}
                   </Text>
                 </HStack>

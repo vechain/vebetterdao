@@ -17,7 +17,8 @@
     "CONTRACT_TO_DEPLOY",
     "CONTRACT_VERSION",
     "FUNCTION_TO_CALL",
-    "NEXT_DEPLOY_LATEST_ONLY"
+    "NEXT_DEPLOY_LATEST_ONLY",
+    "OPENAI_API_KEY"
   ],
   "tasks": {
     "install": {
