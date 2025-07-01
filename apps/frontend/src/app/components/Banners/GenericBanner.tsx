@@ -1,4 +1,16 @@
-import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
+import {
+  Heading,
+  Text,
+  VStack,
+  Card,
+  CardBody,
+  HStack,
+  Image,
+  Button,
+  Show,
+  useMediaQuery,
+  Box,
+} from "@chakra-ui/react"
 import React from "react"
 
 type GenericBannerProps = {
@@ -11,9 +23,11 @@ type GenericBannerProps = {
   backgroundImageSrc?: string
   buttonLabel?: string
   onButtonClick?: () => void
-  buttonVariant?: "outline" | "primaryAction"
+  buttonVariant?: "outline" | "primaryAction" | "custom"
   buttonIcon?: React.ReactElement
   buttonIconPosition?: "left" | "right"
+  customButton?: React.ReactElement
+  imagePosition?: "top" | "center"
 }
 
 export const GenericBanner: React.FC<GenericBannerProps> = ({
@@ -29,11 +43,13 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   buttonVariant = "outline",
   buttonIcon,
   buttonIconPosition = "right",
+  customButton,
+  imagePosition = "center",
 }) => {
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
   const isOutlineBtn = buttonVariant === "outline"
   const isIconLeft = buttonIconPosition === "left"
-  const hasButton = buttonLabel ?? buttonIcon
+  const hasButton = buttonLabel ?? buttonIcon ?? customButton
 
   const descriptionElement =
     typeof description === "string" ? (
@@ -43,6 +59,25 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
     ) : (
       description
     )
+
+  const renderButton = () => {
+    if (customButton) return customButton
+
+    return (
+      <Button
+        onClick={onButtonClick}
+        borderRadius="full"
+        variant={buttonVariant === "outline" ? "outline" : "primaryAction"}
+        {...(isOutlineBtn && {
+          bg: "transparent",
+          border: "1px solid #5F4400",
+          _hover: { bg: "#5F440020" },
+        })}
+        {...(isIconLeft ? { leftIcon: buttonIcon } : { rightIcon: buttonIcon })}>
+        <Text fontWeight="500">{buttonLabel}</Text>
+      </Button>
+    )
+  }
 
   return (
     <Card
@@ -54,25 +89,37 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
         base: "30vh",
         sm: "30vh",
         md: "auto",
-      }}>
+      }}
+      position="relative"
+      overflow="hidden">
+      {/* Background Layer */}
+      {backgroundImageSrc && (
+        <Box
+          position="absolute"
+          inset={0}
+          zIndex={0}
+          bgImage={backgroundImageSrc ? `url(${backgroundImageSrc})` : undefined}
+          bgSize="cover"
+          bgPosition={imagePosition}
+          bgRepeat="no-repeat"
+          _before={{
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            bg: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+      )}
       <CardBody
         position="relative"
-        overflow="hidden"
+        zIndex={1}
         alignContent="center"
         justifyContent="center"
         borderRadius="xl"
         padding={{ base: 4, md: 6 }}>
-        {backgroundImageSrc && (
-          <Image
-            src={backgroundImageSrc}
-            alt="background"
-            position="absolute"
-            right={["-50%", "-50%", "-10%"]}
-            top={["-50%", "-50%", "-150%"]}
-          />
-        )}
         <Show breakpoint="(min-width: 768px)">
-          <HStack align="stretch" zIndex={1} position="relative" w="full">
+          <HStack align="stretch" position="relative" w="full">
             {logoSrc &&
               (typeof logoSrc === "string" ? (
                 <Image src={logoSrc} alt="logo" objectFit="cover" w={24} h={24} />
@@ -86,25 +133,12 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
                 </Text>
                 {descriptionElement}
               </VStack>
-              {hasButton && (
-                <Button
-                  onClick={onButtonClick}
-                  borderRadius="full"
-                  variant={buttonVariant === "outline" ? "outline" : "primaryAction"}
-                  {...(isOutlineBtn && {
-                    bg: "transparent",
-                    border: "1px solid #5F4400",
-                    _hover: { bg: "#5F440020" },
-                  })}
-                  {...(isIconLeft ? { leftIcon: buttonIcon } : { rightIcon: buttonIcon })}>
-                  <Text fontWeight="500">{buttonLabel}</Text>
-                </Button>
-              )}
+              {hasButton && renderButton()}
             </HStack>
           </HStack>
         </Show>
         <Show breakpoint="(max-width: 767px)">
-          <HStack align="center" zIndex={1} position="relative" w="full" alignItems="center">
+          <HStack align="center" position="relative" w="full" alignItems="center">
             <VStack gap={2} align="stretch" justify="space-between">
               <Text fontSize={12} color={titleColor} fontWeight="600">
                 {title}
@@ -112,20 +146,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
               <Heading fontSize="18" fontWeight="700" color={descriptionColor}>
                 {description}
               </Heading>
-              {hasButton && (
-                <Button
-                  onClick={onButtonClick}
-                  borderRadius="full"
-                  variant={buttonVariant === "outline" ? "outline" : "primaryAction"}
-                  {...(isOutlineBtn && {
-                    bg: "transparent",
-                    border: "1px solid #5F4400",
-                    _hover: { bg: "#5F440020" },
-                  })}
-                  {...(isIconLeft ? { leftIcon: buttonIcon } : { rightIcon: buttonIcon })}>
-                  <Text fontWeight="500">{buttonLabel}</Text>
-                </Button>
-              )}
+              {hasButton && renderButton()}
             </VStack>
             {logoSrc &&
               (typeof logoSrc === "string" ? (
