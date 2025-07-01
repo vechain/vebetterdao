@@ -1714,5 +1714,7 @@
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.",
   "Your Node can be currently used only by the manager": "Your Node can be currently used only by the manager",
   "STARGATE IS LIVE 🌌": "STARGATE IS LIVE 🌌",
-  "Migrate your legacy node to discover the new stargate universe !": "Migrate your legacy node to discover the new stargate universe !"
+  "Migrate your legacy node to discover the new stargate universe !": "Migrate your legacy node to discover the new stargate universe !",
+  "The user will not be able to join the Discord channels, participate in the endorsement phases, and submit new apps.": "The user will not be able to join the Discord channels, participate in the endorsement phases, and submit new apps.",
+  "These users will be able to join the Discord channels, participate in the endorsement phases, and submit new apps.": "These users will be able to join the Discord channels, participate in the endorsement phases, and submit new apps."
 }
