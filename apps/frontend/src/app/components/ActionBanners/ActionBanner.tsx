@@ -190,9 +190,11 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   // Legacy Node banners logic
-  const showStargateBanner = useMemo(() => {
+  const isLegacyNode = useMemo(() => {
     return userNodes?.some(node => node.isLegacyNode)
   }, [userNodes])
+  // Remove the banner for every user at the end of this round
+  const showStargateBanner = currentRoundId < 54 || isLegacyNode
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
@@ -207,6 +209,8 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showStargateBanner)
+      bannerComponents.push(<StargateMigrationBanner isLegacyNode={isLegacyNode} key="stargate-migration" />)
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
@@ -217,7 +221,6 @@ export const ActionBanner = () => {
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
-    if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
     return bannerComponents
   }, [
