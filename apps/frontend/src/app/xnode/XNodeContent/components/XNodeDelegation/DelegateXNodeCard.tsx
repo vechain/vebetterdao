@@ -39,11 +39,15 @@ export const DelegateXNodeCard = () => {
                 {isXNodeDelegator ? t("Node is currently managed by:") : t("Node managed for:")}
               </Text>
             ) : (
-              <Text fontSize="sm">
-                {t(
-                  "Assign a manager to help operate this node. Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT. You can revoke access anytime.",
-                )}
-              </Text>
+              <>
+                <Text fontSize="sm">{t("Assign a manager to help operate this node.")}</Text>
+                <Text fontSize="sm">
+                  {t(
+                    "Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT.",
+                  )}
+                </Text>
+                <Text fontSize="sm">{t("You can revoke access anytime.")}</Text>
+              </>
             )}
           </VStack>
 
