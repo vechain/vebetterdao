@@ -1,6 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
-import { ethers, network } from "hardhat"
+import { ethers } from "hardhat"
 import {
   B3TR,
   TimeLock,
@@ -111,7 +111,14 @@ import {
   StargateNFT,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import {
+  deployAndUpgrade,
+  deployProxy,
+  deployProxyOnly,
+  initializeProxy,
+  upgradeProxy,
+  deployStargateProxyWithoutInitialization,
+} from "../../scripts/helpers"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
@@ -128,11 +135,7 @@ import {
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
 import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
-import {
-  deployStargateProxyWithoutInitialization,
-  initialTokenLevels,
-  vthoRewardPerBlock,
-} from "../../scripts/deploy/deployAll"
+import { initialTokenLevels, vthoRewardPerBlock } from "../../scripts/deploy/deployAll"
 interface DeployInstance {
   B3trContract: ContractFactory
   b3tr: B3TR & { deploymentTransaction(): ContractTransactionResponse }

@@ -31,6 +31,7 @@ import {
   initializeProxy,
   saveContractsToFile,
   upgradeProxy,
+  deployStargateProxyWithoutInitialization,
 } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
@@ -221,36 +222,6 @@ export const vthoRewardPerBlock = [
     rewardPerBlock: ethers.parseUnits("0.003900304", 18), // 0.003900304 * 10^18
   },
 ]
-
-export const deployStargateProxyWithoutInitialization = async (
-  contractName: string,
-  libraries: { [libraryName: string]: string } = {},
-  logOutput: boolean = false,
-): Promise<string> => {
-  // Deploy the implementation contract
-  const Contract = await ethers.getContractFactory(contractName, {
-    libraries: libraries,
-  })
-  const implementation = await Contract.deploy()
-  await implementation.waitForDeployment()
-  logOutput && console.log(`${contractName} impl.: ${await implementation.getAddress()}`)
-
-  // Deploy the proxy contract without initialization
-  const proxyFactory = await ethers.getContractFactory("StargateProxy")
-  const proxy = await proxyFactory.deploy(await implementation.getAddress(), "0x")
-  await proxy.waitForDeployment()
-  logOutput && console.log(`${contractName} proxy: ${await proxy.getAddress()}`)
-
-  const newImplementationAddress = await getImplementationAddress(ethers.provider, await proxy.getAddress())
-  if (!AddressUtils.compareAddresses(newImplementationAddress, await implementation.getAddress())) {
-    throw new Error(
-      `The implementation address is not the one expected: ${newImplementationAddress} !== ${await implementation.getAddress()}`,
-    )
-  }
-
-  // Return the proxy address
-  return await proxy.getAddress()
-}
 
 export async function deployAll(config: ContractsConfig) {
   const start = performance.now()
