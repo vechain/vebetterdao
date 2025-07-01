@@ -1,11 +1,11 @@
 import { AppConfig } from "@repo/config"
 import { Emissions__factory as Emissions } from "@repo/contracts"
-import { getSecret } from "../secret"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { buildCheckEndorsementClauses, chunk, getAllApps } from "../xApps"
-import { addressUtils, FunctionFragment } from "@vechain/sdk-core"
 import { publishMessage } from "../slack"
-import { ThorClient } from "@vechain/sdk-network"
+import { ThorClient, TransactionReceipt } from "@vechain/sdk-network"
+import { AppEnv } from "@repo/config/contracts"
+import { ABIContract, Address, Transaction } from "@vechain/sdk-core"
 
 /**
  * Checks the endorsements of the X-Apps before distributing the X-Allocations.
@@ -13,23 +13,40 @@ import { ThorClient } from "@vechain/sdk-network"
  * @param thor - The ThorClient instance
  * @returns an array of transaction receipts if successful and the gas result of the last transaction
  */
+
+// Define a type for the EstimateGasResult based on its usage and expected structure
+// This is necessary because EstimateGasResult is not directly exported by the SDK
+type EstimateGasResultType = {
+  reverted: boolean
+  revertReasons?: (string | bigint)[]
+  vmErrors?: string[]
+  totalGas: number
+  // Add other potential fields from EstimateGasResult if known or needed
+}
+
 export async function checkEndorsements(
   thor: ThorClient,
   secretsClient: SecretsManagerClient,
   config: AppConfig,
   privateKey: string,
-) {
-  const isStaging = config.environment === "testnet-staging"
+): Promise<{ receipt: TransactionReceipt | null; gasResult: EstimateGasResultType | null }> {
+  const isStaging = config.environment === AppEnv.TESTNET_STAGING
 
   // Get the current round number from the Emissions contract
-  const currentRound = await thor.contracts.executeContractCall(
+  const response = await thor.contracts.executeCall(
     config.emissionsContractAddress,
-    Emissions.createInterface().getFunction("getCurrentCycle") as FunctionFragment,
+    ABIContract.ofAbi(Emissions.abi).getFunction("getCurrentCycle"),
     [],
   )
 
+  if (!response.success) {
+    throw new Error("Failed to get current round")
+  }
+
+  const currentRound = response.result?.array?.[0] as string
+
   // Get the eligible X-Apps for the current round
-  const xApps = await getAllApps(thor, currentRound[0], config)
+  const xApps = await getAllApps(thor, currentRound, config)
 
   // Split X-Apps into chunks of 200
   const xAppsChunks = chunk(xApps, 200)
@@ -40,10 +57,8 @@ export async function checkEndorsements(
     const checkendorsementClauses = buildCheckEndorsementClauses(xAppsChunk)
 
     // Estimate the gas cost for the transaction
-    const gasResult = await thor.gas.estimateGas(
-      checkendorsementClauses,
-      addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
-    )
+    const senderAddress = Address.ofPrivateKey(Buffer.from(privateKey, "hex"))
+    const gasResult = await thor.gas.estimateGas(checkendorsementClauses, senderAddress.toString())
 
     // Check if the transaction was estimated to revert and handle accordingly
     if (gasResult.reverted) {
@@ -52,7 +67,9 @@ export async function checkEndorsements(
       await publishMessage(
         secretsClient,
         "C06BLEJE5SA",
-        `${isStaging ? "[STAGING] " : ""}:alert: Failed to check endorsemets:\n${gasResult.revertReasons}, ${gasResult.vmErrors}`,
+        `${isStaging ? "[STAGING] " : ""}:alert: Failed to check endorsemets:\n${gasResult.revertReasons}, ${
+          gasResult.vmErrors
+        }`,
       )
 
       return { receipt: null, gasResult }
@@ -62,7 +79,7 @@ export async function checkEndorsements(
     const txBody = await thor.transactions.buildTransactionBody(checkendorsementClauses, gasResult.totalGas)
 
     // Sign the transaction with the developer's private key
-    const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+    const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
 
     // Send the signed transaction to the blockchain
     const tx = await thor.transactions.sendTransaction(signedTx)

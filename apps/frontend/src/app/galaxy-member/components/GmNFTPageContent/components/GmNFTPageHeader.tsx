@@ -43,7 +43,6 @@ export const GmNFTPageHeader = () => {
     b3trLeftover,
   } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
-
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
 
@@ -175,7 +174,7 @@ export const GmNFTPageHeader = () => {
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
         spacing={4}
-        zIndex={"2"}>
+        zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
           justify="space-between"

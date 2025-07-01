@@ -116,7 +116,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
           </Text>
         )}
         {isFinished ? (
-          <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400} {...textProps}>
+          <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
             {t("You have not voted")}
           </Text>
         ) : (
@@ -128,7 +128,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   return (
     <Box>
       {renderTitle && (
-        <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
+        <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
           {t("Your vote")}
         </Text>
       )}
@@ -162,9 +162,9 @@ const NoVoteAndActiveCheckVotingPower = ({
   return (
     <Skeleton isLoaded={!snapshotLoading}>
       <HStack spacing={2}>
-        <Icon as={MdHowToVote} boxSize={4} color={"#252525"} />
+        <Icon as={MdHowToVote} boxSize={4} color={"contrast-fg-on-muted"} />
 
-        <Text fontSize={["lg", "lg", "md"]} color={"#252525"} fontWeight={400} {...textProps}>
+        <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
           {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}
         </Text>
       </HStack>

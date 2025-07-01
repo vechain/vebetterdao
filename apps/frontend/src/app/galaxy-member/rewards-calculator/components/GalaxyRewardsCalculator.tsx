@@ -33,12 +33,12 @@ export const GalaxyRewardsCalculator = () => {
   let round = currentRound
 
   const { data: emissionAmountCurrent } = useAllocationAmount(round ?? "")
-  if (emissionAmountCurrent?.gm == "0") {
+  if (emissionAmountCurrent?.gm == "0.0") {
     round = (Number(currentRound) + 1).toString()
   }
 
   const { data: emissionAmountNext } = useAllocationAmount(round ?? "")
-  const emissionAmount = emissionAmountCurrent?.gm == "0" ? emissionAmountNext : emissionAmountCurrent
+  const emissionAmount = emissionAmountCurrent?.gm == "0.0" ? emissionAmountNext : emissionAmountCurrent
 
   const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
 

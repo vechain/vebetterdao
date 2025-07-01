@@ -22,7 +22,7 @@ import {
   payDeposit,
   waitForBlock,
 } from "./helpers"
-import { describe, it, beforeEach } from "mocha"
+import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployAndUpgrade, deployProxy, upgradeProxy } from "../scripts/helpers"
 import { endorseApp } from "./helpers/xnodes"
@@ -46,7 +46,7 @@ describe("X-Allocation Voting - @shard14", function () {
   let creator3: HardhatEthersSigner
   let creator4: HardhatEthersSigner
 
-  beforeEach(async function () {
+  before(async function () {
     const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
     creator1 = creators[0]
     creator2 = creators[1]

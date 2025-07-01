@@ -1,6 +1,6 @@
 import mainnetConfig from "@repo/config/mainnet"
-import { FunctionFragment, clauseBuilder } from "@vechain/sdk-core"
 import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
+import { ABIContract, Address, Clause } from "@vechain/sdk-core"
 
 /**
  * Builds the claim clauses for the specified xApps and round.
@@ -10,9 +10,9 @@ import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
  */
 export const buildClaimClauses = (xappIds: string[], roundId: string) => {
   const clauses = xappIds.map(xappId =>
-    clauseBuilder.functionInteraction(
-      mainnetConfig.xAllocationPoolContractAddress,
-      XAllocationPool.createInterface().getFunction("claim") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(mainnetConfig.xAllocationPoolContractAddress),
+      ABIContract.ofAbi(XAllocationPool.abi).getFunction("claim"),
       [roundId, xappId],
     ),
   )
@@ -27,9 +27,9 @@ export const buildClaimClauses = (xappIds: string[], roundId: string) => {
  * @returns the claim clause for the specified xApp and round.
  */
 export const buildClaimClause = (xappId: string, roundId: string) => {
-  return clauseBuilder.functionInteraction(
-    mainnetConfig.xAllocationPoolContractAddress,
-    XAllocationPool.createInterface().getFunction("claim") as FunctionFragment,
+  return Clause.callFunction(
+    Address.of(mainnetConfig.xAllocationPoolContractAddress),
+    ABIContract.ofAbi(XAllocationPool.abi).getFunction("claim"),
     [roundId, xappId],
   )
 }

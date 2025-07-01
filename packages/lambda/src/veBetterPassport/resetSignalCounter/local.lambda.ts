@@ -1,9 +1,8 @@
 import path from "path"
 import dotenv from "dotenv"
-import { FunctionFragment } from "ethers"
 
-import { HttpClient, ThorClient } from "@vechain/sdk-network"
-import { clauseBuilder, mnemonic } from "@vechain/sdk-core"
+import { ThorClient } from "@vechain/sdk-network"
+import { ABIContract, Address, Clause, Mnemonic, Transaction } from "@vechain/sdk-core"
 
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import localConfig from "@repo/config/local"
@@ -12,6 +11,29 @@ import { getConfig } from "@repo/config"
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") })
 
 const NODE_URL = getConfig("local").nodeUrl
+
+const VET_DOMAINS_CONTRACT_ADDRESS_MOCK = "0x92f70f37e41d6b30941444442cde459586341242" // This was deployed on my local network
+const VET_DOMAINS_CONTRACT_ABI_FRAGMENT_MOCK = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "isVerified",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const
 
 /**
  * Retrieves the caller wallet information.
@@ -23,8 +45,8 @@ const getCallerWalletInfo = (): { walletAddress: string; privateKey: string } =>
     throw new Error("Mnemonic not found")
   }
 
-  const walletAddress = mnemonic.deriveAddress(PHRASE, "0")
-  const privateKey = mnemonic.derivePrivateKey(PHRASE, "0").toString("hex")
+  const privateKey = Buffer.from(Mnemonic.toPrivateKey(PHRASE, "m/0")).toString("hex")
+  const walletAddress = Address.ofPrivateKey(Mnemonic.toPrivateKey(PHRASE)).toString()
 
   return { walletAddress, privateKey }
 }
@@ -35,12 +57,16 @@ const getCallerWalletInfo = (): { walletAddress: string; privateKey: string } =>
  * @param reason - The reason for resetting the signal counter.
  * @returns An object containing the transaction receipt and gas result.
  */
-const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason: string) => {
+const resetSignalCounterLocal = async (
+  thor: ThorClient,
+  bannedWallet: string,
+  reason: string,
+): Promise<{ receipt: any; gasResult: any }> => {
   const { walletAddress, privateKey } = getCallerWalletInfo()
 
-  const clause = clauseBuilder.functionInteraction(
-    localConfig.veBetterPassportContractAddress,
-    VeBetterPassport__factory.createInterface().getFunction("resetUserSignalsWithReason") as FunctionFragment,
+  const clause = Clause.callFunction(
+    Address.of(localConfig.veBetterPassportContractAddress),
+    ABIContract.ofAbi(VeBetterPassport__factory.abi).getFunction("resetUserSignalsWithReason"),
     [bannedWallet, reason],
   )
 
@@ -51,21 +77,39 @@ const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason
   }
 
   const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
-  const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+  const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
   const tx = await thor.transactions.sendTransaction(signedTx)
   const receipt = await thor.transactions.waitForTransaction(tx.id)
 
   return { receipt, gasResult }
 }
 
+export const getVerifiedVetDomain = async (thor: ThorClient, walletAddress: string): Promise<boolean> => {
+  const res = await thor.transactions.executeCall(
+    VET_DOMAINS_CONTRACT_ADDRESS_MOCK,
+    ABIContract.ofAbi(VET_DOMAINS_CONTRACT_ABI_FRAGMENT_MOCK).getFunction("isVerified"),
+    [walletAddress],
+  )
+
+  if (!res.success) {
+    throw new Error(`Failed to get verified vet domain for wallet: ${walletAddress}`)
+  }
+
+  return res.result?.array?.[0] as boolean
+}
+
 // Main execution function with error handling
 const main = async () => {
   try {
-    const thor = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
+    const thor = ThorClient.at(NODE_URL, { isPollingEnabled: false })
 
-    const bannedWallet = "0x0000000000000000000000000000000000000000"
-    const reason = "From script: reseting user signal counter"
-    const result = await resetSignalCounter(thor, bannedWallet, reason)
+    const bannedWallet = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
+
+    const isVerified = await getVerifiedVetDomain(thor, bannedWallet)
+    console.log("isVerified", isVerified)
+
+    const reason = "Reseting user signal counter for KYC'ed wallet"
+    const result = await resetSignalCounterLocal(thor, bannedWallet, reason)
     console.log("Signal counter reset successfully:", result)
   } catch (error) {
     console.error("Error executing reset signal counter:", error)
@@ -84,4 +128,4 @@ if (require.main === module) {
 }
 
 // Export for external use
-export { resetSignalCounter, main }
+export { resetSignalCounterLocal, main }

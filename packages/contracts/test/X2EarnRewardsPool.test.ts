@@ -7,7 +7,7 @@ import {
   getOrDeployContractInstances,
   waitForRoundToEnd,
 } from "./helpers"
-import { describe, it, beforeEach } from "mocha"
+import { describe, it, before } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import {
@@ -28,7 +28,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
 
-  beforeEach(async function () {
+  before(async function () {
     const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
     creator1 = creators[0]
     creator2 = creators[1]

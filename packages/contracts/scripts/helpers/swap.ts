@@ -1,8 +1,11 @@
 import { B3TR, B3TR__factory, VOT3, VOT3__factory } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
-import { buildTxBody, signAndSendTx } from "./txHelper"
+import { type TransactionClause, Clause, ABIContract, Address } from "@vechain/sdk-core"
+import { TransactionUtils } from "@repo/utils"
 import { SeedAccount } from "./seedAccounts"
 import { chunk } from "./chunk"
+import { getConfig } from "@repo/config"
+import { ThorClient } from "@vechain/sdk-network"
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 
 export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedAccount[]) => {
   console.log(`Converting B3TR for VOT3...`)
@@ -17,27 +20,21 @@ export const convertB3trForVot3 = async (b3tr: B3TR, vot3: VOT3, accounts: SeedA
       chunk.map(async account => {
         const clauses: TransactionClause[] = []
 
-        const b3trAmount = await b3tr.balanceOf(account.key.address)
-
+        const b3trAmount = await b3tr.balanceOf(account.key.address.toString())
         clauses.push(
-          clauseBuilder.functionInteraction(
-            b3trAddr,
-            coder.createInterface(JSON.stringify(B3TR__factory.abi)).getFunction("approve") as FunctionFragment,
-            [vot3Addr, b3trAmount],
-          ),
-        )
-
-        clauses.push(
-          clauseBuilder.functionInteraction(
+          Clause.callFunction(Address.of(b3trAddr), ABIContract.ofAbi(B3TR__factory.abi).getFunction("approve"), [
             vot3Addr,
-            coder.createInterface(JSON.stringify(VOT3__factory.abi)).getFunction("convertToVOT3") as FunctionFragment,
-            [b3trAmount],
-          ),
+            b3trAmount,
+          ]),
         )
 
-        const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32)
+        clauses.push(
+          Clause.callFunction(Address.of(vot3Addr), ABIContract.ofAbi(VOT3__factory.abi).getFunction("convertToVOT3"), [
+            b3trAmount,
+          ]),
+        )
 
-        await signAndSendTx(body, account.key.pk)
+        await TransactionUtils.sendTx(thorClient, clauses, account.key.pk)
       }),
     )
   }

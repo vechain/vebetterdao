@@ -1,7 +1,29 @@
 import { ethers } from "hardhat"
 
-export async function x2EarnLibraries() {
+export async function x2EarnLibraries(latestOnly: boolean = false) {
   // NOTE: V1 libraries do not exist, libraries were added in V2 of X2EarnApps contract
+
+  // ---------------------- Latest ----------------------
+  // Latest version
+  const AdministrationUtils = await ethers.getContractFactory("AdministrationUtils")
+  const AdministrationUtilsLib = await AdministrationUtils.deploy()
+  await AdministrationUtilsLib.waitForDeployment()
+  // Latest version
+  const EndorsementUtils = await ethers.getContractFactory("EndorsementUtils")
+  const EndorsementUtilsLib = await EndorsementUtils.deploy()
+  await EndorsementUtilsLib.waitForDeployment()
+  // Latest version
+  const VoteEligibilityUtils = await ethers.getContractFactory("VoteEligibilityUtils")
+  const VoteEligibilityUtilsLib = await VoteEligibilityUtils.deploy()
+  await VoteEligibilityUtilsLib.waitForDeployment()
+
+  if (latestOnly) {
+    return {
+      AdministrationUtils: AdministrationUtilsLib,
+      EndorsementUtils: EndorsementUtilsLib,
+      VoteEligibilityUtils: VoteEligibilityUtilsLib,
+    }
+  }
 
   // ---------------------- Version 2 ----------------------
   // Deploy Passport Checks LogicV2
@@ -44,20 +66,6 @@ export async function x2EarnLibraries() {
   const VoteEligibilityUtilsV4 = await ethers.getContractFactory("VoteEligibilityUtilsV4")
   const VoteEligibilityUtilsLibV4 = await VoteEligibilityUtilsV4.deploy()
   await VoteEligibilityUtilsLibV4.waitForDeployment()
-
-  // ---------------------- Version 5 ----------------------
-  // Latest version
-  const AdministrationUtils = await ethers.getContractFactory("AdministrationUtils")
-  const AdministrationUtilsLib = await AdministrationUtils.deploy()
-  await AdministrationUtilsLib.waitForDeployment()
-  // Latest version
-  const EndorsementUtils = await ethers.getContractFactory("EndorsementUtils")
-  const EndorsementUtilsLib = await EndorsementUtils.deploy()
-  await EndorsementUtilsLib.waitForDeployment()
-  // Latest version
-  const VoteEligibilityUtils = await ethers.getContractFactory("VoteEligibilityUtils")
-  const VoteEligibilityUtilsLib = await VoteEligibilityUtils.deploy()
-  await VoteEligibilityUtilsLib.waitForDeployment()
 
   return {
     AdministrationUtils: AdministrationUtilsLib,

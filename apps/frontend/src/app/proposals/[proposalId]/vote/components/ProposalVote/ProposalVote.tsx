@@ -54,7 +54,7 @@ type Props = {
 export const ProposalVote = ({ proposalId }: Props) => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
-  const [selectedVote, setSelectedVote] = useState("1")
+  const [selectedVote, setSelectedVote] = useState("")
   const [comment, setComment] = useState("")
   const router = useRouter()
   const { account } = useWallet()
@@ -89,8 +89,11 @@ export const ProposalVote = ({ proposalId }: Props) => {
 
   const handleCastVote = useCallback(
     (e?: FormEvent) => {
-      castVoteMutation.sendTransaction({ proposalId: proposal.id, vote: selectedVote, comment })
       e?.preventDefault()
+      if (!selectedVote) {
+        return
+      }
+      castVoteMutation.sendTransaction({ proposalId: proposal.id, vote: selectedVote, comment })
     },
     [castVoteMutation, comment, proposal.id, selectedVote],
   )
@@ -113,7 +116,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
               <b>{t("voting power")}</b>
               {t(" will be determined by the amount of VOT3 you had at the time of the snapshot.")}
             </Text>
-            <Card rounded="16px" bg="#F8F8F8" p={"24px"}>
+            <Card rounded="16px" bg="dark-contrast-on-card-bg" p={"24px"}>
               <VStack alignItems={"stretch"} gap={4}>
                 <Stack
                   spacing={[0, 0, 2]}
@@ -222,7 +225,8 @@ export const ProposalVote = ({ proposalId }: Props) => {
               leftIcon={<VoteIcon boxSize={"20px"} color="white" />}
               type="submit"
               variant="primaryAction"
-              w="full">
+              w="full"
+              isDisabled={!selectedVote}>
               {t("Cast your vote")}
             </Button>
           </VStack>

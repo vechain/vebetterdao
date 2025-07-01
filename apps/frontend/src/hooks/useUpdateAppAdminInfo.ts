@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory, VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
@@ -12,6 +12,7 @@ import {
 } from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
+const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 
 type Props = { appId: string; onSuccess?: () => void }
 
@@ -25,6 +26,8 @@ type ClausesProps = {
   distributorsToBeRemoved?: string[]
   creatorsToBeAdded?: string[]
   creatorsToBeRemoved?: string[]
+  signalersToBeAdded?: string[]
+  signalersToBeRemoved?: string[]
 }
 
 /**
@@ -45,6 +48,8 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       distributorsToBeRemoved,
       creatorsToBeAdded,
       creatorsToBeRemoved,
+      signalersToBeAdded,
+      signalersToBeRemoved,
     }: ClausesProps) => {
       const clauses = []
 
@@ -85,6 +90,34 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
               method: "removeAppModerator",
               args: [appId, moderator],
               comment: "remove moderator",
+            }),
+          )
+        })
+      }
+
+      if (signalersToBeAdded?.length) {
+        signalersToBeAdded.forEach(signaler => {
+          clauses.push(
+            buildClause({
+              to: getConfig().veBetterPassportContractAddress,
+              contractInterface: VeBetterPassportInterface,
+              method: "assignSignalerToAppByAppAdmin",
+              args: [appId, signaler],
+              comment: "add signaler to app by app admin",
+            }),
+          )
+        })
+      }
+
+      if (signalersToBeRemoved?.length) {
+        signalersToBeRemoved.forEach(signaler => {
+          clauses.push(
+            buildClause({
+              to: getConfig().veBetterPassportContractAddress,
+              contractInterface: VeBetterPassportInterface,
+              method: "removeSignalerFromAppByAppAdmin",
+              args: [signaler],
+              comment: "remove signaler from app by app admin",
             }),
           )
         })

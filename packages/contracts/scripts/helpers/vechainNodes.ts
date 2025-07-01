@@ -29,6 +29,6 @@ export const mintVechainNodes = async (
   levels: number[],
 ): Promise<void> => {
   for (let i = 0; i < accounts.length; i++) {
-    await addNodeToken(levels[i], accounts[i].key.address, vechainNodes)
+    await addNodeToken(levels[i], accounts[i].key.address.toString(), vechainNodes)
   }
 }

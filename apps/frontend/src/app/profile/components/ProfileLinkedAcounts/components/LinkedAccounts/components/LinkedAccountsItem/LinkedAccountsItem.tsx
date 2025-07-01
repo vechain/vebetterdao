@@ -40,7 +40,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
       justify={"stretch"}
       flexWrap={"wrap"}
       align={["stretch", "stretch", "center"]}
-      bg="#F8F8F8"
+      bg="dark-contrast-on-card-bg"
       rounded="xl"
       p={3}
       border={pending || !isUserAccountCard ? "none" : "1px solid #4A90E2"}

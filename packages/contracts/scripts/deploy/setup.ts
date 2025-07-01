@@ -11,60 +11,61 @@ import {
 } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
-import { endorseXApps, registerXDapps, xDappsCreatorAccounts } from "../helpers/xApp"
+import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
+import { EnvConfig, getContractsConfig, shouldEndorseXApps } from "@repo/config/contracts"
 
 const accounts = getTestKeys(17)
-const xDappCreatorAccounts = xDappsCreatorAccounts(accounts, 8)
+const xDappCreatorAccounts = accounts.slice(0, 8)
 
-export const APPS = [
+export const APPS: App[] = [
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "Mugshot",
     metadataURI: "bafkreidqiirz4ekvzyme5ll3obhh6fmcbt67uipqljeh6cvbb5mvkks2f4",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "Cleanify",
     metadataURI: "bafkreifmgtvgcvgibtrvcmbao4zc2cn2z4ga6xxp3wro5a7z5cdtfxnvrq",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "GreenCart",
     metadataURI: "bafkreif3wf422t4z6zyiztirmpplcdmemldk24dc3a4kow6ug5nznzmvhm",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "Green Ambassador Challenge",
     metadataURI: "bafkreigui2fiwnir3r3k32w7c3irbbdbfkpqanbisxarz7f6gqxk4gzeay",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "Oily",
     metadataURI: "bafkreiegiuaukybbauhae3vdy2ktdqrehf4wzfg6rnfn5ebd36c2k6pmxa",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "EVearn",
     metadataURI: "bafkreicz2cslyuzbmj2msmgyzpz2tqwmbyifb7yvb5jbnydp4yx4jnkfny",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "Vyvo",
     metadataURI: "bafkreid3dbmrxe3orutmptc43me5gnvskz7hu53bjnlfgafwu6xb53w3mi",
   },
   {
-    admin: accounts[6].address,
-    teamWalletAddress: accounts[6].address,
+    admin: accounts[6].address.toString(),
+    teamWalletAddress: accounts[6].address.toString(),
     name: "Non Fungible Book Club (NFBC)",
     metadataURI: "bafkreift6bsmzrjnxvdwkrpmxntbwpsrrxjvsvliycnfxoqznb63poeyka",
   },
@@ -78,6 +79,44 @@ const padNodeTypes = (nodeTypes: number[], requiredLength: number) => {
   }
 
   return nodeTypes
+}
+
+export const setupEnvironment = async (
+  config: EnvConfig,
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps,
+  governor: B3TRGovernorV1,
+  xAllocationVoting: XAllocationVoting,
+  b3tr: B3TR,
+  vot3: VOT3,
+  vechainNodesMock: TokenAuction,
+) => {
+  switch (config) {
+    case "local":
+    case "testnet-staging":
+    case "galactica-test":
+      await setupLocalEnvironment(
+        emissions,
+        treasury,
+        x2EarnApps,
+        governor,
+        xAllocationVoting,
+        b3tr,
+        vot3,
+        vechainNodesMock,
+        shouldEndorseXApps(),
+      )
+      break
+    case "testnet":
+      await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
+      break
+    case "mainnet":
+      await setupMainnetEnvironment(emissions, x2EarnApps)
+      break
+    default:
+      throw new Error(`Unsupported app environment: ${config}`)
+  }
 }
 
 export const updateGMMultipliers = async (levels: number[], multipliers: number[], voterRewards: VoterRewards) => {
@@ -107,6 +146,13 @@ export const setupLocalEnvironment = async (
   // Define specific accounts
   const admin = accounts[0]
 
+  // Make sure the first 10 accounts have a VTHO balance
+  await airdropVTHO(
+    accounts.slice(1, 10).map(acct => acct.address),
+    500n,
+    admin,
+  )
+
   // Bootstrap emissions
   const emissionsContract = await emissions.getAddress()
   await bootstrapEmissions(emissionsContract, admin)
@@ -121,7 +167,11 @@ export const setupLocalEnvironment = async (
   const seedAccounts = allAccounts.slice(0, 5)
   const endorserAccounts = allAccounts
 
-  await airdropVTHO(seedAccounts, admin)
+  await airdropVTHO(
+    seedAccounts.map(acct => acct.key.address),
+    500n,
+    admin,
+  )
 
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
@@ -142,8 +192,8 @@ export const setupLocalEnvironment = async (
   if (endorseApps) {
     // Get unendorsed XAPPs
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
-    const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
-    await endorseXApps(endorserAccounts, x2EarnApps, appsToEndorse, vechainNodesMock)
+    // const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
+    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
   }
   await proposeUpgradeGovernance(governor, xAllocationVoting)
 

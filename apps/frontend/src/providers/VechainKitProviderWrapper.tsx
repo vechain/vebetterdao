@@ -84,7 +84,18 @@ export function VechainKitProviderWrapper({ children }: Props) {
       network={{
         type: networkType,
       }}
-      allowCustomTokens={allowCustomTokens}>
+      allowCustomTokens={allowCustomTokens}
+      legalDocuments={{
+        allowAnalytics: true,
+        termsAndConditions: [
+          {
+            url: "https://vebetterdao.org/terms-of-service",
+            displayName: "VeBetterDAO Terms of Service",
+            version: 1,
+            required: true,
+          },
+        ],
+      }}>
       {children}
     </VeChainKitProvider>
   )

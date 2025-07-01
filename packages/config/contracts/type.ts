@@ -1,5 +1,7 @@
+import { EnvConfig } from "."
+
 export type ContractsConfig = {
-  NEXT_PUBLIC_APP_ENV: "local" | "e2e" | "testnet-staging" | "testnet" | "mainnet"
+  NEXT_PUBLIC_APP_ENV: EnvConfig
 
   B3TR_GOVERNOR_QUORUM_PERCENTAGE: number
   TIMELOCK_MIN_DELAY: number

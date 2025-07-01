@@ -7,7 +7,7 @@ import * as vechainKit from "@vechain/vechain-kit"
 import { screen } from "../../../../../../test"
 import { getEnvWhitelistedContractsWithFunctions } from "@/constants"
 import { vi } from "vitest"
-import { EnvConfig } from "@repo/config/contracts"
+import { EnvConfig, AppEnv } from "@repo/config/contracts"
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
 /**
@@ -105,19 +105,19 @@ describe("NewProposalDiscussion", async () => {
     it("no functions selected - clicks continue - error is showed", async () => {
       vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet-staging")
 
-      await checkCardContractsRendered("testnet-staging")
+      await checkCardContractsRendered(AppEnv.TESTNET_STAGING)
     }) // no functions selected - clicks continue - error is showed
 
     it("all functions selected - clicks continue - error is showed", async () => {
       vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet-staging")
 
-      await checkCardContractsRendered("testnet-staging", true)
+      await checkCardContractsRendered(AppEnv.TESTNET_STAGING, true)
     }) // all functions selected - clicks continue - error is showed
 
     it("add and remove all functions - clicks continue - error is showed", async () => {
       vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet-staging")
 
-      await checkCardContractsRendered("testnet-staging", true, true)
+      await checkCardContractsRendered(AppEnv.TESTNET_STAGING, true, true)
     }) //add and remove all functions - clicks continue - error is showed
   }) //testnet-staging
 

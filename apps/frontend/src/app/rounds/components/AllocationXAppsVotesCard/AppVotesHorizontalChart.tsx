@@ -34,8 +34,8 @@ export const AppVotesHorizontalChart = ({
   maxAllocation,
   maxAllocationPercentage,
   renderMaxAllocation = false,
-  //   showTotalVoters = false,
-}: Props) => {
+}: //   showTotalVoters = false,
+Props) => {
   const router = useRouter()
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
@@ -109,7 +109,7 @@ export const AppVotesHorizontalChart = ({
             <VStack spacing={0} align={["flex-end"]}>
               <Skeleton isLoaded={!forecastedEarningsLoading}>
                 <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
-                  <Heading size={["14px", "16px"]} fontWeight={600} color="#252525">
+                  <Heading size={["14px", "16px"]} fontWeight={600}>
                     {compactFormatter.format(Number(forecastedEarnings?.amount))}
                   </Heading>
                   <B3TRIcon boxSize={["14px", "16px"]} colorVariant="dark" />

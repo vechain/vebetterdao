@@ -77,7 +77,7 @@ export const UserSignaledBanner = () => {
         logoSrc="/assets/icons/info-bell.webp"
         backgroundColor="#FFD979"
         backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
-        buttonLabel={t("Know more")}
+        buttonLabel={t("Appeal here")}
         onButtonClick={onOpen}
         buttonVariant="outline"
         buttonIcon={<UilInfoCircle />}

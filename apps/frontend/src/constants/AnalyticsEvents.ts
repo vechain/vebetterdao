@@ -66,3 +66,26 @@ export const buttonClickActions = (property: ButtonClickProperties) => ({
 })
 
 export const buttonClicked: string = "Button Clicked"
+
+export enum LinkClickProperties {
+  REDIRECT_TO_APP_PAGE = "Redirect to App Page",
+}
+
+export const linkClickActions = (property: LinkClickProperties) => ({
+  action: property,
+})
+
+export const linkClicked: string = "Link Clicked"
+
+// Appeal/KYC events
+export enum SignalResetProperties {
+  SIGNAL_RESET_SUCCESS = "Signal Reset Successful",
+}
+
+export const signalResetActions = (property: SignalResetProperties) => ({
+  action: property,
+})
+
+export const signalReset: string = "Signal Reset"
+
+export const signaledAfterKYC: string = "Signaled After KYC"

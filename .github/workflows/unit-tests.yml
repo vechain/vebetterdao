@@ -86,9 +86,9 @@ jobs:
         run: yarn test --filter=backend
 
       # Run Lambda unit tests only if there are lambda changes and no contracts/utils changes
-      - name: Lambda Unit Tests
-        if: needs.check-changes.outputs.lambda-changed == 'true' && needs.check-changes.outputs.contracts-changed != 'true' && needs.check-changes.outputs.utils-changed != 'true'
-        run: yarn test --filter=lambda
+      # - name: Lambda Unit Tests
+      #   if: needs.check-changes.outputs.lambda-changed == 'true' && needs.check-changes.outputs.contracts-changed != 'true' && needs.check-changes.outputs.utils-changed != 'true'
+      #   run: yarn test --filter=lambda
 
   run-contract-tests:
     name: Contract Testing

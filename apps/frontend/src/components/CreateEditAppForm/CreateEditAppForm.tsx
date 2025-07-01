@@ -44,6 +44,7 @@ import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
 import { AddressUtils } from "@/utils"
 import { FormItem } from "../CustomFormFields"
+import { CategorySelector } from "@/components/CategorySelector"
 
 // Validate image uploads with size and type
 const validateImageUpload = async (
@@ -76,6 +77,7 @@ export type CreateEditAppFormData = {
   banner: string
   projectUrl: string
   distributionStrategy: string
+  categories: string[]
   treasuryWalletAddress: string
   adminWalletAddress: string
   ve_world_banner: string
@@ -237,6 +239,17 @@ export const CreateEditAppForm = ({
               }),
             }}
             error={errors.distributionStrategy?.message}
+          />
+
+          <CategorySelector
+            fieldName="categories"
+            register={register}
+            setValue={setValue}
+            watch={watch}
+            registerOptions={{
+              required: { value: true, message: t("Categories are required") },
+            }}
+            error={errors.categories?.message}
           />
 
           <FormControl isInvalid={!treasuryWalletAddress}>

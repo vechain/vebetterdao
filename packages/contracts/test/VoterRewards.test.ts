@@ -1,4 +1,4 @@
-import { describe, it, beforeEach } from "mocha"
+import { describe, it, before } from "mocha"
 import {
   catchRevert,
   getOrDeployContractInstances,
@@ -53,7 +53,7 @@ describe("VoterRewards - @shard10", () => {
   // Environment params
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
-  beforeEach(async function () {
+  before(async function () {
     const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
     creator1 = creators[0]
     creator2 = creators[1]

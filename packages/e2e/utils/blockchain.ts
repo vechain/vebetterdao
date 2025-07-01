@@ -1,5 +1,5 @@
-import { HttpClient, ThorClient, TransactionsModule } from "@vechain/sdk-network"
-import { clauseBuilder, coder, FunctionFragment, HDNode, TransactionHandler } from "@vechain/sdk-core"
+import { ThorClient } from "@vechain/sdk-network"
+import { Clause, Address, ABIContract, HDKey, ERC20_ABI, Transaction, TransactionBody } from "@vechain/sdk-core"
 import * as constants from "./constants"
 import { BigNumber } from "bignumber.js"
 import uniqueRandom from "./unique-random"
@@ -9,56 +9,7 @@ BigNumber.config({ EXPONENTIAL_AT: 100 })
 // Random number generator for accounts
 const randomAccGenerator = uniqueRandom(constants.DYNAMIC_ACCOUNT_MIN, constants.DYNAMIC_ACCOUNT_MAX)
 
-// ERC20 balanceOf function ABI
-const ERC20_balance_abi = JSON.stringify([
-  {
-    constant: true,
-    inputs: [
-      {
-        name: "_owner",
-        type: "address",
-      },
-    ],
-    name: "balanceOf",
-    outputs: [
-      {
-        name: "balance",
-        type: "uint256",
-      },
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-])
-
-// ERC20 approve function ABI
-const ERC20_approve_abi = JSON.stringify([
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "approve",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-])
+const thorClient = ThorClient.at(constants.THOR_URL)
 
 // VOT3 convertToVOT3 function ABI
 const VOT3_convertToVOT3_abi = JSON.stringify([
@@ -100,9 +51,12 @@ const Emissions_nextCycleBlock_abi = JSON.stringify([
  * @returns Address of account
  */
 const getAccountAddress = (index: number): string => {
-  const hdNode = HDNode.fromMnemonic(constants.SOLO_MNEMONIC)
-  const childNode = hdNode.derive(index)
-  return childNode.address
+  const hdNode = HDKey.fromMnemonic(constants.SOLO_MNEMONIC)
+  const childNode = hdNode.deriveChild(index)
+  if (!childNode.publicKey) {
+    throw new Error("Unable to derive public key")
+  }
+  return Address.ofPublicKey(childNode.publicKey).toString()
 }
 
 /**
@@ -111,14 +65,14 @@ const getAccountAddress = (index: number): string => {
  * @returns Private key of account
  */
 const getAccountPrivateKey = (index: number): Buffer => {
-  const hdNode = HDNode.fromMnemonic(constants.SOLO_MNEMONIC)
-  const childNode = hdNode.derive(index)
+  const hdNode = HDKey.fromMnemonic(constants.SOLO_MNEMONIC)
+  const childNode = hdNode.deriveChild(index)
   const privateKey =
     childNode.privateKey ??
     (() => {
       throw new Error("Unable to derive private key")
     })()
-  return privateKey
+  return Buffer.from(privateKey)
 }
 
 /**
@@ -128,11 +82,9 @@ const getAccountPrivateKey = (index: number): Buffer => {
  * @returns Balance of account (NOTE: this is a decimal value, not the raw balance from the contract)
  */
 const getERC20Balance = async (address: string, contractAddress: string): Promise<BigNumber> => {
-  const httpClient = new HttpClient(constants.THOR_URL)
-  const thorClient = new ThorClient(httpClient)
-  const response = await thorClient.contracts.executeContractCall(
+  const response = await thorClient.contracts.executeCall(
     contractAddress,
-    coder.createInterface(ERC20_balance_abi).getFunction("balanceOf") as FunctionFragment,
+    ABIContract.ofAbi(ERC20_ABI).getFunction("balanceOf"),
     [address],
   )
   const balance = new BigNumber(response[0].toString())
@@ -149,11 +101,16 @@ const getERC20Balance = async (address: string, contractAddress: string): Promis
 const doERC20Transfer = async (contract: string, address: string, amount: BigNumber) => {
   const senderPrivateKey = getAccountPrivateKey(constants.FUNDING_ACCOUNT_INDEX)
   const senderAddress = getAccountAddress(constants.FUNDING_ACCOUNT_INDEX)
-  const httpClient = new HttpClient(constants.THOR_URL)
-  const thorClient = new ThorClient(httpClient)
   const fullAmount = BigInt(amount.multipliedBy(constants.TOKEN_DECIMALS).toString())
   const latestBlock = await thorClient.blocks.getBestBlockCompressed()
-  const clauses = [clauseBuilder.transferToken(contract, address, fullAmount)]
+
+  const clauses = [
+    Clause.callFunction(Address.of(contract), ABIContract.ofAbi(ERC20_ABI).getFunction("transfer"), [
+      address,
+      fullAmount,
+    ]),
+  ]
+
   const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress, { gasPadding: 0.1 })
   const transactionBody = {
     chainTag: constants.THOR_CHAIN_TAG,
@@ -165,24 +122,8 @@ const doERC20Transfer = async (contract: string, address: string, amount: BigNum
     dependsOn: null,
     nonce: 12345678,
   }
-  const rawNormalSigned = TransactionHandler.sign(transactionBody, senderPrivateKey).encoded
-  const send = await thorClient.transactions.sendRawTransaction(`0x${rawNormalSigned.toString("hex")}`)
-  const txId = send.id
-  console.log(`ERC20 transfer transaction ID: ${txId}`)
-  const txModule = new TransactionsModule(thorClient)
-  const waitTx = await txModule.waitForTransaction(txId, {
-    intervalMs: constants.TX_RECEIPT_INTERVAL,
-    timeoutMs: constants.TX_RECEIPT_TIMEOUT,
-  })
-  const txReceipt =
-    waitTx ??
-    (() => {
-      throw new Error("Unable to get transaction receipt")
-    })()
-  console.log(`ERC20 transfer transaction reverted: ${txReceipt.reverted}`)
-  if (txReceipt.reverted) {
-    throw new Error(`ERC20 transfer transaction reverted: ${txId}`)
-  }
+
+  await signAndSendTx(transactionBody, senderPrivateKey)
 }
 
 /**
@@ -246,17 +187,14 @@ const fundB3TR = async (address: string, amount: BigNumber) => {
  */
 const convertB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: BigNumber) => {
   // approve VOT3 contract to spend B3TR
-  const httpClient = new HttpClient(constants.THOR_URL)
-  const thorClient = new ThorClient(httpClient)
-  // approve VOT3 contract to spend B3TR
-  const approveClause = clauseBuilder.functionInteraction(
-    constants.B3TR_CONTRACT_ADDRESS,
-    coder.createInterface(ERC20_approve_abi).getFunction("approve") as FunctionFragment,
+  const approveClause = Clause.callFunction(
+    Address.of(constants.B3TR_CONTRACT_ADDRESS),
+    ABIContract.ofAbi(ERC20_ABI).getFunction("approve"),
     [constants.VOT3_CONTRACT_ADDRESS, amount.multipliedBy(constants.TOKEN_DECIMALS).toString()],
   )
-  const convertToVOT3clause = clauseBuilder.functionInteraction(
-    constants.VOT3_CONTRACT_ADDRESS,
-    coder.createInterface(VOT3_convertToVOT3_abi).getFunction("convertToVOT3") as FunctionFragment,
+  const convertToVOT3clause = Clause.callFunction(
+    Address.of(constants.VOT3_CONTRACT_ADDRESS),
+    ABIContract.ofAbi(JSON.parse(VOT3_convertToVOT3_abi)).getFunction("convertToVOT3"),
     [amount.multipliedBy(constants.TOKEN_DECIMALS).toString()],
   )
   const clauses = [approveClause, convertToVOT3clause]
@@ -272,24 +210,8 @@ const convertB3TRForVOT3 = async (privateKey: Buffer, address: string, amount: B
     dependsOn: null,
     nonce: 12345678,
   }
-  const rawNormalSigned = TransactionHandler.sign(transactionBody, privateKey).encoded
-  const send = await thorClient.transactions.sendRawTransaction(`0x${rawNormalSigned.toString("hex")}`)
-  const txId = send.id
-  console.log(`Convert transfer transaction ID: ${txId}`)
-  const txModule = new TransactionsModule(thorClient)
-  const waitTx = await txModule.waitForTransaction(txId, {
-    intervalMs: constants.TX_RECEIPT_INTERVAL,
-    timeoutMs: constants.TX_RECEIPT_TIMEOUT,
-  })
-  const txReceipt =
-    waitTx ??
-    (() => {
-      throw new Error("Unable to get transaction receipt")
-    })()
-  console.log(`Convert transfer transaction reverted: ${txReceipt.reverted}`)
-  if (txReceipt.reverted) {
-    throw new Error(`Convert transfer transaction reverted: ${txId}`)
-  }
+
+  await signAndSendTx(transactionBody, privateKey)
 }
 
 /**
@@ -337,8 +259,6 @@ const getRndAccountIndex = () => {
 
 // Wait for the next block to be mined
 export const waitForNextBlock = async () => {
-  const httpClient = new HttpClient(constants.THOR_URL)
-  const thorClient = new ThorClient(httpClient)
   let startingBlock = await thorClient.blocks.getBestBlockCompressed()
   let currentBlock
   do {
@@ -361,8 +281,6 @@ export const moveBlocks = async (blocks: number) => {
  * Waits for the specified block number
  */
 const waitForBlock = async (blockNumber: number) => {
-  const httpClient = new HttpClient(constants.THOR_URL)
-  const thorClient = new ThorClient(httpClient)
   const currentBlock = await thorClient.blocks.getBestBlockCompressed()
   if (!currentBlock?.number) throw new Error("Could not get current block number")
   if (currentBlock?.number < blockNumber) {
@@ -377,11 +295,9 @@ const waitForBlock = async (blockNumber: number) => {
  * Waits for the allocation voting cycle to complete
  */
 const waitForNextCycle = async () => {
-  const httpClient = new HttpClient(constants.THOR_URL)
-  const thorClient = new ThorClient(httpClient)
-  const response = await thorClient.contracts.executeContractCall(
+  const response = await thorClient.contracts.executeCall(
     constants.EMISSIONS_CONTRACT_ADDRESS,
-    coder.createInterface(Emissions_nextCycleBlock_abi).getFunction("getNextCycleBlock") as FunctionFragment,
+    ABIContract.ofAbi(JSON.parse(Emissions_nextCycleBlock_abi)).getFunction("getNextCycleBlock"),
     [],
   )
   const blockNumber = response[0].toString()
@@ -402,4 +318,20 @@ const blockchainUtils = {
   getRndAccountIndex,
   waitForNextCycle,
 }
+
+const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
+  const signedTx = Transaction.of(body).sign(Buffer.from(pk))
+
+  const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
+
+  const txReceipt = await thorClient.transactions.waitForTransaction(sendTransactionResult.id)
+
+  if (!txReceipt) {
+    throw new Error("Transaction failed")
+  }
+  if (txReceipt.reverted) {
+    throw new Error("Transaction reverted")
+  }
+}
+
 export default blockchainUtils

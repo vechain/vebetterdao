@@ -129,7 +129,6 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
             border="1px solid #D5D5D5"
             borderRadius="20px"
             p="16px"
-            color="#252525"
             justifyContent="space-between">
             <HStack spacing={2}>
               <Box
@@ -186,7 +185,6 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
           borderRadius="20px"
           p="16px"
           mt={isPaused ? "0" : "24px"}
-          color="#252525"
           justifyContent="space-between">
           <HStack spacing={2}>
             {isPaused && (
@@ -245,10 +243,10 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack border="1px solid #D5D5D5" borderRadius="20px" p="20px">
           <ExclamationTriangle size={"100px"} />
 
-          <Text fontSize={16} fontWeight={600} color="#252525">
+          <Text fontSize={16} fontWeight={600}>
             {confirmationText}
           </Text>
-          <Text fontSize={14} fontWeight={400} color="#252525" textAlign={"center"} px={8}>
+          <Text fontSize={14} fontWeight={400} textAlign={"center"} px={8}>
             {informationOnConfirmationText}
           </Text>
         </VStack>

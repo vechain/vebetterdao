@@ -2,6 +2,7 @@ import { ethers } from "ethers"
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts/typechain-types"
+import { FormattingUtils } from "@repo/utils"
 
 const emissionsContractAddress = getConfig().emissionsContractAddress
 const emissionsInterface = Emissions__factory.createInterface()
@@ -20,7 +21,7 @@ export const getGMPoolAmountQueryKey = (currentRoundId: number) => {
  * @param currentRoundId The current round id.
  * @returns The GM amount for the given round. If no GM amount is found, returns 0.
  */
-export const useGMPoolAmount = (currentRoundId: number) => {
+export const useGMPoolAmount = (currentRoundId?: number) => {
   const { data: gmAmount } = useCall({
     contractInterface: emissionsInterface,
     contractAddress: emissionsContractAddress,
@@ -28,5 +29,13 @@ export const useGMPoolAmount = (currentRoundId: number) => {
     args: [currentRoundId],
     enabled: !!currentRoundId,
   })
-  return gmAmount ? Number(ethers.formatEther(gmAmount)) : 0
+
+  const scaled = ethers.formatEther(gmAmount ?? 0)
+  const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
+
+  return {
+    original: gmAmount,
+    scaled,
+    formatted,
+  }
 }

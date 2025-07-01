@@ -6,6 +6,7 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
 import { useDomainOrAddress } from "@/hooks"
+
 interface GmNFTCardProps {
   isGMOwned: boolean
   isGMLoading: boolean

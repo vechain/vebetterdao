@@ -1,0 +1,1 @@
+export const RESET_SIGNAL_KEY_LOCAL_STORAGE_PREFIX = "bot_signal_reset_success"
