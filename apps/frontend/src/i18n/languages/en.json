@@ -1711,5 +1711,7 @@
   "You're adding the following manager to your Node": "You're adding the following manager to your Node",
   "Managed by": "Managed by",
   "Managing for": "Managing for",
-  "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account."
+  "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.",
+  "MIGRATE YOUR LEGACY NODE TO STARGATE": "MIGRATE YOUR LEGACY NODE TO STARGATE",
+  "Your legacy node ...": "Your legacy node ..."
 }

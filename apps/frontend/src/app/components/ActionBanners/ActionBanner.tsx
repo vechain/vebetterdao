@@ -13,6 +13,7 @@ import {
   useVotingRewards,
   useGMRewards,
   useXApps,
+  useGetUserNodes,
 } from "@/api"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
@@ -35,6 +36,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
+import { LegacyNodeBanner } from "./components/LegacyNodeBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -97,6 +99,8 @@ export const ActionBanner = () => {
     isPerson,
     isLoading,
   } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
+
+  const { data: userNodes } = useGetUserNodes(account?.address ?? "")
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
@@ -185,6 +189,11 @@ export const ActionBanner = () => {
     if (showCreatorUnderReviewBanner) return <CreatorApplicationUnderReviewBanner key="creator-under-review" />
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
+  // Legacy Node banners logic
+  const showLegacyNodeBanner = useMemo(() => {
+    return userNodes?.some(node => node.isLegacyNode)
+  }, [userNodes])
+
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
     .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
@@ -208,6 +217,7 @@ export const ActionBanner = () => {
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
+    if (showLegacyNodeBanner) bannerComponents.push(<LegacyNodeBanner key="legacy-node" />)
 
     return bannerComponents
   }, [
@@ -222,6 +232,7 @@ export const ActionBanner = () => {
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
+    showLegacyNodeBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
