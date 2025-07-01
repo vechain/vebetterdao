@@ -76,7 +76,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           </Text>
         </Box>
         <VStack align="stretch">
-          <Heading fontSize="lg">{t("Who do you want to delegate to?")}</Heading>
+          <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
           <FormControl isInvalid={!delegatee}>
             <FormLabel color="#6A6A6A" fontSize="sm">
               {t("User wallet address")}

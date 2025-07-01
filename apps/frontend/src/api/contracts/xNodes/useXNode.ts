@@ -1,13 +1,26 @@
 import { useNodeEndorsedApp, useNodesEndorsementScore, useXAppMetadata } from "../xApps"
 import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
-import { useIpfsImage } from "@/api/ipfs"
+import { useIpfsImage, useIpfsMetadatas, useIpfsImageList } from "@/api/ipfs"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
 import { useXNodeCheckCooldown } from "./useXNodeCheckCooldown"
+import { useMultipleCalls } from "@/hooks/useMultipleCalls"
+import { StargateNFT__factory } from "@repo/contracts/typechain-types"
+import { getConfig } from "@repo/config"
+import { useMemo } from "react"
+
+const stargateNFTContractAddress = getConfig().stargateNFTContractAddress
+
+// Add these type definitions at the top of the file after imports
+interface StargateMetadata {
+  name: string
+  description: string
+  image: string
+}
 
 /**
  * Custom hook for retrieving data related to an X-Node.
@@ -51,6 +64,9 @@ interface XNodeData {
     isXNodeDelegator: boolean
     isXNodeDelegatee: boolean
     delegatee: string
+    isLegacyNode: boolean
+    name: string
+    image: string
   }>
 }
 
@@ -60,25 +76,77 @@ export const useXNode = (profile?: string): XNodeData => {
   const userNodeDetails = useGetUserNodes(profile ?? account?.address ?? "")
 
   // Store raw node data
-  const allNodes = userNodeDetails?.data ?? []
+  const allNodesWithIsLegacy = useMemo(() => userNodeDetails?.data ?? [], [userNodeDetails?.data])
+
+  // Separate legacy and Stargate nodes
+  const legacyNodes = useMemo(() => allNodesWithIsLegacy.filter(node => node.isLegacyNode), [allNodesWithIsLegacy])
+  const stargateNodes = useMemo(() => allNodesWithIsLegacy.filter(node => !node.isLegacyNode), [allNodesWithIsLegacy])
+
+  // Get tokenURI for each Stargate node
+  const stargateTokenURICalls = useMemo(
+    () =>
+      stargateNodes.map(node => ({
+        contractInterface: StargateNFT__factory.createInterface(),
+        contractAddress: stargateNFTContractAddress,
+        method: "tokenURI",
+        args: [node.nodeId],
+      })),
+    [stargateNodes],
+  )
+
+  const { data: stargateTokenURIs } = useMultipleCalls({
+    calls: stargateTokenURICalls as any,
+    queryKeyPrefix: "user-x-nodes-stargate-token-uris",
+  })
+
+  // Get metadata from IPFS for each Stargate node
+  const stargateTokenURIList = useMemo(
+    () => stargateTokenURIs?.map(uri => uri?.toString() ?? "") ?? [],
+    [stargateTokenURIs],
+  )
+  const stargateMetadatas = useIpfsMetadatas<StargateMetadata>(stargateTokenURIList, false)
+
+  // Only extract image URIs when metadata is available
+  const stargateImagesUris = useMemo(
+    () => stargateMetadatas?.map(metadata => metadata?.data?.image ?? "") ?? [],
+    [stargateMetadatas],
+  )
+
+  // Get images from IPFS for each Stargate node
+  const stargateImages = useIpfsImageList(stargateImagesUris)
+
+  // Process legacy nodes with constant metadata
+  const legacyNodesWithMetadata = useMemo(
+    () =>
+      legacyNodes.map(node => ({
+        ...node,
+        name: allNodeStrengthLevelToName[String(node.nodeLevel)] ?? "Not available",
+        image: NodeStrengthLevelToImage[String(node.nodeLevel)] ?? notFoundImage,
+      })),
+    [legacyNodes],
+  )
+
+  // Process Stargate nodes with IPFS metadata and images
+  const stargateNodesWithMetadata = useMemo(
+    () =>
+      stargateNodes.map((node, index) => ({
+        ...node,
+        name: stargateMetadatas?.[index]?.data?.name ?? "Not available",
+        image: stargateImages?.[index]?.data?.image ?? notFoundImage,
+      })),
+    [stargateNodes, stargateMetadatas, stargateImages],
+  )
+
+  // Combine all nodes
+  const allNodes = [...legacyNodesWithMetadata, ...stargateNodesWithMetadata]
 
   // Process first node for detailed view
   const firstNode = allNodes[0]
   const xNode = firstNode
-    ? {
-        id: firstNode.nodeId,
-        level: Number(firstNode.nodeLevel),
-        image: NodeStrengthLevelToImage[String(firstNode.nodeLevel)],
-        name: allNodeStrengthLevelToName[String(firstNode.nodeLevel)],
-      }
-    : undefined
 
-  const xNodeName = xNode?.name ?? t("Not available")
-  const xNodeImage = xNode?.image ?? notFoundImage
-  const xNodeLevel = xNode?.level ?? 0
-  const nodeType = Number(xNodeLevel) >= 4 ? "XNODE" : "ECONOMIC NODE"
+  const nodeType = Number(xNode?.nodeLevel) >= 4 ? "XNODE" : "ECONOMIC NODE"
 
-  const endorsedAppId = useNodeEndorsedApp(xNode?.id ?? "").data
+  const endorsedAppId = useNodeEndorsedApp(xNode?.nodeId ?? "").data
   const endorsedAppMetadata = useXAppMetadata(endorsedAppId ?? "")
   const { data: logo } = useIpfsImage(endorsedAppMetadata?.data?.logo)
   const endorsedApp = endorsedAppId
@@ -91,14 +159,14 @@ export const useXNode = (profile?: string): XNodeData => {
   const isEndorsingApp = !!endorsedAppId
 
   const nodeLevelToEndorsementScore = useNodesEndorsementScore()
-  const xNodePoints = Number(nodeLevelToEndorsementScore?.data?.[xNode?.level ?? 0] ?? 0)
+  const xNodePoints = Number(nodeLevelToEndorsementScore?.data?.[xNode?.nodeLevel ?? 0] ?? 0)
 
   const {
     data: attachedGMTokenId,
     isLoading: isLoadingAttachedGMTokenId,
     isError: isErrorAttachedGMTokenId,
     error: errorAttachedGMTokenId,
-  } = useGetTokenIdAttachedToNode(xNode?.id ?? "")
+  } = useGetTokenIdAttachedToNode(xNode?.nodeId ?? "")
 
   const isXNodeAttachedToGM = !!Number(attachedGMTokenId)
 
@@ -108,17 +176,16 @@ export const useXNode = (profile?: string): XNodeData => {
 
   const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
 
-  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(xNode?.id ?? "")
-
+  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(xNode?.nodeId ?? "")
   return {
     isXNodeLoading,
     isXNodeError,
     xNodeError,
-    xNodeId: xNode?.id,
-    xNodeName,
+    xNodeId: xNode?.nodeId,
+    xNodeName: xNode?.name ?? t("Not available"),
     nodeType,
-    xNodeImage,
-    xNodeLevel,
+    xNodeImage: xNode?.image ?? notFoundImage,
+    xNodeLevel: xNode?.nodeLevel ?? 0,
     xNodePoints,
     endorsedApp,
     isEndorsingApp,
