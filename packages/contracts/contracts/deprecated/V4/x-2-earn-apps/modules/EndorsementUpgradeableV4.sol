@@ -24,7 +24,7 @@
 pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { VechainNodesDataTypes } from "../../../../libraries/VechainNodesDataTypes.sol";
+import { VechainNodesDataTypes } from "../../../V2/node-management-libraries/VechainNodesDataTypes.sol";
 import { X2EarnAppsUpgradeableV4 } from "../X2EarnAppsUpgradeableV4.sol";
 import { X2EarnAppsDataTypes } from "../../../../libraries/X2EarnAppsDataTypes.sol";
 import { EndorsementUtilsV4 } from "../libraries/EndorsementUtilsV4.sol";

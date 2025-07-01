@@ -29,7 +29,7 @@ import { AppsStorageUpgradeableV5 } from "./x-2-earn-apps/modules/AppsStorageUpg
 import { ContractSettingsUpgradeableV5 } from "./x-2-earn-apps/modules/ContractSettingsUpgradeableV5.sol";
 import { VoteEligibilityUpgradeableV5 } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeableV5.sol";
 import { EndorsementUpgradeableV5 } from "./x-2-earn-apps/modules/EndorsementUpgradeableV5.sol";
-import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
+import { VechainNodesDataTypes } from "../V2/node-management-libraries/VechainNodesDataTypes.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
