@@ -1713,5 +1713,6 @@
   "Managed by": "管理者：",
   "Managing for": "为以下对象管理：",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "您当前拥有多个节点，但我们目前不支持每个账户多个节点。",
-  "Your Node can be currently used only by the manager": "您的节点目前只能由管理员使用"
+  "Your Node can be currently used only by the manager": "您的节点目前只能由管理员使用",
+  "Vote Type": "投票类型"
 }
