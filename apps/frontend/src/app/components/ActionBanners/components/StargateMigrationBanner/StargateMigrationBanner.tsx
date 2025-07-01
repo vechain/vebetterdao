@@ -7,7 +7,7 @@ export type Props = {
   isLegacyNode?: boolean
 }
 
-export const StargateMigrationBanner = (isLegacyNode: Props) => {
+export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
   const GOTOSTARGATE = () => {
     window.open("https://app.stargate.vechain.org/", "_blank", "noopener noreferrer")
   }
