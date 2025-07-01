@@ -36,7 +36,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
-import { LegacyNodeBanner } from "./components/LegacyNodeBanner"
+import { StargateMigrationBanner } from "./components/StargateMigrationBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -190,7 +190,7 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   // Legacy Node banners logic
-  const showLegacyNodeBanner = useMemo(() => {
+  const showStargateBanner = useMemo(() => {
     return userNodes?.some(node => node.isLegacyNode)
   }, [userNodes])
 
@@ -217,7 +217,7 @@ export const ActionBanner = () => {
 
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
-    if (showLegacyNodeBanner) bannerComponents.push(<LegacyNodeBanner key="legacy-node" />)
+    if (showStargateBanner) bannerComponents.push(<StargateMigrationBanner key="stargate-migration" />)
 
     return bannerComponents
   }, [
@@ -232,7 +232,7 @@ export const ActionBanner = () => {
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
-    showLegacyNodeBanner,
+    showStargateBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
