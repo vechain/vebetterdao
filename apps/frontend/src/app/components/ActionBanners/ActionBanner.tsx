@@ -194,7 +194,7 @@ export const ActionBanner = () => {
     return userNodes?.some(node => node.isLegacyNode)
   }, [userNodes])
   // Remove the banner for every user at the end of this round
-  const showStargateBanner = currentRoundId < 54 || isLegacyNode
+  const showStargateBanner = currentRoundId < 55 || isLegacyNode
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals

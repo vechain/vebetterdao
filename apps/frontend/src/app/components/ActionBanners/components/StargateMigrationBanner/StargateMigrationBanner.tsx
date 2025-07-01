@@ -4,7 +4,7 @@ import { UilArrowRight } from "@iconscout/react-unicons"
 import { GlassButton } from "@/components/GlassButton"
 
 export type Props = {
-  isLegacyNode: boolean
+  isLegacyNode?: boolean
 }
 
 export const StargateMigrationBanner = (isLegacyNode: Props) => {
