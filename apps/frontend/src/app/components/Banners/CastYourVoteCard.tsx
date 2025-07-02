@@ -24,7 +24,10 @@ export const CastYourVoteCard: React.FC = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundDetail } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot } = useGetVotesOnBlock(Number(roundDetail.voteStart), account?.address ?? undefined)
+  const { data: votesAtSnapshot } = useGetVotesOnBlock(
+    roundDetail.voteStart ? Number(roundDetail.voteStart) : undefined,
+    account?.address ?? undefined,
+  )
 
   const lottieSize = useBreakpointValue(
     {

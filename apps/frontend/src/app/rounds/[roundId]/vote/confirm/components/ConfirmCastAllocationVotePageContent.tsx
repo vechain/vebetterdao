@@ -56,7 +56,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const { data: roundInfo, isLoading: stateLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? undefined,
   )
 

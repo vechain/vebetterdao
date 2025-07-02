@@ -51,7 +51,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
 
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? undefined,
   )
 
