@@ -5,7 +5,7 @@ import {
   useCurrentAllocationsRoundId,
   useEndorsementScoreThreshold,
   useUserEndorsementScore,
-  useUserXNodes,
+  useXNode,
   useXNodeCheckCooldown,
   XApp,
 } from "@/api"
@@ -34,11 +34,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   const isEndorsementDataLoading = isAppScoreLoading || isEndorsementThresholdLoading
 
-  const { data: userDelegatedNodes, isLoading: isUserNodesLoading } = useUserXNodes()
+  const { allNodes, isXNodeLoading: isUserNodesLoading } = useXNode()
 
-  const firstNode = userDelegatedNodes?.[0]
+  const firstNode = allNodes?.[0]
 
-  const nodeId = userDelegatedNodes?.[0]?.id ?? "0"
+  const nodeId = firstNode?.nodeId ?? "0"
 
   const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(nodeId ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

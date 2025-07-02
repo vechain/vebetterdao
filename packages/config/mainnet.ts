@@ -18,9 +18,11 @@ const config: AppConfig = {
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
   x2EarnCreatorContractAddress: "0xe8e96a768ffd00417d4bd985bec9EcfC6F732a7f",
   indexerUrl: "https://b3tr.mainnet.vechain.org/api/v1",
+  tokenAuctionContractAddress: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302",
   nodeManagementContractAddress: "0xB0EF9D89C6b49CbA6BBF86Bf2FDf0Eee4968c6AB",
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
+  stargateNFTContractAddress: "0x1856c533ac2d94340aaa8544d35a5c1d4a21dee7",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "0xF8746E74334218d79e951313A87D82954b3dF5Ea",
     governorConfiguratorAddress: "0x8E4B5503DbBBCD7A4407b3B3cFE9306F758AFBe9",

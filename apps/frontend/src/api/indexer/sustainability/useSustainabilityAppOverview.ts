@@ -9,11 +9,12 @@ import {
 const indexerUrl = getConfig().indexerUrl
 
 type SustainabilityAppOverviewRequest = {
-  appId: string
+  appId?: string
   roundId?: number
   page?: number
   size?: number
   direction: "asc" | "desc"
+  sortBy?: string
 }
 
 /**
@@ -45,6 +46,7 @@ export const getSustainabilityAppOverviewQueryKey = (data: Omit<SustainabilityAp
   data.appId,
   data.roundId,
   data.direction,
+  data.sortBy,
 ]
 
 /**

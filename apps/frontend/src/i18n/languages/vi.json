@@ -1694,5 +1694,26 @@
   "Complete": "Hoàn tất",
   "Unable to process request. Try refreshing or contact support.": "Không thể xử lý yêu cầu. Thử tải lại hoặc liên hệ hỗ trợ.",
   "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Ví dụ: Mục tiêu của chúng tôi là phân phối ít nhất X phần trăm của phân bổ vòng mỗi tuần.",
-  "Vote Type": "Loại Bỏ Phiếu"
+  "Vote Type": "Loại Bỏ Phiếu",
+
+  "Node Owner": "Chủ sở hữu Node",
+  "Manager": "Quản lý",
+  "You have been added as a manager for this node": "Bạn đã được thêm làm quản lý cho node này",
+  "Only the owner can remove you as a manager.": "Chỉ chủ sở hữu mới có thể gỡ bạn khỏi vai trò quản lý.",
+  "Node is currently managed by:": "Node hiện đang được quản lý bởi:",
+  "Node managed for:": "Node được quản lý cho:",
+  "Node Management": "Quản lý Node",
+  "Assign a manager to help operate this node.": "Chỉ định một người quản lý để vận hành node này.",
+  "Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT.": "Quản lý có thể yêu cầu phần thưởng và truy cập các ứng dụng bên thứ ba xác minh quyền sở hữu NFT (như VeBetterDAO hoặc VeVote), nhưng không thể chuyển, rút stake hoặc đốt NFT.",
+  "You can revoke access anytime.": "Bạn có thể thu hồi quyền truy cập bất cứ lúc nào.",
+  "Add node manager": "Thêm quản lý node",
+  "By adding a manager to your Node, another address will be able to endorse apps and upgrade GM NFTs using your Node.": "Khi thêm quản lý cho Node của bạn, địa chỉ khác sẽ có thể xác nhận ứng dụng và nâng cấp GM NFT bằng Node của bạn.",
+  "The manager won't be able to transfer or sell your Node.": "Người quản lý sẽ không thể chuyển hoặc bán Node của bạn.",
+  "Who do you want to add as a manager?": "Bạn muốn thêm ai làm quản lý?",
+  "Are you sure you want to add a manager to your Node?": "Bạn có chắc muốn thêm quản lý cho Node của mình không?",
+  "You're adding the following manager to your Node": "Bạn đang thêm quản lý sau cho Node:",
+  "Managed by": "Được quản lý bởi",
+  "Managing for": "Quản lý cho",
+  "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "Bạn hiện quản lý nhiều Node, nhưng chúng tôi không hỗ trợ nhiều Node cho mỗi tài khoản.",
+  "Your Node can be currently used only by the manager": "Node của bạn hiện chỉ có thể được sử dụng bởi quản lý"
 }

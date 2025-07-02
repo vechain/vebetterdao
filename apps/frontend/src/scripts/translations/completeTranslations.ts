@@ -22,6 +22,7 @@ ${JSON.stringify(batch, null, 2)}
 const completeTranslations = async () => {
   languagesToGenerate.forEach(async language => {
     const languageTranslations = translations[language.code] || {}
+
     // fill with missing en translations
     const missingTranslations = Object.keys(en).reduce((acc, key) => {
       if (!languageTranslations[key]) {

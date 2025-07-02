@@ -13,6 +13,7 @@ import {
   useVotingRewards,
   useGMRewards,
   useXApps,
+  useGetUserNodes,
 } from "@/api"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
@@ -35,6 +36,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
+import { StargateMigrationBanner } from "./components/StargateMigrationBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -97,6 +99,8 @@ export const ActionBanner = () => {
     isPerson,
     isLoading,
   } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
+
+  const { data: userNodes } = useGetUserNodes(account?.address ?? "")
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
@@ -185,6 +189,13 @@ export const ActionBanner = () => {
     if (showCreatorUnderReviewBanner) return <CreatorApplicationUnderReviewBanner key="creator-under-review" />
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
+  // Legacy Node banners logic
+  const isLegacyNode = useMemo(() => {
+    return userNodes?.some(node => node.isLegacyNode)
+  }, [userNodes])
+  // Remove the banner for every user at the end of this round
+  const showStargateBanner = currentRoundId < 55 || isLegacyNode
+
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
     .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
@@ -198,6 +209,8 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showStargateBanner)
+      bannerComponents.push(<StargateMigrationBanner isLegacyNode={isLegacyNode} key="stargate-migration" />)
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
@@ -222,6 +235,7 @@ export const ActionBanner = () => {
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
+    showStargateBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
