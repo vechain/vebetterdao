@@ -4,9 +4,9 @@ import {
   useEndorsementScoreThreshold,
   useAppEligibleAtRoundStart,
   useIsAppUnendorsed,
+  useAppIsBlackListed,
 } from "@/api"
 import { XAppStatus } from "@/types"
-import { useIsBlacklisted } from "@/api/contracts/vePassport/hooks/useIsBlacklisted"
 
 /**
  * Determine the current app endorsement status
@@ -73,7 +73,7 @@ export const useAppEndorsementStatus = (appId: string) => {
   const { data: appEligibleAtRoundStart, isLoading: isAppEligibleAtRoundStartLoading } =
     useAppEligibleAtRoundStart(appId)
   const { data: isUnendorsed, isLoading: isUnendorsedLoading } = useIsAppUnendorsed(appId)
-  const { data: isBlacklisted, isLoading: isBlacklistedLoading } = useIsBlacklisted(appId)
+  const { data: isBlacklisted = false, isLoading: isBlacklistedLoading } = useAppIsBlackListed(appId)
   const { data: appHasBeenIntoAllocationRounds, isLoading: isAppExistsLoading } = useAppExists(appId)
 
   const isLoading =
