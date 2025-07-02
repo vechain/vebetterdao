@@ -132,7 +132,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.Pending ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
-  const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
+  const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "") // No loading state
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0

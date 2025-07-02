@@ -68,7 +68,7 @@ export const ManageCreatorsNFT = () => {
     },
   })
 
-  const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
+  const { data: hasNFT } = useHasCreatorNFT(lookupAddress ?? "")
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(lookupCreatorAddress ?? "")
   const { data: creatorApps } = useAppsCountFromCreator(lookupCreatorAddress ?? "")
 
