@@ -1,10 +1,9 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { formatEther } from "viem"
 import { useRoundXApps } from "../../xApps/hooks"
-import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 
 const abi = XAllocationPool__factory.abi
@@ -27,7 +26,6 @@ export const getMultipleXAppRoundEarningsQueryKey = (roundId: string, xAppIds: s
  */
 export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[]) => {
   const thor = useThor()
-  const queryClient = useQueryClient()
   const { data: xAppsInRound = [] } = useRoundXApps(roundId)
 
   return useQuery({
@@ -49,11 +47,6 @@ export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[])
       const decoded = res.map((earnings, index) => {
         const parsedAmount = formatEther(earnings[0] || 0n)
         const appId = xAppsInRound[index]?.id as string
-        // Update the cache with the new amount
-        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
-          amount: parsedAmount,
-          appId,
-        })
         return { amount: parsedAmount, appId }
       })
 
