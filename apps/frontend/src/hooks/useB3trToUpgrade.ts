@@ -24,7 +24,7 @@ export const useB3trToUpgrade = (tokenId?: string, enabled = true) => {
     args: [BigInt(tokenId ?? 0)],
     queryOptions: {
       enabled: !!tokenId && enabled,
-      select: data => Number(data[0]),
+      select: data => data[0].toString(),
     },
   })
 }
