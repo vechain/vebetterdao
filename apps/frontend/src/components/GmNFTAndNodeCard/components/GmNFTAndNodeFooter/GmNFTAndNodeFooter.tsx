@@ -112,7 +112,7 @@ export const GmNFTAndNodeFooter = () => {
             })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">
-            {compactFormatter.format(b3trToUpgradeGMToNextLevel)}
+            {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
           </Text>
           <Text as="span" fontSize={"14px"}>
             {"!"}
