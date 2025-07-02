@@ -394,7 +394,18 @@ abstract contract XAllocationVotingGovernor is
    */
   function voterRewards() public view virtual returns (IVoterRewards);
 
+  /**
+   * @dev Checks if autovoting is enabled for an account
+   */
   function _isAutoVotingEnabled(address account) internal view virtual returns (bool);
 
+  /**
+   * @dev Checks if autovoting is enabled for an account at a specific timepoint
+   */
+  function _isAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) internal view virtual returns (bool);
+
+  /**
+   * @dev Returns the voting preferences for an account
+   */
   function _getUserVotingPreferences(address account) internal view virtual returns (bytes32[] memory);
 }

@@ -95,6 +95,6 @@ library GovernorStorageTypes {
     // ------------------------------- Passport -------------------------------
     IVeBetterPassport veBetterPassport;
     // ------------------------------- Version 3 -------------------------------
-    mapping(address => bool) autovotingEnabled;
+    mapping(address => Checkpoints.Trace208) autoVotingEnabled;
   }
 }

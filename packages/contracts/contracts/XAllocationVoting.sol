@@ -159,7 +159,7 @@ contract XAllocationVoting is
     _castVoteOnBehalfOf(voter, roundId);
   }
 
-  function toggleAutovoting() public {
+  function toggleAutoVoting() public {
     _toggleAutovoting(_msgSender());
   }
 
@@ -167,8 +167,12 @@ contract XAllocationVoting is
     _setUserVotingPreferences(_msgSender(), appIds);
   }
 
-  function userAutovotingEnabled(address account) public view returns (bool) {
+  function isUserAutovotingEnabled(address account) public view returns (bool) {
     return _isAutoVotingEnabled(account);
+  }
+
+  function isUserAutovotingEnabledAtTimepoint(address account, uint48 timepoint) public view returns (bool) {
+    return _isAutoVotingEnabledAtTimepoint(account, timepoint);
   }
 
   function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {

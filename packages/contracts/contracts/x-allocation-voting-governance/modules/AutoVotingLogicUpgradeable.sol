@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 
@@ -10,12 +13,14 @@ import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
  * @dev This module is intended to be inherited by the XAllocationVoting contract
  */
 abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
+  using Checkpoints for Checkpoints.Trace208;
+
   /**
    * @dev Storage structure for AutoVoting preferences
    * @custom:storage-location erc7201:b3tr.storage.AutoVotingLogic
    */
   struct AutoVotingStorage {
-    mapping(address => bool) _autoVotingEnabled;
+    mapping(address => Checkpoints.Trace208) _autoVotingEnabled;
     mapping(address => bytes32[]) _userVotingPreferences;
   }
 
@@ -50,20 +55,33 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   function x2EarnApps() public view virtual override returns (IX2EarnApps);
 
   /**
+   * @dev Get the current block number
+   * @return The current block number
+   */
+  function _clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
+  }
+
+  /**
    * @dev Toggles autovoting for an account
    * @param account The address to toggle autovoting for
    */
   function _toggleAutovoting(address account) internal virtual {
     AutoVotingStorage storage $ = _getAutoVotingStorage();
 
-    if ($._autoVotingEnabled[account]) {
+    // Get current status using checkpoint
+    bool currentStatus = $._autoVotingEnabled[account].upperLookupRecent(_clock()) == 1;
+    bool newStatus = !currentStatus;
+
+    if (currentStatus && !newStatus) {
       // Reset the user's voting preferences when autovoting is disabled
       delete $._userVotingPreferences[account];
     }
 
-    $._autoVotingEnabled[account] = !$._autoVotingEnabled[account];
+    // Push new checkpoint with toggled status
+    $._autoVotingEnabled[account].push(_clock(), newStatus ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
 
-    emit AutoVotingToggled(account, $._autoVotingEnabled[account]);
+    emit AutoVotingToggled(account, newStatus);
   }
 
   /**
@@ -73,7 +91,21 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    */
   function _isAutoVotingEnabled(address account) internal view virtual override returns (bool) {
     AutoVotingStorage storage $ = _getAutoVotingStorage();
-    return $._autoVotingEnabled[account];
+    return $._autoVotingEnabled[account].upperLookupRecent(_clock()) == 1;
+  }
+
+  /**
+   * @dev Checks if autovoting is enabled for an account at a specific timepoint
+   * @param account The address to check
+   * @param timepoint The timepoint to check
+   * @return Whether autovoting is enabled for the account at the specific timepoint
+   */
+  function _isAutoVotingEnabledAtTimepoint(
+    address account,
+    uint48 timepoint
+  ) internal view virtual override returns (bool) {
+    AutoVotingStorage storage $ = _getAutoVotingStorage();
+    return $._autoVotingEnabled[account].upperLookupRecent(timepoint) == 1;
   }
 
   /**
