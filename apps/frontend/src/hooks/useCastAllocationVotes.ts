@@ -76,7 +76,7 @@ export const useCastAllocationVotes = ({
       getAllocationVotesQueryKey(roundId),
       getAllocationVotersQueryKey(roundId),
       getXAppsSharesQueryKey(roundId),
-      getUserVotesInRoundQueryKey(roundId, account?.address ?? undefined),
+      getUserVotesInRoundQueryKey(roundId, account?.address ?? ""),
       getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
       getXAppRoundEarningsQueryKey(roundId),
       getParticipatedInGovernanceQueryKey(account?.address ?? ""),
