@@ -238,7 +238,7 @@ library GovernorVotesLogicV6 {
       GovernorStateLogicV6.encodeStateBitmap(GovernorTypesV6.ProposalState.Active)
     );
 
-    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
+    uint256 proposalSnapshot = GovernorProposalLogicV6._proposalSnapshot(self, proposalId);
 
     (bool isPerson, string memory explanation) = self.veBetterPassport.isPersonAtTimepoint(
       voter,
@@ -282,7 +282,7 @@ library GovernorVotesLogicV6 {
    * The state will flip between enabled and disabled each time the function is called.
    */
   function toggleQuadraticVoting(GovernorStorageTypesV6.GovernorStorage storage self) external {
-    bool isQuadraticDisabled = self.quadraticVotingDisabled.upperLookupRecent(GovernorClockLogic.clock(self)) == 1; // 0: enabled, 1: disabled
+    bool isQuadraticDisabled = self.quadraticVotingDisabled.upperLookupRecent(GovernorClockLogicV6.clock(self)) == 1; // 0: enabled, 1: disabled
 
     // If quadratic voting is disabled, set the new status to enabled, otherwise set it to disabled.
     uint208 newStatus = isQuadraticDisabled ? 0 : 1;

@@ -53,7 +53,7 @@ library GovernorFunctionRestrictionsLogicV6 {
    * @param isWhitelisted Boolean indicating if the function is whitelisted for proposals.
    */
   function setWhitelistFunction(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address target,
     bytes4 functionSelector,
     bool isWhitelisted
@@ -72,7 +72,7 @@ library GovernorFunctionRestrictionsLogicV6 {
    * @param isWhitelisted Boolean indicating if the functions are whitelisted for proposals.
    */
   function setWhitelistFunctions(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address target,
     bytes4[] memory functionSelectors,
     bool isWhitelisted
@@ -88,7 +88,10 @@ library GovernorFunctionRestrictionsLogicV6 {
    * @param self The storage reference for the GovernorStorage.
    * @param isEnabled Flag to enable or disable function restriction.
    */
-  function setIsFunctionRestrictionEnabled(GovernorStorageTypes.GovernorStorage storage self, bool isEnabled) external {
+  function setIsFunctionRestrictionEnabled(
+    GovernorStorageTypesV6.GovernorStorage storage self,
+    bool isEnabled
+  ) external {
     self.isFunctionRestrictionEnabled = isEnabled;
   }
 
@@ -102,7 +105,7 @@ library GovernorFunctionRestrictionsLogicV6 {
    * @return Boolean indicating if the function is whitelisted.
    */
   function isFunctionWhitelisted(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address target,
     bytes4 functionSelector
   ) internal view returns (bool) {
@@ -117,7 +120,7 @@ library GovernorFunctionRestrictionsLogicV6 {
    * @param calldatas Function signatures and arguments.
    */
   function checkFunctionsRestriction(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address[] memory targets,
     bytes[] memory calldatas
   ) internal view {

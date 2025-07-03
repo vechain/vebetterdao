@@ -53,7 +53,7 @@ library GovernorGovernanceLogicV6 {
    * @param self The storage reference for the GovernorStorage.
    * @return The executor address.
    */
-  function executor(GovernorStorageTypes.GovernorStorage storage self) internal view returns (address) {
+  function executor(GovernorStorageTypesV6.GovernorStorage storage self) internal view returns (address) {
     return address(self.timelock);
   }
 
@@ -66,7 +66,7 @@ library GovernorGovernanceLogicV6 {
    * @param contractAddress The address of the calling governance contract.
    */
   function checkGovernance(
-    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorStorageTypesV6.GovernorStorage storage self,
     address sender,
     bytes calldata data,
     address contractAddress
