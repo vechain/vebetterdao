@@ -709,6 +709,7 @@ export async function deployAll(config: ContractsConfig) {
       "XAllocationVotingV3",
       "XAllocationVotingV4",
       "XAllocationVotingV5",
+      "XAllocationVotingV6",
       "XAllocationVoting",
     ],
     [
@@ -736,7 +737,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       logOutput: true,
     },
   )) as XAllocationVoting
