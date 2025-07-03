@@ -28,7 +28,7 @@ export const getUserVotesInRoundQueryKey = (roundId: string, userAddress?: strin
  * @returns the user votes in a given round from the xAllocationVoting contract
  */
 export const useUserVotesInRound = (roundId: string, userAddress?: string) => {
-  const { data = [], ...rest } = useEvents({
+  const { data, ...rest } = useEvents({
     abi,
     contractAddress: address,
     eventName,
@@ -49,14 +49,14 @@ export const useUserVotesInRound = (roundId: string, userAddress?: string) => {
   })
 
   const { data: singleVote, ...singleVoteRest } = useQuery({
-    queryKey: [...getUserVotesInRoundQueryKey(roundId, userAddress), "single"],
+    queryKey: ["userVotesInRound", roundId, userAddress],
     queryFn: () => {
-      if (data.length > 1) throw new Error("Multiple votes found")
-      if (data.length === 0) throw new Error("No votes found")
+      if (data!.length > 1) throw new Error("Multiple votes found")
+      if (data!.length === 0) throw new Error("No votes found")
 
-      return data[0]
+      return data![0]
     },
-    enabled: !!userAddress && !!roundId && !!data,
+    enabled: !!userAddress && !!roundId && !!data && Array.isArray(data) && !rest.isLoading,
   })
 
   return {

@@ -53,6 +53,9 @@ export const useNodesEndorsedApps = (nodeIds: string[]) => {
     queryKey: getNodesEndorsedAppsQueryKey(nodeIds),
     queryFn: async () => await getNodesEndorsedApps(thor, nodeIds),
     enabled: !!thor && !!nodeIds?.length,
+    select: data =>
+      // filter unendorsed apps
+      data.filter(node => node.endorsedApp !== "0x0000000000000000000000000000000000000000000000000000000000000000"),
   })
 }
 

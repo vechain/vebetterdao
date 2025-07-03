@@ -1,4 +1,4 @@
-import { getXAppMetadata, useXApps, getXAppMetadataQueryKey } from "@/api"
+import { getXAppMetadata, useXApps, getXAppMetadataQueryKey, useXAppsMetadataBaseUri } from "@/api"
 import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { CastAllocationVoteFormData } from "@/store"
@@ -23,6 +23,7 @@ export type AppVotesBreakdownProps = {
  */
 export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 15 }: AppVotesBreakdownProps) => {
   const { t } = useTranslation()
+  const { data: baseUri } = useXAppsMetadataBaseUri()
   const { data: xApps } = useXApps()
   const x2EarnApps = xApps?.allApps
 
@@ -54,9 +55,7 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
   const appsMetadata = useQueries({
     queries: votedX2EarnApps.map(app => ({
       queryKey: getXAppMetadataQueryKey(app.metadataURI),
-      queryFn: async () => {
-        return await getXAppMetadata(app.metadataURI)
-      },
+      queryFn: () => getXAppMetadata(`${baseUri}${app.metadataURI}`),
     })),
   })
 
