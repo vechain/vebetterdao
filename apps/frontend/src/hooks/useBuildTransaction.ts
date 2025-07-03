@@ -43,7 +43,10 @@ export const useBuildTransaction = <ClausesParams = void>({
    */
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache && refetchQueryKeys?.length) {
-      await Promise.all(refetchQueryKeys?.map(queryKey => queryClient.invalidateQueries({ queryKey })))
+      refetchQueryKeys?.forEach(async queryKey => {
+        await queryClient.cancelQueries({ queryKey })
+        await queryClient.refetchQueries({ queryKey })
+      })
     }
 
     onSuccess?.()
