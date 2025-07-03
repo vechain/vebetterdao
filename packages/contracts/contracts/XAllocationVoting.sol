@@ -57,6 +57,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * ----- Version 6 -----
  *  - Align IVoterRewards and IEmissions interfaces with the new contracts
+ *
+ * ----- Version 7 -----
+ *  - Added autovoting functionality allowing users to enable automatic voting with predefined app preferences
  */
 contract XAllocationVoting is
   XAllocationVotingGovernor,
@@ -177,27 +180,6 @@ contract XAllocationVoting is
   }
 
   /**
-   * @dev Check if autovoting is enabled for an account
-   */
-  function isUserAutoVotingEnabled(address account) public view returns (bool) {
-    return _isAutoVotingEnabled(account);
-  }
-
-  /**
-   * @dev Check if autovoting is enabled for an account at a specific timepoint
-   */
-  function isUserAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) public view returns (bool) {
-    return _isAutoVotingEnabledAtTimepoint(account, timepoint);
-  }
-
-  /**
-   * @dev Get the voting preferences for an account
-   */
-  function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {
-    return _getUserVotingPreferences(account);
-  }
-
-  /**
    * @dev Set the address of the X2EarnApps contract
    */
   function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
@@ -272,6 +254,27 @@ contract XAllocationVoting is
   }
 
   // ---------- Getters ---------- //
+
+  /**
+   * @dev Check if autovoting is enabled for an account
+   */
+  function isUserAutoVotingEnabled(address account) public view returns (bool) {
+    return _isAutoVotingEnabled(account);
+  }
+
+  /**
+   * @dev Check if autovoting is enabled for an account at a specific timepoint
+   */
+  function isUserAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) public view returns (bool) {
+    return _isAutoVotingEnabledAtTimepoint(account, timepoint);
+  }
+
+  /**
+   * @dev Get the voting preferences for an account
+   */
+  function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {
+    return _getUserVotingPreferences(account);
+  }
 
   /**
    * @dev Returns the X2EarnApps contract
