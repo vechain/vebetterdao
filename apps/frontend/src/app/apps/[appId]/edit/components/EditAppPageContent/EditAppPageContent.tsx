@@ -38,9 +38,9 @@ import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
 import { EditAppCategories } from "./components/EditAppCategories"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal } from "@/components/StepModal/StepModal"
-import Lottie from "react-lottie"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import Lottie from "react-lottie"
 
 export type EditAppForm = {
   name: string
@@ -195,6 +195,7 @@ export const EditAppPageContent = () => {
             content: (
               <ModalAnimation>
                 <VStack align={"center"} p={6}>
+                  {/* @ts-ignore eslint-disable-line */}
                   <Lottie
                     style={{
                       pointerEvents: "none",

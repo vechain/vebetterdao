@@ -48,7 +48,7 @@ type CategorySelectorProps<T extends FieldValues> = {
   error?: string
   maxCategories?: number
   categories?: CategoryType[]
-  registerOptions?: RegisterOptions
+  registerOptions?: RegisterOptions<T, Path<T>>
 }
 
 export const CategorySelector = <T extends FieldValues>({

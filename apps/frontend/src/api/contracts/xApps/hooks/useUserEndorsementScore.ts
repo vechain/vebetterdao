@@ -1,29 +1,30 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
-import { UseQueryResult } from "@tanstack/react-query"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().x2EarnAppsContractAddress
-const contractInterface = X2EarnApps__factory.createInterface()
-const method = "getUsersEndorsementScore"
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
+const abi = X2EarnApps__factory.abi
+const method = "getUsersEndorsementScore" as const
 
 /**
  * Get the query key the user endorsement score
  */
-export const getUserEndorsementScore = (user?: string | null) => {
-  getCallKey({ method, keyArgs: [user] })
-}
+export const getUserEndorsementScoreQueryKey = (user?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(user ?? "0x") as `0x${string}`] })
 
 /**
  *  Hook to get the endorsement score of the user
  * @returns The endorsement score of the user
  */
-export const useUserEndorsementScore = (user?: string | null): UseQueryResult<string, Error> => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useUserEndorsementScore = (user?: string) => {
+  return useCallClause({
+    abi,
+    address,
     method: "getUsersEndorsementScore",
-    args: [user],
-    enabled: !!user,
+    args: [(user ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!user,
+      select: data => Number(data[0]),
+    },
   })
 }

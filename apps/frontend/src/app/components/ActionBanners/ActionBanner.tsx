@@ -1,7 +1,5 @@
 import {
-  useAccountBalance,
   useAccountLinking,
-  useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
@@ -9,7 +7,6 @@ import {
   useIsCreatorOfAnyApp,
   useUserBotSignals,
   useUserDelegation,
-  useVot3Balance,
   useVotingRewards,
   useGMRewards,
   useXApps,
@@ -19,7 +16,7 @@ import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSu
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -45,7 +42,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useIsVeDelegated } from "@/hooks"
+import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -69,13 +66,16 @@ export const ActionBanner = () => {
 
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
-  const { original: gmRewards } = useGMRewards(currentRoundId, account?.address ?? undefined)
+  const { data: { original: gmRewards } = { original: "0" } } = useGMRewards(
+    currentRoundId,
+    account?.address ?? undefined,
+  )
 
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
@@ -104,7 +104,7 @@ export const ActionBanner = () => {
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
-    return userSignalCounter && userSignalCounter > 0
+    return userSignalCounter && Number(userSignalCounter || 0) > 0
   }, [userSignalCounter])
 
   const ownsTokens = useMemo(() => {
@@ -114,7 +114,7 @@ export const ActionBanner = () => {
   }, [b3trBalance, vot3Balance])
 
   const isLowOnVtho = useMemo(() => {
-    return Number(balance?.energy.scaled) < VTHO_THRESHOLD
+    return Number(balance?.energy ?? "0") < VTHO_THRESHOLD
   }, [balance])
 
   const isBalanceLoading = useMemo(() => {
@@ -123,7 +123,7 @@ export const ActionBanner = () => {
 
   const userCanVoteInProposals = useMemo<boolean>(() => {
     const isLoading = isLoadingAccountLinking || isLoadingDelegator
-    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && isPerson
+    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && !!isPerson
     return !isLoading && isValidUser
   }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
 
@@ -136,7 +136,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.Pending ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
-  const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
+  const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "") // No loading state
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
@@ -214,7 +214,11 @@ export const ActionBanner = () => {
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
-        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
+        <ClaimVotingRewardsBanner
+          roundsRewardsQuery={votingRewardsQuery}
+          gmRewards={Number(gmRewards)}
+          key="claim-b3tr"
+        />,
       )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)

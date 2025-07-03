@@ -1,5 +1,5 @@
 "use client"
-import { useXApp } from "@/api"
+import { isNewApp, useXApp, AllApps } from "@/api"
 import { useParams } from "next/navigation"
 
 /**
@@ -12,7 +12,7 @@ export const useCurrentAppInfo = () => {
   const { data: app, isLoading: isAppInfoLoading, error: appInfoError } = useXApp(appId ?? "")
 
   return {
-    app,
+    app: { ...app, isNew: isNewApp(app) } as AllApps,
     isAppInfoLoading,
     appInfoError,
   }

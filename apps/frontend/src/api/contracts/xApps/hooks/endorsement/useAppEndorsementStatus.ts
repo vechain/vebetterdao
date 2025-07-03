@@ -1,10 +1,10 @@
 import {
   useAppEndorsementScore,
   useAppExists,
-  useAppIsBlacklisted,
   useEndorsementScoreThreshold,
   useAppEligibleAtRoundStart,
   useIsAppUnendorsed,
+  useAppIsBlackListed,
 } from "@/api"
 import { XAppStatus } from "@/types"
 
@@ -73,7 +73,7 @@ export const useAppEndorsementStatus = (appId: string) => {
   const { data: appEligibleAtRoundStart, isLoading: isAppEligibleAtRoundStartLoading } =
     useAppEligibleAtRoundStart(appId)
   const { data: isUnendorsed, isLoading: isUnendorsedLoading } = useIsAppUnendorsed(appId)
-  const { data: isBlacklisted, isLoading: isBlacklistedLoading } = useAppIsBlacklisted(appId)
+  const { data: isBlacklisted = false, isLoading: isBlacklistedLoading } = useAppIsBlackListed(appId)
   const { data: appHasBeenIntoAllocationRounds, isLoading: isAppExistsLoading } = useAppExists(appId)
 
   const isLoading =

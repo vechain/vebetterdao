@@ -2,8 +2,8 @@ import {
   useAllocationsRound,
   useCurrentAllocationsRoundId,
   useUserEndorsementScore,
-  useXAppMetadata,
   useXNodeCheckCooldown,
+  useXAppMetadata,
   useXNode,
 } from "@/api"
 import { useSwitchEndorsement } from "@/hooks"
@@ -20,6 +20,7 @@ import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 type Props = {
   isOpen: boolean
   onClose: () => void

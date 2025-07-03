@@ -1,18 +1,23 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-const governorInterface = B3TRGovernor__factory.createInterface()
+const address = getConfig().b3trGovernorAddress as `0x${string}`
+const abi = B3TRGovernor__factory.abi
+const method = "getQuadraticVotingPower" as const
 
 /**
  * Returns the query key for fetching the snapshot voting power of a proposal round.
  * @param roundId - The ID of the proposal round.
  * @returns The query key for fetching the snapshot voting power.
  */
-export const getProposalSnapshotVotingPowerQueryKey = (roundId: number) => {
-  getCallKey({ method: "getQuadraticVotingPower", keyArgs: [roundId] })
+export const getProposalSnapshotVotingPowerQueryKey = (userAddress: string, roundId: number) => {
+  return getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [(userAddress ?? "0x") as `0x${string}`, BigInt(roundId ?? 0)],
+  })
 }
 
 /**
@@ -22,11 +27,14 @@ export const getProposalSnapshotVotingPowerQueryKey = (roundId: number) => {
  */
 export const useProposalSnapshotVotingPower = (roundId?: number, enabled = true) => {
   const { account } = useWallet()
-  return useCall({
-    contractInterface: governorInterface,
-    contractAddress: GOVERNANCE_CONTRACT,
-    method: "getQuadraticVotingPower",
-    args: [account?.address, roundId],
-    enabled: !!roundId && !!account?.address && enabled,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(account?.address ?? "0x") as `0x${string}`, BigInt(roundId ?? 0)],
+    queryOptions: {
+      enabled: !!roundId && !!account?.address && enabled,
+      select: data => data[0],
+    },
   })
 }

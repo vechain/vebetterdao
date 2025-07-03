@@ -89,7 +89,7 @@ export const AppDetailOverview = ({
                         <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                           <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
                         </Skeleton>
-                        <Skeleton isLoaded={!appMetadataLoading}>
+                        <Skeleton isLoaded={!appMetadataLoading && !!appMetadata}>
                           <Heading fontSize={"28px"} fontWeight={700}>
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
@@ -106,7 +106,7 @@ export const AppDetailOverview = ({
                     </Stack>
                     <AppDetailSocials socialUrls={appMetadata?.social_urls || []} />
                   </HStack>
-                  <Skeleton isLoaded={!appMetadataLoading}>
+                  <Skeleton isLoaded={!appMetadataLoading && !!appMetadata}>
                     <Text fontSize={"md"}>
                       {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                     </Text>
@@ -187,6 +187,7 @@ export const AppDetailOverview = ({
       <DistributionStrategyModal
         isOpen={isDistributionStrategyModalOpen}
         onClose={onDistributionStrategyModalClose}
+        // TODO: migration add distribution_strategy to XAppMetadata in vechain-kit
         distributionStrategy={appMetadata?.distribution_strategy ?? ""}
         logo={logo ?? notFoundImage}
       />

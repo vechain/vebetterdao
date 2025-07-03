@@ -1,5 +1,6 @@
 import { AnalyticsUtils } from "@/utils"
-import { ButtonProps, Fade, useMediaQuery, keyframes, useColorModeValue, Box } from "@chakra-ui/react"
+import { ButtonProps, Fade, useMediaQuery, useColorModeValue, Box } from "@chakra-ui/react"
+import { keyframes } from "@emotion/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 

@@ -1,41 +1,33 @@
-import { useQuery } from "@tanstack/react-query"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { useConnex } from "@vechain/vechain-kit"
 import { GalaxyMember__factory } from "@repo/contracts"
 
-const GALAXY_MEMBER_CONTRACT = getConfig().galaxyMemberContractAddress
-
-export const getParticipatedInGovernance = async (thor: Connex.Thor, address: null | string): Promise<boolean> => {
-  if (!address) return Promise.reject(new Error("Address not provided"))
-
-  const functionFragment = GalaxyMember__factory.createInterface()
-    .getFunction("participatedInGovernance")
-    .format("json")
-  const res = await thor.account(GALAXY_MEMBER_CONTRACT).method(JSON.parse(functionFragment)).call(address)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0] as boolean
-}
-
-export const getParticipatedInGovernanceQueryKey = (address: null | string) => [
-  "participatedInGovernance",
-  "galaxyMember",
-  address,
-]
+const address = getConfig().galaxyMemberContractAddress
+const abi = GalaxyMember__factory.abi
+const method = "participatedInGovernance" as const
 
 /**
- * Get whether an address has participated in governance
- *
- * @param address the address to know if they have participated in governance
+ * Returns the query key for fetching participated in governance status.
+ * @param userAddress The user address to check governance participation
+ * @returns The query key for fetching participated in governance status.
+ */
+export const getParticipatedInGovernanceQueryKey = (userAddress?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [userAddress as `0x${string}`] })
+
+/**
+ * Hook to get whether an address has participated in governance
+ * @param userAddress The address to know if they have participated in governance
  * @returns whether the address has participated in governance
  */
-export const useParticipatedInGovernance = (address: null | string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getParticipatedInGovernanceQueryKey(address),
-    queryFn: () => getParticipatedInGovernance(thor, address),
-    enabled: !!address,
+export const useParticipatedInGovernance = (userAddress: string | null) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [userAddress as `0x${string}`],
+    queryOptions: {
+      enabled: !!userAddress,
+      select: data => data[0],
+    },
   })
 }

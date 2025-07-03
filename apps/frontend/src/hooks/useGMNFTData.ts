@@ -9,7 +9,7 @@ import { useNFTMetadataUri } from "@/api/contracts/galaxyMember/hooks/useNFTMeta
  * @param tokenId The GM NFT token ID
  * @returns Object containing GM NFT data and loading state
  */
-export const useGMNFTData = (tokenId: string | null) => {
+export const useGMNFTData = (tokenId?: string) => {
   const { data: metadataURI, isLoading: isLoadingMetadataUri } = useNFTMetadataUri(tokenId)
   const { data: imageMetadata, isLoading: isLoadingMetadata } = useIpfsMetadata<NFTMetadata>(metadataURI)
   const { data: imageData, isLoading: isLoadingImageData } = useIpfsImage(imageMetadata?.image ?? null)

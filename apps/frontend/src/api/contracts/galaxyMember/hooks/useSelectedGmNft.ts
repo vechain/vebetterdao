@@ -1,7 +1,6 @@
 import { notFoundImage } from "@/constants"
 import { useIsGMclaimable } from "./useIsGMclaimable"
 import { NFTMetadata, useNFTImage } from "./useNFTImage"
-import { useB3trBalance } from "../../b3tr"
 import { useSelectedTokenId } from "./useSelectedTokenId"
 import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
@@ -12,7 +11,7 @@ import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
 import { useWallet } from "@vechain/vechain-kit"
-import { useB3trToUpgrade } from "."
+import { useB3trToUpgrade, useGetB3trBalance } from "@/hooks"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -31,7 +30,7 @@ export const useSelectedGmNft = (profile?: string) => {
   const { account } = useWallet()
   const { isOwned: isGMOwned } = useIsGMclaimable(profile)
   const { isLoading: isGMLoading } = useNFTImage(profile)
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? "")
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? "")
   const {
     data: selectedTokenId,
     isLoading: isSelectedTokenIdLoading,
@@ -72,7 +71,7 @@ export const useSelectedGmNft = (profile?: string) => {
     isLoading: isLoadingMetadataUri,
     isError: isErrorMetadataUri,
     error: errorMetadataURI,
-  } = useNFTMetadataUri(selectedTokenId ?? null)
+  } = useNFTMetadataUri(selectedTokenId)
 
   const {
     data: nftMetadata,
@@ -141,10 +140,11 @@ export const useSelectedGmNft = (profile?: string) => {
     errorAttachedNodeId ||
     errorMaxGmLevel
 
-  const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
-  const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
+  const isEnoughBalanceToUpgradeGM =
+    b3trBalance && Number(b3trBalance?.scaled || 0) >= Number(b3trToUpgradeGMToNextLevel)
+  const missingB3trToUpgrade = Number(b3trToUpgradeGMToNextLevel) - Number(b3trBalance?.scaled || 0)
 
-  const b3trLeftover = Number(gmNfts[Number(gmLevel)]?.b3trToUpgrade || 0) - b3trToUpgradeGMToNextLevel
+  const b3trLeftover = Number(gmNfts[Number(gmLevel)]?.b3trToUpgrade || 0) - Number(b3trToUpgradeGMToNextLevel)
 
   const { xNodeId } = useXNode(profile)
   const isXNodeAttachedToGM = attachedNodeId === xNodeId
@@ -165,7 +165,7 @@ export const useSelectedGmNft = (profile?: string) => {
     nextLevelGMRewardMultiplier,
     isGMLoading,
     isGMOwned,
-    b3trToUpgradeGMToNextLevel,
+    b3trToUpgradeGMToNextLevel: b3trToUpgradeGMToNextLevel ? Number(b3trToUpgradeGMToNextLevel) : undefined,
     isEnoughBalanceToUpgradeGM,
     missingB3trToUpgrade,
     attachedNodeId,

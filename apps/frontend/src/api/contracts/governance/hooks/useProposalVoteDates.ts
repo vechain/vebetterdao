@@ -1,9 +1,9 @@
-import { useCurrentBlock } from "@/api/blockchain"
 import { useMemo } from "react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { useProposalSnapshot } from "./useProposalSnapshot"
 import { useProposalDeadline } from "./useProposalDeadline"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 
 const blockTime = getConfig().network.blockTime
 
@@ -18,7 +18,7 @@ export const useProposalVoteDates = (proposalId: string) => {
 
     const durationLeftTimestamp = endBlockFromNow * blockTime
     return dayjs().add(durationLeftTimestamp, "milliseconds").toDate().getTime()
-  }, [currentBlock, proposalSnapshot.data])
+  }, [currentBlock?.id, proposalSnapshot.data])
 
   const votingEndDate = useMemo(() => {
     if (!currentBlock || !proposalSnapshot.data) return 0
@@ -26,7 +26,7 @@ export const useProposalVoteDates = (proposalId: string) => {
 
     const durationLeftTimestamp = endBlockFromNow * blockTime
     return dayjs().add(durationLeftTimestamp, "milliseconds").toDate().getTime()
-  }, [currentBlock, proposalDeadline.data, proposalSnapshot.data])
+  }, [currentBlock?.id, proposalDeadline.data, proposalSnapshot.data])
 
   return {
     votingStartBlock: proposalSnapshot.data,

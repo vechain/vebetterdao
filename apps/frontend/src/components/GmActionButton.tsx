@@ -1,12 +1,11 @@
 import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useMintNFT, useUpgradeGM } from "@/hooks"
+import { useB3trDonated, useMintNFT, useUpgradeGM } from "@/hooks"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import {
   getGMLevel,
-  useB3trDonated,
   useCurrentAllocationsRoundId,
   useParticipatedInGovernance,
   useSelectedGmNft,
@@ -20,6 +19,7 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag }
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -94,8 +94,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
   //Handle Upgrade GM
   const { sendTransaction: upgradeGM } = useUpgradeGM({
-    tokenId: gmId,
-    b3trToUpgrade: b3trToUpgradeGMToNextLevel,
+    tokenId: gmId ?? "",
+    b3trToUpgrade: String(b3trToUpgradeGMToNextLevel) ?? "",
   })
 
   const handleUpgradeGM = useCallback(() => {
@@ -171,7 +171,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     }
 
     // Case 4: Can attach GM to X-Node and GM level is >= level after attach
-    if (canAttach && gmLevel >= levelAfterAttach) {
+    if (canAttach && gmLevel && Number(gmLevel) >= levelAfterAttach) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -188,7 +188,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     }
 
     // Case 5: Can attach GM to X-Node and GM level is < level after attach
-    if (canAttach && gmLevel < levelAfterAttach) {
+    if (canAttach && gmLevel && Number(gmLevel) < levelAfterAttach) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -242,9 +242,9 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       <MintNFTModal isOpen={isMintNftModalOpen} onClose={handleMintSuccessClose} tokenID={gmId} />
       <AttachGMToXNodeModal isOpen={isAttachGMModalOpen} onClose={onCloseAttachGMModal} />
       <UpgradeGMModal
-        gmLevel={gmLevel}
-        tokenId={gmId}
-        b3trToUpgradeGMToNextLevel={b3trToUpgradeGMToNextLevel}
+        gmLevel={gmLevel ?? ""}
+        tokenId={gmId ?? ""}
+        b3trToUpgradeGMToNextLevel={String(b3trToUpgradeGMToNextLevel) ?? ""}
         isOpen={isUpgradeGMModalOpen}
         onClose={onCloseUpgradeGMModal}
         sendTransaction={handleUpgradeGM}

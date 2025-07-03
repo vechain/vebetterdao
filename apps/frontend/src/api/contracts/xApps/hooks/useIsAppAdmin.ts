@@ -1,39 +1,40 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts"
+
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
+const abi = X2EarnApps__factory.abi
+const method = "isAppAdmin" as const
 
 /**
- * Check if the given address is the admin of the app
- * @param appId  the id of the app
- * @param address  the address to check
- * @returns a boolean indicating if the address is the admin of the app
+ * Returns the query key for checking if an address is app admin.
+ * @param appId The id of the app
+ * @param userAddress The address to check
+ * @returns The query key for checking if an address is app admin.
  */
-export const getIsAppAdmin = async (thor: Connex.Thor, appId: string, address: string): Promise<boolean> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("isAppAdmin").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId, address)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getIsAppAdminQueryKey = (appId: string, address: string) => ["isAppAdmin", appId, address]
+export const getIsAppAdminQueryKey = (appId: string, userAddress: string) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [appId as `0x${string}`, (userAddress ?? "0x") as `0x${string}`],
+  })
 
 /**
- * Check if the given address is the admin of the app
- * @param appId  the id of the app
- * @param address  the address to check
+ * Hook to check if the given address is the admin of the app
+ * @param appId The id of the app
+ * @param userAddress The address to check
  * @returns a boolean indicating if the address is the admin of the app
  */
-export const useIsAppAdmin = (appId: string, address: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getIsAppAdminQueryKey(appId, address),
-    queryFn: async () => await getIsAppAdmin(thor, appId, address),
-    enabled: !!thor && !!address && !!appId,
+export const useIsAppAdmin = (appId: string, userAddress: string) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [appId as `0x${string}`, (userAddress ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!appId && !!userAddress,
+      select: data => data[0],
+    },
   })
 }

@@ -16,7 +16,7 @@ export const useAccountLinking = (user?: string) => {
   const { data: isEntity, isLoading: isEntityLoading } = useIsUserEntity()
   const { data: userLinkedEntities, isLoading: isUserLinkedEntitiesLoading } =
     useGetEntitiesLinkedToPassport(parsedAccount)
-  const isPassport = !isEntity && userLinkedEntities?.length > 0
+  const isPassport = !isEntity && userLinkedEntities && userLinkedEntities.length > 0
 
   // if the user is an entity, get the passport for that entity
   const { data: entityPassport, isLoading: isEntityPassportLoading } = useGetPassportForEntity(

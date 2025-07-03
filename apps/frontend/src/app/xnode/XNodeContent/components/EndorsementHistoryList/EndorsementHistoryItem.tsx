@@ -1,9 +1,9 @@
-import { useXAppMetadata } from "@/api"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useIpfsImage } from "@/api/ipfs"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
+import { useXAppMetadata } from "@/api"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 

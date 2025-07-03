@@ -1,5 +1,5 @@
-import { useB3trAllowance, useB3trBalance } from "@/api"
-import { useB3trApprove } from "@/hooks"
+import { useB3trAllowance } from "@/api"
+import { useB3trApprove, useGetB3trBalance } from "@/hooks"
 import {
   VStack,
   HStack,
@@ -29,7 +29,7 @@ import { WalletAddressInput } from "@/app/components/Input"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const [amount, setAmount] = useState<number>(0)
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)

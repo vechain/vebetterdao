@@ -4,7 +4,7 @@ import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 
-const contractInterface = X2EarnRewardsPool__factory.createInterface()
+const abi = X2EarnRewardsPool__factory.abi
 const contractAddress = getConfig().x2EarnRewardsPoolContractAddress
 
 export type AppFundActivityEvent = {
@@ -27,58 +27,58 @@ export const useAppFundActivityEvents = (appId: string) => {
 
   const rawDepositEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "NewDeposit",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      appId: decoded.app,
-      amount: ethers.formatEther(decoded.amount),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "DEPOSIT",
     }),
   })
 
   const rawTeamWithdrawalEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "TeamWithdrawal",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      appId: decoded.app,
-      amount: ethers.formatEther(decoded.amount),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "WITHDRAW",
     }),
   })
 
   const rawRewardDistributedEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "RewardDistributed",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      appId: decoded.app,
-      amount: ethers.formatEther(decoded.amount),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "DISTRIBUTE_REWARDS",
     }),
   })
 
   const rawRewardsPoolBalanceUpdatedEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "RewardsPoolBalanceUpdated",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      appId: decoded.app,
-      amount: ethers.formatEther(decoded.amount),
-      availableFunds: ethers.formatEther(decoded.availableFunds),
-      rewardsPoolBalance: ethers.formatEther(decoded.rewardsPoolBalance),
+    mapResponse: ({ decodedData, meta }) => ({
+      appId: decodedData.args.appId,
+      amount: ethers.formatEther(decodedData.args.amount),
+      availableFunds: ethers.formatEther(decodedData.args.availableFunds),
+      rewardsPoolBalance: ethers.formatEther(decodedData.args.rewardsPoolBalance),
       blockNumber: meta.blockNumber,
-      txId: meta.txId,
+      txId: meta.txID,
       txType: "REWARDS_POOL_UPDATED",
     }),
   })

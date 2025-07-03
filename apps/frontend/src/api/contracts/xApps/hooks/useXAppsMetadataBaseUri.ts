@@ -1,20 +1,30 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-import { getXAppsMetadataBaseUri } from "../getXAppsMetadataBaseUri"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@repo/contracts"
 
-export const getXAppsMetadataBaseUriQueryKey = () => ["xApps", "metadata", "baseUri"]
+const address = getConfig().x2EarnAppsContractAddress
+const abi = X2EarnApps__factory.abi
+const method = "baseURI" as const
 
 /**
- *  Hook to get the baseUri of the xApps metadata
+ * Returns the query key for fetching the xApps metadata base URI.
+ * @returns The query key for fetching the xApps metadata base URI.
+ */
+export const getXAppsMetadataBaseUriQueryKey = () => getCallClauseQueryKey({ abi, address, method })
+
+/**
+ * Hook to get the baseUri of the xApps metadata
  * @returns the baseUri of the xApps metadata
  */
 export const useXAppsMetadataBaseUri = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getXAppsMetadataBaseUriQueryKey(),
-    queryFn: async () => await getXAppsMetadataBaseUri(thor),
-    enabled: !!thor,
-    staleTime: 1000 * 60 * 60, // 1 hour,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => data[0],
+      staleTime: 1000 * 60 * 60, // 1 hour
+    },
   })
 }

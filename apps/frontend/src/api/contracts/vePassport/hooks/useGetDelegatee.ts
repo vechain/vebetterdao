@@ -1,10 +1,11 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { ZeroAddress } from "ethers"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "getDelegatee" as const
 
 /**
  * Returns the query key for fetching the delegatee.
@@ -12,7 +13,7 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the delegatee.
  */
 export const getDelegateeQueryKey = (delegator: string) => {
-  return getCallKey({ method: "getDelegatee", keyArgs: [delegator] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegator as `0x${string}`] })
 }
 
 /**
@@ -20,17 +21,18 @@ export const getDelegateeQueryKey = (delegator: string) => {
  * @param delegator - The delegator address.
  * @returns The address of the delegatee for the given delegator, or null if the delegator has no delegatee.
  */
-export const useGetDelegatee = (delegator?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "getDelegatee",
-    args: [delegator],
-    enabled: !!delegator,
-    mapResponse: response => {
-      const delegatee = response.decoded[0]
-      if (delegatee === ZeroAddress) return null
-      return delegatee
+export const useGetDelegatee = (delegator?: string) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(delegator ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!delegator,
+      select: data => {
+        if (data[0] === ZeroAddress) return undefined
+        return data[0]
+      },
     },
   })
 }

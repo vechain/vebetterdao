@@ -1,19 +1,24 @@
-import { ethers } from "ethers"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
+import { formatEther } from "viem"
 
-const voterRewardsContractAddress = getConfig().voterRewardsContractAddress
-const voterRewardsInterface = VoterRewards__factory.createInterface()
-const method = "getGMReward"
+const address = getConfig().voterRewardsContractAddress as `0x${string}`
+const abi = VoterRewards__factory.abi
+const method = "getGMReward" as const
 
 /**
  * Returns the query key for fetching the GM rewards.
  * @returns The query key for fetching the GM rewards.
  */
-export const getGMRewardsQueryKey = (currentRoundId?: number, voter?: string) => {
-  return getCallKey({ method, keyArgs: [currentRoundId, voter] })
+export const getGMRewardsQueryKey = (roundId: number, userAddress: string) => {
+  return getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId), userAddress as `0x${string}`],
+  })
 }
 
 /**
@@ -23,20 +28,23 @@ export const getGMRewardsQueryKey = (currentRoundId?: number, voter?: string) =>
  * @returns The GM rewards for the given round and voter. If no GM rewards are found, returns 0.
  */
 export const useGMRewards = (currentRoundId?: number, voter?: string) => {
-  const { data: gmRewards } = useCall({
-    contractInterface: voterRewardsInterface,
-    contractAddress: voterRewardsContractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [currentRoundId, voter],
-    enabled: !!voter && !!currentRoundId,
+    args: [BigInt(currentRoundId ?? 0), (voter ?? "0x") as `0x${string}`],
+    queryOptions: {
+      select: data => {
+        const original = data[0]
+        const scaled = formatEther(BigInt(original ?? 0))
+        const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
+        return {
+          original,
+          scaled,
+          formatted,
+        }
+      },
+      enabled: !!voter && !!currentRoundId,
+    },
   })
-
-  const scaled = ethers.formatEther(gmRewards ?? 0)
-  const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
-
-  return {
-    original: gmRewards,
-    scaled,
-    formatted,
-  }
 }

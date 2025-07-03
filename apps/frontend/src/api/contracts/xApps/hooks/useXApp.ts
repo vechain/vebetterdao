@@ -1,17 +1,33 @@
-import { useXApps } from "./useXApps"
+import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+import { getConfig } from "@repo/config"
+import { useCallClause } from "@vechain/vechain-kit"
+import { useXAppsMetadataBaseUri } from ".."
 
-/**
- *  Hook to get a specific xApp using useXApps
- * @param appId  the xApp id
- * @returns  the xApp with the given id
- */
-export const useXApp = (appId: string) => {
-  const { data: xApps, ...props } = useXApps()
+const abi = X2EarnApps__factory.abi
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 
-  const app = xApps?.allApps.find(xa => xa.id === appId)
+export const useXApp = (appId?: string) => {
+  const { data: baseUri } = useXAppsMetadataBaseUri()
+  return useCallClause({
+    abi,
+    address,
+    method: "app",
+    args: [appId as `0x${string}`],
+    queryOptions: {
+      enabled: !!appId && !!baseUri,
+      select: data => {
+        const [id, teamWalletAddress, name, metadataURI, createdAtTimestamp, appAvailableForAllocationVoting] =
+          data[0] as unknown as [`0x${string}`, `0x${string}`, string, string, string, boolean]
 
-  return {
-    data: app,
-    ...props,
-  }
+        return {
+          id,
+          teamWalletAddress,
+          name,
+          metadataURI: `${baseUri}${metadataURI}`,
+          createdAtTimestamp,
+          appAvailableForAllocationVoting,
+        }
+      },
+    },
+  })
 }

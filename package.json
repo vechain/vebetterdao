@@ -2,6 +2,7 @@
   "name": "b3tr-monorepo",
   "private": true,
   "scripts": {
+    "typecheck": "yarn workspace frontend typecheck",
     "test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env.example turbo run test --",
     "test:watch": "dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env.example turbo run test:watch --",
     "test:coverage:solidity": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v IS_TEST_COVERAGE=true -e .env.example turbo run test:coverage:solidity",

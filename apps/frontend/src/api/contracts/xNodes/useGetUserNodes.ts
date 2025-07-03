@@ -1,12 +1,11 @@
-import { getCallKey, useCall, useMultipleCalls, UseCallParams } from "@/hooks"
+import { executeMultipleClausesCall, useThor, executeCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
-import { UseQueryResult } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-const contractAddress = getConfig().nodeManagementContractAddress
-const contractInterface = NodeManagement__factory.createInterface()
-const method = "getUserNodes"
+const address = getConfig().nodeManagementContractAddress as `0x${string}`
+const abi = NodeManagement__factory.abi
+const method = "getUserNodes" as const
 
 export type UserNode = {
   nodeId: string
@@ -26,78 +25,51 @@ type UserNodeWithIsLegacy = UserNode & {
  * Get the query key for fetching user nodes
  * @param user - The address of the user to check
  */
-export const getUserNodesQueryKey = (user?: string) => getCallKey({ method, keyArgs: [user] })
+export const getUserNodesQueryKey = (user?: string) => ["userNodes", user]
 
 /**
  * Hook to get delegation details for all nodes associated with a user
  * @param user - The address of the user to check
  * @returns An array of objects containing user node details
  */
-export const useGetUserNodes = (user?: string): UseQueryResult<UserNodeWithIsLegacy[], Error> => {
-  // First get the token ID owned by the address (legacy contract only supports one token per address)
-  const userNodes = useCall({
-    contractInterface,
-    contractAddress,
-    method,
-    args: [user],
-    enabled: !!user,
-    mapResponse: response => {
-      // Response will be an array of node structs
-      return response.decoded[0].map((node: any) => ({
-        nodeId: node.nodeId.toString(),
-        nodeLevel: Number(node.nodeLevel),
-        xNodeOwner: node.xNodeOwner,
-        isXNodeHolder: node.isXNodeHolder,
-        isXNodeDelegated: node.isXNodeDelegated,
-        isXNodeDelegator: node.isXNodeDelegator,
-        isXNodeDelegatee: node.isXNodeDelegatee,
-        delegatee: node.delegatee,
-      }))
+export const useGetUserNodes = (user?: string) => {
+  const thor = useThor()
+
+  return useQuery({
+    queryKey: getUserNodesQueryKey(user),
+    queryFn: async () => {
+      const [userNodes = []] =
+        (await executeCallClause({
+          thor,
+          abi,
+          contractAddress: address,
+          method,
+          args: [(user ?? "0x") as `0x${string}`],
+        })) || []
+
+      const isLegacyCheckCalls = await executeMultipleClausesCall({
+        thor,
+        calls: userNodes.map(
+          node =>
+            ({
+              abi,
+              address,
+              functionName: "isLegacyNode",
+              args: [node.nodeId],
+            }) as const,
+        ),
+      })
+
+      return userNodes.map(
+        (node, index) =>
+          ({
+            ...node,
+            nodeId: node.nodeId.toString(),
+            isLegacyNode: isLegacyCheckCalls[index] ?? true,
+          }) as UserNodeWithIsLegacy,
+      )
     },
   })
-
-  const nodes = userNodes?.data
-
-  // For each node, call isLegacyNode to determine if it is a legacy node or not
-  const isLegacyCheckCalls = useMemo(() => {
-    if (!nodes) return []
-    return (nodes as UserNode[]).map(
-      ({ nodeId }): UseCallParams<any> => ({
-        contractInterface,
-        contractAddress,
-        method: "isLegacyNode",
-        args: [nodeId],
-        mapResponse: res => {
-          if (!res?.decoded) return { nodeId, isLegacyNode: true }
-          return {
-            nodeId,
-            isLegacyNode: res.decoded[0],
-          }
-        },
-      }),
-    )
-  }, [nodes])
-
-  const { data: nodeIdsWithIsLegacy, isLoading: isIsLegacyLoading } = useMultipleCalls({
-    calls: isLegacyCheckCalls,
-    queryKeyPrefix: "user-get-user-nodes",
-  })
-
-  //Merge nodeIdsWithIsLegacy with nodes based on nodeId
-  const allNodesWithIsLegacy = useMemo(() => {
-    if (!nodeIdsWithIsLegacy || !nodes) return []
-    return nodes.map((node: UserNode, index: number) => ({
-      ...node,
-      isLegacyNode: nodeIdsWithIsLegacy?.[index]?.isLegacyNode ?? true,
-    }))
-  }, [nodeIdsWithIsLegacy, nodes])
-
-  return {
-    ...userNodes,
-    data: allNodesWithIsLegacy,
-    isLoading: userNodes.isLoading || isIsLegacyLoading,
-    isError: userNodes.isError || isIsLegacyLoading,
-  } as UseQueryResult<UserNodeWithIsLegacy[], Error>
 }
 
 // For backward compatibility (if needed)

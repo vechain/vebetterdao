@@ -2,13 +2,14 @@ import { Box, Circle, HStack, Skeleton, Stack, Text, useMediaQuery } from "@chak
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useSelectedGmNft, useParticipatedInGovernance, useXNode, useB3trBalance } from "@/api"
+import { useSelectedGmNft, useParticipatedInGovernance, useXNode } from "@/api"
 import { useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
 import { useWallet } from "@vechain/vechain-kit"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
+import { useGetB3trBalance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -28,7 +29,7 @@ export const GmNFTAndNodeFooter = () => {
   } = useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator } = useXNode()
 
-  const { isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
+  const { isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
 
   const upgradeMessage = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
@@ -111,7 +112,7 @@ export const GmNFTAndNodeFooter = () => {
             })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">
-            {compactFormatter.format(b3trToUpgradeGMToNextLevel)}
+            {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
           </Text>
           <Text as="span" fontSize={"14px"}>
             {"!"}

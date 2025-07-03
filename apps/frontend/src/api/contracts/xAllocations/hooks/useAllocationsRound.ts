@@ -4,7 +4,7 @@ import { RoundState, useAllocationsRoundState } from "./useAllocationsRoundState
 import { RoundCreated, useAllocationsRoundsEvents } from "./useAllocationsRoundsEvents"
 import dayjs from "dayjs"
 import { getConfig } from "@repo/config"
-import { useCurrentBlock } from "@/api/blockchain"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 
 export type AllocationRoundWithState = RoundCreated & {
   state?: keyof typeof RoundState
@@ -31,6 +31,9 @@ export const useAllocationsRound = (roundId?: string) => {
     if (!roundInfo) return
     return {
       ...roundInfo,
+      appsIds: [...roundInfo.appsIds],
+      voteStart: roundInfo.voteStart.toString(),
+      voteEnd: roundInfo.voteEnd.toString(),
       state: currentAllocationState.data,
       isCurrent: roundId === currentAllocationId.data,
     }

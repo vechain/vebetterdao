@@ -1,17 +1,22 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
-const method = "isBlacklisted"
+const contractAddress = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "isBlacklisted" as const
 
 /**
  * Returns the query key for fetching the IsBlacklisted status.
  * @returns The query key for fetching the IsBlacklisted status.
  */
-export const getIsBlacklistedQueryKey = (address?: string) => {
-  return getCallKey({ method, keyArgs: [address] })
+export const getIsBlacklistedQueryKey = (user: string) => {
+  return getCallClauseQueryKeyWithArgs({
+    abi,
+    address: contractAddress,
+    method,
+    args: [user as `0x${string}`],
+  })
 }
 
 /**
@@ -20,11 +25,14 @@ export const getIsBlacklistedQueryKey = (address?: string) => {
  * @returns The IsBlacklisted status.
  */
 export const useIsBlacklisted = (address?: string) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
+  return useCallClause({
+    abi,
+    address: contractAddress,
     method,
-    args: [address ?? ""],
-    enabled: !!address,
+    args: [(address ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!address,
+      select: data => data[0],
+    },
   })
 }

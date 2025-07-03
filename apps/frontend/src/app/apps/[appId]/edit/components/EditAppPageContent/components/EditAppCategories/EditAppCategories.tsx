@@ -25,7 +25,7 @@ import { EditAppForm } from "../../EditAppPageContent"
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 
 type EditAppCategoriesProps = {
-  form: UseFormReturn<EditAppForm>
+  form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
 
 export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {

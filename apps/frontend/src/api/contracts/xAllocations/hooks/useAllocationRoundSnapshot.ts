@@ -1,10 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
 
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
-const xAllocationVotingInterface = XAllocationVoting__factory.createInterface()
-const method = "roundSnapshot"
+const address = getConfig().xAllocationVotingContractAddress
+const abi = XAllocationVoting__factory.abi
+const method = "roundSnapshot" as const
 
 /**
  * Returns the query key for fetching the round snapshot.
@@ -12,7 +12,7 @@ const method = "roundSnapshot"
  * @returns The query key for fetching the round snapshot.
  */
 export const getAllocationRoundSnapshotQueryKey = (roundId: string) => {
-  return getCallKey({ method, keyArgs: [roundId] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 }
 
 /**
@@ -21,11 +21,14 @@ export const getAllocationRoundSnapshotQueryKey = (roundId: string) => {
  * @returns The round snapshot.
  */
 export const useAllocationRoundSnapshot = (roundId: string) => {
-  return useCall({
-    contractInterface: xAllocationVotingInterface,
-    contractAddress: XALLOCATIONVOTING_CONTRACT,
-    method: "roundSnapshot",
-    args: [roundId],
-    enabled: !!roundId,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId)],
+    queryOptions: {
+      enabled: !!roundId,
+      select: data => data[0].toString(),
+    },
   })
 }

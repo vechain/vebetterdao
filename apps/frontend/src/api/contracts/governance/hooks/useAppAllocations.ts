@@ -4,7 +4,7 @@ import { ethers } from "ethers"
 
 /**
  * Fetches all allocation pool events
- * @param {Connex.Thor} thor
+ * @param ThorClient
  * @returns {Promise<{ claimedRewards: AllocationRewardsClaimed[] >}
  */
 

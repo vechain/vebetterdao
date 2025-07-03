@@ -4,9 +4,9 @@ import {
   useCanUserVote,
   useGetVotesOnBlock,
   useHasVotedInRound,
-  useRoundXApps,
   useUserVotesInRound,
   useVotingThreshold,
+  useRoundXApps,
 } from "@/api"
 import { AllocationStateBadge, VOT3Icon } from "@/components"
 import {
@@ -51,7 +51,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account?.address ?? undefined)
 
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(data.voteStart),
+    data?.voteStart ? Number(data.voteStart) : undefined,
     account?.address ?? undefined,
   )
 
@@ -66,7 +66,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(votesAtSnapshot) >= (threshold ?? 0)
+    return Number(votesAtSnapshot ?? 0) >= Number(threshold ?? 0)
   }, [votesAtSnapshot, threshold])
 
   const isFinished = useMemo(() => {

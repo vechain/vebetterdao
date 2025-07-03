@@ -19,7 +19,7 @@ export const NewAppPageFormContent = () => {
   const { data: submission } = useCreatorSubmission(account?.address ?? "")
   const { onMetadataUpload } = useUploadAppMetadata() //TODO: Add this to review modal before sending transaction
 
-  const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
+  const { data: hasCreatorNft } = useHasCreatorNFT(account?.address ?? "")
   const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
   const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
 

@@ -2,7 +2,7 @@ import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
+const abi = VeBetterPassport__factory.abi
 const contractAddress = getConfig().veBetterPassportContractAddress
 export type SignalEvent = {
   user: string
@@ -20,13 +20,13 @@ export const useUserSignalEvents = (user: string) => {
 
   const rawSignaledEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "UserSignaled",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      user: decoded.user,
-      appId: decoded.app,
-      reason: decoded.reason,
+    mapResponse: ({ decodedData, meta }) => ({
+      user: decodedData.args.user,
+      appId: decodedData.args.app,
+      reason: decodedData.args.reason,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -34,13 +34,13 @@ export const useUserSignalEvents = (user: string) => {
 
   const rawUnsignaledEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "UserSignalsResetForApp",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      user: decoded.user,
-      appId: decoded.app,
-      reason: decoded.reason,
+    mapResponse: ({ decodedData, meta }) => ({
+      user: decodedData.args.user,
+      appId: decodedData.args.app,
+      reason: decodedData.args.reason,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

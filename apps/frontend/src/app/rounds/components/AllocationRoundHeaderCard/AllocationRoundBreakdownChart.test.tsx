@@ -30,6 +30,7 @@ describe("AllocationRoundBreakdownChart", () => {
         treasury: "1000",
         voteXAllocations: "2000",
         voteX2Earn: "2000",
+        gm: "1",
       },
       isLoading: false,
     })

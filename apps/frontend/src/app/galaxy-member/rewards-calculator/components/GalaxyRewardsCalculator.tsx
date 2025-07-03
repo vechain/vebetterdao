@@ -23,7 +23,7 @@ export const GalaxyRewardsCalculator = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { gmLevel, gmId, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-  const usersGM = { gmLevel, gmId, b3trToUpgradeGMToNextLevel }
+  const usersGM = { gmLevel, gmId, b3trToUpgradeGMToNextLevel: Number(b3trToUpgradeGMToNextLevel) }
   const router = useRouter()
 
   const { data: gmLevelOverview } = useGMLevelsOverview()

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
-import { getPassportToggleQueryKey } from "@/api"
+import { getIsPassportCheckEnabledQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TogglePassportCheck } from "@/constants"
@@ -37,7 +37,7 @@ export const useTogglePassportCheck = ({ checkToToggle, onSuccess }: Props) => {
     return [clauses]
   }, [checkToToggle])
 
-  const refetchQueryKeys = useMemo(() => [getPassportToggleQueryKey(checkToToggle)], [checkToToggle])
+  const refetchQueryKeys = useMemo(() => [getIsPassportCheckEnabledQueryKey(checkToToggle)], [checkToToggle])
 
   return useBuildTransaction({
     clauseBuilder,

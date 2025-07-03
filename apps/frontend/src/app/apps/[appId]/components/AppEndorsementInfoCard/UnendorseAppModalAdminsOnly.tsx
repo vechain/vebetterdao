@@ -7,6 +7,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 type Props = {
   isOpen: boolean
   onClose: () => void

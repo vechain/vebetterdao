@@ -1,48 +1,43 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs, ThorClient, executeCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 
-const contractAddress = getConfig().nodeManagementContractAddress
-const contractInterface = NodeManagement__factory.createInterface()
-const method = "isNodeHolder"
+const address = getConfig().nodeManagementContractAddress as `0x${string}`
+const abi = NodeManagement__factory.abi
+const method = "isNodeHolder" as const
 
 /**
- * Get the query key for checking if an address is a node holder.
- * @param address - The address to check.
+ * Returns the query key for checking if an address is a node holder.
+ * @param userAddress The address to check
+ * @returns The query key for checking if an address is a node holder.
  */
-export const getIsNodeHolderQueryKey = (address: string) => ["isNodeHolder", address]
+export const getIsNodeHolderQueryKey = (userAddress: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
 
-/**
- * Get the node holder status of an address from the contract
- *
- * @param thor  The thor instance
- * @param address The address to check
- * @returns Boolean indicating if the address is a node holder
- */
-export const getIsNodeHolder = async (thor: Connex.Thor, address: string): Promise<boolean> => {
-  if (!address) return Promise.reject(new Error("Address not provided"))
-
-  const functionAbi = contractInterface.getFunction(method)
-  const res = await thor.account(contractAddress).method(functionAbi).call(address)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
+export const getIsNodeHolder = async (thor: ThorClient, userAddress: string) => {
+  return executeCallClause({
+    thor,
+    contractAddress: address,
+    abi,
+    method,
+    args: [(userAddress ?? "0x") as `0x${string}`],
+  })
 }
 
 /**
  * Custom hook that checks if a user is a node holder (either directly or through delegation).
- *
- * @param address - The address to check.
+ * @param userAddress The address to check
  * @returns UseQueryResult containing a boolean indicating if the address is a node holder.
  */
-export const useIsNodeHolder = (address: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getIsNodeHolderQueryKey(address),
-    queryFn: () => getIsNodeHolder(thor, address),
-    enabled: !!address,
+export const useIsNodeHolder = (userAddress: string) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(userAddress ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!userAddress,
+      select: data => data[0],
+    },
   })
 }

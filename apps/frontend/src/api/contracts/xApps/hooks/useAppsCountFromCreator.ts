@@ -1,18 +1,18 @@
-import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress
-const x2EarnAppsInterface = X2EarnApps__factory.createInterface()
-const method = "creatorApps"
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
+const abi = X2EarnApps__factory.abi
+const method = "creatorApps" as const
 
 /**
  * Returns the number of apps created by the creator
  * @dev note that this should be 1 from x2EarnApps v5, but app submitted before v5 could have more than 1 creator
  * @returns The query key for fetching the number of apps created by the creator
  */
-export const getAppsCountFromCreatorQueryKey = (walletAddress: string) => {
-  return getCallKey({ method, keyArgs: [walletAddress] })
+export const getAppsCountFromCreatorQueryKey = (walletAddress?: string) => {
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(walletAddress ?? "0x") as `0x${string}`] })
 }
 
 /**
@@ -21,11 +21,14 @@ export const getAppsCountFromCreatorQueryKey = (walletAddress: string) => {
  * @returns The number of apps created by the creator
  */
 export const useAppsCountFromCreator = (walletAddress: string) => {
-  return useCall({
-    contractInterface: x2EarnAppsInterface,
-    contractAddress: x2EarnAppsContractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [walletAddress],
-    enabled: !!walletAddress,
+    args: [(walletAddress ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!walletAddress,
+      select: data => Number(data[0]),
+    },
   })
 }

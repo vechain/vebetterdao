@@ -1,13 +1,12 @@
-import { useQueryClient, useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
-import { getXAppTotalEarningsClauses } from "./useXAppTotalEarnings"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { XAllocationPool__factory } from "@repo/contracts"
-import { abi } from "thor-devkit"
 import { ethers } from "ethers"
+import { getConfig } from "@repo/config"
+import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
 
-const roundEarningsFragment = XAllocationPool__factory.createInterface().getFunction("roundEarnings").format("json")
-const roundEarningsAbi = new abi.Function(JSON.parse(roundEarningsFragment))
+const abi = XAllocationPool__factory.abi
+const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
 
 export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string[]) => [
   "xApps",
@@ -32,7 +31,7 @@ const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
  * @returns  the total earnings of the xApps in the rounds
  */
 export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string[]) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const queryClient = useQueryClient()
 
   return useQuery({
@@ -48,14 +47,25 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
       const roundBatches = chunkArray(roundIds, BATCH_SIZE)
 
       for (const roundBatch of roundBatches) {
-        const earningsPerAppClauses = appIds.map(appId => getXAppTotalEarningsClauses(roundBatch, appId)).flat()
-
-        const res = await thor.explain(earningsPerAppClauses).execute()
+        const res = await executeMultipleClausesCall({
+          thor,
+          calls: appIds
+            .map(appId =>
+              roundBatch.map(
+                roundId =>
+                  ({
+                    abi,
+                    address,
+                    functionName: "roundEarnings",
+                    args: [roundId, appId],
+                  }) as const,
+              ),
+            )
+            .flat(),
+        })
         const clausesPerApp = roundBatch.length
 
         res.forEach((result, index) => {
-          if (result.reverted) return
-
           const appIndex = Math.floor(index / clausesPerApp)
           const roundIndex = index % clausesPerApp
 
@@ -66,8 +76,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
           const appId = appIds[appIndex]!
           const roundId = roundBatch[roundIndex]!
 
-          const decoded = roundEarningsAbi.decode(result.data)
-          const parsedAmount = ethers.formatEther(decoded[0])
+          const parsedAmount = ethers.formatEther(result[0])
           const numAmount = Number(parsedAmount)
 
           // Update the cache

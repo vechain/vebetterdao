@@ -98,6 +98,8 @@ describe("AllocationRoundHeaderCard", () => {
         state: 0,
         voteEnd: "125",
         voteStart: "120",
+        isFirstRound: false,
+        isLastRound: false,
       },
       isLoading: false,
     })
@@ -115,7 +117,7 @@ describe("AllocationRoundHeaderCard", () => {
     spyOnUserVotesInRound.mockReturnValue({
       data: {
         voteWeights: [ethers.parseEther(totalVotesCast.toString()).toString()],
-        appsIds: [APPS[0]?.id as string],
+        appsIds: [APPS[0]?.id as `0x${string}`],
         roundId,
         voter: "0x123",
       },
