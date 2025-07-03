@@ -155,26 +155,44 @@ contract XAllocationVoting is
 
   // ---------- Setters ---------- //
 
+  /**
+   * @dev Cast a vote on behalf of a voter
+   */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
     _castVoteOnBehalfOf(voter, roundId);
   }
 
+  /**
+   * @dev Toggle autovoting for the caller
+   */
   function toggleAutoVoting() public {
     _toggleAutovoting(_msgSender());
   }
 
+  /**
+   * @dev Set the voting preferences for the caller
+   */
   function setUserVotingPreferences(bytes32[] memory appIds) public {
     _setUserVotingPreferences(_msgSender(), appIds);
   }
 
-  function isUserAutovotingEnabled(address account) public view returns (bool) {
+  /**
+   * @dev Check if autovoting is enabled for an account
+   */
+  function isUserAutoVotingEnabled(address account) public view returns (bool) {
     return _isAutoVotingEnabled(account);
   }
 
-  function isUserAutovotingEnabledAtTimepoint(address account, uint48 timepoint) public view returns (bool) {
+  /**
+   * @dev Check if autovoting is enabled for an account at a specific timepoint
+   */
+  function isUserAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) public view returns (bool) {
     return _isAutoVotingEnabledAtTimepoint(account, timepoint);
   }
 
+  /**
+   * @dev Get the voting preferences for an account
+   */
   function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {
     return _getUserVotingPreferences(account);
   }

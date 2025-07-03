@@ -54,13 +54,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    */
   function x2EarnApps() public view virtual override returns (IX2EarnApps);
 
-  /**
-   * @dev Get the current block number
-   * @return The current block number
-   */
-  function _clock() public view virtual returns (uint48) {
-    return Time.blockNumber();
-  }
+  // ---------- Setters ---------- //
 
   /**
    * @dev Toggles autovoting for an account
@@ -82,30 +76,6 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
     $._autoVotingEnabled[account].push(_clock(), newStatus ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
 
     emit AutoVotingToggled(account, newStatus);
-  }
-
-  /**
-   * @dev Checks if autovoting is enabled for an account
-   * @param account The address to check
-   * @return Whether autovoting is enabled for the account
-   */
-  function _isAutoVotingEnabled(address account) internal view virtual override returns (bool) {
-    AutoVotingStorage storage $ = _getAutoVotingStorage();
-    return $._autoVotingEnabled[account].upperLookupRecent(_clock()) == 1;
-  }
-
-  /**
-   * @dev Checks if autovoting is enabled for an account at a specific timepoint
-   * @param account The address to check
-   * @param timepoint The timepoint to check
-   * @return Whether autovoting is enabled for the account at the specific timepoint
-   */
-  function _isAutoVotingEnabledAtTimepoint(
-    address account,
-    uint48 timepoint
-  ) internal view virtual override returns (bool) {
-    AutoVotingStorage storage $ = _getAutoVotingStorage();
-    return $._autoVotingEnabled[account].upperLookupRecent(timepoint) == 1;
   }
 
   /**
@@ -132,6 +102,40 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
     $._userVotingPreferences[account] = apps;
 
     emit PreferredAppsUpdated(account, apps);
+  }
+
+  // ---------- Getters ---------- //
+
+  /**
+   * @dev Get the current block number
+   * @return The current block number
+   */
+  function _clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
+  }
+
+  /**
+   * @dev Checks if autovoting is enabled for an account
+   * @param account The address to check
+   * @return Whether autovoting is enabled for the account
+   */
+  function _isAutoVotingEnabled(address account) internal view virtual override returns (bool) {
+    AutoVotingStorage storage $ = _getAutoVotingStorage();
+    return $._autoVotingEnabled[account].upperLookupRecent(_clock()) == 1;
+  }
+
+  /**
+   * @dev Checks if autovoting is enabled for an account at a specific timepoint
+   * @param account The address to check
+   * @param timepoint The timepoint to check
+   * @return Whether autovoting is enabled for the account at the specific timepoint
+   */
+  function _isAutoVotingEnabledAtTimepoint(
+    address account,
+    uint48 timepoint
+  ) internal view virtual override returns (bool) {
+    AutoVotingStorage storage $ = _getAutoVotingStorage();
+    return $._autoVotingEnabled[account].upperLookupRecent(timepoint) == 1;
   }
 
   /**
