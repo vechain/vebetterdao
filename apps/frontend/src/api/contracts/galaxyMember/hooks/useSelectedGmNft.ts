@@ -12,7 +12,6 @@ import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useB3trToUpgrade, useGetB3trBalance } from "@/hooks"
-import { ethers } from "ethers"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -142,8 +141,8 @@ export const useSelectedGmNft = (profile?: string) => {
     errorMaxGmLevel
 
   const isEnoughBalanceToUpgradeGM =
-    !!b3trBalance && Number(b3trBalance?.original || 0) >= Number(b3trToUpgradeGMToNextLevel)
-  const missingB3trToUpgrade = Number(b3trToUpgradeGMToNextLevel) - Number(b3trBalance?.original || 0)
+    b3trBalance && Number(b3trBalance?.scaled || 0) >= Number(b3trToUpgradeGMToNextLevel)
+  const missingB3trToUpgrade = Number(b3trToUpgradeGMToNextLevel) - Number(b3trBalance?.scaled || 0)
 
   const b3trLeftover = Number(gmNfts[Number(gmLevel)]?.b3trToUpgrade || 0) - Number(b3trToUpgradeGMToNextLevel)
 
@@ -166,7 +165,7 @@ export const useSelectedGmNft = (profile?: string) => {
     nextLevelGMRewardMultiplier,
     isGMLoading,
     isGMOwned,
-    b3trToUpgradeGMToNextLevel: ethers.formatEther(b3trToUpgradeGMToNextLevel ?? 0),
+    b3trToUpgradeGMToNextLevel: b3trToUpgradeGMToNextLevel ? Number(b3trToUpgradeGMToNextLevel) : undefined,
     isEnoughBalanceToUpgradeGM,
     missingB3trToUpgrade,
     attachedNodeId,

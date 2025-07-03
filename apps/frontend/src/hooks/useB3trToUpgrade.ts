@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
 
 const abi = GalaxyMember__factory.abi
 const address = getConfig().galaxyMemberContractAddress
@@ -24,7 +25,7 @@ export const useB3trToUpgrade = (tokenId?: string, enabled = true) => {
     args: [BigInt(tokenId ?? 0)],
     queryOptions: {
       enabled: !!tokenId && enabled,
-      select: data => data[0].toString(),
+      select: data => ethers.formatEther(data[0]),
     },
   })
 }
