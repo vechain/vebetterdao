@@ -1,4 +1,4 @@
-import { Box, Card, Heading, HStack, Stack, Text, useMediaQuery, VStack, Flex } from "@chakra-ui/react"
+import { Card, Heading, HStack, Stack, useMediaQuery, VStack, Flex } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/vechain-kit"
@@ -9,7 +9,6 @@ import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { GmNFTCard } from "./components/GmNFTCard"
 import { XNodeCard } from "./components/XNodeCard"
 import { GmNFTAndNodeFooter } from "./components/GmNFTAndNodeFooter"
-import { AttachmentIndicator } from "./components/AttachmentIndicator"
 import { useGmNFTState } from "./hooks/useGmNFTState"
 import { useXNodeState } from "./hooks/useXNodeState"
 import { useMemo } from "react"
@@ -95,18 +94,9 @@ export const GmNFTAndNodeCard = () => {
                 {headingText}
               </Heading>
             </FeatureFlagWrapper>
-
-            {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
-              <>
-                <Text fontSize="xs" fontWeight={600} color="#B1F16C">
-                  {t("GM NFT attached to {{node}}", { node: xNodeName })}
-                </Text>
-                <Box flexBasis={"150px"} />
-              </>
-            )}
           </HStack>
 
-          <Stack gap="0" direction={isAbove800 ? "row" : "column"} align="stretch" justify="stretch">
+          <Stack gap="4" direction={isAbove800 ? "row" : "column"} align="stretch" justify="stretch">
             <GmNFTCard
               isGMOwned={isGMOwned}
               isGMLoading={isGMLoading}
@@ -123,11 +113,6 @@ export const GmNFTAndNodeCard = () => {
 
             {(isXNodeHolder || isXNodeDelegator) && (
               <>
-                <AttachmentIndicator
-                  isXNodeAttachedToGM={isXNodeAttachedToGM}
-                  isGMOwned={isGMOwned}
-                  isAbove800={isAbove800}
-                />
                 <XNodeCard
                   xNodeName={xNodeName}
                   xNodeImage={xNodeImage}

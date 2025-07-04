@@ -1,7 +1,6 @@
 import { Stack, VStack } from "@chakra-ui/react"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { AttachXNodeCard } from "./components/AttachXNodeCard"
-import { GMNFTList } from "./components/GMNFTList/GMNFTList"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
@@ -30,7 +29,6 @@ export const GmNFTPageContent = () => {
         <VStack flex={3}>
           <MultipleXNodesAlert />
           <AttachXNodeCard />
-          <GMNFTList />
         </VStack>
         <VStack flex={1.5} align={"stretch"}>
           <GalaxyRewardCalculatorCard />

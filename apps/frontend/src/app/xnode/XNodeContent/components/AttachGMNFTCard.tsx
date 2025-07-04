@@ -20,11 +20,9 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { UilLink, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { FaChevronRight } from "react-icons/fa6"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
@@ -116,35 +114,21 @@ export const AttachGMNFTCard = () => {
                   </HStack>
                 </FeatureFlagWrapper>
               </VStack>
-              <FaChevronRight size={"24px"} />
+              {isXNodeAttachedToGM ? (
+                <Button
+                  color="#C84968"
+                  variant="dangerFilledTonal"
+                  isDisabled={isXNodeDelegator}
+                  onClick={() => handleDetachOnClick()}>
+                  {t("Detach")}
+                </Button>
+              ) : (
+                <Button variant={"primarySubtle"} onClick={() => handleAttachOnClick()} isDisabled={isXNodeDelegator}>
+                  {t("Attach")}
+                </Button>
+              )}
             </HStack>
           </Flex>
-          {isXNodeAttachedToGM ? (
-            <Button
-              leftIcon={<UilLinkBroken color="#C84968" />}
-              color="#C84968"
-              variant={"link"}
-              isDisabled={isXNodeDelegator}
-              onClick={() => handleDetachOnClick()}>
-              {t("Detach")}
-            </Button>
-          ) : (
-            <FeatureFlagWrapper
-              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-              fallback={
-                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
-                  {t("Coming soon!")}
-                </Button>
-              }>
-              <Button
-                leftIcon={<UilLink color="#004CFC" />}
-                variant={"primarySubtle"}
-                onClick={() => handleAttachOnClick()}
-                isDisabled={isXNodeDelegator}>
-                {t("Attach now!")}
-              </Button>
-            </FeatureFlagWrapper>
-          )}
         </VStack>
       </CardBody>
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />

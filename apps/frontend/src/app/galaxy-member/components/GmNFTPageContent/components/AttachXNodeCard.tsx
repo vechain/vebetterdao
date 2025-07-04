@@ -1,15 +1,13 @@
 import { useSelectedGmNft, useXNode } from "@/api"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { FeatureFlagWrapper } from "@/components"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { FaChevronRight } from "react-icons/fa6"
 import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
@@ -109,37 +107,11 @@ export const AttachXNodeCard = () => {
                   </Text>
                 </HStack>
               </VStack>
-              <FaChevronRight size={"24px"} />
-            </HStack>
-          </Flex>
-          {isXNodeAttachedToGM && (
-            <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
-              <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
-              <Text color={"rgb(217, 119, 6)"} fontSize={14}>
-                <Trans
-                  i18nKey="The GM NFT is <bold>not transferable</bold> while attached to a Node."
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
-                />
-              </Text>
-            </HStack>
-          )}
-          {isXNodeAttachedToGM ? (
-            <Button
-              leftIcon={<UilLinkBroken color="#C84968" />}
-              color="#C84968"
-              variant={"link"}
-              onClick={() => handleDetachOnClick()}>
-              {t("Detach")}
-            </Button>
-          ) : (
-            <FeatureFlagWrapper
-              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-              fallback={
-                <Button leftIcon={<UilLinkBroken color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
-                  {t("Coming soon!")}
+              {isXNodeAttachedToGM ? (
+                <Button color="#C84968" variant={"dangerFilledTonal"} onClick={() => handleDetachOnClick()}>
+                  {t("Detach")}
                 </Button>
-              }>
-              {xNodeHasGMAttached ? (
+              ) : xNodeHasGMAttached ? (
                 <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
                   <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
                   <Text color={"rgb(217, 119, 6)"} fontSize={14}>
@@ -172,10 +144,21 @@ export const AttachXNodeCard = () => {
                   variant={"primarySubtle"}
                   isDisabled={isXNodeDelegator}
                   onClick={() => handleAttachOnClick()}>
-                  {t("Attach now!")}
+                  {t("Attach")}
                 </Button>
               )}
-            </FeatureFlagWrapper>
+            </HStack>
+          </Flex>
+          {isXNodeAttachedToGM && (
+            <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
+              <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
+              <Text color={"rgb(217, 119, 6)"} fontSize={14}>
+                <Trans
+                  i18nKey="The GM NFT is <bold>not transferable</bold> while attached to a Node."
+                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                />
+              </Text>
+            </HStack>
           )}
         </VStack>
       </CardBody>

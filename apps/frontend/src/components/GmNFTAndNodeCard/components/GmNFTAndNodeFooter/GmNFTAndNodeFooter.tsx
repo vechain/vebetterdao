@@ -167,7 +167,7 @@ export const GmNFTAndNodeFooter = () => {
         </HStack>
       </Skeleton>
       <Skeleton isLoaded={!isB3trBalanceLoading}>
-        <GmActionButton buttonProps={{ variant: "tertiaryAction" }} />
+        <GmActionButton buttonProps={{ variant: "whiteAction" }} />
       </Skeleton>
     </Stack>
   )
