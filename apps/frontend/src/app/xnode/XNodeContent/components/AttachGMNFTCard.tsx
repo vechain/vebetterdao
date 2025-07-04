@@ -61,7 +61,9 @@ export const AttachGMNFTCard = () => {
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached GM" : "Attach to upgrade")}</Heading>
+              <Heading fontSize="lg">
+                {t(isXNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
+              </Heading>
             </HStack>
             <Text fontSize="sm">
               {t(

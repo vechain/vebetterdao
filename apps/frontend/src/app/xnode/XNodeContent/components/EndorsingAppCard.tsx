@@ -81,7 +81,7 @@ export const EndorsingAppCard = () => {
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Endorsing app")}</Heading>
+              <Heading fontSize="lg">{t("Endorsed app")}</Heading>
               {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
             </HStack>
             {!isEndorsingApp && (
