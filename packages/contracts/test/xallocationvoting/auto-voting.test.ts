@@ -4,7 +4,7 @@ import { expect } from "chai"
 import { getOrDeployContractInstances, getVot3Tokens, startNewAllocationRound, waitForRoundToEnd } from "../helpers"
 import { endorseApp } from "../helpers/xnodes"
 
-describe("AutoVoting - @shard18", function () {
+describe("AutoVoting - @shard14a", function () {
   describe("Core logic", function () {
     it("should toggle autovoting status correctly", async function () {
       const config = await getOrDeployContractInstances({
