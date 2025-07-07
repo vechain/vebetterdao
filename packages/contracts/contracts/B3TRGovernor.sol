@@ -1109,6 +1109,20 @@ contract B3TRGovernor is
     GovernorConfigurator.setProposalTypeVotingThreshold($, proposalTypeValue, newVotingThreshold);
   }
 
+  /**
+   * @notice Update the deposit threshold cap for a proposal type. This operation can only be performed through a governance proposal or by the DEFAULT_ADMIN_ROLE
+   * Emits a {DepositThresholdCapSet} event.
+   * @param newDepositThresholdCap The new deposit threshold cap
+   * @param proposalTypeValue The proposal type
+   */
+  function setProposalTypeDepositThresholdCap(
+    uint256 newDepositThresholdCap,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setProposalTypeDepositThresholdCap($, proposalTypeValue, newDepositThresholdCap);
+  }
+
   // ------------------ Overrides ------------------ //
 
   /**
