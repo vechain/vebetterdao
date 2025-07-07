@@ -185,8 +185,6 @@ abstract contract XAllocationVotingGovernor is
 
     // Calculate equal vote weight per app
     uint256 votePerApp = voterAvailableVotes / eligibleAppsCount;
-    // There could be some dust left, but it's fine
-    // uint256 remainingVotes = voterAvailableVotes % eligibleAppsCount;
 
     // Distribute votes equally
     for (uint256 i = 0; i < eligibleAppsCount; i++) {

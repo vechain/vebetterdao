@@ -34,6 +34,7 @@ import {
   XAllocationVoting,
   XAllocationVotingV1,
   XAllocationVotingV5,
+  XAllocationVotingV6,
 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
@@ -509,8 +510,13 @@ describe("X-Allocation Voting - @shard14", function () {
       expect(await xAllocationVoting.version()).to.equal("6")
     })
 
-    it("Should not break storage when upgrading to V2, V3, V4, V5 and V6", async () => {
+    it("Should not break storage when upgrading to V2, V3, V4, V5, V6 and V7", async () => {
       const config = createTestConfig()
+
+      const configContracts = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
       const {
         otherAccounts,
         x2EarnApps,
@@ -523,9 +529,7 @@ describe("X-Allocation Voting - @shard14", function () {
         owner,
         veBetterPassport,
         minterAccount,
-      } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      } = configContracts!
 
       // set personhood threshold to 0
       await veBetterPassport.connect(owner).setThresholdPoPScore(0)
@@ -753,13 +757,13 @@ describe("X-Allocation Voting - @shard14", function () {
       // Upgrade to V5 (using the V4 contract address)
       const xAllocationVotingV6 = (await upgradeProxy(
         "XAllocationVotingV5",
-        "XAllocationVoting",
-        await xAllocationVotingV4.getAddress(), // Use V4's address
+        "XAllocationVotingV6",
+        await xAllocationVotingV5.getAddress(), // Use V4's address
         [],
         {
           version: 6,
         },
-      )) as XAllocationVoting
+      )) as XAllocationVotingV6
 
       expect(await xAllocationVotingV6.version()).to.equal("6")
 
@@ -794,6 +798,31 @@ describe("X-Allocation Voting - @shard14", function () {
 
       // can cast vote for round 3
       await xAllocationVotingV6.connect(user1).castVote(3, [app1Id], [ethers.parseEther("100")])
+
+      // Upgrade to V7 (using the V6 contract address)
+      const xAllocationVotingV7 = (await upgradeProxy(
+        "XAllocationVotingV6",
+        "XAllocationVoting",
+        await xAllocationVotingV6.getAddress(), // Use V6's address
+        [],
+        {
+          version: 7,
+        },
+      )) as XAllocationVoting
+
+      expect(await xAllocationVotingV7.version()).to.equal("7")
+
+      // Toggle auto-voting
+      await xAllocationVotingV7.connect(owner).toggleAutoVoting()
+      expect(await xAllocationVotingV7.isUserAutoVotingEnabled(owner.address)).to.be.true
+
+      // Set voting preferences
+      await xAllocationVotingV7.connect(owner).setUserVotingPreferences([app1Id, app2Id, app3Id])
+      expect(await xAllocationVotingV7.getUserVotingPreferences(owner.address)).to.eql([app1Id, app2Id, app3Id])
+
+      // check that round is ok
+      expect(await xAllocationVotingV7.currentRoundId()).to.equal(3n)
+      expect(await xAllocationVotingV7.state(3n)).to.equal(0n) // Active
     })
   })
 
