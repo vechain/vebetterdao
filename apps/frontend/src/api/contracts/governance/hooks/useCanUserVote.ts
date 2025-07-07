@@ -21,15 +21,15 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     parsedAccount ?? undefined,
   )
   const { data: threshold } = useVotingThreshold()
-  const hasVotesAtSnapshot = Number(votesAtSnapshot) >= (threshold ?? 0)
+  const hasVotesAtSnapshot = Number(votesAtSnapshot) >= (Number(threshold) ?? 0)
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, parsedAccount ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPersonAtTimepoint(
+  const { data: isPerson = false, isLoading: isPersonLoading } = useIsPersonAtTimepoint(
     delegateeAddress ?? parsedAccount,
     roundSnapshot,
   )

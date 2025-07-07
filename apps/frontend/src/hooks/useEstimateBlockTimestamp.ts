@@ -1,4 +1,4 @@
-import { useCurrentBlock } from "@/api"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { getConfig } from "@repo/config"
 

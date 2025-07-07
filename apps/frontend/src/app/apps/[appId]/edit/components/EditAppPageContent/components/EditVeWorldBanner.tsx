@@ -9,7 +9,7 @@ import { handleImageCompression } from "@/utils/imageListCompression"
 import { useTranslation } from "react-i18next"
 
 type Props = {
-  form: UseFormReturn<EditAppForm, any, undefined>
+  form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
 
 export const EditVeWorldBanner = ({ form }: Props) => {

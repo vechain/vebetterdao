@@ -7,8 +7,8 @@ import { Trans, useTranslation } from "react-i18next"
 import dayjs from "dayjs"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
-import { useGetNodeManager } from "@/api"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useGetNodeManager } from "@/hooks"
 
 type Props = {
   event: AppEndorsedEvent

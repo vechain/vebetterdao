@@ -8,11 +8,8 @@ import {
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesHorizontalChart } from "./AppVotesHorizontalChart"
-type Props = {
-  roundId: string
-}
 
-export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
+export const AllocationXAppsVotesRankingChart = ({ roundId }: { roundId: string }) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
@@ -46,9 +43,9 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
 
   return (
     <VStack spacing={8} align={"flex-start"} w="full">
-      {sortedData.map(app => (
+      {sortedData.map((app, index) => (
         <AppVotesHorizontalChart
-          key={`app-votes-chart-${roundId}-${app.app}`}
+          key={`app-votes-chart-${roundId}-${app.app}-${index}`}
           data={app}
           roundId={roundId}
           showReceived={true}

@@ -4,8 +4,8 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getAllProposalsStateQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
   getProposalStateQueryKey,
-  getProposalUserDepositQueryKey,
   useProposalCreatedEvent,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
@@ -46,7 +46,7 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     () => [
       getProposalStateQueryKey(proposalId),
       getAllProposalsStateQueryKey(),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
+      getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
     ],
     [proposalId, account?.address],
   )

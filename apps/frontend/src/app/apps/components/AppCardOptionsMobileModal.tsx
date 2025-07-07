@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next"
 export type Props = {
   isOpen: boolean
   onClose: () => void
-  teamWalletAddress: string
+  teamWalletAddress?: string
   xAppId?: string
   externalUrl?: string
   isLoading?: boolean
@@ -37,7 +37,7 @@ export const AppCardOptionsMobileModal = ({
   xAppId,
   showViewDetails = false,
 }: Props) => {
-  const { onCopy } = useClipboard(teamWalletAddress)
+  const { onCopy } = useClipboard(teamWalletAddress ?? "")
   const { t } = useTranslation()
   const toast = useToast()
   const handleOnCopy = () => {

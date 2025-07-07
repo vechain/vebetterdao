@@ -34,7 +34,7 @@ export const useNFTImage = (profile?: string) => {
     isLoading: isLoadingMetadataUri,
     isError: isErrorMetadataUri,
     error: errorMetadataURI,
-  } = useNFTMetadataUri(tokenID ?? null)
+  } = useNFTMetadataUri(tokenID)
 
   const {
     data: imageMetadata,

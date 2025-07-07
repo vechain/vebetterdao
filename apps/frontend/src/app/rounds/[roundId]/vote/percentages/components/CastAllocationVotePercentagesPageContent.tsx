@@ -4,12 +4,12 @@ import {
   useAllocationsRoundState,
   useGetVotesOnBlock,
   useHasVotedInRound,
-  useRoundXApps,
   useVotingThreshold,
+  useRoundXApps,
 } from "@/api"
 import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
@@ -51,14 +51,14 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
 
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? undefined,
   )
 
   const { data: threshold } = useVotingThreshold()
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(votesAtSnapshot) >= (threshold ?? 0)
+    return Number(votesAtSnapshot ?? 0) >= Number(threshold ?? 0)
   }, [votesAtSnapshot, threshold])
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)

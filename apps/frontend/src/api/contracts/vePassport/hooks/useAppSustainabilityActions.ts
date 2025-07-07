@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react"
-import { useXApps, XApp } from "../../xApps"
+import { useXApps, XApp } from "@/api"
+import {
+  getSustainabilityAppUsersByRound,
+  SustainabilityAppUsersByRoundResponse,
+} from "@/api/indexer/sustainability/useSustainabilityAppUsersByRound"
 import {
   getSustainabilityAppOverviewByRound,
-  getSustainabilityAppUsersByRound,
   SustainabilityAppOverViewByRoundResponse,
-  SustainabilityAppUsersByRoundResponse,
-} from "@/api"
+} from "@/api/indexer/sustainability/useSustainabilityAppOverviewByRound"
 
 type Props = {
   startRound: number

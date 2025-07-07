@@ -2,8 +2,8 @@ import {
   useAllocationsRound,
   useCurrentAllocationsRoundId,
   useHasXAppClaimed,
-  useXAppRoundEarnings,
   useXApps,
+  useXAppRoundEarnings,
 } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {

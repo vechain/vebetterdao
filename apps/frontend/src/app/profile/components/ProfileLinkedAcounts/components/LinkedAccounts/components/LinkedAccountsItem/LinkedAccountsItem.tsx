@@ -114,7 +114,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
           </Button>
         )}
       </HStack>
-      <RemovePendingRequestModal modal={removePendingRequestModal} passport={outgoingPendingLink} />
+      <RemovePendingRequestModal modal={removePendingRequestModal} passport={outgoingPendingLink ?? ""} />
       <RemoveLinkModalPassportPOV modal={removeLinkModalPassportPOV} entity={account} />
       <RemoveLinkModalEntityPOV modal={removeLinkModalEntityPOV} entity={account} />
     </Stack>

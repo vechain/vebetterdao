@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react"
 import imageCompression from "browser-image-compression"
-import { imageCompressionOptions } from "./useUploadImages"
+import { imageCompressionOptions, UploadedImage } from "./useUploadImages"
 
 type Props = {
   compressImage?: boolean
@@ -13,10 +13,6 @@ type Props = {
  * @returns   uploaded image, setUploadedImage: function to set the uploaded image, onDrop: function to handle the drop event
  */
 
-export type UploadedImage = {
-  file: File
-  image: string
-}
 export const useSingleImageUpload = ({ compressImage, defaultImage }: Props) => {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | undefined>(defaultImage)
 

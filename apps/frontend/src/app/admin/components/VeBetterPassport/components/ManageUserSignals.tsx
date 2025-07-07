@@ -68,7 +68,7 @@ export const ManageUserSignals = () => {
   )
 
   const isFormValid = isValidAddress && reason.trim() !== ""
-  const isSignalResetEnabled = signals > 0
+  const isSignalResetEnabled = signals ? Number(signals) > 0 : false
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
   return (

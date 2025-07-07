@@ -30,13 +30,7 @@ export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
   const { isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenId } = useXNode()
 
-  const {
-    gmImage,
-    gmName,
-    gmLevel,
-    gmRewardMultiplier,
-    isLoading: isGMLoading,
-  } = useGMNFTData(attachedGMTokenId ?? null)
+  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isLoading: isGMLoading } = useGMNFTData(attachedGMTokenId)
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {

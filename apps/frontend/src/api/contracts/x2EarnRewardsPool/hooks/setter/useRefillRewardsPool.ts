@@ -5,7 +5,6 @@ import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import {
   getAppAvailableFundsQueryKey,
   getAppRewardsBalanceQueryKey,
-  getAppBalanceQueryKey,
   getIsRewardsPoolEnabledQueryKey,
 } from "@/api/contracts/x2EarnRewardsPool"
 interface Props {
@@ -56,7 +55,8 @@ export const useRefillRewardsPool = ({ xAppId, amount, onSuccess }: Props) => {
     () => [
       getAppAvailableFundsQueryKey(xAppId),
       getAppRewardsBalanceQueryKey(xAppId),
-      getAppBalanceQueryKey(xAppId),
+      // TODO: check if this is needed cause hook is not used anywhere
+      // getAppBalanceQueryKey(xAppId),
       getIsRewardsPoolEnabledQueryKey(xAppId),
     ],
     [xAppId],

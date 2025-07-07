@@ -1,11 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@repo/contracts"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
-// const method = "getPendingDelegationsDelegatorPOV"
-const method = "getPendingDelegations"
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
+const abi = VeBetterPassport__factory.abi
+const method = "getPendingDelegations" as const
 
 /**
  * Returns the query key for fetching pending delegations.
@@ -13,7 +12,7 @@ const method = "getPendingDelegations"
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegatorPOV = (delegator: string) => {
-  return getCallKey({ method, keyArgs: ["outgoing", delegator] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegator as `0x${string}`] })
 }
 
 /**
@@ -21,15 +20,16 @@ export const getPendingDelegationsQueryKeyDelegatorPOV = (delegator: string) => 
  * @param delegator - The delegator address.
  * @returns An array of addresses representing delegators with pending delegations for the delegator.
  */
+// TODO: check 'incoming' or 'outgoing'
 export const useGetPendingDelegationsDelegatorPOV = (delegator?: string | null) => {
-  // TODO: remove mocked data
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
+  return useCallClause({
+    abi,
+    address,
     method,
-    keyArgs: ["outgoing", delegator],
-    args: [delegator],
-    mapResponse: response => response.decoded[1] ?? null,
-    enabled: !!delegator,
+    args: [(delegator ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!delegator,
+      select: data => (data?.[1] ? data[1] : ""),
+    },
   })
 }

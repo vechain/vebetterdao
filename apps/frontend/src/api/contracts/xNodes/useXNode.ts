@@ -3,19 +3,19 @@ import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { useIpfsImage, useIpfsMetadatas, useIpfsImageList } from "@/api/ipfs"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor, useWallet } from "@vechain/vechain-kit"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
 import { useXNodeCheckCooldown } from "./useXNodeCheckCooldown"
-import { useMultipleCalls } from "@/hooks/useMultipleCalls"
 import { StargateNFT__factory } from "@repo/contracts/typechain-types"
 import { getConfig } from "@repo/config"
 import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 
-const stargateNFTContractAddress = getConfig().stargateNFTContractAddress
+const stargateNFTAbi = StargateNFT__factory.abi
+const stargateNFTContractAddress = getConfig().stargateNFTContractAddress as `0x${string}`
 
-// Add these type definitions at the top of the file after imports
 interface StargateMetadata {
   name: string
   description: string
@@ -72,6 +72,7 @@ interface XNodeData {
 
 export const useXNode = (profile?: string): XNodeData => {
   const { t } = useTranslation()
+  const thor = useThor()
   const { account } = useWallet()
   const userNodeDetails = useGetUserNodes(profile ?? account?.address ?? "")
 
@@ -82,21 +83,21 @@ export const useXNode = (profile?: string): XNodeData => {
   const legacyNodes = useMemo(() => allNodesWithIsLegacy.filter(node => node.isLegacyNode), [allNodesWithIsLegacy])
   const stargateNodes = useMemo(() => allNodesWithIsLegacy.filter(node => !node.isLegacyNode), [allNodesWithIsLegacy])
 
-  // Get tokenURI for each Stargate node
-  const stargateTokenURICalls = useMemo(
-    () =>
-      stargateNodes.map(node => ({
-        contractInterface: StargateNFT__factory.createInterface(),
-        contractAddress: stargateNFTContractAddress,
-        method: "tokenURI",
-        args: [node.nodeId],
-      })),
-    [stargateNodes],
-  )
-
-  const { data: stargateTokenURIs } = useMultipleCalls({
-    calls: stargateTokenURICalls as any,
-    queryKeyPrefix: "user-x-nodes-stargate-token-uris",
+  const { data: stargateTokenURIs } = useQuery({
+    queryKey: ["user-x-nodes-stargate-token-uris", stargateNodes.map(node => node.nodeId)],
+    queryFn: () =>
+      executeMultipleClausesCall({
+        thor,
+        calls: stargateNodes.map(
+          node =>
+            ({
+              abi: stargateNFTAbi,
+              address: stargateNFTContractAddress,
+              functionName: "tokenURI",
+              args: [node.nodeId],
+            }) as const,
+        ),
+      }),
   })
 
   // Get metadata from IPFS for each Stargate node
@@ -176,7 +177,8 @@ export const useXNode = (profile?: string): XNodeData => {
 
   const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
 
-  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(xNode?.nodeId ?? "")
+  const { data: isXNodeOnCooldown = false } = useXNodeCheckCooldown(xNode?.nodeId ?? "")
+
   return {
     isXNodeLoading,
     isXNodeError,

@@ -1,10 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs, useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/vechain-kit"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
+const abi = VeBetterPassport__factory.abi
+const method = "isPerson" as const
 
 /**
  * Returns the query key for fetching the isPerson status.
@@ -12,7 +12,7 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the isPerson status.
  */
 export const getIsPersonQueryKey = (user: string) => {
-  return getCallKey({ method: "isPerson", keyArgs: [user] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`] })
 }
 
 /**
@@ -21,12 +21,15 @@ export const getIsPersonQueryKey = (user: string) => {
  * @returns The isPerson status.
  */
 export const useIsPerson = (user?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "isPerson",
-    args: [user],
-    enabled: !!user,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(user ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!user,
+      select: data => data[0],
+    },
   })
 }
 

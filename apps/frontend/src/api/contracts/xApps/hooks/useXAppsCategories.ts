@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 import { getXAppMetadata } from "../getXAppMetadata"
-import { useXApps } from "./useXApps"
-import { AllApps } from "../getXApps"
+import { useXApps, XApp } from "@/api"
 
-export const getXAppsCategoriesQueryKey = (allApps: AllApps[]) => ["xApps", allApps, "categories"]
+export const getXAppsCategoriesQueryKey = (allApps: XApp[]) => ["xApps", allApps.map(app => app.id), "categories"]
 
 /**
  * Hook to fetch categories from all the xApps

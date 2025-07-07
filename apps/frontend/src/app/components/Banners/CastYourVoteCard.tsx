@@ -15,8 +15,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
-import Lottie from "react-lottie"
 import voteAnimation from "../../../../public/assets/animations/vote.json"
+import Lottie from "react-lottie"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()
@@ -24,7 +24,10 @@ export const CastYourVoteCard: React.FC = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundDetail } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot } = useGetVotesOnBlock(Number(roundDetail.voteStart), account?.address ?? undefined)
+  const { data: votesAtSnapshot } = useGetVotesOnBlock(
+    roundDetail.voteStart ? Number(roundDetail.voteStart) : undefined,
+    account?.address ?? undefined,
+  )
 
   const lottieSize = useBreakpointValue(
     {
@@ -99,6 +102,7 @@ export const CastYourVoteCard: React.FC = () => {
           </GridItem>
 
           <GridItem colSpan={1} order={[1, 1, 2]} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
+            {/* @ts-ignore eslint-disable-line */}
             <Lottie
               style={{
                 pointerEvents: "none",

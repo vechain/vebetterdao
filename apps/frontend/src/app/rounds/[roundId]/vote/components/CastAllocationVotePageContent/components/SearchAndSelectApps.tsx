@@ -1,4 +1,3 @@
-import { XApp } from "@/api"
 import { CastAllocationVoteFormData } from "@/store"
 import {
   VStack,
@@ -12,48 +11,49 @@ import {
   Checkbox,
 } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
-import { UseQueryResult } from "@tanstack/react-query"
 import { useCallback, useMemo, useState } from "react"
 import { AppSelectableCard } from "./AppSelectableCard"
 import { useTranslation } from "react-i18next"
 import { NoAppsCard } from "./NoAppsCard"
 import { splitEvenly } from "../../../utils/splitEvenly"
+import { XApp } from "@/api"
 
 type Props = {
   selectedApps: CastAllocationVoteFormData[]
   onSelectedAppsChange: (_selectedApps: CastAllocationVoteFormData[]) => void
-  xAppsQuery: UseQueryResult<XApp[], Error>
+  xApps?: XApp[]
+  isLoading?: boolean
 }
 
 const searchApp = (app: XApp, query: string) => {
   return app.name.toLowerCase().includes(query.toLowerCase())
 }
 
-export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQuery }: Props) => {
+export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps, isLoading }: Props) => {
   const { t } = useTranslation()
   const [appsToSearch, setAppsToSearch] = useState("")
 
   const onCheckboxChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!xAppsQuery.data) return
+      if (!xApps) return
       if (e.target.checked) {
-        const data = xAppsQuery.data.map(xApp => ({ appId: xApp.id, ...splitEvenly(xAppsQuery.data.length) }))
+        const data = xApps.map(xApp => ({ appId: xApp.id, ...splitEvenly(xApps.length) }))
         return onSelectedAppsChange(data)
       }
       return onSelectedAppsChange([])
     },
-    [onSelectedAppsChange, xAppsQuery],
+    [onSelectedAppsChange, xApps],
   )
 
   const isSelectAllChecked = useMemo(() => {
-    if (!xAppsQuery.data) return false
-    return selectedApps.length === xAppsQuery.data.length
-  }, [selectedApps, xAppsQuery.data])
+    if (!xApps) return false
+    return selectedApps.length === xApps.length
+  }, [selectedApps, xApps])
 
   const filteredApps = useMemo(() => {
-    if (!xAppsQuery.data) return []
-    return xAppsQuery.data.filter(xApp => searchApp(xApp, appsToSearch))
-  }, [appsToSearch, xAppsQuery.data])
+    if (!xApps) return []
+    return xApps.filter(xApp => searchApp(xApp, appsToSearch))
+  }, [appsToSearch, xApps])
 
   return (
     <VStack w="full" spacing={6}>
@@ -69,9 +69,9 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xAppsQ
         />
       </InputGroup>
       <HStack w="full" spacing={4} justify={"space-between"}>
-        <Skeleton isLoaded={!xAppsQuery.isLoading}>
+        <Skeleton isLoaded={!isLoading}>
           <Heading fontSize={"20px"} fontWeight={700}>
-            {t("{{amount}} participating apps", { amount: xAppsQuery.data?.length ?? "0" })}
+            {t("{{amount}} participating apps", { amount: xApps?.length ?? "0" })}
           </Heading>
         </Skeleton>
         <Checkbox colorScheme="primary" onChange={onCheckboxChange} isChecked={isSelectAllChecked} size="lg">

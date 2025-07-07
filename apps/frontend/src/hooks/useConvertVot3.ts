@@ -1,21 +1,14 @@
-import {
-  getB3TrBalanceQueryKey,
-  getVot3BalanceQueryKey,
-  buildConvertVot3Tx,
-  getVotesQueryKey,
-  getB3TrTokenDetailsQueryKey,
-} from "@/api"
+import { buildConvertVot3Tx, getB3TrTokenDetailsQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-const config = getConfig()
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
-// const buffer = 1.01
-// Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-// const suggestedMaxGas = 131664 * buffer
+const config = getConfig()
 
 type useMintB3trProps = {
   amount?: string | number
@@ -31,7 +24,7 @@ type useMintB3trProps = {
  * @returns see {@link UseSendTransactionReturnValue}
  */
 export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: useMintB3trProps) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const { account } = useWallet()
 
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
@@ -43,10 +36,11 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
 
   const refetchQueryKeys = useMemo(
     () => [
-      getB3TrBalanceQueryKey(account?.address ?? undefined),
+      getB3trBalanceQueryKey(account?.address ?? undefined),
       getVot3BalanceQueryKey(account?.address ?? ""),
-      getVotesQueryKey(account?.address ?? undefined),
-      getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      // TODO: migration check if this is needed cause hook not used anywhere
+      //  getVotesQueryKey(account?.address ?? undefined),
+      getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
     ],
     [account?.address],

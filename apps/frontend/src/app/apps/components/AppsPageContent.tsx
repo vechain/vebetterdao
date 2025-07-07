@@ -1,4 +1,4 @@
-import { useXApps, useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically } from "@/api"
+import { useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -41,7 +41,8 @@ export const AppsPageContent = () => {
   const newAppsEndorsedandUnendorsed = [...(xApps?.newApps ?? []), ...newApps]
 
   // Apps tabs
-  const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
+  const currentActiveApps =
+    xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id as unknown as `0x${string}`)) ?? []
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
 

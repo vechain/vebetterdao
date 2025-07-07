@@ -1,9 +1,31 @@
-import { getConfig } from "@repo/config"
+import { EventLogs, FilterEventLogsOptions, ThorClient } from "@vechain/sdk-network"
+import { Abi, decodeEventLog as viemDecodeEventLog, Hex as ViemHex } from "viem"
 
-const nodeUrl = getConfig().nodeUrl
+type Topics = [] | [signature: ViemHex, ...args: ViemHex[]]
+
+export const decodeEventLog = <TAbi extends Abi>(
+  event: EventLogs,
+  abi: TAbi,
+): {
+  meta: EventLogs["meta"]
+  decodedData: ReturnType<typeof viemDecodeEventLog<TAbi>>
+} => {
+  const decodedData = viemDecodeEventLog({
+    abi,
+    data: event.data.toString() as ViemHex,
+    topics: event.topics.map(topic => topic.toString()) as Topics,
+  })
+
+  return {
+    meta: event.meta,
+    decodedData,
+  }
+}
+
 const MAX_EVENTS_PER_QUERY = 1000
 /**
  * Params for getEvents function
+ * @param nodeUrl the node url
  * @param thor the thor client
  * @param auctionId  the auction id to get the events
  * @param order  the order of the events (asc or desc)
@@ -14,13 +36,14 @@ const MAX_EVENTS_PER_QUERY = 1000
  * @returns  the encoded events
  */
 export type GetEventsProps = {
-  thor: Connex.Thor
+  nodeUrl: string
+  thor: ThorClient
   order?: "asc" | "desc"
   offset?: number
   limit?: number
   from?: number
   to?: number
-  filterCriteria: Connex.Thor.Filter.Criteria<"event">[]
+  filterCriteria: FilterEventLogsOptions["criteriaSet"]
 }
 /**
  * Get events from blockchain (auction created, auction successful, auction cancelled)
@@ -29,70 +52,62 @@ export type GetEventsProps = {
  * @param limit
  * @param from block parse start from
  */
-export const getEvents = async ({
+export const getEventLogs = async ({
   thor,
   order = "asc",
   offset = 0,
   limit = MAX_EVENTS_PER_QUERY,
   from = 0,
-  to = thor.status.head.number,
+  to = thor.blocks.getHeadBlock()?.number,
   filterCriteria,
-}: GetEventsProps): Promise<Connex.Thor.Filter.Row<"event">[]> => {
-  // Send tx details to the node to get the gas estimate
-  const response = await fetch(`${nodeUrl}/logs/event`, {
-    method: "POST",
-    body: JSON.stringify({
-      range: {
-        from,
-        to,
-        unit: "block",
-      },
-      options: {
-        offset,
-        limit,
-      },
-      criteriaSet: filterCriteria,
-      order,
-    }),
+}: GetEventsProps) => {
+  const response = await thor.logs.filterEventLogs({
+    range: {
+      from,
+      to,
+      unit: "block",
+    },
+    options: {
+      offset,
+      limit,
+    },
+    order,
+    criteriaSet: filterCriteria,
   })
 
-  if (!response.ok) throw new Error("Failed to fetch events")
+  if (!response) throw new Error("Failed to fetch events")
 
-  const outputs = (await response.json()) as Connex.Thor.Filter.Row<"event", {}>[]
-  return outputs
+  return response
 }
 
 /**
  *  call getEvents iteratively to get all the events
+ * @param nodeUrl the node url
  * @param thor the thor client
  * @param order the order of the events (asc or desc)
  * @param from the block number to start from
  * @param filterCriteria the filter criteria for the events
  * @returns all the events from the blockchain
  */
-export const getAllEvents = async ({
+export const getAllEventLogs = async ({
+  nodeUrl,
   thor,
   order = "asc",
   from = 0,
   to,
   filterCriteria,
 }: Omit<GetEventsProps, "offset" | "limit">) => {
-  const allEvents: Connex.Thor.Filter.Row<"event", {}>[] = []
+  const allEvents: EventLogs[] = []
   let offset = 0
-
-  // thor.block("best").get() is not working, have to use the node directly
-  //   const bestBlock = await fetch(`${appConfig.nodeUrl}/blocks/best`)
-  //   const bestBlockJson = (await bestBlock.json()) as Connex.Thor.Block
-
-  to = to ?? Number.MAX_SAFE_INTEGER
-
   //return from the function only when we get all the events
+  // TODO: check this can be improved, possible infinite loop here
   while (true) {
-    const events = await getEvents({
+    const events = await getEventLogs({
+      nodeUrl,
       thor,
       filterCriteria,
       from,
-      to,
+      to: to ?? Number.MAX_SAFE_INTEGER,
       limit: MAX_EVENTS_PER_QUERY,
       order,
       offset,

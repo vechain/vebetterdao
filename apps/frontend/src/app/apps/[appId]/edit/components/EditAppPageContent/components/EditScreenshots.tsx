@@ -9,7 +9,7 @@ import { blobToBase64 } from "@/utils/BlobUtils"
 import { Reorder, useDragControls } from "framer-motion"
 
 type Props = {
-  form: UseFormReturn<EditAppForm, any, undefined>
+  form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
 
 export const EditScreenshots = ({ form }: Props) => {
@@ -111,7 +111,7 @@ const DraggableScreenshot = ({
   screenshot: string
   index: number
   screenshots: string[]
-  form: UseFormReturn<EditAppForm, any, undefined>
+  form: UseFormReturn<EditAppForm, any, EditAppForm>
 }) => {
   const dragControls = useDragControls()
 

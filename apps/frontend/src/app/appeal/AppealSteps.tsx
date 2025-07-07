@@ -94,7 +94,7 @@ export const AppealSteps = () => {
 
   // VeBetterPassport signal count
   const userSignaledCount = useMemo(() => {
-    return userSignalCounter
+    return Number(userSignalCounter || 0)
   }, [userSignalCounter])
 
   const getActiveStepIndex = () => {

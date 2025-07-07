@@ -2,8 +2,8 @@ import {
   useAllocationsRound,
   useCurrentAllocationsRoundId,
   useHaveXAppsClaimed,
+  useMultipleXAppRoundEarnings,
   useRoundXApps,
-  useRoundEarnings,
 } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
 import {
@@ -38,24 +38,30 @@ export const BulkClaimXAppsAllocations = () => {
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   // Calculate total amount that is avaialble to claim in this round
-  const totalAmounts = useRoundEarnings(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const { data: totalAmounts = [] } = useMultipleXAppRoundEarnings(
+    roundId?.toString() ?? "",
+    xApps?.map(app => app.id) ?? [],
+  )
   const total = useMemo(() => {
-    return totalAmounts.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
+    return totalAmounts.reduce((acc, cur) => acc + parseInt(cur?.amount ?? "0"), 0)
   }, [totalAmounts])
 
   // Retrieve all apps that have claimed for the round and the ones that still needs to claim
-  const claims = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
+  const { data: claims } = useHaveXAppsClaimed(roundId?.toString() ?? "", xApps?.map(app => app.id) ?? [])
   const allClaimed = useMemo(() => {
-    return !claims.some(claim => !claim.data?.claimed)
+    return !claims?.some(claim => !claim.claimed)
   }, [claims])
   const xAppsLeft = useMemo(() => {
-    return xApps?.filter(app => !claims.find(claim => claim.data?.appId === app.id)?.data?.claimed)
+    return xApps?.filter(app => !claims?.find(claim => claim?.appId === app.id)?.claimed)
   }, [claims, xApps])
 
   // Calculate remaining amount to claim excluding already claimed
-  const remainingAmounts = useRoundEarnings(roundId?.toString() ?? "", xAppsLeft?.map(app => app.id) ?? [])
+  const { data: remainingAmounts = [] } = useMultipleXAppRoundEarnings(
+    roundId?.toString() ?? "",
+    xAppsLeft?.map(app => app.id) ?? [],
+  )
   const amountToClaim = useMemo(() => {
-    return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur.data?.amount ?? "0"), 0)
+    return remainingAmounts?.reduce((acc, cur) => acc + parseInt(cur?.amount ?? "0"), 0)
   }, [remainingAmounts])
 
   // Handle submitting the transaction

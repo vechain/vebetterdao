@@ -1,9 +1,10 @@
-import { RoundCreated, useAllocationsRoundsEvents, useCurrentBlock, useVotingPeriod } from "@/api"
+import { RoundCreated, useAllocationsRoundsEvents, useVotingPeriod } from "@/api"
 import { Card, VStack, HStack, Heading, Radio, Skeleton, Text, CardProps } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useCurrentBlock } from "@vechain/vechain-kit"
 
 const blockTime = getConfig().network.blockTime
 

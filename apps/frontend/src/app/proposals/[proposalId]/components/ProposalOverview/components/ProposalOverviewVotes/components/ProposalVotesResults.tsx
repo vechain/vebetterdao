@@ -1,17 +1,17 @@
-import { ProposalState, useIsProposalQuorumReached, useProposalState } from "@/api"
+import { ProposalState, useIsProposalQuorumReached } from "@/api"
 import { HStack, Skeleton, Text } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
 type Props = {
   proposalId: string
+  proposalState: ProposalState
 }
-export const ProposalVotesResults = ({ proposalId }: Props) => {
+export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
   const { t } = useTranslation()
-  const { data: state } = useProposalState(proposalId)
   const { data: isQuorumReached, isLoading: isQuorumReachedLoading } = useIsProposalQuorumReached(proposalId, true)
 
-  switch (state) {
+  switch (proposalState) {
     case ProposalState.Defeated:
       if (!isQuorumReached)
         return (

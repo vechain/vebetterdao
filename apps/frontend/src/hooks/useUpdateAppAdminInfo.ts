@@ -7,8 +7,8 @@ import {
   getAppAdminQueryKey,
   getAppCreatorsQueryKey,
   getAppModeratorsQueryKey,
-  getXAppsQueryKey,
   getAppRewardDistributorsQueryKey,
+  getXAppsQueryKey,
 } from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()

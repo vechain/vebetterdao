@@ -1,4 +1,4 @@
-import { useXAppMetadata, useXAppRoundEarnings, useRoundAppVotes } from "@/api"
+import { useRoundAppVotes, useXAppMetadata, useXAppRoundEarnings } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"

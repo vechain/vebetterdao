@@ -12,8 +12,8 @@ const getSafePercentage = (value: number) => {
 }
 
 type Props = {
-  quorumQuery: UseQueryResult<string, Error>
-  currentVotesQuery: UseQueryResult<string, Error>
+  quorumQuery: UseQueryResult<string, unknown>
+  currentVotesQuery: UseQueryResult<string, unknown>
   isEnded: boolean
   showQuorumNeeded?: boolean
 }

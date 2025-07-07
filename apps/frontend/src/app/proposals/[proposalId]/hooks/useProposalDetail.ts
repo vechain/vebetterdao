@@ -35,7 +35,10 @@ export const useProposalDetailById = (proposalId: string) => {
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const proposalUserDeposit = useProposalUserDeposit(proposalId, account?.address || "")
   const proposalSnapshot = useProposalSnapshot(proposalId)
-  const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
+  const proposalSnapshotBlock = useMemo(
+    () => (proposalSnapshot.data ? Number(proposalSnapshot.data) : undefined),
+    [proposalSnapshot.data],
+  )
   const isDepositReached = useIsDepositReached(proposalId)
   const isProposalActive = useMemo(() => proposalState?.data === ProposalState.Active, [proposalState?.data])
   const proposalQuorum = useProposalQuorum(proposalSnapshotBlock)
@@ -139,7 +142,7 @@ export const useProposalDetailById = (proposalId: string) => {
     const hasUserSupported = proposalDepositEvent.hasUserSupported
     const supportingUserCount = proposalDepositEvent.supportingUserCount
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
-    const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
+    const userVotingPowerOnSnapshot = ethers.formatEther(BigInt(proposalSnapshotVotingPower.data || 0))
     const userVot3OnSnapshot = proposalSnapshotVot3.data ?? "0"
     const result = {
       id: proposalId,

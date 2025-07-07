@@ -1,14 +1,19 @@
-import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
+import {
+  getProposalsEventsQueryKey,
+  getProposalUserDepositQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
+} from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalDepositQueryKey } from "@/api/contracts/governance/hooks/useGetProposalDeposit"
 import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { ethers } from "ethers"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+
 const config = getConfig()
 
 const Vot3Interface = VOT3__factory.createInterface()
@@ -56,8 +61,7 @@ export const useProposalVot3Deposit = ({
   const refetchQueryKeys = useMemo(
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
-      getProposalDepositQueryKey(proposalId),
+      getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),
       getVot3BalanceQueryKey(account?.address ?? ""),

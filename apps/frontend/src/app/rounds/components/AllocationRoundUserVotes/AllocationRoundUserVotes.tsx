@@ -32,7 +32,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? undefined,
   )
 

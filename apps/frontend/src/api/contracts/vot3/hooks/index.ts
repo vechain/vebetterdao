@@ -1,5 +1,3 @@
-export * from "./useVot3Balance"
 export * from "./useVot3Delegates"
-export * from "./useVotes"
 export * from "./useVot3PastTotalSupply"
 export * from "./useVot3Paused"

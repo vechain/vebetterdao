@@ -9,7 +9,7 @@ export default defineConfig({
   test: {
     server: {
       deps: {
-        inline: ["react-tweet"],
+        inline: ["react-tweet", "@chakra-ui/next-js"],
       },
     },
     coverage: {

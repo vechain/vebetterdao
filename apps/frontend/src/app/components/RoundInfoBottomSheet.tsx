@@ -28,7 +28,6 @@ export const RoundInfoBottomSheet = () => {
   const { account } = useWallet()
 
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
-
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
   // First active, then looking for support (pending + deposit not met)
   const sortedProposals = useMemo(() => {
@@ -210,7 +209,7 @@ export const RoundInfoBottomSheet = () => {
             {!!sortedProposals.length ? (
               <VStack spacing={4} w="full">
                 {sortedProposals.map(proposal => (
-                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
+                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
                 ))}
               </VStack>
             ) : (

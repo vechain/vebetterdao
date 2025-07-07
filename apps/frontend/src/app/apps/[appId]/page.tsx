@@ -1,15 +1,18 @@
-import { getNodeJsConnex } from "@/utils"
+import { getNodeJsThorClient } from "@/utils"
 import { getConfig } from "@repo/config"
 import { Metadata, ResolvingMetadata } from "next"
 import { AppDetailPage } from "./AppDetailPage"
 
 //Need precise import to avoid having dapp-kit imported and indexed somewhere
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
-import { getXApps } from "@/api/contracts/xApps/getXApps"
 
-import { getXAppsMetadataBaseUri } from "@/api/contracts/xApps/getXAppsMetadataBaseUri"
 import { getIpfsMetadata } from "@/api/ipfs"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { X2EarnApps__factory } from "@repo/contracts"
+import { XApp } from "@/api"
+
+const abi = X2EarnApps__factory.abi
+const address = getConfig().x2EarnAppsContractAddress
 
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   // read route params
@@ -18,16 +21,21 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
   // optionally access and extend (rather than replace) parent metadata
   //   const previousImages = (await parent).openGraph?.images || []
 
-  const connex = await getNodeJsConnex()
+  const thor = await getNodeJsThorClient()
+  const contract = thor.contracts.load(address, abi)
+  const clauses = [contract.clause.apps(), contract.clause.unendorsedApps()]
 
-  const xApps = await getXApps(connex.thor)
+  const res = await thor.transactions.executeMultipleClausesCall(clauses)
 
-  const allApps = xApps.active.concat(xApps.unendorsed)
-  const app = allApps.find(app => compareAddresses(app.id, id))
+  if (!res) return {}
 
-  if (!app) throw new Error(`App ${id} not found`)
+  const xApps = [...((res[0]?.result.plain as []) ?? []), ...((res[1]?.result.plain as []) ?? [])] as XApp[]
 
-  const baseUri = await getXAppsMetadataBaseUri(connex.thor)
+  const app = xApps.find(app => compareAddresses(app.id, id))
+
+  if (!app) return {}
+
+  const baseUri = await contract.read.baseURI()
 
   const metadata = await getXAppMetadata(`${baseUri}${app.metadataURI}`)
 

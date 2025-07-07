@@ -1,22 +1,23 @@
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().voterRewardsContractAddress
-const contractInterface = VoterRewards__factory.createInterface()
-const method = "levelToMultiplier"
+const address = getConfig().voterRewardsContractAddress
+const abi = VoterRewards__factory.abi
+const method = "levelToMultiplier" as const
 
-export const getLevelMultiplierQueryKey = (level?: string) => getCallKey({ method, keyArgs: [level] })
+export const getLevelMultiplierQueryKey = (level?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(level || "0")] })
 
-const scaledWeight = (weight: number) => weight / 100
-
-export const useLevelMultiplier = (level: string, enabled = true) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useLevelMultiplier = (level?: string, enabled = true) => {
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [level],
-    enabled: !!level && enabled,
-    mapResponse: res => scaledWeight(Number(res.decoded[0])),
+    args: [BigInt(level ?? "0")],
+    queryOptions: {
+      enabled: !!level && enabled,
+      select: data => Number(data[0] || 0) / 100,
+    },
   })
 }
