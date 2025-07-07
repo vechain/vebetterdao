@@ -86,8 +86,6 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
   const toWrite = `import { AppConfig } from \".\" \n const config: AppConfig = ${JSON.stringify(newConfig, null, 2)};
   export default config;`
 
-  // const fileToWrite = network.name === "solo" ? "local.ts" : "testnet-staging.ts"
-
   let fileToWrite: string
   switch (env) {
     case AppEnv.LOCAL:
