@@ -137,6 +137,12 @@ abstract contract XAllocationVotingGovernor is
     _countVote(roundId, voter, appIds, voteWeights);
   }
 
+  // ---------- Internal and Private ---------- //
+
+  /**
+   * @dev Cast a vote for a set of x-2-earn applications on behalf of an account (used for autovoting).
+   * @notice Only addresses with a valid passport can vote.
+   */
   function _castVoteOnBehalfOf(address voter, uint256 roundId) internal {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
@@ -190,8 +196,6 @@ abstract contract XAllocationVotingGovernor is
 
     _countVote(roundId, voter, finalAppIds, voteWeights);
   }
-
-  // ---------- Internal and Private ---------- //
 
   /**
    * @dev Check that the current state of a round matches the requirements described by the `allowedStates` bitmap.
