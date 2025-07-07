@@ -735,6 +735,16 @@ contract B3TRGovernor is
     return GovernorQuorumLogic.quorumNumeratorByType($, timepoint, proposalTypeValue);
   }
 
+  /**
+   * @notice Returns the deposit threshold cap for a proposal type.
+   * @param proposalType The type of proposal.
+   * @return uint256 The deposit threshold cap for the proposal type.
+   */
+  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalType) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorConfigurator.getDepositThresholdCap($, proposalType);
+  }
+
   // ------------------ SETTERS ------------------ //
 
   /**

@@ -585,4 +585,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 depositAmount,
     GovernorTypes.ProposalType proposalType
   ) external returns (uint256 proposalId);
+
+  /**
+   * @notice Returns the deposit threshold cap for a proposal type.
+   * @param proposalType The type of proposal.
+   * @return uint256 The deposit threshold cap for the proposal type.
+   */
+  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalType) external view returns (uint256);
 }
