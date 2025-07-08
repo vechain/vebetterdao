@@ -1,114 +1,251 @@
-import { Icon } from "@chakra-ui/react"
-import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconscout/react-unicons"
-import { Badge } from "@/components"
-import { ProposalState } from "@/api"
+import { ProposalState, useIsDepositReached } from "@/api"
+import { Icon, Skeleton, StackProps, TextProps } from "@chakra-ui/react"
+import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { FaRegHeart } from "react-icons/fa6"
+import { Badge, DotSymbol } from "@/components"
 
 type Props = {
-  state?: number | undefined
+  proposalId: string
+  renderIcon?: boolean
+  renderBadge?: boolean
+  textProps?: TextProps
+  containerProps?: StackProps
+  proposalState?: ProposalState
 }
 
-type BadgeConfig = {
-  text: string
-  textColor: string
-  bgColor: string
-  icon: React.ElementType
-  iconColor: string
-}
-
-// Define reusable color themes
-// Maybe this code be in the theme file
-// TODO: Move to theme file
-const colorThemes = {
-  support: {
-    textColor: "#AF5F00",
-    bgColor: "#FFF3E5",
-    iconColor: "#AF5F00",
-  },
-  success: {
-    textColor: "#6DCB09",
-    bgColor: "#E9FDF1",
-    iconColor: "#6DCB09",
-  },
-  declined: {
-    textColor: "#D23F63",
-    bgColor: "#FCEEF1",
-    iconColor: "#D23F63",
-  },
-  inDev: {
-    textColor: "#0091FF",
-    bgColor: "#E6F4FF",
-    iconColor: "#0091FF",
-  },
-  completed: {
-    textColor: "#4A5568",
-    bgColor: "#EDF2F7",
-    iconColor: "#4A5568",
-  },
-}
-
-// Define the badge configuration for each proposal state
-const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
-  [ProposalState.Pending]: {
-    text: "Support phase",
-    icon: UilHeart,
-    ...colorThemes.support,
-  },
-  [ProposalState.Succeeded]: {
-    text: "Supported",
-    icon: UilHeart,
-    ...colorThemes.success,
-  },
-  [ProposalState.Active]: {
-    text: "Approval phase",
-    icon: UilThumbsUp,
-    ...colorThemes.support,
-  },
-  [ProposalState.Defeated]: {
-    text: "Declined",
-    icon: UilBan,
-    ...colorThemes.declined,
-  },
-  [ProposalState.Queued]: {
-    text: "In development",
-    icon: UilCodeBranch,
-    ...colorThemes.inDev,
-  },
-  [ProposalState.Executed]: {
-    text: "Completed",
-    icon: UilCheck,
-    ...colorThemes.completed,
-  },
-  [ProposalState.Canceled]: {
-    text: "Cancelled",
-    icon: UilBan,
-    ...colorThemes.declined,
-  },
-  [ProposalState.DepositNotMet]: {
-    text: "Declined",
-    icon: UilBan,
-    ...colorThemes.declined,
-  },
-}
-
-export const ProposalStatusBadge = ({ state }: Props) => {
+export const ProposalStatusBadge = ({
+  proposalId,
+  renderBadge = true,
+  renderIcon = true,
+  textProps = {},
+  containerProps = {},
+  proposalState,
+}: Props) => {
+  const { data: isDepositReached, isLoading: isDepositReachedLoading } = useIsDepositReached(proposalId)
   const { t } = useTranslation()
-  const proposalState = state ?? ProposalState.Pending
 
-  const config = BADGE_CONFIG[proposalState as ProposalState]
+  switch (proposalState) {
+    case ProposalState.Succeeded:
+      return (
+        <Badge
+          textProps={{
+            color: "#6DCB09",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#E9FDF1",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Approved")}
+          icon={renderIcon ? <Icon as={UilCheck} boxSize={4} color={"#6DCB09"} /> : undefined}
+        />
+      )
 
-  return (
-    <Badge
-      text={t(config.text as any)} //TODO: Improve this instead of any
-      textProps={{
-        color: config.textColor,
-      }}
-      containerProps={{
-        bgColor: config.bgColor,
-        px: 2,
-        py: 1,
-      }}
-      icon={<Icon as={config.icon} boxSize={4} color={config.iconColor} />}
-    />
-  )
+    case ProposalState.Canceled:
+      return (
+        <Badge
+          textProps={{
+            color: "#D23F63",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#FCEEF1",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Canceled")}
+          icon={renderIcon ? <Icon as={UilBan} boxSize={4} color={"#D23F63"} /> : undefined}
+        />
+      )
+    case ProposalState.DepositNotMet:
+      return (
+        <Badge
+          textProps={{
+            color: "#D23F63",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#FCEEF1",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Support not reached")}
+          icon={renderIcon ? <Icon as={FaRegHeart} boxSize={4} color={"#D23F63"} /> : undefined}
+        />
+      )
+
+    case ProposalState.Pending:
+      if (isDepositReached)
+        return (
+          <Skeleton isLoaded={!isDepositReachedLoading}>
+            <Badge
+              textProps={{
+                color: "#004CFC",
+                ...textProps,
+              }}
+              containerProps={
+                renderBadge
+                  ? {
+                      bgColor: "#E0E9FE",
+                      ...containerProps,
+                    }
+                  : {
+                      px: 0,
+                      py: 0,
+                      ...containerProps,
+                    }
+              }
+              text={t("Upcoming voting")}
+              icon={renderIcon ? <Icon as={UilClockEight} boxSize={4} color={"#004CFC"} /> : undefined}
+            />
+          </Skeleton>
+        )
+
+      return (
+        <Skeleton isLoaded={!isDepositReachedLoading}>
+          <Badge
+            textProps={{
+              color: "#F29B32",
+              ...textProps,
+            }}
+            containerProps={
+              renderBadge
+                ? {
+                    bgColor: "#FFF3E5",
+                    ...containerProps,
+                  }
+                : {
+                    px: 0,
+                    py: 0,
+                    ...containerProps,
+                  }
+            }
+            text={t("Looking for support")}
+            icon={renderIcon ? <Icon as={FaRegHeart} boxSize={4} color={"#F29B32"} /> : undefined}
+          />
+        </Skeleton>
+      )
+
+    case ProposalState.Active:
+      return (
+        <Badge
+          textProps={{
+            color: "#3A6F00",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#CDFF9F",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Active now")}
+          icon={renderIcon ? <DotSymbol pulse size={2} color={"#3A6F00"} /> : undefined}
+        />
+      )
+
+    case ProposalState.Defeated:
+      return (
+        <Badge
+          textProps={{
+            color: "#D23F63",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#F8F8F8",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Ended and rejected")}
+          icon={renderIcon ? <Icon as={UilThumbsDown} boxSize={4} color={"#D23F63"} /> : undefined}
+        />
+      )
+
+    case ProposalState.Queued:
+      return (
+        <Badge
+          textProps={{
+            color: "#004CFC",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#EBF1FE",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Ended and queued")}
+          icon={renderIcon ? <Icon as={UilThumbsUp} boxSize={4} color={"#004CFC"} /> : undefined}
+        />
+      )
+
+    case ProposalState.Executed:
+      return (
+        <Badge
+          textProps={{
+            color: "#6DCB09",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#E9FDF1",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Ended and executed")}
+          icon={renderIcon ? <Icon as={UilCheck} boxSize={4} color={"#6DCB09"} /> : undefined}
+        />
+      )
+
+    default:
+      return null
+  }
 }

@@ -78,7 +78,14 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       <CardBody>
         <HStack justifyContent={"space-between"} w="full">
           <VStack w="full" justifyContent={"space-between"} spacing={3} align={"flex-start"}>
-            <ProposalStatusBadge state={proposalState} />
+            <ProposalStatusBadge
+              proposalId={proposal.proposalId}
+              proposalState={proposalState}
+              containerProps={{
+                py: 1,
+                px: 2,
+              }}
+            />
             <VStack w="full" spacing={1} align={"flex-start"}>
               <SkeletonText
                 isLoaded={proposalMetadata.data !== undefined}

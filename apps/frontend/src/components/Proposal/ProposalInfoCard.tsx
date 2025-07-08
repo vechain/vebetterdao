@@ -117,7 +117,14 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           </Box>
         </Stack>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
-          <ProposalStatusBadge state={proposalState} />
+          <ProposalStatusBadge
+            proposalId={proposalId}
+            proposalState={proposalState}
+            containerProps={{
+              py: 1,
+              px: 2,
+            }}
+          />
           <HStack cursor={"pointer"}>
             <Text fontWeight={500} color="rgba(0, 76, 252, 1)" fontSize={16}>
               {t("See proposal")}
