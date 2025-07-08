@@ -104,6 +104,10 @@ const themeConfig = {
         _light: "#EFEFEF",
         _dark: "#4A5568",
       },
+      "layout-bg": {
+        _light: "#F7F7F7",
+        _dark: "#131313",
+      },
     },
   },
   colors: {
