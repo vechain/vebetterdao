@@ -70,7 +70,7 @@ describe("AutoVoting - @shard14a", function () {
 
       // cast vote on behalf of user
       await expect(xAllocationVoting.connect(owner).castVoteOnBehalfOf(user.address, 1)).to.be.revertedWith(
-        "XAllocationVotingGovernor: AutoVoting is not enabled",
+        "XAllocationVotingGovernor: auto voting is not enabled",
       )
     })
 
@@ -634,7 +634,9 @@ describe("AutoVoting - @shard14a", function () {
       await startNewAllocationRound()
 
       // Vote via autovoting
-      await xAllocationVoting.connect(owner).castVoteOnBehalfOf(user, 1)
+      await expect(xAllocationVoting.connect(owner).castVoteOnBehalfOf(user, 1))
+        .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
+        .withArgs(user.address, 1, [app1Id], [ethers.parseEther("100")])
 
       await waitForRoundToEnd(1)
 
