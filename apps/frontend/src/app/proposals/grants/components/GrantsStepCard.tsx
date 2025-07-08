@@ -1,33 +1,118 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
-import { VStack, HStack, Text, Button, Box, Image, useSteps, Flex } from "@chakra-ui/react"
+import {
+  VStack,
+  HStack,
+  Text,
+  Button,
+  Box,
+  useSteps,
+  Flex,
+  UnorderedList,
+  Heading,
+  ListItem,
+  Image,
+  ListIcon,
+  List,
+} from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
+import { BaseBottomSheet } from "@/components/BaseBottomSheet"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { UilArrowLeft, UilCheck, UilTimes } from "@iconscout/react-unicons"
 
 export type Step = {
   key: string
-  content: React.ReactNode
   title: string
-  description?: string
   image: string
+  heading: string
+  listItems: string[]
 }
 
-export const GrantsStepsCard = ({ steps }: { steps: Step[] }) => {
+export const GrantsStepsCard = ({
+  steps,
+  isOpen,
+  onClose,
+}: {
+  steps: Step[]
+  isOpen: boolean
+  onClose: () => void
+}) => {
   const { t } = useTranslation()
   const { activeStep, goToNext, goToPrevious } = useSteps({
     index: 0,
     count: steps.length,
   })
+  const { isMobile } = useBreakpoints()
 
   const currentStep = steps[activeStep]
+  const isLastStep = activeStep === steps.length - 1
+  const handleApply = () => {
+    window.alert("Go to apply page")
+  }
 
   if (!currentStep) {
     return null
   }
+  if (isMobile) {
+    return (
+      <BaseBottomSheet
+        isOpen={isOpen}
+        onClose={onClose}
+        ariaTitle={currentStep.title}
+        ariaDescription={currentStep.heading}
+        height="100%">
+        <HStack w="full" justify="space-between" alignItems="center">
+          <UilArrowLeft onClick={goToPrevious} cursor="pointer" />
+          <GrantsStepIndicator activeStep={activeStep} steps={steps} width="70%" />
+          <UilTimes onClick={onClose} cursor="pointer" size={24} color="gray.600" />
+        </HStack>
+        <Box pt={5}>
+          <VStack w="full" textAlign="center" spacing={4}>
+            <Heading size="md" textStyle="heading">
+              {currentStep.title}
+            </Heading>
+            <Image
+              src={currentStep.image}
+              alt={`Step ${activeStep + 1}`}
+              objectFit="contain"
+              maxW="150px"
+              maxH="150px"
+            />
+            <Heading size="sm" textStyle="heading">
+              {currentStep.heading}
+            </Heading>
+            <List pl={5} fontSize="sm" spacing={2} color="gray.600" textAlign="left">
+              {currentStep.listItems.map((item, index) => (
+                <ListItem key={`${item}-${index}`}>
+                  <ListIcon as={UilCheck} color="#004CFC" />
+                  {item}
+                </ListItem>
+              ))}
+            </List>
+            <HStack w="full" justifyContent="flex-start" pt={5}>
+              <Button variant="primaryAction" w="full" onClick={isLastStep ? handleApply : goToNext}>
+                {isLastStep ? t("Apply") : t("Next")}
+              </Button>
+            </HStack>
+          </VStack>
+        </Box>
+      </BaseBottomSheet>
+    )
+  }
 
   return (
-    <Box w="full" h="full" bg="contrast-bg-muted" borderRadius="xl" overflow="hidden">
+    <Box
+      display={isOpen ? "block" : "none"}
+      w="full"
+      h="full"
+      bg="contrast-bg-muted"
+      borderRadius="xl"
+      overflow="hidden">
       <Flex h="full">
+        <Button position="absolute" variant={"ghost"} _hover={{ bg: "transparent" }} right={5} onClick={onClose}>
+          <UilTimes size={30} color="gray.600" />
+        </Button>
         <Box flex="1">
           <Box pl={8} pt={8} pb={4}>
             <GrantsStepIndicator activeStep={activeStep} steps={steps} width="35%" />
@@ -44,7 +129,18 @@ export const GrantsStepsCard = ({ steps }: { steps: Step[] }) => {
                   exit={{ opacity: 0, x: -20 }}
                   key={currentStep.key}
                   style={{ width: "100%" }}>
-                  {currentStep.content}
+                  <VStack alignItems="flex-start" w="full">
+                    <Heading size="md" textStyle="heading">
+                      {currentStep.heading}
+                    </Heading>
+                    {currentStep.listItems.length > 0 ? (
+                      <UnorderedList pl={2} fontSize="sm">
+                        {currentStep?.listItems?.map(item => (
+                          <ListItem key={item}>{item}</ListItem>
+                        ))}
+                      </UnorderedList>
+                    ) : null}
+                  </VStack>
                 </motion.div>
               </VStack>
               <HStack w="full" justifyContent="flex-start">
@@ -53,8 +149,8 @@ export const GrantsStepsCard = ({ steps }: { steps: Step[] }) => {
                     {t("Previous")}
                   </Button>
                 )}
-                <Button variant="primaryAction" onClick={goToNext} isDisabled={activeStep === steps.length - 1}>
-                  {t("Next")}
+                <Button variant="primaryAction" onClick={isLastStep ? handleApply : goToNext}>
+                  {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>
             </VStack>
