@@ -26,6 +26,7 @@ export const GmNFTAndNodeFooter = () => {
     isEnoughBalanceToUpgradeGM,
     isXNodeAttachedToGM,
     isMaxGmLevelReached,
+    gmLevel,
   } = useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator } = useXNode()
 
@@ -69,7 +70,7 @@ export const GmNFTAndNodeFooter = () => {
       }
     }
 
-    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator && gmLevel !== "1") {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
@@ -88,17 +89,9 @@ export const GmNFTAndNodeFooter = () => {
     if (isMaxGmLevelReached) {
       return (
         <Box>
-          <FeatureFlagWrapper
-            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-            fallback={
-              <Text as="span" fontSize={"14px"}>
-                {t("You will be able to upgrade your GM NFT soon!")}
-              </Text>
-            }>
-            <Text as="span" fontSize={"14px"}>
-              {t("You have reached the maximum level for your GM NFT")}
-            </Text>
-          </FeatureFlagWrapper>
+          <Text as="span" fontSize={"14px"}>
+            {t("You have reached the maximum level for your GM NFT")}
+          </Text>
         </Box>
       )
     }
@@ -129,12 +122,14 @@ export const GmNFTAndNodeFooter = () => {
             {t("{{b3trToUpgradeGM}} B3TR", { b3trToUpgradeGM: compactFormatter.format(missingB3trToUpgrade) })}
           </Text>{" "}
           <Text as="span" fontSize={"14px"}>
-            {t("to upgrade your NFT to the next level")}
+            {t("to upgrade your NFT to the next level")}{" "}
+            {isXNodeHolder && gmLevel === "1" && t("and attach your node to your GM NFT")}
           </Text>
         </Box>
       )
     }
   }, [
+    gmLevel,
     b3trToUpgradeGMToNextLevel,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,

@@ -2,8 +2,7 @@ import { useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { FeatureFlagWrapper } from "@/components"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
 import { AnalyticsUtils } from "@/utils"
 import {
@@ -104,17 +103,15 @@ export const AttachGMNFTCard = () => {
                 <Text fontWeight={700} noOfLines={1}>
                   {gmName}
                 </Text>
-                <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-                  <HStack gap={1}>
-                    <Text fontSize="sm" fontWeight={600}>
-                      {gmRewardMultiplier}
-                      {"x"}
-                    </Text>
-                    <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                      {t("GM reward weight")}
-                    </Text>
-                  </HStack>
-                </FeatureFlagWrapper>
+                <HStack gap={1}>
+                  <Text fontSize="sm" fontWeight={600}>
+                    {gmRewardMultiplier}
+                    {"x"}
+                  </Text>
+                  <Text fontSize="sm" fontWeight={400} noOfLines={1}>
+                    {t("GM reward weight")}
+                  </Text>
+                </HStack>
               </VStack>
               <FaChevronRight size={"24px"} />
             </HStack>
@@ -129,21 +126,13 @@ export const AttachGMNFTCard = () => {
               {t("Detach")}
             </Button>
           ) : (
-            <FeatureFlagWrapper
-              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-              fallback={
-                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
-                  {t("Coming soon!")}
-                </Button>
-              }>
-              <Button
-                leftIcon={<UilLink color="#004CFC" />}
-                variant={"primarySubtle"}
-                onClick={() => handleAttachOnClick()}
-                isDisabled={isXNodeDelegator}>
-                {t("Attach now!")}
-              </Button>
-            </FeatureFlagWrapper>
+            <Button
+              leftIcon={<UilLink color="#004CFC" />}
+              variant={"primarySubtle"}
+              onClick={() => handleAttachOnClick()}
+              isDisabled={isXNodeDelegator}>
+              {t("Attach now!")}
+            </Button>
           )}
         </VStack>
       </CardBody>

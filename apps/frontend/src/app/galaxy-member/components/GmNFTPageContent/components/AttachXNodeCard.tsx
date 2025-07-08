@@ -14,7 +14,7 @@ import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { isXNodeAttachedToGM, gmId, gmName: selectedGmName } = useSelectedGmNft()
+  const { isXNodeAttachedToGM, gmId, gmName: selectedGmName, gmLevel } = useSelectedGmNft()
   const {
     xNodeName,
     xNodeImage,
@@ -55,9 +55,8 @@ export const AttachXNodeCard = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
   }
 
-  if (!isXNodeHolder) {
-    return null
-  }
+  if (!isXNodeHolder || gmLevel === "1") return null
+
   return (
     <Card variant="baseWithBorder" w="full">
       <CardBody>

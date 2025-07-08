@@ -14,8 +14,7 @@ import {
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
 import { MintNFTModal } from "./MintNFTModal"
-import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -171,55 +170,31 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     }
 
     // Case 4: Can attach GM to X-Node and GM level is >= level after attach
-    if (canAttach && gmLevel && Number(gmLevel) >= levelAfterAttach) {
+    if (canAttach && gmLevel && Number(gmLevel) >= levelAfterAttach && gmLevel !== "1") {
       return (
-        <FeatureFlagWrapper
-          feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-          fallback={
-            <Button {...buttonProps} isDisabled={true}>
-              {t("Coming soon!")}
-            </Button>
-          }>
-          <Button {...buttonProps} onClick={() => handleOnClick("ATTACH_GM")}>
-            {t("Attach now!")}
-          </Button>
-        </FeatureFlagWrapper>
+        <Button {...buttonProps} onClick={() => handleOnClick("ATTACH_GM")}>
+          {t("Attach now!")}
+        </Button>
       )
     }
 
     // Case 5: Can attach GM to X-Node and GM level is < level after attach
     if (canAttach && gmLevel && Number(gmLevel) < levelAfterAttach) {
       return (
-        <FeatureFlagWrapper
-          feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-          fallback={
-            <Button {...buttonProps} isDisabled={true}>
-              {t("Coming soon!")}
-            </Button>
-          }>
-          <Button {...buttonProps} onClick={() => handleOnClick("ATTACH_AND_UPGRADE_GM")}>
-            {t("Attach and Upgrade!")}
-          </Button>
-        </FeatureFlagWrapper>
+        <Button {...buttonProps} onClick={() => handleOnClick("ATTACH_AND_UPGRADE_GM")}>
+          {t("Attach and Upgrade!")}
+        </Button>
       )
     }
 
     // Default case: Upgrade GM
     return (
-      <FeatureFlagWrapper
-        feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-        fallback={
-          <Button {...buttonProps} isDisabled={true}>
-            {t("Coming soon!")}
-          </Button>
-        }>
-        <Button
-          {...buttonProps}
-          isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-          onClick={() => handleOnClick("UPGRADE_GM")}>
-          {t("Upgrade now!")}
-        </Button>
-      </FeatureFlagWrapper>
+      <Button
+        {...buttonProps}
+        isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+        onClick={() => handleOnClick("UPGRADE_GM")}>
+        {t("Upgrade now!")}
+      </Button>
     )
   }, [
     hasUserVoted,

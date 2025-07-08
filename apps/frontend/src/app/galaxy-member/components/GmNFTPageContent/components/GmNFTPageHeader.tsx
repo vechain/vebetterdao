@@ -47,41 +47,26 @@ export const GmNFTPageHeader = () => {
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
 
-  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenLevel } = useXNode()
 
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const actionDescription = useMemo(() => {
-    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator && attachedGMTokenLevel !== "1") {
       return (
         <>
           <HStack>
             <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <FeatureFlagWrapper
-                feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-                fallback={
-                  <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                    {t("You will be able to attach GM NFT to this node")}
-                  </Text>
-                }>
-                <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                  {t("You can attach GM NFT to this node")}
-                </Text>
-              </FeatureFlagWrapper>
+              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                {t("You can attach GM NFT to this node")}
+              </Text>
             </HStack>
           </HStack>
-          <FeatureFlagWrapper
-            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-            fallback={
-              <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {t("Attach GM NFT to Node coming soon!")}
-              </Text>
-            }>
-            <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-              {t("Attach GM NFT to Node")}
-            </Text>
-          </FeatureFlagWrapper>
+
+          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+            {t("Attach GM NFT to Node")}
+          </Text>
         </>
       )
     }

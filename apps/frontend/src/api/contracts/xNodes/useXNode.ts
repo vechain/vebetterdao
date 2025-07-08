@@ -53,6 +53,7 @@ interface XNodeData {
   delegatee: string | undefined
   attachedGMTokenId: string | undefined
   attachedGMTokenName: string
+  attachedGMTokenLevel: string | undefined
   isXNodeAttachedToGM: boolean
   isXNodeOnCooldown: boolean
   allNodes: Array<{
@@ -175,7 +176,7 @@ export const useXNode = (profile?: string): XNodeData => {
   const isXNodeError = userNodeDetails.isError || isErrorAttachedGMTokenId
   const xNodeError = userNodeDetails.error || errorAttachedGMTokenId
 
-  const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
+  const { gmName: attachedGMTokenName, gmLevel } = useGMNFTData(attachedGMTokenId)
 
   const { data: isXNodeOnCooldown = false } = useXNodeCheckCooldown(xNode?.nodeId ?? "")
 
@@ -199,6 +200,7 @@ export const useXNode = (profile?: string): XNodeData => {
     delegatee: firstNode?.delegatee,
     attachedGMTokenId,
     attachedGMTokenName,
+    attachedGMTokenLevel: gmLevel,
     isXNodeAttachedToGM,
     isXNodeOnCooldown,
     allNodes,
