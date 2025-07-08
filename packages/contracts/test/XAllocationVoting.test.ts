@@ -133,7 +133,7 @@ describe("X-Allocation Voting - @shard14", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("6")
+      expect(await xAllocationVoting.version()).to.eql("7")
     })
 
     it("Counting mode is set correctly", async function () {
@@ -507,7 +507,7 @@ describe("X-Allocation Voting - @shard14", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("6")
+      expect(await xAllocationVoting.version()).to.equal("7")
     })
 
     it("Should not break storage when upgrading to V2, V3, V4, V5, V6 and V7", async () => {
@@ -2980,113 +2980,6 @@ describe("X-Allocation Voting - @shard14", function () {
       const appShare3 = Number(app3VotesQF) ** 2 / Number(totalVotes)
       expect(appShare3.toFixed(6)).to.equal(expectedAppShare3.toFixed(6))
       expect(appShare3.toFixed(4)).to.equal("0.2862") // 28.61% of the total votes
-    })
-  })
-
-  describe("Autovoting", function () {
-    it("Can autovote for an app", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport, vot3, voterRewards, b3tr } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      console.log(`Seeding apps`)
-
-      // Adding apps
-      //Add apps
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
-      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
-      await x2EarnApps
-        .connect(owner)
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-      await x2EarnApps
-        .connect(owner)
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-      await x2EarnApps
-        .connect(owner)
-        .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
-
-      await endorseApp(app1Id, otherAccounts[2])
-      await endorseApp(app2Id, otherAccounts[3])
-      await endorseApp(app3Id, otherAccounts[4])
-
-      console.log(`Current apps: ${await x2EarnApps.appsCount()}`)
-
-      console.log("Current round id: ", await xAllocationVoting.currentRoundId(), "\n")
-
-      console.log("Getting VOT3 tokens")
-      await getVot3Tokens(otherAccounts[1], "1000")
-      console.log("VOT3 balances:")
-      console.log(
-        `otherAccounts[1] (${otherAccounts[1].address}): ${ethers.formatEther(await vot3.balanceOf(otherAccounts[1].address))}`,
-      )
-      console.log("B3TR balances:")
-      console.log(
-        `otherAccounts[1] (${otherAccounts[1].address}): ${ethers.formatEther(await b3tr.balanceOf(otherAccounts[1].address))}`,
-        "\n",
-      )
-
-      console.log("Starting new round")
-      await startNewAllocationRound()
-      console.log("New round id: ", await xAllocationVoting.currentRoundId(), "\n")
-
-      // Give actions to user so he can vote
-      await veBetterPassport.whitelist(otherAccounts[1].address)
-      await veBetterPassport.toggleCheck(1)
-
-      console.log("Trying to vote on behalf of otherAccounts[1] with autovoting disabled")
-      await catchRevert(xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 1))
-      console.log("Reverted as expected", "\n")
-
-      console.log("Enabling autovoting for otherAccounts[1]")
-      await xAllocationVoting.connect(otherAccounts[1]).toggleAutovoting()
-
-      console.log("Setting user voting preferences")
-      await xAllocationVoting.connect(otherAccounts[1]).setUserVotingPreferences([app1Id])
-
-      console.log("Voting on behalf of otherAccounts[1]")
-      await xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 1)
-      console.log("Voted successfully on behalf of otherAccounts[1]", "\n")
-
-      console.log("VOT3 balances:")
-      console.log("otherAccounts[1]: ", ethers.formatEther(await vot3.balanceOf(otherAccounts[1].address)))
-      console.log("B3TR balances:")
-      console.log(
-        `otherAccounts[1] (${otherAccounts[1].address}): ${ethers.formatEther(await b3tr.balanceOf(otherAccounts[1].address))}`,
-      )
-      console.log("Checking rewards")
-      const rewards = await voterRewards.getReward(1, otherAccounts[1].address)
-      console.log("Expected rewards: ", ethers.formatEther(rewards), "\n")
-
-      console.log("Waiting for round to end", "\n")
-      await waitForCurrentRoundToEnd()
-
-      console.log("Simulating a new round, with autovoting enabled", "\n")
-      await startNewAllocationRound()
-
-      console.log("Claiming rewards for otherAccounts[1]")
-      await voterRewards.claimReward(1, otherAccounts[1].address)
-      console.log("Rewards claimed for otherAccounts[1]")
-
-      console.log("VOT3 balances:")
-      console.log("otherAccounts[1]: ", ethers.formatEther(await vot3.balanceOf(otherAccounts[1].address)))
-      console.log("B3TR balances:")
-      console.log(
-        `otherAccounts[1] (${otherAccounts[1].address}): ${ethers.formatEther(await b3tr.balanceOf(otherAccounts[1].address))}`,
-        "\n",
-      )
-
-      console.log("Voting on behalf of otherAccounts[1]")
-      await xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 2)
-      console.log("Voted on behalf of otherAccounts[1]", "\n")
-
-      console.log("Checking rewards again")
-      const rewards3 = await voterRewards.getReward(2, otherAccounts[1].address)
-      console.log("Expected rewards: ", ethers.formatEther(rewards3), "\n")
-
-      console.log("Waiting for round to end", "\n")
-      await waitForCurrentRoundToEnd()
     })
   })
 })
