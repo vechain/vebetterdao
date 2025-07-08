@@ -1723,5 +1723,21 @@
   "Declined": "Declined",
   "In development": "In development",
   "Completed": "Completed",
-  "Cancelled": "Cancelled"
+  "Cancelled": "Cancelled",
+  "Grants": "Grants",
+  "How to apply for Grant?": "How to apply for Grant?",
+  "Fill out the form with: project description, funding amount, milestones describing what you'll deliver and when.": "Fill out the form with: project description, funding amount, milestones describing what you'll deliver and when.",
+  "Once submitted, your Grant proposal becomes visible to the community.": "Once submitted, your Grant proposal becomes visible to the community.",
+  "Next": "Next",
+  "Previous": "Previous",
+  "Your Grant needs 3.5M VOT3 deposited within 1 week to move forward.": "Your Grant needs 3.5M VOT3 deposited within 1 week to move forward.",
+  "If it doesn't reach that , it's cancelled automatically.": "If it doesn't reach that , it's cancelled automatically.",
+  "The community express support as Likes, Dislikes and Abstains": "The community express support as Likes, Dislikes and Abstains",
+  "If the Grant is approved, you will receive funds": "If the Grant is approved, you will receive funds",
+  "Funds are released milestone by milestone": "Funds are released milestone by milestone",
+  "Deliver, get reviewed, unlock the next payment — until you complete the project": "Deliver, get reviewed, unlock the next payment — until you complete the project",
+  "1. Submit Grant application": "1. Submit Grant application",
+  "2. Get support from the community": "2. Get support from the community",
+  "3. Get final review from the community": "3. Get final review from the community",
+  "4. Receive funds and start developing": "4. Receive funds and start developing"
 }
