@@ -9,6 +9,7 @@ import { StepperStyle } from "./stepper"
 import { SelectStyle } from "./select"
 import { InputStyle } from "./input"
 import { ModalStyle } from "./modal"
+import { PopoverStyle } from "./popover"
 
 const themeConfig = {
   //@ts-ignore
@@ -24,6 +25,7 @@ const themeConfig = {
     Select: SelectStyle,
     Input: InputStyle,
     Modal: ModalStyle,
+    Popover: PopoverStyle,
   },
 
   // 2. Add your color mode config

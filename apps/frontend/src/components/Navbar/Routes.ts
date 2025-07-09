@@ -1,6 +1,3 @@
-import { FaGear, FaScaleBalanced, FaChartPie, FaHouse, FaUser } from "react-icons/fa6"
-import { PiSquaresFourFill } from "react-icons/pi"
-
 export interface Route {
   name: string
   onClick?: string | (() => void)
@@ -8,6 +5,7 @@ export interface Route {
   isVisible?: boolean
   component?: JSX.Element
   description?: string
+  subRoutes?: Route[]
 }
 
 export const Routes: Route[] = [
@@ -15,30 +13,38 @@ export const Routes: Route[] = [
     name: "Dashboard",
     onClick: "/",
     isVisible: true,
-    icon: FaHouse,
     description: "General overview about your progress, sustainable actions and veBetter news.",
   },
   {
     name: "Apps",
     onClick: "/apps",
     isVisible: true,
-    icon: PiSquaresFourFill,
     description: "Explore apps where you can earn B3TR tokens doing better actions.",
   },
   {
     name: "Allocations",
     onClick: "/rounds",
     isVisible: true,
-    icon: FaChartPie,
     description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
   },
   {
     name: "Governance",
     onClick: "/proposals",
     isVisible: true,
-    icon: FaScaleBalanced,
     description: "Create and vote on proposals with your VOT3 tokens to make changes on the ecosystem.",
+    subRoutes: [
+      {
+        name: "Proposals",
+        description: "Propose your ideas and let the community decide!",
+        onClick: "/proposals",
+      },
+      {
+        name: "Grants",
+        description: "Need funding? Apply for a grant and get support",
+        onClick: "/proposals/grants",
+      },
+    ],
   },
-  { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },
-  { name: "Admin", onClick: "/admin", isVisible: true, icon: FaGear },
+  { name: "Profile", onClick: "/profile", isVisible: true },
+  { name: "Admin", onClick: "/admin", isVisible: true },
 ]
