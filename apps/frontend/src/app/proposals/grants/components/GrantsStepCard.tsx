@@ -110,9 +110,6 @@ export const GrantsStepsCard = ({
       borderRadius="xl"
       overflow="hidden">
       <Flex h="full">
-        <Button position="absolute" variant={"ghost"} _hover={{ bg: "transparent" }} right={5} onClick={onClose}>
-          <UilTimes size={30} color="gray.600" />
-        </Button>
         <Box flex="1">
           <Box pl={8} pt={8} pb={4}>
             <GrantsStepIndicator activeStep={activeStep} steps={steps} width="35%" />
@@ -157,7 +154,7 @@ export const GrantsStepsCard = ({
           </Box>
         </Box>
 
-        <Box bg="b3tr-balance-bg" w="35%" display="flex" alignItems="center" justifyContent="center">
+        <Box bg="b3tr-balance-bg" w="32%" display="flex" alignItems="center" justifyContent="center">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

@@ -1,9 +1,10 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure, useMediaQuery } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
+import { GrantsStatsCards } from "./GrantsStatsCards"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -14,7 +15,8 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [isMobile] = useMediaQuery("(max-width: 768px)")
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !isMobile })
 
   const stepsArray = useMemo(
     () => [
@@ -63,10 +65,11 @@ export const GrantsPageContent = () => {
     ],
     [t],
   )
+  const mockedStats = ["1230", "1230", "3M B3TR"]
 
   return (
-    <VStack w={"full"} spacing={4}>
-      <HStack alignItems={"center"} textAlign={"center"} w="full">
+    <VStack w="full" spacing={8} pb={8}>
+      <HStack alignItems="center" textAlign="center" w="full">
         <Heading as="h1" size="xl">
           {t("Grants")}
         </Heading>
@@ -85,6 +88,7 @@ export const GrantsPageContent = () => {
         )}
       </HStack>
       <GrantsStepsCard steps={stepsArray} isOpen={isOpen} onClose={onClose} />
+      <GrantsStatsCards stats={mockedStats} />
     </VStack>
   )
 }
