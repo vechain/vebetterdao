@@ -33,7 +33,7 @@ export const useAllProposalsState = (proposalsIds: string[]) => {
 
       return res.map((state, index) => {
         const proposalId = proposalsIds[index] as string
-        queryClient.setQueryData(getProposalStateQueryKey(proposalId), state)
+        queryClient.setQueryData(getProposalStateQueryKey(proposalId), [state])
         return { proposalId, state }
       })
     },
