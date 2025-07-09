@@ -634,7 +634,10 @@ describe("AutoVoting - @shard14a", function () {
       await startNewAllocationRound()
 
       // Vote via autovoting
+      // Emit AllocationVoteCast and AllocationAutoVoteCast events
       await expect(xAllocationVoting.connect(owner).castVoteOnBehalfOf(user, 1))
+        .to.emit(xAllocationVoting, "AllocationVoteCast")
+        .withArgs(user.address, 1, [app1Id], [ethers.parseEther("100")])
         .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
         .withArgs(user.address, 1, [app1Id], [ethers.parseEther("100")])
 
