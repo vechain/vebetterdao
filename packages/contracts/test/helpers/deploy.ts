@@ -113,6 +113,8 @@ import {
   GovernorDepositLogicV6,
   GovernorConfiguratorV6,
   GovernorClockLogicV6,
+  GovernorMilestoneLogic,
+  TreasuryGrants,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -168,6 +170,7 @@ export interface DeployInstance {
   governorQuorumLogicLib: GovernorQuorumLogic
   governorStateLogicLib: GovernorStateLogic
   governorVotesLogicLib: GovernorVotesLogic
+  governorMilestoneLogicLib: GovernorMilestoneLogic
   governorClockLogicLibV1: GovernorClockLogicV1
   governorConfiguratorLibV1: GovernorConfiguratorV1
   governorDepositLogicLibV1: GovernorDepositLogicV1
@@ -259,6 +262,7 @@ export interface DeployInstance {
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
   b3trMultiSig: B3TRMultiSig
+  treasuryGrants: TreasuryGrants
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -335,6 +339,7 @@ export const getOrDeployContractInstances = async ({
     GovernorQuorumLogicLibV6,
     GovernorStateLogicLibV6,
     GovernorVotesLogicLibV6,
+    GovernorMilestoneLogicLib,
   } = await governanceLibraries()
 
   // Deploy Passport Libraries
@@ -460,6 +465,10 @@ export const getOrDeployContractInstances = async ({
     config.TREASURY_TRANSFER_LIMIT_VOT3,
     config.TREASURY_TRANSFER_LIMIT_VTHO,
   ])) as Treasury
+
+  // // Deploy TreasuryGrants
+  // const TreasuryGrantsContract = await ethers.getContractFactory("TreasuryGrants")
+  // const treasuryGrants = await TreasuryGrantsContract.deploy(await treasury.getAddress())
 
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
@@ -879,6 +888,7 @@ export const getOrDeployContractInstances = async ({
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          minimumMilestoneCount: config.MINIMUM_MILESTONE_COUNT, //Minimum milestone count
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
     ],
@@ -954,6 +964,7 @@ export const getOrDeployContractInstances = async ({
           GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
           GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+          GovernorMilestoneLogic: await GovernorMilestoneLogicLib.getAddress(),
         },
       ],
     },
@@ -984,6 +995,7 @@ export const getOrDeployContractInstances = async ({
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorMilestoneLogic: await GovernorMilestoneLogicLib.getAddress(),
     },
     X2EarnApps: {
       EndorsementUtils: await EndorsementUtils.getAddress(),
@@ -1100,6 +1112,7 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLib: GovernorQuorumLogicLib,
     governorStateLogicLib: GovernorStateLogicLib,
     governorVotesLogicLib: GovernorVotesLogicLib,
+    governorMilestoneLogicLib: GovernorMilestoneLogicLib,
     governorClockLogicLibV1: GovernorClockLogicLibV1,
     governorConfiguratorLibV1: GovernorConfiguratorLibV1,
     governorDepositLogicLibV1: GovernorDepositLogicLibV1,

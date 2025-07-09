@@ -88,4 +88,7 @@ export type ContractsConfig = {
   VOTER_REWARDS_LEVELS_V2: number[]
 
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
+
+  // Milestones
+  MINIMUM_MILESTONE_COUNT: number
 }

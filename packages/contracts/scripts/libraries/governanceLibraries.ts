@@ -68,6 +68,15 @@ export async function governanceLibraries(latestOnly: boolean = false) {
   const GovernorStateLogicLib = await GovernorStateLogic.deploy()
   await GovernorStateLogicLib.waitForDeployment()
 
+  // Deploy Governor Milestone Logic
+  const GovernorMilestoneLogic = await ethers.getContractFactory("GovernorMilestoneLogic", {
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+    },
+  })
+  const GovernorMilestoneLogicLib = await GovernorMilestoneLogic.deploy()
+  await GovernorMilestoneLogicLib.waitForDeployment()
+
   if (latestOnly) {
     return {
       GovernorClockLogicLib,
@@ -79,6 +88,7 @@ export async function governanceLibraries(latestOnly: boolean = false) {
       GovernorVotesLogicLib,
       GovernorDepositLogicLib,
       GovernorStateLogicLib,
+      GovernorMilestoneLogicLib,
     }
   }
 
@@ -475,5 +485,6 @@ export async function governanceLibraries(latestOnly: boolean = false) {
     GovernorVotesLogicLibV6,
     GovernorDepositLogicLibV6,
     GovernorStateLogicLibV6,
+    GovernorMilestoneLogicLib,
   }
 }

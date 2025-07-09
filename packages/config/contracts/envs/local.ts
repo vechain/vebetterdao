@@ -205,5 +205,8 @@ export function createLocalConfig() {
       2500000000000000000000000n,
       12500000000000000000000000n,
     ],
+
+    // Milestones
+    MINIMUM_MILESTONE_COUNT: 2,
   })
 }
