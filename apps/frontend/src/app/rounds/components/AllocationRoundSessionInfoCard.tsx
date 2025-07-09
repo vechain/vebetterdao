@@ -1,4 +1,5 @@
 import {
+  ProposalState,
   useAllocationRoundQuorum,
   useAllocationVotes,
   useAllocationsRound,
@@ -38,12 +39,16 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   )
 
   const isRoundActive = useMemo(() => {
-    return roundInfo?.state === 0
+    return roundInfo?.state === ProposalState.Active
   }, [roundInfo?.state])
 
   const isUpcoming = useMemo(() => {
     return !isRoundActive && !quorumQuery.isLoading && !quorumQuery.data
   }, [quorumQuery, isRoundActive])
+
+  console.log("isRoundActive", isRoundActive)
+  console.log("isUpcoming", isUpcoming)
+  console.log("quorumQuery", quorumQuery)
 
   return (
     <ProposalSessionSection

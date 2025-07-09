@@ -41,7 +41,10 @@ export const useProposalDetailById = (proposalId: string) => {
   )
   const isDepositReached = useIsDepositReached(proposalId)
   const isProposalActive = useMemo(() => proposalState?.data === ProposalState.Active, [proposalState?.data])
-  const proposalQuorum = useProposalQuorum(proposalSnapshotBlock, proposalState?.data !== ProposalState.Pending)
+  const proposalQuorum = useProposalQuorum(
+    proposalSnapshotBlock,
+    !!proposalState && proposalState?.data !== ProposalState.Pending,
+  )
   const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotesIndexer({ proposalId })
