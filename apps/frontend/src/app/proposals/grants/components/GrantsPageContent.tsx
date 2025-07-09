@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, useMediaQuery } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
@@ -15,8 +15,7 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const [isMobile] = useMediaQuery("(max-width: 768px)")
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !isMobile })
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true })
 
   const stepsArray = useMemo(
     () => [
@@ -65,11 +64,14 @@ export const GrantsPageContent = () => {
     ],
     [t],
   )
-  const mockedStats = ["1230", "1230", "3M B3TR"]
 
   return (
     <VStack w="full" spacing={8} pb={8}>
-      <HStack alignItems="center" textAlign="center" w="full">
+      <HStack
+        alignItems="center"
+        textAlign="center"
+        w="full"
+        justifyContent={{ base: "space-between", lg: "flex-start" }}>
         <Heading as="h1" size="xl">
           {t("Grants")}
         </Heading>
@@ -88,7 +90,7 @@ export const GrantsPageContent = () => {
         )}
       </HStack>
       <GrantsStepsCard steps={stepsArray} isOpen={isOpen} onClose={onClose} />
-      <GrantsStatsCards stats={mockedStats} />
+      <GrantsStatsCards totalApplications={"1230"} totalApproved={"1230"} totalFunds={"3M B3TR"} />
     </VStack>
   )
 }
