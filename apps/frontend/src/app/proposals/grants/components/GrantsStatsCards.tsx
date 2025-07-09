@@ -8,7 +8,7 @@ interface StatsCardProps {
 
 const StatsCard = ({ icon, value, label, alt }: StatsCardProps) => (
   <HStack
-    flex={{ base: "0 0 40%", lg: "1 0 calc(33.333% - 10px)" }}
+    flex={{ base: "0 0 40%", lg: "1 0 calc(30% - 10px)" }}
     bg="contrast-bg-muted"
     borderRadius="xl"
     py={{ base: 2, lg: 6 }}
@@ -49,7 +49,7 @@ export const GrantsStatsCards = ({
   return (
     <Box
       w="full"
-      overflowX={{ base: "auto", lg: "visible" }}
+      overflowX={{ base: "auto", lg: "hidden" }}
       css={{
         "&::-webkit-scrollbar": {
           display: "none",
@@ -57,7 +57,7 @@ export const GrantsStatsCards = ({
         scrollbarWidth: "none",
         "-webkit-overflow-scrolling": "touch",
       }}>
-      <HStack w={{ base: "max-content", lg: "full" }} spacing={5}>
+      <HStack w={{ base: "max-content", lg: "full" }} spacing={8}>
         {statsUI.map(stat => (
           <StatsCard key={`${stat.label}`} {...stat} />
         ))}
