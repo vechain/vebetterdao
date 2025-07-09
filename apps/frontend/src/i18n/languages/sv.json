@@ -1714,5 +1714,8 @@
   "Managed by": "Hanteras av",
   "Managing for": "Hanterar för",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "Du har för närvarande flera noder under din kontroll, men vi stöder inte flera noder per konto.",
-  "Your Node can be currently used only by the manager": "Din nod kan för närvarande endast användas av managern"
+  "Your Node can be currently used only by the manager": "Din nod kan för närvarande endast användas av managern",
+  "STARGATE IS LIVE 🌌": "STARGATE ÄR LIVE 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "Migrera din gamla nod för att upptäcka det nya stargate-universumet!",
+  "Start staking VET to explore the new stargate universe !": "Börja satsa VET för att utforska det nya stargate-universumet!"
 }

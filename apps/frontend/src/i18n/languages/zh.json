@@ -1714,5 +1714,8 @@
   "Managing for": "为以下对象管理：",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "您当前拥有多个节点，但我们目前不支持每个账户多个节点。",
   "Your Node can be currently used only by the manager": "您的节点目前只能由管理员使用",
-  "Vote Type": "投票类型"
+  "Vote Type": "投票类型",
+  "STARGATE IS LIVE 🌌": "星际之门已开启 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "迁移您的旧节点以探索新的星际之门宇宙！",
+  "Start staking VET to explore the new stargate universe !": "开始质押 VET 以探索新的星际之门宇宙！"
 }
