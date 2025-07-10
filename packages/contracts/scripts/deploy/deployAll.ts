@@ -347,7 +347,7 @@ export async function deployAll(config: ContractsConfig) {
     console.log(`Deploying StargateDelegation...`)
     stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, true)
 
-    stargateNftMock = await initializeProxy(
+    stargateNftMock = (await initializeProxy(
       stargateNftAddress,
       "StargateNFT",
       [
@@ -374,10 +374,10 @@ export async function deployAll(config: ContractsConfig) {
         VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
         Levels: await StargateNFTLevelsLib.getAddress(),
       },
-    )
+    )) as StargateNFT
     console.log("StargateNFT initialized")
 
-    stargateDelegateMock = await initializeProxy(
+    stargateDelegateMock = (await initializeProxy(
       stargateDelegateAddress,
       "StargateDelegation",
       [
@@ -392,21 +392,21 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       {},
-    )
+    )) as StargateDelegation
     console.log("StargateDelegation initialized")
 
     // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
     await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
     await vechainNodesMock.setLeadTime(0)
 
-    nodeManagementMock = await deployAndUpgrade(
+    nodeManagementMock = (await deployAndUpgrade(
       ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
       [[vechainNodesAddress, deployer.address, deployer.address], [], [stargateNftAddress]],
       {
         versions: [undefined, 2, 3],
         logOutput: true,
       },
-    )
+    )) as NodeManagementV3
 
     nodeManagementAddress = await nodeManagementMock.getAddress()
   }
@@ -1520,8 +1520,8 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
-    vechainNodesMock: vechainNodesAddress,
-    vechainNodeManagement: nodeManagementAddress,
+    vechainNodesMock: vechainNodesMock,
+    vechainNodeManagement: nodeManagementMock,
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
     libraries: {
