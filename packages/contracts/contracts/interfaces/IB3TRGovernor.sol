@@ -7,7 +7,7 @@ import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IB3TR } from "./IB3TR.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGoverno bytes[] memory calldatas,r } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
 import { IVeBetterPassport } from "./IVeBetterPassport.sol";
 

@@ -77,11 +77,6 @@ library GovernorProposalLogic {
   event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
 
   /**
-   * @dev Emitted when grant funds are transferred.
-   */
-  event GrantFundsTransferred(uint256 proposalId, uint256 amount);
-
-  /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
    */
   error GovernorUnexpectedProposalState(

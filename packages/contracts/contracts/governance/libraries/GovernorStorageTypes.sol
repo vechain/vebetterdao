@@ -72,7 +72,6 @@ library GovernorStorageTypes {
     IB3TR b3tr;
     // VOT3 contract
     IVOT3 vot3;
-    
     // ------------------------------- Desposits Storage -------------------------------
     // mapping to track deposits made to proposals by address
     mapping(uint256 => mapping(address => uint256)) deposits;

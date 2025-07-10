@@ -139,6 +139,7 @@ contract GrantsManager is
   // event MilestoneValidated(uint256 indexed proposalId, uint256 indexed milestoneIndex);
   // event MilestoneClaimed(uint256 indexed proposalId, uint256 indexed milestoneIndex, uint256 amount);
   // event FundsReceived(uint256 indexed proposalId, uint256 amount);
+  // event GrantFundsTransferred(uint256 proposalId, uint256 amount);
 
   // // ------------------ Milestone Events ------------------ //
   // /**
