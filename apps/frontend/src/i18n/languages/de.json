@@ -1714,5 +1714,8 @@
   "Managed by": "Verwaltet von",
   "Managing for": "Verwaltet für",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "Du hast derzeit mehrere Knoten unter deiner Kontrolle, und wir unterstützen aktuell keine mehreren Knoten pro Konto.",
-  "Your Node can be currently used only by the manager": "Dein Knoten kann derzeit nur vom Manager genutzt werden"
+  "Your Node can be currently used only by the manager": "Dein Knoten kann derzeit nur vom Manager genutzt werden",
+  "STARGATE IS LIVE 🌌": "STARGATE IST LIVE 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "Migrieren Sie Ihren Legacy-Knoten, um das neue Stargate-Universum zu entdecken!",
+  "Start staking VET to explore the new stargate universe !": "Beginnen Sie VET zu staken, um das neue Stargate-Universum zu erkunden!"
 }

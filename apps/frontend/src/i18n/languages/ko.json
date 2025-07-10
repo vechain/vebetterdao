@@ -1714,5 +1714,8 @@
   "Managed by": "관리자:",
   "Managing for": "대리 관리 대상:",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "현재 여러 노드를 관리 중이지만, 한 계정에서 여러 노드를 지원하지 않습니다.",
-  "Your Node can be currently used only by the manager": "현재 이 노드는 매니저만 사용할 수 있습니다"
+  "Your Node can be currently used only by the manager": "현재 이 노드는 매니저만 사용할 수 있습니다",
+  "STARGATE IS LIVE 🌌": "스타게이트가 시작되었습니다 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "새로운 스타게이트 유니버스를 발견하기 위해 기존 노드를 마이그레이션하세요!",
+  "Start staking VET to explore the new stargate universe !": "새로운 스타게이트 유니버스를 탐험하기 위해 VET 스테이킹을 시작하세요!"
 }
