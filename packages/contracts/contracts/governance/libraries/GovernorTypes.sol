@@ -141,20 +141,17 @@ library GovernorTypes {
   }
   // Register milestones for a grant proposal
   struct Milestones {
-    Milestone[] milestone;
+    uint256 id; // Milestone id = proposalId
     uint256 totalAmount; // Amount of funding for this milestone
     uint256 claimedAmount; // Amount of funds claimed by the recipient
     address recipient; // Treasury address ? multisig ? who can claim the amount in the team ? the admin only ?
-    uint256 id; // Milestone id
-    string projectName; // Project name
-    uint256 minimumMilestoneCount; // Minimum number of milestones required for this proposal
+    Milestone[] milestone;
   }
 
   // Data for a milestone within a grant proposal
   struct Milestone {
     uint256 amount;
-    string description;
-    uint256 deadline; // Deadline timestamp for milestone completion
+    // uint256 deadline; // Deadline timestamp for milestone completion
     MilestoneState status;
   }
 }

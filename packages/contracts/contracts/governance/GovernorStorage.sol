@@ -154,8 +154,5 @@ contract GovernorStorage is Initializable {
     // Set deposit threshold cap for Grant proposal type
     governorStorage.proposalTypeDepositThresholdCap[GovernorTypes.ProposalType.Grant] = initializationDataV7
       .grantDepositThresholdCap;
-
-    // Set minimum milestone count
-    governorStorage.minimumMilestoneCount = initializationDataV7.minimumMilestoneCount;
   }
 }

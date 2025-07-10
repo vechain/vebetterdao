@@ -32,7 +32,7 @@ import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEn
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
-import { ITreasuryGrants } from "../../interfaces/ITreasuryGrants.sol";
+import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
@@ -75,7 +75,7 @@ library GovernorStorageTypes {
     IVOT3 vot3;
     //TODO : DOUBLE CHECK THAT IT WONT MESS WITH THE STORAGE
     // TreasuryGrants contract
-    ITreasuryGrants treasuryGrants;
+    IGrantsManager grantsManager;
     // TODO : DOUBLE CHECK IF THAT MAKE SENSE
     // B3TRGovernor contract
     IB3TRGovernor governor;
@@ -116,7 +116,5 @@ library GovernorStorageTypes {
     mapping(GovernorTypes.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
     // mapping to store the deposit threshold cap for each proposal type
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
-    // mapping to store the milestones for each proposal
-    mapping(uint256 => GovernorTypes.Milestones) proposalMilestones;
   }
 }

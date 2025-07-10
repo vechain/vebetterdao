@@ -35,7 +35,6 @@ import { GovernorGovernanceLogic } from "./governance/libraries/GovernorGovernan
 import { GovernorConfigurator } from "./governance/libraries/GovernorConfigurator.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { GovernorStorage } from "./governance/GovernorStorage.sol";
-import { GovernorMilestoneLogic } from "./governance/libraries/GovernorMilestoneLogic.sol";
 import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
 import { IVOT3 } from "./interfaces/IVOT3.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
@@ -676,59 +675,6 @@ contract B3TRGovernor is
     return GovernorProposalLogic.proposalType($, proposalId);
   }
 
-  /**
-   * @notice Returns the state of a milestone for a grant proposal.
-   * @param proposalId The id of the proposal
-   * @param milestoneIndex The index of the milestone
-   * @return GovernorTypes.MilestoneState The state of the milestone
-   * @dev See GovernorTypes.MilestoneState for the possible states
-   */
-  function milestoneState(
-    uint256 proposalId,
-    uint256 milestoneIndex
-  ) external view returns (GovernorTypes.MilestoneState) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorMilestoneLogic.milestoneState($, proposalId, milestoneIndex);
-  }
-  /**
-   * @notice Returns a milestone for a grant proposal.
-   * @param proposalId The id of the proposal
-   * @param milestoneIndex The index of the milestone
-   * @return GovernorTypes.Milestone The milestone
-   */
-  function getMilestone(
-    uint256 proposalId,
-    uint256 milestoneIndex
-  ) external view returns (GovernorTypes.Milestone memory) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorMilestoneLogic.getMilestone($, proposalId, milestoneIndex);
-  }
-
-  /**
-   * @notice Returns the milestones for a grant proposal.
-   * @param proposalId The id of the proposal.
-   * @return GovernorTypes.Milestones The milestones for the proposal
-   */
-  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestones memory) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorMilestoneLogic.getMilestones($, proposalId);
-  }
-
-  function setMilestoneStatus(
-    uint256 proposalId,
-    uint256 milestoneIndex,
-    GovernorTypes.MilestoneState newStatus
-  ) external {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    require(msg.sender == address($.treasuryGrants), "Only TreasuryGrants can call");
-    GovernorStateLogic.validateMilestoneStateBitmap(
-      $,
-      proposalId,
-      milestoneIndex,
-      GovernorStateLogic.encodeMilestoneStateBitmap(newStatus)
-    );
-    $.proposalMilestones[proposalId].milestone[milestoneIndex].status = newStatus;
-  }
 
   /** GovernorStorageTypes.GovernorStorage storage self = $.governor.getGovernorStorage();
    * @notice Returns the deposit threshold for a proposal type.
@@ -1089,8 +1035,8 @@ contract B3TRGovernor is
    * @return uint256 The proposal id
    */
   function proposeWithType(
-    address[] memory targets,
-    uint256[] memory values,
+    address[] memory targets, 
+    uint256[] memory values, 
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,

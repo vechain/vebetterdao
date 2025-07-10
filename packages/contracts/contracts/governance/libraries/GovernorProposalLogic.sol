@@ -33,8 +33,7 @@ import { GovernorFunctionRestrictionsLogic } from "./GovernorFunctionRestriction
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-import { GovernorMilestoneLogic } from "./GovernorMilestoneLogic.sol";
-import { ITreasuryGrants } from "../../interfaces/ITreasuryGrants.sol";
+import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 
 /// @title GovernorProposalLogic
 /// @notice Library for managing proposals in the Governor contract.
@@ -76,16 +75,6 @@ library GovernorProposalLogic {
    * @dev Emitted when a proposal is created with type information.
    */
   event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
-
-  /**
-   * @dev Emitted when a milestone is scheduled.
-   */
-  event MilestoneScheduled(
-    uint256 indexed proposalId,
-    uint256 indexed milestoneIndex,
-    bytes32 operationId,
-    uint256 scheduledFor
-  );
 
   /**
    * @dev Emitted when grant funds are transferred.
@@ -284,7 +273,7 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas,
+    bytes[] memory calldatas, 
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount
@@ -572,7 +561,7 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
-    GovernorTypes.ProposalType proposalTypeValue // was it ok to modify the params of an internal function ? Won't it mess up with the signature ?
+    GovernorTypes.ProposalType proposalTypeValue
   ) private returns (uint256) {
     uint256 depositThresholdAmount = GovernorDepositLogic._depositThresholdByProposalType(self, proposalTypeValue);
     uint32 votingPeriod = SafeCast.toUint32(self.xAllocationVoting.votingPeriod());
@@ -590,21 +579,8 @@ library GovernorProposalLogic {
       proposalTypeValue
     );
 
-    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
-      GovernorMilestoneLogic._createMilestones(
-        self,
-        proposalId,
-        targets,
-        values,
-        calldatas,
-        description,
-        startRoundId,
-        depositAmount
-      );
-    }
-
-    // should user be able to deposit funds for a grant proposal ?
-    if (depositAmount > 0 && proposalTypeValue != GovernorTypes.ProposalType.Grant) {
+    // TODO : check if the user can deposit funds for a grant proposal ( currently added for grant proposal )
+    if (depositAmount > 0) {
       GovernorDepositLogic.depositFunds(self, depositAmount, proposer, proposalId);
     }
 
@@ -701,7 +677,10 @@ library GovernorProposalLogic {
       revert GovernorRestrictedProposer(proposer);
     }
 
-    if (targets.length != values.length || targets.length != calldatas.length) {
+    if (proposalTypeValue == GovernorTypes.ProposalType.Grant && targets.length != calldatas.length) {
+      // targets and values are not co-dependent ( values = amounts required for milestones, targets = contracts to interact with  )
+      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+    } else if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
 
@@ -760,71 +739,23 @@ library GovernorProposalLogic {
    */
   function _executeOperations(
     GovernorStorageTypes.GovernorStorage storage self,
-    address contractAddress,
+    address contractAddress, // Address of the calling contract
     uint256 proposalId,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas,
+    bytes[] memory calldatas, // [transferB3tr(addressTreasuryGrant, amount), createMilestones(description, values)]
     bytes32 descriptionHash
   ) private {
-    GovernorTypes.ProposalType typeOfProposal = self.proposalType[proposalId];
-
-    if (typeOfProposal == GovernorTypes.ProposalType.Grant) {
-      _executeGrantOperations(self, proposalId, descriptionHash, contractAddress);
-    } else {
-      _executeStandardOperations(self, targets, values, calldatas, descriptionHash, contractAddress);
-    }
-
-    delete self.timelockIds[proposalId];
-  }
-
-  /**
-   * @dev Executes a grant proposal's operations
-   */
-  function _executeGrantOperations(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    bytes32 descriptionHash,
-    address contractAddress
-  ) private {
-    GovernorTypes.Milestones storage milestones = self.proposalMilestones[proposalId];
-    require(milestones.milestone.length > 0, "No milestones found");
-
-    // Transfer funds to TreasuryGrants
-    _transferToTreasuryGrants(self, proposalId, milestones.totalAmount, descriptionHash, contractAddress);
-
-    // Update milestone states
-    _initializeMilestoneStates(milestones);
-
-    emit GrantFundsTransferred(proposalId, milestones.totalAmount);
-  }
-
-  /**
-   * @dev Transfers funds to the TreasuryGrants contract
-   */
-  function _transferToTreasuryGrants(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 proposalId,
-    uint256 amount,
-    bytes32 descriptionHash,
-    address contractAddress
-  ) private {
-    address[] memory targets = new address[](1);
-    targets[0] = address(self.treasuryGrants);
-
-    uint256[] memory values = new uint256[](1);
-    values[0] = amount;
-
-    bytes[] memory calldatas = new bytes[](1);
-    calldatas[0] = abi.encodeCall(ITreasuryGrants.receiveFunds, (proposalId));
-
-    self.timelock.executeBatch(
+    // execute
+    self.timelock.executeBatch{ value: msg.value }(
       targets,
       values,
-      calldatas,
+      calldatas, // [transferB3tr(addressTreasuryGrant, amount), createMilestones(description, values, proposalId)]
       0,
       GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
     );
+    // cleanup for refund
+    delete self.timelockIds[proposalId];
   }
 
   /**
@@ -895,9 +826,9 @@ library GovernorProposalLogic {
    */
   function _cancel(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) private returns (uint256) {
     self.proposals[proposalId].canceled = true;
-    if (self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
-      GovernorMilestoneLogic.rejectMilestone(self, proposalId);
-    }
+    // if (self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
+    //   IGrantsManager(self.grantsManager).rejectMilestone(proposalId);
+    // }
 
     emit ProposalCanceled(proposalId);
 
