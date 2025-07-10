@@ -1035,8 +1035,8 @@ contract B3TRGovernor is
    * @return uint256 The proposal id
    */
   function proposeWithType(
-    address[] memory targets, 
-    uint256[] memory values, 
+    address[] memory targets,
+    uint256[] memory values,
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,

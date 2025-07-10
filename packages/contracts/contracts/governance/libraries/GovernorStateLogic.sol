@@ -30,7 +30,6 @@ import { GovernorVotesLogic } from "./GovernorVotesLogic.sol";
 import { GovernorQuorumLogic } from "./GovernorQuorumLogic.sol";
 import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 import { GovernorDepositLogic } from "./GovernorDepositLogic.sol";
-import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 
 /// @title GovernorStateLogic
 /// @notice Library for Governor state logic, managing the state transitions and validations of governance proposals.
@@ -50,18 +49,6 @@ library GovernorStateLogic {
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
     GovernorTypes.ProposalState current,
-    bytes32 expectedStates
-  );
-
-  /// @dev Thrown when the current state of a milestone does not match the expected states.
-  /// @param proposalId The ID of the proposal.
-  /// @param milestoneIndex The index of the milestone.
-  /// @param current The current state of the milestone.
-  /// @param expectedStates The expected states of the milestone as a bitmap.
-  error GovernorUnexpectedMilestoneState(
-    uint256 proposalId,
-    uint256 milestoneIndex,
-    GovernorTypes.MilestoneState current,
     bytes32 expectedStates
   );
 

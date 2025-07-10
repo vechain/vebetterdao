@@ -119,7 +119,6 @@ library GovernorProposalLogic {
    * @dev Thrown when the proposal type is invalid.
    */
   error GovernorInvalidProposalType(GovernorTypes.ProposalType proposalType);
-
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -273,7 +272,7 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas, 
+    bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount
@@ -579,7 +578,6 @@ library GovernorProposalLogic {
       proposalTypeValue
     );
 
-    // TODO : check if the user can deposit funds for a grant proposal ( currently added for grant proposal )
     if (depositAmount > 0) {
       GovernorDepositLogic.depositFunds(self, depositAmount, proposer, proposalId);
     }
@@ -756,37 +754,6 @@ library GovernorProposalLogic {
     );
     // cleanup for refund
     delete self.timelockIds[proposalId];
-  }
-
-  /**
-   * @dev Initializes milestone states for a new grant
-   */
-  function _initializeMilestoneStates(GovernorTypes.Milestones storage milestones) private {
-    for (uint256 i = 0; i < milestones.milestone.length; i++) {
-      milestones.milestone[i].status = GovernorTypes.MilestoneState.Pending;
-    }
-    // First milestone becomes Validated (ready for admin approval)
-    milestones.milestone[0].status = GovernorTypes.MilestoneState.Validated;
-  }
-
-  /**
-   * @dev Executes a standard (non-grant) proposal's operations
-   */
-  function _executeStandardOperations(
-    GovernorStorageTypes.GovernorStorage storage self,
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    bytes32 descriptionHash,
-    address contractAddress
-  ) private {
-    self.timelock.executeBatch{ value: msg.value }(
-      targets,
-      values,
-      calldatas,
-      0,
-      GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
-    );
   }
 
   /**

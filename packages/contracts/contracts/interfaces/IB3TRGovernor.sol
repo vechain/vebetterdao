@@ -7,7 +7,7 @@ import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IB3TR } from "./IB3TR.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationVotingGoverno bytes[] memory calldatas,r } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
 import { IVeBetterPassport } from "./IVeBetterPassport.sol";
 
@@ -579,7 +579,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function proposeWithType(
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas, 
+    bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
