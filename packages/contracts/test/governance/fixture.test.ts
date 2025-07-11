@@ -16,6 +16,8 @@ import {
   GovernorVotesLogicV1,
   GovernorConfiguratorV1,
   VeBetterPassport,
+  Treasury,
+  GrantsManager,
 } from "../../typechain-types"
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
@@ -25,6 +27,8 @@ import {
   createProposal,
   createProposalWithType,
   waitForCurrentRoundToEnd,
+  createMultiContractProposal,
+  ProposalFunction,
 } from "../helpers/common"
 
 //Constants for proposal types
@@ -35,6 +39,7 @@ interface GovernanceFixture {
   governor: B3TRGovernor
   vot3: VOT3
   b3tr: B3TR
+  treasury: Treasury
   owner: SignerWithAddress
   timeLock: TimeLock
   xAllocationVoting: XAllocationVoting
@@ -55,6 +60,7 @@ interface GovernanceFixture {
   veBetterPassport: VeBetterPassport
   minterAccount: SignerWithAddress
   otherAccount: SignerWithAddress
+  grantsManager: GrantsManager
 }
 
 export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
@@ -66,6 +72,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
   const governor = deployInstances?.governor
   const vot3 = deployInstances?.vot3
   const b3tr = deployInstances?.b3tr
+  const treasury = deployInstances?.treasury
   const owner = deployInstances?.owner
   const timeLock = deployInstances?.timeLock
   const xAllocationVoting = deployInstances?.xAllocationVoting
@@ -82,6 +89,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
   const b3trContract = deployInstances?.B3trContract
   const veBetterPassport = deployInstances?.veBetterPassport
   const minterAccount = deployInstances?.minterAccount
+  const grantsManager = deployInstances?.grantsManager
   //Setup other accounts
   const otherAccounts = deployInstances?.otherAccounts
   const otherAccount = deployInstances?.otherAccount
@@ -98,6 +106,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     !governor ||
     !vot3 ||
     !b3tr ||
+    !treasury ||
     !owner ||
     !timeLock ||
     !xAllocationVoting ||
@@ -114,7 +123,8 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     !b3trContract ||
     !veBetterPassport ||
     !minterAccount ||
-    !otherAccount
+    !otherAccount ||
+    !grantsManager
   ) {
     throw new Error("Deploy instances are not correctly set")
   }
@@ -123,6 +133,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     governor,
     vot3,
     b3tr,
+    treasury,
     owner,
     timeLock,
     xAllocationVoting,
@@ -143,6 +154,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     veBetterPassport,
     minterAccount,
     otherAccount,
+    grantsManager,
   }
 }
 
@@ -176,6 +188,7 @@ export async function startNewRoundAndGetRoundId(
   return ((await xAllocationVoting.currentRoundId()) + 1n).toString()
 }
 
+// TODO : might be redundant
 export async function createUniqueTestProposal(
   account: SignerWithAddress,
   b3tr: B3TR,
@@ -189,12 +202,79 @@ export async function createUniqueTestProposal(
   const description = `Get token details ${unixTimestamp} ${blockNumber}`
 
   if (useTypeMethod) {
-    const tx = await createProposalWithType(b3tr, b3trContract, account, description, functionToCall, [], proposalType)
+    const tx = await createProposalWithType(
+      b3tr,
+      b3trContract,
+      account,
+      description,
+      [functionToCall],
+      [],
+      proposalType,
+    )
     return { tx, description, functionToCall }
   } else {
     const tx = await createProposal(b3tr, b3trContract, account, description, functionToCall, [])
     return { tx, description, functionToCall }
   }
+}
+
+export async function createGrantProposal(
+  owner: SignerWithAddress,
+  grantsManager: GrantsManager,
+  treasury: Treasury,
+  values: bigint[],
+  proposer: SignerWithAddress,
+  depositAmount: number = 0,
+  description: string = "",
+) {
+  // Total amount of all milestones
+  const totalAmount = values.reduce((sum, value) => sum + value, 0n)
+
+  const treasuryAddress = await treasury.getAddress()
+  const grantsManagerAddress = await grantsManager.getAddress()
+
+  const transferCalldata = treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, totalAmount])
+  const createMilestonesCalldata = grantsManager.interface.encodeFunctionData("createMilestones", [
+    description,
+    values,
+    [treasuryAddress, grantsManagerAddress],
+    [transferCalldata],
+  ])
+
+  // We prepare the function and the arguments to be encoded for the calldata (transferB3TR and createMilestones)
+  // Issus start here ( circular dependency on the millestone calldata)
+  const functions: ProposalFunction[] = [
+    {
+      contract: treasury,
+      functionName: "transferB3TR",
+      args: [grantsManagerAddress, totalAmount],
+      value: 0,
+    },
+    {
+      contract: grantsManager,
+      functionName: "createMilestones",
+      args: [
+        description,
+        values,
+        [treasuryAddress, grantsManagerAddress],
+        [transferCalldata, createMilestonesCalldata],
+      ],
+      value: 0,
+    },
+  ]
+
+  // Send proposal
+  const tx = await createMultiContractProposal(
+    owner,
+    proposer,
+    functions,
+    [0n, 0n],
+    description,
+    1, // Grant proposal type
+    depositAmount,
+  )
+
+  return tx
 }
 
 export async function validateProposalEvents(

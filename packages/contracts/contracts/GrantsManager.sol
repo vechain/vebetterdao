@@ -195,48 +195,53 @@ contract GrantsManager is
     string memory description,
     uint256[] memory values,
     address[] memory targets,
-    bytes[] memory calldatas
+    bytes[] memory calldatas // transferB3TR calldata
   ) external onlyAdminOrGovernance returns (uint256) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-    uint256 milestoneId = $.governor.hashProposal(targets, values, calldatas, keccak256(bytes(description)));
-    require(milestoneId == 0, "Milestone ID already exists");
+    uint256[] memory valuesToUse = new uint256[](2);
+    valuesToUse[0] = 0;
+    valuesToUse[1] = 0;
 
-    GovernorTypes.ProposalState state = $.governor.state(milestoneId);
+    // Calculate the proposal ID using the same method as the governor
+    bytes32 descriptionHash = keccak256(bytes(description));
+    uint256 milestoneId = $.governor.hashProposal(targets, valuesToUse, calldatas, descriptionHash);
+    require(milestoneId != 0, "Milestone ID already exists");
+
+    // Verify the proposal state
+    GovernorTypes.ProposalState proposalState = $.governor.state(milestoneId);
     require(
-      state == GovernorTypes.ProposalState.Succeeded || state == GovernorTypes.ProposalState.Queued,
-      "GovernorMilestoneLogic: Invalid proposal state"
+      proposalState == GovernorTypes.ProposalState.Executed || proposalState == GovernorTypes.ProposalState.Queued,
+      "Proposal not executed or queued"
     );
-    require(values.length >= $.minimumMilestoneCount, "GovernorMilestoneLogic: Not enough milestones");
 
-    // proposal Id should be the same as the one in the proposal
-    // print following solidity code in the console
-    GovernorTypes.Milestones storage proposalMilestones = $.proposalMilestones[milestoneId];
-    proposalMilestones.id = milestoneId;
-    proposalMilestones.recipient = msg.sender;
+    // Validate milestone requirements
+    require(values.length >= $.minimumMilestoneCount, "Not enough milestones");
 
-    uint256 total = 0;
+    // Calculate total amount
+    uint256 totalAmount = 0;
     for (uint256 i = 0; i < values.length; i++) {
       require(values[i] > 0, "Milestone amount must be greater than 0");
-      total += values[i];
+      totalAmount += values[i];
     }
-    proposalMilestones.totalAmount = total;
-    proposalMilestones.claimedAmount = 0;
 
-    // Create milestones with Pending status
+    // Create milestones
+    GovernorTypes.Milestones storage milestones = $.proposalMilestones[milestoneId];
+    milestones.totalAmount = totalAmount;
+    milestones.claimedAmount = 0;
+    milestones.recipient = msg.sender;
+    milestones.id = milestoneId;
+
+    // Create milestone array
     for (uint256 i = 0; i < values.length; i++) {
-      proposalMilestones.milestone.push(
+      milestones.milestone.push(
         GovernorTypes.Milestone({ amount: values[i], status: GovernorTypes.MilestoneState.Pending })
       );
     }
 
-    emit MilestonesCreated(
-      proposalMilestones.id,
-      proposalMilestones.totalAmount,
-      proposalMilestones.recipient,
-      description,
-      proposalMilestones
-    );
+    emit MilestonesCreated(milestoneId, totalAmount, msg.sender, description, milestones);
+
+    return milestoneId;
   }
 
   // function setMilestoneStatus(
@@ -304,31 +309,30 @@ contract GrantsManager is
   //   return self.proposalMilestones[proposalId].milestone[milestoneIndex].status;
   // }
 
-  // /**
-  //  * @notice Returns a milestone for a proposal.
-  //  * @param proposalId The id of the proposal
-  //  * @param milestoneIndex The index of the milestone
-  //  * @return GovernorTypes.Milestone The milestone
-  //  */
-  // function getMilestone(
-  //   GovernorStorageTypes.GovernorStorage storage self,
-  //   uint256 proposalId,
-  //   uint256 milestoneIndex
-  // ) external view returns (GovernorTypes.Milestone memory) {
-  //   return self.proposalMilestones[proposalId].milestone[milestoneIndex];
-  // }
+  /**
+   * @notice Returns a milestone for a proposal.
+   * @param proposalId The id of the proposal
+   * @param milestoneIndex The index of the milestone
+   * @return GovernorTypes.Milestone The milestone
+   */
+  function getMilestone(
+    uint256 proposalId,
+    uint256 milestoneIndex
+  ) external view returns (GovernorTypes.Milestone memory) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-  // /**
-  //  * @notice Returns the milestones for a proposal.
-  //  * @param proposalId The id of the proposal
-  //  * @return GovernorTypes.Milestones The milestones for the proposal
-  //  */
-  // function getMilestones(
-  //   GovernorStorageTypes.GovernorStorage storage self,
-  //   uint256 proposalId
-  // ) external view returns (GovernorTypes.Milestones memory) {
-  //   return self.proposalMilestones[proposalId];
-  // }
+    return $.proposalMilestones[proposalId].milestone[milestoneIndex];
+  }
+
+  /**
+   * @notice Returns the milestones for a proposal.
+   * @param proposalId The id of the proposal
+   * @return GovernorTypes.Milestones The milestones for the proposal
+   */
+  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestones memory) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    return $.proposalMilestones[proposalId];
+  }
 
   /**
    * @notice Returns the minimum milestone count for a proposal.

@@ -88,7 +88,7 @@ export const createProposalWithType = async (
   ContractFactory: ContractFactory,
   proposer: HardhatEthersSigner,
   description: string = "",
-  functionTocall: string = "tokenDetails",
+  functionTocall: string[] = ["tokenDetails"],
   values: any[] = [],
   type: string | BigInt | number,
   roundId?: string | BigInt | number,
@@ -115,11 +115,96 @@ export const createProposalWithType = async (
   }
 
   const address = await contractToCall.getAddress()
-  const encodedFunctionCall = ContractFactory.interface.encodeFunctionData(functionTocall, values)
+  const encodedFunctionCall = functionTocall.map((func, index) => {
+    return ContractFactory.interface.encodeFunctionData(func, [values[index]])
+  })
 
   const tx = await governor
     .connect(proposer)
-    .proposeWithType([address], [0], [encodedFunctionCall], description, roundId.toString(), 0, Number(type))
+    .proposeWithType([address], [0, 0], encodedFunctionCall, description, roundId.toString(), 0, Number(type))
+
+  return tx
+}
+
+export interface ProposalFunction {
+  contract: BaseContract // The contract instance
+  functionName: string // Name of the function to call
+  args: any[] // Arguments for the function
+  value?: any // Optional: B3TR amount to send with the call (defaults to 0)
+}
+
+export const createMultiContractProposal = async (
+  owner: HardhatEthersSigner,
+  proposer: HardhatEthersSigner,
+  functions: ProposalFunction[],
+  values: bigint[] = [],
+  description: string,
+  proposalType: number = 1, // Grant proposal by default
+  depositAmount: number = 0,
+  roundId?: string,
+): Promise<ContractTransactionResponse> => {
+  const { governor, xAllocationVoting } = await getOrDeployContractInstances({})
+
+  // If roundId is not provided, get the next round
+  if (!roundId) {
+    roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
+  }
+
+  // Prepare arrays for the proposal
+  const targets: string[] = []
+  const calldatas: string[] = []
+
+  // Process each function for each contract
+  for (const func of functions) {
+    const contractAddress = await func.contract.getAddress()
+
+    if (func.functionName === "transferB3TR" || func.functionName === "createMilestones") {
+    }
+
+    console.log("++++++++++++++++++++++++++++")
+    console.log("func.args", func.args)
+    console.log("func.functionName", func.functionName)
+    console.log("++++++++++++++++++++++++++++")
+    const encodedCall = func.contract.interface.encodeFunctionData(func.functionName, func.args)
+
+    targets.push(contractAddress)
+    calldatas.push(encodedCall)
+  }
+
+  // TRANSFER B3TR CALLLDATA
+  const functionFragmentTransferB3TR = functions[0].contract.interface.getFunction(functions[0].functionName)
+  if (!functionFragmentTransferB3TR) {
+    throw new Error(`Function ${functions[0].functionName} not found in contract interface`)
+  }
+  const selectorTransferB3TR = functionFragmentTransferB3TR.selector
+  await governor.connect(owner).setWhitelistFunction(functions[0].contract.getAddress(), selectorTransferB3TR, true)
+  const encodedTransferB3TR = functions[0].contract.interface.encodeFunctionData(
+    functions[0].functionName,
+    functions[0].args,
+  )
+  calldatas.push(encodedTransferB3TR)
+
+  // CREATE MILESTONES CALLLDATA
+  const functionFragmentCreateMilestones = functions[1].contract.interface.getFunction(functions[1].functionName)
+  if (!functionFragmentCreateMilestones) {
+    throw new Error(`Function ${functions[1].functionName} not found in contract interface`)
+  }
+  const selectorCreateMilestones = functionFragmentCreateMilestones.selector
+  await governor.connect(owner).setWhitelistFunction(functions[1].contract.getAddress(), selectorCreateMilestones, true)
+
+  const encodedCreateMilestones = functions[1].contract.interface.encodeFunctionData(
+    functions[1].functionName,
+    functions[1].args,
+  )
+  calldatas.push(encodedCreateMilestones)
+
+  // callDataProposeWithType = encode(transferB3TR(grants, total)) + encode(milestone(description, values, targets, encode(transferB3TR(grants, total))))
+  // calldataPassingToCreateMilestones = encode(transferB3TR(grants, total + encode(milestone(description, values, targets, encode(transferB3TR(grants, total))))))
+
+  // Create the proposal
+  const tx = await governor
+    .connect(proposer)
+    .proposeWithType(targets, [0, 0], calldatas, description, roundId, depositAmount, proposalType)
 
   return tx
 }
@@ -150,7 +235,7 @@ export const createProposalWithMultipleFunctions = async (
   }
 
   // create a new proposal
-  const tx = await governor.connect(proposer).propose(
+  const tx = await governor.connect(proposer).proposeWithType(
     contractToCalls,
     Array(functionsToCall.length).fill(0),
     functionsToCall.map((func, index) => {
@@ -162,6 +247,7 @@ export const createProposalWithMultipleFunctions = async (
     {
       gasLimit: 10_000_000,
     },
+    1, // Grant proposal type : MOCK FOR NOW
   )
 
   return tx

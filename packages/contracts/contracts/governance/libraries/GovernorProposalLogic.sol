@@ -74,7 +74,14 @@ library GovernorProposalLogic {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
+  event ProposalCreatedWithType(
+    uint256 indexed proposalId,
+    GovernorTypes.ProposalType proposalType,
+    address[] targets,
+    uint256[] values,
+    bytes[] calldatas,
+    string description
+  );
 
   /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
@@ -114,6 +121,7 @@ library GovernorProposalLogic {
    * @dev Thrown when the proposal type is invalid.
    */
   error GovernorInvalidProposalType(GovernorTypes.ProposalType proposalType);
+
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -623,7 +631,7 @@ library GovernorProposalLogic {
     );
 
     // Emit new event with type information
-    emit ProposalCreatedWithType(proposalId, proposalTypeValue);
+    emit ProposalCreatedWithType(proposalId, proposalTypeValue, targets, values, calldatas, description);
   }
 
   /**
@@ -670,9 +678,10 @@ library GovernorProposalLogic {
       revert GovernorRestrictedProposer(proposer);
     }
 
-    if (proposalTypeValue == GovernorTypes.ProposalType.Grant && targets.length != calldatas.length) {
-      // targets and values are not co-dependent ( values = amounts required for milestones, targets = contracts to interact with  )
-      revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
+      if (targets.length != calldatas.length) {
+        revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+      }
     } else if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
@@ -736,14 +745,14 @@ library GovernorProposalLogic {
     uint256 proposalId,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas, // [transferB3tr(addressTreasuryGrant, amount), createMilestones(description, values)]
+    bytes[] memory calldatas, 
     bytes32 descriptionHash
   ) private {
     // execute
     self.timelock.executeBatch{ value: msg.value }(
       targets,
       values,
-      calldatas, // [transferB3tr(addressTreasuryGrant, amount), createMilestones(description, values, proposalId)]
+      calldatas, // [transferB3tr(addressTreasuryGrant, amount), createMilestones(description, values, calldatas)]
       0,
       GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
     );

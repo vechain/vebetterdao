@@ -16,7 +16,7 @@ import { DeployInstance, getOrDeployContractInstances } from "../helpers"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
 
-describe.only("Governance - Upgrades", function () {
+describe("Governance - Upgrades", function () {
   it("Should preserve proposal data through version upgrades and add proposal type support", async () => {
     const config = createLocalConfig()
     const {

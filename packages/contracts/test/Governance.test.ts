@@ -36,7 +36,7 @@ import {
 } from "../typechain-types"
 import { deployAndUpgrade, deployProxy, getInitializerData } from "../scripts/helpers"
 
-describe.only("Governor and TimeLock - @shard4", function () {
+describe("Governor and TimeLock - @shard4", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()

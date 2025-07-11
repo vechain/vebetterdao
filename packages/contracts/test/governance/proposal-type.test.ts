@@ -12,7 +12,7 @@ import { ContractFactory } from "ethers"
 import { createProposalWithType, waitForBlock } from "../helpers/common"
 import { ethers } from "hardhat"
 
-describe.only("Governance - Proposal Types", function () {
+describe("Governance - Proposal Types", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
