@@ -32,6 +32,7 @@ import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEn
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
@@ -108,5 +109,8 @@ library GovernorStorageTypes {
     mapping(GovernorTypes.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
     // mapping to store the deposit threshold cap for each proposal type
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
+    // ------------------------------- Grants Manager Storage -------------------------------
+    // GrantsManager contract
+    IGrantsManager grantsManager;
   }
 }

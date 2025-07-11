@@ -49,6 +49,7 @@ import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
+import { IGrantsManager } from "./interfaces/IGrantsManager.sol";
 
 /**
  * @title B3TRGovernor
@@ -1055,6 +1056,19 @@ contract B3TRGovernor is
         depositAmount,
         proposalTypeValue
       );
+  }
+
+  function proposeGrant(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    IGrantsManager.Milestones memory milestones
+  ) external returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorProposalLogic.proposeGrant($, targets, values, calldatas, description, startRoundId, depositAmount, milestones);
   }
 
   /**

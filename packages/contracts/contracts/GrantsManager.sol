@@ -55,6 +55,7 @@ contract GrantsManager is
   /** ------------------ ROLES ------------------ **/
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  bytes32 public constant MILESTONE_EDITOR_ROLE = keccak256("MILESTONE_EDITOR_ROLE");
   // bytes32 public constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
   // bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
@@ -69,7 +70,7 @@ contract GrantsManager is
   // b3tr treasury yes
 
   struct GrantsManagerStorage {
-    mapping(uint256 => GovernorTypes.Milestones) proposalMilestones; // proposalId => milestones
+    mapping(uint256 => Milestones) proposalMilestones; // proposalId => milestones
     uint256 minimumMilestoneCount;
     ITreasury treasury;
     IB3TRGovernor governor;
@@ -150,13 +151,31 @@ contract GrantsManager is
   /**
    * @dev Emitted when a milestone is created.
    */
-  event MilestonesCreated(
-    uint256 indexed milestonesId,
-    uint256 totalAmount,
-    address recipient,
-    string description,
-    GovernorTypes.Milestones milestones
-  );
+  event MilestonesCreated(uint256 indexed milestonesId, Milestones milestones);
+
+  event MilestoneDescriptionUpdated(uint256 indexed proposalId, string oldDescriptionHash, string newDescriptionHash);
+  // MilestoneState enum to store the status of the milestone
+  enum MilestoneState {
+    Pending, // 0 - default
+    Validated, // 1 - milestone is active and claimable
+    Claimed, // 2 - funds claimed by recipient
+    Rejected, // 3 - admin rejects
+    Expired, // 4 - deadline passed without action
+    Refunded // 5 - funds returned to treasury
+  }
+
+  struct Milestone {
+    uint256 amount;
+    MilestoneState status;
+  }
+  struct Milestones {
+    uint256 id; // Milestone id = proposalId
+    uint256 totalAmount; // Amount of funding for this milestone
+    uint256 claimedAmount; // Amount of funds claimed by the recipient
+    address recipient; // Treasury address ? multisig ? who can claim the amount in the team ? the admin only ?
+    Milestone[] milestone;
+    string descriptionHash;
+  }
 
   // // Errors
   // error InvalidMilestoneState();
@@ -184,28 +203,21 @@ contract GrantsManager is
 
   /** ------------------ Grants Manager Milestone Functions ------------------ **/
   /**
-  //  * @dev Internal function to create milestones for a proposal.
-  //  * @param description The description of the proposal.
-  //  * @param values The values of the proposal.
-  //  * @param targets The targets of the proposal.
-  //  * @param calldatas The calldatas of the proposal.
-  //  * @return uint256 The milestone id.
-  //  */
+   * @dev Internal function to create milestones for a proposal.
+   * @param descriptionHash The IPFS hash containing milestone descriptions and metadata
+   * @param values The values array containing amounts for each milestone
+   * @param proposalId The ID of the proposal
+   */
   function createMilestones(
-    string memory description,
+    string memory descriptionHash,
     uint256[] memory values,
-    address[] memory targets,
-    bytes[] memory calldatas // transferB3TR calldata
-  ) external onlyAdminOrGovernance returns (uint256) {
+    Milestones memory milestones,
+    uint256 proposalId
+  ) external onlyAdminOrGovernance {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-    uint256[] memory valuesToUse = new uint256[](2);
-    valuesToUse[0] = 0;
-    valuesToUse[1] = 0;
-
     // Calculate the proposal ID using the same method as the governor
-    bytes32 descriptionHash = keccak256(bytes(description));
-    uint256 milestoneId = $.governor.hashProposal(targets, valuesToUse, calldatas, descriptionHash);
+    uint256 milestoneId = proposalId;
     require(milestoneId != 0, "Milestone ID already exists");
 
     // Verify the proposal state
@@ -215,39 +227,56 @@ contract GrantsManager is
       "Proposal not executed or queued"
     );
 
-    // Validate milestone requirements
-    require(values.length >= $.minimumMilestoneCount, "Not enough milestones");
-
-    // Calculate total amount
-    uint256 totalAmount = 0;
-    for (uint256 i = 0; i < values.length; i++) {
-      require(values[i] > 0, "Milestone amount must be greater than 0");
-      totalAmount += values[i];
-    }
-
     // Create milestones
-    GovernorTypes.Milestones storage milestones = $.proposalMilestones[milestoneId];
-    milestones.totalAmount = totalAmount;
-    milestones.claimedAmount = 0;
-    milestones.recipient = msg.sender;
-    milestones.id = milestoneId;
+    Milestones storage m = $.proposalMilestones[milestoneId];
+
+    m.descriptionHash = descriptionHash;
+    m.totalAmount = milestones.totalAmount;
+    m.claimedAmount = 0;
+    m.recipient = msg.sender;
+    m.id = milestoneId;
 
     // Create milestone array
     for (uint256 i = 0; i < values.length; i++) {
-      milestones.milestone.push(
-        GovernorTypes.Milestone({ amount: values[i], status: GovernorTypes.MilestoneState.Pending })
-      );
+      m.milestone.push(Milestone({ amount: values[i], status: MilestoneState.Pending }));
     }
 
-    emit MilestonesCreated(milestoneId, totalAmount, msg.sender, description, milestones);
+    emit MilestonesCreated(milestoneId, m);
+  }
 
-    return milestoneId;
+  /**
+   * @dev Updates the description hash for a milestone
+   * @param proposalId The ID of the proposal
+   * @param newDescriptionHash The new IPFS hash containing updated milestone descriptions
+   */
+  function updateMilestoneDescription(
+    uint256 proposalId,
+    string memory newDescriptionHash
+  ) external onlyRole(MILESTONE_EDITOR_ROLE) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+
+    require($.proposalMilestones[proposalId].id != 0, "Milestone does not exist");
+
+    string memory oldDescriptionHash = $.proposalMilestones[proposalId].descriptionHash;
+    $.proposalMilestones[proposalId].descriptionHash = newDescriptionHash;
+
+    emit MilestoneDescriptionUpdated(proposalId, oldDescriptionHash, newDescriptionHash);
+  }
+
+  /**
+   * @notice Gets the description hash for a milestone
+   * @param proposalId The ID of the proposal
+   * @return string The IPFS hash containing milestone descriptions
+   */
+  function getMilestoneDescription(uint256 proposalId) external view returns (string memory) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    return $.proposalMilestones[proposalId].descriptionHash;
   }
 
   // function setMilestoneStatus(
   //   uint256 proposalId,
   //   uint256 milestoneIndex,
-  //   GovernorTypes.MilestoneState newStatus
+  //   MilestoneState newStatus
   // ) external {
   //   GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
   //   require(msg.sender == address($.treasuryGrants), "Only GrantsManager can call");
@@ -313,12 +342,9 @@ contract GrantsManager is
    * @notice Returns a milestone for a proposal.
    * @param proposalId The id of the proposal
    * @param milestoneIndex The index of the milestone
-   * @return GovernorTypes.Milestone The milestone
+   * @return Milestone The milestone
    */
-  function getMilestone(
-    uint256 proposalId,
-    uint256 milestoneIndex
-  ) external view returns (GovernorTypes.Milestone memory) {
+  function getMilestone(uint256 proposalId, uint256 milestoneIndex) external view returns (Milestone memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     return $.proposalMilestones[proposalId].milestone[milestoneIndex];
@@ -327,9 +353,9 @@ contract GrantsManager is
   /**
    * @notice Returns the milestones for a proposal.
    * @param proposalId The id of the proposal
-   * @return GovernorTypes.Milestones The milestones for the proposal
+   * @return Milestones The milestones for the proposal
    */
-  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestones memory) {
+  function getMilestones(uint256 proposalId) external view returns (Milestones memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     return $.proposalMilestones[proposalId];
   }
@@ -373,7 +399,7 @@ contract GrantsManager is
   //  */
   // function validateMilestone(uint256 proposalId, uint256 milestoneIndex) external onlyRole(GOVERNANCE_ROLE) {
   //   GrantsManagerStorage storage $ = _getTreasuryGrantsStorage();
-  //   GovernorTypes.Milestones memory milestones = $.governor.getMilestones(proposalId);
+  //   Milestones memory milestones = $.governor.getMilestones(proposalId);
   //   require(milestoneIndex < milestones.milestone.length, "Invalid milestone index");
 
   //   // Check if first milestone or previous milestone is claimed

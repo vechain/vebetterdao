@@ -364,6 +364,53 @@ library GovernorProposalLogic {
       );
   }
 
+  function proposeGrant(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    IGrantsManager.Milestones memory milestones
+  ) external returns (uint256) {
+    address proposer = msg.sender;
+    uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+
+    validateProposeParams(
+      self,
+      proposer,
+      startRoundId,
+      description,
+      targets,
+      values,
+      calldatas,
+      proposalId,
+      GovernorTypes.ProposalType.Grant
+    );
+
+    // Create milestones first
+    IGrantsManager(targets[0]).createMilestones(
+      description,
+      values,
+      milestones,
+      proposalId
+    );
+
+    return _propose(
+      self,
+      proposer,
+      proposalId,
+      targets,
+      values,
+      calldatas,
+      description,
+      startRoundId,
+      depositAmount,
+      GovernorTypes.ProposalType.Grant
+    );
+  }
+
   /**
    * @dev Function to know if a proposal is executable or not.
    * If the proposal was creted without any targets, values, or calldatas, it is not executable.
@@ -748,14 +795,15 @@ library GovernorProposalLogic {
     bytes[] memory calldatas, 
     bytes32 descriptionHash
   ) private {
-    // execute
+    // execute transfer first
     self.timelock.executeBatch{ value: msg.value }(
       targets,
       values,
-      calldatas, // [transferB3tr(addressTreasuryGrant, amount), createMilestones(description, values, calldatas)]
+      calldatas,
       0,
       GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
     );
+
     // cleanup for refund
     delete self.timelockIds[proposalId];
   }

@@ -41,7 +41,7 @@ interface IGrantsManager {
     uint256 totalAmount,
     address recipient,
     string description,
-    GovernorTypes.Milestones milestones
+    Milestones milestones
   );
 
   // Errors
@@ -51,18 +51,43 @@ interface IGrantsManager {
   error InvalidMilestoneIndex();
   error PreviousMilestoneNotClaimed();
 
+  // Milestone struct
+  struct Milestone {
+    uint256 amount;
+    MilestoneState status;
+  }
+  // Milestones struct
+  struct Milestones {
+    uint256 id;
+    uint256 totalAmount;
+    uint256 claimedAmount;
+    address recipient;
+    Milestone[] milestone;
+    string descriptionHash;
+  } 
+
+  // MilestoneState enum to store the status of the milestone
+  enum MilestoneState {
+    Pending, // 0 - default
+    Validated, // 1 - milestone is active and claimable
+    Claimed, // 2 - funds claimed by recipient
+    Rejected, // 3 - admin rejects
+    Expired, // 4 - deadline passed without action
+    Refunded // 5 - funds returned to treasury
+  }
+
   // Grants Manager Milestone Functions
   function createMilestones(
-    string memory description,
+    string memory descriptionHash,
     uint256[] memory values,
-    address[] memory targets,
-    bytes[] memory calldatas
-  ) external returns (uint256);
+    Milestones memory milestones,
+    uint256 proposalId
+  ) external;
 
   function setMilestoneStatus(
     uint256 proposalId,
     uint256 milestoneIndex,
-    GovernorTypes.MilestoneState newStatus
+    MilestoneState newStatus
   ) external;
 
   function approveMilestones(uint256 proposalId, uint256 milestoneIndex) external;
@@ -74,14 +99,14 @@ interface IGrantsManager {
   function milestoneState(
     uint256 proposalId,
     uint256 milestoneIndex
-  ) external view returns (GovernorTypes.MilestoneState);
+  ) external view returns (MilestoneState);
 
   function getMilestone(
     uint256 proposalId,
     uint256 milestoneIndex
-  ) external view returns (GovernorTypes.Milestone memory);
+  ) external view returns (Milestone memory);
 
-  function getMilestones(uint256 proposalId) external view returns (GovernorTypes.Milestones memory);
+  function getMilestones(uint256 proposalId) external view returns (Milestones memory);
 
   function getMinimumMilestoneCount() external view returns (uint256);
 

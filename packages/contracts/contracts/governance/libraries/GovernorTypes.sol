@@ -129,29 +129,4 @@ library GovernorTypes {
     Standard,
     Grant
   }
-
-  // MilestoneState enum to store the status of the milestone
-  enum MilestoneState {
-    Pending, // 0 - default
-    Validated, // 1 - milestone is active and claimable
-    Claimed, // 2 - funds claimed by recipient
-    Rejected, // 3 - admin rejects
-    Expired, // 4 - deadline passed without action
-    Refunded // 5 - funds returned to treasury
-  }
-  // Register milestones for a grant proposal
-  struct Milestones {
-    uint256 id; // Milestone id = proposalId
-    uint256 totalAmount; // Amount of funding for this milestone
-    uint256 claimedAmount; // Amount of funds claimed by the recipient
-    address recipient; // Treasury address ? multisig ? who can claim the amount in the team ? the admin only ?
-    Milestone[] milestone;
-  }
-
-  // Data for a milestone within a grant proposal
-  struct Milestone {
-    uint256 amount;
-    // uint256 deadline; // Deadline timestamp for milestone completion
-    MilestoneState status;
-  }
 }
