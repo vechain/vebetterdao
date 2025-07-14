@@ -51,6 +51,7 @@ const getCallerWalletInfo = (): { walletAddress: string; privateKey: string } =>
  * @param voter - The address of the voter to claim rewards for.
  * @returns An object containing the transaction receipt and gas result.
  */
+// todo - make this dynamic for testnet and mainnet
 const claimRewardLocal = async (
   thor: ThorClient,
   cycle: number,
@@ -478,11 +479,17 @@ const main = async () => {
   try {
     const thor = ThorClient.at(NODE_URL, { isPollingEnabled: false })
 
+    const cycleInput = process.argv[2]
+    if (!cycleInput) {
+      throw new Error("Cycle input is required")
+    }
+    const cycle = parseInt(cycleInput)
+
     // Example usage - replace with actual values
     const usersToCheck = [
-      { voter: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", cycle: 17 },
-      { voter: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", cycle: 17 },
-      { voter: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", cycle: 17 },
+      { voter: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", cycle },
+      { voter: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", cycle },
+      { voter: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", cycle },
       // Add more users as needed
     ]
 

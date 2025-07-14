@@ -1,5 +1,4 @@
-import { getConfig } from "@repo/config"
-import { getTestKeys } from "../../../../../contracts/scripts/helpers/seedAccounts"
+import { AppConfig, getConfig } from "@repo/config"
 import { distributeEmissions } from "../../../../../contracts/scripts/helpers/emissions"
 import { Emissions__factory, XAllocationVoting__factory } from "../../../../../contracts/typechain-types"
 import { Clause, Address, ABIContract } from "@vechain/sdk-core"
@@ -7,19 +6,15 @@ import { TransactionUtils } from "@repo/utils"
 import { ThorClient } from "@vechain/sdk-network"
 import { getCurrentRoundId } from "../../xApps/getCurrentRoundId"
 import { ethers } from "ethers"
+import path from "path"
+import dotenv from "dotenv"
 
-const NUM_VOTERS = 5
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env") })
+import { getTestKeys } from "../../../../../contracts/scripts/helpers/seedAccounts"
 
-export const simulateRound = async () => {
-  console.log("=== Starting Round Simulation ===")
+const NUM_VOTERS = 4
 
-  const config = getConfig()
-  const thorClient = ThorClient.at(config.nodeUrl)
-  const accounts = getTestKeys(NUM_VOTERS + 1)
-  const admin = accounts[0]
-
-  console.log("Waiting for next round to start...")
-
+const waitForNextRound = async (thorClient: ThorClient, config: AppConfig) => {
   const nextRoundBlock = await thorClient.contracts.executeCall(
     config.emissionsContractAddress,
     ABIContract.ofAbi(Emissions__factory.abi).getFunction("getNextCycleBlock"),
@@ -28,6 +23,18 @@ export const simulateRound = async () => {
 
   // Wait for the blockchain to reach the specified block number
   await thorClient.blocks.waitForBlockCompressed(Number(nextRoundBlock.result.array?.[0]), { intervalMs: 10000 })
+}
+
+const simulateRound = async () => {
+  console.log("=== Starting Round Simulation ===")
+
+  const config = getConfig()
+  const thorClient = ThorClient.at(config.nodeUrl)
+  const accounts = getTestKeys(NUM_VOTERS + 1)
+  const admin = accounts[0]
+
+  console.log("Waiting for next round to start...")
+  await waitForNextRound(thorClient, config)
 
   console.log("1. Starting new round...")
 
@@ -38,12 +45,10 @@ export const simulateRound = async () => {
   console.log(`Using round ID: ${currentRoundId}`)
 
   console.log("3. Getting eligible apps for voting...")
-  const mugshotAppId = "0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a"
-  const appIds = [mugshotAppId] // Mugshot Harcoded
+  const mugshotAppId = "0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a" // Mugshot Harcoded
+  const appIds = [mugshotAppId]
 
   console.log("4. Casting votes with 4 accounts...")
-  // Use 4 accounts to vote
-  // addresses: 0x435933c8064b4Ae76bE665428e0307eF2cCFBD68, 0x0F872421Dc479F3c11eDd89512731814D0598dB5, 0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa, 0x0F872421Dc479F3c11eDd89512731814D0598dB5
   const voters = accounts.slice(1, NUM_VOTERS + 1)
 
   for (let i = 0; i < voters.length; i++) {
@@ -74,5 +79,4 @@ export const simulateRound = async () => {
   console.log(`Round ${currentRoundId} has ${NUM_VOTERS} votes cast`)
 }
 
-// simulateRound()
-console.log(ethers.parseEther("1000"))
+simulateRound()
