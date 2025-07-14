@@ -77,7 +77,7 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
               colorScheme={selected ? "primary" : "gray"}
               variant={selected ? "primaryAction" : "ghost"}
               rounded="full">
-              {route.name}
+              <Text fontWeight={selected ? "bold" : "normal"}>{route.name}</Text>
               <Icon
                 ml={2}
                 as={FaChevronDown}
@@ -153,7 +153,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           const selected = isSelected(route, pathname)
           const onClick = handleClick(route, router, onMenuClick)
           const fontWeight = selected ? 600 : 400
-          const hasSubRoutes = route?.subRoutes?.length && route?.subRoutes?.length > 0
+          const hasSubRoutes = route?.subRoutes?.length
           if (hasSubRoutes) {
             return <ButtonWithSubRoutes key={route.name} route={route} selected={selected} />
           }
