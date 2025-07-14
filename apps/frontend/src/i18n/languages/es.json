@@ -1714,5 +1714,8 @@
   "Managed by": "Administrado por",
   "Managing for": "Administrando para",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "Actualmente tienes varios nodos bajo tu control, y no admitimos múltiples nodos por cuenta.",
-  "Your Node can be currently used only by the manager": "Tu nodo solo puede ser utilizado actualmente por el administrador"
+  "Your Node can be currently used only by the manager": "Tu nodo solo puede ser utilizado actualmente por el administrador",
+  "STARGATE IS LIVE 🌌": "STARGATE ESTÁ EN VIVO 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "Migra tu nodo heredado para descubrir el nuevo universo stargate!",
+  "Start staking VET to explore the new stargate universe !": "Comienza a hacer staking de VET para explorar el nuevo universo stargate!"
 }

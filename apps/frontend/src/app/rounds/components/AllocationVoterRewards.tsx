@@ -150,7 +150,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           {description}
         </Box>
         <Button
-          zIndex={2}
+          zIndex={1}
           mt={2}
           isDisabled={!canClaim}
           isLoading={isRoundRewardLoading}

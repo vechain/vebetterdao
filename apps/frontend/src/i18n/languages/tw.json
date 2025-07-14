@@ -1714,5 +1714,8 @@
   "Managed by": "管理者：",
   "Managing for": "管理對象：",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "您目前擁有多個節點，我們目前尚未支援單一帳號管理多個節點。",
-  "Your Node can be currently used only by the manager": "目前此節點只能由管理者使用"
+  "Your Node can be currently used only by the manager": "目前此節點只能由管理者使用",
+  "STARGATE IS LIVE 🌌": "星際之門已啟動 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "遷移舊節點以探索新的星際之門宇宙！",
+  "Start staking VET to explore the new stargate universe !": "開始質押 VET 以探索新的星際之門宇宙！"
 }
