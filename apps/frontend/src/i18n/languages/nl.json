@@ -1714,5 +1714,8 @@
   "Managed by": "Beheerd door",
   "Managing for": "Beheerd voor",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "Je hebt momenteel meerdere knopen onder jouw controle en we ondersteunen momenteel geen meerdere knopen per account.",
-  "Your Node can be currently used only by the manager": "Je knoop kan momenteel alleen door de manager worden gebruikt"
+  "Your Node can be currently used only by the manager": "Je knoop kan momenteel alleen door de manager worden gebruikt",
+  "STARGATE IS LIVE 🌌": "STARGATE IS LIVE 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "Migreer uw legacy-node om het nieuwe stargate-universum te ontdekken!",
+  "Start staking VET to explore the new stargate universe !": "Begin met het staken van VET om het nieuwe stargate-universum te verkennen!"
 }

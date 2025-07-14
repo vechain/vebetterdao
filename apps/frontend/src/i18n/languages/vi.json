@@ -1695,7 +1695,6 @@
   "Unable to process request. Try refreshing or contact support.": "Không thể xử lý yêu cầu. Thử tải lại hoặc liên hệ hỗ trợ.",
   "Eg. Our goal is to distribute at least X percent of the round allocation each week.": "Ví dụ: Mục tiêu của chúng tôi là phân phối ít nhất X phần trăm của phân bổ vòng mỗi tuần.",
   "Vote Type": "Loại Bỏ Phiếu",
-
   "Node Owner": "Chủ sở hữu Node",
   "Manager": "Quản lý",
   "You have been added as a manager for this node": "Bạn đã được thêm làm quản lý cho node này",
@@ -1715,5 +1714,8 @@
   "Managed by": "Được quản lý bởi",
   "Managing for": "Quản lý cho",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "Bạn hiện quản lý nhiều Node, nhưng chúng tôi không hỗ trợ nhiều Node cho mỗi tài khoản.",
-  "Your Node can be currently used only by the manager": "Node của bạn hiện chỉ có thể được sử dụng bởi quản lý"
+  "Your Node can be currently used only by the manager": "Node của bạn hiện chỉ có thể được sử dụng bởi quản lý",
+  "STARGATE IS LIVE 🌌": "STARGATE ĐANG HOẠT ĐỘNG 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "Di chuyển node cũ của bạn để khám phá vũ trụ stargate mới!",
+  "Start staking VET to explore the new stargate universe !": "Bắt đầu staking VET để khám phá vũ trụ stargate mới!"
 }

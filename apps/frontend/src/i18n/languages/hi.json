@@ -1714,5 +1714,8 @@
   "Managed by": "प्रबंधित द्वारा",
   "Managing for": "के लिए प्रबंधित कर रहा है",
   "You currently have multiple Nodes under your control, and we currently don't support multiple Nodes per account.": "आपके नियंत्रण में वर्तमान में कई नोड हैं, और हम अभी प्रति खाता कई नोड का समर्थन नहीं करते हैं।",
-  "Your Node can be currently used only by the manager": "आपका नोड वर्तमान में केवल प्रबंधक द्वारा उपयोग किया जा सकता है"
+  "Your Node can be currently used only by the manager": "आपका नोड वर्तमान में केवल प्रबंधक द्वारा उपयोग किया जा सकता है",
+  "STARGATE IS LIVE 🌌": "स्टारगेट लाइव है 🌌",
+  "Migrate your legacy node to discover the new stargate universe !": "अपने पुराने नोड को नए स्टारगेट ब्रह्मांड की खोज के लिए माइग्रेट करें!",
+  "Start staking VET to explore the new stargate universe !": "नए स्टारगेट ब्रह्मांड की खोज के लिए वीईटी स्टेक करना शुरू करें!"
 }

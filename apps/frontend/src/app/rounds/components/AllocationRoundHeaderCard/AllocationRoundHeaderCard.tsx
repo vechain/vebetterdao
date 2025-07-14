@@ -177,7 +177,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Box>
                 )}
               </Stack>
-              {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && (
+              {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && !isFinished && (
                 <Button
                   data-testid="cast-your-vote-button"
                   variant={"primaryAction"}
