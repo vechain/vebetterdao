@@ -3,6 +3,23 @@ import { ThorClient } from "@vechain/sdk-network"
 
 let chainTag: number
 
+// Copied type from @vechain/sdk-network/dist/index.d.ts
+type EstimateGasResult = {
+  totalGas: number
+  reverted: boolean
+  revertReasons: Array<string | bigint>
+  vmErrors: string[]
+}
+
+export const waitForNextBlock = async (thorClient: ThorClient): Promise<void> => {
+  const startingBlock = await thorClient.blocks.getBestBlockCompressed()
+  let currentBlock
+  do {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    currentBlock = await thorClient.blocks.getBestBlockCompressed()
+  } while (startingBlock?.number === currentBlock?.number)
+}
+
 export const getBestBlockRef = async (thorClient: ThorClient): Promise<string> => {
   const blockRef = await thorClient.blocks.getBestBlockRef()
 
@@ -28,6 +45,16 @@ export const getChainTag = async (thorClient: ThorClient): Promise<number> => {
   return chainTag
 }
 
+export const estimateGas = async (
+  thorClient: ThorClient,
+  clauses: TransactionClause[],
+  pk: Uint8Array,
+): Promise<EstimateGasResult> => {
+  const senderAddress = Address.ofPrivateKey(pk)
+  const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress.toString())
+  return gasResult
+}
+
 export const buildTxBody = async (
   thorClient: ThorClient,
   clauses: TransactionClause[],
@@ -43,7 +70,10 @@ export const buildTxBody = async (
       throw new Error(`Gas estimation failed: ${gasResult.revertReasons} - ${gasResult.vmErrors}`)
     }
 
-    gas = gasResult.totalGas + 200_000
+    console.log(`Gas result: ${gasResult.totalGas}`)
+
+    // gas = gasResult.totalGas + 200_000
+    gas = gasResult.totalGas
   }
 
   const body: TransactionBody = {
@@ -80,6 +110,7 @@ export const sendTx = async (
   clauses: TransactionClause[],
   pk: Uint8Array,
   retries: number = 5,
+  waitForNext: boolean = false,
 ) => {
   const signerAddress = Address.ofPrivateKey(pk)
 
@@ -90,10 +121,18 @@ export const sendTx = async (
       if (attempt > 1) {
         console.log(`Attempt ${attempt} of ${actualRetries}: Sending transaction...`)
       }
+
+      // Wait for next block if requested
+      // This was added to ensure we don't fail at estimateGas when processing a transaction too quickly
+      if (waitForNext) {
+        await waitForNextBlock(thorClient)
+      }
+
       // Rebuild the transaction body for each attempt to get fresh gas, nonce, and blockRef.
       const body: TransactionBody = await buildTxBody(thorClient, clauses, signerAddress, 32)
 
       await signAndSendTx(thorClient, body, pk) // This function signs the body and sends the transaction
+
       return // Transaction was successful, exit the function
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
