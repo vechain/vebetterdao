@@ -120,4 +120,12 @@ interface IGrantsManager {
   function claimMilestone(uint256 proposalId, uint256 milestoneIndex) external;
 
   function isClaimable(uint256 proposalId, uint256 milestoneIndex) external view returns (bool);
+
+  function setGovernorContract(address _governor) external; 
+
+  function setTreasuryContract(address _treasury) external;
+
+  function getGovernorContract() external view returns (address);
+
+  function getTreasuryContract() external view returns (address);
 }

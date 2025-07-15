@@ -15,6 +15,7 @@ import {
   NodeManagement,
   VeBetterPassport,
   X2EarnCreator,
+  GrantsManager,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -519,6 +520,9 @@ export async function deployLatest(config: ContractsConfig) {
             grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
             grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
             standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+            standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+            grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+            galaxyMember: await galaxyMember.getAddress(),
           },
         ],
       },
@@ -536,6 +540,18 @@ export async function deployLatest(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
+  const grantsManager = (await deployAndInitializeLatest(
+    "GrantsManager",
+    [
+      {
+        name: "initialize",
+        args: [await governor.getAddress(), await treasury.getAddress(), TEMP_ADMIN],
+      },
+    ],
+    {},
+    true,
+  )) as GrantsManager
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -544,6 +560,7 @@ export async function deployLatest(config: ContractsConfig) {
     B3TRGovernor: await governor.getAddress(),
     Emissions: await emissions.getAddress(),
     GalaxyMember: await galaxyMember.getAddress(),
+    GrantsManager: await grantsManager.getAddress(),
     TimeLock: await timelock.getAddress(),
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),

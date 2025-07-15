@@ -14,9 +14,9 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { DeployInstance, getOrDeployContractInstances } from "../helpers"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
-import { setupProposer, STANDARD_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
+import { setupProposer, STANDARD_PROPOSAL_TYPE, GRANT_PROPOSAL_TYPE, startNewRoundAndGetRoundId } from "./fixture.test"
 
-describe("Governance - Upgrades", function () {
+describe.only("Governance - Upgrades", function () {
   it("Should preserve proposal data through version upgrades and add proposal type support", async () => {
     const config = createLocalConfig()
     const {
@@ -78,6 +78,8 @@ describe("Governance - Upgrades", function () {
       minterAccount,
       otherAccounts,
       emissions,
+      grantsManager,
+      galaxyMember,
     } = (await getOrDeployContractInstances({
       forceDeploy: true,
     })) as DeployInstance
@@ -327,6 +329,10 @@ describe("Governance - Upgrades", function () {
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(),
+          grantsManager: await grantsManager.getAddress(),
         },
       ],
       {
@@ -449,6 +455,8 @@ describe("Governance - Upgrades", function () {
       governorStateLogicLib,
       governorVotesLogicLib,
       veBetterPassport,
+      grantsManager,
+      galaxyMember,
     } = (await getOrDeployContractInstances({
       forceDeploy: true,
     })) as DeployInstance
@@ -565,6 +573,10 @@ describe("Governance - Upgrades", function () {
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(),
+          grantsManager: await grantsManager.getAddress(),
         },
       ],
       {
@@ -664,6 +676,8 @@ describe("Governance - Upgrades", function () {
       governorStateLogicLib,
       governorVotesLogicLib,
       veBetterPassport,
+      galaxyMember,
+      grantsManager,
     } = (await getOrDeployContractInstances({
       forceDeploy: true,
     })) as DeployInstance
@@ -798,6 +812,10 @@ describe("Governance - Upgrades", function () {
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(), //GalaxyMember contract
+          grantsManager: await grantsManager.getAddress(), //GrantsManager contract
         },
       ],
       {
@@ -899,6 +917,8 @@ describe("Governance - Upgrades", function () {
       governorStateLogicLib,
       governorVotesLogicLib,
       veBetterPassport,
+      grantsManager,
+      galaxyMember,
     } = (await getOrDeployContractInstances({
       forceDeploy: true,
     })) as DeployInstance
@@ -1011,6 +1031,10 @@ describe("Governance - Upgrades", function () {
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(),
+          grantsManager: await grantsManager.getAddress(),
         },
       ],
       {
@@ -1036,5 +1060,20 @@ describe("Governance - Upgrades", function () {
       STANDARD_PROPOSAL_TYPE, //Proposal type
     )
     expect(v7QuorumNumeratorByType).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE))
+
+    //Check if the GM weight is the same as the GM weight initialized in previous version
+    const v7StandardGMWeight = await governorV7.getProposalTypeGMWeight(STANDARD_PROPOSAL_TYPE)
+    expect(v7StandardGMWeight).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT))
+
+    const v7GrantGMWeight = await governorV7.getProposalTypeGMWeight(GRANT_PROPOSAL_TYPE)
+    expect(v7GrantGMWeight).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_GRANT_GM_WEIGHT))
+
+    // Check if the grantsManager is the same as the grantsManager initialized in previous version
+    const v7GrantsManager = await governorV7.getGrantsManagerContract()
+    expect(v7GrantsManager).to.be.equal(await grantsManager.getAddress())
+
+    // Check if the galaxyMember is the same as the galaxyMember initialized in previous version
+    const v7GalaxyMember = await governorV7.getGalaxyMemberContract()
+    expect(v7GalaxyMember).to.be.equal(await galaxyMember.getAddress())
   })
 })

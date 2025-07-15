@@ -839,6 +839,14 @@ export const getOrDeployContractInstances = async ({
     },
   )) as VeBetterPassport
 
+  // Set the TEMP governor address before deploying the governor
+  const TEMP_GOVERNOR_ADDRESS = owner.address
+  const grantsManager = (await deployProxy("GrantsManager", [
+    TEMP_GOVERNOR_ADDRESS,
+    await treasury.getAddress(),
+    owner.address,
+  ])) as GrantsManager
+
   const governor = (await deployAndUpgrade(
     [
       "B3TRGovernorV1",
@@ -883,6 +891,10 @@ export const getOrDeployContractInstances = async ({
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(), //GalaxyMember contract
+          grantsManager: await grantsManager.getAddress(), //GrantsManager contract
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
     ],
@@ -962,12 +974,6 @@ export const getOrDeployContractInstances = async ({
       ],
     },
   )) as B3TRGovernor
-
-  const grantsManager = (await deployProxy("GrantsManager", [
-    await governor.getAddress(),
-    await treasury.getAddress(),
-    owner.address,
-  ])) as GrantsManager
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -1069,6 +1075,9 @@ export const getOrDeployContractInstances = async ({
     x2EarnCreator.safeMint(owner.address), // Mint for the owner
     ...creators.map(creator => x2EarnCreator.safeMint(creator.address)), // Mint for all creators
   ])
+
+  // Set up the GrantsManager
+  await grantsManager.connect(owner).setGovernorContract(await governor.getAddress())
 
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {

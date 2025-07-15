@@ -783,15 +783,19 @@ library GovernorProposalLogic {
     self.proposalType[proposalId] = proposalTypeValue;
   }
 
+  /**
+   * @dev Internal function to validate the proposer.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposer The address of the proposer.
+   * @param proposalTypeValue The type of the proposal.
+   */
   function _validateProposer(
     GovernorStorageTypes.GovernorStorage storage self,
     address proposer,
     GovernorTypes.ProposalType proposalTypeValue
   ) private view {
-    // Check GM weight requirement for all proposal types
     uint256 requiredWeight = self.proposalTypeGMWeight[proposalTypeValue];
-    // get the levelOf(tokenIdOf(proposer))
-    uint256 level = self.galaxyMember.levelOf(self.galaxyMember.getSelectedTokenId(proposer));
+    uint256 level = self.galaxyMember.levelOf(self.galaxyMember.getSelectedTokenId(proposer)); // 1 for earth 
     if (level < requiredWeight) {
       revert GovernorInvalidProposer(proposer, requiredWeight);
     }

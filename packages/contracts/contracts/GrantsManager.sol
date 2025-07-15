@@ -462,6 +462,26 @@ contract GrantsManager is
   //   return milestones.milestone[milestoneIndex].status == GovernorTypes.MilestoneState.Validated;
   // }
 
+  function setGovernorContract(address _governor) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    $.governor = IB3TRGovernor(_governor);
+  }
+
+  function getGovernorContract() external view returns (address) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    return address($.governor);
+  }
+
+  function setTreasuryContract(address _treasury) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    $.treasury = ITreasury(_treasury);
+  }
+
+  function getTreasuryContract() external view returns (address) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    return address($.treasury);
+  }
+
   /** ------------------ OVERRIDES ------------------ **/
   /**
    * @notice Implements IERC721Receiver interface

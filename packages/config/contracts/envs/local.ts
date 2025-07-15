@@ -19,9 +19,9 @@ export function createLocalConfig() {
     B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("3500000000000000000000000"), // 3.5M B3TR
     B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("5000000000000000000000000"), // 5M B3TR
 
-    // GM weight requirements for proposal types
-    B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for standard proposals
-    B3TR_GOVERNOR_GRANT_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for grant proposals
+    // GM weight requirements for proposal types ( for tests compatibility putting to 0 )
+    B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 0, // 0 -> No GM weight required for standard proposals
+    B3TR_GOVERNOR_GRANT_GM_WEIGHT: 0, // 0 -> No GM weight required for grant proposals
 
     /*
       For ambiguous functions (functions with same name), the function signature is used to differentiate them

@@ -756,6 +756,16 @@ contract B3TRGovernor is
     return $.grantsManager;
   }
 
+  /**
+   * @notice Get the GM weight for a proposal type
+   * @param proposalType The type of the proposal
+   * @return The GM weight for the proposal type
+   */
+  function getProposalTypeGMWeight(GovernorTypes.ProposalType proposalType) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.proposalTypeGMWeight[proposalType];
+  }
+
   // ------------------ SETTERS ------------------ //
 
   /**
@@ -1163,6 +1173,17 @@ contract B3TRGovernor is
   ) external onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setGrantsManagerContract($, newGrantsManager);
+  }
+
+  /**
+   * @notice Set the GM weight for a proposal type
+   * @param proposalType The type of the proposal
+   * @param newGMWeight The new GM weight for the proposal type
+   * @notice e.g. setProposalTypeGMWeight(0, 1) = GM level 1 is required to create a standard proposal
+   */
+  function setProposalTypeGMWeight(GovernorTypes.ProposalType proposalType, uint256 newGMWeight) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setProposalTypeGMWeight($, proposalType, newGMWeight);
   }
 
   // ------------------ Overrides ------------------ //

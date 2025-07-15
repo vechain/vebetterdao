@@ -99,7 +99,7 @@ library GovernorStorageTypes {
 
     // ------------------------------- Passport -------------------------------
     IVeBetterPassport veBetterPassport;
-    IGalaxyMember galaxyMember;
+
     // ------------------------------- Version 7 -------------------------------
     // mapping to store the proposal type for each proposal
     mapping(uint256 => GovernorTypes.ProposalType) proposalType;
@@ -113,6 +113,8 @@ library GovernorStorageTypes {
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
     // GrantsManager contract
     IGrantsManager grantsManager;
+    // GalaxyMember contract
+    IGalaxyMember galaxyMember;
     // mapping to store the GM weight required for each proposal type
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeGMWeight;
   }
