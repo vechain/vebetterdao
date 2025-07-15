@@ -1235,7 +1235,6 @@
   "Download template": "Download template",
   "wallets voted": "wallets voted",
   "Wallets voted": "Wallets voted",
-  "View your Better Profile": "View your Better Profile",
   "General overview about your progress, sustainable actions and veBetter news.": "General overview about your progress, sustainable actions and veBetter news.",
   "Explore apps where you can earn B3TR tokens doing better actions.": "Explore apps where you can earn B3TR tokens doing better actions.",
   "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.": "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
@@ -1740,5 +1739,6 @@
   "2. Get support from the community": "2. Get support from the community",
   "3. Get final review from the community": "3. Get final review from the community",
   "4. Receive funds and start developing": "4. Receive funds and start developing",
-  "Apply": "Apply"
+  "Apply": "Apply",
+  "View profile": "View profile"
 }
