@@ -10,6 +10,8 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { GovernorTypes } from "../governance/libraries/GovernorTypes.sol";
 import { IVeBetterPassport } from "./IVeBetterPassport.sol";
+import { IGalaxyMember } from "./IGalaxyMember.sol";
+import { IGrantsManager } from "./IGrantsManager.sol";
 
 /**
  * @dev Interface of the {B3TRGovernor} core.
@@ -585,4 +587,28 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 depositAmount,
     GovernorTypes.ProposalType proposalType
   ) external returns (uint256 proposalId);
+
+  /**
+   * @notice Set the GalaxyMember contract
+   * @param newGalaxyMember The new GalaxyMember contract
+   */
+  function setGalaxyMember(IGalaxyMember newGalaxyMember) external;
+
+  /**
+   * @notice Get the GalaxyMember contract
+   * @return The current GalaxyMember contract
+   */
+  function getGalaxyMemberContract() external view returns (IGalaxyMember);
+
+  /**
+   * @notice Set the GrantsManager contract
+   * @param newGrantsManager The new GrantsManager contract
+   */
+  function setGrantsManager(IGrantsManager newGrantsManager) external;
+
+  /**
+   * @notice Get the GrantsManager contract
+   * @return The current GrantsManager contract
+   */
+  function getGrantsManagerContract() external view returns (IGrantsManager);
 }

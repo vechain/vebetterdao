@@ -50,6 +50,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "./interfaces/IGrantsManager.sol";
+import { IGalaxyMember } from "./interfaces/IGalaxyMember.sol";
 
 /**
  * @title B3TRGovernor
@@ -737,6 +738,24 @@ contract B3TRGovernor is
     return GovernorQuorumLogic.quorumNumeratorByType($, timepoint, proposalTypeValue);
   }
 
+  /**
+   * @notice Get the GalaxyMember contract
+   * @return The current GalaxyMember contract
+   */
+  function getGalaxyMemberContract() external view returns (IGalaxyMember) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.galaxyMember;
+  }
+
+  /**
+   * @notice Get the GrantsManager contract
+   * @return The current GrantsManager contract
+   */
+  function getGrantsManagerContract() external view returns (IGrantsManager) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.grantsManager;
+  }
+
   // ------------------ SETTERS ------------------ //
 
   /**
@@ -1068,7 +1087,17 @@ contract B3TRGovernor is
     IGrantsManager.Milestones memory milestones
   ) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorProposalLogic.proposeGrant($, targets, values, calldatas, description, startRoundId, depositAmount, milestones);
+    return
+      GovernorProposalLogic.proposeGrant(
+        $,
+        targets,
+        values,
+        calldatas,
+        description,
+        startRoundId,
+        depositAmount,
+        milestones
+      );
   }
 
   /**
@@ -1112,6 +1141,28 @@ contract B3TRGovernor is
   ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setProposalTypeVotingThreshold($, proposalTypeValue, newVotingThreshold);
+  }
+
+  /**
+   * @notice Set the GalaxyMember contract
+   * @param newGalaxyMember The new GalaxyMember contract
+   */
+  function setGalaxyMember(
+    IGalaxyMember newGalaxyMember
+  ) external onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setGalaxyMemberContract($, newGalaxyMember);
+  }
+
+  /**
+   * @notice Set the GrantsManager contract
+   * @param newGrantsManager The new GrantsManager contract
+   */
+  function setGrantsManager(
+    IGrantsManager newGrantsManager
+  ) external onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setGrantsManagerContract($, newGrantsManager);
   }
 
   // ------------------ Overrides ------------------ //

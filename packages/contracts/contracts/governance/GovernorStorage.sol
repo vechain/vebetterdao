@@ -154,5 +154,19 @@ contract GovernorStorage is Initializable {
     // Set deposit threshold cap for Grant proposal type
     governorStorage.proposalTypeDepositThresholdCap[GovernorTypes.ProposalType.Grant] = initializationDataV7
       .grantDepositThresholdCap;
+
+    // Set GM weight for Standard proposal type
+    governorStorage.proposalTypeGMWeight[GovernorTypes.ProposalType.Standard] = initializationDataV7.standardGMWeight;
+
+    // Set GM weight for Grant proposal type
+    governorStorage.proposalTypeGMWeight[GovernorTypes.ProposalType.Grant] = initializationDataV7.grantGMWeight;
+
+    // Set GalaxyMember contract
+    require(address(initializationDataV7.galaxyMember) != address(0), "B3TRGovernor: GalaxyMember address cannot be zero");
+    governorStorage.galaxyMember = initializationDataV7.galaxyMember;
+
+    // Set GrantsManager contract
+    require(address(initializationDataV7.grantsManager) != address(0), "B3TRGovernor: GrantsManager address cannot be zero");
+    governorStorage.grantsManager = initializationDataV7.grantsManager;
   }
 }

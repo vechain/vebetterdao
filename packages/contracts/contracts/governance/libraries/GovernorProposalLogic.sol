@@ -122,6 +122,11 @@ library GovernorProposalLogic {
    */
   error GovernorInvalidProposalType(GovernorTypes.ProposalType proposalType);
 
+  /**
+   * @dev Thrown when the proposer does not fit the requirement (GM weight ATM)
+   */
+  error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
+
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -616,6 +621,8 @@ library GovernorProposalLogic {
     uint32 votingPeriod = SafeCast.toUint32(self.xAllocationVoting.votingPeriod());
     bool isExecutable = targets.length > 0;
 
+    _validateProposer(self, proposer, proposalTypeValue);
+
     _setProposal(
       self,
       proposalId,
@@ -774,6 +781,20 @@ library GovernorProposalLogic {
     proposal.depositThreshold = proposalDepositThreshold;
     // set the proposal type
     self.proposalType[proposalId] = proposalTypeValue;
+  }
+
+  function _validateProposer(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address proposer,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) private view {
+    // Check GM weight requirement for all proposal types
+    uint256 requiredWeight = self.proposalTypeGMWeight[proposalTypeValue];
+    // get the levelOf(tokenIdOf(proposer))
+    uint256 level = self.galaxyMember.levelOf(self.galaxyMember.getSelectedTokenId(proposer));
+    if (level < requiredWeight) {
+      revert GovernorInvalidProposer(proposer, requiredWeight);
+    }
   }
 
   /**

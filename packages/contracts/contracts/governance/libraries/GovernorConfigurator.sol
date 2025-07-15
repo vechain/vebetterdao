@@ -32,6 +32,9 @@ import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { GovernorProposalLogic } from "./GovernorProposalLogic.sol";
 import { GovernorTypes } from "./GovernorTypes.sol";
+import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
+import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
+
 /// @title GovernorConfigurator Library
 /// @notice Library for managing the configuration of a Governor contract.
 /// @dev This library provides functions to set and get various configuration parameters and contracts used by the Governor contract.
@@ -288,6 +291,29 @@ library GovernorConfigurator {
     self.proposalTypeDepositThresholdCap[proposalType] = newDepositThresholdCap;
   }
 
+  /**
+   * @notice Sets the GalaxyMember contract.
+   * @param self The storage reference for the GovernorStorage.
+   * @param newGalaxyMember The new GalaxyMember contract.
+   */
+  function setGalaxyMemberContract(GovernorStorageTypes.GovernorStorage storage self, IGalaxyMember newGalaxyMember) internal {
+    require(address(newGalaxyMember) != address(0), "GovernorConfigurator: GalaxyMember address cannot be zero");
+    self.galaxyMember = newGalaxyMember;
+  }
+
+  /**
+   * @notice Sets the GrantsManager contract.
+   * @param self The storage reference for the GovernorStorage.
+   * @param newGrantsManager The new GrantsManager contract.
+   */
+  function setGrantsManagerContract(
+    GovernorStorageTypes.GovernorStorage storage self,
+    IGrantsManager newGrantsManager
+  ) internal {  
+    require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
+    self.grantsManager = newGrantsManager;
+  }
+
   /**------------------ GETTERS ------------------**/
   /**
    * @notice Returns the voting threshold.
@@ -348,5 +374,23 @@ library GovernorConfigurator {
   ) internal view returns (uint256) {
     require(GovernorProposalLogic.isValidProposalType(proposalType), "GovernorConfigurator: invalid proposal type");
     return self.proposalTypeDepositThresholdCap[proposalType];
+  }
+
+  /**
+   * @notice Returns the GalaxyMember contract.
+   * @param self The storage reference for the GovernorStorage.
+   * @return The current GalaxyMember contract.
+   */
+  function getGalaxyMemberContract(GovernorStorageTypes.GovernorStorage storage self) internal view returns (IGalaxyMember) {
+    return self.galaxyMember;
+  }
+
+  /**
+   * @notice Returns the GrantsManager contract.
+   * @param self The storage reference for the GovernorStorage.
+   * @return The current GrantsManager contract.
+   */
+  function getGrantsManagerContract(GovernorStorageTypes.GovernorStorage storage self) internal view returns (IGrantsManager) {
+    return self.grantsManager;
   }
 }

@@ -33,6 +33,7 @@ import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeab
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
+import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 
 /// @title GovernorStorageTypes
 /// @notice Library for defining storage types used in the Governor contract.
@@ -98,6 +99,7 @@ library GovernorStorageTypes {
 
     // ------------------------------- Passport -------------------------------
     IVeBetterPassport veBetterPassport;
+    IGalaxyMember galaxyMember;
     // ------------------------------- Version 7 -------------------------------
     // mapping to store the proposal type for each proposal
     mapping(uint256 => GovernorTypes.ProposalType) proposalType;
@@ -109,8 +111,9 @@ library GovernorStorageTypes {
     mapping(GovernorTypes.ProposalType => Checkpoints.Trace208) proposalTypeQuorum;
     // mapping to store the deposit threshold cap for each proposal type
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeDepositThresholdCap;
-    // ------------------------------- Grants Manager Storage -------------------------------
     // GrantsManager contract
     IGrantsManager grantsManager;
+    // mapping to store the GM weight required for each proposal type
+    mapping(GovernorTypes.ProposalType => uint256) proposalTypeGMWeight;
   }
 }
