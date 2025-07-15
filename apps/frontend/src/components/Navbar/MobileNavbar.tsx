@@ -9,6 +9,7 @@ import {
   HStack,
   Icon,
   IconButton,
+  Divider,
   VStack,
   useDisclosure,
   useMediaQuery,
@@ -47,6 +48,7 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
         <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"} px={5}>
           <VStack spacing={0} w="full">
             <ProfileButton onMenuClose={props.onClose} />
+            <Divider />
             <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
           </VStack>
           <ThemeSwitcher w={"full"} withText={true} />
