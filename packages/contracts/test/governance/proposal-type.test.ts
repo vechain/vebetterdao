@@ -72,7 +72,7 @@ describe("Governance - Proposal Types", function () {
       const blockNumber = await ethers.provider.getBlockNumber()
       const description = `Get token details ${unixTimestamp} ${blockNumber}`
 
-      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, functionToCall, [], 2)).to.be
+      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, [functionToCall], [], 2)).to.be
         .reverted
     })
 
@@ -132,7 +132,7 @@ describe("Governance - Proposal Types", function () {
       const description = "Get token details edge-case"
 
       // Test type 2 (should be rejected by contract if only 0 and 1 are valid)
-      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, functionToCall, [], 2)).to.be
+      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, [functionToCall], [], 2)).to.be
         .reverted
     })
   })
