@@ -1,16 +1,67 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
-import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure } from "@chakra-ui/react"
+import { UilInfoCircle, UilThumbsUp, UilThumbsDown } from "@iconscout/react-unicons"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, Card, GridItem } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
+import { GrantsProposalCard, ProposalInteractions, Proposal } from "./GrantsProposalCard"
+import { ProposalState } from "@/api/contracts/governance"
+import { FaRegHeart } from "react-icons/fa6"
+import { AbstainedIcon } from "@/components"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
   GET_SUPPORT = "GET_SUPPORT",
   COMMUNITY_VOTE = "COMMUNITY_VOTE",
   RECEIVE_FUNDS = "RECEIVE_FUNDS",
+}
+
+const communityInteractions: ProposalInteractions = {
+  [ProposalState.Pending]: [
+    {
+      percentage: 100,
+      icon: <Icon as={FaRegHeart} />,
+    },
+  ],
+  [ProposalState.Active]: [
+    {
+      percentage: 80,
+      icon: <Icon as={UilThumbsUp} />,
+    },
+    {
+      percentage: 15,
+      icon: <Icon as={UilThumbsDown} transform="scaleX(-1)" />,
+    },
+
+    {
+      percentage: 5,
+      icon: <Icon as={() => <AbstainedIcon color="currentColor" />} color="currentColor" />,
+    },
+  ],
+}
+
+const mockProposal: Proposal = {
+  id: "111965945612441767232324032544037588349319109273722078697382174199449589178419",
+  title: "Comprehensive Redesign and Correction of the VeBetterDAO Ecosystem",
+  b3tr: "8,000,000 B3TR",
+  dAppGrant: "dApp Grant",
+  proposer: {
+    profilePicture: "https://via.placeholder.com/150",
+    addressOrDomain: "domainname.vet",
+  },
+  state: ProposalState.Pending,
+  phases: {
+    [ProposalState.Pending]: {
+      startAt: "2025-01-01",
+      endAt: "2025-01-01",
+    },
+    [ProposalState.Active]: {
+      startAt: "2025-01-08",
+      endAt: "2025-01-15",
+    },
+  },
+  communityInteractions,
 }
 
 export const GrantsPageContent = () => {
@@ -91,6 +142,14 @@ export const GrantsPageContent = () => {
       </HStack>
       <GrantsStepsCard steps={stepsArray} isOpen={isOpen} onClose={onClose} />
       <GrantsStatsCards totalApplications={"1230"} totalApproved={"1230"} totalFunds={"3M B3TR"} />
+      <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
+        <GridItem colSpan={{ base: 1, md: 2 }}>
+          <GrantsProposalCard proposal={mockProposal} />
+        </GridItem>
+        <GridItem colSpan={{ base: 1, md: 1 }}>
+          <Card w="full" variant="ghost" p={8}></Card>
+        </GridItem>
+      </Grid>
     </VStack>
   )
 }
