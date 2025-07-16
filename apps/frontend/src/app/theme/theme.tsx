@@ -10,6 +10,7 @@ import { SelectStyle } from "./select"
 import { InputStyle } from "./input"
 import { ModalStyle } from "./modal"
 import { PopoverStyle } from "./popover"
+import { BadgeStyle } from "./badge"
 
 const themeConfig = {
   //@ts-ignore
@@ -26,6 +27,7 @@ const themeConfig = {
     Input: InputStyle,
     Modal: ModalStyle,
     Popover: PopoverStyle,
+    Badge: BadgeStyle,
   },
 
   // 2. Add your color mode config
