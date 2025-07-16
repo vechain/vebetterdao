@@ -26,7 +26,8 @@ pragma solidity 0.8.20;
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import { IXAllocationVotingGovernor, IERC6372 } from "../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IXAllocationVotingGovernorV6 } from "../interfaces/IXAllocationVotingGovernorV6.sol";
+import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
 import { IXAllocationPool } from "../../../interfaces/IXAllocationPool.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
@@ -58,7 +59,7 @@ abstract contract XAllocationVotingGovernorV6 is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
-  IXAllocationVotingGovernor
+  IXAllocationVotingGovernorV6
 {
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
 
@@ -155,7 +156,7 @@ abstract contract XAllocationVotingGovernorV6 is
   function supportsInterface(
     bytes4 interfaceId
   ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
-    return interfaceId == type(IXAllocationVotingGovernor).interfaceId || super.supportsInterface(interfaceId);
+    return interfaceId == type(IXAllocationVotingGovernorV6).interfaceId || super.supportsInterface(interfaceId);
   }
 
   /**

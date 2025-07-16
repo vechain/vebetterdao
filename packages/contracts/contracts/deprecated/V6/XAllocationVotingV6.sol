@@ -57,7 +57,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * ----- Version 6 -----
  *  - Align IVoterRewards and IEmissions interfaces with the new contracts
  */
-contract XAllocationVotingV6 is
+abstract contract XAllocationVotingV6 is
   XAllocationVotingGovernorV6,
   VotingSettingsUpgradeableV6,
   RoundVotesCountingUpgradeableV6,
