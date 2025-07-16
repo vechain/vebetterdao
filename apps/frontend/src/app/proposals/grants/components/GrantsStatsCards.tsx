@@ -1,4 +1,4 @@
-import { Box, HStack, VStack, Heading, Text, Image } from "@chakra-ui/react"
+import { Box, HStack, VStack, Heading, Text, Image, Grid, GridItem } from "@chakra-ui/react"
 interface StatsCardProps {
   icon: string
   value: string
@@ -57,11 +57,16 @@ export const GrantsStatsCards = ({
         scrollbarWidth: "none",
         "-webkit-overflow-scrolling": "touch",
       }}>
-      <HStack w={{ base: "max-content", lg: "full" }} spacing={8}>
+      <Grid
+        w={{ base: "max-content", lg: "full" }}
+        templateColumns={{ base: "repeat(3, 300px)", lg: "repeat(3, 1fr)" }}
+        gap={8}>
         {statsUI.map(stat => (
-          <StatsCard key={`${stat.label}`} {...stat} />
+          <GridItem key={`${stat.label}`}>
+            <StatsCard {...stat} />
+          </GridItem>
         ))}
-      </HStack>
+      </Grid>
     </Box>
   )
 }
