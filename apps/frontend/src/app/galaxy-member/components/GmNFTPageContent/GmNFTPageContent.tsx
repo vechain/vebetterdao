@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { useState } from "react"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { BaseTooltip } from "@/components"
 
 export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
   const { t } = useTranslation()
@@ -111,16 +112,31 @@ export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
                         <Button variant="dangerFilledTonal" size="sm" onClick={onDetachGMToXNodeModalOpen}>
                           {t("Detach")}
                         </Button>
+                      ) : nodesAttachedToGMs?.[node.nodeId] ? (
+                        <BaseTooltip text={t("This node is already attached to another GM")}>
+                          <span>
+                            <Button
+                              disabled={!!nodesAttachedToGMs?.[node.nodeId]}
+                              variant="whiteAction"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedNode(node)
+                                onAttachGMToXNodeModalOpen()
+                              }}>
+                              {t("Attached")}
+                            </Button>
+                          </span>
+                        </BaseTooltip>
                       ) : (
                         <Button
-                          disabled={!!attachedNode || !!nodesAttachedToGMs?.[node.nodeId]}
+                          disabled={!!attachedNode}
                           variant="whiteAction"
                           size="sm"
                           onClick={() => {
                             setSelectedNode(node)
                             onAttachGMToXNodeModalOpen()
                           }}>
-                          {nodesAttachedToGMs?.[node.nodeId] ? t("Attached to another GM") : t("Attach")}
+                          {t("Attach")}
                         </Button>
                       )}
                     </CardFooter>
@@ -144,7 +160,7 @@ export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
         }}
       />
       <AttachGMToXNodeModal
-        gmId={gm.tokenId}
+        gm={gm}
         node={selectedNode}
         isOpen={isAttachGMToXNodeModalOpen}
         onClose={() => {

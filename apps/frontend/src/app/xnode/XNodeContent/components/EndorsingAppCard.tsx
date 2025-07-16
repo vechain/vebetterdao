@@ -163,13 +163,12 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                   w="full">
                   <Flex>
                     <EndorsementDetails
+                      appId={xNode.endorsedAppId ?? ""}
                       endorsementScore={endorsementScore}
                       endorsementStatus={endorsementStatus}
                       endorsementThreshold={endorsementThreshold}
                       isEndorsementStatusLoading={isEndorsementStatusLoading}
-                      xNodePoints={xNode.xNodePoints}
                       isUserAppEndorser={true}
-                      isXNodeLoading={false}
                       endorsers={appEndorsers || []}
                       isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   </Flex>

@@ -108,13 +108,12 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               justify="space-between"
               alignItems={["center", "center", "center"]}>
               <EndorsementDetails
+                appId={appId}
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
                 endorsementThreshold={endorsementThreshold}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
-                xNodePoints={userNode?.xNodePoints ?? 0}
                 isUserAppEndorser={isUserAppEndorser ?? false}
-                isXNodeLoading={false}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>

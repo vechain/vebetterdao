@@ -42,8 +42,8 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
                   {gm?.metadata?.name}
                 </Text>
 
-                <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                  <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
+                <Box display="inline-block" bg="#FFFFFF4A" rounded="8px" padding="4px 8px">
+                  <Text fontSize={"xs"} fontWeight={400} noOfLines={1}>
                     {t("{{value}}x reward weight", { value: gm.multiplier || 0 })}
                   </Text>
                 </Box>
@@ -92,8 +92,8 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
                   {`${node.name} #${node.nodeId}`}
                 </Text>
 
-                <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                  <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
+                <Box display="inline-block" bg="#FFFFFF4A" rounded="8px" padding="4px 8px">
+                  <Text fontSize={"xs"} fontWeight={400} noOfLines={1}>
                     {t("{{value}} points", { value: node.xNodePoints })}
                   </Text>
                 </Box>

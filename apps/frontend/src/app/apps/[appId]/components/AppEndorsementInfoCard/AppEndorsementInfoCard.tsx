@@ -64,7 +64,7 @@ export const AppEndorsementInfoCard = ({
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  const { data: userNodes } = useGetUserNodes()
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === app?.id)
   const isXNodeHolder = userNodes?.allNodes?.some(node => node.isXNodeHolder && !node.endorsedAppId)
   const totalXNodePoints = Math.max(
@@ -210,20 +210,19 @@ export const AppEndorsementInfoCard = ({
 
             <Stack direction="column" spacing={4} w="full" justify="space-between" alignItems="center">
               <EndorsementDetails
+                appId={app?.id ?? ""}
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
                 endorsementThreshold={endorsementThreshold}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
-                xNodePoints={totalXNodePoints}
                 isUserAppEndorser={!!nodeEndorsingApp}
-                isXNodeLoading={false}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
           </Stack>
         </CardBody>
         <CardFooter>
-          <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading} w="full">
+          <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isUserNodesLoading} w="full">
             <VStack spacing={2} w={"full"}>
               {actionButtons}
             </VStack>

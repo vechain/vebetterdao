@@ -39,7 +39,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
   const { data: gmMaxLevel } = useGMMaxLevel()
 
-  const { multiplier, tokenLevel, b3trToUpgrade, metadata } = gm
+  const { multiplier = 0, tokenLevel, b3trToUpgrade, metadata } = gm
   const b3trLeftover = Number(gmNfts[Number(tokenLevel)]?.b3trToUpgrade || 0) - Number(b3trToUpgrade)
 
   const actionDescription = useMemo(() => {
@@ -144,6 +144,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
             <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
               <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                 {multiplier}
+                {"x"}
               </Text>
               <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
                 {t("GM reward weight")}

@@ -44,7 +44,6 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
 
-  // const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
   const isUserAppEndorser = useMemo(() => {
     if (!appId) return false
     return nodeEndorsingApp?.isXNodeHolder

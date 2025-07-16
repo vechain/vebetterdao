@@ -1,6 +1,6 @@
-import { getGMLevel, UserNode } from "@/api"
+import { getGMLevel, UserGM, UserNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-import { CustomModalContent } from "@/components"
+import { CustomModalContent, BaseTooltip } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
@@ -35,18 +35,17 @@ import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
-  gmId: string
+  gm: UserGM
   node?: UserNode
   isOpen: boolean
   onClose: () => void
 }
 
-export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => {
+export const AttachGMToXNodeModal = ({ gm, node, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
 
-  const { data: b3trDonated } = useB3trDonated(gmId)
-
+  const { data: b3trDonated } = useB3trDonated(gm.tokenId)
   const { data: gmMaxLevel } = useGMMaxLevel()
 
   const gmStartingLevel = useMemo(() => {
@@ -59,12 +58,14 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
   }, [b3trDonated, gmStartingLevel])
 
+  const isNoAffectAttachment = gm.tokenLevel === String(levelAfterDetach)
+
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
-    gmId,
+    gmId: gm.tokenId,
     xNodeId: node?.nodeId ?? "",
     onSuccess: handleClose,
   })
@@ -152,9 +153,21 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                 </AlertDescription>
               </Box>
             </Alert>
-            <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
-              {t("Attach now!")}
-            </Button>
+
+            <BaseTooltip
+              showTooltip={isNoAffectAttachment}
+              text={t("This feature is available only to nodes that provide free upgrade to GM NFTs.")}>
+              <span>
+                <Button
+                  disabled={isNoAffectAttachment}
+                  variant={"primaryAction"}
+                  w={"full"}
+                  onClick={handleAttachment}
+                  leftIcon={<UilLink />}>
+                  {t("Attach now!")}
+                </Button>
+              </span>
+            </BaseTooltip>
           </VStack>
         </ModalFooter>
       </CustomModalContent>

@@ -1732,5 +1732,7 @@
   "{{value}}x reward weight": "{{value}}x reward weight",
   "Active NFT {{gmName}}: {{multiplier}}x multiplier": "Active NFT {{gmName}}: {{multiplier}}x multiplier",
   "This node is already endorsing an app.": "This node is already endorsing an app.",
-  "Attached to another GM": "Attached to another GM"
+  "Attached": "Attached",
+  "This node is already attached to another GM": "This node is already attached to another GM",
+  "This feature is available only to nodes that provide free upgrade to GM NFTs.": "This feature is available only to nodes that provide free upgrade to GM NFTs."
 }

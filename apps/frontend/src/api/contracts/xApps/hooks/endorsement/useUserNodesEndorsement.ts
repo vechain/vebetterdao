@@ -2,15 +2,12 @@ import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
-import { zeroAddress } from "viem"
 import { getXAppMetadata } from "../../getXAppMetadata"
 import { isNewApp, XApp, XAppWithMetadata } from "../../getXApps"
 import { useXAppsMetadataBaseUri } from "../useXAppsMetadataBaseUri"
-import { getIpfsImage } from "@/api/ipfs"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
-const method = "nodeToEndorsedApp" as const
 
 const UNENDORSED_APP_ID = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
@@ -22,7 +19,7 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
         ({
           abi,
           address,
-          functionName: method,
+          functionName: "nodeToEndorsedApp",
           args: [nodeId as `0x${string}`],
         }) as const,
     ),
@@ -30,10 +27,19 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
 
   if (apps.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
 
+  const appToNodeIndexMap = apps.reduce(
+    (acc, app, index) => {
+      if (app !== UNENDORSED_APP_ID) acc[app] = index
+
+      return acc
+    },
+    {} as Record<`0x${string}`, number>,
+  )
+
   const appDetails = (
     await executeMultipleClausesCall({
       thor,
-      calls: apps.map(
+      calls: Object.keys(appToNodeIndexMap).map(
         appId =>
           ({
             abi,
@@ -53,22 +59,19 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
   })
 
   const appsMetadata = await Promise.all(appDetails.map(app => getXAppMetadata(`${baseURI}${app.metadataURI}`)))
-  const appsLogo = await Promise.all(appsMetadata.map(app => getIpfsImage(app?.logo)))
 
-  return apps
-    .filter(address => address !== zeroAddress)
-    .map((_address, index) => {
-      return {
-        id: nodeIds[index] as string,
-        endorsedApp: {
-          ...appDetails[index],
-          metadata: {
-            ...appsMetadata[index],
-            logo: appsLogo[index]?.image ?? "",
-          },
-        } as XAppWithMetadata,
-      }
-    })
+  return appDetails.map((app, index) => {
+    return {
+      nodeId: appToNodeIndexMap[app.id as `0x${string}`],
+      endorsedApp: {
+        ...appDetails[index],
+        metadata: {
+          ...appsMetadata[index],
+          logo: `https://ipfs.io/ipfs/${appsMetadata[index]?.logo.replace("ipfs://", "")}`,
+        },
+      } as XAppWithMetadata,
+    }
+  })
 }
 
 export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", nodeIds, "ENDORSED_APPS"]
