@@ -11,6 +11,7 @@ import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory as Emissions } from "@repo/contracts"
+import { maxGasLimit, buildTxBody, buildGasEstimate } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -136,12 +137,10 @@ async function distributeEmissions(thor: ThorClient) {
   )
 
   // Estimate the gas cost for the transaction
-  let gasResult = await thor.gas.estimateGas([clause], signerAddress)
+  let gasResult = await buildGasEstimate(thor, [clause], signerAddress)
 
   // Check if the transaction was estimated to revert and handle accordingly
   if (gasResult.reverted) {
-    console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
-
     // Publish an error message to the Slack channel
     await publishMessage(
       client,
@@ -153,7 +152,7 @@ async function distributeEmissions(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  let txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas * 2)
+  let txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2, maxGasLimit.toString())
 
   // Sign the transaction with the developer's private key
   let signedTx = Transaction.of(txBody).sign(privateKey)
@@ -202,7 +201,8 @@ async function distributeXAllocations(thor: ThorClient) {
     const claimClause = buildClaimClause(xAppId, previousRound.toString())
 
     // Estimate the gas cost for the transaction
-    const gasResult = await thor.gas.estimateGas(
+    const gasResult = await buildGasEstimate(
+      thor,
       [claimClause],
       Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
     )
@@ -214,7 +214,8 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Estimate the gas cost for the transaction
-  const gasResult = await thor.gas.estimateGas(
+  const gasResult = await buildGasEstimate(
+    thor,
     claimClauses,
     Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
   )
@@ -233,7 +234,7 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  const txBody = await thor.transactions.buildTransactionBody(claimClauses, gasResult.totalGas * 2)
+  const txBody = await buildTxBody(thor, claimClauses, gasResult.totalGas * 2, maxGasLimit.toString())
 
   // Sign the transaction with the developer's private key
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))

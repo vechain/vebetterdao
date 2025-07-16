@@ -7,6 +7,7 @@ import { ABIContract, Address, Clause, Mnemonic, Transaction } from "@vechain/sd
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import localConfig from "@repo/config/local"
 import { getConfig } from "@repo/config"
+import { buildTxBody } from "../../helpers"
 
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") })
 
@@ -76,7 +77,7 @@ const resetSignalCounterLocal = async (
     throw new Error(`Txn (Gas) reverted: ${JSON.stringify(gasResult?.revertReasons)}`)
   }
 
-  const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
+  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas)
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
   const tx = await thor.transactions.sendTransaction(signedTx)
   const receipt = await thor.transactions.waitForTransaction(tx.id)
