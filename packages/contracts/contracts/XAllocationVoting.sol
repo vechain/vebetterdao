@@ -256,10 +256,12 @@ contract XAllocationVoting is
   // ---------- Getters ---------- //
 
   /**
-   * @dev Check if autovoting is enabled for an account
+   * @dev Checks if auto-voting is enabled for an account at the start of the current cycle
+   * Status changes mid-cycle will only take effect in the next cycle
    */
   function isUserAutoVotingEnabled(address account) public view returns (bool) {
-    return _isAutoVotingEnabled(account);
+    uint256 lastEmissionBlock = emissions().lastEmissionBlock();
+    return _isAutoVotingEnabledAtTimepoint(account, uint48(lastEmissionBlock));
   }
 
   /**

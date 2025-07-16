@@ -315,4 +315,19 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    * @dev Returns the max amount of shares an app can get in a round.
    */
   function getRoundAppSharesCap(uint256 roundId) external view returns (uint256);
+
+  /**
+   * @dev Check if autovoting is enabled for an account at a specific timepoint
+   * @param account The address to check
+   * @param timepoint The timepoint to check
+   * @return Whether autovoting is enabled for the account at the specific timepoint
+   */
+  function isUserAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) external view returns (bool);
+
+  /**
+   * @dev Check if autovoting is enabled for an account
+   * @param account The address to check
+   * @return Whether autovoting is enabled for the account
+   */
+  function isUserAutoVotingEnabled(address account) external view returns (bool);
 }

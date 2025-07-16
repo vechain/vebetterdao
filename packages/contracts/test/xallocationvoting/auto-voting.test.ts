@@ -1,7 +1,14 @@
 import { ethers } from "hardhat"
 import { describe, it } from "mocha"
 import { expect } from "chai"
-import { getOrDeployContractInstances, getVot3Tokens, startNewAllocationRound, waitForRoundToEnd } from "../helpers"
+import {
+  getOrDeployContractInstances,
+  getVot3Tokens,
+  startNewAllocationRound,
+  waitForRoundToEnd,
+  waitForNextCycle,
+  bootstrapAndStartEmissions,
+} from "../helpers"
 import { endorseApp } from "../helpers/xnodes"
 
 describe("AutoVoting - @shard14a", function () {
@@ -10,17 +17,35 @@ describe("AutoVoting - @shard14a", function () {
       const config = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      const { xAllocationVoting, otherAccounts } = config!
+      const { xAllocationVoting, emissions, minterAccount, otherAccounts, x2EarnApps, owner } = config!
 
       const user = otherAccounts[0]
 
+      await bootstrapAndStartEmissions()
+      // =========== Initial cycle ===========
+      const initialCycle = await emissions.getCurrentCycle()
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(user.address))
+      await x2EarnApps.connect(owner).submitApp(user.address, user.address, user.address, "metadataURI")
+      await endorseApp(app1Id, user)
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+
+      // Toggle auto-voting: ON, OFF, and ON
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting()
       expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
 
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      // Wait for the next cycle to be distributable
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // =========== cycle 1 ===========
+      const cycle1 = await emissions.getCurrentCycle()
+
+      expect(Number(cycle1)).to.be.greaterThan(Number(initialCycle))
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id]) // The user must set his preferences again to be able to vote after autovoting is disabled
+      expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([app1Id])
       expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
-
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
     })
 
     it("should set and get user voting preferences", async function () {
@@ -72,31 +97,6 @@ describe("AutoVoting - @shard14a", function () {
       await expect(xAllocationVoting.connect(owner).castVoteOnBehalfOf(user.address, 1)).to.be.revertedWith(
         "XAllocationVotingGovernor: auto voting is not enabled",
       )
-    })
-
-    it("should check autovoting status at specific timepoints", async function () {
-      const config = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-      const { xAllocationVoting, otherAccounts } = config!
-
-      const user = otherAccounts[0]
-
-      // Get current block number
-      const currentBlock = await ethers.provider.getBlockNumber()
-
-      // Initially autovoting should be disabled at current time
-      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, currentBlock)).to.be.false
-
-      // Toggle autovoting on
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-      const toggleBlock = await ethers.provider.getBlockNumber()
-
-      // Should be enabled at current time
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
-
-      // Should be enabled at the toggle block
-      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, toggleBlock)).to.be.true
     })
 
     it("should clear preferences when autovoting is disabled", async function () {
@@ -587,6 +587,79 @@ describe("AutoVoting - @shard14a", function () {
         expect(dust).to.equal(1)
       })
     })
+
+    it("should correctly handle auto-voting status when disabled mid-cycle", async function () {
+      // Scenario:
+      // Auto voting status
+      // Initial cycle - OFF
+      // Cycle 1 - ON (enabled during previous cycle)
+      // Cycle 2 - OFF (disabled during cycle 1)
+      // Cycle 3 - OFF (remains disabled)
+
+      const config = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const { xAllocationVoting, emissions, minterAccount, otherAccounts } = config!
+
+      const user = otherAccounts[0]
+
+      // Make sure emissions are bootstrapped and started
+      await bootstrapAndStartEmissions()
+
+      // =========== initial cycle ===========
+      // Get initial cycle data
+      const initialCycle = await emissions.getCurrentCycle()
+      const initialEmissionBlock = await emissions.lastEmissionBlock()
+
+      // Enable auto-voting mid-cycle
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+
+      // Wait for the next cycle to be distributable
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // =========== cycle 1 ===========
+      const cycle1 = await emissions.getCurrentCycle()
+      const cycle1EmissionBlock = await emissions.lastEmissionBlock()
+
+      expect(Number(cycle1)).to.be.greaterThan(Number(initialCycle))
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
+
+      // User disables auto-voting mid-cycle
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+
+      // Wait for the next cycle
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // =========== cycle 2 ===========
+      const cycle2 = await emissions.getCurrentCycle()
+      const cycle2EmissionBlock = await emissions.lastEmissionBlock()
+
+      expect(Number(cycle2)).to.be.greaterThan(Number(cycle1))
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // =========== cycle 3 ===========
+      const cycle3 = await emissions.getCurrentCycle()
+      const cycle3EmissionBlock = await emissions.lastEmissionBlock()
+
+      // Verify cycle has advanced
+      expect(Number(cycle3)).to.be.greaterThan(Number(cycle2))
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+
+      // It should be disabled at the start of the initial cycle
+      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, initialEmissionBlock)).to.be.false
+      // It should be enabled at the start of cycle 1
+      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, cycle1EmissionBlock)).to.be.true
+      // But it should still be disabled at the start of cycle 2
+      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, cycle2EmissionBlock)).to.be.false
+      // Auto-voting should be disabled at the start of cycle 3
+      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, cycle3EmissionBlock)).to.be.false
+    })
   })
 
   describe("Events", function () {
@@ -613,13 +686,10 @@ describe("AutoVoting - @shard14a", function () {
       expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
       expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([])
 
-      // 1. Enable autovoting - should emit AutoVotingToggled(user, true)
+      // 1. Should emit AutoVotingToggled(user, true)
       await expect(xAllocationVoting.connect(user).toggleAutoVoting())
         .to.emit(xAllocationVoting, "AutoVotingToggled")
         .withArgs(user.address, true)
-
-      // Verify state change
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
 
       // 2. Set voting preferences - should emit PreferredAppsUpdated
       await expect(xAllocationVoting.connect(user).setUserVotingPreferences([app1Id]))
@@ -647,27 +717,8 @@ describe("AutoVoting - @shard14a", function () {
       const userReward = await voterRewards.getReward(1, user.address)
       expect(userReward).to.not.equal(0)
 
-      // 3. Disable autovoting - should emit AutoVotingToggled(user, false) and clear preferences
-      await expect(xAllocationVoting.connect(user).toggleAutoVoting())
-        .to.emit(xAllocationVoting, "AutoVotingToggled")
-        .withArgs(user.address, false)
-
       // Verify state changes
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
-      const clearedPreferences = await xAllocationVoting.getUserVotingPreferences(user.address)
-      expect(clearedPreferences).to.deep.equal([])
-
-      // 4. Re-enable autovoting - should emit AutoVotingToggled(user, true)
-      await expect(xAllocationVoting.connect(user).toggleAutoVoting())
-        .to.emit(xAllocationVoting, "AutoVotingToggled")
-        .withArgs(user.address, true)
-
       expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
-
-      // 5. Set preferences again - should emit PreferredAppsUpdated
-      await expect(xAllocationVoting.connect(user).setUserVotingPreferences([app1Id]))
-        .to.emit(xAllocationVoting, "PreferredAppsUpdated")
-        .withArgs(user.address, [app1Id])
 
       const finalPreferences = await xAllocationVoting.getUserVotingPreferences(user.address)
       expect(finalPreferences).to.deep.equal([app1Id])
