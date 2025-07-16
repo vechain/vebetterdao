@@ -43,7 +43,8 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
 
-  const handleDetachOnClick = () => {
+  const handleDetachOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
     detachGmToXNodeModal.onOpen()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
   }
@@ -120,7 +121,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                   color="#C84968"
                   variant="dangerFilledTonal"
                   isDisabled={isXNodeDelegator}
-                  onClick={() => handleDetachOnClick()}>
+                  onClick={handleDetachOnClick}>
                   {t("Detach")}
                 </Button>
               ) : (

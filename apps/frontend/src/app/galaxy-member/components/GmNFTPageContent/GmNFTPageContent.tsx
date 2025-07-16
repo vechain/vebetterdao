@@ -57,94 +57,94 @@ export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
-        <Card flex={3}>
-          <CardHeader p="1.25rem" pb="0">
-            <Heading fontSize="lg" lineHeight={1}>
-              {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
-            </Heading>
-          </CardHeader>
-          <CardBody p="1.25rem">
-            <VStack align={"stretch"} gap="4">
-              {userNodes?.allNodes
-                ?.sort((a, b) => {
-                  // Sort so that attached node appears first
-                  if (a.nodeId === gm.nodeIdAttached) return -1
-                  if (b.nodeId === gm.nodeIdAttached) return 1
-                  return 0
-                })
-                ?.map(node => (
-                  <Card
-                    key={node.nodeId}
-                    alignItems="center"
-                    direction="row"
-                    gap="8px"
-                    border={gm ? "none" : "1px dashed #FFFFFF33"}
-                    bg="#FFFFFF26"
-                    borderColor={"#FFFFFF33"}
-                    p="16px"
-                    rounded="8px">
-                    <CardHeader p="0">
-                      <Image
-                        src={node?.image}
-                        fallbackSrc="/assets/icons/not-found-image-fallback.svg"
-                        alt={node?.name}
-                        boxSize="62px"
-                        rounded="8px"
-                      />
-                    </CardHeader>
+        {userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
+          <Card flex={3} variant="outline">
+            <CardHeader p="1.25rem" pb="0">
+              <Heading fontSize="lg" lineHeight={1}>
+                {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
+              </Heading>
+            </CardHeader>
+            <CardBody p="1.25rem">
+              <VStack align={"stretch"} gap="4">
+                {userNodes?.allNodes
+                  ?.sort((a, b) => {
+                    // Sort so that attached node appears first
+                    if (a.nodeId === gm.nodeIdAttached) return -1
+                    if (b.nodeId === gm.nodeIdAttached) return 1
+                    return 0
+                  })
+                  ?.map(node => (
+                    <Card
+                      key={node.nodeId}
+                      variant="outline"
+                      alignItems="center"
+                      direction="row"
+                      gap="8px"
+                      p="16px"
+                      rounded="8px">
+                      <CardHeader p="0">
+                        <Image
+                          src={node?.image}
+                          fallbackSrc="/assets/icons/not-found-image-fallback.svg"
+                          alt={node?.name}
+                          boxSize="62px"
+                          rounded="8px"
+                        />
+                      </CardHeader>
 
-                    <CardBody p="0" gap="8px">
-                      <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
-                        {t("Node")}
-                      </Text>
-                      <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
-                        {`${node.name} #${node.nodeId}`}
-                      </Text>
-                      <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                        <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
-                          {t("{{value}} points", { value: node.xNodePoints })}
+                      <CardBody p="0" gap="8px">
+                        <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+                          {t("Node")}
                         </Text>
-                      </Box>
-                    </CardBody>
+                        <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
+                          {`${node.name} #${node.nodeId}`}
+                        </Text>
+                        <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
+                          <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
+                            {t("{{value}} points", { value: node.xNodePoints })}
+                          </Text>
+                        </Box>
+                      </CardBody>
 
-                    <CardFooter>
-                      {attachedNode?.nodeId === node.nodeId ? (
-                        <Button variant="dangerFilledTonal" size="sm" onClick={onDetachGMToXNodeModalOpen}>
-                          {t("Detach")}
-                        </Button>
-                      ) : nodesAttachedToGMs?.[node.nodeId] ? (
-                        <BaseTooltip text={t("This node is already attached to another GM")}>
-                          <span>
-                            <Button
-                              disabled={!!nodesAttachedToGMs?.[node.nodeId]}
-                              variant="whiteAction"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedNode(node)
-                                onAttachGMToXNodeModalOpen()
-                              }}>
-                              {t("Attached")}
-                            </Button>
-                          </span>
-                        </BaseTooltip>
-                      ) : (
-                        <Button
-                          disabled={!!attachedNode}
-                          variant="whiteAction"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedNode(node)
-                            onAttachGMToXNodeModalOpen()
-                          }}>
-                          {t("Attach")}
-                        </Button>
-                      )}
-                    </CardFooter>
-                  </Card>
-                ))}
-            </VStack>
-          </CardBody>
-        </Card>
+                      <CardFooter>
+                        {attachedNode?.nodeId === node.nodeId ? (
+                          <Button variant="dangerFilledTonal" size="sm" onClick={onDetachGMToXNodeModalOpen}>
+                            {t("Detach")}
+                          </Button>
+                        ) : nodesAttachedToGMs?.[node.nodeId] ? (
+                          <BaseTooltip text={t("This node is already attached to another GM")}>
+                            <span>
+                              <Button
+                                disabled={!!nodesAttachedToGMs?.[node.nodeId]}
+                                variant="whiteAction"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedNode(node)
+                                  onAttachGMToXNodeModalOpen()
+                                }}>
+                                {t("Attached")}
+                              </Button>
+                            </span>
+                          </BaseTooltip>
+                        ) : (
+                          <Button
+                            disabled={!!attachedNode}
+                            variant="whiteAction"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedNode(node)
+                              onAttachGMToXNodeModalOpen()
+                            }}>
+                            {t("Attach")}
+                          </Button>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  ))}
+              </VStack>
+            </CardBody>
+          </Card>
+        )}
         <VStack flex={1.5} align={"stretch"}>
           <GalaxyRewardCalculatorCard />
           <GmPoolAmountCard />
@@ -160,7 +160,7 @@ export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
         }}
       />
       <AttachGMToXNodeModal
-        gm={gm}
+        gmId={gm.tokenId}
         node={selectedNode}
         isOpen={isAttachGMToXNodeModalOpen}
         onClose={() => {

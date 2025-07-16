@@ -26,7 +26,7 @@ export const ProfileGMLevel = () => {
   const list: ListItem[] = [...attachedGMsWithNodes, ...gmsNotAttached, ...nodesNotAttached]
 
   return (
-    <Card>
+    <Card variant="baseWithBorder">
       <CardHeader p="1.25rem" pb="0">
         <Heading fontSize="1.25rem">{t("Your galaxy member")}</Heading>
       </CardHeader>

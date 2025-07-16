@@ -99,9 +99,11 @@ export const useGetUserGMs = () => {
 
       return userGMs.map((gm, index) => {
         const nftMetadata = metadata[index]
-        const image = nftMetadata?.image
-          ? `https://ipfs.io/ipfs/${nftMetadata?.image}`
-          : gmNfts[Number(gm.tokenLevel) - 1]?.image || notFoundImage
+        const image = gmNfts[Number(gm.tokenLevel) - 1]?.image
+          ? gmNfts[Number(gm.tokenLevel) - 1]?.image
+          : nftMetadata?.image
+            ? `https://ipfs.io/ipfs/${nftMetadata?.image.replace("ipfs://", "")}`
+            : notFoundImage
         const nftName = nftMetadata?.name || gmNfts[Number(gm.tokenLevel) - 1]?.name
         const name = `${nftName} #${gm.tokenId}`
         return {

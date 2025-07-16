@@ -11,14 +11,16 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
     <Stack gap="2" direction={"row"} align="center" justify="stretch">
       <LinkBox flex={1}>
         <Card
+          variant="outline"
           alignItems="center"
           direction="row"
           gap="8px"
-          border={gm ? "none" : "1px dashed #FFFFFF33"}
-          bg="#FFFFFF26"
-          borderColor={"#FFFFFF33"}
           p="16px"
-          rounded="8px">
+          rounded="8px"
+          borderStyle={gm ? "solid" : "dashed"}
+          _dark={{
+            border: gm ? "none" : "1px dashed #FFFFFF33",
+          }}>
           <CardHeader p="0">
             <Image
               src={gm?.metadata?.image}
@@ -33,7 +35,7 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
             {gm ? (
               <>
                 <LinkOverlay href={`/galaxy-member/${gm?.tokenId}`} as={NextLink}>
-                  <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+                  <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                     {t("NFT")}
                   </Text>
                 </LinkOverlay>
@@ -42,14 +44,14 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
                   {gm?.metadata?.name}
                 </Text>
 
-                <Box display="inline-block" bg="#FFFFFF4A" rounded="8px" padding="4px 8px">
+                <Box display="inline-block" bg="#F8F8F8" _dark={{ bg: "#FFFFFF4A" }} rounded="8px" padding="4px 8px">
                   <Text fontSize={"xs"} fontWeight={400} noOfLines={1}>
                     {t("{{value}}x reward weight", { value: gm.multiplier || 0 })}
                   </Text>
                 </Box>
               </>
             ) : (
-              <Text fontSize="sm" color="#FFFFFFB2">
+              <Text fontSize="sm" _dark={{ color: "#FFFFFFB2" }}>
                 {t("No NFT attached")}
               </Text>
             )}
@@ -61,12 +63,14 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
 
       <LinkBox flex={1}>
         <Card
+          variant="outline"
           alignItems="center"
           direction="row"
           gap="8px"
-          border={gm ? "none" : "1px dashed #FFFFFF33"}
-          bg="#FFFFFF26"
-          borderColor={"#FFFFFF33"}
+          borderStyle={node ? "solid" : "dashed"}
+          _dark={{
+            border: node ? "none" : "1px dashed #FFFFFF33",
+          }}
           p="16px"
           rounded="8px">
           <CardHeader p="0">
@@ -83,7 +87,7 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
             {node ? (
               <>
                 <LinkOverlay href={`/xnode/${node.nodeId}`} as={NextLink}>
-                  <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+                  <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                     {t("Node")}
                   </Text>
                 </LinkOverlay>
@@ -92,14 +96,14 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
                   {`${node.name} #${node.nodeId}`}
                 </Text>
 
-                <Box display="inline-block" bg="#FFFFFF4A" rounded="8px" padding="4px 8px">
+                <Box display="inline-block" bg="#F8F8F8" _dark={{ bg: "#FFFFFF4A" }} rounded="8px" padding="4px 8px">
                   <Text fontSize={"xs"} fontWeight={400} noOfLines={1}>
                     {t("{{value}} points", { value: node.xNodePoints })}
                   </Text>
                 </Box>
               </>
             ) : (
-              <Text fontSize="sm" color="#FFFFFFB2">
+              <Text fontSize="sm" _dark={{ color: "#FFFFFFB2" }}>
                 {t("No Node attached")}
               </Text>
             )}

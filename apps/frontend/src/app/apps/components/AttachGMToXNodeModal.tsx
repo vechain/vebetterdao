@@ -1,4 +1,4 @@
-import { getGMLevel, UserGM, UserNode } from "@/api"
+import { getGMLevel, useGetUserGMs, UserNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { CustomModalContent, BaseTooltip } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
@@ -35,18 +35,20 @@ import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
-  gm: UserGM
+  gmId: string
   node?: UserNode
   isOpen: boolean
   onClose: () => void
 }
 
-export const AttachGMToXNodeModal = ({ gm, node, isOpen, onClose }: Props) => {
+export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
 
-  const { data: b3trDonated } = useB3trDonated(gm.tokenId)
+  const { data: b3trDonated } = useB3trDonated(gmId)
   const { data: gmMaxLevel } = useGMMaxLevel()
+  const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs()
+  const gm = userGMs?.find(gm => gm.tokenId === gmId)
 
   const gmStartingLevel = useMemo(() => {
     const gmStartingLevel = xNodeToGMstartingLevel[node?.nodeLevel ?? 0]
@@ -58,14 +60,14 @@ export const AttachGMToXNodeModal = ({ gm, node, isOpen, onClose }: Props) => {
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
   }, [b3trDonated, gmStartingLevel])
 
-  const isNoAffectAttachment = gm.tokenLevel === String(levelAfterDetach)
+  const isNoAffectAttachment = gm ? gm?.tokenLevel === String(levelAfterDetach) : true
 
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
-    gmId: gm.tokenId,
+    gmId,
     xNodeId: node?.nodeId ?? "",
     onSuccess: handleClose,
   })
@@ -159,6 +161,7 @@ export const AttachGMToXNodeModal = ({ gm, node, isOpen, onClose }: Props) => {
               text={t("This feature is available only to nodes that provide free upgrade to GM NFTs.")}>
               <span>
                 <Button
+                  isLoading={isLoadingUserGMs}
                   disabled={isNoAffectAttachment}
                   variant={"primaryAction"}
                   w={"full"}

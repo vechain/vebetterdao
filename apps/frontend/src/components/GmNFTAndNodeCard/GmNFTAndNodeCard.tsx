@@ -35,7 +35,7 @@ export const GmNFTAndNodeCard = () => {
   const { data: userGMs } = useGetUserGMs()
   const { data: nodes } = useGetUserNodes()
 
-  const selectedGmMultiplier = useMemo(() => userGMs?.find(gm => gm.isSelected)?.multiplier, [userGMs])
+  const selectedGmMultiplier = useMemo(() => userGMs?.find(gm => gm.isSelected)?.multiplier || 0, [userGMs])
   const totalPoints = useMemo(() => {
     return nodes?.allNodes?.reduce((acc, node) => acc + node.xNodePoints, 0) || 0
   }, [nodes])
@@ -119,10 +119,12 @@ export const GmNFTAndNodeCard = () => {
                       {t("NFTs")}
                     </Text>
                   </LinkOverlay>
-                  <Heading fontSize="1.75rem">{userGMs?.length || 0} </Heading>
-                  {selectedGmMultiplier && (
+                  <Heading fontSize="1.75rem" textColor="white">
+                    {userGMs?.length || 0}
+                  </Heading>
+                  {selectedGmMultiplier !== undefined && (
                     <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                      <Text fontSize="sm" color="#FFFFFFB2" textColor="white">
+                      <Text fontSize="xs" color="#FFFFFFB2" textColor="white" noOfLines={1}>
                         {t("Active NFT {{gmName}}: {{multiplier}}x multiplier", {
                           gmName: userGMs?.find(gm => gm.isSelected)?.metadata?.name,
                           multiplier: selectedGmMultiplier,
@@ -131,8 +133,8 @@ export const GmNFTAndNodeCard = () => {
                     </Box>
                   )}
                 </CardBody>
-                <CardFooter alignItems="center">
-                  <FaChevronRight />
+                <CardFooter alignItems="center" p="0">
+                  <FaChevronRight color="white" />
                 </CardFooter>
               </Card>
             </LinkBox>
@@ -154,15 +156,17 @@ export const GmNFTAndNodeCard = () => {
                       {t("Nodes")}
                     </Text>
                   </LinkOverlay>
-                  <Heading fontSize="1.75rem">{nodes?.allNodes?.length}</Heading>
+                  <Heading fontSize="1.75rem" textColor="white">
+                    {nodes?.allNodes?.length}
+                  </Heading>
                   <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                    <Text fontSize="sm" color="#FFFFFFB2" textColor="white">
+                    <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
                       {t("Total: {{value}} points", { value: totalPoints })}
                     </Text>
                   </Box>
                 </CardBody>
-                <CardFooter alignItems="center">
-                  <FaChevronRight />
+                <CardFooter alignItems="center" p="0">
+                  <FaChevronRight color="white" />
                 </CardFooter>
               </Card>
             </LinkBox>

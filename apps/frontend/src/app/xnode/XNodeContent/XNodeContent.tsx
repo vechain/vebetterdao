@@ -26,8 +26,6 @@ export const XNodeContent = ({ xNodeId }: Props) => {
     }
   }, [isXNodeHolder, isUserNodesLoading, router])
 
-  // if (!isXNodeHolder && !isXNodeDelegator) return null
-
   if (!xNode) return null
 
   return (
