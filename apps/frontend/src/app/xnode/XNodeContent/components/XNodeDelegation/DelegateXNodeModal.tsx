@@ -1,4 +1,4 @@
-import { useXNode } from "@/api"
+import { UserNode } from "@/api"
 import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
 import { ExclamationTriangle } from "@/components"
 import { useDelegateXNode } from "@/hooks/useDelegateXNode"
@@ -37,13 +37,13 @@ enum DelegateXNodeStep {
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
 
-export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => {
+export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { account } = useWallet()
   const thor = useThor()
-  const { isXNodeAttachedToGM } = useXNode()
   const { isOpen = false, onClose } = modal
+  const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
 
   const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
     index: 0,
@@ -65,6 +65,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   }, [onClose, setActiveStep])
 
   const delegateXNode = useDelegateXNode({
+    xNode,
     onSuccess: handleClose,
   })
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })

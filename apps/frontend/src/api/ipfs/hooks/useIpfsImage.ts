@@ -34,6 +34,7 @@ export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
     "image/tiff",
     "image/webp",
     "image/svg+xml",
+    "application/json",
   ]
   if (!allowedMimeTypes.includes(response.data.type)) {
     throw new Error(`Unsupported MIME type: ${response.data.type}`)

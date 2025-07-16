@@ -1,41 +1,157 @@
-import { Stack, VStack } from "@chakra-ui/react"
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Stack,
+  VStack,
+  Image,
+  Text,
+  Box,
+  Heading,
+  CardFooter,
+  Button,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
-import { AttachXNodeCard } from "./components/AttachXNodeCard"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
-import { useSelectedGmNft } from "@/api"
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { MultipleXNodesAlert } from "@/app/xnode/XNodeContent/components/XNodeDelegation/MultipleXNodesAlert"
+import { UserGM, UserNode, useGetUserGMs, useGetUserNodes } from "@/api"
+import { useTranslation } from "react-i18next"
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
+import { useState } from "react"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 
-export const GmNFTPageContent = () => {
-  const { gmId, isLoading } = useSelectedGmNft()
-  const router = useRouter()
+export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
+  const { t } = useTranslation()
+  const { data: userNodes } = useGetUserNodes()
+  const { data: userGMs } = useGetUserGMs()
+  const [selectedNode, setSelectedNode] = useState<UserNode | undefined>(undefined)
 
-  // Redirect to the previous page if the user is not a GM NFT holder
-  useEffect(() => {
-    if (!Number(gmId) && !isLoading) {
-      router.push("/")
-    }
-  }, [gmId, isLoading, router])
+  const nodesAttachedToGMs = userGMs?.reduce(
+    (acc, gm) => {
+      if (gm.nodeIdAttached) {
+        acc[gm.nodeIdAttached] = gm.nodeIdAttached
+      }
+      return acc
+    },
+    {} as Record<string, string>,
+  )
 
-  if (!Number(gmId)) return null
+  const attachedNode = userNodes?.allNodes?.find(node => node.nodeId === gm.nodeIdAttached)
+
+  const {
+    isOpen: isAttachGMToXNodeModalOpen,
+    onOpen: onAttachGMToXNodeModalOpen,
+    onClose: onAttachGMToXNodeModalClose,
+  } = useDisclosure()
+
+  const {
+    isOpen: isDetachGMToXNodeModalOpen,
+    onOpen: onDetachGMToXNodeModalOpen,
+    onClose: onDetachGMToXNodeModalClose,
+  } = useDisclosure()
 
   return (
     <VStack align="stretch" flex="1" gap="4">
-      <GmNFTPageHeader />
+      <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
-        <VStack flex={3}>
-          <MultipleXNodesAlert />
-          <AttachXNodeCard />
-        </VStack>
+        <Card flex={3}>
+          <CardHeader p="1.25rem" pb="0">
+            <Heading fontSize="lg" lineHeight={1}>
+              {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
+            </Heading>
+          </CardHeader>
+          <CardBody p="1.25rem">
+            <VStack align={"stretch"} gap="4">
+              {userNodes?.allNodes
+                ?.sort((a, b) => {
+                  // Sort so that attached node appears first
+                  if (a.nodeId === gm.nodeIdAttached) return -1
+                  if (b.nodeId === gm.nodeIdAttached) return 1
+                  return 0
+                })
+                ?.map(node => (
+                  <Card
+                    key={node.nodeId}
+                    alignItems="center"
+                    direction="row"
+                    gap="8px"
+                    border={gm ? "none" : "1px dashed #FFFFFF33"}
+                    bg="#FFFFFF26"
+                    borderColor={"#FFFFFF33"}
+                    p="16px"
+                    rounded="8px">
+                    <CardHeader p="0">
+                      <Image
+                        src={node?.image}
+                        fallbackSrc="/assets/icons/not-found-image-fallback.svg"
+                        alt={node?.name}
+                        boxSize="62px"
+                        rounded="8px"
+                      />
+                    </CardHeader>
+
+                    <CardBody p="0" gap="8px">
+                      <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+                        {t("Node")}
+                      </Text>
+                      <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
+                        {`${node.name} #${node.nodeId}`}
+                      </Text>
+                      <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
+                        <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
+                          {t("{{value}} points", { value: node.xNodePoints })}
+                        </Text>
+                      </Box>
+                    </CardBody>
+
+                    <CardFooter>
+                      {attachedNode?.nodeId === node.nodeId ? (
+                        <Button variant="dangerFilledTonal" size="sm" onClick={onDetachGMToXNodeModalOpen}>
+                          {t("Detach")}
+                        </Button>
+                      ) : (
+                        <Button
+                          disabled={!!attachedNode || !!nodesAttachedToGMs?.[node.nodeId]}
+                          variant="whiteAction"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedNode(node)
+                            onAttachGMToXNodeModalOpen()
+                          }}>
+                          {nodesAttachedToGMs?.[node.nodeId] ? t("Attached to another GM") : t("Attach")}
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+            </VStack>
+          </CardBody>
+        </Card>
         <VStack flex={1.5} align={"stretch"}>
           <GalaxyRewardCalculatorCard />
           <GmPoolAmountCard />
           <GalaxyLevelsCard />
         </VStack>
       </Stack>
+      <DetachGMToXNodeModal
+        gmId={gm.tokenId}
+        xNodeId={gm.nodeIdAttached ?? ""}
+        isOpen={isDetachGMToXNodeModalOpen}
+        onClose={() => {
+          onDetachGMToXNodeModalClose()
+        }}
+      />
+      <AttachGMToXNodeModal
+        gmId={gm.tokenId}
+        node={selectedNode}
+        isOpen={isAttachGMToXNodeModalOpen}
+        onClose={() => {
+          setSelectedNode(undefined)
+          onAttachGMToXNodeModalClose()
+        }}
+      />
     </VStack>
   )
 }

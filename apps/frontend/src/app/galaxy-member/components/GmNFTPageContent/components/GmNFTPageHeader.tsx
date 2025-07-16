@@ -1,8 +1,6 @@
-import { useSelectedGmNft, useXNode } from "@/api"
+import { UserGM } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { FeatureFlagWrapper } from "@/components"
 import { GmActionButton } from "@/components/GmActionButton"
-import { FeatureFlag } from "@/constants"
 import {
   Box,
   Card,
@@ -27,94 +25,38 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
 import { useGetB3trBalance } from "@/hooks"
+import { gmNfts } from "@/constants/gmNfts"
+import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const GmNFTPageHeader = () => {
+export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
   const { t } = useTranslation()
-  const {
-    gmImage,
-    gmName,
-    gmRewardMultiplier,
-    isGMLoading,
-    gmLevel,
-    b3trToUpgradeGMToNextLevel,
-    isMaxGmLevelReached,
-    isLoading,
-    b3trLeftover,
-  } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
   const { account } = useWallet()
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
-
-  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
-
   const { isOpen, onOpen, onClose } = useDisclosure()
 
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
+  const { data: gmMaxLevel } = useGMMaxLevel()
+
+  const { multiplier, tokenLevel, b3trToUpgrade, metadata } = gm
+  const b3trLeftover = Number(gmNfts[Number(tokenLevel)]?.b3trToUpgrade || 0) - Number(b3trToUpgrade)
+
   const actionDescription = useMemo(() => {
-    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
-      return (
-        <>
-          <HStack>
-            <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
-            <HStack gap={0} alignItems={"baseline"}>
-              <FeatureFlagWrapper
-                feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-                fallback={
-                  <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                    {t("You will be able to attach GM NFT to this node")}
-                  </Text>
-                }>
-                <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                  {t("You can attach GM NFT to this node")}
-                </Text>
-              </FeatureFlagWrapper>
-            </HStack>
-          </HStack>
-          <FeatureFlagWrapper
-            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-            fallback={
-              <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {t("Attach GM NFT to Node coming soon!")}
-              </Text>
-            }>
-            <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-              {t("Attach GM NFT to Node")}
-            </Text>
-          </FeatureFlagWrapper>
-        </>
-      )
-    }
-    if (isMaxGmLevelReached) {
+    if (Number(tokenLevel) >= (gmMaxLevel ?? 0)) {
       return (
         <>
           <HStack>
             <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <FeatureFlagWrapper
-                feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-                fallback={
-                  <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                    {t("Upgrade your GM NFT coming soon!")}
-                  </Text>
-                }>
-                <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                  {t("You reached the max GM NFT level")}
-                </Text>
-              </FeatureFlagWrapper>
+              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                {t("You reached the max GM NFT level")}
+              </Text>
             </HStack>
           </HStack>
-          <FeatureFlagWrapper
-            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-            fallback={
-              <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {t("You will be able to upgrade your GM NFT soon")}
-              </Text>
-            }>
-            <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-              {t("You can't upgrade your GM NFT anymore")}
-            </Text>
-          </FeatureFlagWrapper>
+          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+            {t("You can't upgrade your GM NFT anymore")}
+          </Text>
         </>
       )
     }
@@ -130,7 +72,7 @@ export const GmNFTPageHeader = () => {
             </Skeleton>
             <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
               {"/"}
-              {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
+              {compactFormatter.format(Number(b3trToUpgrade))}
               {" B3TR"}
             </Text>
           </HStack>
@@ -147,18 +89,7 @@ export const GmNFTPageHeader = () => {
         )}
       </>
     )
-  }, [
-    b3trBalance?.scaled,
-    b3trToUpgradeGMToNextLevel,
-    b3trLeftover,
-    isAbove800,
-    isB3trBalanceLoading,
-    isMaxGmLevelReached,
-    isXNodeAttachedToGM,
-    isXNodeHolder,
-    t,
-    isXNodeDelegator,
-  ])
+  }, [b3trBalance?.scaled, b3trLeftover, b3trToUpgrade, gmMaxLevel, isAbove800, isB3trBalanceLoading, t, tokenLevel])
 
   return (
     <Card>
@@ -184,53 +115,40 @@ export const GmNFTPageHeader = () => {
           flex={1}
           color="#FFFFFF"
           flexGrow={4}>
-          <Skeleton
-            isLoaded={!isGMLoading}
+          <Box
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}
-            rounded="8px">
-            <Box
-              w={isAbove800 ? "132px" : "68px"}
-              h={isAbove800 ? "132px" : "68px"}
-              rounded="8px"
-              bgGradient={getLevelGradient(Number(gmLevel))}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              onClick={onOpen}
-              cursor="pointer">
-              <Skeleton
-                isLoaded={!isLoading}
-                w={isAbove800 ? "126px" : "64px"}
-                h={isAbove800 ? "126px" : "64px"}
-                rounded={"7px"}>
-                <Image
-                  src={gmImage}
-                  alt="gm"
-                  w={isAbove800 ? "126px" : "64px"}
-                  h={isAbove800 ? "126px" : "64px"}
-                  rounded="7px"
-                />
-              </Skeleton>
-            </Box>
-          </Skeleton>
+            rounded="8px"
+            bgGradient={getLevelGradient(Number(tokenLevel))}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            onClick={onOpen}
+            cursor="pointer">
+            <Image
+              src={metadata?.image}
+              alt="gm"
+              w={isAbove800 ? "126px" : "64px"}
+              h={isAbove800 ? "126px" : "64px"}
+              rounded="7px"
+            />
+          </Box>
+
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
             <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
-              {t("LEVEL {{level}}", { level: gmLevel })}
+              {t("LEVEL {{level}}", { level: tokenLevel })}
             </Text>
             <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
-              {gmName}
+              {metadata?.name}
             </Text>
-            <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-              <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
-                  {gmRewardMultiplier}
-                </Text>
-                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                  {t("GM reward weight")}
-                </Text>
-              </HStack>
-            </FeatureFlagWrapper>
+            <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                {multiplier}
+              </Text>
+              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                {t("GM reward weight")}
+              </Text>
+            </HStack>
           </VStack>
         </HStack>
         <Flex w={isAbove800 ? "1px" : "full"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF4D" flexBasis={"1px"} />
@@ -243,7 +161,7 @@ export const GmNFTPageHeader = () => {
           {actionDescription}
           <GmActionButton
             buttonProps={{
-              variant: "tertiaryAction",
+              variant: "whiteAction",
               w: "full",
               boxShadow: "0px 0px 9.4px 0px #B1F16C",
               color: "#080F1E",
@@ -275,10 +193,10 @@ export const GmNFTPageHeader = () => {
               alignItems="center"
               justifyContent="center"
               overflow="hidden"
-              bgGradient={getLevelGradient(Number(gmLevel))}
+              bgGradient={getLevelGradient(Number(tokenLevel))}
               p={1}
               rounded="16px">
-              <Image src={gmImage} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
+              <Image src={metadata?.image} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
             </Box>
           </ModalBody>
         </ModalContent>

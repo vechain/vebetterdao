@@ -1,4 +1,4 @@
-import { getGMLevel, useSelectedGmNft, useXNode } from "@/api"
+import { getGMLevel, UserNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { CustomModalContent } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
@@ -35,26 +35,25 @@ import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
+  gmId: string
+  node?: UserNode
   isOpen: boolean
   onClose: () => void
 }
 
-export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
+export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-  const { gmId } = useSelectedGmNft()
 
   const { data: b3trDonated } = useB3trDonated(gmId)
-
-  const { xNodeLevel } = useXNode()
 
   const { data: gmMaxLevel } = useGMMaxLevel()
 
   const gmStartingLevel = useMemo(() => {
-    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
+    const gmStartingLevel = xNodeToGMstartingLevel[node?.nodeLevel ?? 0]
 
     return Math.min(gmStartingLevel ?? 1, gmMaxLevel ?? 1)
-  }, [gmMaxLevel, xNodeLevel])
+  }, [gmMaxLevel, node?.nodeLevel])
 
   const levelAfterDetach = useMemo(() => {
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
@@ -65,6 +64,8 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [onClose])
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
+    gmId,
+    xNodeId: node?.nodeId ?? "",
     onSuccess: handleClose,
   })
 

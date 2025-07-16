@@ -1717,5 +1717,20 @@
   "Your Node can be currently used only by the manager": "Your Node can be currently used only by the manager",
   "STARGATE IS LIVE 🌌": "STARGATE IS LIVE 🌌",
   "Migrate your legacy node to discover the new stargate universe !": "Migrate your legacy node to discover the new stargate universe !",
-  "Start staking VET to explore the new stargate universe !": "Start staking VET to explore the new stargate universe !"
+  "Start staking VET to explore the new stargate universe !": "Start staking VET to explore the new stargate universe !",
+  "NFTs": "NFTs",
+  "NFT": "NFT",
+  "Nodes": "Nodes",
+  "Node": "Node",
+  "Total: {{value}} points": "Total: {{value}} points",
+  "Endorse {{appName}} dApp": "Endorse {{appName}} dApp",
+  "Select your node": "Select your node",
+  "Current DApp score: {{score}}": "Current DApp score: {{score}}",
+  "DApp score after endorsement: {{score}}": "DApp score after endorsement: {{score}}",
+  "No Node attached": "No Node attached",
+  "No NFT attached": "No NFT attached",
+  "{{value}}x reward weight": "{{value}}x reward weight",
+  "Active NFT {{gmName}}: {{multiplier}}x multiplier": "Active NFT {{gmName}}: {{multiplier}}x multiplier",
+  "This node is already endorsing an app.": "This node is already endorsing an app.",
+  "Attached to another GM": "Attached to another GM"
 }
