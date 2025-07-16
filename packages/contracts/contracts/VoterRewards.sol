@@ -32,6 +32,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import "@openzeppelin/contracts/utils/types/Time.sol";
+import "./interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title VoterRewards
@@ -73,6 +74,16 @@ import "@openzeppelin/contracts/utils/types/Time.sol";
  * - Added a function to get the total GM Weight for a user in a specific cycle.
  * - Added a function to get the total GM Weight in a specific cycle.
  * - Added the abiltity to be able to update GM Multipliers mid cycle.
+ * ------------------ Version 6 Changes ------------------
+ * - Added RELAYER_ROLE for permissioned relayer access
+ * - Added relayerFeePercentage
+ * - Added xAllocationVoting reference
+ * - Added RelayerFeeTaken event for fee transparency
+ * - Modified claimReward to apply fees when:
+ *   - Caller is a relayer
+ *   - Voter had auto-voting enabled during the cycle
+ * - Added reinitializer for V6 upgrade
+ * - Updated version string to "6"
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
@@ -85,6 +96,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
   /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+
+  /// @notice The role that can claim rewards on behalf of users and take a fee.
+  bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
 
   /// @notice The scaling factor for the rewards calculation.
   uint256 public constant SCALING_FACTOR = 1e6;
@@ -120,6 +134,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     mapping(uint256 cycle => mapping(address voter => uint256 gmWeight)) cycleToVoterToGMWeight;
     // Incoming GM Multipliers, these are the multipliers that will be used for the next cycle
     mapping(uint256 cycle => GMMultiplier[] incomingGMMultipliers) cycleToIncomingGMMultipliers;
+    // --------------------------- V6 Additions --------------------------- //
+    IXAllocationVotingGovernor xAllocationVoting;
+    // The percentage of the reward that will be taken as a fee by the relayer.
+    uint256 relayerFeePercentage;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -185,6 +203,22 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
   event GMVoteRegistered(uint256 indexed cycle, uint256 indexed tokenId, uint256 indexed level, uint256 multiplier);
 
+  /// @notice Emitted when a relayer takes a fee.
+  /// @param relayer - The address of the relayer.
+  /// @param fee - The amount of fee taken by the relayer.
+  /// @param cycle - The cycle in which the fee was taken.
+  /// @param voter - The address of the voter.
+  event RelayerFeeTaken(address indexed relayer, uint256 fee, uint256 indexed cycle, address indexed voter);
+
+  /// @notice Emitted when the XAllocationVoting contract address is set.
+  /// @param newAddress - The address of the new XAllocationVoting contract.
+  event XAllocationVotingAddressUpdated(address indexed newAddress);
+
+  /// @notice Emitted when the relayer fee percentage is updated.
+  /// @param newFee - The new fee percentage.
+  /// @param oldFee - The old fee percentage.
+  event RelayerFeePercentageUpdated(uint256 indexed newFee, uint256 indexed oldFee);
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -246,6 +280,39 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     for (uint256 i; i < levels.length; i++) {
       _setLevelToMultiplier(levels[i], multipliers[i]);
     }
+  }
+
+  /// @notice Reinitializes the contract with relayer fee settings for version 6.
+  function initializeV6(IXAllocationVotingGovernor _xAllocationVoting) external reinitializer(6) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    // Set default relayer fee to 5%
+    $.relayerFeePercentage = 5;
+
+    // Set the XAllocationVoting contract
+    $.xAllocationVoting = _xAllocationVoting;
+  }
+
+  /// @notice Set the percentage of the reward that will be taken as a fee by the relayer.
+  /// @param newFee - The new percentage of the reward that will be taken as a fee by the relayer.
+  function setRelayerFeePercentage(uint256 newFee) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(newFee <= 100, "VoterRewards: Fee must be <= 100%");
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint256 oldFee = $.relayerFeePercentage;
+    $.relayerFeePercentage = newFee;
+
+    emit RelayerFeePercentageUpdated(newFee, oldFee);
+  }
+
+  /// @notice Set the XAllocationVoting contract.
+  /// @param _xAllocationVoting - The address of the XAllocationVoting contract.
+  function setXAllocationVoting(address _xAllocationVoting) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(_xAllocationVoting != address(0), "VoterRewards: Invalid address");
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    $.xAllocationVoting = IXAllocationVotingGovernor(_xAllocationVoting);
+
+    emit XAllocationVotingAddressUpdated(_xAllocationVoting);
   }
 
   /// @notice Upgrade the implementation of the VoterRewards contract.
@@ -347,11 +414,45 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Reset the reward-weighted votes for the voter in the cycle.
     $.cycleToVoterToTotal[cycle][voter] = 0;
     $.cycleToVoterToGMWeight[cycle][voter] = 0;
-    // transfer reward to voter
-    require($.b3tr.transfer(voter, totalReward), "VoterRewards: transfer failed");
 
-    // Emit an event to log the reward claimed by the voter.
-    emit RewardClaimedV2(cycle, voter, reward, gmReward);
+    // Check if the caller is a relayer and if the voter had auto-voting enabled
+    bool applyFee = false;
+    if (msg.sender != voter && hasRole(RELAYER_ROLE, msg.sender)) {
+      uint48 emissionCycleStartBlock = SafeCast.toUint48($.emissions.lastEmissionBlock());
+
+      // Check if auto-voting was enabled for this voter at the cycle start
+      if (
+        $.xAllocationVoting != IXAllocationVotingGovernor(address(0)) &&
+        $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock)
+      ) {
+        applyFee = true;
+      }
+    }
+
+    if (applyFee) {
+      // Calculate the fee amount
+      uint256 fee = (totalReward * $.relayerFeePercentage) / 100;
+      uint256 voterAmount = totalReward - fee;
+
+      // Transfer the fee to the relayer
+      require($.b3tr.transfer(msg.sender, fee), "VoterRewards: fee transfer failed");
+      // Transfer the remaining reward to the voter
+      require($.b3tr.transfer(voter, voterAmount), "VoterRewards: voter transfer failed");
+
+      // Calculate proportional distribution of fee between reward types
+      uint256 adjustedReward = reward - ((fee * reward) / totalReward);
+      uint256 adjustedGmReward = gmReward - ((fee * gmReward) / totalReward);
+
+      // Emit events
+      emit RewardClaimedV2(cycle, voter, adjustedReward, adjustedGmReward);
+      emit RelayerFeeTaken(msg.sender, fee, cycle, voter);
+    } else {
+      // Transfer the full reward to the voter
+      require($.b3tr.transfer(voter, totalReward), "VoterRewards: transfer failed");
+
+      // Emit event
+      emit RewardClaimedV2(cycle, voter, reward, gmReward);
+    }
   }
 
   // ----------------- Getters ----------------- //
@@ -605,7 +706,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "5";
+    return "6";
   }
 
   /// @dev Clock used for flagging checkpoints.
