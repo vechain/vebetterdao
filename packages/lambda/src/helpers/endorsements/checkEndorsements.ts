@@ -6,6 +6,8 @@ import { publishMessage } from "../slack"
 import { ThorClient, TransactionReceipt } from "@vechain/sdk-network"
 import { AppEnv } from "@repo/config/contracts"
 import { ABIContract, Address, Transaction } from "@vechain/sdk-core"
+import { buildGasEstimate, buildTxBody } from "../transaction"
+import { maxGasLimit } from "../gas"
 
 /**
  * Checks the endorsements of the X-Apps before distributing the X-Allocations.
@@ -58,12 +60,10 @@ export async function checkEndorsements(
 
     // Estimate the gas cost for the transaction
     const senderAddress = Address.ofPrivateKey(Buffer.from(privateKey, "hex"))
-    const gasResult = await thor.gas.estimateGas(checkendorsementClauses, senderAddress.toString())
+    const gasResult = await buildGasEstimate(thor, checkendorsementClauses, senderAddress.toString())
 
     // Check if the transaction was estimated to revert and handle accordingly
     if (gasResult.reverted) {
-      console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
-
       await publishMessage(
         secretsClient,
         "C06BLEJE5SA",
@@ -76,7 +76,7 @@ export async function checkEndorsements(
     }
 
     // Build the transaction body with the estimated gas
-    const txBody = await thor.transactions.buildTransactionBody(checkendorsementClauses, gasResult.totalGas)
+    const txBody = await buildTxBody(thor, checkendorsementClauses, gasResult.totalGas, maxGasLimit.toString())
 
     // Sign the transaction with the developer's private key
     const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))

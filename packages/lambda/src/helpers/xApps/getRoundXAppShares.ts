@@ -1,5 +1,5 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { clauseBuilder, FunctionFragment } from "@vechain/sdk-core"
+import { Clause, ABIContract, Address } from "@vechain/sdk-core"
 import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
 
 /**
@@ -20,9 +20,9 @@ export const getRoundXAppShares = async (
 ) => {
   // Prepare the clauses to get the shares for the xApps in the round
   const clauses = roundAppIds.map(appId =>
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      XAllocationPool.createInterface().getFunction("getAppShares") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(XAllocationPool.abi).getFunction("getAppShares"),
       [roundId, appId],
     ),
   )
