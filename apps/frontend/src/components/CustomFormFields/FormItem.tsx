@@ -24,7 +24,9 @@ export const FormItem = ({
 
   return (
     <FormControl isInvalid={!!error}>
-      <FormLabel mb={description ? 0 : undefined}>{label}</FormLabel>
+      <FormLabel mb={description ? 0 : undefined} color="#252525">
+        {label}
+      </FormLabel>
       {description && (
         <Text fontSize="xs" color="gray.500" mb={2}>
           {description}

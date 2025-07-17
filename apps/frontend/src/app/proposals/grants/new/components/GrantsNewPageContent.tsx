@@ -17,15 +17,22 @@ import {
 import { BsChevronRight } from "react-icons/bs"
 import { GrantsNewFormStepper } from "./GrantsNewFormStepper"
 import { GrantTypeSelection } from "./GrantTypeSelection"
-import { useForm } from "react-hook-form"
+import { AboutApplicant } from "./AboutApplicant"
+import { useForm, FormProvider } from "react-hook-form"
 import { useRouter } from "next/navigation"
 
 export type GrantFormData = {
   grantType: string
   // About applicant
   applicantName: string
-  applicantEmail: string
-  applicantWallet: string
+  applicantSurname: string
+  applicantRole: string
+  applicantProfileUrl: string
+  applicantCountry?: string
+  applicantCity?: string
+  applicantStreet?: string
+  applicantPostalCode?: string
+  applicantBackground?: string
   // About project
   projectName: string
   projectDescription: string
@@ -72,12 +79,18 @@ const GrantsNewStepCard = () => {
     { title: "Grant Milestones" },
   ]
 
-  const { handleSubmit, control } = useForm<GrantFormData>({
+  const methods = useForm<GrantFormData>({
     defaultValues: {
       grantType: "dapp",
       applicantName: "",
-      applicantEmail: "",
-      applicantWallet: "",
+      applicantSurname: "",
+      applicantRole: "",
+      applicantProfileUrl: "",
+      applicantCountry: "",
+      applicantCity: "",
+      applicantStreet: "",
+      applicantPostalCode: "",
+      applicantBackground: "",
       projectName: "",
       projectDescription: "",
       projectWebsite: "",
@@ -100,11 +113,12 @@ const GrantsNewStepCard = () => {
 
   const handleNext = () => {
     if (activeStep === steps.length - 1) {
-      handleSubmit(onSubmit)()
+      methods.handleSubmit(onSubmit)()
     } else {
       goToNext()
     }
   }
+
   const handleSaveDraft = () => {
     router.push("/proposals/grants")
   }
@@ -112,7 +126,9 @@ const GrantsNewStepCard = () => {
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
-        return <GrantTypeSelection control={control} />
+        return <GrantTypeSelection control={methods.control} />
+      case 1:
+        return <AboutApplicant register={methods.register} errors={methods.formState.errors} />
       // Add other cases for different steps
       default:
         return null
@@ -125,22 +141,26 @@ const GrantsNewStepCard = () => {
         <GrantsNewFormStepper activeStep={activeStep} steps={steps} />
       </CardHeader>
       <CardBody>
-        <VStack spacing={4} w="full" align="flex-start">
-          <form onSubmit={handleSubmit(onSubmit)}>{renderStepContent()}</form>
-          <HStack spacing={4} w="full" align="flex-start">
-            {activeStep !== firstStep && (
-              <Button onClick={handleSaveDraft} variant="secondary" px={8}>
-                {t("Save draft")}
-              </Button>
-            )}
+        <FormProvider {...methods}>
+          <VStack spacing={4} w="full" align="flex-start">
+            <form onSubmit={methods.handleSubmit(onSubmit)} style={{ width: "100%" }}>
+              {renderStepContent()}
+            </form>
+            <HStack spacing={4} w="full" justify="flex-start">
+              {activeStep !== firstStep && (
+                <Button onClick={handleSaveDraft} variant="secondary" px={8}>
+                  {t("Save draft")}
+                </Button>
+              )}
 
-            {activeStep !== lastStep && (
-              <Button onClick={handleNext} variant="primaryAction" px={8}>
-                {t("Continue")}
-              </Button>
-            )}
-          </HStack>
-        </VStack>
+              {activeStep !== lastStep && (
+                <Button onClick={handleNext} variant="primaryAction" px={8}>
+                  {t("Continue")}
+                </Button>
+              )}
+            </HStack>
+          </VStack>
+        </FormProvider>
       </CardBody>
     </Card>
   )
