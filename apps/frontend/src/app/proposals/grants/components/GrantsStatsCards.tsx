@@ -1,4 +1,4 @@
-import { Box, HStack, VStack, Heading, Text, Image, Grid, GridItem } from "@chakra-ui/react"
+import { Box, VStack, Heading, Text, Image, Grid, GridItem, Card } from "@chakra-ui/react"
 interface StatsCardProps {
   icon: string
   value: string
@@ -7,13 +7,16 @@ interface StatsCardProps {
 }
 
 const StatsCard = ({ icon, value, label, alt }: StatsCardProps) => (
-  <HStack
+  <Card
+    variant="base"
     flex={{ base: "0 0 40%", lg: "1 0 calc(30% - 10px)" }}
-    bg="contrast-bg-muted"
-    borderRadius="xl"
+    flexDirection="row"
+    alignItems="center"
+    gap={4}
+    w="full"
+    h="full"
     py={{ base: 2, lg: 6 }}
-    pl={{ base: 4, lg: 6 }}
-    h="full">
+    pl={{ base: 4, lg: 6 }}>
     <Box
       bg="light-contrast-on-card-bg"
       borderRadius="full"
@@ -30,7 +33,7 @@ const StatsCard = ({ icon, value, label, alt }: StatsCardProps) => (
         {label}
       </Text>
     </VStack>
-  </HStack>
+  </Card>
 )
 export const GrantsStatsCards = ({
   totalApplications,
