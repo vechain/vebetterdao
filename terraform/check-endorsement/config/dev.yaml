@@ -8,8 +8,8 @@ environment: "testnet"
 lambda_function_name: "check-endorsement"
 lambda_handler: "index.handler"
 lambda_runtime: "nodejs20.x"
-lambda_memory_size: 128
+lambda_memory_size: 512
 lambda_timeout: 30
 
 # Lambda Build Path
-lambda_source_dir: "packages/lambda/dist/testnet-staging/checkEndorsements" 
+lambda_source_dir: "packages/lambda/dist/testnet-staging/checkEndorsements"
