@@ -89,21 +89,15 @@ export const useGetUserGMs = () => {
         }),
       ])
 
-      let metadata: NFTMetadata[] = []
-
-      try {
-        metadata = await Promise.all(userGMs.map(gm => getIpfsMetadata<NFTMetadata>(gm.tokenURI)))
-      } catch (error) {
-        console.error(error)
-      }
+      let metadata: (NFTMetadata | undefined)[] = (
+        await Promise.allSettled(userGMs.map(gm => getIpfsMetadata<NFTMetadata>(gm.tokenURI)))
+      ).map(result => (result.status === "fulfilled" ? result.value : undefined))
 
       return userGMs.map((gm, index) => {
         const nftMetadata = metadata[index]
-        const image = gmNfts[Number(gm.tokenLevel) - 1]?.image
-          ? gmNfts[Number(gm.tokenLevel) - 1]?.image
-          : nftMetadata?.image
-            ? `https://ipfs.io/ipfs/${nftMetadata?.image.replace("ipfs://", "")}`
-            : notFoundImage
+        const image = nftMetadata?.image
+          ? `https://ipfs.io/ipfs/${nftMetadata?.image.replace("ipfs://", "")}`
+          : gmNfts[Number(gm.tokenLevel) - 1]?.image || notFoundImage
         const nftName = nftMetadata?.name || gmNfts[Number(gm.tokenLevel) - 1]?.name
         const name = `${nftName} #${gm.tokenId}`
         return {
