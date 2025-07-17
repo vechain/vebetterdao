@@ -12,11 +12,13 @@ import {
   GridItem,
   useSteps,
   Button,
+  HStack,
 } from "@chakra-ui/react"
 import { BsChevronRight } from "react-icons/bs"
 import { GrantsNewFormStepper } from "./GrantsNewFormStepper"
 import { GrantTypeSelection } from "./GrantTypeSelection"
 import { useForm } from "react-hook-form"
+import { useRouter } from "next/navigation"
 
 export type GrantFormData = {
   grantType: string
@@ -62,7 +64,7 @@ const BreadcrumbOverview = () => {
 
 const GrantsNewStepCard = () => {
   const { t } = useTranslation()
-
+  const router = useRouter()
   const steps = [
     { title: "Type of grant" },
     { title: "About applicant" },
@@ -70,9 +72,9 @@ const GrantsNewStepCard = () => {
     { title: "Grant Milestones" },
   ]
 
-  const { register, watch, handleSubmit } = useForm<GrantFormData>({
+  const { handleSubmit, control } = useForm<GrantFormData>({
     defaultValues: {
-      grantType: "",
+      grantType: "dapp",
       applicantName: "",
       applicantEmail: "",
       applicantWallet: "",
@@ -88,6 +90,8 @@ const GrantsNewStepCard = () => {
     index: 0,
     count: steps.length,
   })
+  const firstStep = 0
+  const lastStep = steps.length - 1
 
   const onSubmit = (data: GrantFormData) => {
     // Handle form submission
@@ -101,13 +105,14 @@ const GrantsNewStepCard = () => {
       goToNext()
     }
   }
+  const handleSaveDraft = () => {
+    router.push("/proposals/grants")
+  }
 
   const renderStepContent = () => {
-    const grantType = watch("grantType")
-
     switch (activeStep) {
       case 0:
-        return <GrantTypeSelection register={register} value={grantType} />
+        return <GrantTypeSelection control={control} />
       // Add other cases for different steps
       default:
         return null
@@ -122,9 +127,19 @@ const GrantsNewStepCard = () => {
       <CardBody>
         <VStack spacing={4} w="full" align="flex-start">
           <form onSubmit={handleSubmit(onSubmit)}>{renderStepContent()}</form>
-          <Button onClick={handleNext} variant="primaryAction" px={8}>
-            {t("Continue")}
-          </Button>
+          <HStack spacing={4} w="full" align="flex-start">
+            {activeStep !== firstStep && (
+              <Button onClick={handleSaveDraft} variant="secondary" px={8}>
+                {t("Save draft")}
+              </Button>
+            )}
+
+            {activeStep !== lastStep && (
+              <Button onClick={handleNext} variant="primaryAction" px={8}>
+                {t("Continue")}
+              </Button>
+            )}
+          </HStack>
         </VStack>
       </CardBody>
     </Card>

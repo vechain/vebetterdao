@@ -20,6 +20,7 @@ import { GrantsStepIndicator } from "./GrantsStepIndicator"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { UilArrowLeft, UilCheck, UilTimes } from "@iconscout/react-unicons"
+import { useRouter } from "next/navigation"
 
 export type Step = {
   key: string
@@ -44,11 +45,11 @@ export const GrantsStepsCard = ({
     count: steps.length,
   })
   const { isMobile } = useBreakpoints()
-
+  const router = useRouter()
   const currentStep = steps[activeStep]
   const isLastStep = activeStep === steps.length - 1
   const handleApply = () => {
-    window.alert("Go to apply page")
+    router.push("/proposals/grants/new")
   }
 
   if (!currentStep) {

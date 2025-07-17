@@ -1745,5 +1745,6 @@
   "Up to {{amount}}": "Up to {{amount}}",
   "Apply if you are building": "Apply if you are building",
   "dApp grant": "dApp grant",
-  "Tooling grant": "Tooling grant"
+  "Tooling grant": "Tooling grant",
+  "Save draft": "Save draft"
 }
