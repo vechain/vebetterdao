@@ -126,6 +126,8 @@ async function distributeEmissions(thor: ThorClient) {
   const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
+  console.log("Stepping 2")
+
   // Wait for the next round to start before proceeding
   await waitForRoundStart(thor)
 
@@ -270,8 +272,12 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       isPollingEnabled: false,
     })
 
+    console.log("Stepping 1")
+
     // Distribute the emissions to the VeBetterDAO and start the next round
     const { receipt: receiptEmissions, gasResult: gasResultEmissions } = await distributeEmissions(thorClient)
+
+    console.log("Stepping 3")
 
     if (!receiptEmissions)
       return {
