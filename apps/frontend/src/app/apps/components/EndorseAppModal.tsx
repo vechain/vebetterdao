@@ -105,11 +105,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               {nodesNotEndorsingApp?.map(node => (
                 <Card
                   key={node.nodeId}
+                  variant="outline"
                   alignItems="flex-start"
                   direction="row"
                   gap="8px"
-                  bg="#FFFFFF26"
-                  borderColor={"#FFFFFF33"}
                   p="16px"
                   rounded="8px">
                   <CardHeader p="0">
@@ -123,17 +122,15 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   </CardHeader>
 
                   <Radio value={node.nodeId} flex={1} justifyContent="space-between" flexDirection="row-reverse">
-                    <CardBody p="0" gap="8px" textAlign="left">
-                      <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+                    <CardBody p="0" gap="8px">
+                      <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                         {t("Node")}
                       </Text>
-
                       <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
                         {`${node.name} #${node.nodeId}`}
                       </Text>
-
                       <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                        <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
+                        <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
                           {t("{{value}} points", { value: node.xNodePoints })}
                         </Text>
                       </Box>
@@ -144,7 +141,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </VStack>
           </RadioGroup>
 
-          <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+          <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
             {t("Current DApp score: {{score}}", { score: appScore })}
             <br />
             {t("DApp score after endorsement: {{score}}", { score: newScore })}

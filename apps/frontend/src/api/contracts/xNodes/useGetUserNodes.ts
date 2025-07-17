@@ -189,6 +189,7 @@ export const useGetUserNodes = (user?: string) => {
         stargateNodes: stargateNodesWithMetadata,
       }
     },
+    enabled: !!userAddress && !!nodeLevelToEndorsementScore,
   })
 }
 

@@ -61,7 +61,7 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && isEndorsingApp && (
         <VStack alignItems={"flex-start"} spacing={4}>
-          <Heading size="lg">{t("Your endorsed app")}</Heading>
+          <Heading size="lg">{t("Your endorsed apps")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
           </Text>

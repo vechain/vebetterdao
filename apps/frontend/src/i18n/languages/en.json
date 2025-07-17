@@ -96,7 +96,7 @@
   "All the apps": "All the apps",
   "/100": "/100",
   "With your Node, you endorse apps to allow them to participate in governance": "With your Node, you endorse apps to allow them to participate in governance",
-  "Your endorsed app": "Your endorsed app",
+  "Your endorsed apps": "Your endorsed apps",
   "Go to app": "Go to app",
   "You are endorsing this app with {{value}} points": "You are endorsing this app with {{value}} points",
   "Sort by most recent": "Sort by most recent",
@@ -1734,5 +1734,6 @@
   "This node is already endorsing an app.": "This node is already endorsing an app.",
   "Attached": "Attached",
   "This node is already attached to another GM": "This node is already attached to another GM",
-  "This feature is available only to nodes that provide free upgrade to GM NFTs.": "This feature is available only to nodes that provide free upgrade to GM NFTs."
+  "This feature is available only to nodes that provide free upgrade to GM NFTs.": "This feature is available only to nodes that provide free upgrade to GM NFTs.",
+  "Only one node can be attached to a GM": "Only one node can be attached to a GM"
 }

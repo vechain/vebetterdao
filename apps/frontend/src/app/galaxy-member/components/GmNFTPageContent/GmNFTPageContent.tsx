@@ -99,7 +99,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                       </CardHeader>
 
                       <CardBody p="0" gap="8px">
-                        <Text fontSize="sm" lineHeight={1} color="#FFFFFFB2">
+                        <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                           {t("Node")}
                         </Text>
                         <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
@@ -133,16 +133,20 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                             </span>
                           </BaseTooltip>
                         ) : (
-                          <Button
-                            disabled={!!attachedNode}
-                            variant="whiteAction"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedNode(node)
-                              onAttachGMToXNodeModalOpen()
-                            }}>
-                            {t("Attach")}
-                          </Button>
+                          <BaseTooltip showTooltip={!!attachedNode} text={t("Only one node can be attached to a GM")}>
+                            <span>
+                              <Button
+                                disabled={!!attachedNode}
+                                variant="whiteAction"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedNode(node)
+                                  onAttachGMToXNodeModalOpen()
+                                }}>
+                                {t("Attach")}
+                              </Button>
+                            </span>
+                          </BaseTooltip>
                         )}
                       </CardFooter>
                     </Card>
