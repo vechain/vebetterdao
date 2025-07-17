@@ -65,7 +65,7 @@ export const GrantsStepsCard = ({
         <HStack w="full" justify="space-between" alignItems="center">
           <UilArrowLeft onClick={goToPrevious} cursor="pointer" />
           <GrantsStepIndicator activeStep={activeStep} steps={steps} width="70%" />
-          <UilTimes onClick={onClose} cursor="pointer" size={24} color="gray.600" />
+          <UilTimes onClick={onClose} cursor="pointer" size={24} />
         </HStack>
         <Box pt={5}>
           <VStack w="full" textAlign="center" spacing={4}>
