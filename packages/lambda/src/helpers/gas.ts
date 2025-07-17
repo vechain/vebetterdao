@@ -1,1 +1,1 @@
-export const maxGasLimit = 40000000 // 40 millions
+export const maxGasLimit = 40_000_000 // 40 millions

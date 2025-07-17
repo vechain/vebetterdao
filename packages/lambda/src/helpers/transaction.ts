@@ -29,14 +29,12 @@ const buildGasEstimate = async (
  * Builds a transaction body with the specified clause and gas settings
  * @param thor - Thor client instance
  * @param clause - Transaction clause
- * @param gasResult - Gas estimation result
- * @param gasLimit - Optional gas limit (40000000 = 40mil max), if not provided, the default is half of the max gas limit
+ * @param gasResult - Gas estimation result - if not provided, the default is half of the max gas limit
  * @returns The built transaction body
  */
-const buildTxBody = async (thor: ThorClient, clauses: TransactionClause[], totalGas: number, gasLimit?: string) => {
-  return await thor.transactions.buildTransactionBody(clauses, totalGas, {
-    gasLimit: gasLimit || (maxGasLimit / 2).toString(),
-  })
+const buildTxBody = async (thor: ThorClient, clauses: TransactionClause[], totalGas: number) => {
+  const useGas = totalGas || maxGasLimit / 2
+  return await thor.transactions.buildTransactionBody(clauses, useGas)
 }
 
 export { buildTxBody, buildGasEstimate }

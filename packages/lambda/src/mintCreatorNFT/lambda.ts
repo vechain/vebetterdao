@@ -100,7 +100,7 @@ const mintCreatorNFT = async (thor: ThorClient, creatorWalletAddress: string) =>
   if (gasResult.reverted) {
     throw new Error(`Transaction reverted: ${JSON.stringify(gasResult?.revertReasons)}`)
   }
-  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas, maxGasLimit.toString())
+  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas)
 
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
 

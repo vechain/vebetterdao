@@ -76,7 +76,7 @@ export async function checkEndorsements(
     }
 
     // Build the transaction body with the estimated gas
-    const txBody = await buildTxBody(thor, checkendorsementClauses, gasResult.totalGas, maxGasLimit.toString())
+    const txBody = await buildTxBody(thor, checkendorsementClauses, gasResult.totalGas)
 
     // Sign the transaction with the developer's private key
     const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
