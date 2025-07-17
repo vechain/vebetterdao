@@ -29,22 +29,32 @@ resource "terraform_data" "build_lambda" {
 }
 
 data "archive_file" "lambda_zip" {
-  depends_on = [terraform_data.build_lambda]
-  type        = "zip"
+  type             = "zip"
   output_file_mode = "0666"
-  source_dir  = "${path.module}/../../${local.config.lambda_source_dir}"
-  output_path = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
+  source_dir       = "${path.module}/../../${local.config.lambda_source_dir}"
+  output_path      = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
+  excludes         = ["index.zip"]
 }
 
 # Lambda Function
 resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   architectures = ["x86_64"]
-  depends_on    = [terraform_data.build_lambda]
+
+  ephemeral_storage {
+    size = "512"
+  }
 
   function_name = local.config.lambda_function_name
   handler       = local.config.lambda_handler
   filename      = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  lifecycle {
+    precondition {
+      condition     = fileexists("${path.module}/../../${local.config.lambda_source_dir}/index.zip")
+      error_message = "Lambda build does not exist. Please run the build script first."
+    }
+  }
 
   logging_config {
     log_format = "Text"
@@ -58,20 +68,21 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   runtime                        = local.config.lambda_runtime
   timeout                        = local.config.lambda_timeout
 
-  environment {
-    variables = {
-      RESET_SIGNALER_PK = local.minter_pk
-      MNEMONIC          = local.mnemonic
-      WALLET            = local.wallet
-    }
+  tracing_config {
+    mode = "PassThrough"
+  }
+
+  tags = {
+    Environment = local.network
+    ManagedBy   = "terraform"
+    Project     = "vebetterpassport"
   }
 
   # Match existing deployment if source code hash matches and ignore source_code_hash changes
   lifecycle {
     ignore_changes = [
       tags,
-      tags_all,
-      last_modified
+      tags_all
     ]
   }
 }
