@@ -135,7 +135,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       borderColor={"#D5D5D5"}
       py={8}
       px={6}
-      bg={"white"}
+      bg={"info-bg"}
       w={"full"}
       mt={{ base: 0, md: 8 }}
       position={"relative"}
@@ -150,7 +150,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           {description}
         </Box>
         <Button
-          zIndex={2}
+          zIndex={1}
           mt={2}
           isDisabled={!canClaim}
           isLoading={isRoundRewardLoading}

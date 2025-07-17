@@ -1,11 +1,11 @@
 import { Heading, VStack, Text, Button, Link } from "@chakra-ui/react"
-import Lottie from "react-lottie"
 import errorAnimation from "./error.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { useTranslation } from "react-i18next"
+import Lottie from "react-lottie"
 
 export type ErrorModalContentProps = {
   title?: ReactNode
@@ -40,6 +40,7 @@ export const ErrorModalContent = ({
           animate={{
             scale: [1, 1.1, 1],
           }}>
+          {/* @ts-ignore eslint-disable-line */}
           <Lottie
             style={{
               pointerEvents: "none",

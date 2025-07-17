@@ -56,10 +56,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   // Get the next level GM NFT image
   const { nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useNextLevelImage(Number(gmLevel))
 
-  // TODO: REMOVE IN ROUND 46
-  const nextGMLevel = Number(gmLevel) + 1
-  const nextGMLevelInfo = gmNfts.find(nft => nft.level === nextGMLevel.toString())
-
   const levelAfterUpgrade = useMemo(() => {
     const currentLevel = Number(gmLevel ?? 1) - 1 // gmNfts start from 1
     const nextLevel = currentLevel + 1 // GMNFTs lists start from 0
@@ -161,7 +157,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                       <HStack rounded="8px" gap={1} color={""}>
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
-                          {nextGMLevelInfo?.multiplier ?? nextLevelGM?.multiplier}
+                          {nextLevelGM?.multiplier}
                         </Text>
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
                           {t("GM reward weight").toLowerCase()}

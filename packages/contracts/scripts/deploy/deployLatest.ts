@@ -19,9 +19,8 @@ import {
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
-import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
+import { shouldEndorseXApps } from "@repo/config/contracts"
 import { deployAndInitializeLatest, deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
@@ -87,7 +86,6 @@ export async function deployLatest(config: ContractsConfig) {
   } = await passportLibraries(true)
 
   console.log("Deploying X2Earn App Libraries")
-  console.log("Deploying X2Earn App Libraries")
   const {
     AdministrationUtils,
     EndorsementUtils,
@@ -141,6 +139,7 @@ export async function deployLatest(config: ContractsConfig) {
       await b3tr.getAddress(),
     ],
     undefined,
+    undefined,
     true,
   )) as VOT3
 
@@ -153,6 +152,7 @@ export async function deployLatest(config: ContractsConfig) {
       TEMP_ADMIN, // admin
       config.CONTRACTS_ADMIN_ADDRESS, // upgrader
     ],
+    undefined,
     undefined,
     true,
   )) as TimeLock
@@ -173,6 +173,7 @@ export async function deployLatest(config: ContractsConfig) {
       config.TREASURY_TRANSFER_LIMIT_VOT3,
       config.TREASURY_TRANSFER_LIMIT_VTHO,
     ],
+    undefined,
     undefined,
     true,
   )) as Treasury
@@ -747,12 +748,6 @@ export async function deployLatest(config: ContractsConfig) {
   }
 
   //await updateGMMultipliers(config.VOTER_REWARDS_LEVELS, config.GM_MULTIPLIERS_V2, voterRewards)
-
-  // ---------- Run Simulation ---------- //
-  if (shouldRunSimulation()) {
-    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
-  }
-
   console.log(`appEnv: ${appEnv}`)
 
   // ---------- Role updates ---------- //

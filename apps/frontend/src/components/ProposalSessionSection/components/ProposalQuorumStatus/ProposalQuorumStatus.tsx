@@ -12,8 +12,8 @@ const getSafePercentage = (value: number) => {
 }
 
 type Props = {
-  quorumQuery: UseQueryResult<string, Error>
-  currentVotesQuery: UseQueryResult<string, Error>
+  quorumQuery: UseQueryResult<string, unknown>
+  currentVotesQuery: UseQueryResult<string, unknown>
   isEnded: boolean
   showQuorumNeeded?: boolean
 }
@@ -90,7 +90,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       {showQuorumNeeded ? (
         <HStack>
           <Skeleton isLoaded={quorumQueryReady}>
-            <Text color="#252525" fontWeight={600} fontSize={"14px"}>
+            <Text fontWeight={600} fontSize={"14px"}>
               {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
             </Text>
           </Skeleton>

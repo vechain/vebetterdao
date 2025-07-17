@@ -1,9 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
+const abi = VeBetterPassport__factory.abi
+const method = "isPersonAtTimepoint" as const
 
 /**
  * Returns the query key for fetching the isPerson status at a given block number.
@@ -12,7 +13,12 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the isPerson status at a given block number.
  */
 export const getIsPersonAtTimepointQueryKey = (user: string, blockNumber: string) => {
-  return getCallKey({ method: "isPersonAtTimepoint", keyArgs: [user, blockNumber] })
+  return getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [user as `0x${string}`, Number(blockNumber)],
+  })
 }
 
 /**
@@ -22,11 +28,14 @@ export const getIsPersonAtTimepointQueryKey = (user: string, blockNumber: string
  * @returns The isPerson status at a given block number.
  */
 export const useIsPersonAtTimepoint = (user?: string | null, blockNumber?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "isPersonAtTimepoint",
-    args: [user, blockNumber],
-    enabled: !!user && !!blockNumber,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(user ?? "0x") as `0x${string}`, Number(blockNumber ?? 0)],
+    queryOptions: {
+      enabled: !!user && !!blockNumber,
+      select: data => data[0],
+    },
   })
 }

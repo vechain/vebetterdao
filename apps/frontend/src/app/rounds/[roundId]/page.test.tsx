@@ -33,8 +33,8 @@ test("Allocations", async () => {
   })
   //@ts-ignore
   vi.spyOn(apiHooks, "useUserDelegation").mockReturnValue({
-    delegator: null,
-    delegatee: null,
+    delegator: undefined,
+    delegatee: undefined,
     isLoading: false,
     isDelegator: false,
     isDelegatee: false,
@@ -192,6 +192,7 @@ test("Allocations", async () => {
       ve_world: {
         banner: "",
       },
+      categories: [],
     },
     isLoading: false,
     error: null,

@@ -16,7 +16,7 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
-import { useAppEndorsementStatus, useXAppMetadata, useIpfsImage, useXNode, UnendorsedApp, XApp } from "@/api"
+import { useAppEndorsementStatus, useIpfsImage, useXNode, UnendorsedApp, XApp, useXAppMetadata } from "@/api"
 import { notFoundImage } from "@/constants"
 import { useXAppStatusConfig } from "../[appId]/hooks"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -65,7 +65,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
       maxW="100%"
       _hover={{
         cursor: "pointer",
-        backgroundColor: "gray.50",
+        backgroundColor: "hover-contrast-bg",
         transition: "all 0.3s",
       }}>
       <CardBody py="16px" px="24px">

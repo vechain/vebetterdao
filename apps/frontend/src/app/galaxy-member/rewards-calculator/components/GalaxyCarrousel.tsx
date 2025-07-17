@@ -7,7 +7,7 @@ import { useSelectedGmNft } from "@/api"
 
 type Props = {
   setSelectedGMLevel: (GMLevel: string) => void
-  usersGM: { gmLevel: string; gmId: string }
+  usersGM: { gmLevel?: string; gmId?: string; b3trToUpgradeGMToNextLevel?: number }
 }
 
 export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {

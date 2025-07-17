@@ -1,10 +1,14 @@
-import { extendTheme, keyframes } from "@chakra-ui/react"
+import { extendTheme } from "@chakra-ui/react"
+import { keyframes } from "@emotion/react"
 import { darkThemeColors, lightThemeColors } from "./colors"
 import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
 import { ButtonStyle } from "./button"
 import { StepperStyle } from "./stepper"
+import { SelectStyle } from "./select"
+import { InputStyle } from "./input"
+import { ModalStyle } from "./modal"
 
 const themeConfig = {
   //@ts-ignore
@@ -17,6 +21,9 @@ const themeConfig = {
     Card: cardTheme,
     Button: ButtonStyle,
     Stepper: StepperStyle,
+    Select: SelectStyle,
+    Input: InputStyle,
+    Modal: ModalStyle,
   },
 
   // 2. Add your color mode config
@@ -33,11 +40,74 @@ const themeConfig = {
         _light: "#F7F7F7",
         _dark: "#131313",
       },
+      "info-bg": {
+        _light: "#F8F8F8",
+        _dark: "#1E1E1E",
+      },
+      "dark-contrast-on-card-bg": {
+        _light: "#F8F8F8",
+        _dark: "#131313",
+      },
+      "profile-bg": {
+        _light: "#FFFFFF",
+        _dark: "#2D2D2F",
+      },
+      "contrast-on-dark-bg": {
+        _light: "#FFFFFF",
+        _dark: "#1A1A1A",
+      },
+      "light-contrast-on-card-bg": {
+        _light: "#FAFAFA",
+        _dark: "#2D2D2F",
+      },
+      "your-ranking-hover": {
+        _light: "#005EFF",
+        _dark: "#005EFF",
+      },
+      "b3tr-balance-bg": {
+        _light: "#E5EEFF",
+        _dark: "#1A2547",
+      },
+      "vot3-balance-bg": {
+        _light: "#E3FFC4",
+        _dark: "#1A2E0F",
+      },
+      "contrast-bg-strong": {
+        _light: "#000000",
+        _dark: "#E2E8F0",
+      },
+      "contrast-bg-muted": {
+        _light: "#FFFFFF",
+        _dark: "#2D3748",
+      },
+      "contrast-bg-muted-hover": {
+        _light: "#EFEFEF",
+        _dark: "#A0AEC0",
+      },
+      "contrast-bg-strong-hover": {
+        _light: "#1A1A1A",
+        _dark: "#CBD5E0",
+      },
+      "contrast-fg-on-strong": {
+        _light: "#FFFFFF",
+        _dark: "#000000",
+      },
+      "contrast-fg-on-muted": {
+        _light: "#000000",
+        _dark: "#FFFFFF",
+      },
+      "hover-contrast-bg": {
+        _light: "#F8F8F8",
+        _dark: "#2D2F31",
+      },
+      "contrast-border": {
+        _light: "#EFEFEF",
+        _dark: "#4A5568",
+      },
     },
   },
   colors: {
     //dynamic primary coor based on the light/dark
-
     green: {
       "50": "#f3f9f3",
       "100": "#cfe6d0",

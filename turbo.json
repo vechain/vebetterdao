@@ -1,7 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [".env"],
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": ["**/.env.*local", ".env"],
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
@@ -18,9 +17,10 @@
     "CONTRACT_TO_DEPLOY",
     "CONTRACT_VERSION",
     "FUNCTION_TO_CALL",
-    "NEXT_DEPLOY_LATEST_ONLY"
+    "NEXT_DEPLOY_LATEST_ONLY",
+    "OPENAI_API_KEY"
   ],
-  "pipeline": {
+  "tasks": {
     "install": {
       "dependsOn": ["@repo/contracts#install", "^compile"]
     },

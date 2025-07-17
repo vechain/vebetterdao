@@ -96,7 +96,6 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
       onClick={navigateToAppDetail}
       _hover={{
         bg: nonActiveBackgroundColor,
-
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>
@@ -117,9 +116,11 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
           <HStack spacing={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
               <Text fontSize={"sm"} color={"gray.500"}>
-                {appMetadata?.description.slice(0, 150) + "..." ??
-                  appMetadataError?.message ??
-                  "Error loading description"}
+                {appMetadata?.description
+                  ? appMetadata.description.slice(0, 150) + "..."
+                  : appMetadataError?.message
+                    ? appMetadataError.message
+                    : "Error loading description"}
               </Text>
             </Skeleton>
           </HStack>

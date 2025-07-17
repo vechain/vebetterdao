@@ -7,10 +7,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  gitleaks:
-    uses: vechain/github-actions/.github/workflows/gitleaks.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
-    secrets:
-       GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
   scorecard:
     uses: vechain/github-actions/.github/workflows/scorecard.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
     secrets:

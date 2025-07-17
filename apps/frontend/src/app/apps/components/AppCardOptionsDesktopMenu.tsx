@@ -15,7 +15,7 @@ import { FaExternalLinkAlt } from "react-icons/fa"
 import { FaEllipsisVertical, FaCheck, FaCopy, FaRegImage } from "react-icons/fa6"
 
 type Props = {
-  teamWalletAddress: string
+  teamWalletAddress?: string
   externalUrl?: string
   isLoading?: boolean
   showViewDetails?: boolean
@@ -29,7 +29,7 @@ export const AppCardOptionsDesktopMenu = ({
   showViewDetails = false,
 }: Props) => {
   const { t } = useTranslation()
-  const { onCopy, hasCopied } = useClipboard(teamWalletAddress)
+  const { onCopy, hasCopied } = useClipboard(teamWalletAddress ?? "")
 
   const toast = useToast()
   const handleOnCopy = () => {

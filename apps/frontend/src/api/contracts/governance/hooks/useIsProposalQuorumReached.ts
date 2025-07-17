@@ -1,30 +1,28 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernorJson } from "@repo/contracts"
-const b3trGovernorAbi = B3TRGovernorJson.abi
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+import { B3TRGovernor__factory } from "@repo/contracts"
 
-export const getIsProposalQuorumReached = async (thor: Connex.Thor, proposalId: string): Promise<boolean> => {
-  if (!proposalId) return Promise.reject(new Error("proposalId is required"))
-  const quorumAbi = b3trGovernorAbi.find(abi => abi.name === "quorumReached")
-  if (!quorumAbi) throw new Error("quorumReached function not found")
-  const res = await thor.account(GOVERNANCE_CONTRACT).method(quorumAbi).call(proposalId)
+const abi = B3TRGovernor__factory.abi
+const address = getConfig().b3trGovernorAddress as `0x${string}`
+const method = "quorumReached" as const
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getIsProposalQuorumReachedQueryKey = (proposalId: string) => ["quorumReached", proposalId]
+export const getIsProposalQuorumReachedQueryKey = (proposalId: string) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [BigInt(proposalId)],
+  })
 
 export const useIsProposalQuorumReached = (proposalId: string, enabled: boolean = false) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getIsProposalQuorumReachedQueryKey(proposalId),
-    queryFn: async () => await getIsProposalQuorumReached(thor, proposalId),
-    enabled: !!thor && !!proposalId && enabled,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(proposalId)],
+    queryOptions: {
+      enabled: !!proposalId && enabled,
+      select: res => res[0],
+    },
   })
 }

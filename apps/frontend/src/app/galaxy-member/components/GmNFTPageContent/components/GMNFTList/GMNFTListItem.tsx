@@ -50,9 +50,6 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  // TODO: REMOVE IN ROUND 46
-  const gmInfo = gmNfts.find(nft => nft.level === token.tokenLevel)
-
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
   const currentNFTAttachedToNode = nodeIdAttachedToToken === userXNodeId && attachedGMTokenId === token.tokenId
 
@@ -82,7 +79,6 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
       <CardBody p={"4"}>
         <VStack align="stretch" gap={4}>
           <HStack
-            color="#252525"
             align={"center"}
             justify="space-between"
             rounded="12px"
@@ -138,7 +134,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1} maxW={{ base: "full", md: "auto" }}>
                     <Text fontSize={"xs"} fontWeight={600}>
-                      {gmInfo?.multiplier ?? gmRewardMultiplier}
+                      {gmRewardMultiplier}
                       {"x"}
                     </Text>
                     <Text

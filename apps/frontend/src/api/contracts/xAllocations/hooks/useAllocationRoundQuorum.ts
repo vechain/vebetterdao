@@ -1,42 +1,34 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
-import { ethers } from "ethers"
+import { formatEther } from "viem"
 
-const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
+const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
+const abi = XAllocationVoting__factory.abi
+const method = "roundQuorum" as const
 
 /**
- * Get the quorum that needs to be reached for an allocation round
- *
- * @param roundId the round id
- *
- * @returns amount of votes needed to reach quorum
+ * Returns the query key for fetching the allocation round quorum.
+ * @param roundId The round ID to get the quorum for
+ * @returns The query key for fetching the allocation round quorum.
  */
-export const getAllocationRoundQuorum = async (thor: Connex.Thor, roundId: string): Promise<string> => {
-  const functionFragment = XAllocationVotingInterface.getFunction("roundQuorum").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return ethers.formatEther(res.decoded[0])
-}
-
-export const getAllocationRoundQuorumQueryKey = (roundId: string) => ["allocationRoundQuorum", roundId]
+export const getAllocationRoundQuorumQueryKey = (roundId: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId)] })
 
 /**
- * Get the quorum that needs to be reached for an allocation round
- *
- * @param roundId the round id
- *
+ * Hook to get the quorum that needs to be reached for an allocation round
+ * @param roundId The round ID to get the quorum for
  * @returns amount of votes needed to reach quorum
  */
 export const useAllocationRoundQuorum = (roundId: string) => {
-  const { thor } = useConnex()
-  return useQuery({
-    queryKey: getAllocationRoundQuorumQueryKey(roundId),
-    queryFn: async () => await getAllocationRoundQuorum(thor, roundId),
-    enabled: !!thor && !!roundId,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [BigInt(roundId)],
+    queryOptions: {
+      enabled: !!roundId,
+      select: data => formatEther(BigInt(data[0])),
+    },
   })
 }

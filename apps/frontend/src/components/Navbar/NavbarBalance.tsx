@@ -1,14 +1,14 @@
-import { useB3trBalance, useVot3Balance } from "@/api"
 import { HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(1)
 
 export const NavbarBalance = () => {
   const { account } = useWallet()
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
 
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
 

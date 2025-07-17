@@ -42,7 +42,7 @@ export const LinkedAccounts = ({ address }: Props) => {
           </VStack>
           <LinkedAccountsItem
             isConnectedUser={isConnectedUser}
-            account={outgoingPendingLink ? outgoingPendingLink : passport}
+            account={outgoingPendingLink ? outgoingPendingLink : passport || ""}
           />
           <VStack align="start">
             <Heading fontSize="lg" fontWeight="700">

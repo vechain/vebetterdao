@@ -1,12 +1,13 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().galaxyMemberContractAddress
-const contractInterface = GalaxyMember__factory.createInterface()
-const method = "levelOf"
+const address = getConfig().galaxyMemberContractAddress
+const abi = GalaxyMember__factory.abi
+const method = "levelOf" as const
 
-export const getLevelOfTokenQueryKey = (tokenId?: string) => getCallKey({ method, keyArgs: [tokenId] })
+export const getLevelOfTokenQueryKey = (tokenId?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(tokenId || "0")] })
 
 /**
  * Custom hook that retrieves the level of the specified token.
@@ -16,11 +17,14 @@ export const getLevelOfTokenQueryKey = (tokenId?: string) => getCallKey({ method
  * @returns The level of the specified token.
  */
 export const useLevelOfToken = (tokenId?: string, enabled = true) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [tokenId],
-    enabled: !!tokenId && enabled,
+    args: [BigInt(tokenId || "0")],
+    queryOptions: {
+      enabled: !!tokenId && enabled,
+      select: data => data[0].toString(),
+    },
   })
 }

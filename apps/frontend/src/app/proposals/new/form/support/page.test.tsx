@@ -4,6 +4,7 @@ import * as store from "@/store"
 import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
 import * as apiHooks from "@/api"
+import * as hooks from "@/hooks"
 import { render, waitFor } from "../../../../../../test"
 import { vi } from "vitest"
 import { fireEvent, screen } from "@testing-library/react"
@@ -25,7 +26,7 @@ vi.spyOn(router, "useRouter").mockReturnValue({
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/support")
-const spyOnVot3Balance = vi.spyOn(apiHooks, "useVot3Balance")
+const spyOnVot3Balance = vi.spyOn(hooks, "useGetVot3Balance")
 const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
 
 const compactFormatter = getCompactFormatter(2)

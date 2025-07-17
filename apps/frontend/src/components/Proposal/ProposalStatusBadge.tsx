@@ -1,4 +1,4 @@
-import { ProposalState, useIsDepositReached, useProposalState } from "@/api"
+import { ProposalState, useIsDepositReached } from "@/api"
 import { Icon, Skeleton, StackProps, TextProps } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
@@ -11,6 +11,7 @@ type Props = {
   renderBadge?: boolean
   textProps?: TextProps
   containerProps?: StackProps
+  proposalState?: ProposalState
 }
 
 export const ProposalStatusBadge = ({
@@ -19,34 +20,12 @@ export const ProposalStatusBadge = ({
   renderIcon = true,
   textProps = {},
   containerProps = {},
+  proposalState,
 }: Props) => {
-  const { data: state, isLoading: stateLoading } = useProposalState(proposalId)
   const { data: isDepositReached, isLoading: isDepositReachedLoading } = useIsDepositReached(proposalId)
   const { t } = useTranslation()
 
-  if (stateLoading)
-    return (
-      <Skeleton>
-        <Badge
-          text={t("loading")}
-          containerProps={
-            renderBadge
-              ? {
-                  bgColor: "#F8F8F8",
-                  ...containerProps,
-                }
-              : {
-                  px: 0,
-                  py: 0,
-                  ...containerProps,
-                }
-          }
-          icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
-        />
-      </Skeleton>
-    )
-
-  switch (state) {
+  switch (proposalState) {
     case ProposalState.Succeeded:
       return (
         <Badge

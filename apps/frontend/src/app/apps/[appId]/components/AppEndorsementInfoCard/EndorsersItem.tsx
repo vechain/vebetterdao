@@ -16,7 +16,7 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
-import { useXNodes } from "@/api"
+import { useXNode } from "@/api"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
@@ -46,9 +46,9 @@ export const EndorsersItem = ({
   const router = useRouter()
 
   // Get the endorser's first node and the node endorsement score
-  const { data: endorserNodes, isLoading: endorserNodesLoading } = useXNodes(endorserAddress)
+  const { xNodeId, isXNodeLoading: endorserNodesLoading } = useXNode(endorserAddress)
   // TODO support multiple nodes
-  const endorserNodeId = endorserNodes?.[0]?.id
+  const endorserNodeId = xNodeId
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
 
   // Find the first element in events (ie most recent) where the endorser endorsed the app
@@ -75,7 +75,7 @@ export const EndorsersItem = ({
 
   return (
     <HStack
-      bg="white"
+      bg="light-contrast-on-card-bg"
       p={"12px"}
       borderRadius={"16px"}
       boxShadow="sm"

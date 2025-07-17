@@ -12,7 +12,7 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useProposalState } from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { parseDate, toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
@@ -22,12 +22,11 @@ import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
 import { ProposalStatusBadge } from "./ProposalStatusBadge"
 
-type Props = {
-  proposal: ProposalCreatedEvent
+type Props = Pick<ProposalCreatedEvent, "proposalId" | "description" | "roundIdVoteStart"> & {
+  proposalState?: ProposalState
 }
 
-export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
-  const { proposalId, description, roundIdVoteStart } = proposal
+export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, roundIdVoteStart, proposalState }) => {
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
 
   const router = useRouter()
@@ -35,8 +34,6 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
   const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
 
   const { t } = useTranslation()
-
-  const { data: proposalState } = useProposalState(proposalId)
 
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposalId}`)
@@ -55,7 +52,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
     <Card
       variant={"baseWithBorder"}
       onClick={goToProposal}
-      _hover={{ bg: "#F8F8F8" }}
+      _hover={{ bg: "hover-contrast-bg" }}
       cursor={"pointer"}
       alignSelf={"flex-start"}
       w={"full"}>
@@ -121,7 +118,8 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
         </Stack>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
           <ProposalStatusBadge
-            proposalId={proposal.proposalId}
+            proposalId={proposalId}
+            proposalState={proposalState}
             containerProps={{
               py: 1,
               px: 2,

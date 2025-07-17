@@ -1,25 +1,25 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().galaxyMemberContractAddress
-const contractInterface = GalaxyMember__factory.createInterface()
-const method = "MAX_LEVEL"
+const address = getConfig().galaxyMemberContractAddress
+const abi = GalaxyMember__factory.abi
+const method = "MAX_LEVEL" as const
 
-export const getGMMaxLevelQueryKey = () => getCallKey({ method })
+export const getGMMaxLevelQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
- * Custom hook that retrieves the maximum level of the Galaxy Member NFT.
- *
- * @param enabled - Determines whether the hook is enabled or not. Default is true.
- * @returns The maximum level of the Galaxy Member NFT.
+ * Hook to get the max level of the GM NFT.
+ * @returns The max level of the GM NFT.
  */
-export const useGMMaxLevel = (enabled = true) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useGMMaxLevel = () => {
+  return useCallClause({
+    abi,
+    address,
     method,
     args: [],
-    enabled,
+    queryOptions: {
+      select: data => Number(data[0]),
+    },
   })
 }

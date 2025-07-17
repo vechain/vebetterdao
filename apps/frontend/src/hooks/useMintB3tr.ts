@@ -1,10 +1,11 @@
-import { getB3TrTokenDetailsQueryKey, getB3TrBalanceQueryKey, buildMintB3trTx } from "@/api"
+import { getB3TrTokenDetailsQueryKey, buildMintB3trTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 
 import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useConnex, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useWallet, UseSendTransactionReturnValue, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 
 type useMintB3trProps = {
   address?: string
@@ -19,7 +20,7 @@ type useMintB3trProps = {
  * @returns see {@link UseSendTransactionReturnValue}
  */
 export const useMintB3tr = ({ address, amount, onSuccess }: useMintB3trProps): UseSendTransactionReturnValue => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const { account } = useWallet()
   const toast = useToast()
 
@@ -48,7 +49,7 @@ export const useMintB3tr = ({ address, amount, onSuccess }: useMintB3trProps): U
   }, [toast, onSuccess, amount, address])
 
   const refetchQueryKeys = useMemo(
-    () => [getB3TrBalanceQueryKey(account?.address ?? undefined), getB3TrTokenDetailsQueryKey()],
+    () => [getB3trBalanceQueryKey(account?.address ?? undefined), getB3TrTokenDetailsQueryKey()],
     [account?.address],
   )
 

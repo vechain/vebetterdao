@@ -82,13 +82,13 @@ export const ProposalSupportProgressChart = ({
           <Flex position="relative" top="7px" display={"inline-flex"}>
             <FaRegHeart color={yourDepositColor} size={"36"} />
           </Flex>
-          <Text fontSize={"28px"} color={"#252525"} fontWeight={700}>
+          <Text fontSize={"28px"} fontWeight={700}>
             {compactFormatter.format(totalDeposits)}
           </Text>
-          <Text fontSize={"20px"} fontWeight={500} color={"#252525"}>
+          <Text fontSize={"20px"} fontWeight={500}>
             {t("/")}
           </Text>
-          <Text fontSize={"20px"} fontWeight={500} color={"#252525"}>
+          <Text fontSize={"20px"} fontWeight={500}>
             {compactFormatter.format(depositThreshold)}
           </Text>
         </HStack>

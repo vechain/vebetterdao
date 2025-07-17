@@ -90,16 +90,22 @@ export const ProposalsPageContent = () => {
           gap={4}
           w={{ base: "full", md: undefined }}>
           {sortedProposals.map(proposal => (
-            <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
+            <ProposalInfoCard
+              key={proposal.proposalId}
+              proposalId={proposal.proposalId}
+              description={proposal.description}
+              roundIdVoteStart={proposal.roundIdVoteStart}
+              proposalState={proposal.state}
+            />
           ))}
           {sortedProposals.length === 0 && !isLoading && (
             <NoProposalsCard
               onClick={onNewClick}
               buttonText={t("Create proposal")}
               description={
-                <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
+                <Text fontSize={16} fontWeight={400} mt={2}>
                   {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}{" "}
-                  <b style={{ color: "black" }}>{t("Create a proposal")}</b>{" "}
+                  <b style={{ color: "contrast-fg-on-muted" }}>{t("Create a proposal")}</b>{" "}
                   {t("and let the community vote to make it happen!")}
                 </Text>
               }

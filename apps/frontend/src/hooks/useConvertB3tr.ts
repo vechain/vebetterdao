@@ -1,19 +1,14 @@
-import {
-  getB3TrBalanceQueryKey,
-  buildConvertB3trTx,
-  getVot3BalanceQueryKey,
-  getVotesQueryKey,
-  buildB3trApprovesTx,
-  getB3TrTokenDetailsQueryKey,
-  buildDelegateVot3Tx,
-} from "@/api"
+import { buildConvertB3trTx, buildB3trApprovesTx, getB3TrTokenDetailsQueryKey, buildDelegateVot3Tx } from "@/api"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useVot3RequireSelfDelegation } from "./vechainKitHooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
+
 const config = getConfig()
 
 // const buffer = 1.01
@@ -34,7 +29,7 @@ type useMintB3trProps = {
  * @returns see {@link UseSendTransactionReturnValue}
  */
 export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: useMintB3trProps) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const { account } = useWallet()
   const requiresSelfDelegation = useVot3RequireSelfDelegation()
 
@@ -59,10 +54,11 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
 
   const refetchQueryKeys = useMemo(
     () => [
-      getB3TrBalanceQueryKey(account?.address ?? undefined),
+      getB3trBalanceQueryKey(account?.address ?? undefined),
       getVot3BalanceQueryKey(account?.address ?? ""),
-      getVotesQueryKey(account?.address ?? undefined),
-      getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      // TODO: migration check if this is needed cause hook not used anywhere
+      // getVotesQueryKey(account?.address ?? undefined),
+      getB3trBalanceQueryKey(config.vot3ContractAddress),
       getB3TrTokenDetailsQueryKey(),
     ],
     [account?.address],

@@ -104,7 +104,8 @@ jobs:
           [
             shard0,
             shard2,
-            shard3,
+            shard3a,
+            shard3b,
             shard4,
             shard5,
             shard6,

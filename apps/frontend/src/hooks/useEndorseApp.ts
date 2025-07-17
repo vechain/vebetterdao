@@ -5,12 +5,12 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getAppEndorsementScoreQueryKey,
   getAppExistsQueryKey,
-  getAppIsBlacklistedQueryKey,
+  getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
-  getNodeCheckCooldownQueryKey,
+  getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
-  getUserXNodesQueryKey,
+  getUserNodesQueryKey,
   getXAppsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
@@ -43,16 +43,16 @@ export const useEndorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) 
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserXNodesQueryKey(userAddress),
+      getUserNodesQueryKey(userAddress),
       getIsAppUnendorsedQueryKey(appId),
       getAppEndorsementScoreQueryKey(appId),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId),
       getXAppsQueryKey(),
-      getAppIsBlacklistedQueryKey(appId),
+      getIsBlacklistedQueryKey(appId),
       getAppExistsQueryKey(appId),
       getAppEndorsedEventsQueryKey({ appId }),
-      getNodeCheckCooldownQueryKey(nodeId),
+      getXNodeCheckCooldownQueryKey(nodeId),
     ],
     [appId, nodeId, userAddress],
   )

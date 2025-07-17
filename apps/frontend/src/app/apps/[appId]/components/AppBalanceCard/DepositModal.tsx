@@ -13,7 +13,7 @@ import {
   Icon,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useDepositToAppBalance } from "@/hooks"
+import { useDepositToAppBalance, useGetB3trBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { CustomModalContent, B3TRIcon } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
@@ -21,10 +21,11 @@ import { motion } from "framer-motion"
 import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useXApp } from "@/api"
+
 export type Props = {
   appId: string
   isOpen: boolean
@@ -59,7 +60,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const { data: app } = useXApp(appId)
 
-  const { data: availableBalanceToDeposit } = useB3trBalance(account?.address ?? "")
+  const { data: availableBalanceToDeposit } = useGetB3trBalance(account?.address ?? "")
 
   const { data: appBalance, isLoading: isAppBalanceLoading } = useAppAvailableFunds(appId)
 
@@ -124,15 +125,11 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         control={control}
         render={({ field: { onChange, value } }) => (
           <Input
-            h="50px"
             placeholder="0"
-            fontSize={{ base: 30, md: 36 }}
-            fontWeight={700}
             type="text"
             value={value}
             onChange={e => onChange(filterAmount(e.target.value))}
-            variant="unstyled"
-            _placeholder={{ color: "black" }}
+            variant="amountInput"
           />
         )}
       />
@@ -153,7 +150,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             {t("Send B3TR tokens from the connected account to the app, and use them for rewards distribution.")}
           </Text>
 
-          <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
+          <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
               <Skeleton isLoaded={!isAppBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>

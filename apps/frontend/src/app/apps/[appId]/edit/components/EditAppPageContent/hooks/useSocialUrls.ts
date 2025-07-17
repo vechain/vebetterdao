@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from "../EditAppPageContent"
 
-export const useSocialUrls = (form: UseFormReturn<EditAppForm, any, undefined>) => {
+export const useSocialUrls = (form: UseFormReturn<EditAppForm, any, EditAppForm>) => {
   const twitterUrl = form.watch("twitterUrl")
   const discordUrl = form.watch("discordUrl")
   const telegramUrl = form.watch("telegramUrl")

@@ -1,6 +1,7 @@
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister"
 import { QueryClient } from "@tanstack/react-query"
 import { Persister } from "@tanstack/react-query-persist-client"
+import { hashFn } from "@wagmi/core/query"
 
 // to persist react-query daya in LS
 // @ts-ignore
@@ -11,7 +12,9 @@ export const persister: Persister = createSyncStoragePersister({
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      queryKeyHashFn: hashFn,
       retry: 0,
+      retryOnMount: false,
       staleTime: 30000,
       refetchOnWindowFocus: true,
       refetchOnMount: true,

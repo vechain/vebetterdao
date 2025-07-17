@@ -25,22 +25,12 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
-import { gmNfts } from "@/constants/gmNfts"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
   const { isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenId } = useXNode()
 
-  const {
-    gmImage,
-    gmName,
-    gmLevel,
-    gmRewardMultiplier,
-    isLoading: isGMLoading,
-  } = useGMNFTData(attachedGMTokenId ?? null)
-
-  // TODO: REMOVE IN ROUND 46
-  const gmInfo = gmNfts.find(nft => nft.level === gmLevel)
+  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isLoading: isGMLoading } = useGMNFTData(attachedGMTokenId)
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -117,7 +107,7 @@ export const AttachGMNFTCard = () => {
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
                     <Text fontSize="sm" fontWeight={600}>
-                      {gmInfo?.multiplier ?? gmRewardMultiplier}
+                      {gmRewardMultiplier}
                       {"x"}
                     </Text>
                     <Text fontSize="sm" fontWeight={400} noOfLines={1}>

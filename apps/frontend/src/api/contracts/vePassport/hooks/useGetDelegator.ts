@@ -1,11 +1,11 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { ZeroAddress } from "ethers"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "getDelegator" as const
 
 /**
  * Returns the query key for fetching the delegator.
@@ -13,7 +13,7 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the delegator.
  */
 export const getDelegatorQueryKey = (delegator: string) => {
-  return getCallKey({ method: "getDelegator", keyArgs: [delegator] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegator as `0x${string}`] })
 }
 
 /**
@@ -22,16 +22,17 @@ export const getDelegatorQueryKey = (delegator: string) => {
  * @returns The address of the delegator for the given delegator address, or null if the delegator has no delegator.
  */
 export const useGetDelegator = (delegator?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "getDelegator",
-    args: [delegator],
-    mapResponse: response => {
-      const delegator = response.decoded[0]
-      if (compareAddresses(delegator, ZeroAddress)) return null
-      return delegator
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(delegator ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!delegator,
+      select: data => {
+        if (data[0] === ZeroAddress) return undefined
+        return data[0]
+      },
     },
-    enabled: !!delegator,
   })
 }

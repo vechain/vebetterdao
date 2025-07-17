@@ -1,8 +1,14 @@
-import { ProposalDeposit, buildClaimDepositsTx, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
+import {
+  ProposalDeposit,
+  buildClaimDepositsTx,
+  getProposalUserDepositQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
+} from "@/api"
 
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
 /**
  * Type definition for properties accepted by the `useWithdrawDeposits` hook.
@@ -40,7 +46,7 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
     const queryKeys = proposalDeposits.map(proposalDeposit =>
       getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
     )
-    queryKeys.push(getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""))
+    queryKeys.push(getProposalClaimableUserDepositsQueryKey(account?.address ?? ""))
     queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
 
     return queryKeys

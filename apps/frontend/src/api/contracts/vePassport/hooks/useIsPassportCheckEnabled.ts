@@ -1,25 +1,30 @@
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { TogglePassportCheck } from "@/constants"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
-const contractAddress = getConfig().veBetterPassportContractAddress
-const method = "isCheckEnabled"
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "isCheckEnabled" as const
 
-export const getPassportToggleQueryKey = (checkName: TogglePassportCheck) => {
-  return getCallKey({ method: method, keyArgs: [checkName] })
+export const getIsPassportCheckEnabledQueryKey = (checkName: TogglePassportCheck) => {
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [checkName] })
 }
+
 /**
- * Hook to get the status of a passport check
- * @param checkName - the function name of the check
- * @returns the status of the check as a boolean
+ * Hook to get the passport check enabled status from the VeBetterPassport contract.
+ * @param checkName - The check name.
+ * @returns The passport check enabled status.
  */
 export const useIsPassportCheckEnabled = (checkName: TogglePassportCheck) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
-    method: method,
+  return useCallClause({
+    abi,
+    address,
+    method,
     args: [checkName],
+    queryOptions: {
+      select: data => data[0],
+      enabled: checkName !== undefined,
+    },
   })
 }

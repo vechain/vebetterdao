@@ -30,7 +30,7 @@ export interface ProposalDeposit {
  * @param address - The Ethereum address of the claimant.
  * @returns An array of `Connex.Vendor.TxMessage` representing the transaction clauses needed to claim the deposits.
  */
-export const buildClaimDepositsTx = (proposalDeposits: ProposalDeposit[], address: string): Connex.Vendor.TxMessage => {
+export const buildClaimDepositsTx = (proposalDeposits: ProposalDeposit[], address: string): EnhancedClause[] => {
   const clauses = []
 
   for (const deposit of proposalDeposits) {

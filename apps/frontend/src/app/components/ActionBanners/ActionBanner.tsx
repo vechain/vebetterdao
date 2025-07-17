@@ -1,26 +1,22 @@
 import {
-  useAccountBalance,
   useAccountLinking,
-  useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
-  useParticipatedInGovernance,
   useGetDelegatee,
   useHasVotedInProposals,
   useIsCreatorOfAnyApp,
   useUserBotSignals,
   useUserDelegation,
-  useVot3Balance,
   useVotingRewards,
   useGMRewards,
   useXApps,
-  useSelectedGmNft,
+  useGetUserNodes,
 } from "@/api"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -37,8 +33,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
-import { VeChainKitLaunchBanner } from "./components/VeChainKitLaunchBanner"
-import { GMPoolRewardsBanner } from "./components/GMPoolRewardsBanner"
+import { StargateMigrationBanner } from "./components/StargateMigrationBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -47,8 +42,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useFeatureFlag, useIsVeDelegated } from "@/hooks"
-import { FeatureFlag } from "@/constants"
+import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -69,18 +63,19 @@ export const ActionBanner = () => {
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
-  const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
 
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
-  const { original: gmRewards } = useGMRewards(currentRoundId, account?.address ?? undefined)
-  const { b3trLeftover, gmImage, isGMOwned } = useSelectedGmNft()
+  const { data: { original: gmRewards } = { original: "0" } } = useGMRewards(
+    currentRoundId,
+    account?.address ?? undefined,
+  )
 
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
@@ -105,9 +100,11 @@ export const ActionBanner = () => {
     isLoading,
   } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
 
+  const { data: userNodes } = useGetUserNodes(account?.address ?? "")
+
   // Custom computed values
   const isUserSignaled = useMemo(() => {
-    return userSignalCounter && userSignalCounter > 0
+    return userSignalCounter && Number(userSignalCounter || 0) > 0
   }, [userSignalCounter])
 
   const ownsTokens = useMemo(() => {
@@ -117,7 +114,7 @@ export const ActionBanner = () => {
   }, [b3trBalance, vot3Balance])
 
   const isLowOnVtho = useMemo(() => {
-    return Number(balance?.energy.scaled) < VTHO_THRESHOLD
+    return Number(balance?.energy ?? "0") < VTHO_THRESHOLD
   }, [balance])
 
   const isBalanceLoading = useMemo(() => {
@@ -126,13 +123,9 @@ export const ActionBanner = () => {
 
   const userCanVoteInProposals = useMemo<boolean>(() => {
     const isLoading = isLoadingAccountLinking || isLoadingDelegator
-    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && isPerson
+    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && !!isPerson
     return !isLoading && isValidUser
   }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
-
-  // GM Upgrade banner - keeping the banner for 3 rounds, or for those who haven't upgraded with the b3tr left over the upgrade
-  const showGmRewardsPoolBanner = !!account?.address && (b3trLeftover || currentRoundId <= 49)
-  const notAGalaxyMember = (hasUserVoted && !isGMOwned) || (!hasUserVoted && !isGMOwned)
 
   // Creator banners
   const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account?.address ?? "")
@@ -143,7 +136,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.Pending ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
-  const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
+  const { data: hasCreatorNFT } = useHasCreatorNFT(account?.address ?? "") // No loading state
   const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
@@ -196,6 +189,13 @@ export const ActionBanner = () => {
     if (showCreatorUnderReviewBanner) return <CreatorApplicationUnderReviewBanner key="creator-under-review" />
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
+  // Legacy Node banners logic
+  const isLegacyNode = useMemo(() => {
+    return userNodes?.some(node => node.isLegacyNode)
+  }, [userNodes])
+  // Remove the banner for every user at the end of this round
+  const showStargateBanner = currentRoundId < 55 || isLegacyNode
+
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
     .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
@@ -207,29 +207,22 @@ export const ActionBanner = () => {
       />
     ))
 
-  // VeChainKit launch banner
-  const { isEnabled: isVechainKitFlagOn } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
-  const showVeChainKitLaunchBanner = !!account?.address && isVechainKitFlagOn
-
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
-        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
+        <ClaimVotingRewardsBanner
+          roundsRewardsQuery={votingRewardsQuery}
+          gmRewards={Number(gmRewards)}
+          key="claim-b3tr"
+        />,
       )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
-    if (showGmRewardsPoolBanner)
-      bannerComponents.push(
-        <GMPoolRewardsBanner
-          currentRoundId={currentRoundId}
-          gmImage={gmImage}
-          notAGalaxyMember={notAGalaxyMember}
-          key="gm-rewards-pool"
-        />,
-      )
-    if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
+    if (showStargateBanner)
+      bannerComponents.push(<StargateMigrationBanner isLegacyNode={isLegacyNode} key="stargate-migration" />)
+
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
 
@@ -237,11 +230,7 @@ export const ActionBanner = () => {
   }, [
     showCantVoteBanners,
     CantVoteBanner,
-    showGmRewardsPoolBanner,
-    gmImage,
     showClaimB3trBanner,
-    currentRoundId,
-    notAGalaxyMember,
     votingRewardsQuery,
     gmRewards,
     showCastVoteBanner,
@@ -250,7 +239,7 @@ export const ActionBanner = () => {
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
-    showVeChainKitLaunchBanner,
+    showStargateBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1

@@ -1,46 +1,29 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { GalaxyMemberContractJson } from "@repo/contracts"
+import { GalaxyMember__factory } from "@repo/contracts"
 
-const galaxyMemberABI = GalaxyMemberContractJson.abi
-
-const GALAXY_MEMBER_CONTRACT = getConfig().galaxyMemberContractAddress
+const address = getConfig().galaxyMemberContractAddress
+const abi = GalaxyMember__factory.abi
+const method = "paused" as const
 
 /**
- * getIsGMpaused is an asynchronous function that checks if the GalaxyMember contract is paused.
- *
- * @param {Connex.Thor} thor - The Connex.Thor instance to interact with the VeChain Thor blockchain.
- * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the GalaxyMember contract is paused.
- * @throws Will throw an error if the function ABI is not found or if there is a VM error.
+ * Returns the query key for fetching the Galaxy Member paused status.
+ * @returns The query key for fetching the Galaxy Member paused status.
  */
-export const getIsGMpaused = async (thor: Connex.Thor): Promise<boolean> => {
-  const functionAbi = galaxyMemberABI.find(e => e.name === "paused")
-  if (!functionAbi) return Promise.reject(new Error("Function abi not found for delegates"))
-  const res = await thor.account(GALAXY_MEMBER_CONTRACT).method(functionAbi).call()
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return Boolean(res.decoded[0])
-}
+export const getIsGMPausedQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
- * getIsGMPausedQueryKey is a function that returns the query key for the getIsGMpaused query.
- *
- * @returns {string[]} An array of strings representing the query key.
- */
-export const getIsGMPausedQueryKey = () => ["galaxyMember", "paused"]
-
-/**
- * useIsGMpaused is a custom hook that uses the useQuery hook from react-query to fetch the paused status of the GalaxyMember contract.
- *
- * @returns {UseQueryResult} The result object from the useQuery hook. Refer to the react-query documentation for more details.
+ * Hook to check if the GalaxyMember contract is paused
+ * @returns boolean indicating if the GalaxyMember contract is paused
  */
 export const useIsGMpaused = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getIsGMPausedQueryKey(),
-    queryFn: () => getIsGMpaused(thor),
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => data[0],
+    },
   })
 }

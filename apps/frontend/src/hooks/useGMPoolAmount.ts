@@ -1,19 +1,19 @@
 import { ethers } from "ethers"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
 
-const emissionsContractAddress = getConfig().emissionsContractAddress
-const emissionsInterface = Emissions__factory.createInterface()
-const method = "getGMAmount"
+const address = getConfig().emissionsContractAddress as `0x${string}`
+const abi = Emissions__factory.abi
+const method = "getGMAmount" as const
 
 /**
  * Returns the query key for fetching the GM amount.
  * @returns The query key for fetching the GM amount.
  */
-export const getGMPoolAmountQueryKey = (currentRoundId: number) => {
-  return getCallKey({ method, keyArgs: [currentRoundId] })
+export const getGMFullPoolAmountQueryKey = (currentRoundId?: number) => {
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(currentRoundId || 0)] })
 }
 
 /**
@@ -22,15 +22,18 @@ export const getGMPoolAmountQueryKey = (currentRoundId: number) => {
  * @returns The GM amount for the given round. If no GM amount is found, returns 0.
  */
 export const useGMPoolAmount = (currentRoundId?: number) => {
-  const { data: gmAmount } = useCall({
-    contractInterface: emissionsInterface,
-    contractAddress: emissionsContractAddress,
+  const { data: gmAmountData } = useCallClause({
+    abi,
+    address,
     method,
-    args: [currentRoundId],
-    enabled: !!currentRoundId,
+    args: [currentRoundId ? BigInt(currentRoundId) : BigInt(0)],
+    queryOptions: {
+      enabled: !!currentRoundId,
+    },
   })
 
-  const scaled = ethers.formatEther(gmAmount ?? 0)
+  const gmAmount = gmAmountData?.[0]
+  const scaled = ethers.formatEther(BigInt(gmAmount ?? 0))
   const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
 
   return {

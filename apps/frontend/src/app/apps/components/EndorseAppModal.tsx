@@ -5,7 +5,7 @@ import {
   useCurrentAllocationsRoundId,
   useEndorsementScoreThreshold,
   useUserEndorsementScore,
-  useUserXNodes,
+  useXNode,
   useXNodeCheckCooldown,
   XApp,
 } from "@/api"
@@ -34,11 +34,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   const isEndorsementDataLoading = isAppScoreLoading || isEndorsementThresholdLoading
 
-  const { data: userDelegatedNodes, isLoading: isUserNodesLoading } = useUserXNodes()
+  const { allNodes, isXNodeLoading: isUserNodesLoading } = useXNode()
 
-  const firstNode = userDelegatedNodes?.[0]
+  const firstNode = allNodes?.[0]
 
-  const nodeId = userDelegatedNodes?.[0]?.id ?? "0"
+  const nodeId = firstNode?.nodeId ?? "0"
 
   const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(nodeId ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -204,7 +204,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         </Skeleton>
         {newScoreMetThreshold ? (
           <HStack spacing={4} align={"center"} w={"full"}>
-            <Icon as={UilExclamationCircle} boxSize="24px" color="#252525" />
+            <Icon as={UilExclamationCircle} boxSize="24px" />
             <Text color="black">
               {t("With your endorsement, {{appName}} gets enough score to get into the next allocation round.", {
                 appName: xApp?.name,

@@ -1,42 +1,33 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { Vot3ContractJson } from "@repo/contracts"
-const vot3Abi = Vot3ContractJson.abi
+import { VOT3__factory } from "@repo/contracts"
 
-const config = getConfig()
-const VOT3_CONTRACT = config.vot3ContractAddress
-
-/**
- *  Get the vot3 balance of an address from the contract
- * @param thor  The thor instance
- * @param address  The address to check the delegates of. If not provided, will return an error (for better react-query DX)
- * @returns the address chosen as delegate
- */
-export const getVot3Delegates = async (thor: Connex.Thor, address?: string): Promise<string> => {
-  if (!address) return Promise.reject(new Error("Address not provided"))
-  const functionAbi = vot3Abi.find(e => e.name === "delegates")
-  if (!functionAbi) return Promise.reject(new Error("Function abi not found for delegates"))
-  const res = await thor.account(VOT3_CONTRACT).method(functionAbi).call(address)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
+const address = getConfig().vot3ContractAddress as `0x${string}`
+const abi = VOT3__factory.abi
+const method = "delegates" as const
 
 /**
- * Return the address the user has delegated his votes to (if any)
- * @param address the address of the user
- * @returns  the address the user has delegated his votes to (if any)
+ * Returns the query key for fetching vot3 delegates.
+ * @param userAddress The address to check the delegates of
+ * @returns The query key for fetching vot3 delegates.
  */
-export const getVot3DelegatesQueryKey = (address?: string) => ["vot3", "delegates", address]
-export const useVot3Delegates = (address?: string) => {
-  const { thor } = useConnex()
+export const getVot3DelegatesQueryKey = (userAddress?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(userAddress ?? "0x") as `0x${string}`] })
 
-  return useQuery({
-    queryKey: getVot3DelegatesQueryKey(address),
-    queryFn: () => getVot3Delegates(thor, address),
-    enabled: !!address,
+/**
+ * Hook to get the address the user has delegated his votes to (if any)
+ * @param userAddress The address of the user
+ * @returns the address the user has delegated his votes to (if any)
+ */
+export const useVot3Delegates = (userAddress?: string) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [(userAddress ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!userAddress,
+      select: data => data[0],
+    },
   })
 }

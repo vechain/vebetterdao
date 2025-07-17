@@ -18,7 +18,7 @@ export const GmPoolAmountCard = () => {
             <Heading fontSize="lg">{t("GM Pool Amount")}</Heading>
           </HStack>
           <Flex p={4} borderRadius="md" justify="center" align="center" direction="column">
-            <Text fontSize="2xl" fontWeight="bold" color="black">
+            <Text fontSize="2xl" fontWeight="bold">
               {gmPoolAmount} {"B3TR"}
             </Text>
             <Badge mt={1} borderRadius="full" px={2}>

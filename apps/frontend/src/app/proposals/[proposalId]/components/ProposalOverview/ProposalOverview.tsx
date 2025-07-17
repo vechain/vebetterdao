@@ -55,7 +55,7 @@ export const ProposalOverview = () => {
                 <Heading size={["lg", "xl"]}>{proposal.title}</Heading>
               </Skeleton>
               <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
-                <ProposalStatusBadge proposalId={proposal.id} />
+                <ProposalStatusBadge proposalId={proposal.id} proposalState={proposal.state} />
               </Skeleton>
               <Spacer h={"24px"} />
               <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
@@ -83,9 +83,9 @@ export const ProposalOverview = () => {
                     <HStack>
                       <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
                       {compareAddresses(proposal.proposer, account?.address || "") ? (
-                        <Text color="#252525">{t("You")}</Text>
+                        <Text>{t("You")}</Text>
                       ) : (
-                        <Text color="#252525">{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
+                        <Text>{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
                       )}
                     </HStack>
                   </Skeleton>
@@ -95,7 +95,7 @@ export const ProposalOverview = () => {
                 <ProposalOverviewCommunitySupport />
                 <ProposalOverviewYourSupport />
 
-                <ProposalYourVote proposalId={proposal.id} />
+                <ProposalYourVote proposalId={proposal.id} proposalState={proposal.state} />
               </Stack>
 
               {account?.address && <CastProposalVoteButton proposalId={proposal.id} />}

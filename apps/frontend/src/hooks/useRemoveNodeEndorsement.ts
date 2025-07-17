@@ -6,10 +6,10 @@ import { buildClause } from "@/utils/buildClause"
 import {
   getAppEndorsementScoreQueryKey,
   getAppExistsQueryKey,
-  getAppIsBlacklistedQueryKey,
+  getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
-  getNodeCheckCooldownQueryKey,
+  getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
   getXAppsQueryKey,
 } from "@/api"
@@ -42,14 +42,14 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
   const refetchQueryKeys = useMemo(
     () => [
       getIsAppUnendorsedQueryKey(appId ?? ""),
-      getAppEndorsementScoreQueryKey(appId),
+      getAppEndorsementScoreQueryKey(appId ?? ""),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId ?? ""),
       getXAppsQueryKey(),
-      getAppIsBlacklistedQueryKey(appId ?? ""),
+      getIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
       getAppEndorsedEventsQueryKey({ appId }),
-      getNodeCheckCooldownQueryKey(nodeId ?? ""),
+      getXNodeCheckCooldownQueryKey(nodeId ?? ""),
     ],
     [appId, nodeId],
   )

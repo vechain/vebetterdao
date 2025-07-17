@@ -129,7 +129,7 @@ export const updateGMMultipliers = async (levels: number[], multipliers: number[
   }
 }
 
-const setupLocalEnvironment = async (
+export const setupLocalEnvironment = async (
   emissions: Emissions,
   treasury: Treasury,
   x2EarnApps: X2EarnApps,
@@ -202,7 +202,11 @@ const setupLocalEnvironment = async (
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps, vechainNodesMock: TokenAuction) => {
+export const setupTestEnvironment = async (
+  emissions: Emissions,
+  x2EarnApps: X2EarnApps,
+  vechainNodesMock: TokenAuction,
+) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
@@ -229,7 +233,7 @@ const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps
   console.log(`Setup complete in ${end - start}ms`)
 }
 
-const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
+export const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
   console.log("================ Setup Mainnet environment")
   const start = performance.now()
 

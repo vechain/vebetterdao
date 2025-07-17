@@ -5,9 +5,10 @@ import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
-import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey } from "@/api"
+import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -105,10 +106,7 @@ export const useCreateProposal = ({ onSuccess, transactionModalCustomUI }: useCr
   )
 
   const refetchQueryKeys = useMemo(() => {
-    return [
-      getProposalsEventsQueryKey(),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
-    ]
+    return [getProposalsEventsQueryKey(), getProposalClaimableUserDepositsQueryKey(account?.address ?? "")]
   }, [account?.address])
   return useBuildTransaction({
     clauseBuilder: buildClauses,

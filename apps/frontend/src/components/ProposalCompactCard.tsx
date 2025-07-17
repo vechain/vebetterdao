@@ -1,6 +1,6 @@
 import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useProposalState } from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
@@ -14,9 +14,10 @@ import { ProposalYourVote } from "./Proposal/ProposalYourVote"
 
 type Props = {
   proposal: ProposalCreatedEvent
+  proposalState?: ProposalState
 }
 
-export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
+export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
   const { proposalId, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
@@ -26,8 +27,6 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
   const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(proposalId)
 
   const { t } = useTranslation()
-
-  const { data: proposalState } = useProposalState(proposalId)
 
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposalId}`)
@@ -58,6 +57,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
         return (
           <ProposalYourVote
             proposalId={proposalId}
+            proposalState={proposalState}
             renderTitle={false}
             textProps={{ color: "gray.500", fontSize: "14px" }}
           />
@@ -71,7 +71,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
     <Card
       variant={["filledSmall", "filledSmall", "filled"]}
       onClick={goToProposal}
-      _hover={{ bg: "#F8F8F8" }}
+      _hover={{ bg: "light-contrast-on-card-bg" }}
       cursor={"pointer"}
       alignSelf={"flex-start"}
       w={"full"}>
@@ -80,6 +80,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
           <VStack w="full" justifyContent={"space-between"} spacing={3} align={"flex-start"}>
             <ProposalStatusBadge
               proposalId={proposal.proposalId}
+              proposalState={proposalState}
               containerProps={{
                 py: 1,
                 px: 2,

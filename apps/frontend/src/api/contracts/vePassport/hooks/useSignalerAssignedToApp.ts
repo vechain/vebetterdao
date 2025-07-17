@@ -2,7 +2,7 @@ import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
+const abi = VeBetterPassport__factory.abi
 const contractAddress = getConfig().veBetterPassportContractAddress
 
 /**
@@ -14,12 +14,12 @@ export const useSignalerAssignedToApp = (appId: string) => {
 
   const rawSignalerAssignedToAppEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "SignalerAssignedToApp",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      signaler: decoded.signaler,
-      appId: decoded.app,
+    mapResponse: ({ decodedData, meta }) => ({
+      signaler: decodedData.args.signaler,
+      appId: decodedData.args.app,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -27,12 +27,12 @@ export const useSignalerAssignedToApp = (appId: string) => {
 
   const rawSignalerRemovedFromAppEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "SignalerRemovedFromApp",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      signaler: decoded.signaler,
-      appId: decoded.app,
+    mapResponse: ({ decodedData, meta }) => ({
+      signaler: decodedData.args.signaler,
+      appId: decodedData.args.app,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

@@ -96,7 +96,7 @@ export const AttachXNodeCard = () => {
                   </Text>
                   {(isXNodeDelegator || isXNodeDelegatee) && (
                     <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                      <Text fontSize={"xs"}>{isXNodeDelegator ? "Delegator" : "Delegatee"}</Text>
+                      <Text fontSize={"xs"}>{isXNodeDelegator ? "NFT Owner" : "Manager"}</Text>
                     </HStack>
                   )}
                 </HStack>

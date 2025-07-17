@@ -21,10 +21,23 @@ export const useProposalDepositEvent = (proposalId: string) => {
     () => [...new Set(proposalDeposits.map(deposit => deposit.depositor))].length,
     [proposalDeposits],
   )
-  const communityDeposits = useMemo(() => {
-    const deposits = proposalDeposits.reduce((acc, deposit) => acc + Number(deposit.amount), 0)
-    return Number(ethers.formatEther(BigInt(deposits || 0)))
+
+  const proposalDepositThresholdBN = useMemo(
+    () => BigInt(events.data?.created.find(event => event.proposalId === proposalId)?.depositThreshold || 0),
+    [events, proposalId],
+  )
+
+  const communityDepositsBN = useMemo(() => {
+    return proposalDeposits.reduce((acc, deposit) => acc + BigInt(deposit.amount), BigInt(0))
   }, [proposalDeposits])
+
+  const missingSupport = useMemo(() => {
+    return ethers.formatEther(proposalDepositThresholdBN - communityDepositsBN)
+  }, [proposalDepositThresholdBN, communityDepositsBN])
+
+  const communityDeposits = useMemo(() => {
+    return Number(ethers.formatEther(communityDepositsBN))
+  }, [communityDepositsBN])
 
   const userSupport = useMemo(() => {
     const deposits = proposalDeposits
@@ -51,6 +64,7 @@ export const useProposalDepositEvent = (proposalId: string) => {
   return {
     supportingUserCount,
     communityDeposits,
+    missingSupport,
     userSupport,
     othersSupport,
     othersSupportUserCount,
