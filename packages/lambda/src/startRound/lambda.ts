@@ -10,7 +10,7 @@ import { getIdsOfUnclaimed } from "../helpers/xApps"
 import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
-import { Emissions__factory as Emissions } from "@repo/contracts"
+import { Emissions__factory } from "@repo/contracts"
 import { maxGasLimit, buildTxBody, buildGasEstimate } from "../helpers"
 
 interface NetworkConfig {
@@ -132,7 +132,7 @@ async function distributeEmissions(thor: ThorClient) {
   // Prepare the contract function call with necessary parameters
   const clause = Clause.callFunction(
     Address.of(CONFIG.emissionsContractAddress),
-    ABIContract.ofAbi(Emissions.abi).getFunction("distribute"),
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("distribute"),
     [],
   )
 
@@ -182,7 +182,7 @@ async function distributeXAllocations(thor: ThorClient) {
   // Get the current round number from the Emissions contract
   const currentRound = await thor.contracts.executeCall(
     CONFIG.emissionsContractAddress,
-    ABIContract.ofAbi(Emissions.abi).getFunction("getCurrentCycle"),
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
     [],
   )
   // Get the previous round number for which the X-Allocations are to be distributed
@@ -306,11 +306,11 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Receipt:", receiptClaim)
 
     // Publish a success message to the Slack channel
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
-    )
+    // await publishMessage(
+    //   client,
+    //   SLACK_CHANNEL_ID,
+    //   `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
+    // )
 
     // Return a successful response with the transaction receipt
     return {
@@ -325,11 +325,11 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error starting the round:", error)
 
     // Publish an error message to the Slack channel
-    await publishMessage(
-      client,
-      SLACK_CHANNEL_ID,
-      `${SLACK_MESSAGE_PREFIX}:alert: Error starting round or distributing allocations: ${error}`,
-    )
+    // await publishMessage(
+    //   client,
+    //   SLACK_CHANNEL_ID,
+    //   `${SLACK_MESSAGE_PREFIX}:alert: Error starting round or distributing allocations: ${error}`,
+    // )
 
     return {
       statusCode: 500,
