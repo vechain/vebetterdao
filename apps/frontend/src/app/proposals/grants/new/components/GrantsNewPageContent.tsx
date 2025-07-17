@@ -11,13 +11,33 @@ import {
   Grid,
   GridItem,
   useSteps,
+  Button,
 } from "@chakra-ui/react"
 import { BsChevronRight } from "react-icons/bs"
 import { GrantsNewFormStepper } from "./GrantsNewFormStepper"
 import { GrantTypeSelection } from "./GrantTypeSelection"
 import { useForm } from "react-hook-form"
-import { GrantFormData } from "../types"
 
+export type GrantFormData = {
+  grantType: string
+  // About applicant
+  applicantName: string
+  applicantEmail: string
+  applicantWallet: string
+  // About project
+  projectName: string
+  projectDescription: string
+  projectWebsite: string
+  projectTimeline: string
+  // Milestones
+  milestones: Array<{
+    title: string
+    description: string
+    deliverables: string
+    timeline: string
+    fundingAmount: string
+  }>
+}
 const BreadcrumbOverview = () => {
   const { t } = useTranslation()
 
@@ -41,6 +61,8 @@ const BreadcrumbOverview = () => {
 }
 
 const GrantsNewStepCard = () => {
+  const { t } = useTranslation()
+
   const steps = [
     { title: "Type of grant" },
     { title: "About applicant" },
@@ -85,7 +107,7 @@ const GrantsNewStepCard = () => {
 
     switch (activeStep) {
       case 0:
-        return <GrantTypeSelection register={register} value={grantType} onNext={handleNext} />
+        return <GrantTypeSelection register={register} value={grantType} />
       // Add other cases for different steps
       default:
         return null
@@ -98,7 +120,12 @@ const GrantsNewStepCard = () => {
         <GrantsNewFormStepper activeStep={activeStep} steps={steps} />
       </CardHeader>
       <CardBody>
-        <form onSubmit={handleSubmit(onSubmit)}>{renderStepContent()}</form>
+        <VStack spacing={4} w="full" align="flex-start">
+          <form onSubmit={handleSubmit(onSubmit)}>{renderStepContent()}</form>
+          <Button onClick={handleNext} variant="primaryAction" px={8}>
+            {t("Continue")}
+          </Button>
+        </VStack>
       </CardBody>
     </Card>
   )
