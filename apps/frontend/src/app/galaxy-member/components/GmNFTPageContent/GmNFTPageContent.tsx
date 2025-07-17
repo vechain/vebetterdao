@@ -11,22 +11,24 @@ import {
   CardFooter,
   Button,
   useDisclosure,
+  Spinner,
 } from "@chakra-ui/react"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
-import { UserGM, UserNode, useGetUserGMs, useGetUserNodes } from "@/api"
+import { UserNode, useGetUserGMs, useGetUserNodes } from "@/api"
 import { useTranslation } from "react-i18next"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { useState } from "react"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { BaseTooltip } from "@/components"
 
-export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
+export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()
-  const { data: userNodes } = useGetUserNodes()
-  const { data: userGMs } = useGetUserGMs()
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
+  const gm = userGMs?.find(gm => gm.tokenId === gmId)
   const [selectedNode, setSelectedNode] = useState<UserNode | undefined>(undefined)
 
   const nodesAttachedToGMs = userGMs?.reduce(
@@ -39,7 +41,7 @@ export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
     {} as Record<string, string>,
   )
 
-  const attachedNode = userNodes?.allNodes?.find(node => node.nodeId === gm.nodeIdAttached)
+  const attachedNode = userNodes?.allNodes?.find(node => node.nodeId === gm?.nodeIdAttached)
 
   const {
     isOpen: isAttachGMToXNodeModalOpen,
@@ -52,6 +54,10 @@ export const GmNFTPageContent = ({ gm }: { gm: UserGM }) => {
     onOpen: onDetachGMToXNodeModalOpen,
     onClose: onDetachGMToXNodeModalClose,
   } = useDisclosure()
+
+  if (isUserNodesLoading || isUserGMsLoading) return <Spinner size={"lg"} />
+
+  if (!gm) return null
 
   return (
     <VStack align="stretch" flex="1" gap="4">
