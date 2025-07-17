@@ -96,7 +96,7 @@ export const useGetUserGMs = () => {
       return userGMs.map((gm, index) => {
         const nftMetadata = metadata[index]
         const image = nftMetadata?.image
-          ? `https://ipfs.io/ipfs/${nftMetadata?.image.replace("ipfs://", "")}`
+          ? `https://api.gateway-proxy.vechain.org/ipfs/${nftMetadata?.image.replace("ipfs://", "")}`
           : gmNfts[Number(gm.tokenLevel) - 1]?.image || notFoundImage
         const nftName = nftMetadata?.name || gmNfts[Number(gm.tokenLevel) - 1]?.name
         const name = `${nftName} #${gm.tokenId}`

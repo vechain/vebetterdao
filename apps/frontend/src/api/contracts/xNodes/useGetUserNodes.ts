@@ -177,7 +177,7 @@ export const useGetUserNodes = (user?: string) => {
           xNodePoints: Number(nodeLevelToEndorsementScore?.[node.nodeLevel] ?? 0),
           name: stargateMetadatas?.[index]?.name ?? "Not available",
           image: stargateMetadatas?.[index]?.image
-            ? `https://ipfs.io/ipfs/${stargateMetadatas?.[index]?.image.replace("ipfs://", "")}`
+            ? `https://api.gateway-proxy.vechain.org/ipfs/${stargateMetadatas?.[index]?.image.replace("ipfs://", "")}`
             : notFoundImage,
           isLegacyNode: false,
         }))

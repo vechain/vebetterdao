@@ -11,7 +11,7 @@ export const ProfileGMLevel = () => {
   const { t } = useTranslation()
 
   const attachedGMsWithNodes: ListItem[] = userGMs
-    .filter(gm => gm.nodeIdAttached)
+    .filter(gm => gm.nodeIdAttached && gm.nodeIdAttached !== "0")
     .map(gm => {
       const node = userNodes?.allNodes?.find(node => node.nodeId === gm.nodeIdAttached)
       return [gm, node]
@@ -21,7 +21,9 @@ export const ProfileGMLevel = () => {
   const nodesNotAttached: ListItem[] =
     userNodes?.allNodes?.filter(node => !attachedNodesIds.includes(node.nodeId)).map(node => [undefined, node]) ?? []
 
-  const gmsNotAttached: ListItem[] = userGMs.filter(gm => !gm.nodeIdAttached).map(gm => [gm, undefined])
+  const gmsNotAttached: ListItem[] = userGMs
+    .filter(gm => !gm.nodeIdAttached || gm.nodeIdAttached === "0")
+    .map(gm => [gm, undefined])
 
   const list: ListItem[] = [...attachedGMsWithNodes, ...gmsNotAttached, ...nodesNotAttached]
 

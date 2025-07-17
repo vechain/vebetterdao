@@ -67,7 +67,7 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
         ...appDetails[index],
         metadata: {
           ...appsMetadata[index],
-          logo: `https://ipfs.io/ipfs/${appsMetadata[index]?.logo.replace("ipfs://", "")}`,
+          logo: `https://api.gateway-proxy.vechain.org/ipfs/${appsMetadata[index]?.logo.replace("ipfs://", "")}`,
         },
       } as XAppWithMetadata,
     }
