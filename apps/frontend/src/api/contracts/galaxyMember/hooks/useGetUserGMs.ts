@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import { NFTMetadata, getIpfsMetadata } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
 import { notFoundImage } from "@/constants"
+import { formatEther } from "viem"
 
 const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress
 const galaxyMemberAbi = GalaxyMember__factory.abi
@@ -104,7 +105,7 @@ export const useGetUserGMs = () => {
           tokenId: gm.tokenId.toString(),
           tokenURI: gm.tokenURI,
           tokenLevel: gm.tokenLevel.toString(),
-          b3trToUpgrade: gm.b3trToUpgrade.toString(),
+          b3trToUpgrade: formatEther(gm.b3trToUpgrade),
           isSelected: gm.tokenId === selectedTokenId,
           multiplier: multipliers[index] ? Number(multipliers[index]) / 100 : undefined,
           nodeIdAttached: attachedNodeIds[index]?.toString(),

@@ -103,7 +103,11 @@ export const GmNFTAndNodeCard = () => {
             </FeatureFlagWrapper>
           </HStack>
 
-          <Stack gap="2" direction={isAbove800 ? "row" : "column"} align="center" justify="stretch">
+          <Stack
+            gap="2"
+            direction={isAbove800 ? "row" : "column"}
+            align={isAbove800 ? "center" : "stretch"}
+            justify="center">
             <LinkBox flex={1}>
               <Card
                 direction={"row"}
@@ -138,8 +142,13 @@ export const GmNFTAndNodeCard = () => {
                 </CardFooter>
               </Card>
             </LinkBox>
-
-            <Image src="/assets/icons/arrow-connection.svg" boxSize={"24px"} color="#757575" alt="arrow connection" />
+            <Image
+              src="/assets/icons/arrow-connection.svg"
+              boxSize={"24px"}
+              color="#757575"
+              alt="arrow connection"
+              alignSelf="center"
+            />
             <LinkBox flex={1}>
               <Card
                 direction={"row"}

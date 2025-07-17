@@ -12,6 +12,7 @@ import {
   Button,
   useDisclosure,
   Spinner,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
@@ -26,6 +27,7 @@ import { BaseTooltip } from "@/components"
 
 export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()
+  const [isAbove800] = useMediaQuery("(min-width: 800px)")
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
@@ -64,13 +66,13 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
         {userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
-          <Card flex={3} variant="outline">
+          <Card flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"}>
             <CardHeader p="1.25rem" pb="0">
               <Heading fontSize="lg" lineHeight={1}>
                 {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
               </Heading>
             </CardHeader>
-            <CardBody p="1.25rem">
+            <CardBody p={isAbove800 ? "1.25rem" : "0.5rem"}>
               <VStack align={"stretch"} gap="4">
                 {userNodes?.allNodes
                   ?.sort((a, b) => {
@@ -102,7 +104,11 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                         <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                           {t("Node")}
                         </Text>
-                        <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
+                        <Text
+                          fontSize={isAbove800 ? "sm" : "xs"}
+                          fontWeight={700}
+                          lineHeight={isAbove800 ? 1.6 : 1.2}
+                          noOfLines={isAbove800 ? 1 : undefined}>
                           {`${node.name} #${node.nodeId}`}
                         </Text>
                         <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
@@ -112,9 +118,12 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                         </Box>
                       </CardBody>
 
-                      <CardFooter>
+                      <CardFooter p="0">
                         {attachedNode?.nodeId === node.nodeId ? (
-                          <Button variant="dangerFilledTonal" size="sm" onClick={onDetachGMToXNodeModalOpen}>
+                          <Button
+                            variant="dangerFilledTonal"
+                            size={isAbove800 ? "sm" : "xs"}
+                            onClick={onDetachGMToXNodeModalOpen}>
                             {t("Detach")}
                           </Button>
                         ) : nodesAttachedToGMs?.[node.nodeId] ? (
@@ -123,7 +132,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                               <Button
                                 disabled={!!nodesAttachedToGMs?.[node.nodeId]}
                                 variant="whiteAction"
-                                size="sm"
+                                size={isAbove800 ? "sm" : "xs"}
                                 onClick={() => {
                                   setSelectedNode(node)
                                   onAttachGMToXNodeModalOpen()
@@ -138,7 +147,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                               <Button
                                 disabled={!!attachedNode}
                                 variant="whiteAction"
-                                size="sm"
+                                size={isAbove800 ? "sm" : "xs"}
                                 onClick={() => {
                                   setSelectedNode(node)
                                   onAttachGMToXNodeModalOpen()
