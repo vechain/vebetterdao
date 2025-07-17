@@ -11,7 +11,7 @@ import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@repo/contracts"
-import { maxGasLimit, buildTxBody, buildGasEstimate } from "../helpers"
+import { buildTxBody, buildGasEstimate } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -126,10 +126,8 @@ async function distributeEmissions(thor: ThorClient) {
   const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
-  console.log("Stepping 2")
-
   // Wait for the next round to start before proceeding
-  await waitForRoundStart(thor)
+  await waitForRoundStart(thor, CONFIG)
 
   // Prepare the contract function call with necessary parameters
   const clause = Clause.callFunction(
@@ -191,20 +189,19 @@ async function distributeXAllocations(thor: ThorClient) {
   const previousRound = Number(currentRound.result?.array?.[0] ?? 0) - 1
 
   // Get the X-Apps for the current round
-  const xApps = await getAllApps(thor, previousRound.toString(), CONFIG)
+  const xApps = await getAllApps(thor, CONFIG, previousRound.toString())
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
-  const xAppIds = await getIdsOfUnclaimed(thor, xApps, previousRound.toString())
+  const xAppIds = await getIdsOfUnclaimed(thor, CONFIG, xApps, previousRound.toString())
 
   const claimClauses = []
 
   // Build the claim clauses for the X-Apps that have not yet claimed their allocations and the gas estimation does not revert
   for (const xAppId of xAppIds) {
-    const claimClause = buildClaimClause(xAppId, previousRound.toString())
+    const claimClause = buildClaimClause(CONFIG, xAppId, previousRound.toString())
 
     // Estimate the gas cost for the transaction
-    const gasResult = await buildGasEstimate(
-      thor,
+    const gasResult = await thor.gas.estimateGas(
       [claimClause],
       Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
     )
@@ -272,12 +269,8 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       isPollingEnabled: false,
     })
 
-    console.log("Stepping 1")
-
     // Distribute the emissions to the VeBetterDAO and start the next round
     const { receipt: receiptEmissions, gasResult: gasResultEmissions } = await distributeEmissions(thorClient)
-
-    console.log("Stepping 3")
 
     if (!receiptEmissions)
       return {
@@ -312,11 +305,11 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Receipt:", receiptClaim)
 
     // Publish a success message to the Slack channel
-    // await publishMessage(
-    //   client,
-    //   SLACK_CHANNEL_ID,
-    //   `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
-    // )
+    await publishMessage(
+      client,
+      SLACK_CHANNEL_ID,
+      `${SLACK_MESSAGE_PREFIX}:white_check_mark: X-Allocations distributed successfully`,
+    )
 
     // Return a successful response with the transaction receipt
     return {
@@ -331,11 +324,11 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error starting the round:", error)
 
     // Publish an error message to the Slack channel
-    // await publishMessage(
-    //   client,
-    //   SLACK_CHANNEL_ID,
-    //   `${SLACK_MESSAGE_PREFIX}:alert: Error starting round or distributing allocations: ${error}`,
-    // )
+    await publishMessage(
+      client,
+      SLACK_CHANNEL_ID,
+      `${SLACK_MESSAGE_PREFIX}:alert: Error starting round or distributing allocations: ${error}`,
+    )
 
     return {
       statusCode: 500,

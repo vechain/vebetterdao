@@ -32,7 +32,7 @@ const buildGasEstimate = async (
  * @param gasResult - Gas estimation result - if not provided, the default is half of the max gas limit
  * @returns The built transaction body
  */
-const buildTxBody = async (thor: ThorClient, clauses: TransactionClause[], totalGas: number) => {
+const buildTxBody = async (thor: ThorClient, clauses: TransactionClause[], totalGas?: number) => {
   const useGas = totalGas || maxGasLimit / 2
   return await thor.transactions.buildTransactionBody(clauses, useGas)
 }

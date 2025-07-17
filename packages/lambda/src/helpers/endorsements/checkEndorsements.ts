@@ -7,7 +7,6 @@ import { ThorClient, TransactionReceipt } from "@vechain/sdk-network"
 import { AppEnv } from "@repo/config/contracts"
 import { ABIContract, Address, Transaction } from "@vechain/sdk-core"
 import { buildGasEstimate, buildTxBody } from "../transaction"
-import { maxGasLimit } from "../gas"
 
 /**
  * Checks the endorsements of the X-Apps before distributing the X-Allocations.
@@ -48,7 +47,7 @@ export async function checkEndorsements(
   const currentRound = response.result?.array?.[0] as string
 
   // Get the eligible X-Apps for the current round
-  const xApps = await getAllApps(thor, currentRound, config)
+  const xApps = await getAllApps(thor, config, currentRound)
 
   // Split X-Apps into chunks of 200
   const xAppsChunks = chunk(xApps, 200)
@@ -56,7 +55,7 @@ export async function checkEndorsements(
   let lastGasResult = null
   for (const xAppsChunk of xAppsChunks) {
     // Build the check endorsement clauses for the current chunk of X-Apps
-    const checkendorsementClauses = buildCheckEndorsementClauses(xAppsChunk)
+    const checkendorsementClauses = buildCheckEndorsementClauses(xAppsChunk, config)
 
     // Estimate the gas cost for the transaction
     const senderAddress = Address.ofPrivateKey(Buffer.from(privateKey, "hex"))

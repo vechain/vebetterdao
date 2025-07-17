@@ -10,7 +10,7 @@ import { AppEnv } from "@repo/config/contracts"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildResponse } from "../helpers/api/response"
 import { StandardApiError, CustomApiError, SuccessResponseType } from "../helpers/api.types"
-import { buildGasEstimate, buildTxBody, maxGasLimit } from "../helpers"
+import { buildGasEstimate, buildTxBody } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string

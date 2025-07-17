@@ -1,4 +1,4 @@
-import mainnetConfig from "@repo/config/mainnet"
+import { AppConfig } from "@repo/config"
 import { Emissions__factory } from "@repo/contracts"
 import { ABIContract } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
@@ -9,10 +9,10 @@ import { ThorClient } from "@vechain/sdk-network"
  *
  * @param {ThorClient} thor - An initialized Thor client for blockchain interactions.
  */
-export async function waitForRoundStart(thor: ThorClient) {
+export async function waitForRoundStart(thor: ThorClient, config: AppConfig) {
   // Execute a contract call to get the block number of the next cycle
   const nextRoundBlock = await thor.contracts.executeCall(
-    mainnetConfig.emissionsContractAddress,
+    config.emissionsContractAddress,
     ABIContract.ofAbi(Emissions__factory.abi).getFunction("getNextCycleBlock"),
     [],
   )

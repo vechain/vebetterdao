@@ -10,7 +10,7 @@ import { ABIContract } from "@vechain/sdk-core"
  *
  * @returns an array of xApps Ids for the specified round.
  */
-export const getRoundXApps = async (thor: ThorClient, roundId: string, config: AppConfig): Promise<string[]> => {
+export const getRoundXApps = async (thor: ThorClient, config: AppConfig, roundId: string): Promise<string[]> => {
   const res = await thor.contracts.executeCall(
     config.xAllocationVotingContractAddress,
     ABIContract.ofAbi(XAllocationVoting.abi).getFunction("getAppIdsOfRound"),
@@ -50,8 +50,8 @@ export const getUnendorsedXApps = async (thor: ThorClient, config: AppConfig): P
  * @param roundId - The round ID to retrieve xApps for.
  * @returns an array of xApps Ids that are eligible or not endorsed.
  */
-export const getAllApps = async (thor: ThorClient, roundId: string, config: AppConfig): Promise<string[]> => {
-  const eligibleApps = await getRoundXApps(thor, roundId, config)
+export const getAllApps = async (thor: ThorClient, config: AppConfig, roundId: string): Promise<string[]> => {
+  const eligibleApps = await getRoundXApps(thor, config, roundId)
   const unendorsedApps = await getUnendorsedXApps(thor, config)
 
   const allApps = Array.from(new Set([...eligibleApps, ...unendorsedApps]))

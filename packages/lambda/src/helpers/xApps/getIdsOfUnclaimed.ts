@@ -1,4 +1,4 @@
-import mainnetConfig from "@repo/config/mainnet"
+import { AppConfig } from "@repo/config"
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract } from "@vechain/sdk-core"
 import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
@@ -11,12 +11,17 @@ import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
  *
  * @returns an array of xApp IDs that have not yet claimed their rewards.
  */
-export const getIdsOfUnclaimed = async (thor: ThorClient, xapps: string[], roundId: string): Promise<string[]> => {
+export const getIdsOfUnclaimed = async (
+  thor: ThorClient,
+  config: AppConfig,
+  xapps: string[],
+  roundId: string,
+): Promise<string[]> => {
   const unclaimed: string[] = []
 
   for (const xappId of xapps) {
     const res = await thor.contracts.executeCall(
-      mainnetConfig.xAllocationPoolContractAddress,
+      config.xAllocationPoolContractAddress,
       ABIContract.ofAbi(XAllocationPool.abi).getFunction("claimed"),
       [Number(roundId), xappId],
     )
