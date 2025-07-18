@@ -11,7 +11,7 @@ import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@repo/contracts"
-import { buildTxBody, buildGasEstimate } from "../helpers"
+import { buildTxBody, buildGasEstimate, maxGasLimit } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -85,6 +85,7 @@ const getSlackConfig = (): SlackConfig => {
   const environment = process.env.LAMBDA_ENV
 
   // C06BLEJE5SA - b3tr-dev (slack channel)
+  // C096GF8HC84 - b3tr-lambda (slack channel)
   // We are pointing this channel for both testnet and mainnet
   switch (environment) {
     case AppEnv.MAINNET:
@@ -95,14 +96,14 @@ const getSlackConfig = (): SlackConfig => {
 
     case AppEnv.TESTNET_STAGING:
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: "C096GF8HC84",
         messagePrefix: "[STAGING] ",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: "C096GF8HC84",
         messagePrefix: "[STAGING] ",
       }
   }
@@ -152,7 +153,7 @@ async function distributeEmissions(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  let txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2)
+  let txBody = await buildTxBody(thor, [clause], maxGasLimit)
 
   // Sign the transaction with the developer's private key
   let signedTx = Transaction.of(txBody).sign(privateKey)
@@ -233,7 +234,7 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  const txBody = await buildTxBody(thor, claimClauses, gasResult.totalGas * 2)
+  const txBody = await buildTxBody(thor, claimClauses, maxGasLimit)
 
   // Sign the transaction with the developer's private key
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
