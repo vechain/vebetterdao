@@ -152,7 +152,7 @@ async function distributeEmissions(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  let txBody = await buildTxBody(thor, [clause], maxGasLimit)
+  let txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
   let signedTx = Transaction.of(txBody).sign(privateKey)
@@ -233,7 +233,7 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  const txBody = await buildTxBody(thor, claimClauses, maxGasLimit)
+  const txBody = await buildTxBody(thor, claimClauses, gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
