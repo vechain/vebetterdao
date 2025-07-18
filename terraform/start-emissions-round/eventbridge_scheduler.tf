@@ -4,7 +4,7 @@ resource "aws_scheduler_schedule" "start_emissions_round_schedule" {
   description = "Schedule that starts the emissions round"
   state       = "ENABLED"
 
-  schedule_expression          = "cron(30 1 ? * MON *)"
+  schedule_expression          = local.config.schedule_expression
   schedule_expression_timezone = "UTC"
 
   flexible_time_window {
