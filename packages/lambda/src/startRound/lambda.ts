@@ -85,7 +85,6 @@ const getSlackConfig = (): SlackConfig => {
   const environment = process.env.LAMBDA_ENV
 
   // C06BLEJE5SA - b3tr-dev (slack channel)
-  // C096GF8HC84 - b3tr-lambda (slack channel)
   // We are pointing this channel for both testnet and mainnet
   switch (environment) {
     case AppEnv.MAINNET:
@@ -96,14 +95,14 @@ const getSlackConfig = (): SlackConfig => {
 
     case AppEnv.TESTNET_STAGING:
       return {
-        channelId: "C096GF8HC84",
+        channelId: "C06BLEJE5SA",
         messagePrefix: "[STAGING] ",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
-        channelId: "C096GF8HC84",
+        channelId: "C06BLEJE5SA",
         messagePrefix: "[STAGING] ",
       }
   }
