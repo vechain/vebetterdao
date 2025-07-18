@@ -6,6 +6,7 @@ import { publishMessage } from "../slack"
 import { ThorClient, TransactionReceipt } from "@vechain/sdk-network"
 import { AppEnv } from "@repo/config/contracts"
 import { ABIContract, Address, Transaction } from "@vechain/sdk-core"
+import { buildGasEstimate, buildTxBody } from "../transaction"
 
 /**
  * Checks the endorsements of the X-Apps before distributing the X-Allocations.
@@ -46,7 +47,7 @@ export async function checkEndorsements(
   const currentRound = response.result?.array?.[0] as string
 
   // Get the eligible X-Apps for the current round
-  const xApps = await getAllApps(thor, currentRound, config)
+  const xApps = await getAllApps(thor, config, currentRound)
 
   // Split X-Apps into chunks of 200
   const xAppsChunks = chunk(xApps, 200)
@@ -54,16 +55,14 @@ export async function checkEndorsements(
   let lastGasResult = null
   for (const xAppsChunk of xAppsChunks) {
     // Build the check endorsement clauses for the current chunk of X-Apps
-    const checkendorsementClauses = buildCheckEndorsementClauses(xAppsChunk)
+    const checkendorsementClauses = buildCheckEndorsementClauses(xAppsChunk, config)
 
     // Estimate the gas cost for the transaction
     const senderAddress = Address.ofPrivateKey(Buffer.from(privateKey, "hex"))
-    const gasResult = await thor.gas.estimateGas(checkendorsementClauses, senderAddress.toString())
+    const gasResult = await buildGasEstimate(thor, checkendorsementClauses, senderAddress.toString())
 
     // Check if the transaction was estimated to revert and handle accordingly
     if (gasResult.reverted) {
-      console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
-
       await publishMessage(
         secretsClient,
         "C06BLEJE5SA",
@@ -76,7 +75,7 @@ export async function checkEndorsements(
     }
 
     // Build the transaction body with the estimated gas
-    const txBody = await thor.transactions.buildTransactionBody(checkendorsementClauses, gasResult.totalGas)
+    const txBody = await buildTxBody(thor, checkendorsementClauses, gasResult.totalGas)
 
     // Sign the transaction with the developer's private key
     const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))

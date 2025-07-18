@@ -10,7 +10,8 @@ import { getIdsOfUnclaimed } from "../helpers/xApps"
 import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
-import { Emissions__factory as Emissions } from "@repo/contracts"
+import { Emissions__factory } from "@repo/contracts"
+import { buildTxBody, buildGasEstimate } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -126,22 +127,20 @@ async function distributeEmissions(thor: ThorClient) {
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
   // Wait for the next round to start before proceeding
-  await waitForRoundStart(thor)
+  await waitForRoundStart(thor, CONFIG)
 
   // Prepare the contract function call with necessary parameters
   const clause = Clause.callFunction(
     Address.of(CONFIG.emissionsContractAddress),
-    ABIContract.ofAbi(Emissions.abi).getFunction("distribute"),
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("distribute"),
     [],
   )
 
   // Estimate the gas cost for the transaction
-  let gasResult = await thor.gas.estimateGas([clause], signerAddress)
+  let gasResult = await buildGasEstimate(thor, [clause], signerAddress)
 
   // Check if the transaction was estimated to revert and handle accordingly
   if (gasResult.reverted) {
-    console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
-
     // Publish an error message to the Slack channel
     await publishMessage(
       client,
@@ -153,7 +152,9 @@ async function distributeEmissions(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  let txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas * 2)
+  // 2x the gas limit for the gas used by the transaction,
+  // this increases the gas limit but the transaction will only charge the actual gas used
+  let txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
   let signedTx = Transaction.of(txBody).sign(privateKey)
@@ -183,23 +184,23 @@ async function distributeXAllocations(thor: ThorClient) {
   // Get the current round number from the Emissions contract
   const currentRound = await thor.contracts.executeCall(
     CONFIG.emissionsContractAddress,
-    ABIContract.ofAbi(Emissions.abi).getFunction("getCurrentCycle"),
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getCurrentCycle"),
     [],
   )
   // Get the previous round number for which the X-Allocations are to be distributed
   const previousRound = Number(currentRound.result?.array?.[0] ?? 0) - 1
 
   // Get the X-Apps for the current round
-  const xApps = await getAllApps(thor, previousRound.toString(), CONFIG)
+  const xApps = await getAllApps(thor, CONFIG, previousRound.toString())
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
-  const xAppIds = await getIdsOfUnclaimed(thor, xApps, previousRound.toString())
+  const xAppIds = await getIdsOfUnclaimed(thor, CONFIG, xApps, previousRound.toString())
 
   const claimClauses = []
 
   // Build the claim clauses for the X-Apps that have not yet claimed their allocations and the gas estimation does not revert
   for (const xAppId of xAppIds) {
-    const claimClause = buildClaimClause(xAppId, previousRound.toString())
+    const claimClause = buildClaimClause(CONFIG, xAppId, previousRound.toString())
 
     // Estimate the gas cost for the transaction
     const gasResult = await thor.gas.estimateGas(
@@ -214,7 +215,8 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Estimate the gas cost for the transaction
-  const gasResult = await thor.gas.estimateGas(
+  const gasResult = await buildGasEstimate(
+    thor,
     claimClauses,
     Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
   )
@@ -233,7 +235,7 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  const txBody = await thor.transactions.buildTransactionBody(claimClauses, gasResult.totalGas * 2)
+  const txBody = await buildTxBody(thor, claimClauses, gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
