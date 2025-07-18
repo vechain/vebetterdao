@@ -4,7 +4,7 @@ resource "aws_scheduler_schedule" "check_endorsements_schedule" {
   description = "Schedule that checks XApp endorsements"
   state       = "ENABLED"
 
-  schedule_expression          = "cron(0 9 ? * 1,3,6 *)"
+  schedule_expression          = local.config.schedule_expression
   schedule_expression_timezone = "UTC"
 
   flexible_time_window {
