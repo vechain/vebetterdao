@@ -1,4 +1,15 @@
-import { Stepper, Step, StepIndicator, StepStatus, StepNumber, StepTitle, Box, Icon, HStack } from "@chakra-ui/react"
+import {
+  Stepper,
+  Step,
+  StepIndicator,
+  StepStatus,
+  StepNumber,
+  StepTitle,
+  Box,
+  Icon,
+  HStack,
+  Hide,
+} from "@chakra-ui/react"
 import { BsCheck, BsChevronRight } from "react-icons/bs"
 
 export type Step = {
@@ -19,9 +30,11 @@ export const GrantsNewFormStepper = ({ activeStep, steps }: { activeStep: number
               />
             </StepIndicator>
 
-            <Box flexShrink="0">
-              <StepTitle>{step.title}</StepTitle>
-            </Box>
+            <Hide below="md">
+              <Box flexShrink="0">
+                <StepTitle>{step.title}</StepTitle>
+              </Box>
+            </Hide>
           </Step>
           {index !== steps.length - 1 && (
             <Icon as={BsChevronRight} color="gray.400" boxSize={4} ml={2} flexShrink={0} />

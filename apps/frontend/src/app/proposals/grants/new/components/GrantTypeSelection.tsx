@@ -47,7 +47,7 @@ export const GrantTypeSelection = ({ control }: GrantTypeSelectionProps) => {
       control={control}
       render={({ field: { onChange, value } }) => (
         <VStack spacing={8} align="stretch" w="full">
-          <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
             {Object.entries(grantTypes).map(([type, info]) => (
               <Card
                 key={type}
