@@ -11,7 +11,7 @@ import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@repo/contracts"
-import { buildTxBody, buildGasEstimate, maxGasLimit } from "../helpers"
+import { buildTxBody, buildGasEstimate } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -152,6 +152,8 @@ async function distributeEmissions(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
+  // 2x the gas limit for the gas used by the transaction,
+  // this increases the gas limit but the transaction will only charge the actual gas used
   let txBody = await buildTxBody(thor, [clause], gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
