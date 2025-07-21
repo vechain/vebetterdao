@@ -17,7 +17,6 @@ export function createTestnetConfig() {
     */
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       Treasury: ["transferB3TR"],
-      B3TRGovernor: ["createMilestones"],
     },
     EMISSIONS_CYCLE_DURATION: 60480, // blocks - 60480 blocks - 1 week.
     EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE: 4, // 4% decay every cycle

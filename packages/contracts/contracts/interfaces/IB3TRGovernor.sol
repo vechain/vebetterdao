@@ -165,6 +165,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   );
 
   /**
+   * @dev Emitted when a proposal is created with milestones
+   */
+  event MilestonesCreated(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType, string description);
+
+  /**
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
@@ -227,7 +232,14 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType, address[] targets, uint256[] values, bytes[] calldatas, string description);
+  event ProposalCreatedWithType(
+    uint256 indexed proposalId,
+    GovernorTypes.ProposalType proposalType,
+    address[] targets,
+    uint256[] values,
+    bytes[] calldatas,
+    string description
+  );
 
   /**
    * @dev Emitted when the quorum numerator for a specific proposal type is updated.
@@ -348,15 +360,23 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   /**
    * @notice module:core
-   * @dev The deposit threshold percentage of the total supply of B3TR tokens that need to be deposited to create a proposal
+   * @dev The proposal Threshold Percentage for all type of proposal
    */
-  function depositThresholdPercentage() external view returns (uint256);
+  function getProposalTypeDepositThresholdPercentage(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256);
 
   /**
    * @notice module:core
    * @dev The minimum number of vote tokens needed to cast a vote
    */
   function votingThreshold() external view returns (uint256);
+
+  /**
+   * @notice module:core
+   * @dev The voting threshold for a proposal type
+   */
+  function votingThresholdByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice module:core
@@ -573,22 +593,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function proposalType(uint256 proposalId) external view returns (GovernorTypes.ProposalType);
 
   /**
-   * @dev Create a new proposal. Specify the allocation round when vote should become active.
-   * The duration is specified by {IGovernor-votingPeriod}.
-   *
-   * Emits a {ProposalCreated} and {ProposalCreatedWithType} event.
-   */
-  function proposeWithType(
-    address[] memory targets,
-    uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description,
-    uint256 startRoundId,
-    uint256 depositAmount,
-    GovernorTypes.ProposalType proposalType
-  ) external returns (uint256 proposalId);
-
-  /**
    * @notice Set the GalaxyMember contract
    * @param newGalaxyMember The new GalaxyMember contract
    */
@@ -614,16 +618,16 @@ interface IB3TRGovernor is IERC165, IERC6372 {
 
   /**
    * @notice Get the GM weight for a proposal type
-   * @param proposalType The type of the proposal
+   * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getProposalTypeGMWeight(GovernorTypes.ProposalType proposalType) external view returns (uint256);
+  function getProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice Set the GM weight for a proposal type
-   * @param proposalType The type of the proposal
-   * @param newGMWeight The new GM weight for the proposal type 
+   * @param proposalTypeValue The type of the proposal
+   * @param newGMWeight The new GM weight for the proposal type
    * @notice e.g. setProposalTypeGMWeight(0, 1) = GM level 1 is required to create a standard proposal
    */
-  function setProposalTypeGMWeight(GovernorTypes.ProposalType proposalType, uint256 newGMWeight) external;
+  function setProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external;
 }

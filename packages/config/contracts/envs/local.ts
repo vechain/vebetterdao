@@ -38,7 +38,6 @@ export function createLocalConfig() {
         "setIsFunctionRestrictionEnabled",
         "setDepositThresholdPercentage",
         "setVotingThreshold",
-        "createMilestones",
       ],
       Treasury: ["transferVET", "transferB3TR"],
       XAllocationVoting: [

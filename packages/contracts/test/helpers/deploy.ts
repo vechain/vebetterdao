@@ -455,10 +455,10 @@ export const getOrDeployContractInstances = async ({
   const treasury = (await deployProxy("Treasury", [
     await b3tr.getAddress(),
     await vot3.getAddress(),
-    owner.address,
-    owner.address,
-    owner.address,
-    owner.address,
+    await timeLock.getAddress(), // timelock address
+    owner.address, // admin
+    owner.address, // proxy admin
+    owner.address, // pauser
     config.TREASURY_TRANSFER_LIMIT_VET,
     config.TREASURY_TRANSFER_LIMIT_B3TR,
     config.TREASURY_TRANSFER_LIMIT_VOT3,
@@ -845,6 +845,7 @@ export const getOrDeployContractInstances = async ({
     TEMP_GOVERNOR_ADDRESS,
     await treasury.getAddress(),
     owner.address,
+    await b3tr.getAddress(),
   ])) as GrantsManager
 
   const governor = (await deployAndUpgrade(

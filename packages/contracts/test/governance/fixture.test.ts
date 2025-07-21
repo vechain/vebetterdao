@@ -22,14 +22,7 @@ import {
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
 import { ethers } from "hardhat"
-import {
-  bootstrapAndStartEmissions,
-  createProposal,
-  createProposalWithType,
-  waitForCurrentRoundToEnd,
-  createMultiContractProposal,
-  ProposalFunction,
-} from "../helpers/common"
+import { bootstrapAndStartEmissions, createProposal, waitForCurrentRoundToEnd } from "../helpers/common"
 
 //Constants for proposal types
 export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
@@ -218,65 +211,6 @@ export async function createUniqueTestProposal(
   }
 }
 
-export async function createGrantProposal(
-  owner: SignerWithAddress,
-  grantsManager: GrantsManager,
-  treasury: Treasury,
-  values: bigint[],
-  proposer: SignerWithAddress,
-  depositAmount: number = 0,
-  description: string = "",
-) {
-  // Total amount of all milestones
-  const totalAmount = values.reduce((sum, value) => sum + value, 0n)
-
-  const treasuryAddress = await treasury.getAddress()
-  const grantsManagerAddress = await grantsManager.getAddress()
-
-  const transferCalldata = treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, totalAmount])
-  const createMilestonesCalldata = grantsManager.interface.encodeFunctionData("createMilestones", [
-    description,
-    values,
-    [treasuryAddress, grantsManagerAddress],
-    [transferCalldata],
-  ])
-
-  // We prepare the function and the arguments to be encoded for the calldata (transferB3TR and createMilestones)
-  // Issus start here ( circular dependency on the millestone calldata)
-  const functions: ProposalFunction[] = [
-    {
-      contract: treasury,
-      functionName: "transferB3TR",
-      args: [grantsManagerAddress, totalAmount],
-      value: 0,
-    },
-    {
-      contract: grantsManager,
-      functionName: "createMilestones",
-      args: [
-        description,
-        values,
-        [treasuryAddress, grantsManagerAddress],
-        [transferCalldata, createMilestonesCalldata],
-      ],
-      value: 0,
-    },
-  ]
-
-  // Send proposal
-  const tx = await createMultiContractProposal(
-    owner,
-    proposer,
-    functions,
-    [0n, 0n],
-    description,
-    1, // Grant proposal type
-    depositAmount,
-  )
-
-  return tx
-}
-
 export async function validateProposalEvents(
   governor: B3TRGovernor,
   receipt: ContractTransactionReceipt | null,
@@ -288,32 +222,55 @@ export async function validateProposalEvents(
     throw new Error("Receipt is null")
   }
 
-  const proposalCreatedEvent = receipt?.logs[0]
-  const proposalCreatedWithTypeEvent = receipt?.logs[1]
+  // Find the ProposalCreated event in the logs
+  const proposalCreatedEvent = receipt.logs.find(log => {
+    try {
+      const decoded = governor.interface.parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      return decoded?.name === "ProposalCreated"
+    } catch (e) {
+      return false
+    }
+  })
 
-  if (!proposalCreatedEvent || !proposalCreatedWithTypeEvent) {
-    throw new Error("Required events not found")
+  // Find the MilestonesCreated event in the logs
+  const milestonesCreatedEvent = receipt.logs.find(log => {
+    try {
+      const decoded = governor.interface.parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      return decoded?.name === "MilestonesCreated"
+    } catch (e) {
+      return false
+    }
+  })
+
+  if (!proposalCreatedEvent || (!milestonesCreatedEvent && expectedType === 1)) {
+    throw new Error("ProposalCreated event not found")
   }
 
   const decodedProposalCreatedEvent = governor.interface.parseLog({
-    topics: [...(proposalCreatedEvent?.topics as string[])],
+    topics: [...proposalCreatedEvent.topics],
     data: proposalCreatedEvent.data,
   })
 
-  const decodedProposalCreatedWithTypeEvent = governor.interface.parseLog({
-    topics: [...(proposalCreatedWithTypeEvent?.topics as string[])],
-    data: proposalCreatedWithTypeEvent.data,
+  const decodedMilestonesCreatedEvent = governor.interface.parseLog({
+    topics: [...(milestonesCreatedEvent?.topics as string[])],
+    data: milestonesCreatedEvent?.data as string,
   })
 
-  if (!decodedProposalCreatedEvent || !decodedProposalCreatedWithTypeEvent) {
-    throw new Error("Failed to decode events")
+  if (!decodedProposalCreatedEvent) {
+    throw new Error("Failed to decode ProposalCreated event")
   }
 
   if (decodedProposalCreatedEvent.name !== "ProposalCreated") {
     throw new Error(`Expected ProposalCreated event, got ${decodedProposalCreatedEvent.name}`)
   }
 
-  if (decodedProposalCreatedEvent.args[1] !== proposerAddress) {
+  if (decodedProposalCreatedEvent?.args[1] !== proposerAddress) {
     throw new Error(`Expected proposer ${proposerAddress}, got ${decodedProposalCreatedEvent.args[1]}`)
   }
 
@@ -321,18 +278,18 @@ export async function validateProposalEvents(
     throw new Error(`Expected description ${description}, got ${decodedProposalCreatedEvent.args[6]}`)
   }
 
-  if (decodedProposalCreatedWithTypeEvent.name !== "ProposalCreatedWithType") {
-    throw new Error(`Expected ProposalCreatedWithType event, got ${decodedProposalCreatedWithTypeEvent.name}`)
+  if (decodedMilestonesCreatedEvent?.name !== "MilestonesCreated") {
+    throw new Error(`Expected MilestonesCreated event, got ${decodedMilestonesCreatedEvent?.name}`)
   }
 
-  if (decodedProposalCreatedWithTypeEvent.args[1] !== ethers.toBigInt(expectedType)) {
-    throw new Error(`Expected type ${expectedType}, got ${decodedProposalCreatedWithTypeEvent.args[1]}`)
+  if (decodedMilestonesCreatedEvent?.args[1] !== ethers.toBigInt(expectedType)) {
+    throw new Error(`Expected type ${expectedType}, got ${decodedMilestonesCreatedEvent?.args[1]}`)
   }
 
   return {
     proposalId: decodedProposalCreatedEvent.args[0],
     decodedProposalCreatedEvent,
-    decodedProposalCreatedWithTypeEvent,
+    decodedMilestonesCreatedEvent,
   }
 }
 

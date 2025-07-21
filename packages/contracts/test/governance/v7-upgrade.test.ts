@@ -1075,5 +1075,12 @@ describe("Governance - Upgrades", function () {
     // Check if the galaxyMember is the same as the galaxyMember initialized in previous version
     const v7GalaxyMember = await governorV7.getGalaxyMemberContract()
     expect(v7GalaxyMember).to.be.equal(await galaxyMember.getAddress())
+
+    // Check if the voting threshold is the same as the voting threshold initialized in previous version
+    const v7VotingThresholdGrant = await governorV7.votingThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+    expect(v7VotingThresholdGrant).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD))
+
+    const v7VotingThresholdStandard = await governorV7.votingThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+    expect(v7VotingThresholdStandard).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_VOTING_THRESHOLD))
   })
 })

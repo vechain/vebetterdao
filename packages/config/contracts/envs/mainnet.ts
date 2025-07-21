@@ -30,7 +30,7 @@ export function createMainnetConfig() {
     */
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       Treasury: ["transferB3TR"],
-      B3TRGovernor: ["upgradeToAndCall", "createMilestones"],
+      B3TRGovernor: ["upgradeToAndCall"],
     },
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
