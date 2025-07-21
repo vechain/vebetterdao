@@ -5,8 +5,9 @@ import {
   createUniqueTestProposal,
   validateProposalEvents,
   setupGovernanceFixtureWithEmissions,
+  GRANT_PROPOSAL_TYPE,
 } from "./fixture.test"
-import { B3TRGovernor, VOT3, B3TR } from "../../typechain-types"
+import { B3TRGovernor, VOT3, B3TR, Treasury, GrantsManager } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory } from "ethers"
 import { createProposalWithType, waitForBlock } from "../helpers/common"
@@ -20,6 +21,8 @@ describe("Governance - Proposal Types", function () {
   let b3trContract: ContractFactory
   let minterAccount: SignerWithAddress
   let proposer: SignerWithAddress
+  let treasury: Treasury
+  let grantsManager: GrantsManager
 
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
@@ -30,6 +33,8 @@ describe("Governance - Proposal Types", function () {
     b3trContract = fixture.b3trContract
     minterAccount = fixture.minterAccount
     proposer = fixture.proposer
+    treasury = fixture.treasury
+    grantsManager = fixture.grantsManager
 
     // Setup proposer for all tests
     await setupProposer(proposer, b3tr, vot3, minterAccount)
