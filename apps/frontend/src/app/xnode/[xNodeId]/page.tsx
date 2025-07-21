@@ -6,7 +6,7 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const XNodeContent = dynamic(() => import("./XNodeContent").then(mod => mod.XNodeContent), {
+const XNodeContent = dynamic(() => import("../XNodeContent").then(mod => mod.XNodeContent), {
   ssr: false,
   loading: () => (
     <VStack w="full" spacing={12} h="80vh" justify="center">
@@ -15,14 +15,20 @@ const XNodeContent = dynamic(() => import("./XNodeContent").then(mod => mod.XNod
   ),
 })
 
-export default function XNodePage() {
+type Props = {
+  params: {
+    xNodeId: string
+  }
+}
+
+export default function XNodePage({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage("XNodePage")
   }, [])
 
   return (
     <MotionVStack>
-      <XNodeContent />
+      <XNodeContent xNodeId={params.xNodeId} />
     </MotionVStack>
   )
 }

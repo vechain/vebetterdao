@@ -2,13 +2,7 @@ import { useCallback, useMemo } from "react"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import {
-  getLevelOfTokenQueryKey,
-  getNFTMetadataUriQueryKey,
-  getTokensInfoByOwnerQueryKey,
-  useSelectedGmNft,
-  useXNode,
-} from "@/api"
+import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey, getUserNodesQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { useWallet } from "@vechain/vechain-kit"
@@ -21,6 +15,8 @@ import {
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 type Props = {
+  gmId: string
+  xNodeId: string
   onSuccess?: () => void
 }
 
@@ -34,9 +30,7 @@ type Props = {
  * @param {Function} [props.onSuccess] - Optional callback function to be called on successful transaction.
  * @returns {Object} An object containing the transaction builder and related data.
  */
-export const useAttachGMToXNode = ({ onSuccess }: Props) => {
-  const { xNodeId } = useXNode()
-  const { gmId } = useSelectedGmNft()
+export const useAttachGMToXNode = ({ gmId, xNodeId, onSuccess }: Props) => {
   const { data: currentNodeId } = useGetNodeIdAttached(gmId)
 
   const clauseBuilder = useCallback(() => {
@@ -86,7 +80,8 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(gmId),
       getNFTMetadataUriQueryKey(gmId),
-      getTokensInfoByOwnerQueryKey(account?.address ?? ""),
+      getUserNodesQueryKey(account?.address ?? ""),
+      getUserGMsQueryKey(account?.address ?? ""),
     ],
     [account?.address, gmId, xNodeId],
   )

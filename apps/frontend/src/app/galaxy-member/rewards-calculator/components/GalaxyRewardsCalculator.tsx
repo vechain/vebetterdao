@@ -8,9 +8,9 @@ import {
   useCurrentAllocationsRoundId,
   useAllocationAmount,
   useParticipatedInGovernance,
-  useSelectedGmNft,
   useGMLevelsOverview,
   usePotentialRewardsFromIndexer,
+  useGetUserGMs,
 } from "@/api"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
 import { BaseTooltip } from "@/components"
@@ -22,8 +22,8 @@ const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 export const GalaxyRewardsCalculator = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { gmLevel, gmId, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-  const usersGM = { gmLevel, gmId, b3trToUpgradeGMToNextLevel: Number(b3trToUpgradeGMToNextLevel) }
+  const { data: userGms } = useGetUserGMs()
+  const usersGM = userGms?.find(gm => gm.isSelected)
   const router = useRouter()
 
   const { data: gmLevelOverview } = useGMLevelsOverview()
@@ -48,7 +48,7 @@ export const GalaxyRewardsCalculator = () => {
     gmLevelOverview || [],
     emissionAmount_gmRewards,
     selectedGMLevel ?? "",
-    usersGM.gmLevel,
+    usersGM?.tokenLevel,
   )
 
   const estimatedRewards = useMemo(() => {
@@ -56,7 +56,7 @@ export const GalaxyRewardsCalculator = () => {
       return { potentialRewards, currentRewards }
     }
     return null
-  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards])
+  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards, currentRewards])
 
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
