@@ -1,5 +1,5 @@
 import { useGetUserGMs, useGetUserNodes, UserNode, UserGM } from "@/api"
-import { Card, VStack, CardBody, CardHeader, Heading, Text } from "@chakra-ui/react"
+import { Card, VStack, CardBody, CardHeader, Heading, Text, Spinner, Skeleton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { ProfileGMListItem } from "./ProfileGMListItem"
 import { useWallet } from "@vechain/vechain-kit"
@@ -9,8 +9,8 @@ type ListItem = [UserGM | undefined, UserNode | undefined]
 export const ProfileGMLevel = ({ address }: { address: string }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: userGMs = [] } = useGetUserGMs(address)
-  const { data: userNodes } = useGetUserNodes(address)
+  const { data: userGMs = [], isLoading: isUserGMsLoading } = useGetUserGMs(address)
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(address)
 
   const attachedGMsWithNodes: ListItem[] = userGMs
     .filter(gm => gm.nodeIdAttached && gm.nodeIdAttached !== "0")
@@ -36,20 +36,24 @@ export const ProfileGMLevel = ({ address }: { address: string }) => {
       </CardHeader>
 
       <CardBody>
-        {list.length === 0 ? (
-          <Text>{t("No galaxy members found.")}</Text>
-        ) : (
-          <VStack gap="4" align="stretch">
-            {list.map((listItem, index) => (
-              <ProfileGMListItem
-                key={index}
-                gm={listItem[0]}
-                node={listItem[1]}
-                isClickable={account?.address === address}
-              />
-            ))}
-          </VStack>
-        )}
+        <Skeleton isLoaded={!isUserGMsLoading && !isUserNodesLoading}>
+          {isUserGMsLoading || isUserNodesLoading ? (
+            <Spinner />
+          ) : list.length === 0 ? (
+            <Text>{t("No galaxy members found.")}</Text>
+          ) : (
+            <VStack gap="4" align="stretch">
+              {list.map((listItem, index) => (
+                <ProfileGMListItem
+                  key={index}
+                  gm={listItem[0]}
+                  node={listItem[1]}
+                  isClickable={account?.address === address}
+                />
+              ))}
+            </VStack>
+          )}
+        </Skeleton>
       </CardBody>
     </Card>
   )

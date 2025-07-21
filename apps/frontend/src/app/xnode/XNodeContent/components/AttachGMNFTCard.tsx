@@ -37,7 +37,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
     // because we do not have a page that displays GM NFT info based on the tokenId
     if (isXNodeDelegator) return
 
-    router.push("/galaxy-member")
+    router.push(`/galaxy-member/${attachedGMNFT?.tokenId}`)
   }, [router, isXNodeDelegator])
 
   const attachGmToXNodeModal = useDisclosure()
