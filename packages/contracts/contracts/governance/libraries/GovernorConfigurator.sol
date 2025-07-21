@@ -397,20 +397,20 @@ library GovernorConfigurator {
   /**
    * @notice Returns the GM weight for a proposal type.
    * @param self The storage reference for the GovernorStorage.
-   * @param proposalType The proposal type.
+   * @param proposalTypeValue The proposal type.
    * @return The current GM weight for the proposal type.
    */
-  function getProposalTypeGMWeight(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalType) internal view returns (uint256) {
-    return self.proposalTypeGMWeight[proposalType];
+  function getProposalTypeGMWeight(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue) internal view returns (uint256) {
+    return self.proposalTypeGMWeight[proposalTypeValue];
   }
 
   /**
    * @notice Sets the GM weight for a proposal type.
    * @param self The storage reference for the GovernorStorage.
-   * @param proposalType The proposal type.
+   * @param proposalTypeValue The proposal type.
    * @param newGMWeight The new GM weight for the proposal type.
    */ 
-  function setProposalTypeGMWeight(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalType, uint256 newGMWeight) internal {
-    self.proposalTypeGMWeight[proposalType] = newGMWeight;
+  function setProposalTypeGMWeight(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) internal {
+    self.proposalTypeGMWeight[proposalTypeValue] = newGMWeight;
   }
 }
