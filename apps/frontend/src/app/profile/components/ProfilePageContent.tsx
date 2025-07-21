@@ -42,7 +42,7 @@ const TabContent = memo(function TabContent({ tab, address }: TabContentProps) {
     case Tab.LinkedAccounts:
       return <ProfileLinkedAcounts address={address} />
     case Tab.GM:
-      return <ProfileGMLevel />
+      return <ProfileGMLevel address={address} />
     default:
       return null
   }

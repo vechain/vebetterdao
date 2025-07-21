@@ -16,7 +16,15 @@ import { UserGM } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { useTranslation } from "react-i18next"
 
-export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }) => {
+export const ProfileGMListItem = ({
+  gm,
+  node,
+  isClickable,
+}: {
+  gm?: UserGM
+  node?: UserNode
+  isClickable: boolean
+}) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -47,11 +55,17 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
           <CardBody p="0" gap="8px">
             {gm ? (
               <>
-                <LinkOverlay href={`/galaxy-member/${gm?.tokenId}`} as={NextLink}>
+                {isClickable ? (
+                  <LinkOverlay href={`/galaxy-member/${gm?.tokenId}`} as={NextLink}>
+                    <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                      {t("NFT")}
+                    </Text>
+                  </LinkOverlay>
+                ) : (
                   <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                     {t("NFT")}
                   </Text>
-                </LinkOverlay>
+                )}
 
                 <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
                   {gm?.metadata?.name}
@@ -99,11 +113,17 @@ export const ProfileGMListItem = ({ gm, node }: { gm?: UserGM; node?: UserNode }
           <CardBody p="0" gap="8px">
             {node ? (
               <>
-                <LinkOverlay href={`/xnode/${node.nodeId}`} as={NextLink}>
+                {isClickable ? (
+                  <LinkOverlay href={`/xnode/${node.nodeId}`} as={NextLink}>
+                    <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                      {t("Node")}
+                    </Text>
+                  </LinkOverlay>
+                ) : (
                   <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                     {t("Node")}
                   </Text>
-                </LinkOverlay>
+                )}
 
                 <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
                   {`${node.name} #${node.nodeId}`}

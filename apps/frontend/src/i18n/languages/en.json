@@ -1735,5 +1735,6 @@
   "Attached": "Attached",
   "This node is already attached to another GM": "This node is already attached to another GM",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "This feature is available only to nodes that provide free upgrade to GM NFTs.",
-  "Only one node can be attached to a GM": "Only one node can be attached to a GM"
+  "Only one node can be attached to a GM": "Only one node can be attached to a GM",
+  "No galaxy members found.": "No galaxy members found."
 }
