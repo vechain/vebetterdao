@@ -1,29 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { useCallClause } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
-import { B3trContractJson } from "@repo/contracts"
-const b3trAbi = B3trContractJson.abi
+import { B3TR__factory } from "@repo/contracts"
 
-const config = getConfig()
-const B3TR_CONTRACT = config.b3trContractAddress
-
-/**
- * getIsB3trPaused is an asynchronous function that checks if the B3tr contract is paused.
- *
- * @param {Connex.Thor} thor - The Connex.Thor instance to interact with the VeChain Thor blockchain.
- * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the B3tr contract is paused.
- * @throws Will throw an error if the function ABI is not found or if there is a VM error.
- */
-export const getIsB3trPaused = async (thor: Connex.Thor): Promise<boolean> => {
-  const functionAbi = b3trAbi.find(e => e.name === "paused")
-  if (!functionAbi) return Promise.reject(new Error("Function abi not found for delegates"))
-  const res = await thor.account(B3TR_CONTRACT).method(functionAbi).call()
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return Boolean(res.decoded[0])
-}
+const abi = B3TR__factory.abi
+const address = getConfig().b3trContractAddress
+const method = "paused" as const
 
 /**
  * getIsB3trPausedQueryKey is a function that returns the query key for the getIsB3trPaused query.
@@ -38,10 +20,13 @@ export const getIsB3trPausedQueryKey = () => ["b3tr", "paused"]
  * @returns {UseQueryResult} The result object from the useQuery hook. Refer to the react-query documentation for more details.
  */
 export const useB3trPaused = () => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getIsB3trPausedQueryKey(),
-    queryFn: () => getIsB3trPaused(thor),
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [],
+    queryOptions: {
+      select: data => data[0],
+    },
   })
 }

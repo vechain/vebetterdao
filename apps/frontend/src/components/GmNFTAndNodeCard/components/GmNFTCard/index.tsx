@@ -13,7 +13,7 @@ interface GmNFTCardProps {
   gmImage?: string
   gmName?: string
   gmLevel?: string
-  gmRewardMultiplier?: string
+  gmRewardMultiplier?: number
   nodeAttachedColor: string
   viewMode?: boolean
   onCardClick?: () => void

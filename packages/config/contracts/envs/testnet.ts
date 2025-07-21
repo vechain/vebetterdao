@@ -1,4 +1,5 @@
 import { defineConfig } from "../defineConfig"
+
 export function createTestnetConfig() {
   return defineConfig({
     NEXT_PUBLIC_APP_ENV: "testnet",
@@ -130,6 +131,11 @@ export function createTestnetConfig() {
       2500000000000000000000000n,
       12500000000000000000000000n,
     ],
+
+    // Stargate contracts - contracts will be deployed as mocks on testnet
+    STARGATE_NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
+    STARGATE_DELEGATE_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
+    NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
 
     // Milestones
     MINIMUM_MILESTONE_COUNT: 2,

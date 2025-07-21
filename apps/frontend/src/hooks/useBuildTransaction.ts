@@ -5,7 +5,7 @@ import { useTransactionModal, TransactionCustomUI } from "@/providers/Transactio
 
 export type BuildTransactionProps<ClausesParams = void> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
-  refetchQueryKeys?: (string | undefined)[][]
+  refetchQueryKeys?: Array<(string | undefined | unknown[])[]>
   onSuccess?: () => void
   invalidateCache?: boolean
   suggestedMaxGas?: number
@@ -42,14 +42,10 @@ export const useBuildTransaction = <ClausesParams = void>({
    * It cancels and refetches the specified queries if `invalidateCache` is `true`.
    */
   const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
+    if (invalidateCache && refetchQueryKeys?.length) {
       refetchQueryKeys?.forEach(async queryKey => {
-        await queryClient.cancelQueries({
-          queryKey,
-        })
-        await queryClient.refetchQueries({
-          queryKey,
-        })
+        await queryClient.cancelQueries({ queryKey })
+        await queryClient.refetchQueries({ queryKey })
       })
     }
 

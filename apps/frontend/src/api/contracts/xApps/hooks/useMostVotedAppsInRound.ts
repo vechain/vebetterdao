@@ -1,8 +1,5 @@
-import { useRoundXApps } from "./useRoundXApps"
-import { useXApps } from "./useXApps"
-import { XApp } from "../getXApps"
-import { useXAppsShares } from "./useXAppsShares"
 import { useMemo } from "react"
+import { useXApps, XApp, useRoundXApps, useXAppsShares } from "@/api"
 
 export type MostVotedAppsInRoundReturnType = {
   percentage: number

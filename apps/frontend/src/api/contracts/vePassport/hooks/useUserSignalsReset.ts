@@ -3,7 +3,7 @@ import { useEvents } from "@/hooks"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 
-const contractInterface = VeBetterPassport__factory.createInterface()
+const abi = VeBetterPassport__factory.abi
 const contractAddress = getConfig().veBetterPassportContractAddress
 
 /**
@@ -15,11 +15,11 @@ export const useUserSignalsReset = (walletAddress?: string) => {
 
   const rawUserSignalsResetEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "UserSignalsReset",
     filterParams,
-    mapResponse: (decoded, meta) => ({
-      user: decoded.user,
+    mapResponse: ({ decodedData, meta }) => ({
+      user: decodedData.args.user,
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

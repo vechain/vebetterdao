@@ -1,53 +1,41 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
-import { abi } from "thor-devkit"
-import { getProposalStateQueryKey, ProposalState } from "./useProposalState"
+import { getProposalStateQueryKey } from "./useProposalState"
 
-const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
-const proposalStateFragment = b3trGovernorInterface.getFunction("state").format("json")
-const proposalStateABi = new abi.Function(JSON.parse(proposalStateFragment))
+const abi = B3TRGovernor__factory.abi
+const functionName = "state" as const
+const address = getConfig().b3trGovernorAddress as `0x${string}`
 
-const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-
-const getAllProposalsStateClauses = (proposalIds: string[]) => {
-  const clauses: Connex.VM.Clause[] = proposalIds.map(proposalId => {
-    return {
-      to: GOVERNANCE_CONTRACT,
-      value: 0,
-      data: proposalStateABi.encode(proposalId),
-    }
-  })
-
-  return clauses
-}
-
-export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
+export const getAllProposalsStateQueryKey = (proposalsIds?: string[]) =>
+  proposalsIds ? ["PROPOSALS", "ALL", "STATE", proposalsIds] : ["PROPOSALS", "ALL", "STATE"]
 
 export const useAllProposalsState = (proposalsIds: string[]) => {
-  const { thor } = useConnex()
+  const thor = useThor()
   const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: getAllProposalsStateQueryKey(),
+    queryKey: getAllProposalsStateQueryKey(proposalsIds),
     queryFn: async () => {
-      const clauses = getAllProposalsStateClauses(proposalsIds)
-      const res = await thor.explain(clauses).execute()
-
-      const states = res.map((r, index) => {
-        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
-        const decoded = proposalStateABi.decode(r.data)
-        const proposalId = proposalsIds[index] as string
-        const state = Number(decoded[0]) as ProposalState
-
-        queryClient.setQueryData(getProposalStateQueryKey(proposalId), state)
-        return {
-          proposalId,
-          state,
-        }
+      const res = await executeMultipleClausesCall({
+        thor,
+        calls: proposalsIds.map(
+          proposalId =>
+            ({
+              abi,
+              functionName,
+              address,
+              args: [proposalId],
+            }) as const,
+        ),
       })
-      return states
+
+      return res.map((state, index) => {
+        const proposalId = proposalsIds[index] as string
+        queryClient.setQueryData(getProposalStateQueryKey(proposalId), [state])
+        return { proposalId, state }
+      })
     },
     enabled: !!proposalsIds.length && !!thor,
   })

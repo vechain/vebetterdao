@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 
 export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 
@@ -10,7 +10,7 @@ export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS
  * @returns An object containing information about the vote event.
  */
 export const useUserProposalsVoteEvents = (user?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getUserProposalsVoteEventsQueryKey(user ?? undefined),

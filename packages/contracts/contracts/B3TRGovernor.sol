@@ -760,6 +760,16 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Returns the deposit threshold cap for a proposal type.
+   * @param proposalType The type of proposal.
+   * @return uint256 The deposit threshold cap for the proposal type.
+   */
+  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalType) external view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorConfigurator.getDepositThresholdCap($, proposalType);
+  }
+
+  /**
    * @notice Get the GalaxyMember contract
    * @return The current GalaxyMember contract
    */
@@ -1137,6 +1147,20 @@ contract B3TRGovernor is
   ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setProposalTypeVotingThreshold($, proposalTypeValue, newVotingThreshold);
+  }
+
+  /**
+   * @notice Update the deposit threshold cap for a proposal type. This operation can only be performed through a governance proposal or by the DEFAULT_ADMIN_ROLE
+   * Emits a {DepositThresholdCapSet} event.
+   * @param newDepositThresholdCap The new deposit threshold cap
+   * @param proposalTypeValue The proposal type
+   */
+  function setProposalTypeDepositThresholdCap(
+    uint256 newDepositThresholdCap,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setProposalTypeDepositThresholdCap($, proposalTypeValue, newDepositThresholdCap);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { getProposalUserDepositQueryKey } from "@/api"
+import { getProposalUserDepositQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
@@ -47,7 +47,7 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
   const refetchQueryKeys = useMemo(
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
+      getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
     ],
     [account, proposalId],
   )

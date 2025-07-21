@@ -1,4 +1,4 @@
-import { ProposalMetadata } from "@/api"
+import { ProposalMetadata, useProposalState } from "@/api"
 import { ProposalStatusBadge } from "@/components"
 import { Box, HStack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -12,6 +12,7 @@ type Props = {
 
 export const ProposalBox = ({ proposalId, metadata }: Props) => {
   const router = useRouter()
+  const { data: proposalState } = useProposalState(proposalId)
 
   const [isDesktop] = useMediaQuery("(min-width: 500px)")
 
@@ -42,6 +43,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
       <VStack w={"full"} alignItems={"start"} spacing={2}>
         <ProposalStatusBadge
           proposalId={proposalId}
+          proposalState={proposalState}
           textProps={{
             fontSize: 12,
           }}

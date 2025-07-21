@@ -1,14 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
 
 import { GetAllApps } from "../getXApps"
 import { sortXAppsAlphabetically } from "../sortXAppsAlphabetically"
+import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 
 export const useSortXappAlphabetically = (xAppsNotSorted: GetAllApps | undefined) => {
-  const { thor } = useConnex()
+  const { data: baseUri = "" } = useXAppsMetadataBaseUri()
+
   return useQuery({
-    queryKey: ["sortedXApps", xAppsNotSorted],
-    queryFn: () => sortXAppsAlphabetically(xAppsNotSorted, thor),
-    enabled: !!xAppsNotSorted,
+    queryKey: ["sortedXApps", xAppsNotSorted?.allApps.map(app => app.id)],
+    queryFn: () =>
+      sortXAppsAlphabetically({
+        apps: xAppsNotSorted,
+        baseUri,
+      }),
+    enabled: !!xAppsNotSorted && !!baseUri,
   })
 }

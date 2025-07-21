@@ -15,9 +15,9 @@ export interface RoundReward {
  * @param {Connex.Thor} thor - The Connex.Thor instance to use for interacting with the VeChain Thor blockchain.
  * @param {RoundReward[]} roundRewards - An array of RoundReward objects representing the rewards for each round.
  * @param {string} address - The address of the voter.
- * @returns {Connex.Vendor.TxMessage} A Connex.Vendor.TxMessage object representing the transaction.
+ * @returns {EnhancedClause[]} An array of EnhancedClause objects representing the transaction.
  */
-export const buildClaimRewardsTx = (roundRewards: RoundReward[], address: string): Connex.Vendor.TxMessage => {
+export const buildClaimRewardsTx = (roundRewards: RoundReward[], address: string) => {
   const clauses = []
 
   for (const round of roundRewards) {

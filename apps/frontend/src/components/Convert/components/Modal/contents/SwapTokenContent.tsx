@@ -1,10 +1,10 @@
-import { TokenBalance } from "@/api"
 import { Text, HStack, Flex, Button } from "@chakra-ui/react"
 import { t } from "i18next"
 import { UseFormReturn } from "react-hook-form"
 import { FiInfo } from "react-icons/fi"
 import { TokenCards } from "../../TokenCards"
 import { BalanceInfo } from "../../BalanceInfo"
+import { TokenBalance } from "@vechain/vechain-kit"
 
 type Props = {
   amount: string
@@ -53,7 +53,7 @@ export const SwapTokenContent = ({
       </Flex>
 
       {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
-        <HStack px={4} py={3} bg={"#F8F8F8"} borderRadius={8} mt={2}>
+        <HStack px={4} py={3} bg={"dark-contrast-on-card-bg"} borderRadius={8} mt={2}>
           <FiInfo size={36} color="#6a6a6a" />
           <Text fontSize={{ base: 14 }} fontWeight={400}>
             {t("The maximum amount of VOT3 you can convert is ")}

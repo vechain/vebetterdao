@@ -1,6 +1,6 @@
-import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey, currentBlockQueryKey } from "@/api"
+import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
-import { EnhancedClause } from "@vechain/vechain-kit"
+import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { Emissions__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"

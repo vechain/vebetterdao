@@ -1,13 +1,13 @@
 import { getConfig } from "@repo/config"
-import { useWallet } from "@vechain/vechain-kit"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().galaxyMemberContractAddress
-const contractInterface = GalaxyMember__factory.createInterface()
-const method = "getSelectedTokenId"
+const address = getConfig().galaxyMemberContractAddress
+const abi = GalaxyMember__factory.abi
+const method = "getSelectedTokenId" as const
 
-export const getSelectedTokenIdQueryKey = (account?: string | null) => getCallKey({ method, keyArgs: [account] })
+export const getSelectedTokenIdQueryKey = (account?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(account ?? "0x") as `0x${string}`] })
 
 /**
  * Custom hook that retrieves the selected token ID for the selected galaxy member.
@@ -17,11 +17,14 @@ export const getSelectedTokenIdQueryKey = (account?: string | null) => getCallKe
  */
 export const useSelectedTokenId = (profile?: string, enabled = true) => {
   const { account } = useWallet()
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [profile ?? account?.address ?? ""],
-    enabled: (!!profile || !!account?.address) && enabled,
+    args: [(profile ?? account?.address ?? "") as `0x${string}`],
+    queryOptions: {
+      enabled: (!!profile || !!account?.address) && enabled,
+      select: data => data[0].toString(),
+    },
   })
 }

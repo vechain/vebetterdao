@@ -1,12 +1,12 @@
-import { getAccountBalanceQueryKey, useAccountBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
-import { useWallet } from "@vechain/vechain-kit"
+import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { useQueryClient } from "@tanstack/react-query"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
@@ -17,8 +17,8 @@ export const LowOnVthoCard: React.FC = () => {
   const queryClient = useQueryClient()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
 
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
@@ -27,12 +27,12 @@ export const LowOnVthoCard: React.FC = () => {
   }, [b3trBalance, vot3Balance])
 
   const isLowOnVtho = useMemo(() => {
-    return Number(balance?.energy.scaled) < minVtho
+    return Number(balance?.energy ?? "0") < minVtho
   }, [balance])
 
   const labels = useMemo(() => {
     if (!balance) return
-    const balanceNumber = new BigNumber(balance.energy.scaled)
+    const balanceNumber = new BigNumber(balance.energy ?? "0")
     if (balanceNumber.isZero())
       return {
         heading: "Not enough VTHO",

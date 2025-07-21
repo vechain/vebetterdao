@@ -5,7 +5,7 @@ export const isValid = (appId: string): boolean => {
   try {
     const appIdFormatted = HexUtils.addPrefix(appId)
     return isHexString(appIdFormatted, 32)
-  } catch (error) {
+  } catch {
     return false
   }
 }

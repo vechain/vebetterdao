@@ -1,4 +1,4 @@
-import { ProposalState, useProposalVotesIndexer, useProposalState } from "@/api"
+import { ProposalState, useProposalVotesIndexer } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
@@ -22,12 +22,9 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
   const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({ proposalId })
-  const { data: proposalState } = useProposalState(proposalId)
-
-  //TODO: Enable again when indexer is ready
-  //   const { data: voteEvents, isLoading: voteEventsLoading } = useProposalVoteEvents(proposalId)
 
   const { proposal } = useProposalDetail()
+  const proposalState = proposal.state
   const [_, setSeconds] = useState(0)
 
   useEffect(() => {
@@ -153,7 +150,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
                 />
               ))}
             </VStack>
-            <ProposalVotesResults proposalId={proposalId} />
+            <ProposalVotesResults proposalId={proposalId} proposalState={proposalState} />
           </VStack>
         </ResponsiveCard>
       )

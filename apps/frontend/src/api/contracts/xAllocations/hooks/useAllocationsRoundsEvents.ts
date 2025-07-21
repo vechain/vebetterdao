@@ -2,7 +2,7 @@ import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@repo/contracts"
 
-const contractInterface = XAllocationVoting__factory.createInterface()
+const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress
 export type RoundCreated = {
   roundId: string
@@ -19,14 +19,14 @@ export type RoundCreated = {
 export const useAllocationsRoundsEvents = () => {
   const rawAllocationCreatedEvents = useEvents({
     contractAddress,
-    contractInterface,
+    abi,
     eventName: "RoundCreated",
-    mapResponse: (decoded, meta) => ({
-      roundId: decoded.roundId,
-      proposer: decoded.proposer,
-      voteStart: decoded.voteStart,
-      voteEnd: decoded.voteEnd,
-      appsIds: decoded.appsIds,
+    mapResponse: ({ decodedData, meta }) => ({
+      roundId: decodedData.args.roundId.toString(),
+      proposer: decodedData.args.proposer,
+      voteStart: decodedData.args.voteStart.toString(),
+      voteEnd: decodedData.args.voteEnd.toString(),
+      appsIds: [...decodedData.args.appsIds],
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),

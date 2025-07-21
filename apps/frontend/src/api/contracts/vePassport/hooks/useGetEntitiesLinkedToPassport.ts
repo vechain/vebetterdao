@@ -1,11 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/vechain-kit"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
-const method = "getEntitiesLinkedToPassport"
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "getEntitiesLinkedToPassport" as const
 
 /**
  * Returns the query key for fetching entities linked to a passport.
@@ -13,7 +12,7 @@ const method = "getEntitiesLinkedToPassport"
  * @returns The query key for fetching entities linked to a passport.
  */
 export const getEntitiesLinkedToPassportQueryKey = (passport?: string | null) => {
-  return getCallKey({ method, keyArgs: [passport] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [passport as `0x${string}`] })
 }
 
 /**
@@ -22,12 +21,15 @@ export const getEntitiesLinkedToPassportQueryKey = (passport?: string | null) =>
  * @returns An array of entity addresses linked to the given passport.
  */
 export const useGetEntitiesLinkedToPassport = (passport?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [passport],
-    enabled: !!passport,
+    args: [(passport ?? "0x") as `0x${string}`],
+    queryOptions: {
+      select: data => data[0],
+      enabled: !!passport,
+    },
   })
 }
 

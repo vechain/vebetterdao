@@ -1,15 +1,17 @@
 import { ethers, network } from "hardhat"
 import {
   B3TR,
-  B3TRGovernor,
   Emissions,
   GalaxyMember,
+  StargateNFT,
+  VeBetterPassport,
+  XAllocationVoting,
+  Errors__factory,
+  B3TRGovernor,
   GrantsManager,
   TimeLock,
   Treasury,
-  VeBetterPassport,
   VOT3,
-  XAllocationVoting,
 } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse, AddressLike } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
@@ -1162,4 +1164,20 @@ export const getTwoUniqueRandomIndices = (max: number) => {
     secondIndex = Math.floor(Math.random() * max)
   } while (secondIndex === firstIndex)
   return [firstIndex, secondIndex]
+}
+
+// Since we moved errors to a separate library, our tests expect the
+// error from the library instead of from the contract.
+// The most common pattern people use in their tests when using library
+// errors is to create a test helper like this one.
+export const getStargateNFTErrorsInterface = async (_stargateNFTContract?: StargateNFT) => {
+  const { stargateNftMock } = await getOrDeployContractInstances({
+    forceDeploy: false,
+  })
+
+  const addressToUse = _stargateNFTContract
+    ? await _stargateNFTContract.getAddress()
+    : await stargateNftMock.getAddress()
+
+  return Errors__factory.connect(addressToUse, ethers.provider)
 }

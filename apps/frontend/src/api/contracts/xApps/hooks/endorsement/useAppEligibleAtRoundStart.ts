@@ -1,33 +1,35 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
-import { UseQueryResult } from "@tanstack/react-query"
 import { useAllocationRoundSnapshot, useCurrentAllocationsRoundId } from "@/api"
 
-const contractAddress = getConfig().x2EarnAppsContractAddress
-const contractInterface = X2EarnApps__factory.createInterface()
-const method = "isEligible"
+const address = getConfig().x2EarnAppsContractAddress
+const abi = X2EarnApps__factory.abi
+const method = "isEligible" as const
 
 /**
  * Get the query key for a boolean value indicating if the app was eligible at the start of the current allocation round
  * @param appId  the query key
  */
-export const getAppEligibleAtRoundStartQueryKey = (appId: string) => getCallKey({ method, keyArgs: [appId] })
+export const getAppEligibleAtRoundStartQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 
 /**
  * Hook to get a boolean value indicating if the app was eligible at the start of the current allocation round
  * @param appId  the app id
  * @returns a boolean value indicating if the app was eligible at the start of the current allocation round
  */
-export const useAppEligibleAtRoundStart = (appId: string): UseQueryResult<boolean, Error> => {
+export const useAppEligibleAtRoundStart = (appId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundSnapshot } = useAllocationRoundSnapshot(currentRoundId ?? "")
 
-  return useCall({
-    contractInterface,
-    contractAddress,
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [appId, roundSnapshot],
-    enabled: !!appId && !!roundSnapshot,
+    args: [appId as `0x${string}`, BigInt(roundSnapshot ?? 0)],
+    queryOptions: {
+      enabled: !!appId && !!roundSnapshot,
+      select: data => data[0],
+    },
   })
 }

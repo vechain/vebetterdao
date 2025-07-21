@@ -1,23 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
-
-import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 import { useXApp } from "./useXApp"
 import { getXAppMetadata } from "../getXAppMetadata"
 
-export const getXAppMetadataQueryKey = (metadataURI?: string) => ["xApps", metadataURI, "metadata"]
+export const getXAppMetadataQueryKey = (xAppId?: string) => ["xAppMetadata", xAppId]
 
-/**
- * Hook to fetch the metadata of an xApp from the xApps metadata base uri
- * @param xAppId - The id of the xApp
- * @returns  The metadata of the xApp
- */
 export const useXAppMetadata = (xAppId?: string) => {
-  const { data: baseUri } = useXAppsMetadataBaseUri()
-  const { data: xApp } = useXApp(xAppId ?? "")
+  const { data: xApp } = useXApp(xAppId)
 
   return useQuery({
-    queryKey: getXAppMetadataQueryKey(xApp?.metadataURI || ""),
-    queryFn: async () => (!(!baseUri && xApp) ? await getXAppMetadata(`${baseUri}${xApp?.metadataURI}`) : null),
-    enabled: !!baseUri && !!xApp,
+    queryKey: getXAppMetadataQueryKey(xAppId),
+    queryFn: () => getXAppMetadata(xApp?.metadataURI ?? ""),
+    enabled: !!xApp && !!xApp?.metadataURI,
   })
 }

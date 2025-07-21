@@ -1,4 +1,4 @@
-import { useXApps, useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically } from "@/api"
+import { useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -41,9 +41,13 @@ export const AppsPageContent = () => {
   const newAppsEndorsedandUnendorsed = [...(xApps?.newApps ?? []), ...newApps]
 
   // Apps tabs
-  const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
+  const currentActiveApps =
+    xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id as unknown as `0x${string}`)) ?? []
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
+
+  const gracePeriodIds = new Set(gracePeriodApps.map(app => app.id))
+  const activeAppsWithoutGracePeriod = currentActiveApps.filter(app => !gracePeriodIds.has(app.id))
 
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
@@ -68,7 +72,7 @@ export const AppsPageContent = () => {
           <Heading size="lg">{t("Sustainability apps")}</Heading>
           <AllApps
             newApps={newAppsEndorsedandUnendorsed}
-            currentActiveApps={currentActiveApps}
+            currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}
             endorsementLostApps={endorsementLostApps}
             isXAppsLoading={appsLoading}
@@ -79,7 +83,7 @@ export const AppsPageContent = () => {
           <AllApps
             headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
             newApps={newAppsEndorsedandUnendorsed}
-            currentActiveApps={currentActiveApps}
+            currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}
             endorsementLostApps={endorsementLostApps}
             isXAppsLoading={appsLoading}

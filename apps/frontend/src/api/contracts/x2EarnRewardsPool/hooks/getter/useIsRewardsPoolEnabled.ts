@@ -1,46 +1,33 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 
-const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
+const address = getConfig().x2EarnRewardsPoolContractAddress
+const abi = X2EarnRewardsPool__factory.abi
+const method = "isRewardsPoolEnabled" as const
 
 /**
- * Get the whether the rewards pool is enabled or not for a specific xApp
- *
- * @param thor  the connex instance
- * @param xAppId  the xApp id
- * @returns the whether the rewards pool is enabled or not for a specific xApp
+ * Returns the query key for checking if rewards pool is enabled.
+ * @param xAppId The xApp id
+ * @returns The query key for checking if rewards pool is enabled.
  */
-export const isRewardsPoolEnabled = async (thor: Connex.Thor, xAppId: string): Promise<boolean> => {
-  const functionFragment = X2EarnRewardsPool__factory.createInterface()
-    .getFunction("isRewardsPoolEnabled")
-    .format("json")
-  const res = await thor.account(X2EARN_REWARDS_POOL_CONTRACT).method(JSON.parse(functionFragment)).call(xAppId)
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getIsRewardsPoolEnabledQueryKey = (xAppId: string) => [
-  "X2EarnRewardsPool",
-  "IS_REWARDS_POOL_ENABLED",
-  xAppId,
-]
+export const getIsRewardsPoolEnabledQueryKey = (xAppId: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [xAppId as `0x${string}`] })
 
 /**
- * Get whether the rewards pool is enabled or not for a specific xApp
- *
- * @param thor  the connex instance
- * @param xAppId  the xApp id
+ * Hook to get whether the rewards pool is enabled or not for a specific xApp
+ * @param xAppId The xApp id
  * @returns whether the rewards pool is enabled or not for a specific xApp
  */
 export const useIsRewardsPoolEnabled = (xAppId: string) => {
-  const { thor } = useConnex()
-  return useQuery({
-    queryKey: getIsRewardsPoolEnabledQueryKey(xAppId),
-    queryFn: async () => await isRewardsPoolEnabled(thor, xAppId),
-    enabled: !!thor && !!xAppId,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [xAppId as `0x${string}`],
+    queryOptions: {
+      enabled: !!xAppId,
+      select: data => data[0],
+    },
   })
 }

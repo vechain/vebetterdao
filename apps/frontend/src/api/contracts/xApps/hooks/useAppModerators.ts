@@ -1,26 +1,18 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts"
 
-/**
- *  Get the moderators of the app
- * @param thor  the thor connection
- * @param appId  the id of the app to get the moderators for
- * @returns  the moderators of the app
- */
-export const getAppModerators = async (thor: Connex.Thor, appId: string): Promise<string[]> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("appModerators").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId)
+const abi = X2EarnApps__factory.abi
+const address = getConfig().x2EarnAppsContractAddress
+const method = "appModerators" as const
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getAppModeratorsQueryKey = (appId: string) => ["xApps", appId, "moderators"]
+export const getAppModeratorsQueryKey = (appId: string) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method,
+    args: [appId as `0x${string}`],
+  })
 
 /**
  *  Get the moderators of the app
@@ -28,11 +20,13 @@ export const getAppModeratorsQueryKey = (appId: string) => ["xApps", appId, "mod
  * @returns  the moderators of the app
  */
 export const useAppModerators = (appId: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getAppModeratorsQueryKey(appId),
-    queryFn: async () => await getAppModerators(thor, appId),
-    enabled: !!thor,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [appId as `0x${string}`],
+    queryOptions: {
+      select: data => data[0],
+    },
   })
 }

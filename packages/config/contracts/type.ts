@@ -93,6 +93,11 @@ export type ContractsConfig = {
 
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 
+  // Stargate contracts
+  STARGATE_NFT_CONTRACT_ADDRESS: string
+  STARGATE_DELEGATE_CONTRACT_ADDRESS: string
+  NODE_MANAGEMENT_CONTRACT_ADDRESS: string
+
   // Milestones
   MINIMUM_MILESTONE_COUNT: number
 }

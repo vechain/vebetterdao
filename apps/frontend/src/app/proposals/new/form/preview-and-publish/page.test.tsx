@@ -53,9 +53,7 @@ describe("NewProposalPreviewAndPublish", async () => {
     spyOnuseCreateProposal.mockReturnValue({
       isTransactionPending: false,
       txReceipt: null,
-      txReceiptError: null,
       sendTransaction: mockSendTransaction,
-      sendTransactionError: null,
       resetStatus: vi.fn(),
       status: "pending",
       error: undefined,

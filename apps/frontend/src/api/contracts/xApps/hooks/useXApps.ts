@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
 import { getXApps } from "../getXApps"
+import { useThor } from "@vechain/vechain-kit"
 
 /**
  * Query key for the xApps query
@@ -18,7 +18,7 @@ export const getXAppsQueryKey = (filterBlacklisted: boolean = false) => [
  * @returns all the available xApps in the B3TR ecosystem capped to 256
  */
 export const useXApps = ({ filterBlacklisted = false } = {}) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getXAppsQueryKey(filterBlacklisted),

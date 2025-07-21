@@ -1,11 +1,11 @@
 import { Button, HStack, Input, Stack, Text, VStack, Image } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
-import { TokenBalance, useB3trBalance, useVot3Balance } from "@/api"
-import { useWallet } from "@vechain/vechain-kit"
+import { TokenBalance, useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon } from "@/components/Icons"
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 
 type Props = {
   amount: string
@@ -24,8 +24,8 @@ export const TokenCards = ({
 }: Props) => {
   const { account } = useWallet()
 
-  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
-  const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
+  const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
   }, [b3trBalance?.scaled])

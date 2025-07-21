@@ -630,4 +630,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice e.g. setProposalTypeGMWeight(0, 1) = GM level 1 is required to create a standard proposal
    */
   function setProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external;
+
+  /**
+   * @notice Returns the deposit threshold cap for a proposal type.
+   * @param proposalType The type of proposal.
+   * @return uint256 The deposit threshold cap for the proposal type.
+   */
+  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalType) external view returns (uint256);
 }
