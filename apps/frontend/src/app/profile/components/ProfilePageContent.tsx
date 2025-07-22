@@ -13,6 +13,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { FaAngleLeft } from "react-icons/fa6"
 import { ProfileGMLevel } from "./ProfileGMLevel"
+import { ProfileNodes } from "./ProfileNodes"
 
 enum Tab {
   Balance = "balance",
@@ -20,6 +21,7 @@ enum Tab {
   Governance = "governance",
   LinkedAccounts = "linked-accounts",
   GM = "gm",
+  Nodes = "nodes",
 }
 
 interface ProfilePageContentProps {
@@ -43,6 +45,8 @@ const TabContent = memo(function TabContent({ tab, address }: TabContentProps) {
       return <ProfileLinkedAcounts address={address} />
     case Tab.GM:
       return <ProfileGMLevel address={address} />
+    case Tab.Nodes:
+      return <ProfileNodes address={address} />
     default:
       return null
   }
@@ -79,6 +83,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
       { tab: Tab.Balance, label: t("Balance") },
       { tab: Tab.BetterActions, label: t("Better Actions") },
       { tab: Tab.GM, label: t("GM Level") },
+      { tab: Tab.Nodes, label: t("Nodes") },
       { tab: Tab.Governance, label: t("Governance") },
       { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
     ],

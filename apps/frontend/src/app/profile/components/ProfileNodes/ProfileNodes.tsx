@@ -1,29 +1,29 @@
-import { useGetUserGMs } from "@/api"
+import { useGetUserNodes } from "@/api"
 import { Card, VStack, CardBody, CardHeader, Heading, Text, Skeleton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
-import { GMNftCard } from "./GMNftCard"
+import { NodeCard } from "./NodeCard"
 
-export const ProfileGMLevel = ({ address }: { address: string }) => {
+export const ProfileNodes = ({ address }: { address: string }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: userGMs = [], isLoading: isUserGMsLoading } = useGetUserGMs(address)
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(address)
 
   return (
     <VStack gap="4" align="stretch">
       <Card variant="baseWithBorder">
         <CardHeader p="1.25rem" pb="0">
-          <Heading fontSize="1.25rem">{t("Galaxy Member")}</Heading>
+          <Heading fontSize="1.25rem">{t("Nodes")}</Heading>
         </CardHeader>
 
         <CardBody>
-          <Skeleton isLoaded={!isUserGMsLoading}>
-            {userGMs.length === 0 ? (
-              <Text>{t("No GM NFTs found.")}</Text>
+          <Skeleton isLoaded={!isUserNodesLoading}>
+            {userNodes?.allNodes?.length === 0 ? (
+              <Text>{t("No nodes found.")}</Text>
             ) : (
               <VStack gap="4" align="stretch">
-                {userGMs.map(gm => (
-                  <GMNftCard key={gm.tokenId} gm={gm} isClickable={account?.address === address} />
+                {userNodes?.allNodes?.map(node => (
+                  <NodeCard key={node.nodeId} node={node} isClickable={account?.address === address} />
                 ))}
               </VStack>
             )}
