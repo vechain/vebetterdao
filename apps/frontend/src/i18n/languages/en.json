@@ -1147,8 +1147,7 @@
   "Active": "Active",
   "You can upgrade this node": "You can upgrade this node",
   "points to endorse": "points to endorse",
-  "Active NFT": "Active NFT",
-  "Select as active": "Select as active",
+  "Activate": "Activate",
   "My Galaxy NFTs": "My Galaxy NFTs",
   "You can choose which NFT use for rewards multiplier.": "You can choose which NFT use for rewards multiplier.",
   "Attach now!": "Attach now!",
@@ -1735,5 +1734,8 @@
   "Attached": "Attached",
   "This node is already attached to another GM": "This node is already attached to another GM",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "This feature is available only to nodes that provide free upgrade to GM NFTs.",
-  "Only one node can be attached to a GM": "Only one node can be attached to a GM"
+  "Only one node can be attached to a GM": "Only one node can be attached to a GM",
+  "No galaxy members found.": "No galaxy members found.",
+  "No nodes found.": "No nodes found.",
+  "No GM NFTs found.": "No GM NFTs found."
 }

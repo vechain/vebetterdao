@@ -160,7 +160,7 @@ export const GmNFTAndNodeCard = () => {
                 p="12px 16px"
                 rounded="8px">
                 <CardBody p="0">
-                  <LinkOverlay href={`/profile?tab=gm`} as={NextLink}>
+                  <LinkOverlay href={`/profile?tab=nodes`} as={NextLink}>
                     <Text fontSize="sm" color="#FFFFFFB2">
                       {t("Nodes")}
                     </Text>
