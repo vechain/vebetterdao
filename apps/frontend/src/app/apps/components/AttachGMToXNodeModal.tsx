@@ -1,6 +1,6 @@
-import { getGMLevel, useSelectedGmNft, useXNode } from "@/api"
+import { getGMLevel, useGetUserGMs, UserNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-import { CustomModalContent } from "@/components"
+import { CustomModalContent, BaseTooltip } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
@@ -35,36 +35,40 @@ import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
+  gmId: string
+  node?: UserNode
   isOpen: boolean
   onClose: () => void
 }
 
-export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
+export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-  const { gmId } = useSelectedGmNft()
 
   const { data: b3trDonated } = useB3trDonated(gmId)
-
-  const { xNodeLevel } = useXNode()
-
   const { data: gmMaxLevel } = useGMMaxLevel()
+  const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs()
+  const gm = userGMs?.find(gm => gm.tokenId === gmId)
 
   const gmStartingLevel = useMemo(() => {
-    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
+    const gmStartingLevel = xNodeToGMstartingLevel[node?.nodeLevel ?? 0]
 
     return Math.min(gmStartingLevel ?? 1, gmMaxLevel ?? 1)
-  }, [gmMaxLevel, xNodeLevel])
+  }, [gmMaxLevel, node?.nodeLevel])
 
   const levelAfterDetach = useMemo(() => {
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
   }, [b3trDonated, gmStartingLevel])
+
+  const isNoAffectAttachment = gm ? gm?.tokenLevel === String(levelAfterDetach) : true
 
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
+    gmId,
+    xNodeId: node?.nodeId ?? "",
     onSuccess: handleClose,
   })
 
@@ -151,9 +155,22 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
                 </AlertDescription>
               </Box>
             </Alert>
-            <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
-              {t("Attach now!")}
-            </Button>
+
+            <BaseTooltip
+              showTooltip={isNoAffectAttachment}
+              text={t("This feature is available only to nodes that provide free upgrade to GM NFTs.")}>
+              <span>
+                <Button
+                  isLoading={isLoadingUserGMs}
+                  disabled={isNoAffectAttachment}
+                  variant={"primaryAction"}
+                  w={"full"}
+                  onClick={handleAttachment}
+                  leftIcon={<UilLink />}>
+                  {t("Attach now!")}
+                </Button>
+              </span>
+            </BaseTooltip>
           </VStack>
         </ModalFooter>
       </CustomModalContent>

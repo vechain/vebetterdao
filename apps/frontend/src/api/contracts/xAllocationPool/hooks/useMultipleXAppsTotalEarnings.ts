@@ -80,10 +80,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
           const numAmount = Number(parsedAmount)
 
           // Update the cache
-          queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
-            amount: parsedAmount,
-            appId,
-          })
+          queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), result)
 
           results[appId]!.amount += numAmount
         })

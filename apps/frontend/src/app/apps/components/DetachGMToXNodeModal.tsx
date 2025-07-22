@@ -1,4 +1,3 @@
-import { useXNode } from "@/api"
 import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
 import { CustomModalContent } from "@/components"
 import { useDetachGMFromXNode, useB3trDonated } from "@/hooks"
@@ -23,16 +22,17 @@ import { IoWarningOutline } from "react-icons/io5"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
+  gmId: string
+  xNodeId: string
   isOpen: boolean
   onClose: () => void
 }
 
-export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
+export const DetachGMToXNodeModal = ({ gmId, xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-  const { attachedGMTokenId } = useXNode()
 
-  const { data: b3trDonated } = useB3trDonated(attachedGMTokenId)
+  const { data: b3trDonated } = useB3trDonated(gmId)
 
   const levelAfterDetach = useMemo(() => {
     return getGMLevel(1, Number(b3trDonated ?? 0))
@@ -43,6 +43,7 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [onClose])
 
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
+    xNodeId,
     onSuccess: handleClose,
   })
 

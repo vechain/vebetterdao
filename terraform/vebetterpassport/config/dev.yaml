@@ -8,8 +8,8 @@ environment: "testnet"
 lambda_function_name: "resetUserSignalsWithReason_vebetterpassport_testnet"
 lambda_handler: "index.handler"
 lambda_runtime: "nodejs20.x"
-lambda_memory_size: 256
+lambda_memory_size: 512
 lambda_timeout: 30
 
 # Lambda Build Path
-lambda_source_dir: "packages/lambda/dist/testnet-staging/resetSignalCounter" 
+lambda_source_dir: "packages/lambda/dist/testnet-staging/resetSignalCounter"

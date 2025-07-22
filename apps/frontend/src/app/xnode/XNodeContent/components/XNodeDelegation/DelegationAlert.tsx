@@ -1,10 +1,14 @@
 import { Alert, AlertIcon, Box, AlertTitle, Text } from "@chakra-ui/react"
-import { useXNode } from "@/api"
 import { useTranslation } from "react-i18next"
 
-export const DelegationAlert = () => {
+export const DelegationAlert = ({
+  isXNodeDelegator,
+  isXNodeDelegated,
+}: {
+  isXNodeDelegator: boolean
+  isXNodeDelegated: boolean
+}) => {
   const { t } = useTranslation()
-  const { isXNodeDelegator, isXNodeDelegated } = useXNode()
 
   if (!isXNodeDelegated) {
     return null
