@@ -1735,5 +1735,9 @@
   "Attached": "Ansluten",
   "This node is already attached to another GM": "Denna nod är redan ansluten till en annan GM",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "Denna funktion är endast tillgänglig för noder som erbjuder gratis uppgradering till GM NFT:er.",
-  "Only one node can be attached to a GM": "Endast en nod kan anslutas till en GM"
+  "Only one node can be attached to a GM": "Endast en nod kan anslutas till en GM",
+  "Activate": "Aktivera",
+  "No galaxy members found.": "Inga galaxmedlemmar hittades.",
+  "No nodes found.": "Inga noder hittades.",
+  "No GM NFTs found.": "Inga GM NFT:er hittades."
 }

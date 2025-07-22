@@ -1735,5 +1735,9 @@
   "Attached": "Attaché",
   "This node is already attached to another GM": "Ce nœud est déjà attaché à un autre GM",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "Cette fonctionnalité est disponible uniquement pour les nœuds qui offrent une mise à niveau gratuite vers les NFTs GM.",
-  "Only one node can be attached to a GM": "Un seul nœud peut être attaché à un GM"
+  "Only one node can be attached to a GM": "Un seul nœud peut être attaché à un GM",
+  "Activate": "Activer",
+  "No galaxy members found.": "Aucun membre de la galaxie trouvé.",
+  "No nodes found.": "Aucun nœud trouvé.",
+  "No GM NFTs found.": "Aucun NFT GM trouvé."
 }

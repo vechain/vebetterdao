@@ -1737,5 +1737,6 @@
   "Only one node can be attached to a GM": "하나의 GM에는 하나의 노드만 연결될 수 있습니다.",
   "No galaxy members found.": "갤럭시 멤버 없음.",
   "No nodes found.": "노드 없음.",
-  "No GM NFTs found.": "GM NFT 없음."
+  "No GM NFTs found.": "GM NFT 없음.",
+  ".": "."
 }

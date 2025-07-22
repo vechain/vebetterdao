@@ -1735,5 +1735,10 @@
   "Attached": "संलग्न",
   "This node is already attached to another GM": "यह नोड पहले से ही किसी अन्य GM से जुड़ा हुआ है",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "यह सुविधा केवल उन नोड्स के लिए उपलब्ध है जो GM NFTs के लिए मुफ्त अपग्रेड प्रदान करते हैं।",
-  "Only one node can be attached to a GM": "केवल एक नोड को ही GM से जोड़ा जा सकता है"
+  "Only one node can be attached to a GM": "केवल एक नोड को ही GM से जोड़ा जा सकता है",
+  "Activate": "सक्रिय",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "{{amount}} VOT3 होने पर, राउंडिंग के कारण {{numApps}} ऐप्स के लिए मतदान विफल हो सकता है। कम ऐप्स के लिए मतदान करने पर विचार करें या अधिक VOT3 प्राप्त करें।",
+  "No galaxy members found.": "कोई आकाशगंगा सदस्य नहीं मिला।",
+  "No nodes found.": "कोई नोड नहीं मिला।",
+  "No GM NFTs found.": "कोई GM NFTs नहीं मिला।"
 }
