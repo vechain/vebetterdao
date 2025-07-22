@@ -38,8 +38,8 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
     <LinkBox flex={1}>
       <Card
         variant={gm?.isSelected ? "primaryBoxShadow" : "outline"}
-        alignItems={isAbove800 ? "center" : "flex-start"}
-        direction={isAbove800 ? "row" : "column"}
+        alignItems="center"
+        direction="row"
         gap="8px"
         p="16px"
         rounded="8px"
@@ -90,13 +90,13 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
         </CardBody>
 
         {isClickable && (
-          <CardFooter>
-            <HStack spacing="4">
+          <CardFooter p="0">
+            <HStack spacing="4" w="full" justifyContent={isAbove800 ? "flex-start" : "center"}>
               <Button variant="primarySubtle" w="7rem" isDisabled={gm?.isSelected} onClick={handleSelectGM}>
                 {t(gm?.isSelected ? "Active" : "Activate")}
               </Button>
 
-              <FaChevronRight />
+              {isAbove800 && <FaChevronRight />}
             </HStack>
           </CardFooter>
         )}

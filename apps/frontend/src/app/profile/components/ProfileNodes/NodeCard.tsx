@@ -24,8 +24,8 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
     <LinkBox flex={1}>
       <Card
         variant="outline"
-        alignItems={isAbove800 ? "center" : "flex-start"}
-        direction={isAbove800 ? "row" : "column"}
+        alignItems="center"
+        direction="row"
         gap="8px"
         borderStyle={node ? "solid" : "dashed"}
         _dark={{
@@ -75,8 +75,8 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
           )}
         </CardBody>
 
-        {isClickable && (
-          <CardFooter>
+        {isClickable && isAbove800 && (
+          <CardFooter p="0">
             <FaChevronRight />
           </CardFooter>
         )}
