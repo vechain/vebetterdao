@@ -1735,5 +1735,9 @@
   "Attached": "已附加",
   "This node is already attached to another GM": "此节点已附加到另一个 GM",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "此功能仅适用于提供 GM NFT 免费升级的节点。",
-  "Only one node can be attached to a GM": "只能有一个节点附加到一个 GM"
+  "Only one node can be attached to a GM": "只能有一个节点附加到一个 GM",
+  "Activate": "激活",
+  "No galaxy members found.": "未找到银河成员。",
+  "No nodes found.": "未找到节点。",
+  "No GM NFTs found.": "未找到GM NFTs。"
 }

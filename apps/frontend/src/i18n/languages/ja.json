@@ -1735,5 +1735,9 @@
   "Attached": "接続済み",
   "This node is already attached to another GM": "このノードはすでに別のGMに接続されています",
   "This feature is available only to nodes that provide free upgrade to GM NFTs.": "この機能は、GM NFTへの無料アップグレードを提供するノードにのみ利用可能です。",
-  "Only one node can be attached to a GM": "GMには1つのノードしか接続できません"
+  "Only one node can be attached to a GM": "GMには1つのノードしか接続できません",
+  "Activate": "アクティブ化する",
+  "No galaxy members found.": "ギャラクシーのメンバーが見つかりません。",
+  "No nodes found.": "ノードが見つかりません。",
+  "No GM NFTs found.": "GMのNFTが見つかりません。"
 }
