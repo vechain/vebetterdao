@@ -127,7 +127,7 @@ interface IXAllocationPool {
 
   /**
    * @dev Check if quadratic funding is disabled at a given round
-    * @param roundId The round ID
+   * @param roundId The round ID
    * @return true if quadratic funding is disabled at the given round
    */
   function isQuadraticFundingDisabledForRound(uint256 roundId) external view returns (bool);
@@ -142,4 +142,20 @@ interface IXAllocationPool {
    * @dev Function to toggle quadratic funding on/off
    */
   function toggleQuadraticFunding() external;
+
+  /**
+   * @dev Check if app has already claimed the rewards for a given round.
+   *
+   * @param roundId The round ID for which to check if the app has claimed the rewards.
+   * @param appId The ID of the app.
+   */
+  function claimed(uint256 roundId, bytes32 appId) external view returns (bool);
+
+  /**
+   * @dev Claim the rewards for an app in a given round.
+   *
+   * @param roundId The round ID for which to claim the rewards.
+   * @param appId The ID of the app.
+   */
+  function claim(uint256 roundId, bytes32 appId) external;
 }
