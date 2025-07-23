@@ -68,7 +68,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   console.log("Retrieve allocation shares data for round:", lastRoundId)
 
   // Get the round app ids
-  const roundAppIds = await getRoundXApps(thor, lastRoundId.toString(), CONFIG)
+  const roundAppIds = await getRoundXApps(thor, CONFIG, lastRoundId.toString())
 
   // Find blacklisted apps and get the round app shares in parallel
   const [blacklistedAppIds, roundAppShares] = await Promise.all([

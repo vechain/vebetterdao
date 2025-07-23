@@ -33,6 +33,7 @@ import { GovernorFunctionRestrictionsLogic } from "./GovernorFunctionRestriction
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
+import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 
 /// @title GovernorProposalLogic
 /// @notice Library for managing proposals in the Governor contract.
@@ -73,7 +74,7 @@ library GovernorProposalLogic {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
+  event MilestonesCreated(uint256 indexed proposalId, GovernorTypes.ProposalType proposalTypeValue, string description);
 
   /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
@@ -113,6 +114,12 @@ library GovernorProposalLogic {
    * @dev Thrown when the proposal type is invalid.
    */
   error GovernorInvalidProposalType(GovernorTypes.ProposalType proposalType);
+
+  /**
+   * @dev Thrown when the proposer does not fit the requirement (GM weight ATM)
+   */
+  error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
+
   /** ------------------ GETTERS ------------------ **/
 
   /**
@@ -303,7 +310,7 @@ library GovernorProposalLogic {
   }
 
   /**
-   * @notice Proposes a new governance action.
+   * @notice Proposes a new grant proposal.
    * @dev Creates a new proposal and validates the proposal parameters.
    * @param self The storage reference for the GovernorStorage.
    * @param targets The addresses of the contracts to call.
@@ -312,21 +319,22 @@ library GovernorProposalLogic {
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param milestones The milestones of the proposal.
    * @return The proposal id.
    */
-  function proposeWithType(
+  function proposeGrant(
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
     bytes[] memory calldatas,
-    string memory description,
+    string memory description, // project details metadata URI cannot be changed or it will break the proposal id.
     uint256 startRoundId,
     uint256 depositAmount,
-    GovernorTypes.ProposalType proposalTypeValue
+    IGrantsManager.Milestones memory milestones
   ) external returns (uint256) {
     address proposer = msg.sender;
-
     uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
+    IGrantsManager grantsManager = self.grantsManager;
 
     validateProposeParams(
       self,
@@ -337,7 +345,13 @@ library GovernorProposalLogic {
       values,
       calldatas,
       proposalId,
-      proposalTypeValue
+      GovernorTypes.ProposalType.Grant
+    );
+
+    grantsManager.createMilestones(
+      description, // IPNS URI ( cannot be changed or it will break the proposal id)
+      milestones,
+      proposalId
     );
 
     return
@@ -351,7 +365,7 @@ library GovernorProposalLogic {
         description,
         startRoundId,
         depositAmount,
-        proposalTypeValue
+        GovernorTypes.ProposalType.Grant
       );
   }
 
@@ -560,6 +574,8 @@ library GovernorProposalLogic {
     uint32 votingPeriod = SafeCast.toUint32(self.xAllocationVoting.votingPeriod());
     bool isExecutable = targets.length > 0;
 
+    _validateProposer(self, proposer, proposalTypeValue);
+
     _setProposal(
       self,
       proposalId,
@@ -621,8 +637,9 @@ library GovernorProposalLogic {
       depositThresholdAmount
     );
 
-    // Emit new event with type information
-    emit ProposalCreatedWithType(proposalId, proposalTypeValue);
+    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
+      emit MilestonesCreated(proposalId, proposalTypeValue, description);
+    }
   }
 
   /**
@@ -669,7 +686,11 @@ library GovernorProposalLogic {
       revert GovernorRestrictedProposer(proposer);
     }
 
-    if (targets.length != values.length || targets.length != calldatas.length) {
+    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
+      if (targets.length != calldatas.length) {
+        revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+      }
+    } else if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
 
@@ -717,6 +738,24 @@ library GovernorProposalLogic {
   }
 
   /**
+   * @dev Internal function to validate the proposer.
+   * @param self The storage reference for the GovernorStorage.
+   * @param proposer The address of the proposer.
+   * @param proposalTypeValue The type of the proposal.
+   */
+  function _validateProposer(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address proposer,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) private view {
+    uint256 requiredWeight = self.proposalTypeGMWeight[proposalTypeValue];
+    uint256 level = self.galaxyMember.levelOf(self.galaxyMember.getSelectedTokenId(proposer)); // 1 for earth
+    if (level < requiredWeight) {
+      revert GovernorInvalidProposer(proposer, requiredWeight);
+    }
+  }
+
+  /**
    * @dev Internal function to execute operations of a proposal.
    * @param self The storage reference for the GovernorStorage.
    * @param contractAddress The address of the calling contract.
@@ -735,7 +774,7 @@ library GovernorProposalLogic {
     bytes[] memory calldatas,
     bytes32 descriptionHash
   ) private {
-    // execute
+    // execute transfer first
     self.timelock.executeBatch{ value: msg.value }(
       targets,
       values,
@@ -743,6 +782,7 @@ library GovernorProposalLogic {
       0,
       GovernorGovernanceLogic.timelockSalt(descriptionHash, contractAddress)
     );
+
     // cleanup for refund
     delete self.timelockIds[proposalId];
   }
@@ -784,6 +824,10 @@ library GovernorProposalLogic {
    */
   function _cancel(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) private returns (uint256) {
     self.proposals[proposalId].canceled = true;
+    // if (self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
+    //   IGrantsManager(self.grantsManager).rejectMilestone(proposalId);
+    // }
+
     emit ProposalCanceled(proposalId);
 
     return proposalId;

@@ -19,6 +19,7 @@ import {
   StargateNFT,
   StargateDelegation,
   NodeManagementV3,
+  GrantsManager,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -982,6 +983,14 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as B3TRGovernor
 
+  // Deploy GrantsManager
+  const grantsManager = (await deployProxy("GrantsManager", [
+    await governor.getAddress(),
+    await treasury.getAddress(),
+    TEMP_ADMIN,
+    await b3tr.getAddress(),
+  ])) as GrantsManager
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -1001,6 +1010,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodesManagement: nodeManagementAddress,
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
+    GrantsManager: await grantsManager.getAddress(),
   }
 
   const libraries: {

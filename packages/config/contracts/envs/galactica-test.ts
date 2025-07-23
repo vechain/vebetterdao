@@ -17,6 +17,11 @@ export function createGalacticaTestConfig() {
     //Deposit threshold cap for grants and standard proposals
     B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("3500000000000000000000000"), // 3.5M B3TR
     B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("5000000000000000000000000"), // 5M B3TR
+
+    // GM weight requirements for proposal types
+    B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for standard proposals
+    B3TR_GOVERNOR_GRANT_GM_WEIGHT: 2, // Requires GM level 2 (Moon) for grant proposals
+
     /*
       For ambiguous functions (functions with same name), the function signature is used to differentiate them
       e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
@@ -208,5 +213,8 @@ export function createGalacticaTestConfig() {
     STARGATE_NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     STARGATE_DELEGATE_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
+
+    // Milestones
+    MINIMUM_MILESTONE_COUNT: 2,
   })
 }

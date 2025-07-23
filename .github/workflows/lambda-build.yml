@@ -1,0 +1,82 @@
+name: Lambda Build
+
+on:
+  workflow_call:
+    inputs:
+      workspace:
+        required: true
+        type: string
+        description: 'Terraform workspace to use (dev, prod)'
+    secrets:
+      TESTNET_MNEMONIC:
+        required: false
+        description: 'Required when workspace is dev'
+      MAINNET_MNEMONIC:
+        required: false
+        description: 'Required when workspace is prod'
+
+jobs:
+  build:
+    name: Build Lambda
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing project dependencies..."
+          yarn install --frozen-lockfile
+          echo "Installing esbuild globally..."
+          yarn global add esbuild
+          echo "Verify esbuild installation..."
+          esbuild --version
+
+      - name: Build Lambda
+        env:
+          TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
+          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+        run: |
+          # Set environment variables based on workspace
+          set +x  # Disable command echoing
+          if [ "${{ inputs.workspace }}" == "dev" ]; then
+            if [ -z "$TESTNET_MNEMONIC" ]; then
+              echo "Error: TESTNET_MNEMONIC is required for dev workspace"
+              exit 1
+            fi
+            export MNEMONIC="$TESTNET_MNEMONIC"
+          else
+            if [ -z "$MAINNET_MNEMONIC" ]; then
+              echo "Error: MAINNET_MNEMONIC is required for prod workspace"
+              exit 1
+            fi
+            export MNEMONIC="$MAINNET_MNEMONIC"
+          fi
+          set -x  # Re-enable command echoing
+
+          # Compile contracts
+          echo "Running yarn contracts:compile..."
+          yarn contracts:compile || { echo "Contract compilation failed"; exit 1; }
+
+          # Build lambda
+          cd packages/lambda
+          echo "Running yarn build..."
+          if [ "${{ inputs.workspace }}" == "dev" ]; then
+            LAMBDA_ENV=testnet-staging yarn build:lambda || { echo "Lambda build failed"; exit 1; }
+          else
+            LAMBDA_ENV=mainnet yarn build:lambda || { echo "Lambda build failed"; exit 1; }
+          fi
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-build
+          path: packages/lambda/dist
+          retention-days: 1 

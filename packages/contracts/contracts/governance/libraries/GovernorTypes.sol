@@ -28,6 +28,8 @@ import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingG
 import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
+import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
+import { IGrantsManager } from "../../interfaces/IGrantsManager.sol";
 
 library GovernorTypes {
   /**
@@ -122,6 +124,10 @@ library GovernorTypes {
     uint256 grantQuorum;
     uint256 grantDepositThresholdCap;
     uint256 standardDepositThresholdCap;
+    uint256 standardGMWeight;
+    uint256 grantGMWeight;
+    IGalaxyMember galaxyMember;
+    IGrantsManager grantsManager;
   }
 
   // ProposalType enum to distinguish between different types of proposals

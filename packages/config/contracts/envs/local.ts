@@ -18,6 +18,11 @@ export function createLocalConfig() {
     //Deposit threshold cap for grants and standard proposals
     B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP: BigInt("15000000000000000000000"), // 15K B3TR
     B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP: BigInt("25000000000000000000000"), // 25K B3TR
+
+    // GM weight requirements for proposal types ( for tests compatibility putting to 0 )
+    B3TR_GOVERNOR_STANDARD_GM_WEIGHT: 0, // 0 -> No GM weight required for standard proposals
+    B3TR_GOVERNOR_GRANT_GM_WEIGHT: 0, // 0 -> No GM weight required for grant proposals
+
     /*
       For ambiguous functions (functions with same name), the function signature is used to differentiate them
       e.g., instead of using "setVoterRewards", we use "setVoterRewards(address)"
@@ -209,5 +214,8 @@ export function createLocalConfig() {
     STARGATE_NFT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     STARGATE_DELEGATE_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
     NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
+
+    // Milestones
+    MINIMUM_MILESTONE_COUNT: 2,
   })
 }

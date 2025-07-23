@@ -5,14 +5,15 @@ import {
   createUniqueTestProposal,
   validateProposalEvents,
   setupGovernanceFixtureWithEmissions,
+  GRANT_PROPOSAL_TYPE,
 } from "./fixture.test"
-import { B3TRGovernor, VOT3, B3TR } from "../../typechain-types"
+import { B3TRGovernor, VOT3, B3TR, Treasury, GrantsManager } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory } from "ethers"
 import { createProposalWithType, waitForBlock } from "../helpers/common"
 import { ethers } from "hardhat"
 
-describe.only("Governance - Proposal Types", function () {
+describe("Governance - Proposal Types", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -20,6 +21,8 @@ describe.only("Governance - Proposal Types", function () {
   let b3trContract: ContractFactory
   let minterAccount: SignerWithAddress
   let proposer: SignerWithAddress
+  let treasury: Treasury
+  let grantsManager: GrantsManager
 
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
@@ -30,6 +33,8 @@ describe.only("Governance - Proposal Types", function () {
     b3trContract = fixture.b3trContract
     minterAccount = fixture.minterAccount
     proposer = fixture.proposer
+    treasury = fixture.treasury
+    grantsManager = fixture.grantsManager
 
     // Setup proposer for all tests
     await setupProposer(proposer, b3tr, vot3, minterAccount)
@@ -72,7 +77,7 @@ describe.only("Governance - Proposal Types", function () {
       const blockNumber = await ethers.provider.getBlockNumber()
       const description = `Get token details ${unixTimestamp} ${blockNumber}`
 
-      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, functionToCall, [], 2)).to.be
+      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, [functionToCall], [], 2)).to.be
         .reverted
     })
 
@@ -132,7 +137,7 @@ describe.only("Governance - Proposal Types", function () {
       const description = "Get token details edge-case"
 
       // Test type 2 (should be rejected by contract if only 0 and 1 are valid)
-      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, functionToCall, [], 2)).to.be
+      await expect(createProposalWithType(b3tr, b3trContract, proposer, description, [functionToCall], [], 2)).to.be
         .reverted
     })
   })

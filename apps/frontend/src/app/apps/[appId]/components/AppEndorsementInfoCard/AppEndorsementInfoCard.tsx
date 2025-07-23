@@ -4,7 +4,6 @@ import {
   useCurrentAllocationsRoundId,
   useIsAppAdmin,
   useIsAppModerator,
-  useXNode,
 } from "@/api"
 import { XAppStatus } from "@/types"
 import {
@@ -23,19 +22,18 @@ import {
 } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/vechain-kit"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { SwitchEndorsementAppModal } from "@/app/apps/components/SwitchEndorsementAppModal"
-import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import dayjs from "dayjs"
 import { GenericAlert } from "@/app/components/Alert"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 
 type Props = {
   endorsementScore?: string
@@ -66,26 +64,12 @@ export const AppEndorsementInfoCard = ({
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  // User xnodes, TODO support multiple xnodes
-  const {
-    isXNodeLoading,
-    isEndorsingApp,
-    isXNodeHolder,
-    endorsedApp,
-    xNodePoints,
-    isXNodeDelegator,
-    isXNodeOnCooldown,
-  } = useXNode()
-
-  const isUserAppEndorser = useMemo(() => {
-    if (!app || isXNodeLoading) return false
-    return isXNodeHolder && isEndorsingApp && compareAddresses(app.id, endorsedApp?.id)
-  }, [app, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
-
-  const isUserEndorsingOtherApp = useMemo(() => {
-    if (!app || isXNodeLoading) return false
-    return isXNodeHolder && isEndorsingApp && !compareAddresses(app.id, endorsedApp?.id)
-  }, [app, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === app?.id)
+  const isXNodeHolder = userNodes?.allNodes?.some(node => node.isXNodeHolder && !node.endorsedAppId)
+  const totalXNodePoints = Math.max(
+    ...(userNodes?.allNodes?.filter(node => !node.endorsedAppId).map(node => node.xNodePoints) ?? []),
+  )
 
   // Call to actions
   const appUnendorsedStatus =
@@ -94,31 +78,26 @@ export const AppEndorsementInfoCard = ({
     endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE
 
   const shouldRenderEndorseButton = useMemo(() => {
-    return isXNodeHolder && !isEndorsingApp && appUnendorsedStatus
-  }, [isXNodeHolder, isEndorsingApp, appUnendorsedStatus])
-
-  const shouldRenderSwitchEndorsementButton = useMemo(() => {
-    return isXNodeHolder && isUserEndorsingOtherApp && appUnendorsedStatus
-  }, [isXNodeHolder, isUserEndorsingOtherApp, appUnendorsedStatus])
+    return isXNodeHolder && !nodeEndorsingApp && appUnendorsedStatus
+  }, [isXNodeHolder, nodeEndorsingApp, appUnendorsedStatus])
 
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
-  const shouldRenderRemoveEndorsementButton = useMemo(() => {
-    return isUserAppEndorser
-  }, [isUserAppEndorser])
-  const lookForEndorsersButtonVariant =
-    !shouldRenderEndorseButton && !shouldRenderSwitchEndorsementButton ? "primaryAction" : "primarySubtle"
+  const lookForEndorsersButtonVariant = !shouldRenderEndorseButton ? "primaryAction" : "primarySubtle"
 
   const shouldDisableEndorsementButton = useMemo(() => {
-    return isXNodeDelegator || isXNodeOnCooldown || xNodePoints === 0
-  }, [isXNodeDelegator, isXNodeOnCooldown, xNodePoints])
+    return (
+      nodeEndorsingApp?.isXNodeDelegator || nodeEndorsingApp?.isXNodeOnCooldown || nodeEndorsingApp?.xNodePoints === 0
+    )
+  }, [nodeEndorsingApp])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account && isXNodeOnCooldown && isUserAppEndorser
-  }, [account, isXNodeOnCooldown, isUserAppEndorser])
-  // Modals
+    return account && nodeEndorsingApp?.isXNodeOnCooldown && nodeEndorsingApp?.nodeId === app?.id
+  }, [account, app?.id, nodeEndorsingApp?.isXNodeOnCooldown, nodeEndorsingApp?.nodeId])
+
+  // // Modals
   const {
     isOpen: isEndorsementModalOpen,
     onOpen: onOpenEndorsementModal,
@@ -128,11 +107,6 @@ export const AppEndorsementInfoCard = ({
     isOpen: isUnendorsementModalOpen,
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
-  } = useDisclosure()
-  const {
-    isOpen: isSwitchEndorsementModalOpen,
-    onOpen: onOpenSwitchEndorsementModal,
-    onClose: onCloseSwitchEndorsementModal,
   } = useDisclosure()
 
   const {
@@ -164,20 +138,7 @@ export const AppEndorsementInfoCard = ({
           onClick={onOpenEndorsementModal}
           isDisabled={shouldDisableEndorsementButton}
           w="full">
-          {t("Endorse with your {{value}} points", { value: xNodePoints })}
-        </Button>,
-      )
-    }
-
-    if (shouldRenderSwitchEndorsementButton) {
-      buttonComponents.push(
-        <Button
-          key="switchEndorsementButton"
-          variant="primaryAction"
-          onClick={onOpenSwitchEndorsementModal}
-          isDisabled={shouldDisableEndorsementButton}
-          w="full">
-          {t("Switch endorsement to this app")}
+          {t("Endorse with your {{value}} points", { value: totalXNodePoints })}
         </Button>,
       )
     }
@@ -199,7 +160,7 @@ export const AppEndorsementInfoCard = ({
       )
     }
 
-    if (shouldRenderRemoveEndorsementButton) {
+    if (nodeEndorsingApp) {
       buttonComponents.push(
         <Button
           key="removeEndorsementButton"
@@ -217,18 +178,16 @@ export const AppEndorsementInfoCard = ({
   }, [
     shouldDisplayCooldownAlert,
     shouldRenderEndorseButton,
-    shouldRenderSwitchEndorsementButton,
     shouldRenderLookForEndorsersButton,
-    xNodePoints,
-    onOpenEndorsementModal,
-    onOpenSwitchEndorsementModal,
-    onOpenUnendorsementModal,
-    lookForEndorsersButtonVariant,
-    t,
-    roundInfo,
+    nodeEndorsingApp,
     roundInfoLoading,
+    t,
+    roundInfo?.voteEndTimestamp,
+    onOpenEndorsementModal,
     shouldDisableEndorsementButton,
-    shouldRenderRemoveEndorsementButton,
+    totalXNodePoints,
+    lookForEndorsersButtonVariant,
+    onOpenUnendorsementModal,
   ])
 
   return (
@@ -251,20 +210,19 @@ export const AppEndorsementInfoCard = ({
 
             <Stack direction="column" spacing={4} w="full" justify="space-between" alignItems="center">
               <EndorsementDetails
+                appId={app?.id ?? ""}
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
                 endorsementThreshold={endorsementThreshold}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
-                xNodePoints={xNodePoints}
-                isUserAppEndorser={isUserAppEndorser}
-                isXNodeLoading={isXNodeLoading}
+                isUserAppEndorser={!!nodeEndorsingApp}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
           </Stack>
         </CardBody>
         <CardFooter>
-          <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading} w="full">
+          <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isUserNodesLoading} w="full">
             <VStack spacing={2} w={"full"}>
               {actionButtons}
             </VStack>
@@ -272,20 +230,16 @@ export const AppEndorsementInfoCard = ({
         </CardFooter>
       </Card>
 
-      <SwitchEndorsementAppModal
-        isOpen={isSwitchEndorsementModalOpen}
-        onClose={onCloseSwitchEndorsementModal}
-        appIdToEndorse={app?.id}
-        appIdToUnendorse={endorsedApp?.id}
+      <EndorseAppModal xApp={app} isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} />
+      <UnendorseAppModal
+        xNodeId={nodeEndorsingApp?.nodeId ?? ""}
+        isOpen={isUnendorsementModalOpen}
+        onClose={onCloseUnendorsementModal}
       />
-
-      <EndorseAppModal isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} xApp={app} />
-
-      <UnendorseAppModal isOpen={isUnendorsementModalOpen} onClose={onCloseUnendorsementModal} />
-
       <AppEndorsementInfoCardModal
         isOpen={isEndorsementInfoOpen}
         onClose={onCloseEndorsementInfoModal}
+        userNode={nodeEndorsingApp}
         appId={app?.id ?? ""}
       />
     </>

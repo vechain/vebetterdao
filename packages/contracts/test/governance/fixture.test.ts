@@ -16,16 +16,13 @@ import {
   GovernorVotesLogicV1,
   GovernorConfiguratorV1,
   VeBetterPassport,
+  Treasury,
+  GrantsManager,
 } from "../../typechain-types"
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
 import { ethers } from "hardhat"
-import {
-  bootstrapAndStartEmissions,
-  createProposal,
-  createProposalWithType,
-  waitForCurrentRoundToEnd,
-} from "../helpers/common"
+import { bootstrapAndStartEmissions, createProposal, waitForCurrentRoundToEnd } from "../helpers/common"
 
 //Constants for proposal types
 export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
@@ -35,6 +32,7 @@ interface GovernanceFixture {
   governor: B3TRGovernor
   vot3: VOT3
   b3tr: B3TR
+  treasury: Treasury
   owner: SignerWithAddress
   timeLock: TimeLock
   xAllocationVoting: XAllocationVoting
@@ -55,6 +53,7 @@ interface GovernanceFixture {
   veBetterPassport: VeBetterPassport
   minterAccount: SignerWithAddress
   otherAccount: SignerWithAddress
+  grantsManager: GrantsManager
 }
 
 export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
@@ -66,6 +65,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
   const governor = deployInstances?.governor
   const vot3 = deployInstances?.vot3
   const b3tr = deployInstances?.b3tr
+  const treasury = deployInstances?.treasury
   const owner = deployInstances?.owner
   const timeLock = deployInstances?.timeLock
   const xAllocationVoting = deployInstances?.xAllocationVoting
@@ -82,6 +82,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
   const b3trContract = deployInstances?.B3trContract
   const veBetterPassport = deployInstances?.veBetterPassport
   const minterAccount = deployInstances?.minterAccount
+  const grantsManager = deployInstances?.grantsManager
   //Setup other accounts
   const otherAccounts = deployInstances?.otherAccounts
   const otherAccount = deployInstances?.otherAccount
@@ -98,6 +99,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     !governor ||
     !vot3 ||
     !b3tr ||
+    !treasury ||
     !owner ||
     !timeLock ||
     !xAllocationVoting ||
@@ -114,7 +116,8 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     !b3trContract ||
     !veBetterPassport ||
     !minterAccount ||
-    !otherAccount
+    !otherAccount ||
+    !grantsManager
   ) {
     throw new Error("Deploy instances are not correctly set")
   }
@@ -123,6 +126,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     governor,
     vot3,
     b3tr,
+    treasury,
     owner,
     timeLock,
     xAllocationVoting,
@@ -143,6 +147,7 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     veBetterPassport,
     minterAccount,
     otherAccount,
+    grantsManager,
   }
 }
 
@@ -176,6 +181,7 @@ export async function startNewRoundAndGetRoundId(
   return ((await xAllocationVoting.currentRoundId()) + 1n).toString()
 }
 
+// TODO : might be redundant
 export async function createUniqueTestProposal(
   account: SignerWithAddress,
   b3tr: B3TR,
@@ -189,7 +195,15 @@ export async function createUniqueTestProposal(
   const description = `Get token details ${unixTimestamp} ${blockNumber}`
 
   if (useTypeMethod) {
-    const tx = await createProposalWithType(b3tr, b3trContract, account, description, functionToCall, [], proposalType)
+    const tx = await createProposalWithType(
+      b3tr,
+      b3trContract,
+      account,
+      description,
+      [functionToCall],
+      [],
+      proposalType,
+    )
     return { tx, description, functionToCall }
   } else {
     const tx = await createProposal(b3tr, b3trContract, account, description, functionToCall, [])
@@ -208,32 +222,55 @@ export async function validateProposalEvents(
     throw new Error("Receipt is null")
   }
 
-  const proposalCreatedEvent = receipt?.logs[0]
-  const proposalCreatedWithTypeEvent = receipt?.logs[1]
+  // Find the ProposalCreated event in the logs
+  const proposalCreatedEvent = receipt.logs.find(log => {
+    try {
+      const decoded = governor.interface.parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      return decoded?.name === "ProposalCreated"
+    } catch (e) {
+      return false
+    }
+  })
 
-  if (!proposalCreatedEvent || !proposalCreatedWithTypeEvent) {
-    throw new Error("Required events not found")
+  // Find the MilestonesCreated event in the logs
+  const milestonesCreatedEvent = receipt.logs.find(log => {
+    try {
+      const decoded = governor.interface.parseLog({
+        topics: [...log.topics],
+        data: log.data,
+      })
+      return decoded?.name === "MilestonesCreated"
+    } catch (e) {
+      return false
+    }
+  })
+
+  if (!proposalCreatedEvent || (!milestonesCreatedEvent && expectedType === 1)) {
+    throw new Error("ProposalCreated event not found")
   }
 
   const decodedProposalCreatedEvent = governor.interface.parseLog({
-    topics: [...(proposalCreatedEvent?.topics as string[])],
+    topics: [...proposalCreatedEvent.topics],
     data: proposalCreatedEvent.data,
   })
 
-  const decodedProposalCreatedWithTypeEvent = governor.interface.parseLog({
-    topics: [...(proposalCreatedWithTypeEvent?.topics as string[])],
-    data: proposalCreatedWithTypeEvent.data,
+  const decodedMilestonesCreatedEvent = governor.interface.parseLog({
+    topics: [...(milestonesCreatedEvent?.topics as string[])],
+    data: milestonesCreatedEvent?.data as string,
   })
 
-  if (!decodedProposalCreatedEvent || !decodedProposalCreatedWithTypeEvent) {
-    throw new Error("Failed to decode events")
+  if (!decodedProposalCreatedEvent) {
+    throw new Error("Failed to decode ProposalCreated event")
   }
 
   if (decodedProposalCreatedEvent.name !== "ProposalCreated") {
     throw new Error(`Expected ProposalCreated event, got ${decodedProposalCreatedEvent.name}`)
   }
 
-  if (decodedProposalCreatedEvent.args[1] !== proposerAddress) {
+  if (decodedProposalCreatedEvent?.args[1] !== proposerAddress) {
     throw new Error(`Expected proposer ${proposerAddress}, got ${decodedProposalCreatedEvent.args[1]}`)
   }
 
@@ -241,18 +278,18 @@ export async function validateProposalEvents(
     throw new Error(`Expected description ${description}, got ${decodedProposalCreatedEvent.args[6]}`)
   }
 
-  if (decodedProposalCreatedWithTypeEvent.name !== "ProposalCreatedWithType") {
-    throw new Error(`Expected ProposalCreatedWithType event, got ${decodedProposalCreatedWithTypeEvent.name}`)
+  if (decodedMilestonesCreatedEvent?.name !== "MilestonesCreated") {
+    throw new Error(`Expected MilestonesCreated event, got ${decodedMilestonesCreatedEvent?.name}`)
   }
 
-  if (decodedProposalCreatedWithTypeEvent.args[1] !== ethers.toBigInt(expectedType)) {
-    throw new Error(`Expected type ${expectedType}, got ${decodedProposalCreatedWithTypeEvent.args[1]}`)
+  if (decodedMilestonesCreatedEvent?.args[1] !== ethers.toBigInt(expectedType)) {
+    throw new Error(`Expected type ${expectedType}, got ${decodedMilestonesCreatedEvent?.args[1]}`)
   }
 
   return {
     proposalId: decodedProposalCreatedEvent.args[0],
     decodedProposalCreatedEvent,
-    decodedProposalCreatedWithTypeEvent,
+    decodedMilestonesCreatedEvent,
   }
 }
 

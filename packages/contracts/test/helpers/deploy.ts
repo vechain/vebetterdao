@@ -117,6 +117,7 @@ import {
   GovernorConfiguratorV6,
   GovernorClockLogicV6,
   StargateNFT,
+  GrantsManager,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -221,6 +222,9 @@ export interface DeployInstance {
   governorQuorumLogicLibV6: GovernorQuorumLogicV6
   governorStateLogicLibV6: GovernorStateLogicV6
   governorVotesLogicLibV6: GovernorVotesLogicV6
+
+  // GrantsManager
+  grantsManager: GrantsManager
 
   // Passport
   passportChecksLogic: PassportChecksLogic
@@ -575,10 +579,10 @@ export const getOrDeployContractInstances = async ({
   const treasury = (await deployProxy("Treasury", [
     await b3tr.getAddress(),
     await vot3.getAddress(),
-    owner.address,
-    owner.address,
-    owner.address,
-    owner.address,
+    await timeLock.getAddress(), // timelock address
+    owner.address, // admin
+    owner.address, // proxy admin
+    owner.address, // pauser
     config.TREASURY_TRANSFER_LIMIT_VET,
     config.TREASURY_TRANSFER_LIMIT_B3TR,
     config.TREASURY_TRANSFER_LIMIT_VOT3,
@@ -966,6 +970,15 @@ export const getOrDeployContractInstances = async ({
     },
   )) as VeBetterPassport
 
+  // Set the TEMP governor address before deploying the governor
+  const TEMP_GOVERNOR_ADDRESS = owner.address
+  const grantsManager = (await deployProxy("GrantsManager", [
+    TEMP_GOVERNOR_ADDRESS,
+    await treasury.getAddress(),
+    owner.address,
+    await b3tr.getAddress(),
+  ])) as GrantsManager
+
   const governor = (await deployAndUpgrade(
     [
       "B3TRGovernorV1",
@@ -1010,6 +1023,10 @@ export const getOrDeployContractInstances = async ({
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(), //GalaxyMember contract
+          grantsManager: await grantsManager.getAddress(), //GrantsManager contract
         },
       ], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
     ],
@@ -1191,6 +1208,9 @@ export const getOrDeployContractInstances = async ({
     ...creators.map(creator => x2EarnCreator.safeMint(creator.address)), // Mint for all creators
   ])
 
+  // Set up the GrantsManager
+  await grantsManager.connect(owner).setGovernorContract(await governor.getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
@@ -1202,6 +1222,7 @@ export const getOrDeployContractInstances = async ({
     vot3,
     timeLock,
     x2EarnCreator,
+    grantsManager,
     governor,
     galaxyMember,
     x2EarnApps,
