@@ -21,6 +21,7 @@ export const ConfirmationAppBalanceModalContent = ({
 
   return (
     <VStack align={"center"} p={6} gap={2}>
+      {/* @ts-ignore */}
       <Lottie
         style={{
           pointerEvents: "none",

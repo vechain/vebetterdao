@@ -8,7 +8,7 @@ import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
 
 type Props = {
-  form: UseFormReturn<EditAppForm, any, undefined>
+  form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
 
 export const EditScreenshots = ({ form }: Props) => {

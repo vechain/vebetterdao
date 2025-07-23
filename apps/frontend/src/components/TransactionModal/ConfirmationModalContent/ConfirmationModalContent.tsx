@@ -15,6 +15,7 @@ export const ConfirmationModalContent = ({
   return (
     <VStack align={"center"} p={6} gap={6}>
       <Heading size="md">{title}</Heading>
+      {/* @ts-ignore */}
       <Lottie
         style={{
           pointerEvents: "none",

@@ -2929,7 +2929,7 @@
   resolved "https://registry.yarnpkg.com/@nestjs/mongoose/-/mongoose-10.1.0.tgz#4785219cae6792341da4a1a26727ca39208ef08d"
   integrity sha512-1ExAnZUfh2QffEaGjqYGgVPy/sYBQCVLCLqVgkcClKx/BCd0QNgND8MB70lwyobp3nm/+nbGQqBpu9F3/hgOCw==
 
-"@nestjs/platform-express@^10.0.0":
+"@nestjs/platform-express@^10.4.18":
   version "10.4.20"
   resolved "https://registry.yarnpkg.com/@nestjs/platform-express/-/platform-express-10.4.20.tgz#7266acbdda550f230ed7e661ee60699270fd48f4"
   integrity sha512-rh97mX3rimyf4xLMLHuTOBKe6UD8LOJ14VlJ1F/PTd6C6ZK9Ak6EHuJvdaGcSFQhd3ZMBh3I6CuujKGW9pNdIg==

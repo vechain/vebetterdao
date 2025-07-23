@@ -25,7 +25,7 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 type Props = {
   onClose: () => void
   isOpen: boolean
-  form: UseFormReturn<AdminAppForm, any, undefined>
+  form: UseFormReturn<AdminAppForm, any, AdminAppForm>
   onSubmit: () => void
   isAdminAddressChanged: boolean
   isTeamWalletAddressChanged: boolean
