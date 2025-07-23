@@ -761,12 +761,12 @@ contract B3TRGovernor is
 
   /**
    * @notice Returns the deposit threshold cap for a proposal type.
-   * @param proposalType The type of proposal.
+   * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
    */
-  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalType) external view returns (uint256) {
+  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue  ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorConfigurator.getDepositThresholdCap($, proposalType);
+    return GovernorConfigurator.getDepositThresholdCap($, proposalTypeValue);
   }
 
   /**
@@ -1083,14 +1083,25 @@ contract B3TRGovernor is
     GovernorConfigurator.setVeBetterPassport($, newVeBetterPassport);
   }
 
+  /**
+   * @notice Propose a grant
+   * @param targets The list of target addresses
+   * @param values The list of values to send
+   * @param calldatas The list of call data
+   * @param description The proposal description
+   * @param startRoundId The round in which the proposal should start
+   * @param depositAmount The amount of deposit for the proposal
+   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
+   * @return The proposal id
+   */
   function proposeGrant(
     address[] memory targets,
     uint256[] memory values,
     bytes[] memory calldatas,
-    string memory description, // always empty string for grants ( storing within ipfs hashes )
+    string memory description, 
     uint256 startRoundId,
     uint256 depositAmount,
-    IGrantsManager.Milestones memory milestones
+    string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return
@@ -1102,7 +1113,7 @@ contract B3TRGovernor is
         description,
         startRoundId,
         depositAmount,
-        milestones
+        milestonesDetailsMetadataURI
       );
   }
 

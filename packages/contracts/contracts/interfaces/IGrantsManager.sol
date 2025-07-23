@@ -62,8 +62,16 @@ interface IGrantsManager {
   /**
    * @notice Emitted when a milestone is rejected
    * @param proposalId The ID of the proposal
+   * @param amount The amount of the milestone
    */
-  event MilestoneRejected(uint256 indexed proposalId);
+  event MilestoneRejectedAndFundsReturnedToTreasury(uint256 indexed proposalId, uint256 amount);
+
+  /**
+   * @notice Emitted when a milestone description metadata URI is updated
+   * @param proposalId The ID of the proposal
+   * @param newDescriptionMetadataURI The new description metadata URI
+   */
+  event MilestoneDescriptionMetadataURIUpdated(uint256 indexed proposalId, string newDescriptionMetadataURI);
 
   // ------------------ Errors ------------------ //
   /**
@@ -81,18 +89,17 @@ interface IGrantsManager {
   );
 
   /**
-   * @notice Error thrown when an unexpected milestone state is encountered
+   * @notice Error thrown when a target is invalid
+   * @param target The invalid target
+   */
+  error InvalidTarget(address target);
+
+  /**
+   * @notice Error thrown when a milestone is already validated
    * @param proposalId The ID of the proposal
    * @param milestoneIndex The index of the milestone
-   * @param currentState The current state of the milestone
-   * @param allowedStates The allowed states to validate the milestone
    */
-  error UnexpectedMilestoneState(
-    uint256 proposalId,
-    uint256 milestoneIndex,
-    MilestoneState currentState,
-    bytes32 allowedStates
-  );
+  error MilestoneAlreadyValidated(uint256 proposalId, uint256 milestoneIndex);
 
   /**
    * @notice Error thrown when milestone status is not pending
@@ -242,37 +249,43 @@ interface IGrantsManager {
   struct Milestones {
     uint256 id;
     uint256 totalAmount;
-    uint256 claimedAmount;
-    address recipient;
+    uint256 claimedAmount;  
+    address proposer;
     Milestone[] milestone;
-    string milestonesDetailsMetadataURI;
+    string milestonesDetailsMetadataURI; 
+    string projectDetailsMetadataURI; 
   }
 
-  /**
-   * @notice Validates a milestone state
-   * @param proposalId The ID of the proposal
-   * @param milestoneIndex The index of the milestone
-   * @param allowedStates The allowed states to validate the milestone
-   * @return The new state of the milestone
-   */
-  function validateMilestoneStateBitmap(
-    uint256 proposalId,
-    uint256 milestoneIndex,
-    bytes32 allowedStates
-  ) external view returns (MilestoneState);
+  // /**
+  //  * @notice Sets the status of a proposal
+  //  * @param proposalId The ID of the proposal
+  //  * @param status The status to set
+  //  */
+  // function setProposalStatus(uint256 proposalId, ProposalStatus status) external;
+
+  // /**
+  //  * @notice Returns the status of a proposal
+  //  * @param proposalId The ID of the proposal
+  //  * @return ProposalStatus The status of the proposal
+  //  */
+  // function getProposalStatus(uint256 proposalId) external view returns (ProposalStatus);
 
   // ------------------ Grants Manager Milestone Functions ------------------ //
 
   /**
    * @notice Creates milestones for a proposal
-   * @param projectDetailsMetadataURI The metadata URI of the project
-   * @param milestones The milestones of the proposal
+   * @param projectDetailsMetadataURI The IPFS hash containing milestones descriptions and metadata
+   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
    * @param proposalId The ID of the proposal
+   * @param proposer The address of the proposer
+   * @param calldatas The calldatas of the milestones
    */
   function createMilestones(
     string memory projectDetailsMetadataURI,
-    Milestones memory milestones,
-    uint256 proposalId
+    string memory milestonesDetailsMetadataURI,
+    uint256 proposalId,
+    address proposer,
+    bytes[] memory calldatas
   ) external;
 
   /**
@@ -338,6 +351,13 @@ interface IGrantsManager {
    */
   function claimMilestone(uint256 proposalId, uint256 milestoneIndex) external;
 
+  /**
+   * @notice Returns if a milestone is claimable
+   * @param proposalId The ID of the proposal
+   * @param milestoneIndex The index of the milestone
+   * @return bool True if the milestone is claimable, false otherwise
+   */
+  function isClaimable(uint256 proposalId, uint256 milestoneIndex) external view returns (bool);
   // ------------------ Grants Manager Contract Functions ------------------ //
   /**
    * @notice Sets the governor contract
@@ -374,69 +394,34 @@ interface IGrantsManager {
    * @param _b3tr The address of the b3tr contract
    */
   function setB3trContract(address _b3tr) external;
+
+  // ------------------ Metadata Functions ------------------ //
+
+  // /**
+  //  * @notice Returns the project details metadata URI for a proposal
+  //  * @param proposalId The ID of the proposal
+  //  * @return The project details metadata URI for the proposal
+  //  */
+  // function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory);
+
+  /**
+   * @notice Updates the milestone description metadata URI for a proposal
+   * @param proposalId The ID of the proposal
+   * @param newDescriptionMetadataURI The milestone description metadata URI to set
+   */
+  function updateMilestoneDescriptionMetadataURI(uint256 proposalId, string memory newDescriptionMetadataURI) external;
+
+  /**
+   * @notice Returns the project details metadata URI for a proposal
+   * @param proposalId The ID of the proposal
+   * @return The project details metadata URI for the proposal
+   */
+  function getMilestoneDescriptionMetadataURI(uint256 proposalId) external view returns (string memory);
+
+  /**
+   * @notice Returns the project details metadata URI for a proposal
+   * @param proposalId The ID of the proposal
+   * @return The project details metadata URI for the proposal
+   */
+  function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory);
 }
-
-// // Errors
-//   error NotGrantRecipient();
-//   error InsufficientFunds();
-//   error PreviousMilestoneNotClaimed();
-
-//   error UnauthorizedMetadataUpdate(address user, uint256 proposalId);
-//   error InvalidMilestoneIndex(uint256 proposalId, uint256 milestoneIndex);
-//   error ProposalNotFound(uint256 proposalId);
-
-// event ProposalMetadataUpdated(
-//   uint256 indexed proposalId,
-//   string oldIpfsHash,
-//   string newIpfsHash,
-//   address indexed updatedBy
-// );
-// event MilestoneMetadataUpdated(
-//   uint256 indexed proposalId,
-//   uint256 indexed milestoneIndex,
-//   string oldIpfsHash,
-//   string newIpfsHash,
-//   address indexed updatedBy
-// );
-
-// /**
-//  * @dev ProposalMetadata struct
-//  */
-// struct ProposalMetadata {
-//   string ipfsHash;
-//   address proposer;
-//   uint256 createdAt;
-//   bool isEdited;
-//   uint256 lastEditedAt;
-// }
-
-// struct MilestoneMetadata {
-//   string ipfsHash;
-//   uint256 milestoneIndex;
-//   uint256 createdAt;
-//   bool isEdited;
-//   uint256 lastEditedAt;
-// }
-
-// /**
-//  * @notice Checks if a milestone is claimable
-//  * @param proposalId The ID of the proposal
-//  * @param milestoneIndex The index of the milestone
-//  * @return True if the milestone is claimable, false otherwise
-//  */
-// function isClaimable(uint256 proposalId, uint256 milestoneIndex) external view returns (bool);
-
-// function getProposalMetadata(uint256 proposalId) external view returns (ProposalMetadata memory);
-
-// function getMilestoneMetadata(
-//   uint256 proposalId,
-//   uint256 milestoneIndex
-// ) external view returns (MilestoneMetadata memory);
-
-// function setProposalMetadata(uint256 proposalId, string memory ipfsHash) external;
-
-// function setMilestoneMetadata(uint256 proposalId, uint256 milestoneIndex, string memory ipfsHash) external;
-
-// function updateProposalMetadata(uint256 proposalId, string memory ipfsHash) external;
-
-// function updateMilestoneMetadata(uint256 proposalId, uint256 milestoneIndex, string memory ipfsHash) external;
