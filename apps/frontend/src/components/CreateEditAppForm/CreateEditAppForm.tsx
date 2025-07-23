@@ -31,9 +31,8 @@ import {
 } from "react-hook-form"
 import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
-import { useCallback } from "react"
+import { ChangeEvent, useCallback, useRef } from "react"
 import { notFoundImage } from "@/constants"
-import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
 
@@ -97,10 +96,13 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
+  const uploadLogoRef = useRef<HTMLLabelElement>(null)
+  const uploadBannerRef = useRef<HTMLLabelElement>(null)
+
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner") => async (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0]
+    (image: "logo" | "banner") => async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
       if (!file) return
       if (image === "logo") {
         clearErrors("logo")
@@ -117,10 +119,6 @@ export const CreateEditAppForm = ({
     },
     [setError, setValue, clearErrors],
   )
-
-  const { open: openUploadLogo } = useDropzone({ onDrop: onDrop("logo") })
-
-  const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
 
   return (
     <Card>
@@ -222,7 +220,7 @@ export const CreateEditAppForm = ({
                   <VStack w="full" align="flex-start">
                     <Image
                       alignSelf={"center"}
-                      onClick={openUploadLogo}
+                      onClick={() => uploadLogoRef.current?.click()}
                       _hover={{ cursor: "pointer" }}
                       src={value ?? notFoundImage}
                       alt="logo"
@@ -236,7 +234,7 @@ export const CreateEditAppForm = ({
                     ) : (
                       <FormHelperText>{t("Recommended size: 96x96px")}</FormHelperText>
                     )}
-                    <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
+                    <UploadFileButton mt={4} alignSelf={"flex-end"} onChange={onDrop("logo")} ref={uploadLogoRef} />
                   </VStack>
                 </FormControl>
               )}
@@ -259,7 +257,7 @@ export const CreateEditAppForm = ({
                   <VStack w="full" align={"flex-start"}>
                     <Image
                       alignSelf={"center"}
-                      onClick={openUploadBanner}
+                      onClick={() => uploadBannerRef.current?.click()}
                       _hover={{ cursor: "pointer" }}
                       src={value ?? notFoundImage}
                       alt="banner"
@@ -273,7 +271,7 @@ export const CreateEditAppForm = ({
                     ) : (
                       <FormHelperText>{t("Recommended size: 150x200px")}</FormHelperText>
                     )}
-                    <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
+                    <UploadFileButton mt={4} alignSelf={"flex-end"} onChange={onDrop("banner")} ref={uploadBannerRef} />
                   </VStack>
                 </FormControl>
               )}
