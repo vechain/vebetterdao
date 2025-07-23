@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.22;
 
 import { GovernorStorageTypes } from "./libraries/GovernorStorageTypes.sol";
 import { GovernorTypes } from "./libraries/GovernorTypes.sol";

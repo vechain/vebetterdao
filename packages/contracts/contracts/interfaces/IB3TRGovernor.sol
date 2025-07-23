@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Forked from OpenZeppelin Contracts (last updated v5.0.0) (governance/IGovernor.sol)
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.22;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";

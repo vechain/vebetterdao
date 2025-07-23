@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.22;
 
 import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
 import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";

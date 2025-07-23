@@ -9,7 +9,7 @@ import { useMemo } from "react"
 import { URL_REGEX } from "@/constants"
 
 type Props = {
-  form: UseFormReturn<EditAppForm, any, undefined>
+  form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
 
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {

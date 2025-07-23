@@ -99,6 +99,7 @@ export const CastYourVoteCard: React.FC = () => {
           </GridItem>
 
           <GridItem colSpan={1} order={[1, 1, 2]} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
+            {/* @ts-ignore */}
             <Lottie
               style={{
                 pointerEvents: "none",

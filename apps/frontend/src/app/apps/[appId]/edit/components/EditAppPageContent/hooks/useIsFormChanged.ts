@@ -4,7 +4,7 @@ import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "@
 import { useSocialUrls } from "./useSocialUrls"
 import { useCurrentAppScreenshots } from "@/app/apps/[appId]/hooks/useCurrentAppScreenshots"
 
-export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, undefined>) => {
+export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, EditAppForm>) => {
   const { logo } = useCurrentAppLogo()
   const { banner } = useCurrentAppBanner()
   const { appMetadata } = useCurrentAppMetadata()

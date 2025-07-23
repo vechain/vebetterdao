@@ -14,7 +14,7 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "npx ts-node ./src/scripts/generateTranslations.ts"
+    "generate-translations": "npx tsx ./src/scripts/generateTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
@@ -52,7 +52,6 @@
     "openai": "^4.52.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.51.2",
     "react-i18next": "^14.1.1",
     "react-icons": "^5.0.1",

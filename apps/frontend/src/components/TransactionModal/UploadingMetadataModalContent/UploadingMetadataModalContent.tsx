@@ -17,6 +17,7 @@ export const UploadingMetadataModalContent = ({
     <ModalAnimation>
       <VStack align={"center"} p={6}>
         <Heading size="md">{title}</Heading>
+        {/* @ts-ignore */}
         <Lottie
           style={{
             pointerEvents: "none",
