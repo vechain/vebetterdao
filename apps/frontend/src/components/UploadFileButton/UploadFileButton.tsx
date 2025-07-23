@@ -1,15 +1,28 @@
-import { Button, ButtonProps } from "@chakra-ui/react"
+import { Input, Button, ButtonProps } from "@chakra-ui/react"
 import { FaFile } from "react-icons/fa6"
-import { useDropzone } from "react-dropzone"
 import { useTranslation } from "react-i18next"
+import { useId, ChangeEventHandler, forwardRef } from "react"
 
-type Props = { onDrop: (acceptedFiles: File[]) => void } & Omit<ButtonProps, "onDrop">
-export const UploadFileButton = ({ onDrop, ...props }: Props) => {
-  const { open } = useDropzone({ onDrop: onDrop })
+interface Props extends Omit<ButtonProps, "onChange"> {
+  onChange: ChangeEventHandler<HTMLInputElement>
+}
+
+export const UploadFileButton = forwardRef<HTMLLabelElement, Props>(({ onChange, ...props }, ref) => {
   const { t } = useTranslation()
+  const id = useId()
   return (
-    <Button variant="outline" colorScheme="primary" rounded="full" onClick={open} leftIcon={<FaFile />} {...props}>
+    <Button
+      ref={ref}
+      as="label"
+      cursor="pointer"
+      htmlFor={id}
+      variant="outline"
+      colorScheme="primary"
+      rounded="full"
+      leftIcon={<FaFile />}
+      {...props}>
       {t("Upload File")}
+      <Input display="none" type="file" id={id} name={id} onChange={onChange} />
     </Button>
   )
-}
+})

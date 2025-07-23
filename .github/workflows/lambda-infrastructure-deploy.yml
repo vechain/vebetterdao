@@ -1,0 +1,138 @@
+name: Lambda Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspace:
+        description: 'Terraform workspace to use (dev, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      lambda_name:
+        description: 'Name of the Lambda function to deploy'
+        required: true
+        type: string
+      terraform_dir:
+        description: 'Directory containing the Terraform configuration'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      workspace:
+        required: true
+        type: string
+      lambda_name:
+        required: true
+        type: string
+      terraform_dir:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_ROLE:
+        required: true
+      DEV_AWS_ACC_ROLE:
+        required: true
+      VECHAINCI_SSH_PRIVATE_KEYS:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  deploy:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-build
+          path: packages/lambda/dist
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ github.event.inputs.workspace == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.0
+          terraform_wrapper: false
+    
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+
+      - name: Terraform Format
+        id: fmt
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        run: |
+          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
+          BUCKET="b3tr-terraform-state-${WORKSPACE}"
+          
+          terraform init -backend-config="bucket=${BUCKET}"
+
+      - name: Terraform Workspace
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        id: workspace
+        run: |
+          WORKSPACE="${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}"
+          
+          if ! terraform workspace list | grep -q "$WORKSPACE"; then
+            terraform workspace new "$WORKSPACE"
+          else
+            terraform workspace select "$WORKSPACE"
+          fi
+    
+      - name: Terraform Validate
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        id: plan
+        continue-on-error: true
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
+          LAMBDA_NAME: ${{ github.event.inputs.lambda_name || inputs.lambda_name }}
+        run: |
+          terraform plan \
+            -out=lambda.tfplan \
+            -detailed-exitcode
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-plan
+          path: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}/lambda.tfplan
+          retention-days: 5
+     # If the workflow is triggered by a push to main, or an intentional workflow_dispatch, or a pull_request to dev, apply the changes
+      - name: Terraform Apply
+        if: |
+          (github.event_name == 'workflow_dispatch') ||
+          (github.event_name == 'pull_request' && env.WORKSPACE == 'dev') ||
+          (github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
+        id: apply
+        working-directory: ${{ github.event.inputs.terraform_dir || inputs.terraform_dir }}
+        env:
+          WORKSPACE: ${{ github.event.inputs.workspace || inputs.workspace || 'dev' }}
+        run: |
+          terraform apply -auto-approve

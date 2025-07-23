@@ -22,7 +22,7 @@ export const SustainabilityActionsResponseSchema = z.object({
         proof: z
           .object({
             version: z.number(),
-            description: z.string(),
+            description: z.string().optional(),
             proof: z
               .object({
                 image: z.string().optional(),

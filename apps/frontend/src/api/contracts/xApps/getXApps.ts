@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import dayjs from "@/utils/dayjsConfig"
-import { ThorClient, executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { ThorClient, XAppMetadata, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 
 const abi = X2EarnApps__factory.abi
@@ -25,6 +25,10 @@ export type XApp = {
   metadataURI: string
   createdAtTimestamp: string
   isNew: boolean
+}
+
+export type XAppWithMetadata = XApp & {
+  metadata: XAppMetadata
 }
 
 /**

@@ -1,0 +1,18 @@
+---
+# AWS Configuration
+aws_region: eu-west-1
+aws_account_id: "211125319139"
+environment: "testnet"
+
+# Lambda Configuration
+lambda_function_name: "check-endorsement"
+lambda_handler: "index.handler"
+lambda_runtime: "nodejs20.x"
+lambda_memory_size: 512
+lambda_timeout: 30
+
+# Lambda Build Path
+lambda_source_dir: "packages/lambda/dist/testnet-staging/checkEndorsements"
+
+# Schedule Configuration
+schedule_expression: "cron(0 9 ? * SUN,TUE,FRI *)" # Runs on Sunday, Tuesday, Friday at 9 AM UTC (day before prod)
