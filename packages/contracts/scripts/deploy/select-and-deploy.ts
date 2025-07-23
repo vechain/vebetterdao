@@ -27,6 +27,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "b3tr-multi-sig",
     description: "Deploy only this contract",
   },
+  "VeBetter Round Starter": {
+    name: "ve-better-round-starter",
+    description: "Deploy only this contract",
+  },
 } as const
 
 async function upgradeContract() {
@@ -81,11 +85,19 @@ async function upgradeContract() {
         // Run the upgrade script
         execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
         break
+      case "ve-better-round-starter":
+        console.log("Deploying VeBetter Round Starter")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
       case "deploy-all":
         console.log("Deploying all contracts")
         // Run the upgrade script
         execSync(`turbo run deploy:${env}`, { stdio: "inherit" })
         break
+
       default:
         throw new Error("Invalid choice")
     }
