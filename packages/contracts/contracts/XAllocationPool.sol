@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.22;
 
 import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";

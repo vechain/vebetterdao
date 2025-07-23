@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.22;
 
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";

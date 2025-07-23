@@ -14,7 +14,7 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "npx ts-node ./src/scripts/generateTranslations.ts"
+    "generate-translations": "npx tsx ./src/scripts/generateTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",

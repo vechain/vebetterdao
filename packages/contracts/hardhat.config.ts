@@ -12,7 +12,7 @@ import "solidity-docgen"
 import { EnvConfig } from "@repo/config/contracts"
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.20",
+  solidity: "0.8.22",
 }
 
 const getEnvMnemonic = () => {
@@ -30,7 +30,7 @@ const getSoloUrl = () => {
 
 module.exports = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.22",
     evmVersion: "paris",
     settings: {
       optimizer: {

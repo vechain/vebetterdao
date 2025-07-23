@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity 0.8.20;
+pragma solidity 0.8.22;
 
 import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
 import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol";
