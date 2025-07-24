@@ -20,7 +20,7 @@ export enum XAppStatus {
 }
 
 export const APP_CATEGORIES = [
-  { id: "carbon-footprint", name: "Others", color: "#feeab6" },
+  { id: "others", name: "Others", color: "#feeab6" },
   { id: "education-learning", name: "Learning", color: "#E5E9F0" },
   { id: "fitness-wellness", name: "Lifestyle", color: "#D1E2FF" },
   { id: "green-finance-defi", name: "Web3", color: "##ffe0cd" },
@@ -33,7 +33,7 @@ export const APP_CATEGORIES = [
 ]
 
 // Track deprecated categories that should not count towards the category limit if present in metadata
-export const DEPRECATED_CATEGORIES = ["social-community-activism"]
+export const DEPRECATED_CATEGORIES = ["social-community-activism", "carbon-footprint"]
 
 // SORTING
 export type SortOption = "newest" | "rewards" | "alphabetical" | "default"
