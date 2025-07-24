@@ -11,9 +11,9 @@ import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
 const config = getConfig()
 
-// const buffer = 1.01
-// Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-// const suggestedMaxGas = 260118 * buffer
+// Extra 5% to mitigate sporadic wrong estimation of gas
+// Check https://vechain-foundation.slack.com/archives/C060FHDHG2J/p1753095056679039?thread_ts=1753093780.802499&cid=C060FHDHG2J
+const GAS_PADDING = 0.05
 
 type useMintB3trProps = {
   amount?: string | number
@@ -69,5 +69,6 @@ export const useConvertB3tr = ({ amount, onSuccess, transactionModalCustomUI }: 
     refetchQueryKeys,
     onSuccess,
     transactionModalCustomUI,
+    gasPadding: GAS_PADDING,
   })
 }

@@ -4778,7 +4778,7 @@
   resolved "https://registry.yarnpkg.com/@safe-global/safe-gateway-typescript-sdk/-/safe-gateway-typescript-sdk-3.23.1.tgz#1e86d471bcd2adb0f777246ccbea6fa39618e02c"
   integrity sha512-6ORQfwtEJYpalCeVO21L4XXGSdbEMfyp2hEv6cP82afKXSwvse6d3sdelgaPWUxHIsFRkWvHDdzh8IyyKHZKxw==
 
-"@scure/base@1.2.6", "@scure/base@^1.1.3", "@scure/base@^1.1.9", "@scure/base@^1.2.4", "@scure/base@~1.2.2", "@scure/base@~1.2.4", "@scure/base@~1.2.5":
+"@scure/base@1.2.6", "@scure/base@^1.1.3", "@scure/base@^1.2.4", "@scure/base@~1.2.2", "@scure/base@~1.2.4", "@scure/base@~1.2.5":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.2.6.tgz#ca917184b8231394dd8847509c67a0be522e59f6"
   integrity sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==
@@ -6996,26 +6996,26 @@
   resolved "https://registry.yarnpkg.com/@vechain/connex-types/-/connex-types-2.2.1.tgz#a8bb367e002f64891b48c2b1e87ade7801eacce4"
   integrity sha512-jSicxZQznD+UZN0lmxdmIHdruVqTc2b0xDChePIzki/m4AabELJpSrmq7ynu7kEqM1sU9qXZ9KiWkdkBQmWuRw==
 
-"@vechain/dapp-kit-react@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-2.0.1.tgz#7f0bdf296846d89a26ef0144a57d67b05dc90757"
-  integrity sha512-Jb8ZjvVfktvng/rxq84eKM9SBRGPDLZouohD0A021ZD0r7bb5ka9ksz9naBZffVDDkYhRc+OFnQhMuMGagJprQ==
+"@vechain/dapp-kit-react@2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-2.0.2.tgz#e552e66a68605fe9e8770a9c8a1dc504f66f9a0e"
+  integrity sha512-viu24ZsYaZzC5Jr2uBQnVVv7dF8x/X4Xp76j7eiva9CfNuQhHeTPyaACBje3cmtgG885ChOX4TbRAwAabiVP/Q==
   dependencies:
     "@lit/react" "^1.0.7"
-    "@vechain/dapp-kit" "2.0.1"
-    "@vechain/dapp-kit-ui" "2.0.1"
-    "@vechain/sdk-core" "1.1.0"
+    "@vechain/dapp-kit" "2.0.2"
+    "@vechain/dapp-kit-ui" "2.0.2"
+    "@vechain/sdk-core" "1.2.0"
     valtio "1.13.2"
 
-"@vechain/dapp-kit-ui@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-2.0.1.tgz#5a7d1d14e8c48c84a0d4def3d1e8cbc5cb7dc5b4"
-  integrity sha512-8mUcvuZuQ7RgSKPsjdndmCU+k4vzWw1HJSPci0/QiTSxCGTn3EWMo+Q8ZpvE/VeYCxudwytLq54e/HMadGCNDQ==
+"@vechain/dapp-kit-ui@2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-ui/-/dapp-kit-ui-2.0.2.tgz#0a3b2ad978762b9d98c9a46cadd877e926723998"
+  integrity sha512-fr16WRe0EJoqpOY3D1obqvEGU0Y/yu9/J1RBZ1u6jk6LqAW8qFWPfDnF4Q/fnFccgKSwWyuFG4A21x0D+uOb4A==
   dependencies:
-    "@vechain/dapp-kit" "2.0.1"
+    "@vechain/dapp-kit" "2.0.2"
     "@vechain/picasso" "2.1.1"
-    "@vechain/sdk-core" "1.1.0"
-    "@vechain/sdk-network" "1.1.0"
+    "@vechain/sdk-core" "1.2.0"
+    "@vechain/sdk-network" "1.2.0"
     "@wagmi/core" "^2.16.7"
     "@web3modal/ethereum" "^2.7.1"
     "@web3modal/html" "^2.7.1"
@@ -7023,14 +7023,14 @@
     qrcode "1.5.4"
     valtio "1.13.2"
 
-"@vechain/dapp-kit@2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-2.0.1.tgz#1480329a8fb44f544e73cea308b470ffc3b59674"
-  integrity sha512-MhJgJmzVPOvQ1vkpB2u6RZ8fUXrOdEs2qJ0TGX+bDPsW4uq9TkpsX3ooq1pHhDdFediSbPw/eqHvkH25iStQ2w==
+"@vechain/dapp-kit@2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-2.0.2.tgz#8da0321ad799daadd99aeebb90785986517c00ef"
+  integrity sha512-teSxYeKUFMA+nnpACH61XqFoh3gww/NbrRYC0aCbN7FNxqG5ETqxQ3bBnscjtWxZIiAC/C0bR7clet+kPldsfQ==
   dependencies:
-    "@vechain/sdk-core" "1.1.0"
-    "@vechain/sdk-errors" "1.1.0"
-    "@vechain/sdk-network" "1.1.0"
+    "@vechain/sdk-core" "1.2.0"
+    "@vechain/sdk-errors" "1.2.0"
+    "@vechain/sdk-network" "1.2.0"
     "@walletconnect/modal" "2.7.0"
     "@walletconnect/sign-client" "2.19.2"
     "@walletconnect/utils" "2.19.2"
@@ -7059,25 +7059,6 @@
   integrity sha512-SOH35A4jxmxQeIn+Q6qA2X+ivRKDE+9n/gvLgCQnacsJrrwh/tSinUbhj9KnfU4ixm+g1aRgTm0IYuz1/uS+uw==
   dependencies:
     mersenne-twister "^1.1.0"
-
-"@vechain/sdk-core@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-core/-/sdk-core-1.1.0.tgz#7997635019c63511e4c22d8cdfdd3760d4e4e5e6"
-  integrity sha512-5nY/t0x5IJuanY7Vl3i1FRbCbchW3pe2RCNKZFGZTJHLQoCQ2J3VfpHxvHun4gY+p9RucQ5gGRyWPa9LEPbw+w==
-  dependencies:
-    "@ethereumjs/rlp" "^5.0.2"
-    "@noble/ciphers" "^1.1.1"
-    "@noble/curves" "^1.6.0"
-    "@noble/hashes" "^1.5.0"
-    "@scure/base" "^1.1.9"
-    "@scure/bip32" "^1.4.0"
-    "@scure/bip39" "^1.5.1"
-    "@vechain/sdk-errors" "1.1.0"
-    "@vechain/sdk-logging" "1.1.0"
-    abitype "^1.0.6"
-    ethers "6.13.4"
-    fast-json-stable-stringify "^2.1.0"
-    viem "^2.21.45"
 
 "@vechain/sdk-core@1.2.0", "@vechain/sdk-core@^1.1.0":
   version "1.2.0"
@@ -7136,11 +7117,6 @@
     fast-json-stable-stringify "^2.1.0"
     viem "^2.21.45"
 
-"@vechain/sdk-errors@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-1.1.0.tgz#50ed1b15349eea2e5ee755cedaa64f2518553924"
-  integrity sha512-oaNi/mDgp0BG8ZhDhVok6F+OCuKir3h9wWXT/NGv9G7VbQkyOizNXTba4FguIN9VpiXC4uLExONviwvsRX2DPQ==
-
 "@vechain/sdk-errors@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-1.2.0.tgz#5561f3804a7f1e18067168a25196267a43cbd807"
@@ -7180,13 +7156,6 @@
     ethers "6.13.4"
     hardhat "^2.22.15"
 
-"@vechain/sdk-logging@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-logging/-/sdk-logging-1.1.0.tgz#27f69321062ea118fea8a3bfef952006dfc38d0e"
-  integrity sha512-18F71JWt5CvV90h2qvW7dbvote26x+wbdxi1JtNLEU+T/yUy9fY3+raH0NLikBjYP41XvjxnUL5wzUU2y1Z31g==
-  dependencies:
-    "@vechain/sdk-errors" "1.1.0"
-
 "@vechain/sdk-logging@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@vechain/sdk-logging/-/sdk-logging-1.2.0.tgz#142967653299f958d1cdc89969157c73a69d53ae"
@@ -7208,21 +7177,18 @@
   dependencies:
     "@vechain/sdk-errors" "2.0.0"
 
-"@vechain/sdk-network@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-1.1.0.tgz#c5c692dd06acb0aa02f86fd34bbb311f7f51cf26"
-  integrity sha512-/KveiUOeJWNpAUq8HAOg8ZDUeFeEbKWsJiAuxUB0mHWW0taBQit001kAPKPkwwORw23Pn7SSLEEvYDDr838S0g==
+"@vechain/sdk-network@1.2.0", "@vechain/sdk-network@^1.1.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-1.2.0.tgz#237ec25cf29ac7817131a57b2f5add29ac879d6c"
+  integrity sha512-XlEwMVggjs3xg7zoRXPI+Mq1ad/sy5lKi2lVMn8LcbGM76bNhU262bYBNdy3aiEOVEOMRhM68mgGW9blEdX+HQ==
   dependencies:
     "@noble/curves" "^1.6.0"
-    "@vechain/sdk-core" "1.1.0"
-    "@vechain/sdk-errors" "1.1.0"
-    "@vechain/sdk-logging" "1.1.0"
-    "@vechain/vebetterdao-contracts" "^4.0.0"
+    "@vechain/sdk-core" "1.2.0"
+    "@vechain/sdk-errors" "1.2.0"
+    "@vechain/sdk-logging" "1.2.0"
     abitype "^1.0.6"
     ethers "6.13.4"
-    isomorphic-ws "^5.0.0"
     viem "^2.21.45"
-    ws "^8.18.0"
 
 "@vechain/sdk-network@1.2.0-rc.2":
   version "1.2.0-rc.2"
@@ -7250,20 +7216,7 @@
     ethers "6.13.4"
     viem "^2.21.54"
 
-"@vechain/sdk-network@^1.1.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-1.2.0.tgz#237ec25cf29ac7817131a57b2f5add29ac879d6c"
-  integrity sha512-XlEwMVggjs3xg7zoRXPI+Mq1ad/sy5lKi2lVMn8LcbGM76bNhU262bYBNdy3aiEOVEOMRhM68mgGW9blEdX+HQ==
-  dependencies:
-    "@noble/curves" "^1.6.0"
-    "@vechain/sdk-core" "1.2.0"
-    "@vechain/sdk-errors" "1.2.0"
-    "@vechain/sdk-logging" "1.2.0"
-    abitype "^1.0.6"
-    ethers "6.13.4"
-    viem "^2.21.45"
-
-"@vechain/vebetterdao-contracts@^4.0.0", "@vechain/vebetterdao-contracts@^4.1.0":
+"@vechain/vebetterdao-contracts@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@vechain/vebetterdao-contracts/-/vebetterdao-contracts-4.1.0.tgz#5a081bf9c548ea777fe16dcab40536d6d2cc1a62"
   integrity sha512-vLxxErpvHuVisrkgvrrqgz8hkhbhreEmOyjolcRGpYF9ozzhEm1wTZKelO9qmKoNi/mviMG6ZYZU3Ykwg9LfIw==
@@ -7272,10 +7225,10 @@
     "@openzeppelin/contracts-upgradeable" "5.0.2"
     ethers "^6.9.0"
 
-"@vechain/vechain-kit@2.0.0-rc.7":
-  version "2.0.0-rc.7"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.0.0-rc.7.tgz#0734044d78efe6e3c1fb457bd47ebab55e6af51f"
-  integrity sha512-uy4djf8w2KJau5dG1k4kEAVs/lmTdAtwkk/N5575nqP1Tu7gP6seaTYFuT6sAV7ZWuOSEgKTI5hPY2tJndlLGA==
+"@vechain/vechain-kit@2.0.0-rc.8":
+  version "2.0.0-rc.8"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-2.0.0-rc.8.tgz#7deca2c6b4b9813c73a85a698821c2ff66cdea9c"
+  integrity sha512-9Ge/NK45d6EwnoFMNobVczURQaGyVVgqdVFi6gOY21c22R/cutkkwHgjXq2sJYYHf7B9cDtXO5E6Ug4+pHxUEg==
   dependencies:
     "@adraffy/ens-normalize" "^1.11.0"
     "@chakra-ui/react" "^2.8.2"
@@ -7286,7 +7239,7 @@
     "@solana/web3.js" "^1.98.0"
     "@tanstack/react-query" "^5.64.2"
     "@tanstack/react-query-devtools" "^5.64.1"
-    "@vechain/dapp-kit-react" "2.0.1"
+    "@vechain/dapp-kit-react" "2.0.2"
     "@vechain/picasso" "^2.1.1"
     "@vechain/vebetterdao-contracts" "^4.1.0"
     "@wagmi/core" "^2.17.2"
@@ -8809,11 +8762,6 @@ atomic-sleep@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/atomic-sleep/-/atomic-sleep-1.0.0.tgz#eb85b77a601fc932cfe432c5acd364a9e2c9075b"
   integrity sha512-kNOjDqAh7px0XWNI+4QbzoiR/nTkHAWNud2uvnJquD1/x5a7EQZMJT0AczqK0Qn67oY/TTQ1LbUKajZpp3I9tQ==
-
-attr-accept@^2.2.4:
-  version "2.2.5"
-  resolved "https://registry.yarnpkg.com/attr-accept/-/attr-accept-2.2.5.tgz#d7061d958e6d4f97bf8665c68b75851a0713ab5e"
-  integrity sha512-0bDNnY/u6pPwHDMoF0FieU354oBi0a8rD9FcsLwzcGWbc8KS8KPIi7y+s13OlVY+gMWc/9xEMUgNE6Qm8ZllYQ==
 
 available-typed-arrays@^1.0.7:
   version "1.0.7"
@@ -12549,13 +12497,6 @@ file-entry-cache@^6.0.1:
   dependencies:
     flat-cache "^3.0.4"
 
-file-selector@^2.1.0:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/file-selector/-/file-selector-2.1.2.tgz#fe7c7ee9e550952dfbc863d73b14dc740d7de8b4"
-  integrity sha512-QgXo+mXTe8ljeqUFaX3QVHc5osSItJ/Km+xpocx0aSqWGMSCf6qYs/VnzZgS864Pjn5iceMRFigeAV7AfTlaig==
-  dependencies:
-    tslib "^2.7.0"
-
 filelist@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/filelist/-/filelist-1.0.4.tgz#f78978a1e944775ff9e62e744424f215e58352b5"
@@ -14739,11 +14680,6 @@ isomorphic-ws@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-4.0.1.tgz#55fd4cd6c5e6491e76dc125938dd863f5cd4f2dc"
   integrity sha512-BhBvN2MBpWTaSHdWRb/bwdZJ1WaehQ2L1KngkCkfLUGF0mAWAT1sQUQacEmQ0jXkFw/czDXPNQSL5u2/Krsz1w==
-
-isomorphic-ws@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/isomorphic-ws/-/isomorphic-ws-5.0.0.tgz#e5529148912ecb9b451b46ed44d53dae1ce04bbf"
-  integrity sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==
 
 isows@1.0.6:
   version "1.0.6"
@@ -18735,15 +18671,6 @@ react-dom@^18:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
 
-react-dropzone@^14.2.3:
-  version "14.3.8"
-  resolved "https://registry.yarnpkg.com/react-dropzone/-/react-dropzone-14.3.8.tgz#a7eab118f8a452fe3f8b162d64454e81ba830582"
-  integrity sha512-sBgODnq+lcA4P296DY4wacOZz3JFpD99fp+hb//iBO2HHnyeZU3FwWyXJ6salNpqQdsZrgMrotuko/BdJMV8Ug==
-  dependencies:
-    attr-accept "^2.2.4"
-    file-selector "^2.1.0"
-    prop-types "^15.8.1"
-
 react-fast-compare@3.2.2:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
@@ -21422,7 +21349,7 @@ tslib@2.7.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.7.0.tgz#d9b40c5c40ab59e8738f297df3087bf1a2690c01"
   integrity sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==
 
-tslib@^2.0.0, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.6.0, tslib@^2.6.2, tslib@^2.7.0, tslib@^2.8.0:
+tslib@^2.0.0, tslib@^2.0.3, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.6.0, tslib@^2.6.2, tslib@^2.8.0:
   version "2.8.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.8.1.tgz#612efe4ed235d567e8aba5f2a5fab70280ade83f"
   integrity sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==
@@ -23184,7 +23111,7 @@ ws@^7.1.0, ws@^7.4.6, ws@^7.5.1, ws@^7.5.10:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.10.tgz#58b5c20dc281633f6c19113f39b349bd8bd558d9"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.18.0, ws@^8.5.0:
+ws@^8.5.0:
   version "8.18.3"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.3.tgz#b56b88abffde62791c639170400c93dcb0c95472"
   integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==

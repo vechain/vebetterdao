@@ -38,12 +38,13 @@ export interface UserGM {
  * @param userAddress The address to get the number of GM NFTs owned
  * @returns the number of GM NFTs for the address
  */
-export const useGetUserGMs = () => {
+export const useGetUserGMs = (userAddress?: string) => {
   const { account } = useWallet()
   const thor = useThor()
+  const address = userAddress ?? account?.address ?? ""
 
   return useQuery({
-    queryKey: getUserGMsQueryKey(account?.address as string),
+    queryKey: getUserGMsQueryKey(address),
     queryFn: async () => {
       const [selectedTokenId, userGMs] = await executeMultipleClausesCall({
         thor,
@@ -52,13 +53,13 @@ export const useGetUserGMs = () => {
             abi: galaxyMemberAbi,
             address: galaxyMemberContractAddress,
             functionName: "getSelectedTokenId",
-            args: [account?.address as `0x${string}`],
+            args: [address as `0x${string}`],
           },
           {
             abi: galaxyMemberAbi,
             address: galaxyMemberContractAddress,
             functionName: "getTokensInfoByOwner",
-            args: [account?.address as `0x${string}`, BigInt(0), BigInt(PAGE_SIZE)],
+            args: [address as `0x${string}`, BigInt(0), BigInt(PAGE_SIZE)],
           },
         ],
       })
@@ -118,6 +119,6 @@ export const useGetUserGMs = () => {
         } as UserGM
       })
     },
-    enabled: !!account?.address,
+    enabled: !!address,
   })
 }
