@@ -326,11 +326,11 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas, // encodefunction(transferb3tr(grants, value[i]))
-    string memory description, // metadata URI of the project
+    bytes[] memory calldatas, 
+    string memory description, 
     uint256 startRoundId,
     uint256 depositAmount,
-    string memory milestonesDetailsMetadataURI// --> not the big struct anymore 
+    string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     address proposer = msg.sender;
     uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
@@ -649,7 +649,7 @@ library GovernorProposalLogic {
    * @param self The storage reference for the GovernorStorage.
    * @param proposer The address of the proposer.
    * @param startRoundId The round in which the proposal should be active.
-   * @param description The description of the proposal.
+   * @param description The description of the proposal.si
    * @param targets The addresses of the contracts to call.
    * @param values The values to send to the contracts.
    * @param calldatas The function signatures and arguments.

@@ -218,9 +218,12 @@ export const createGrantProposal = async (
     roundId = await getRoundId(contractToPassToMethods)
   }
 
+  console.log("milestones", milestones)
+  console.log("milestonesDetailsMetadataURI", milestones.milestonesDetailsMetadataURI)
+  const milestonesDetailsMetadataURI = milestones.milestonesDetailsMetadataURI
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(targets, values, calldatas, description, roundId, depositAmount, milestones, {
+    .proposeGrant(targets, values, calldatas, description, roundId, depositAmount, milestonesDetailsMetadataURI, {
       gasLimit: 10_000_000,
     })
 

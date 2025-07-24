@@ -165,25 +165,44 @@ contract GrantsManager is
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     uint256 _milestoneId = proposalId;
-
     Milestones storage m = $.proposalMilestones[_milestoneId];
+    uint256 totalAmount = 0;
+
+    for (uint256 i = 0; i < calldatas.length; i++) {
+      bytes memory data = calldatas[i];
+
+      // Extract selector for safety check
+      bytes4 selector;
+      assembly {
+        selector := mload(add(data, 32))
+      }
+
+      if (selector != bytes4(keccak256("transferB3TR(address,uint256)"))) {
+        revert InvalidFunctionSelector(selector);
+      }
+
+      // Slice off the first 4 bytes (selector) manually
+      bytes memory slicedData = new bytes(data.length - 4);
+      for (uint256 j = 0; j < slicedData.length; j++) {
+        slicedData[j] = data[j + 4];
+      }
+
+      // Decode arguments
+      (address recipient, uint256 amount) = abi.decode(slicedData, (address, uint256));
+
+      if (recipient != address(this)) {
+        revert InvalidTarget(recipient);
+      }
+
+      totalAmount += amount;
+
+      $.proposalMilestones[_milestoneId].milestone.push(Milestone({ amount: amount, status: MilestoneState.Pending }));
+    }
+
     m.id = _milestoneId;
     m.proposer = proposer;
     m.milestonesDetailsMetadataURI = milestonesDetailsMetadataURI;
     m.projectDetailsMetadataURI = projectDetailsMetadataURI;
-
-    uint256 totalAmount = 0;
-    for (uint256 i = 0; i < calldatas.length; i++) {
-      (address target, uint256 value) = abi.decode(calldatas[i], (address, uint256));
-      if (target != address(this)) {
-        revert InvalidTarget(target);
-      }
-
-      totalAmount += value;
-
-      $.proposalMilestones[_milestoneId].milestone[i].amount = value; // values[i]
-      $.proposalMilestones[_milestoneId].milestone[i].status = MilestoneState.Pending; // 0
-    }
     m.totalAmount = totalAmount;
     m.claimedAmount = 0; // 0 because the milestone is not claimed yet
 
@@ -357,18 +376,18 @@ contract GrantsManager is
     emit MilestoneClaimed(proposalId, milestoneIndex, milestone.amount);
   }
 
-    /**
-     * @notice Public function to set milestone status, only callable by this contract
-     * @param proposalId The ID of the proposal
-     * @param milestoneIndex The index of the milestone
-     * @param newStatus The new status to set
-     */
-    function setMilestoneStatus(uint256 proposalId, uint256 milestoneIndex, MilestoneState newStatus) external {
-      if (msg.sender != address(this)) {
-        revert NotAuthorized();
-      }
-      _setMilestoneStatus(proposalId, milestoneIndex, newStatus);
+  /**
+   * @notice Public function to set milestone status, only callable by this contract
+   * @param proposalId The ID of the proposal
+   * @param milestoneIndex The index of the milestone
+   * @param newStatus The new status to set
+   */
+  function setMilestoneStatus(uint256 proposalId, uint256 milestoneIndex, MilestoneState newStatus) external {
+    if (msg.sender != address(this)) {
+      revert NotAuthorized();
     }
+    _setMilestoneStatus(proposalId, milestoneIndex, newStatus);
+  }
 
   /**
    * @notice Returns if a milestone is claimable
@@ -614,4 +633,3 @@ contract GrantsManager is
    */
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 }
-

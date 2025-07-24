@@ -83,13 +83,13 @@ describe.only("Governance - Milestone Creation", function () {
   })
 
   //ok
-  describe("Milestone contract setup and creation", function () {
+  describe.only("Milestone contract setup and creation", function () {
     it("Should set the minimum milestone count", async function () {
       const minimumMilestoneCount = await grantsManager.getMinimumMilestoneCount()
       expect(minimumMilestoneCount).to.equal(2) // MINIMUM_MILESTONE_COUNT = 2
     })
 
-    it("Should not create the proposal if the number of milestones is less than the minimum milestone accepted", async function () {
+    it.only("Should not create the proposal if the number of milestones is less than the minimum milestone accepted", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI
       const values = [ethers.parseEther("10000")]
       const totalAmount = ethers.parseEther("10000")
@@ -113,7 +113,7 @@ describe.only("Governance - Milestone Creation", function () {
           description,
           roundId,
           0,
-          milestones,
+          milestones.milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
         {
@@ -154,7 +154,7 @@ describe.only("Governance - Milestone Creation", function () {
           description,
           roundId,
           0,
-          milestones,
+          milestones.milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
         {
@@ -184,11 +184,17 @@ describe.only("Governance - Milestone Creation", function () {
       }
 
       const roundId = await getRoundId(contractToPassToMethods)
+
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[1]]),
+      ]
+
       expect(
         governor.connect(proposer).proposeGrant(
           [treasuryAddress], // Only Treasury for now
           [0], // transferb3tr is not payable
-          [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, totalAmount])],
+          calldatas,
           description,
           roundId,
           0,
@@ -197,7 +203,7 @@ describe.only("Governance - Milestone Creation", function () {
       ).to.emit(grantsManager, "MilestonesCreated")
     })
 
-    it("Should create milestones on proposal creation", async function () {
+    it.only("Should create milestones on proposal creation", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI
       const values = [ethers.parseEther("10000"), ethers.parseEther("20000")] // 2 milestones minimum set in the contract
       const totalAmount = values.reduce((a, b) => a + b, 0n)
@@ -217,11 +223,15 @@ describe.only("Governance - Milestone Creation", function () {
         milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
       }
 
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[1]]),
+      ]
       const tx = await createGrantProposal(
         proposer,
-        [treasuryAddress],
-        [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, totalAmount])],
-        values,
+        [treasuryAddress, treasuryAddress],
+        calldatas,
+        [0n, 0n],
         description,
         0,
         milestones,
@@ -241,13 +251,13 @@ describe.only("Governance - Milestone Creation", function () {
       // Verify milestone data was created during proposal creation
       const storedMilestones = await grantsManager.getMilestones(proposalId)
       expect(storedMilestones.totalAmount).to.equal(totalAmount)
-      expect(storedMilestones.recipient).to.equal(proposer.address)
-      expect(storedMilestones.milestone.length).to.equal(2)
+      expect(storedMilestones.proposer).to.equal(proposer.address)
+      expect(storedMilestones.milestone.length).to.equal(calldatas.length)
       expect(storedMilestones.milestone[0].amount).to.equal(values[0])
       expect(storedMilestones.milestone[1].amount).to.equal(values[1])
       expect(storedMilestones.milestone[0].status).to.equal(0) // Pending
       expect(storedMilestones.milestone[1].status).to.equal(0) // Pending
-      expect(storedMilestones.milestonesDetailsMetadataURI).to.equal(description)
+      expect(storedMilestones.milestonesDetailsMetadataURI).to.equal(milestones.milestonesDetailsMetadataURI)
     })
 
     it("Cannot create the milestone if it is missing one of the required fields of the Milestone", async () => {
