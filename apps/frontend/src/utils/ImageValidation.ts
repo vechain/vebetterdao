@@ -39,7 +39,7 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
       if (Math.abs(ratio - requirements.dimensions.ratio) > ratioTolerance) {
         resolve({
           isValid: false,
-          error: `Image must have a ${requirements.dimensions.ratio} aspect ratio`,
+          error: `Image must have a ${requirements.dimensions.ratioString} aspect ratio`,
         })
         return
       }

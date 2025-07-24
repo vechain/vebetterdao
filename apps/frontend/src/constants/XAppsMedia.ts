@@ -14,6 +14,7 @@ export const IMAGE_REQUIREMENTS = {
       minWidth: 512,
       minHeight: 512,
       ratio: 1, // 1:1
+      ratioString: "1:1",
     },
   },
   banner: {
@@ -23,6 +24,7 @@ export const IMAGE_REQUIREMENTS = {
       minWidth: 1240,
       minHeight: 460,
       ratio: 2.695652173913043, // 1240:460
+      ratioString: "4:3",
     },
   },
   ve_world_banner: {
@@ -32,6 +34,7 @@ export const IMAGE_REQUIREMENTS = {
       minWidth: 800,
       minHeight: 400,
       ratio: 2, // 2:1
+      ratioString: "2:1",
     },
   },
   screenshot: {
@@ -41,6 +44,7 @@ export const IMAGE_REQUIREMENTS = {
       minWidth: 686,
       minHeight: 515,
       ratio: 1.333333333333333, // 4:3
+      ratioString: "4:3",
     },
   },
 } as const
