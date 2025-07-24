@@ -11,6 +11,7 @@ export type BuildTransactionProps<ClausesParams = void> = {
   suggestedMaxGas?: number
   onFailure?: () => void
   transactionModalCustomUI?: TransactionCustomUI
+  gasPadding?: number
 }
 
 /**
@@ -21,6 +22,7 @@ export type BuildTransactionProps<ClausesParams = void> = {
  * @param onSuccess - An optional callback function to be called after the transaction is successfully sent.
  * @param onFailure - An optional callback function to be called after the transaction is failed or cancelled.
  * @param suggestedMaxGas - The suggested maximum gas for the transaction.
+ * @param gasPadding - The padding to add to the suggested max gas. (Eg. 0.1 = 10%)
  * @returns An object containing the result of the `useSendTransaction` hook and a `sendTransaction` function.
  */
 export const useBuildTransaction = <ClausesParams = void>({
@@ -31,6 +33,7 @@ export const useBuildTransaction = <ClausesParams = void>({
   onFailure,
   suggestedMaxGas,
   transactionModalCustomUI = {},
+  gasPadding,
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
@@ -73,6 +76,7 @@ export const useBuildTransaction = <ClausesParams = void>({
     onTxConfirmed: handleOnSuccess,
     suggestedMaxGas,
     onTxFailedOrCancelled: handleOnFailure,
+    gasPadding,
   })
 
   const transactionStatus = useMemo(() => result?.status, [result?.status])
