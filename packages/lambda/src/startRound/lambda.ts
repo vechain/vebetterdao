@@ -267,6 +267,9 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   console.log(`Environment: ${process.env.LAMBDA_ENV}`)
   console.log(`Network: ${NODE_URL}`)
 
+  const maxRetries = 5
+  const delayMs = 3000
+
   try {
     // Initialize the Thor client with the environment-specific URL and disable polling
     const thorClient = ThorClient.at(NODE_URL, {
@@ -276,7 +279,12 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     // Distribute the emissions to the VeBetterDAO and start the next round with retry
     let emissionsResult
     try {
-      emissionsResult = await withRetry(() => distributeEmissions(thorClient), 5, 3000, "Distribute Emissions")
+      emissionsResult = await withRetry(
+        () => distributeEmissions(thorClient),
+        maxRetries,
+        delayMs,
+        "Distribute Emissions",
+      )
     } catch (error) {
       console.log("Failed to distribute emissions after all retries:", error)
       await publishMessage(
@@ -321,8 +329,8 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     try {
       xAllocationsResult = await withRetry(
         () => distributeXAllocations(thorClient),
-        5,
-        3000,
+        maxRetries,
+        delayMs,
         "Distribute X-Allocations",
       )
     } catch (error) {
