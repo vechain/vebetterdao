@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -8,8 +7,6 @@ import { isZero } from "@repo/utils/FormattingUtils"
 import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
 import { useBuildTransaction } from "@/hooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-
-export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()

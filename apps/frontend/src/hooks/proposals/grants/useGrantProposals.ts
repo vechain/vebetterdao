@@ -50,11 +50,7 @@ export const useGrantProposals = () => {
             endAt: event.votingRoundId.toString(),
           },
         },
-        // Additional enriched data
         description: details?.description || "",
-        //TODO: Figure out how to get the deposit reached and voting power
-        isDepositReached: false,
-        votingPower: { against: BigNumber(0), for: BigNumber(0), abstain: BigNumber(0) },
       }
     })
   }, [events, proposalStates, proposalDetails, isLoadingStates, isLoadingDetails])

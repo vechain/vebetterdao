@@ -1,5 +1,4 @@
 import { ProposalState } from "@/api"
-import { GrantProposalVotingData } from "./useGrantProposalVotingData"
 
 export type PhaseInfo = {
   startAt: string
@@ -25,8 +24,6 @@ export type Proposal = {
   description: string
   b3tr: string
   dAppGrant: string
-  isDepositReached: boolean
-  votingPower: GrantProposalVotingData["votingPower"]
   proposer: {
     profilePicture: string
     addressOrDomain: string
