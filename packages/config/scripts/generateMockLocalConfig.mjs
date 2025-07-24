@@ -36,6 +36,7 @@ export const generateMockLocalConfig = () => {
     "veBetterPassportContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "x2EarnCreatorContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "stargateNFTContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    "grantsManagerContractAddress": "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "indexerUrl": "https://b3tr.testnet.vechain.org/api/v1",
     "nodeUrl": "http://localhost:8669",
     "network": {

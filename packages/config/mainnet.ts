@@ -23,6 +23,7 @@ const config: AppConfig = {
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
   stargateNFTContractAddress: "0x1856c533ac2d94340aaa8544d35a5c1d4a21dee7",
+  grantsManagerContractAddress: "0x0000000000000000000000000000000000000000",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "0xF8746E74334218d79e951313A87D82954b3dF5Ea",
     governorConfiguratorAddress: "0x8E4B5503DbBBCD7A4407b3B3cFE9306F758AFBe9",
