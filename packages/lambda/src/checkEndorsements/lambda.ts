@@ -7,6 +7,7 @@ import mainnetConfig from "@repo/config/mainnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 
 import { checkEndorsements, getSecret, publishMessage } from "../helpers"
+import { slackIds } from "../helpers/slack/slackIds"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -79,25 +80,24 @@ const getSlackConfig = (): SlackConfig => {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
   const environment = process.env.LAMBDA_ENV
 
-  // C06BLEJE5SA - b3tr-dev (slack channel)
   // We are pointing this channel for both testnet and mainnet
   switch (environment) {
     case AppEnv.MAINNET:
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: slackIds.b3trDev,
         messagePrefix: "",
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: slackIds.b3trLambda,
         messagePrefix: "[STAGING] ",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: slackIds.b3trLambda,
         messagePrefix: "[STAGING] ",
       }
   }
