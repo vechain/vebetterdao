@@ -1,17 +1,5 @@
 import { CustomModalContent } from "@/components"
-import {
-  Button,
-  FormControl,
-  HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalOverlay,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -27,7 +15,7 @@ type Props = {
 
 export const AddModeratorButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ moderatorAddress: string }>()
   const { setValue, watch } = addressForm
   const moderatorAddress = watch("moderatorAddress")
@@ -49,11 +37,11 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={false}>
-        <ModalOverlay />
+      <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
+        <Dialog.Backdrop />
         <CustomModalContent>
-          <ModalCloseButton />
-          <ModalBody p={"40px"}>
+          <Dialog.CloseTrigger />
+          <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
               <UilUser size="54px" color="#004CFC" />
               <Heading fontSize="28px">{t("Add a new moderator")}</Heading>
@@ -67,7 +55,7 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isRequired isInvalid={!moderatorAddress}>
+                <Field.Root required invalid={!moderatorAddress}>
                   <WalletAddressInput
                     onAddressResolved={address => setValue("moderatorAddress", address ?? "")}
                     customValidation={({ address }) => {
@@ -79,11 +67,11 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                         : ""
                     }}
                   />
-                </FormControl>
+                </Field.Root>
               </VStack>
               <VStack align="stretch">
                 <Button
-                  isDisabled={!moderatorAddress}
+                  disabled={!moderatorAddress}
                   variant="primaryAction"
                   type="submit"
                   onClick={addressForm.handleSubmit(onSubmit)}>
@@ -94,16 +82,16 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                 </Button>
               </VStack>
             </VStack>
-          </ModalBody>
+          </Dialog.Body>
         </CustomModalContent>
-      </Modal>
+      </Dialog.Root>
       <Button
         mt={4}
         onClick={onOpen}
         variant="primarySubtle"
-        isDisabled={editAdminForm.getValues("moderators").length >= 3}
-        leftIcon={<UilPlus size="14px" />}
+        disabled={editAdminForm.getValues("moderators").length >= 3}
         alignSelf={"flex-start"}>
+        <UilPlus size="14px" />
         {editAdminForm.getValues("moderators").length >= 3 ? t("Max 3 moderators") : t("Add moderator")}
       </Button>
     </>

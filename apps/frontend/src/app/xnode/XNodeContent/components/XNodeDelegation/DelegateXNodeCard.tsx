@@ -1,5 +1,5 @@
 import { useXNode } from "@/api"
-import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
@@ -29,8 +29,8 @@ export const DelegateXNodeCard = () => {
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <Heading fontSize="lg">{t("Node Management")}</Heading>
@@ -68,11 +68,11 @@ export const DelegateXNodeCard = () => {
 
           <DelegationAlert />
         </VStack>
-      </CardBody>
+      </Card.Body>
 
       <DelegateXNodeModal modal={delegateModal} />
       <RevokeXNodeDelegationModal modal={revokeModal} />
-    </Card>
+    </Card.Root>
   )
 }
 

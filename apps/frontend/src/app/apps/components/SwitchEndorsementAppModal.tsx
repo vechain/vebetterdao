@@ -80,11 +80,11 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
-      <VStack spacing={6} align="flex-start" w="full">
+      <VStack gap={6} align="flex-start" w="full">
         <Heading fontSize={"24px"}>{t("Switch Your Endorsement to Another App")}</Heading>
 
         <HStack align={"center"} justifyContent={"space-around"} w={"full"} py="16px" px="10%" rounded={"md"}>
-          <Skeleton isLoaded={!isAppToUnendorseLoading}>
+          <Skeleton loading={isAppToUnendorseLoading}>
             <Box position="relative" display="inline-block">
               <Image
                 src={appToUnendorseLogo?.image ?? notFoundImage}
@@ -100,7 +100,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
 
           <ArrowRightIcon color="#C84968" />
 
-          <Skeleton isLoaded={!isAppToEndorseLoading && !isUserEndorsementScoreLoading}>
+          <Skeleton loading={isAppToEndorseLoading || isUserEndorsementScoreLoading}>
             <Box position="relative" display="inline-block">
               <Image
                 src={appToEndorseLogo?.image ?? notFoundImage}
@@ -115,7 +115,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
           </Skeleton>
         </HStack>
 
-        <Skeleton isLoaded={!isAppToEndorseLoading && !isUserEndorsementScoreLoading}>
+        <Skeleton loading={isAppToEndorseLoading || isUserEndorsementScoreLoading}>
           <Text
             as="span"
             textTransform="none"
@@ -134,7 +134,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
           </Text>
         </Skeleton>
 
-        <HStack spacing={3} align={"center"} w={"full"} p="16px" rounded={"16px"} bgColor={"#FFF3E5"}>
+        <HStack gap={3} align={"center"} w={"full"} p="16px" rounded={"16px"} bgColor={"#FFF3E5"}>
           <Box>
             <UilClock size={30} color="#AF5F00" />
           </Box>
@@ -161,7 +161,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
 
         <Skeleton
           w={"full"}
-          isLoaded={!isAppToEndorseLoading && !isAppToUnendorseLoading}
+          loading={isAppToEndorseLoading || isAppToUnendorseLoading}
           justifyContent={"center"}
           justifyItems={"center"}
           alignContent={"center"}

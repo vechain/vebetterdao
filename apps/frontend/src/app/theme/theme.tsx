@@ -1,124 +1,88 @@
-import { extendTheme } from "@chakra-ui/react"
+import { createSystem, defaultConfig } from "@chakra-ui/react"
 import { keyframes } from "@emotion/react"
 import { darkThemeColors, lightThemeColors } from "./colors"
-import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
 import "@fontsource-variable/inter"
-import { ButtonStyle } from "./button"
-import { StepperStyle } from "./stepper"
-import { SelectStyle } from "./select"
-import { InputStyle } from "./input"
-import { ModalStyle } from "./modal"
 
-const themeConfig = {
-  //@ts-ignore
-  fonts: {
-    heading: `"Instrument Sans Variable", sans-serif`,
-    body: `"Inter Variable", sans-serif`,
-  },
-
-  components: {
-    Card: cardTheme,
-    Button: ButtonStyle,
-    Stepper: StepperStyle,
-    Select: SelectStyle,
-    Input: InputStyle,
-    Modal: ModalStyle,
-  },
-
-  // 2. Add your color mode config
-  initialColorMode: "system",
-  useSystemColorMode: true,
-  //@ts-ignore
-  semanticTokens: {
-    colors: {
-      "chakra-body-text": {
-        _light: "#1E1E1E",
-        _dark: "#E4E4E4",
+const baseThemeConfig = {
+  theme: {
+    tokens: {
+      fonts: {
+        heading: { value: `"Instrument Sans Variable", sans-serif` },
+        body: { value: `"Inter Variable", sans-serif` },
       },
-      "chakra-body-bg": {
-        _light: "#F7F7F7",
-        _dark: "#131313",
-      },
-      "info-bg": {
-        _light: "#F8F8F8",
-        _dark: "#1E1E1E",
-      },
-      "dark-contrast-on-card-bg": {
-        _light: "#F8F8F8",
-        _dark: "#131313",
-      },
-      "profile-bg": {
-        _light: "#FFFFFF",
-        _dark: "#2D2D2F",
-      },
-      "contrast-on-dark-bg": {
-        _light: "#FFFFFF",
-        _dark: "#1A1A1A",
-      },
-      "light-contrast-on-card-bg": {
-        _light: "#FAFAFA",
-        _dark: "#2D2D2F",
-      },
-      "your-ranking-hover": {
-        _light: "#005EFF",
-        _dark: "#005EFF",
-      },
-      "b3tr-balance-bg": {
-        _light: "#E5EEFF",
-        _dark: "#1A2547",
-      },
-      "vot3-balance-bg": {
-        _light: "#E3FFC4",
-        _dark: "#1A2E0F",
-      },
-      "contrast-bg-strong": {
-        _light: "#000000",
-        _dark: "#E2E8F0",
-      },
-      "contrast-bg-muted": {
-        _light: "#FFFFFF",
-        _dark: "#2D3748",
-      },
-      "contrast-bg-muted-hover": {
-        _light: "#EFEFEF",
-        _dark: "#A0AEC0",
-      },
-      "contrast-bg-strong-hover": {
-        _light: "#1A1A1A",
-        _dark: "#CBD5E0",
-      },
-      "contrast-fg-on-strong": {
-        _light: "#FFFFFF",
-        _dark: "#000000",
-      },
-      "contrast-fg-on-muted": {
-        _light: "#000000",
-        _dark: "#FFFFFF",
-      },
-      "hover-contrast-bg": {
-        _light: "#F8F8F8",
-        _dark: "#2D2F31",
-      },
-      "contrast-border": {
-        _light: "#EFEFEF",
-        _dark: "#4A5568",
+      colors: {
+        green: {
+          50: { value: "#f3f9f3" },
+          100: { value: "#cfe6d0" },
+          200: { value: "#a4d1a6" },
+          300: { value: "#6fb672" },
+          400: { value: "#51a654" },
+          500: { value: "#259029" },
+          600: { value: "#007b05" },
+          700: { value: "#006304" },
+          800: { value: "#005403" },
+          900: { value: "#003d02" },
+        },
       },
     },
-  },
-  colors: {
-    //dynamic primary coor based on the light/dark
-    green: {
-      "50": "#f3f9f3",
-      "100": "#cfe6d0",
-      "200": "#a4d1a6",
-      "300": "#6fb672",
-      "400": "#51a654",
-      "500": "#259029",
-      "600": "#007b05",
-      "700": "#006304",
-      "800": "#005403",
-      "900": "#003d02",
+    semanticTokens: {
+      colors: {
+        "chakra-body-text": {
+          value: { base: "#1E1E1E", _dark: "#E4E4E4" },
+        },
+        "chakra-body-bg": {
+          value: { base: "#F7F7F7", _dark: "#131313" },
+        },
+        "info-bg": {
+          value: { base: "#F8F8F8", _dark: "#1E1E1E" },
+        },
+        "dark-contrast-on-card-bg": {
+          value: { base: "#F8F8F8", _dark: "#131313" },
+        },
+        "profile-bg": {
+          value: { base: "#FFFFFF", _dark: "#2D2D2F" },
+        },
+        "contrast-on-dark-bg": {
+          value: { base: "#FFFFFF", _dark: "#1A1A1A" },
+        },
+        "light-contrast-on-card-bg": {
+          value: { base: "#FAFAFA", _dark: "#2D2D2F" },
+        },
+        "your-ranking-hover": {
+          value: { base: "#005EFF", _dark: "#005EFF" },
+        },
+        "b3tr-balance-bg": {
+          value: { base: "#E5EEFF", _dark: "#1A2547" },
+        },
+        "vot3-balance-bg": {
+          value: { base: "#E3FFC4", _dark: "#1A2E0F" },
+        },
+        "contrast-bg-strong": {
+          value: { base: "#000000", _dark: "#E2E8F0" },
+        },
+        "contrast-bg-muted": {
+          value: { base: "#FFFFFF", _dark: "#2D3748" },
+        },
+        "contrast-bg-muted-hover": {
+          value: { base: "#EFEFEF", _dark: "#A0AEC0" },
+        },
+        "contrast-bg-strong-hover": {
+          value: { base: "#1A1A1A", _dark: "#CBD5E0" },
+        },
+        "contrast-fg-on-strong": {
+          value: { base: "#FFFFFF", _dark: "#000000" },
+        },
+        "contrast-fg-on-muted": {
+          value: { base: "#000000", _dark: "#FFFFFF" },
+        },
+        "hover-contrast-bg": {
+          value: { base: "#F8F8F8", _dark: "#2D2F31" },
+        },
+        "contrast-border": {
+          value: { base: "#EFEFEF", _dark: "#4A5568" },
+        },
+      },
     },
   },
 }
@@ -150,11 +114,100 @@ export const TooltipBackgroundColor = (isDark = false) => (isDark ? "#CBD5E0" : 
 
 export const TooltipTextColor = (isDark = false) => (isDark ? "#171923" : "white")
 
-export const lightTheme = extendTheme({
-  ...themeConfig,
-  colors: lightThemeColors,
+export const lightTheme = createSystem(defaultConfig, {
+  ...baseThemeConfig,
+  theme: {
+    ...baseThemeConfig.theme,
+    tokens: {
+      ...baseThemeConfig.theme.tokens,
+      colors: {
+        ...baseThemeConfig.theme.tokens.colors,
+        primary: {
+          50: { value: lightThemeColors.primary["50"] },
+          100: { value: lightThemeColors.primary["100"] },
+          200: { value: lightThemeColors.primary["200"] },
+          300: { value: lightThemeColors.primary["300"] },
+          400: { value: lightThemeColors.primary["400"] },
+          500: { value: lightThemeColors.primary["500"] },
+          600: { value: lightThemeColors.primary["600"] },
+          700: { value: lightThemeColors.primary["700"] },
+          800: { value: lightThemeColors.primary["800"] },
+          900: { value: lightThemeColors.primary["900"] },
+        },
+        secondary: {
+          50: { value: lightThemeColors.secondary["50"] },
+          100: { value: lightThemeColors.secondary["100"] },
+          200: { value: lightThemeColors.secondary["200"] },
+          300: { value: lightThemeColors.secondary["300"] },
+          400: { value: lightThemeColors.secondary["400"] },
+          500: { value: lightThemeColors.secondary["500"] },
+          600: { value: lightThemeColors.secondary["600"] },
+          700: { value: lightThemeColors.secondary["700"] },
+          800: { value: lightThemeColors.secondary["800"] },
+          900: { value: lightThemeColors.secondary["900"] },
+        },
+        tertiary: {
+          100: { value: lightThemeColors.tertiary["100"] },
+          200: { value: lightThemeColors.tertiary["200"] },
+          300: { value: lightThemeColors.tertiary["300"] },
+          400: { value: lightThemeColors.tertiary["400"] },
+          500: { value: lightThemeColors.tertiary["500"] },
+          600: { value: lightThemeColors.tertiary["600"] },
+          700: { value: lightThemeColors.tertiary["700"] },
+          800: { value: lightThemeColors.tertiary["800"] },
+        },
+      },
+    },
+  },
 })
-export const darkTheme = extendTheme({
-  ...themeConfig,
-  colors: darkThemeColors,
+
+export const darkTheme = createSystem(defaultConfig, {
+  ...baseThemeConfig,
+  theme: {
+    ...baseThemeConfig.theme,
+    tokens: {
+      ...baseThemeConfig.theme.tokens,
+      colors: {
+        ...baseThemeConfig.theme.tokens.colors,
+        primary: {
+          50: { value: darkThemeColors.primary["50"] },
+          100: { value: darkThemeColors.primary["100"] },
+          200: { value: darkThemeColors.primary["200"] },
+          300: { value: darkThemeColors.primary["300"] },
+          400: { value: darkThemeColors.primary["400"] },
+          500: { value: darkThemeColors.primary["500"] },
+          600: { value: darkThemeColors.primary["600"] },
+          700: { value: darkThemeColors.primary["700"] },
+          800: { value: darkThemeColors.primary["800"] },
+          900: { value: darkThemeColors.primary["900"] },
+        },
+        secondary: {
+          50: { value: darkThemeColors.secondary["50"] },
+          100: { value: darkThemeColors.secondary["100"] },
+          200: { value: darkThemeColors.secondary["200"] },
+          300: { value: darkThemeColors.secondary["300"] },
+          400: { value: darkThemeColors.secondary["400"] },
+          500: { value: darkThemeColors.secondary["500"] },
+          600: { value: darkThemeColors.secondary["600"] },
+          700: { value: darkThemeColors.secondary["700"] },
+          800: { value: darkThemeColors.secondary["800"] },
+          900: { value: darkThemeColors.secondary["900"] },
+        },
+        tertiary: {
+          100: { value: darkThemeColors.tertiary["100"] },
+          200: { value: darkThemeColors.tertiary["200"] },
+          300: { value: darkThemeColors.tertiary["300"] },
+          400: { value: darkThemeColors.tertiary["400"] },
+          500: { value: darkThemeColors.tertiary["500"] },
+          600: { value: darkThemeColors.tertiary["600"] },
+          700: { value: darkThemeColors.tertiary["700"] },
+          800: { value: darkThemeColors.tertiary["800"] },
+        },
+      },
+    },
+  },
 })
+
+// For now, we'll use the defaultSystem from Chakra UI
+// In the future, we can create a custom system when we need to support theme switching
+export const system = lightTheme

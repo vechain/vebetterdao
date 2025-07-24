@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, CardProps, Heading, Image, Stack, StackProps, Text } from "@chakra-ui/react"
+import { Box, Card, CardRootProps, Heading, Image, Stack, StackProps, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export type StepCardProps = {
@@ -7,7 +7,7 @@ export type StepCardProps = {
   stepTitle: string
   stepDescription: string
   stackProps?: StackProps
-} & CardProps
+} & CardRootProps
 export const StepCard: React.FC<StepCardProps> = ({
   stepImageSrc,
   stepNumber,
@@ -18,9 +18,9 @@ export const StepCard: React.FC<StepCardProps> = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Card variant="filled" rounded={"3xl"} {...props}>
-      <CardBody>
-        <Stack spacing={4} align={"flex-start"} {...stackProps}>
+    <Card.Root variant="filled" rounded={"3xl"} {...props}>
+      <Card.Body>
+        <Stack gap={4} align={"flex-start"} {...stackProps}>
           <Image src={stepImageSrc} boxSize={32} alt={`step-${stepNumber}-image`} />
           <Box>
             <Text textTransform={"uppercase"} fontWeight={400} color="gray.500">
@@ -32,7 +32,7 @@ export const StepCard: React.FC<StepCardProps> = ({
             </Text>
           </Box>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

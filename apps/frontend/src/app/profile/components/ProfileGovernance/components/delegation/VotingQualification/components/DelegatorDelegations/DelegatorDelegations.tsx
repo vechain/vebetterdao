@@ -1,6 +1,6 @@
 import { useGetDelegatee } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
-import { Divider, HStack, Heading, Text, VStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
+import { Separator, HStack, Heading, Text, VStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
@@ -29,7 +29,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
   if (!isDelegator) return null
   return (
     <>
-      <Divider />
+      <Separator />
       <VStack align="stretch" gap={6}>
         <VStack align="stretch">
           <HStack justify="space-between">

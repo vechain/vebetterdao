@@ -4,19 +4,7 @@ import {
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
 
-import {
-  Button,
-  Card,
-  CardBody,
-  Divider,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Skeleton,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 
 import { useWallet } from "@vechain/vechain-kit"
@@ -108,7 +96,7 @@ export const Leaderboard = () => {
 
     if (leaderboardQuery.isError || !rankings.length)
       return (
-        <VStack spacing={4} align="stretch" w="full" h="full" pos="relative">
+        <VStack gap={4} align="stretch" w="full" h="full" pos="relative">
           <VStack
             pos={"absolute"}
             backdropFilter="blur(10px)"
@@ -117,7 +105,7 @@ export const Leaderboard = () => {
             left={0}
             w={"full"}
             justify={"center"}
-            spacing={1}
+            gap={1}
             p={4}
             h="full"
             zIndex={2}
@@ -149,10 +137,10 @@ export const Leaderboard = () => {
     AddressUtils.compareAddresses(ranking.address, account?.address ?? ""),
   )
   return (
-    <Card w="full" variant={"baseWithBorder"}>
-      <CardBody>
-        <VStack spacing={6} align="stretch" h="full">
-          <VStack spacing={2} align="stretch">
+    <Card.Root w="full" variant={"baseWithBorder"}>
+      <Card.Body>
+        <VStack gap={6} align="stretch" h="full">
+          <VStack gap={2} align="stretch">
             <HStack justify={"space-between"} w="full">
               <IconButton
                 minW={0}
@@ -160,11 +148,11 @@ export const Leaderboard = () => {
                 aria-label="Next round"
                 variant="link"
                 colorScheme="primary"
-                icon={<Icon as={FaAngleLeft} boxSize={5} />}
-                isDisabled={isFirstRound}
-                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-              />
-              <Skeleton isLoaded={!roundIdLoading}>
+                disabled={isFirstRound}
+                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+                <Icon as={FaAngleLeft} boxSize={5} />
+              </IconButton>
+              <Skeleton loading={roundIdLoading}>
                 <Heading size={["sm", "sm", "md"]}>
                   {t("Round {{id}} leaderboard", {
                     id: selectedRoundId ?? "",
@@ -177,10 +165,10 @@ export const Leaderboard = () => {
                 aria-label="Next round"
                 variant="link"
                 colorScheme="primary"
-                icon={<Icon as={FaAngleRight} boxSize={5} />}
-                isDisabled={isLastRound}
-                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
-              />
+                disabled={isLastRound}
+                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+                <Icon as={FaAngleRight} boxSize={5} />
+              </IconButton>
             </HStack>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
               {t(
@@ -188,21 +176,21 @@ export const Leaderboard = () => {
               )}
             </Text>
           </VStack>
-          <VStack spacing={4} align="stretch" w="full" h="full">
+          <VStack gap={4} align="stretch" w="full" h="full">
             {renderRankings}
             {!isRankingInTop5 && (
               <>
-                <Divider w="full" h={1} />
+                <Separator w="full" h={1} />
                 {yourRaking && <LeaderboardRankingComponent ranking={yourRaking} isYourRanking />}
               </>
             )}
           </VStack>
-          <Divider w="full" h={1} />
+          <Separator w="full" h={1} />
           <Button size="md" variant={"link"} colorScheme="primary" w="full" onClick={onSeeAllClick}>
             {t("See full leaderboard")}
           </Button>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

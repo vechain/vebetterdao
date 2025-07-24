@@ -86,7 +86,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
-      <VStack spacing={6} align="flex-start" w="full">
+      <VStack gap={6} align="flex-start" w="full">
         <Heading size="lg">{t("Endorse dApp")}</Heading>
         <Text
           as="span"
@@ -103,22 +103,15 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           />
         </Text>
 
-        <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
-          <HStack
-            spacing={3}
-            align={"center"}
-            w={"full"}
-            justify={"space-between"}
-            bg="#FAFAFA"
-            p="16px"
-            rounded={"md"}>
+        <Skeleton w="full" loading={isUserNodesLoading || isEndorsementDataLoading}>
+          <HStack gap={3} align={"center"} w={"full"} justify={"space-between"} bg="#FAFAFA" p="16px" rounded={"md"}>
             <Box>
               <Text color={"#000000"} fontWeight={600}>
                 {xApp?.name ?? ""}
               </Text>
               <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
             </Box>
-            <HStack spacing={1} align={"flex-end"}>
+            <HStack gap={1} align={"flex-end"}>
               <Heading fontSize={"36px"} fontWeight={700} color={"#252525"} lineHeight={"36px"}>
                 {appScore}
               </Heading>
@@ -131,22 +124,15 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           </HStack>
         </Skeleton>
 
-        <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
-          <HStack
-            spacing={3}
-            align={"center"}
-            w={"full"}
-            justify={"space-between"}
-            bg="#FAFAFA"
-            p="16px"
-            rounded={"md"}>
+        <Skeleton w="full" loading={isUserNodesLoading || isEndorsementDataLoading}>
+          <HStack gap={3} align={"center"} w={"full"} justify={"space-between"} bg="#FAFAFA" p="16px" rounded={"md"}>
             <Box>
               <Text color={"#000000"} fontWeight={600}>
                 {firstNode?.name}
               </Text>
               <Text color={"#6A6A6A"}>{t("Your X-node score")}</Text>
             </Box>
-            <HStack spacing={1} align={"flex-end"}>
+            <HStack gap={1} align={"flex-end"}>
               <Text
                 as="span"
                 textTransform="none"
@@ -169,15 +155,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </HStack>
           </HStack>
         </Skeleton>
-        <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
-          <HStack
-            spacing={3}
-            align={"center"}
-            w={"full"}
-            justify={"space-between"}
-            bg="#E9FDF1"
-            p="16px"
-            rounded={"md"}>
+        <Skeleton w="full" loading={isUserNodesLoading || isEndorsementDataLoading}>
+          <HStack gap={3} align={"center"} w={"full"} justify={"space-between"} bg="#E9FDF1" p="16px" rounded={"md"}>
             <Box>
               <Text color={"#000000"} fontWeight={600}>
                 {t("New dApp score")}
@@ -203,7 +182,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           </HStack>
         </Skeleton>
         {newScoreMetThreshold ? (
-          <HStack spacing={4} align={"center"} w={"full"}>
+          <HStack gap={4} align={"center"} w={"full"}>
             <Icon as={UilExclamationCircle} boxSize="24px" />
             <Text color="black">
               {t("With your endorsement, {{appName}} gets enough score to get into the next allocation round.", {
@@ -224,8 +203,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             )}
           />
         ) : null}
-        <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
-          <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement}>
+        <Skeleton w="full" loading={isUserNodesLoading || isEndorsementDataLoading}>
+          <Button variant={"solid"} w={"full"} onClick={handleEndorsement}>
             {t("Endorse now")}
           </Button>
         </Skeleton>

@@ -1,17 +1,5 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps } from "@/api"
-import {
-  VStack,
-  Button,
-  FormControl,
-  FormLabel,
-  Heading,
-  Select,
-  HStack,
-  Text,
-  Card,
-  CardHeader,
-  CardBody,
-} from "@chakra-ui/react"
+import { VStack, Button, Field, Heading, NativeSelect, HStack, Text, Card } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useCheckEndorsement } from "@/hooks/useCheckEndorsement"
@@ -43,12 +31,12 @@ export const XAppCheckEndorsement = () => {
   const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Check Endorsement")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack flex={1} align="flex-start" spacing={8}>
+      </Card.Header>
+      <Card.Body>
+        <VStack flex={1} align="flex-start" gap={8}>
           <VStack align={"start"}>
             <Text>
               {currentRound.voteEndTimestamp?.isBefore()
@@ -63,35 +51,33 @@ export const XAppCheckEndorsement = () => {
             </Text>
           </VStack>
           <form onSubmit={handleSubmit}>
-            <VStack spacing={4} alignItems={"start"}>
+            <VStack gap={4} alignItems={"start"}>
               <HStack w={"full"}>
-                <FormControl isRequired>
-                  <FormLabel>
+                <Field.Root required>
+                  <Field.Label>
                     <strong>{"App"}</strong>
-                  </FormLabel>
-                  <Select
-                    placeholder="Select app"
-                    isDisabled={isLoading}
-                    onChange={e => setAppId(e.target.value)}
-                    value={appId}>
-                    {xApps?.allApps.map(item => {
-                      return (
-                        <option key={`AppSelectOption-${item?.id}`} value={item.id}>
-                          {item.name + " - id: " + item.id}
-                        </option>
-                      )
-                    })}
-                  </Select>
-                </FormControl>
+                  </Field.Label>
+                  <NativeSelect.Root disabled={isLoading}>
+                    <NativeSelect.Field placeholder="Select app" onChange={e => setAppId(e.target.value)} value={appId}>
+                      {xApps?.allApps.map(item => {
+                        return (
+                          <option key={`AppSelectOption-${item?.id}`} value={item.id}>
+                            {item.name + " - id: " + item.id}
+                          </option>
+                        )
+                      })}
+                    </NativeSelect.Field>
+                  </NativeSelect.Root>
+                </Field.Root>
               </HStack>
 
-              <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+              <Button disabled={!isFormValid} colorScheme="blue" type="submit" loading={isLoading}>
                 {t("Check Endorsement")}
               </Button>
             </VStack>
           </form>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

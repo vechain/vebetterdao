@@ -4,7 +4,7 @@ import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal
 import { FeatureFlagWrapper } from "@/components"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
-import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -59,8 +59,8 @@ export const AttachXNodeCard = () => {
     return null
   }
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -91,7 +91,7 @@ export const AttachXNodeCard = () => {
               <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
               <VStack flex="1" align={"flex-start"}>
                 <HStack>
-                  <Text fontWeight={700} noOfLines={1}>
+                  <Text fontWeight={700} lineClamp={1}>
                     {xNodeName}
                   </Text>
                   {(isXNodeDelegator || isXNodeDelegatee) && (
@@ -104,7 +104,7 @@ export const AttachXNodeCard = () => {
                   <Text fontSize="sm" fontWeight={600}>
                     {xNodePoints}
                   </Text>
-                  <Text fontSize="sm" fontWeight={400} noOfLines={1}>
+                  <Text fontSize="sm" fontWeight={400} lineClamp={1}>
                     {t("points to endorse Apps")}
                   </Text>
                 </HStack>
@@ -135,7 +135,7 @@ export const AttachXNodeCard = () => {
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
               fallback={
-                <Button leftIcon={<UilLinkBroken color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
+                <Button leftIcon={<UilLinkBroken color="#004CFC" />} variant={"primarySubtle"} disabled={true}>
                   {t("Coming soon!")}
                 </Button>
               }>
@@ -170,7 +170,7 @@ export const AttachXNodeCard = () => {
                 <Button
                   leftIcon={<UilLinkBroken color="#004CFC" />}
                   variant={"primarySubtle"}
-                  isDisabled={isXNodeDelegator}
+                  disabled={isXNodeDelegator}
                   onClick={() => handleAttachOnClick()}>
                   {t("Attach now!")}
                 </Button>
@@ -178,9 +178,9 @@ export const AttachXNodeCard = () => {
             </FeatureFlagWrapper>
           )}
         </VStack>
-      </CardBody>
+      </Card.Body>
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
       <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
-    </Card>
+    </Card.Root>
   )
 }

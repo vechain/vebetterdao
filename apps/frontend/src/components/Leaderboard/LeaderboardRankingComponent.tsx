@@ -1,4 +1,4 @@
-import { Card, CardBody, HStack, Box, Image, Text } from "@chakra-ui/react"
+import { Card, HStack, Box, Image, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
@@ -59,7 +59,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
   const grayColor = isYourRanking ? "white" : "#6A6A6A"
 
   return (
-    <Card
+    <Card.Root
       onClick={onClick}
       _hover={{
         cursor: "pointer",
@@ -72,7 +72,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       pos="relative"
       overflow={"hidden"}
       borderColor={positionStyles.borderColor}>
-      <CardBody color={whiteColor} p="12px">
+      <Card.Body color={whiteColor} p="12px">
         {isYourRanking && (
           <Image
             src="/assets/backgrounds/your-ranking-bg.svg"
@@ -88,10 +88,10 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
           />
         )}
         <HStack w="full" justify="space-between">
-          <HStack spacing={2} zIndex={1}>
+          <HStack gap={2} zIndex={1}>
             <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
             <Box>
-              <HStack spacing={1}>
+              <HStack gap={1}>
                 {isYourRanking && (
                   <Text fontSize="sm" fontWeight={600}>
                     {`(${t("You")})`}
@@ -132,7 +132,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
             </Text>
           )}
         </HStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-literals */
 import { SustainabilityProof, useXApps } from "@/api"
-import { VStack, HStack, Text, Card, CardBody, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
+import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -97,14 +97,14 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
       onClose={actionModal.onClose ?? (() => {})}
       ariaTitle="ActionModal"
       ariaDescription="ActionModal">
-      <VStack align="stretch" spacing={4}>
+      <VStack align="stretch" gap={4}>
         <Text fontSize="sm" color="black" bg="#F8F8F8" py={1} px={3} borderRadius="full" alignSelf="flex-start">
           {dayjs.unix(blockTimestamp ?? 0).fromNow()}
         </Text>
         {b3trAmount && (
-          <Card variant="filled">
-            <CardBody p={4}>
-              <VStack align="stretch" spacing={1}>
+          <Card.Root variant="filled">
+            <Card.Body p={4}>
+              <VStack align="stretch" gap={1}>
                 <HStack>
                   <Heading fontSize="3xl" fontWeight="bold">
                     {compactFormatter.format(Number(b3trAmount ?? 0))}
@@ -118,19 +118,19 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
                   </Heading>
                 </HStack>
               </VStack>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         )}
         {isProof && (
-          <VStack align="stretch" spacing={2}>
+          <VStack align="stretch" gap={2}>
             <Heading fontSize="lg">{t("Sustainability proof")}</Heading>
-            <VStack align="stretch" spacing={2}>
+            <VStack align="stretch" gap={2}>
               <Text fontSize="sm">{proof?.description}</Text>
               {renderProof}
             </VStack>
           </VStack>
         )}
-        <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" gap={4}>
           <Heading fontSize="lg">{t("Transaction information")}</Heading>
           <HStack justify="space-between">
             <Text fontWeight="600">{t("Block")}</Text>
@@ -140,14 +140,14 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
         {txId && (
           <VStack
             align="stretch"
-            spacing={4}
+            gap={4}
             w={"full"}
             alignItems={"center"}
             mt={4}
             color={"rgba(0, 76, 252, 1)"}
             cursor={"pointer"}
             onClick={onTransactionDetailClick}>
-            <HStack align="stretch" spacing={4} alignItems={"center"}>
+            <HStack align="stretch" gap={4} alignItems={"center"}>
               <Text fontSize={16} fontWeight={500}>
                 {t("See more details on")} Vechain Stats
               </Text>

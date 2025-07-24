@@ -1,13 +1,12 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useBreakpoints } from "@/hooks"
 import {
   Button,
   Heading,
   HStack,
   IconButton,
-  Modal,
-  ModalBody,
-  ModalOverlay,
+  Dialog,
   Show,
   Text,
   useBreakpointValue,
@@ -26,7 +25,8 @@ type Props = {
 
 export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props) => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isMobile } = useBreakpoints()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { data: vnsData } = useVechainDomain(distributor)
   const domain = vnsData?.domain
 
@@ -35,10 +35,10 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
   return (
     <>
       {isDeleteable && (
-        <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
-          <ModalOverlay />
+        <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
+          <Dialog.Backdrop />
           <CustomModalContent>
-            <ModalBody p={"40px"}>
+            <Dialog.Body p={"40px"}>
               <VStack align="center" gap="20px">
                 <ExclamationTriangle color="#D23F63" size={iconSize} />
                 <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
@@ -61,12 +61,12 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
                   </Button>
                 </VStack>
               </VStack>
-            </ModalBody>
+            </Dialog.Body>
           </CustomModalContent>
-        </Modal>
+        </Dialog.Root>
       )}
       <HStack gap={6} justify={"space-between"}>
-        <Show above={"sm"}>
+        <Show when={!isMobile}>
           <HStack>
             <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
             <VStack align="stretch" gap={0}>
@@ -84,7 +84,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
             </Button>
           )}
         </Show>
-        <Show below={"sm"}>
+        <Show when={isMobile}>
           <HStack>
             <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
             <Text fontSize={"14px"} color="#6A6A6A">
@@ -92,12 +92,9 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
             </Text>
           </HStack>
           {isDeleteable && (
-            <IconButton
-              variant="dangerGhost"
-              aria-label="Remove"
-              icon={<UilTrash size={"14px"} color="#D23F63" />}
-              onClick={onOpen}
-            />
+            <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+              <UilTrash size={"14px"} color="#D23F63" />
+            </IconButton>
           )}
         </Show>
       </HStack>

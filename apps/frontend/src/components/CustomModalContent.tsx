@@ -1,10 +1,11 @@
-import { ModalContent, ModalContentProps, Show } from "@chakra-ui/react"
+import { Dialog, Show, useMediaQuery } from "@chakra-ui/react"
 
-export const CustomModalContent = ({ children, ...others }: ModalContentProps) => {
+export const CustomModalContent = ({ children, ...others }: Dialog.ContentProps) => {
+  const [isMobile] = useMediaQuery(["(max-width: 768px)"])
   return (
     <>
-      <Show below="sm">
-        <ModalContent
+      <Show when={isMobile}>
+        <Dialog.Content
           position="fixed"
           bottom="0px"
           mb="0"
@@ -14,12 +15,12 @@ export const CustomModalContent = ({ children, ...others }: ModalContentProps) =
           overflow="auto"
           {...others}>
           {children}
-        </ModalContent>
+        </Dialog.Content>
       </Show>
-      <Show above="sm">
-        <ModalContent rounded={"20px"} {...others}>
+      <Show when={!isMobile}>
+        <Dialog.Content rounded={"20px"} {...others}>
           {children}
-        </ModalContent>
+        </Dialog.Content>
       </Show>
     </>
   )

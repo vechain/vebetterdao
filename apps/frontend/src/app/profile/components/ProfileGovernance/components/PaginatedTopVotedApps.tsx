@@ -32,8 +32,10 @@ export const PaginatedTopVotedApps = ({ topVotedApps, itemsPerPage = 6, goBack }
           {t("go back")}
         </Text>
       </HStack>
-      <VStack w={"full"} spacing={4}>
-        {currentItems?.map(app => <AppVotedBox key={app.appId} appVoted={app} />)}
+      <VStack w={"full"} gap={4}>
+        {currentItems?.map(app => (
+          <AppVotedBox key={app.appId} appVoted={app} />
+        ))}
       </VStack>
       {/* Sentinel Element */}
       {hasMore && (

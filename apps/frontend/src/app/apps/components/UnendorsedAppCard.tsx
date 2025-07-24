@@ -1,7 +1,6 @@
 import {
   Card,
-  CardBody,
-  Divider,
+  Separator,
   Heading,
   HStack,
   Image,
@@ -11,6 +10,7 @@ import {
   VStack,
   Show,
   Icon,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -32,6 +32,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
 
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const {
     score: endorsementScore,
@@ -58,7 +59,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
   }, [xApp])
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       w="full"
       onClick={onCardClick}
@@ -68,14 +69,14 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
         backgroundColor: "hover-contrast-bg",
         transition: "all 0.3s",
       }}>
-      <CardBody py="16px" px="24px">
+      <Card.Body py="16px" px="24px">
         <Stack
           direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
           align="stretch"
           w="full"
           h="full">
-          <Stack direction="row" spacing={4} align="center" flex="1">
-            <Skeleton isLoaded={!isLogoLoading}>
+          <Stack direction="row" gap={4} align="center" flex="1">
+            <Skeleton loading={isLogoLoading}>
               <Image
                 src={logo?.image ?? notFoundImage}
                 alt="logo"
@@ -88,12 +89,12 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
             </Skeleton>
 
             <Stack flex="1" align="stretch" justify="center">
-              <Skeleton isLoaded={!appMetadataLoading}>
-                <HStack spacing={4} align="center">
+              <Skeleton loading={appMetadataLoading}>
+                <HStack gap={4} align="center">
                   <Heading
                     fontWeight={700}
                     fontSize="20px"
-                    noOfLines={1}
+                    lineClamp={1}
                     maxW={{ base: "full", md: "150px", lg: "200px" }}
                     overflow="hidden"
                     textOverflow="ellipsis">
@@ -108,7 +109,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                       py={1}
                       borderRadius={"16px"}
                       fontSize="12px"
-                      spacing={1}
+                      gap={1}
                       flexShrink={0}>
                       <Image src="/assets/icons/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
                       <Text>{t("New!")}</Text>
@@ -116,32 +117,32 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                   )}
                 </HStack>
               </Skeleton>
-              <Skeleton isLoaded={!appMetadataLoading}>
-                <Text fontSize="14px" color="#6A6A6A" fontWeight={400} noOfLines={2}>
+              <Skeleton loading={appMetadataLoading}>
+                <Text fontSize="14px" color="#6A6A6A" fontWeight={400} lineClamp={2}>
                   {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                 </Text>
               </Skeleton>
             </Stack>
           </Stack>
 
-          <Show above="md">
-            <Divider orientation="vertical" h="100%" />
+          <Show when={isAbove800}>
+            <Separator orientation="vertical" h="100%" />
           </Show>
-          <Show below="md">
-            <Divider orientation="horizontal" h="100%" />
+          <Show when={!isAbove800}>
+            <Separator orientation="horizontal" h="100%" />
           </Show>
 
           {/* Right Section: Score */}
           <Stack direction="row" align="center" justify="center">
             <Stack
               direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
-              spacing={3}
+              gap={3}
               align={{ base: "center", lg: "stretch", md: "stretch" }}
               justify={{ base: "space-between", md: "stretch" }}
               w="full">
               <VStack gap={0} alignItems="flex-start">
-                <Skeleton isLoaded={!isEndorsementStatusLoading}>
-                  <HStack spacing={1}>
+                <Skeleton loading={isEndorsementStatusLoading}>
+                  <HStack gap={1}>
                     <Text fontSize="24px" fontWeight="700" color={color}>
                       {endorsementScore}
                     </Text>
@@ -155,7 +156,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
 
               {isUserAppEndorser && (
                 <VStack gap={0} alignItems="flex-start">
-                  <Skeleton isLoaded={!isXNodeLoading}>
+                  <Skeleton loading={isXNodeLoading}>
                     <Text fontSize="24px" fontWeight="700" color="#004CFC">
                       {xNodePoints}
                     </Text>
@@ -166,12 +167,12 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                 </VStack>
               )}
             </Stack>
-            <Show above="md">
+            <Show when={isAbove800}>
               <Icon as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
             </Show>
           </Stack>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

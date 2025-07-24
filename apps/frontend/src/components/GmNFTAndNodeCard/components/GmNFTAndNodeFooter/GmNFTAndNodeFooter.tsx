@@ -15,7 +15,7 @@ const compactFormatter = getCompactFormatter(4)
 
 export const GmNFTAndNodeFooter = () => {
   const { t } = useTranslation()
-  const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
+  const [isAbove1200] = useMediaQuery(["(min-width: 1200px)"])
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const {
@@ -154,7 +154,7 @@ export const GmNFTAndNodeFooter = () => {
       align={isAbove1200 ? "center" : "stretch"}
       direction={isAbove1200 ? "row" : "column"}
       gap={"20px"}>
-      <Skeleton isLoaded={!isB3trBalanceLoading}>
+      <Skeleton loading={isB3trBalanceLoading}>
         <HStack gap={2}>
           {isGMOwned ? (
             <UilArrowCircleUp size={"30px"} color="#B1F16C" />
@@ -166,7 +166,7 @@ export const GmNFTAndNodeFooter = () => {
           {upgradeMessage}
         </HStack>
       </Skeleton>
-      <Skeleton isLoaded={!isB3trBalanceLoading}>
+      <Skeleton loading={isB3trBalanceLoading}>
         <GmActionButton buttonProps={{ variant: "tertiaryAction" }} />
       </Skeleton>
     </Stack>

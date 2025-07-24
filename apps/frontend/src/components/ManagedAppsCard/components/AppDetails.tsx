@@ -1,7 +1,7 @@
 import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Divider, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Separator, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -11,10 +11,10 @@ type Props = {
   appId: string
   isAdmin: boolean
   isModerator: boolean
-  showDivider?: boolean
+  showSeparator?: boolean
 }
 
-export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }: Props) => {
+export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false }: Props) => {
   const router = useRouter()
   const {
     data: appMetadata,
@@ -39,14 +39,14 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }:
   }, [router, appId])
 
   return (
-    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} spacing={4}>
-      <HStack spacing={1} justifyContent={"space-between"} w={"full"}>
+    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap={4}>
+      <HStack gap={1} justifyContent={"space-between"} w={"full"}>
         <HStack>
-          <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+          <Skeleton loading={isLogoLoading} alignContent={"start"}>
             <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
           </Skeleton>
 
-          <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
+          <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
             <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
             <Text fontSize={"sm"} fontWeight={"300"} color={"#6A6A6A"}>
               {role}
@@ -54,23 +54,23 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showDivider = false }:
           </Skeleton>
         </HStack>
 
-        <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
+        <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
           <IconButton
-            isRound={true}
+            rounded={"full"}
             variant="solid"
             aria-label="Go to App"
             fontSize="22px"
             disabled={isAppMetadataError}
             onClick={navigateToAppDetail}
-            color={"primary.500"}
-            icon={<FiArrowUpRight />}
-          />
+            color={"primary.500"}>
+            <FiArrowUpRight />
+          </IconButton>
         </Skeleton>
       </HStack>
 
       <LatestAllocationDetails appId={appId} />
 
-      {showDivider && <Divider w={"full"} />}
+      {showSeparator && <Separator w={"full"} />}
     </VStack>
   )
 }

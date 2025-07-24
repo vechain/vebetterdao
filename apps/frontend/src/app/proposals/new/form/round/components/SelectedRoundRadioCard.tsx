@@ -1,5 +1,5 @@
 import { RoundCreated, useAllocationsRoundsEvents, useVotingPeriod } from "@/api"
-import { Card, VStack, HStack, Heading, Radio, Skeleton, Text, CardProps } from "@chakra-ui/react"
+import { Card, VStack, HStack, Heading, RadioGroup, Skeleton, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -14,7 +14,7 @@ type Props = {
   onSelect?: () => void
   renderSkeleton?: boolean
   isSelectable?: boolean
-  cardProps?: CardProps
+  cardProps?: Card.RootProps
 }
 export const SelectedRoundRadioCard: React.FC<Props> = ({
   roundId,
@@ -59,7 +59,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
   const isEstimatedStartTimeLoading = !estimatedStartTime || !currentBlock || !estimatedStartBlock
 
   return (
-    <Card
+    <Card.Root
       data-testid={renderSkeleton ? "round-radio-card-skeleton" : "round-radio-card"}
       w="full"
       onClick={onSelect}
@@ -77,26 +77,33 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
           _hover: { borderColor: "primary.active", transition: "border-color 0.2s" },
         })}
       {...cardProps}>
-      <VStack spacing={4} align="flex-start">
+      <VStack gap={4} align="flex-start">
         <HStack justify="space-between" w="full">
-          <VStack spacing={2} align="flex-start">
-            <Skeleton isLoaded={!renderSkeleton}>
+          <VStack gap={2} align="flex-start">
+            <Skeleton loading={renderSkeleton}>
               <Heading size={["sm", "md"]}>
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
               </Heading>
             </Skeleton>
-            <Skeleton isLoaded={!isEstimatedStartTimeLoading}>
+            <Skeleton loading={isEstimatedStartTimeLoading}>
               <Text fontSize={["sm", "md"]} as="span" display={"inline-flex"} gap={1}>
                 {t("Starts on")}
                 <Text fontWeight="600">{estimatedStartTime?.format("MMM D")}</Text>
               </Text>
             </Skeleton>
           </VStack>
-          {isSelectable && <Radio isChecked={selected} isDisabled={renderSkeleton} />}
+          {isSelectable && (
+            <RadioGroup.Root value={selected ? roundId.toString() : undefined}>
+              <RadioGroup.Item value={roundId.toString()} disabled={renderSkeleton}>
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+              </RadioGroup.Item>
+            </RadioGroup.Root>
+          )}
         </HStack>
       </VStack>
-    </Card>
+    </Card.Root>
   )
 }

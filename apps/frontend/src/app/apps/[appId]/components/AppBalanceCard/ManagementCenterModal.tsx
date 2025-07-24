@@ -125,12 +125,12 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
         {!isPaused && (
           <VStack
             align="start"
-            spacing={4}
+            gap={4}
             border="1px solid #D5D5D5"
             borderRadius="20px"
             p="16px"
             justifyContent="space-between">
-            <HStack spacing={2}>
+            <HStack gap={2}>
               <Box
                 w="8px"
                 h="8px"
@@ -179,14 +179,14 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
         )}
         <VStack
           align="start"
-          spacing={4}
+          gap={4}
           border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
           boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}
           borderRadius="20px"
           p="16px"
           mt={isPaused ? "0" : "24px"}
           justifyContent="space-between">
-          <HStack spacing={2}>
+          <HStack gap={2}>
             {isPaused && (
               <Box w="8px" h="8px" borderRadius="full" bg={"#C84968"} boxShadow={"0 0 8px rgba(245, 101, 101, 0.5)"} />
             )}
@@ -250,7 +250,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
             {informationOnConfirmationText}
           </Text>
         </VStack>
-        <HStack mt={6} spacing={4} width="full">
+        <HStack mt={6} gap={4} width="full">
           <Button variant="primarySubtle" flex={1} onClick={goToPrevious}>
             {t("Cancel")}
           </Button>

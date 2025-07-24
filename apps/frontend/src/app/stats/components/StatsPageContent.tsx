@@ -1,20 +1,5 @@
 import { AppUsersData, useAppsSustainabilityActions, useCurrentAllocationsRoundId } from "@/api"
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  CircularProgress,
-  CircularProgressLabel,
-  Grid,
-  Heading,
-  HStack,
-  Select,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Accordion, Box, ProgressCircle, Grid, Heading, HStack, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { median } from "d3-array"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -249,19 +234,17 @@ export const StatsPageContent = () => {
     const progressPercent = totalAppCount > 0 ? Math.round((loadedAppCount / totalAppCount) * 100) : 0
 
     return (
-      <VStack w="full" spacing={8} mt={10}>
-        <CircularProgress
-          value={progressPercent}
-          size="120px"
-          thickness="8px"
-          color="teal.400"
-          trackColor="gray.200"
-          capIsRound>
-          <CircularProgressLabel>
+      <VStack w="full" gap={8} mt={10}>
+        <ProgressCircle.Root value={progressPercent} size="xl">
+          <ProgressCircle.Circle css={{ "--thickness": "8px" }}>
+            <ProgressCircle.Track stroke="gray.200" />
+            <ProgressCircle.Range stroke="teal.400" strokeLinecap="round" />
+          </ProgressCircle.Circle>
+          <ProgressCircle.Label>
             {progressPercent}
             {"%"}
-          </CircularProgressLabel>
-        </CircularProgress>
+          </ProgressCircle.Label>
+        </ProgressCircle.Root>
         <Text fontSize="lg" color="gray.600">
           {t("Fetching data...")}
         </Text>
@@ -270,126 +253,131 @@ export const StatsPageContent = () => {
   }
 
   return (
-    <VStack w="full" spacing={8} overflow={"clip"}>
+    <VStack w="full" gap={8} overflow={"clip"}>
       {/* Round Range Dropdowns */}
-      <HStack spacing={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
+      <HStack gap={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
         <VStack alignItems="flex-start" w="full">
           <Text>{t("Start Round:")}</Text>
-          <Select value={startRound} onChange={onStartRoundChange} placeholder={t("Select start round")}>
-            {startRoundOptions.map(round => (
-              <option key={round} value={round}>
-                {t("Round")} {round}
-              </option>
-            ))}
-          </Select>
+          <NativeSelect.Root>
+            <NativeSelect.Field value={startRound} onChange={onStartRoundChange} placeholder={t("Select start round")}>
+              {startRoundOptions.map(round => (
+                <option key={round} value={round}>
+                  {t("Round")} {round}
+                </option>
+              ))}
+            </NativeSelect.Field>
+          </NativeSelect.Root>
         </VStack>
         <VStack alignItems="flex-start" w="full">
           <Text>{t("End Round:")}</Text>
-          <Select value={endRound} onChange={onEndRoundChange} placeholder={t("Select end round")}>
-            {endRoundOptions.map(round => (
-              <option key={round} value={round}>
-                {t("Round")} {round}
-              </option>
-            ))}
-          </Select>
+          <NativeSelect.Root>
+            <NativeSelect.Field value={endRound} onChange={onEndRoundChange} placeholder={t("Select end round")}>
+              {endRoundOptions.map(round => (
+                <option key={round} value={round}>
+                  {t("Round")} {round}
+                </option>
+              ))}
+            </NativeSelect.Field>
+          </NativeSelect.Root>
         </VStack>
       </HStack>
 
       {/* Chart Components */}
-      <HStack spacing={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
-        <VStack w="full" spacing={4}>
+      <HStack gap={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
+        <VStack w="full" gap={4}>
           <Heading size="md">{t("Total Actions per App")}</Heading>
           <TotalActionsPerAppChart data={totalActionsPerApp} />
         </VStack>
-        <VStack w="full" spacing={4}>
+        <VStack w="full" gap={4}>
           <Heading size="md">{t("Percentage Share of Actions per App")}</Heading>
           <ActionsSharePieChart data={totalActionsPerApp} />
         </VStack>
       </HStack>
-      <HStack spacing={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
-        <VStack w="full" spacing={4}>
+      <HStack gap={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
+        <VStack w="full" gap={4}>
           <Heading size="md">{t("Active Users per App")}</Heading>
           <ActiveUsersPerAppChart data={activeUsersPerApp} />
         </VStack>
-        <VStack w="full" spacing={4}>
+        <VStack w="full" gap={4}>
           <Heading size="md">{t("Total Rewards per App")}</Heading>
           <TotalRewardsPerAppChart data={totalRewardsPerApp} />
         </VStack>
       </HStack>
 
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         <Heading size="md">{t("Average and Median Reward per Action per App")}</Heading>
         <RewardPerActionChart data={rewardStatsPerApp} />
       </VStack>
 
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         <Heading size="md">{t("Top Users by Rewards")}</Heading>
         <TopUsersByRewardsChart data={topUsersByRewards} />
       </VStack>
 
       {/* Additional Components for Users if needed */}
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         <Heading size="md">{t("Top Users by Actions")}</Heading>
         <TopUsersChart data={topUsers} />
       </VStack>
       {/* Accordion for Top Users' Most Used Apps */}
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         <Heading size="md">{t("Top Users' Most Used Apps")}</Heading>
-        <Accordion allowToggle w="full">
-          {/* Top Users by Actions */}
-          <AccordionItem>
-            <AccordionButton>
+        <Accordion.Root collapsible w="full">
+          <Accordion.Item value="top-users-by-actions">
+            <Accordion.ItemTrigger>
               <Box flex="1" textAlign="left">
                 {t("Top Users by Actions")}
               </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel pb={4}>
+              <Accordion.ItemIndicator />
+            </Accordion.ItemTrigger>
+            <Accordion.ItemContent pb={4}>
               <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} w="full">
                 {topUsersAppActions.map(({ userId, appActions }) => (
                   <UserAppsChart key={userId} userId={userId} appActions={appActions} type="actions" />
                 ))}
               </Grid>
-            </AccordionPanel>
-          </AccordionItem>
+            </Accordion.ItemContent>
+          </Accordion.Item>
 
           {/* Top Users by Rewards */}
-          <AccordionItem>
-            <AccordionButton>
+          <Accordion.Item value="top-users-by-rewards">
+            <Accordion.ItemTrigger>
               <Box flex="1" textAlign="left">
                 {t("Top Users by Rewards")}
               </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel pb={4}>
+              <Accordion.ItemIndicator />
+            </Accordion.ItemTrigger>
+            <Accordion.ItemContent pb={4}>
               <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} w="full">
                 {topUsersByRewardsAppActions.map(({ userId, appActions }) => (
                   <UserAppsChart key={userId} userId={userId} appActions={appActions} type="rewards" />
                 ))}
               </Grid>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+            </Accordion.ItemContent>
+          </Accordion.Item>
+        </Accordion.Root>
       </VStack>
 
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         <Heading size="md">{t("Top Users by Rewards for Selected App")}</Heading>
         {/* App Selection Dropdown */}
         <VStack alignItems="flex-start" w="full">
           <Text>{t("Select App:")}</Text>
-          <Select
-            value={selectedAppId}
-            onChange={event => setSelectedAppId(event.target.value)}
-            placeholder={t("Select an app")}>
-            {Object.keys(appActions).map(appId => (
-              <option key={appId} value={appId}>
-                {appActions[appId]?.name ?? appId}
-              </option>
-            ))}
-          </Select>
+          <NativeSelect.Root>
+            <NativeSelect.Field
+              value={selectedAppId}
+              onChange={event => setSelectedAppId(event.target.value)}
+              placeholder={t("Select an app")}>
+              {Object.keys(appActions).map(appId => (
+                <option key={appId} value={appId}>
+                  {appActions[appId]?.name ?? appId}
+                </option>
+              ))}
+            </NativeSelect.Field>
+          </NativeSelect.Root>
         </VStack>
         {selectedAppId && topUsersForSelectedApp.length > 0 ? (
-          <VStack w="full" spacing={4}>
+          <VStack w="full" gap={4}>
             <Heading size="sm">
               {t("Users by Rewards for")} {appActions[selectedAppId]?.name}
             </Heading>

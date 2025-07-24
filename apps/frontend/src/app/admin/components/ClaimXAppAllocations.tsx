@@ -9,42 +9,44 @@ import { useClaimXAppsAllocations } from "@/hooks"
 import {
   VStack,
   Button,
-  FormControl,
-  FormLabel,
+  Field,
   InputGroup,
   Input,
   Heading,
-  FormErrorMessage,
   Select,
   HStack,
   Text,
-  InputRightAddon,
   NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
   Card,
-  CardHeader,
-  CardBody,
+  Portal,
+  createListCollection,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const ClaimXAppAllocations = () => {
-  const [appId, setAppId] = useState<string | undefined>()
-  const [roundId, setRoundId] = useState<number>(1)
+  const [appId, setAppId] = useState<string[]>([])
+  const [roundId, setRoundId] = useState<string>("1")
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
-  const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId || "")
+  const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId[0] || "")
+  const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId[0] ?? "")
 
-  const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
+  const appsCollection = useMemo(() => {
+    return createListCollection({
+      items:
+        xApps?.active.map(item => ({
+          label: item.name + " - id: " + item.id,
+          value: item.id,
+        })) ?? [],
+    })
+  }, [xApps])
 
   const { sendTransaction, isTransactionPending, status } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
-    appIds: appId ? [appId] : [],
+    appIds: appId[0] ? [appId[0]] : [],
   })
   const isLoading = isTransactionPending || status === "pending"
 
@@ -58,103 +60,119 @@ export const ClaimXAppAllocations = () => {
 
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
-    if (roundId === parseInt(currentRoundId) && currentRound.state === 0) return false
-    if (roundId > parseInt(currentRoundId) || roundId === 0) return false
+    if (parseInt(roundId) === parseInt(currentRoundId) && currentRound.state === 0) return false
+    if (parseInt(roundId) > parseInt(currentRoundId) || parseInt(roundId) === 0) return false
 
     return true
   }, [roundId, currentRoundId, currentRound])
 
-  const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId !== "", [appId, isRoundValid])
+  const isFormValid = useMemo(() => isRoundValid && appId !== undefined && appId[0] !== "", [appId, isRoundValid])
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Allocation claiming")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack flex={1} align="flex-start" spacing={8}>
+      </Card.Header>
+      <Card.Body>
+        <VStack flex={1} align="flex-start" gap={8}>
           <VStack align={"start"}>
             <Text>
               {t("Last round id:")} {currentRoundId}
             </Text>
           </VStack>
           <form onSubmit={handleSubmit}>
-            <VStack spacing={4} alignItems={"start"}>
+            <VStack gap={4} alignItems={"start"}>
               <HStack w={"full"}>
-                <FormControl isRequired>
-                  <FormLabel>
+                <Field.Root required>
+                  <Field.Label>
                     <strong>{"App"}</strong>
-                  </FormLabel>
-                  <Select
-                    placeholder="Select app"
-                    isDisabled={isLoading}
-                    onChange={e => setAppId(e.target.value)}
+                  </Field.Label>
+                  <Select.Root
+                    disabled={isLoading}
+                    collection={appsCollection}
+                    onValueChange={e => setAppId(e.value)}
                     value={appId}>
-                    {xApps?.active.map(item => {
-                      return (
-                        <option key={item.id} value={item.id}>
-                          {item.name + " - id: " + item.id}
-                        </option>
-                      )
-                    })}
-                  </Select>
-                </FormControl>
+                    <Select.HiddenSelect />
 
-                <FormControl isRequired isInvalid={!isRoundValid}>
-                  <FormLabel>
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText placeholder="Select app" />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                      <Select.Positioner>
+                        <Select.Content>
+                          {appsCollection.items.map(item => (
+                            <Select.Item item={item} key={item.value}>
+                              {item.label}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
+                </Field.Root>
+
+                <Field.Root required invalid={!isRoundValid}>
+                  <Field.Label>
                     <strong>{"Round #"}</strong>
-                  </FormLabel>
-                  <NumberInput
+                  </Field.Label>
+                  <NumberInput.Root
                     min={0}
                     value={roundId}
-                    isDisabled={isLoading}
-                    onChange={value => setRoundId(parseInt(value))}>
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
-                </FormControl>
+                    disabled={isLoading}
+                    onValueChange={e => setRoundId(e.value)}>
+                    <NumberInput.Input />
+                    <NumberInput.Control>
+                      <NumberInput.IncrementTrigger />
+                      <NumberInput.DecrementTrigger />
+                    </NumberInput.Control>
+                  </NumberInput.Root>
+                  <Field.ErrorText>{"Invalid round"}</Field.ErrorText>
+                </Field.Root>
               </HStack>
 
-              <FormControl>
-                <FormLabel>
+              <Field.Root>
+                <Field.Label>
                   <strong>{"Reserved amount"}</strong>
-                </FormLabel>
-
-                <InputGroup>
+                </Field.Label>
+                <InputGroup
+                  endAddon={
+                    <Text
+                      pointerEvents="none"
+                      pl={1}
+                      pr={1}
+                      ml={0}
+                      backgroundColor={"transparent"}
+                      borderColor={"inherit"}
+                      borderLeft={"none"}>
+                      {t("B3TR")}
+                    </Text>
+                  }>
                   <Input
                     placeholder="Reserved allocation"
                     type="number"
                     value={claimableAmountResponse?.amount ?? ""}
                     disabled={true}
                   />
-                  <InputRightAddon
-                    pointerEvents="none"
-                    pl={1}
-                    pr={1}
-                    ml={0}
-                    backgroundColor={"transparent"}
-                    borderColor={"inherit"}
-                    borderLeft={"none"}>
-                    {t("B3TR")}
-                  </InputRightAddon>
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
 
               <Button
-                isDisabled={!isFormValid || claimedResponse?.claimed}
+                disabled={!isFormValid || claimedResponse?.claimed}
                 colorScheme="blue"
                 type="submit"
-                isLoading={isLoading}>
+                loading={isLoading}>
                 {claimedResponse?.claimed ? "Already claimed" : "Claim"}
               </Button>
             </VStack>
           </form>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

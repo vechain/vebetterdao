@@ -1,17 +1,4 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  HStack,
-  Text,
-  VStack,
-  Modal,
-  ModalOverlay,
-  ModalCloseButton,
-  Input,
-  Skeleton,
-  Icon,
-} from "@chakra-ui/react"
+import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useDepositToAppBalance, useGetB3trBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
@@ -139,7 +126,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
+        <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
@@ -152,7 +139,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
-              <Skeleton isLoaded={!isAppBalanceLoading}>
+              <Skeleton loading={isAppBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
                   {FormattingUtils.humanNumber(Number(appBalanceScaled))}
                 </Text>
@@ -171,10 +158,10 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
                 h="full"
                 w="full"
                 align="flex-start"
-                spacing={12}
+                gap={12}
                 borderBottomWidth={2}
                 borderColor={"rgba(213, 213, 213, 1)"}>
-                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+                <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
@@ -199,7 +186,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             variant={"primaryAction"}
             w={"full"}
             rounded={"full"}
-            isDisabled={invalidAmount}
+            disabled={invalidAmount}
             size={"lg"}>
             <Icon as={IoAddCircleOutline} mr={2} />
             <Text fontSize={{ base: 14, md: 18 }}>{t("Deposit now")}</Text>
@@ -221,13 +208,13 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   ])
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={details => !details.open && handleClose()}>
+      <Dialog.Backdrop />
       <CustomModalContent w={"auto"} maxW={"container.md"}>
-        <Card rounded={20}>
-          <CardBody>{renderCardContent()}</CardBody>
-        </Card>
+        <Card.Root rounded={20}>
+          <Card.Body>{renderCardContent()}</Card.Body>
+        </Card.Root>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

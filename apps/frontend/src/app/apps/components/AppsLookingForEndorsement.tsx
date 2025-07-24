@@ -1,5 +1,5 @@
 import React, { useRef } from "react"
-import { VStack, HStack, Heading, Text, IconButton, Hide, useBreakpointValue } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, IconButton, Show, useBreakpointValue, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -16,6 +16,8 @@ type Props = {
 export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   const { t } = useTranslation()
   const swiperRef = useRef<SwiperClass | null>(null)
+
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const swiperStyle = useBreakpointValue({
     base: {
@@ -39,7 +41,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   return (
     <VStack
       alignItems="flex-start"
-      spacing={4}
+      gap={4}
       p={"20px"}
       width={"full"}
       border={"1px solid #EFEFEF"}
@@ -88,7 +90,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
           </SwiperSlide>
         ))}
 
-        <Hide below="md">
+        <Show when={isAbove800}>
           <IconButton
             pos={"absolute"}
             zIndex={2}
@@ -96,10 +98,10 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
             left={5}
             top={"50%"}
             transform={"translateY(-50%)"}
-            icon={<FaChevronLeft />}
             onClick={() => swiperRef.current?.slidePrev()}
-            aria-label="Previous app"
-          />
+            aria-label="Previous app">
+            <FaChevronLeft />
+          </IconButton>
           <IconButton
             pos={"absolute"}
             zIndex={2}
@@ -107,11 +109,11 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
             right={5}
             top={"50%"}
             transform={"translateY(-50%)"}
-            icon={<FaChevronRight />}
             onClick={() => swiperRef.current?.slideNext()}
-            aria-label="Next app"
-          />
-        </Hide>
+            aria-label="Next app">
+            <FaChevronRight />
+          </IconButton>
+        </Show>
       </Swiper>
     </VStack>
   )

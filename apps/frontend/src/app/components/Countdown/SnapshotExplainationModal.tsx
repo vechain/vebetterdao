@@ -1,18 +1,4 @@
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  Heading,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  VStack,
-  HStack,
-  Text,
-  Image,
-  Box,
-  Button,
-} from "@chakra-ui/react"
+import { Dialog, Heading, VStack, HStack, Text, Image, Box, Button } from "@chakra-ui/react"
 import { t } from "i18next"
 
 interface Props {
@@ -26,22 +12,22 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
   }
 
   const renderStep = (step: number) => (
-    <Text fontSize={10} textColor={"#6A6A6A"}>
+    <Text fontSize={10} color={"#6A6A6A"}>
       {t("STEP {{value}}", { value: step })}
     </Text>
   )
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size={"xl"}>
-      <ModalOverlay />
-      <ModalContent rounded={"20px"} pt={10} px={3}>
-        <VStack px={5} alignItems={"start"} spacing={6}>
+    <Dialog.Root open={isOpen} onOpenChange={onClose} size={"xl"}>
+      <Dialog.Backdrop />
+      <Dialog.Content rounded={"20px"} pt={10} px={3}>
+        <VStack px={5} alignItems={"start"} gap={6}>
           <Heading size={["lg", "xl"]}>{t("What is a snapshot ?")}</Heading>
         </VStack>
 
-        <ModalCloseButton py={10} />
-        <ModalBody alignItems={"center"}>
-          <VStack alignItems={"center"} spacing={8}>
+        <Dialog.CloseTrigger py={10} />
+        <Dialog.Body alignItems={"center"}>
+          <VStack alignItems={"center"} gap={8}>
             <Text fontSize={["sm", "lg"]}>
               {t(
                 "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
@@ -97,9 +83,9 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
               {t("Learn more")}
             </Button>
           </VStack>
-        </ModalBody>
-        <ModalFooter></ModalFooter>
-      </ModalContent>
-    </Modal>
+        </Dialog.Body>
+        <Dialog.Footer></Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 }

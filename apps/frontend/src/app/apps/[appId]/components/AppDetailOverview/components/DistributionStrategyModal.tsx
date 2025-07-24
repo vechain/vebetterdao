@@ -1,5 +1,5 @@
 import { BaseModal } from "@/components/BaseModal"
-import { Box, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Separator, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { DistributorItem } from "../../../admin/components/AdminAppPageContent/components/EditAppRewardDistributors/components/DistributorItem"
 import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
@@ -19,12 +19,12 @@ export const DistributionStrategyModal = ({
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose}>
-      <VStack spacing={6} p={4}>
+      <VStack gap={6} p={4}>
         <Box position="relative" p={4} bg="white" borderRadius="xl" boxShadow="0 4px 20px rgba(0, 0, 0, 0.1)">
           <Image src={logo ?? ""} alt="app-logo" w="32" h="32" rounded="xl" objectFit="cover" />
         </Box>
 
-        <VStack spacing={3}>
+        <VStack gap={3}>
           <Heading
             fontSize={{
               base: "xl",
@@ -41,8 +41,8 @@ export const DistributionStrategyModal = ({
             color={"gray.600"}>
             {distributionStrategy}
           </Text>
-          <Divider />
-          <Skeleton isLoaded={!distributorsLoading} w="full">
+          <Separator />
+          <Skeleton loading={distributorsLoading} w="full">
             {distributors?.length > 0 ? (
               <VStack align="stretch" w="full">
                 <Text fontSize="md" fontWeight={"500"}>

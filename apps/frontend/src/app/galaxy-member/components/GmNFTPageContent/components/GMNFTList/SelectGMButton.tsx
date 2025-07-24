@@ -29,8 +29,8 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         label={t(isXNodeAttachedToGM ? "Detach the node from the NFT before activating a new one" : "", {
           defaultValue: "",
         })}
-        isDisabled={isSelected}>
-        <Button variant="primarySubtle" w="full" isDisabled={isSelected} onClick={handleSelectGM}>
+        disabled={isSelected}>
+        <Button variant="primarySubtle" w="full" disabled={isSelected} onClick={handleSelectGM}>
           {t(isSelected ? "Active NFT" : "Select as active")}
         </Button>
       </Tooltip>

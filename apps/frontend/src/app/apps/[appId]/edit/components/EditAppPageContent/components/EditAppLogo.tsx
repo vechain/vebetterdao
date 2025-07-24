@@ -1,12 +1,13 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Box, Circle, Flex, Image, Input, useToast, Text, VStack } from "@chakra-ui/react"
+import { Box, Circle, Flex, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { LOGO_UPLOAD_GUIDELINES, notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
 import { useTranslation } from "react-i18next"
+import { toaster } from "@/components/ui/toaster"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -15,7 +16,6 @@ type Props = {
 export const EditAppLogo = ({ form }: Props) => {
   const logo = form.watch("logoImage")
   const inputRef = useRef<HTMLInputElement>(null)
-  const toast = useToast()
   const { t } = useTranslation()
 
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
@@ -30,17 +30,16 @@ export const EditAppLogo = ({ form }: Props) => {
           form.setValue("logoImage", base64File)
         }
       } catch (error) {
-        toast({
+        toaster.error({
           title: "Error",
           description: "An error occurred while uploading the logo",
-          status: "error",
           duration: 5000,
-          isClosable: true,
+          closable: true,
         })
         console.error(error)
       }
     },
-    [form, toast],
+    [form],
   )
 
   return (

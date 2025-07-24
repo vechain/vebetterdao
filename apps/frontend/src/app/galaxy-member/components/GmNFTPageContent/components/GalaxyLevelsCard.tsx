@@ -2,24 +2,7 @@ import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { BaseTooltip } from "@/components"
 import { gmNfts } from "@/constants/gmNfts"
-import {
-  Button,
-  Card,
-  CardBody,
-  Flex,
-  Heading,
-  HStack,
-  Image,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, HStack, Image, Table, VStack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
@@ -59,44 +42,40 @@ export const GalaxyLevelsCard = () => {
   }
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("Reward Weight")}</Heading>
               <BaseTooltip
                 text={
-                  <TableContainer maxW="280px" maxH="400px" overflowY="auto">
-                    <Table variant="simple" size="sm">
-                      <Thead position="sticky" top={0}>
-                        <Tr>
-                          <Th color="white" py={2}>
+                  <Table.ScrollArea maxW="280px" maxH="400px" overflowY="auto">
+                    <Table.Root variant="line" size="sm">
+                      <Table.Header position="sticky" top={0}>
+                        <Table.Row>
+                          <Table.ColumnHeader color="white" py={2}>
                             {t("Name")}
-                          </Th>
-                          <Th color="white" py={2} isNumeric>
+                          </Table.ColumnHeader>
+                          <Table.ColumnHeader color="white" py={2}>
                             {t("Reward Weight")}
-                          </Th>
-                          <Th color="white" py={2} isNumeric>
+                          </Table.ColumnHeader>
+                          <Table.ColumnHeader color="white" py={2}>
                             {t("Cost")}
-                          </Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
+                          </Table.ColumnHeader>
+                        </Table.Row>
+                      </Table.Header>
+                      <Table.Body>
                         {gmNfts.map(nft => (
-                          <Tr key={nft.level} p={0}>
-                            <Td py={2}>{nft.name}</Td>
-                            <Td py={2} isNumeric>
-                              {nft.multiplier}
-                            </Td>
-                            <Td py={2} isNumeric>
-                              {compactFormatter.format(nft.b3trToUpgrade)}
-                            </Td>
-                          </Tr>
+                          <Table.Row key={nft.level} p={0}>
+                            <Table.Cell py={2}>{nft.name}</Table.Cell>
+                            <Table.Cell py={2}>{nft.multiplier}</Table.Cell>
+                            <Table.Cell py={2}>{compactFormatter.format(nft.b3trToUpgrade)}</Table.Cell>
+                          </Table.Row>
                         ))}
-                      </Tbody>
-                    </Table>
-                  </TableContainer>
+                      </Table.Body>
+                    </Table.Root>
+                  </Table.ScrollArea>
                 }>
                 <span>
                   <UilInfoCircle color="#004CFC" />
@@ -153,7 +132,7 @@ export const GalaxyLevelsCard = () => {
             </Button>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

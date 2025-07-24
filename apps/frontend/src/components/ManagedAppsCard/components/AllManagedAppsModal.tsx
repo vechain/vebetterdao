@@ -1,14 +1,5 @@
 import { AppDetails } from "./AppDetails"
-import {
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  VStack,
-} from "@chakra-ui/react"
+import { Heading, Dialog, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export type AppAdministrationRole = {
@@ -26,16 +17,22 @@ type Props = {
 export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"xl"} trapFocus={true} isCentered={true} closeOnOverlayClick={true}>
-      <ModalOverlay />
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={onClose}
+      size={"xl"}
+      trapFocus={true}
+      placement="center"
+      closeOnInteractOutside>
+      <Dialog.Backdrop />
 
-      <ModalContent>
-        <ModalHeader>
+      <Dialog.Content>
+        <Dialog.Header>
           <Heading size="lg">{t("Managed apps")}</Heading>
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack spacing={12}>
+        </Dialog.Header>
+        <Dialog.CloseTrigger />
+        <Dialog.Body>
+          <VStack gap={12}>
             {userAppRoles.map(role => {
               if (role.isAdmin || role.isModerator) {
                 return (
@@ -44,14 +41,14 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
                     isAdmin={role.isAdmin}
                     isModerator={role.isModerator}
                     key={`managed-app-${role.appId}`}
-                    showDivider={true}
+                    showSeparator={true}
                   />
                 )
               }
             })}
           </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </Dialog.Body>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 }

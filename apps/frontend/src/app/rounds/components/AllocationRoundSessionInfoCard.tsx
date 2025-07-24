@@ -6,17 +6,7 @@ import {
   useVot3PastSupply,
 } from "@/api"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
-import {
-  Box,
-  Circle,
-  Step,
-  StepDescription,
-  StepIndicator,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
-} from "@chakra-ui/react"
+import { Box, Circle, Steps } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useMemo } from "react"
@@ -95,29 +85,35 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
   )
 
   return (
-    <Stepper
+    <Steps.Root
       size="sm"
-      index={activeStep}
+      step={activeStep}
       orientation="vertical"
       colorScheme="primary"
       gap="0"
       height="200px"
       mt={4}
       variant="primaryVertical">
-      {steps.map(step => (
-        <Step key={`allocation-round-session-step-${uuid()}`}>
-          <StepIndicator>
-            <StepStatus complete={<Circle bg="#004CFC" size={"30%"} />} active={<Circle bg="#004CFC" size={"60%"} />} />
-          </StepIndicator>
+      <Steps.List>
+        {steps.map((step, index) => (
+          <Steps.Item key={`allocation-round-session-step-${uuid()}`} index={index}>
+            <Steps.Indicator>
+              <Steps.Status
+                incomplete={<Circle bg="#004CFC" size={"30%"} />}
+                complete={<Circle bg="#004CFC" size={"30%"} />}
+                current={<Circle bg="#004CFC" size={"60%"} />}
+              />
+            </Steps.Indicator>
 
-          <Box flexShrink="0">
-            <StepTitle>{step.title}</StepTitle>
-            <StepDescription>{step.description}</StepDescription>
-          </Box>
+            <Box flexShrink="0">
+              <Steps.Title>{step.title}</Steps.Title>
+              <Steps.Description>{step.description}</Steps.Description>
+            </Box>
 
-          <StepSeparator />
-        </Step>
-      ))}
-    </Stepper>
+            <Steps.Separator />
+          </Steps.Item>
+        ))}
+      </Steps.List>
+    </Steps.Root>
   )
 }

@@ -35,7 +35,7 @@ export const OverlappedAppsImages: React.FC<Props> = ({
 
   if (isLoading)
     return (
-      <HStack spacing={0}>
+      <HStack gap={0}>
         {Array.from({ length: maxAppsToShow }).map(_ => (
           <Skeleton key={`loading-${uuid()}`} boxSize={`${boxSize}px`} borderRadius={`${borderRadius}px`} />
         ))}
@@ -44,7 +44,7 @@ export const OverlappedAppsImages: React.FC<Props> = ({
 
   if (appsIds?.length) {
     return (
-      <HStack spacing={0}>
+      <HStack gap={0}>
         {appsToRender?.map((appId, index) => {
           const ml = index > 0 ? `-${marginleft}px` : "0"
           return (

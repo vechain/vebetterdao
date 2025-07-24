@@ -1,17 +1,4 @@
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Box,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  HStack,
-  Heading,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Box, Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
 import { useAllocationsRoundsEvents } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useCallback, useMemo, useState } from "react"
@@ -53,7 +40,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
 
   const renderList = useMemo(() => {
     return (
-      <VStack spacing={8} w="full" align={"flex-start"}>
+      <VStack gap={8} w="full" align={"flex-start"}>
         {!renderInsideCard && (
           <HStack w="full" justify="space-between" alignItems={"baseline"}>
             <Heading size={headingSize}>{t("Allocations")}</Heading>
@@ -68,15 +55,15 @@ export const AllocationRoundsList: React.FC<Props> = ({
             )}
           </HStack>
         )}
-        <VStack spacing={4} w="full">
+        <VStack gap={4} w="full">
           {allocationRoundEventsError && (
-            <Alert status="error">
-              <AlertIcon />
+            <Alert.Root status="error">
+              <Alert.Indicator />
               <Box>
-                <AlertTitle>{t("Error loading allocation rounds")}</AlertTitle>
-                <AlertDescription>{allocationRoundEventsError.message}</AlertDescription>
+                <Alert.Title>{t("Error loading allocation rounds")}</Alert.Title>
+                <Alert.Description>{allocationRoundEventsError.message}</Alert.Description>
               </Box>
-            </Alert>
+            </Alert.Root>
           )}
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
@@ -105,8 +92,8 @@ export const AllocationRoundsList: React.FC<Props> = ({
   return (
     <>
       {renderInsideCard ? (
-        <Card w="full" variant="baseWithBorder">
-          <CardHeader>
+        <Card.Root w="full" variant="baseWithBorder">
+          <Card.Header>
             <HStack w="full" justify="space-between" alignItems={"baseline"}>
               <Heading size={headingSize}>{t("Allocations")}</Heading>
               {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
@@ -119,9 +106,9 @@ export const AllocationRoundsList: React.FC<Props> = ({
                 </Button>
               )}
             </HStack>
-          </CardHeader>
-          <CardBody>{renderList}</CardBody>
-        </Card>
+          </Card.Header>
+          <Card.Body>{renderList}</Card.Body>
+        </Card.Root>
       ) : (
         renderList
       )}

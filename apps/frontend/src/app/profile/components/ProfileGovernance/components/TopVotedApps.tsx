@@ -26,7 +26,7 @@ export const TopVotedApps = ({ votedApps, isMoreTopVotedApps, onSeeAllAppsVoted 
           </HStack>
         )}
       </HStack>
-      <VStack w={"full"} spacing={4}>
+      <VStack w={"full"} gap={4}>
         {votedApps.map(app => (
           <AppVotedBox key={app.appId} appVoted={app} />
         ))}

@@ -4,14 +4,9 @@ import { ExclamationTriangle } from "@/components"
 import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
+  Field,
   Heading,
   Input,
   Text,
@@ -43,10 +38,15 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   const { account } = useWallet()
   const thor = useThor()
   const { isXNodeAttachedToGM } = useXNode()
-  const { isOpen = false, onClose } = modal
+  const { open: isOpen = false, onClose } = modal
 
-  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
-    index: 0,
+  const {
+    value: activeStep,
+    goToPrevStep: goToPrevious,
+    goToNextStep: goToNext,
+    setStep: setActiveStep,
+  } = useSteps({
+    defaultStep: 0,
     count: Object.keys(DelegateXNodeStep).length,
   })
 
@@ -99,20 +99,20 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                 {t("The manager won't be able to transfer or sell your Node.")}
               </Text>
             </Box>
-            <Alert status="warning" borderRadius="2xl">
-              <AlertIcon />
-              <Box>
-                <AlertDescription as="span" fontSize="sm">
+            <Alert.Root status="warning" borderRadius="2xl">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Description as="span" fontSize="sm">
                   {t("Currently, we only support one Node per account.")}
-                </AlertDescription>
-              </Box>
-            </Alert>
+                </Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
             <VStack align="stretch">
               <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
-              <FormControl isInvalid={!!errors.walletAddress}>
-                <FormLabel color="#6A6A6A" fontSize="sm">
+              <Field.Root invalid={!!errors.walletAddress}>
+                <Field.Label color="#6A6A6A" fontSize="sm">
                   {t("User wallet address")}
-                </FormLabel>
+                </Field.Label>
                 <Input
                   {...register("walletAddress", {
                     required: t("Wallet address is required"),
@@ -135,8 +135,8 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                     },
                   })}
                 />
-                <FormErrorMessage>{errors?.walletAddress?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors?.walletAddress?.message}</Field.ErrorText>
+              </Field.Root>
             </VStack>
             <VStack align="stretch">
               <Button variant="primaryAction" type="submit">
@@ -164,18 +164,18 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
               <Text fontWeight="600">{t("You're adding the following manager to your Node")}</Text>
               <Text fontSize="sm">{finalAddress}</Text>
             </VStack>
-            <Alert status="warning" borderRadius="2xl">
-              <AlertIcon w={5} h={5} />
+            <Alert.Root status="warning" borderRadius="2xl">
+              <Alert.Indicator w={5} h={5} />
               <Box lineHeight={"1.20rem"} fontSize="sm">
-                <AlertTitle as="span">{t("The manager won't be able to transfer or sell your Node.")}</AlertTitle>
-                <AlertDescription as="span">{t("but won't be able to transfer or sell your Node.")}</AlertDescription>
+                <Alert.Title as="span">{t("The manager won't be able to transfer or sell your Node.")}</Alert.Title>
+                <Alert.Description as="span">{t("but won't be able to transfer or sell your Node.")}</Alert.Description>
                 {isXNodeAttachedToGM && (
                   <Text mt={2} fontSize="sm" color="#C84968" fontWeight={600}>
                     {t("Notice: the GM NFT attached to this Node will be detached and will lose the free levels.")}
                   </Text>
                 )}
               </Box>
-            </Alert>
+            </Alert.Root>
             <VStack>
               <Button variant="primaryAction" onClick={handleDelegate}>
                 {t("Yes, I'm sure")}

@@ -1,5 +1,5 @@
 import { useAccountAppPermissions } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { AppDetails } from "./components/AppDetails"
 import { useTranslation } from "react-i18next"
 import { AllManagedAppsModal, AppAdministrationRole } from "./components/AllManagedAppsModal"
@@ -9,7 +9,7 @@ import { useMemo } from "react"
 export const ManagedAppsCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const { data: appsPermissions } = useAccountAppPermissions(account?.address ?? "")
 
   // filter only apps that are managed by the user and recreate the array by not using UseQueryResult but directly data
@@ -32,9 +32,9 @@ export const ManagedAppsCard = () => {
   if (!userAppRoles || userAppRoles.length < 1) return null
 
   return (
-    <Card w="full" variant="baseWithBorder">
-      <CardBody>
-        <VStack spacing={4} align="flex-start" w={"full"}>
+    <Card.Root w="full" variant="baseWithBorder">
+      <Card.Body>
+        <VStack gap={4} align="flex-start" w={"full"}>
           <HStack justifyContent={"space-between"} w="full">
             <Heading fontSize="24px">{t("Managed apps")}</Heading>
 
@@ -47,7 +47,7 @@ export const ManagedAppsCard = () => {
             )}
           </HStack>
 
-          <VStack spacing={8} w="full" align="flex-start" justify={"stretch"}>
+          <VStack gap={8} w="full" align="flex-start" justify={"stretch"}>
             {userAppRoles[0] && (
               <AppDetails
                 appId={userAppRoles[0].appId}
@@ -57,9 +57,9 @@ export const ManagedAppsCard = () => {
             )}
           </VStack>
         </VStack>
-      </CardBody>
+      </Card.Body>
 
       <AllManagedAppsModal isOpen={isOpen} onClose={onClose} userAppRoles={userAppRoles} />
-    </Card>
+    </Card.Root>
   )
 }

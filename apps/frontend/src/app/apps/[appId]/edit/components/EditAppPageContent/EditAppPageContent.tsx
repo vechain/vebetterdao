@@ -1,16 +1,4 @@
-import {
-  Button,
-  Divider,
-  FormControl,
-  FormErrorMessage,
-  HStack,
-  Input,
-  Stack,
-  Text,
-  Textarea,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Separator, Field, HStack, Input, Stack, Text, Textarea, VStack, useDisclosure } from "@chakra-ui/react"
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
@@ -75,7 +63,7 @@ export const EditAppPageContent = () => {
   const { screenshots } = useCurrentAppScreenshots()
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
   const router = useRouter()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { isTxModalOpen, onClose: onTxModalClose } = useTransactionModal()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
@@ -225,7 +213,7 @@ export const EditAppPageContent = () => {
           justify={["flex-start", "space-between"]}
           align={["flex-start", "center"]}>
           <HStack gap={4}>
-            <FormControl isInvalid={!!errors.name}>
+            <Field.Root invalid={!!errors.name}>
               <Input
                 {...register("name", {
                   required: { value: true, message: t("Name required") },
@@ -235,18 +223,14 @@ export const EditAppPageContent = () => {
                 fontSize={"28px"}
                 fontWeight={700}
               />
-              <FormErrorMessage fontSize={"12px"}>{errors?.name?.message ?? ""}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText fontSize={"12px"}>{errors?.name?.message ?? ""}</Field.ErrorText>
+            </Field.Root>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
             <Button variant="primaryGhost" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
-            <Button
-              variant="primaryAction"
-              type="submit"
-              leftIcon={<UilCheck size="16px" />}
-              isDisabled={!isFormChanged}>
+            <Button variant="primaryAction" type="submit" leftIcon={<UilCheck size="16px" />} disabled={!isFormChanged}>
               {t("Save changes")}
             </Button>
           </HStack>
@@ -262,7 +246,7 @@ export const EditAppPageContent = () => {
               <Text fontSize={16} fontWeight={500}>
                 {t("Project URL")}
               </Text>
-              <FormControl isInvalid={!!errors.external_url}>
+              <Field.Root invalid={!!errors.external_url}>
                 <Input
                   defaultValue={appMetadata?.external_url ?? ""}
                   {...register("external_url", {
@@ -273,15 +257,15 @@ export const EditAppPageContent = () => {
                     },
                   })}
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message ?? ""}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText fontSize={"12px"}>{errors?.external_url?.message ?? ""}</Field.ErrorText>
+              </Field.Root>
             </VStack>
 
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={16} fontWeight={500}>
                 {t("Description")}
               </Text>
-              <FormControl isInvalid={!!errors.description}>
+              <Field.Root invalid={!!errors.description}>
                 <Textarea
                   {...register("description", {
                     required: { value: true, message: t("Description required") },
@@ -291,14 +275,14 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message ?? ""}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText fontSize={"12px"}>{errors?.description?.message ?? ""}</Field.ErrorText>
+              </Field.Root>
             </VStack>
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={16} fontWeight={500}>
                 {t("Distribution Strategy")}
               </Text>
-              <FormControl isInvalid={!!errors.distribution_strategy}>
+              <Field.Root invalid={!!errors.distribution_strategy}>
                 <Textarea
                   {...register("distribution_strategy", {
                     minLength: {
@@ -311,14 +295,14 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</Field.ErrorText>
+              </Field.Root>
             </VStack>
             <EditAppCategories form={form} />
           </VStack>
           <EditAppSocialUrls form={form} />
         </Stack>
-        <Divider />
+        <Separator />
         <EditScreenshots form={form} />
         <EditVeWorldBanner form={form} />
       </VStack>

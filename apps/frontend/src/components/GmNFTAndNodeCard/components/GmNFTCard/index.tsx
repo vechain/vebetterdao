@@ -71,7 +71,7 @@ export const GmNFTCard = ({
       flex={1}
       cursor={viewMode ? "default" : "pointer"}
       onClick={viewMode ? undefined : onCardClick}>
-      <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
+      <Skeleton loading={isGMLoading} w="68px" h="68px" rounded="8px">
         <Box
           w={"68px"}
           h={"68px"}
@@ -84,7 +84,7 @@ export const GmNFTCard = ({
         </Box>
       </Skeleton>
       <VStack flex="1" align={"flex-start"}>
-        <Text fontWeight={700} noOfLines={1}>
+        <Text fontWeight={700} lineClamp={1}>
           {gmName}
         </Text>
         <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
@@ -93,7 +93,7 @@ export const GmNFTCard = ({
               {gmRewardMultiplier}
               {"x"}
             </Text>
-            <Text fontSize="xs" fontWeight={400} noOfLines={1}>
+            <Text fontSize="xs" fontWeight={400} lineClamp={1}>
               {t("GM reward weight")}
             </Text>
           </HStack>

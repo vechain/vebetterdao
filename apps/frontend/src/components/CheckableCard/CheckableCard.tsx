@@ -1,17 +1,4 @@
-import {
-  Card,
-  CardBody,
-  Stack,
-  Heading,
-  CardProps,
-  StackProps,
-  Box,
-  Image,
-  Text,
-  HStack,
-  Checkbox,
-  Radio,
-} from "@chakra-ui/react"
+import { Card, Stack, Heading, StackProps, Box, Image, Text, HStack, Checkbox, RadioGroup } from "@chakra-ui/react"
 
 export type CheckableCardProps = {
   checked: boolean
@@ -19,7 +6,7 @@ export type CheckableCardProps = {
   imageSrc?: string
   title: string
   description: string
-  cardProps?: CardProps
+  cardProps?: Card.RootProps
   stackProps?: StackProps
   inputType?: "checkbox" | "radio"
 }
@@ -34,7 +21,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
   inputType = "radio",
 }) => {
   return (
-    <Card
+    <Card.Root
       data-testid={`checkable-card__${title}`}
       variant="baseWithBorder"
       rounded={"3xl"}
@@ -51,27 +38,33 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
       }}
       onClick={() => onChange(!checked)}
       {...cardProps}>
-      <CardBody data-testid="checkable-card__body">
-        <Stack spacing={4} align={"flex-start"} {...stackProps}>
+      <Card.Body data-testid="checkable-card__body">
+        <Stack gap={4} align={"flex-start"} {...stackProps}>
           <HStack justify={"space-between"} w="full" alignItems={"flex-start"}>
             <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />
             {inputType === "checkbox" ? (
-              <Checkbox
+              <Checkbox.Root
                 pointerEvents={"none"}
                 size="lg"
                 data-testid={`checkable-card__${title}__checkbox`}
-                isChecked={checked}
-                onChange={e => onChange(e.target.checked)}
-                rounded={"full"}
-              />
+                checked={checked}
+                onCheckedChange={details => onChange(!!details.checked)}
+                rounded={"full"}>
+                <Checkbox.HiddenInput />
+                <Checkbox.Control />
+              </Checkbox.Root>
             ) : (
-              <Radio
+              <RadioGroup.Root
                 size="lg"
                 data-testid={`checkable-card__${title}__radio`}
-                isChecked={checked}
-                onChange={e => onChange(e.target.checked)}
-                rounded={"full"}
-              />
+                value={checked ? "1" : undefined}
+                onValueChange={details => onChange(details.value === "1")}
+                rounded={"full"}>
+                <RadioGroup.Item value="1">
+                  <RadioGroup.ItemHiddenInput />
+                  <RadioGroup.ItemIndicator />
+                </RadioGroup.Item>
+              </RadioGroup.Root>
             )}
           </HStack>
           <Box>
@@ -81,7 +74,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
             </Text>
           </Box>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

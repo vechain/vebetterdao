@@ -10,7 +10,7 @@ interface CountdownProps {
 }
 
 export const CountdownVoting = ({ onOpen }: CountdownProps) => {
-  const [isAbove500] = useMediaQuery("(min-width: 500px)")
+  const [isAbove500] = useMediaQuery(["(min-width: 500px)"])
 
   const { data: currentRoundId, isLoading: isCurrentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: allocationRound, isLoading: isCurrentRoundLoading } = useAllocationsRound(currentRoundId)
@@ -28,7 +28,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
     // For accuracy in the UI, we round to the nearest minute
     const endTime = allocationRound?.voteEndTimestamp?.toDate()
     return endTime
-  }, [allocationRound?.voteEnd, allocationRound?.state, currentRoundId])
+  }, [allocationRound?.voteEndTimestamp, allocationRound?.state])
 
   const countdownKey = `countdown-${allocationRound?.roundId ?? "initial"}`
 
@@ -74,24 +74,24 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
             borderColor={"#F2F2F2"}
             fontSize={isAbove500 ? "13px" : "10px"}
             fontWeight={600}
-            spacing={1}>
+            gap={1}>
             <Image src={isNearEndIcon} alt="clock" boxSize={"20px"} />
             <Text>{t("Next snapshot")}</Text>
-            <HStack spacing={0}>
+            <HStack gap={0}>
               <Text>{days}</Text>
               <Text>{"d"}</Text>
             </HStack>
 
-            <HStack spacing={0}>
+            <HStack gap={0}>
               <Text>{hours}</Text>
               <Text>{"h"}</Text>
             </HStack>
 
-            <HStack spacing={0}>
+            <HStack gap={0}>
               <Text>{minutes}</Text>
               <Text>{"m"}</Text>
             </HStack>
-            <HStack spacing={0}>
+            <HStack gap={0}>
               <Text minW={seconds >= 10 ? "1.4em" : "0.8em"}>{seconds}</Text>
               <Text>{"s"}</Text>
             </HStack>

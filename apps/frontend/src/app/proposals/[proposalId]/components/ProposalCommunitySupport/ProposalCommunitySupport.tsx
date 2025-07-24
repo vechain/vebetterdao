@@ -39,7 +39,7 @@ export const ProposalCommunitySupport = () => {
     return null
   }
   return (
-    <Card border={`1px solid ${borderColor}`} rounded="16px" p="24px" boxShadow={boxShadow}>
+    <Card.Root border={`1px solid ${borderColor}`} rounded="16px" p="24px" boxShadow={boxShadow}>
       <VStack alignItems={"stretch"} gap={6}>
         <HStack justify="space-between">
           <Heading fontSize={"24px"} fontWeight={700}>
@@ -83,6 +83,6 @@ export const ProposalCommunitySupport = () => {
           </HStack>
         )}
       </VStack>
-    </Card>
+    </Card.Root>
   )
 }

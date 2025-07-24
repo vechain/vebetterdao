@@ -47,7 +47,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
   })
 
   return (
-    <VStack w="full" spacing={4}>
+    <VStack w="full" gap={4}>
       {/* Back Button */}
       <HStack w="full" mb={{ base: 2, md: 4 }} color="#004CFC" cursor="pointer" onClick={goBack}>
         <IoIosArrowBack size={16} />
@@ -57,7 +57,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
       </HStack>
 
       {/* Proposals List */}
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         {itemsWithMetadata?.map(proposal => (
           <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
         ))}

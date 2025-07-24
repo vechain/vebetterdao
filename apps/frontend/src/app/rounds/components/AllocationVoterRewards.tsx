@@ -152,8 +152,8 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         <Button
           zIndex={1}
           mt={2}
-          isDisabled={!canClaim}
-          isLoading={isRoundRewardLoading}
+          disabled={!canClaim}
+          loading={isRoundRewardLoading}
           onClick={handleClaim}
           variant={"primaryAction"}
           borderRadius={"full"}

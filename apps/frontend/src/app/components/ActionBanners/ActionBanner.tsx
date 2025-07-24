@@ -15,7 +15,7 @@ import {
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
-import { Hide, IconButton } from "@chakra-ui/react"
+import { Show, IconButton, useMediaQuery } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -52,6 +52,7 @@ export const ActionBanner = () => {
   const swiperRef = useRef<SwiperClass | null>(null) // Create a ref for the Swiper instance with type
   const [isSliderEnd, setIsSliderEnd] = useState(false)
   const [isSliderStart, setIsSliderStart] = useState(true)
+  const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
 
   const handleSliderChange = useCallback((_swiper: SwiperClass) => {
     setIsSliderEnd(_swiper.isEnd)
@@ -240,6 +241,7 @@ export const ActionBanner = () => {
     showCreatorNftBanners,
     CreatorNftBanner,
     showStargateBanner,
+    isLegacyNode,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
@@ -275,7 +277,7 @@ export const ActionBanner = () => {
       ))}
 
       {/* Custom Navigation Buttons */}
-      <Hide below="md">
+      <Show when={!isAboveMd}>
         {!isSliderStart && (
           <IconButton
             pos={"absolute"}
@@ -289,8 +291,8 @@ export const ActionBanner = () => {
             aria-label="Prev slide"
           />
         )}
-      </Hide>
-      <Hide below="md">
+      </Show>
+      <Show when={!isAboveMd}>
         {!isSliderEnd && slides.length > 1 && (
           <IconButton
             pos={"absolute"}
@@ -304,7 +306,7 @@ export const ActionBanner = () => {
             aria-label="Next slide"
           />
         )}
-      </Hide>
+      </Show>
     </Swiper>
   )
 }

@@ -35,8 +35,8 @@ export const EndorsementDetails = ({
   return (
     <HStack w="full" justify="space-between" gap={4}>
       <VStack gap={0} alignItems="center">
-        <Skeleton isLoaded={!isEndorsementStatusLoading}>
-          <HStack spacing={1} alignItems="flex-end">
+        <Skeleton loading={isEndorsementStatusLoading}>
+          <HStack gap={1} alignItems="flex-end">
             <Text fontSize={"24px"} fontWeight="700" color={color}>
               {endorsementScore}
             </Text>
@@ -50,7 +50,7 @@ export const EndorsementDetails = ({
 
       {isUserAppEndorser && (
         <VStack gap={0} alignItems="center">
-          <Skeleton isLoaded={!isXNodeLoading}>
+          <Skeleton loading={isXNodeLoading}>
             <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
               {xNodePoints}
             </Text>
@@ -62,7 +62,7 @@ export const EndorsementDetails = ({
       )}
 
       <VStack gap={0} alignItems="center">
-        <Skeleton isLoaded={!isAppEndorsersLoading}>
+        <Skeleton loading={isAppEndorsersLoading}>
           <HStack>
             {endorsers && endorsers.length > 0 && <EndorsersIcon endorsers={endorsers} />}
             <Text fontSize={"24px"} fontWeight="700" color="#004CFC">

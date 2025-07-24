@@ -9,7 +9,10 @@ if (typeof self === "undefined") {
 }
 
 const nextConfig = {
-  transpilePackages: ["@repo/contracts"],
+  transpilePackages: ["@repo/contracts", "@vechain/vechain-kit"],
+  experimental: {
+    optimizePackageImports: ["@chakra-ui/react"],
+  },
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

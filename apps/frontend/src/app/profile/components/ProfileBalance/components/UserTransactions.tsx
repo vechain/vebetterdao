@@ -1,6 +1,6 @@
 import { useTransactions } from "@/api"
 import { TransactionCard } from "@/components"
-import { Button, Card, CardBody, Flex, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -30,13 +30,13 @@ export const UserTransactions = ({ address }: Props) => {
   }, [router, address])
 
   return (
-    <Card w={"full"} variant={"baseWithBorder"}>
-      <CardBody>
-        <VStack spacing={4} align="stretch">
-          <VStack spacing={2} align="stretch">
+    <Card.Root w={"full"} variant={"baseWithBorder"}>
+      <Card.Body>
+        <VStack gap={4} align="stretch">
+          <VStack gap={2} align="stretch">
             <Heading size="md">{t("Last Transactions")}</Heading>
           </VStack>
-          <VStack spacing={4} align="stretch">
+          <VStack gap={4} align="stretch">
             {last5Transactions.map(transaction => (
               <TransactionCard key={transaction.txId} transaction={transaction} />
             ))}
@@ -51,7 +51,7 @@ export const UserTransactions = ({ address }: Props) => {
             <Text>{t("No transactions found")}</Text>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

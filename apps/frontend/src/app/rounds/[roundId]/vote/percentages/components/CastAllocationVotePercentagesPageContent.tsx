@@ -140,7 +140,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
 
   return (
     <ResponsiveCard>
-      <VStack w="full" spacing={8} align={"flex-start"}>
+      <VStack w="full" gap={8} align={"flex-start"}>
         <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
           {t("Assign percentage of VOT3 to the apps")}
         </Heading>
@@ -149,7 +149,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
           )}
         </Text>
-        <HStack w="full" spacing={4} justify={"space-between"}>
+        <HStack w="full" gap={4} justify={"space-between"}>
           <Heading fontSize={"20px"} fontWeight={700}>
             <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: votes.length }} t={t} />
           </Heading>
@@ -157,7 +157,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             {t("Split evenly")}
           </Button>
         </HStack>
-        <VStack w="full" spacing={8} align={"flex-start"}>
+        <VStack w="full" gap={8} align={"flex-start"}>
           {parsedVotes.map((vote, index) => {
             return (
               <SelectAppVotesInput

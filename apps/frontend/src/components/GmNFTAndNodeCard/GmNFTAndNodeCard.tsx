@@ -37,8 +37,8 @@ export const GmNFTAndNodeCard = () => {
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
-  const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove1200] = useMediaQuery(["(min-width: 1200px)"])
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const headingText = useMemo(() => {
     if (!isGMOwned) {
@@ -70,7 +70,7 @@ export const GmNFTAndNodeCard = () => {
   }
 
   return (
-    <Card
+    <Card.Root
       bg="#004CFC"
       rounded="12px"
       p="24px"
@@ -79,7 +79,7 @@ export const GmNFTAndNodeCard = () => {
       overflow={"hidden"}
       bgImage="url('/assets/backgrounds/cloud-background.webp')"
       bgSize="cover"
-      bgPosition="center"
+      backgroundPosition="center"
       bgRepeat="no-repeat">
       <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"}>
         <VStack flex="3" align={"stretch"} gap="24px">
@@ -146,6 +146,6 @@ export const GmNFTAndNodeCard = () => {
         {!isOnProfilePage && <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />}
         {account?.address && !isOnProfilePage && <SwapB3trVot3 address={account?.address} />}
       </Stack>
-    </Card>
+    </Card.Root>
   )
 }

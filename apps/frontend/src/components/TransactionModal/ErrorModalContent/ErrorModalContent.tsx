@@ -55,7 +55,7 @@ export const ErrorModalContent = ({
           />
         </motion.div>
         <VStack gap={4}>
-          {description && <Text size="sm">{description}</Text>}
+          {description && <Text textStyle="sm">{description}</Text>}
           {showExplorerButton && txId && (
             <Link
               href={getExplorerTxLink(txId)}

@@ -1,7 +1,7 @@
 import { useUserScore } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 import { useMissingActionsLabel } from "@/hooks"
-import { UseDisclosureProps, Card, CardBody, VStack, Flex, Text, Heading, Button, Image, Link } from "@chakra-ui/react"
+import { UseDisclosureProps, Card, VStack, Flex, Text, Heading, Button, Image, Link } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -30,9 +30,9 @@ export const DoActionModal = ({ doActionModal }: Props) => {
 
   return (
     <BaseModal isOpen={doActionModal.isOpen || false} onClose={doActionModal.onClose || (() => {})}>
-      <VStack align="stretch" spacing={4}>
-        <Card bg="#FFD979" borderRadius="xl">
-          <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
+      <VStack align="stretch" gap={4}>
+        <Card.Root bg="#FFD979" borderRadius="xl">
+          <Card.Body pb={2} position="relative" overflow="hidden" borderRadius="xl">
             <Image
               src="/assets/backgrounds/cloud-background-orange.webp"
               alt="cloud-background-orange"
@@ -60,8 +60,8 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                 </Text>
               </Flex>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
         <Heading fontSize={"2xl"} fontWeight={700}>
           {missingActionsLabel.long}
         </Heading>

@@ -1,21 +1,4 @@
-import {
-  Card,
-  CardBody,
-  Modal,
-  ModalOverlay,
-  ModalCloseButton,
-  HStack,
-  Text,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  VStack,
-  Select,
-  Box,
-  Center,
-  Image,
-  Icon,
-} from "@chakra-ui/react"
+import { Card, Dialog, HStack, Text, VStack, NativeSelect, Box, Center, Image, Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
 import { DatePicker } from "@/components"
@@ -95,7 +78,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
             background: "#a1a1a1",
           },
         }}>
-        <VStack align="stretch" spacing={0}>
+        <VStack alignItems="stretch" gap={0}>
           {filteredTransactions.map((transaction, index) => (
             <TransactionsHistory
               key={`${transaction.txType}-${transaction.blockNumber}-${transaction.txId}`}
@@ -111,19 +94,19 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} isCentered={true} size={"xl"}>
-      <ModalOverlay />
-      <ModalContent borderRadius="20px">
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <ModalHeader>
+    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
+      <Dialog.Backdrop />
+      <Dialog.Content borderRadius="20px">
+        <Dialog.CloseTrigger />
+        <Dialog.Header>
           <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
             {t("Transaction history")}
           </Text>
-        </ModalHeader>
+        </Dialog.Header>
 
-        <ModalBody pb={6}>
-          <Card w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={2} h={"full"} pb={4}>
-            <CardBody overflowY="hidden">
+        <Dialog.Body pb={6}>
+          <Card.Root w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={2} h={"full"} pb={4}>
+            <Card.Body overflowY="hidden">
               <HStack justifyContent="flex-end" alignItems="baseline">
                 <Icon
                   as={FaSync}
@@ -138,26 +121,27 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                 />
               </HStack>
 
-              <HStack spacing={4} mb={4} justifyContent="space-between" w="full">
-                <VStack alignItems="start" spacing={0} flex="0.75">
+              <HStack gap={4} mb={4} justifyContent="space-between" w="full">
+                <VStack alignItems="start" gap={0} flex="0.75">
                   <Text fontSize="sm" mb={1}>
                     {t("Type")}
                   </Text>
-                  <Select
-                    rounded={"md"}
-                    value={transactionTypeFilter}
-                    onChange={e => setTransactionTypeFilter(e.target.value)}
-                    size="sm"
-                    w="full">
-                    <option value="ALL">{t("All")}</option>
-                    <option value="DEPOSIT">{t("Deposits")}</option>
-                    <option value="WITHDRAW">{t("Withdrawals")}</option>
-                    <option value="DISTRIBUTE_REWARDS">{t("Rewards Distribution")}</option>
-                    <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
-                  </Select>
+                  <NativeSelect.Root size="sm">
+                    <NativeSelect.Field
+                      rounded={"md"}
+                      value={transactionTypeFilter}
+                      onChange={e => setTransactionTypeFilter(e.target.value)}
+                      w="full">
+                      <option value="ALL">{t("All")}</option>
+                      <option value="DEPOSIT">{t("Deposits")}</option>
+                      <option value="WITHDRAW">{t("Withdrawals")}</option>
+                      <option value="DISTRIBUTE_REWARDS">{t("Rewards Distribution")}</option>
+                      <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
+                    </NativeSelect.Field>
+                  </NativeSelect.Root>
                 </VStack>
 
-                <VStack alignItems="start" spacing={0} flex="1">
+                <VStack alignItems="start" gap={0} flex="1">
                   <Text fontSize="sm" mb={1}>
                     {t("Date Range")}
                   </Text>
@@ -166,10 +150,10 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
               </HStack>
 
               {renderTx()}
-            </CardBody>
-          </Card>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+            </Card.Body>
+          </Card.Root>
+        </Dialog.Body>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 }

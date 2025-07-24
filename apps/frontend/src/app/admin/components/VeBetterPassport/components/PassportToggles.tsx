@@ -1,20 +1,7 @@
 import { usePassportChecks } from "@/api"
 import { TogglePassportCheck } from "@/constants"
 import { useTogglePassportCheck } from "@/hooks"
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
-  FormControl,
-  FormLabel,
-  Heading,
-  HStack,
-  SimpleGrid,
-  Switch,
-  VStack,
-} from "@chakra-ui/react"
-import { useCallback } from "react"
+import { Card, Separator, Field, Heading, HStack, SimpleGrid, Switch, VStack } from "@chakra-ui/react"
 
 export const PassportToggles = () => {
   const {
@@ -26,12 +13,12 @@ export const PassportToggles = () => {
   } = usePassportChecks()
 
   return (
-    <Card>
-      <CardHeader>
+    <Card.Root>
+      <Card.Header>
         <Heading size="lg">{"Passport checks enabled"}</Heading>
-      </CardHeader>
-      <CardBody>
-        <FormControl as={SimpleGrid} gap={3}>
+      </Card.Header>
+      <Card.Body>
+        <Field.Root as={SimpleGrid} gap={3}>
           <PassportCheck
             name={"Whitelist Check"}
             isEnabled={isWhiteListCheckEnabled === true}
@@ -57,9 +44,9 @@ export const PassportToggles = () => {
             isEnabled={isGMOwnershipCheckEnabled === true}
             checkToToggle={TogglePassportCheck.GmOwnershipCheck}
           />
-        </FormControl>
-      </CardBody>
-    </Card>
+        </Field.Root>
+      </Card.Body>
+    </Card.Root>
   )
 }
 
@@ -74,26 +61,27 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
     checkToToggle,
   })
 
-  const handleToggle = useCallback(
-    (event?: { preventDefault: () => void }) => {
-      if (event) event.preventDefault()
+  // const handleToggle = useCallback(
+  //   (event?: { preventDefault: () => void }) => {
+  //     if (event) event.preventDefault()
 
-      sendTransaction()
-    },
-    [sendTransaction],
-  )
+  //     sendTransaction()
+  //   },
+  //   [sendTransaction],
+  // )
 
   return (
     <VStack>
       <HStack w={"full"} justifyContent={"space-between"}>
-        <FormLabel>{name}</FormLabel>
-        <Switch
-          isChecked={isEnabled}
-          onChange={event => handleToggle(event)}
-          disabled={isTransactionPending || status === "pending"}
-        />
+        <Field.Label>{name}</Field.Label>
+        <Switch.Root
+          checked={isEnabled}
+          onCheckedChange={() => sendTransaction()}
+          disabled={isTransactionPending || status === "pending"}>
+          <Switch.Control />
+        </Switch.Root>
       </HStack>
-      <Divider />
+      <Separator />
     </VStack>
   )
 }

@@ -1,15 +1,5 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import {
-  Box,
-  Button,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalOverlay,
-  Text,
-  VStack,
-  useBreakpointValue,
-} from "@chakra-ui/react"
+import { Box, Button, Heading, Dialog, Text, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
@@ -21,10 +11,10 @@ type Props = {
 export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, isOpen }: Props) => {
   const { t } = useTranslation()
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
+      <Dialog.Backdrop />
       <CustomModalContent>
-        <ModalBody p={"40px"}>
+        <Dialog.Body p={"40px"}>
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
             <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
@@ -49,8 +39,8 @@ export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, isOpen 
               </Button>
             </VStack>
           </VStack>
-        </ModalBody>
+        </Dialog.Body>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

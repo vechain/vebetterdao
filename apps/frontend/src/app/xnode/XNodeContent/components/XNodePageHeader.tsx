@@ -19,7 +19,7 @@ export const XNodePageHeader = () => {
     nodeType,
   } = useXNode()
 
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
@@ -42,7 +42,7 @@ export const XNodePageHeader = () => {
   }, [hasUserVoted, isGMOwned, isMaxGmLevelReached, isXNodeAttachedToGM, isXNodeHolder, isXNodeDelegator, t])
 
   return (
-    <Card>
+    <Card.Root>
       <Image
         src={"/assets/backgrounds/xnode-page-background.webp"}
         alt="gm-nft-header"
@@ -55,7 +55,7 @@ export const XNodePageHeader = () => {
         direction={isAbove800 ? "row" : "column"}
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
-        spacing={4}
+        gap={4}
         zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
@@ -67,7 +67,7 @@ export const XNodePageHeader = () => {
           color="#FFFFFF"
           flexGrow={4}>
           <Skeleton
-            isLoaded={!isXNodeLoading}
+            loading={isXNodeLoading}
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}
             rounded="8px">
@@ -80,11 +80,11 @@ export const XNodePageHeader = () => {
             />
           </Skeleton>
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
+            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
               {nodeType}
             </Text>
 
-            <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "xl" : "md"}>
               {xNodeName}
             </Text>
 
@@ -98,7 +98,7 @@ export const XNodePageHeader = () => {
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                   {xNodePoints}
                 </Text>
-                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
                   {t("points to endorse")}
                 </Text>
               </HStack>
@@ -134,6 +134,6 @@ export const XNodePageHeader = () => {
           />
         </VStack>
       </Stack>
-    </Card>
+    </Card.Root>
   )
 }

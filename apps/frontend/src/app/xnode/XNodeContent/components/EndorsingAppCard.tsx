@@ -14,8 +14,7 @@ import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import {
   Button,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   Flex,
   Heading,
   HStack,
@@ -76,8 +75,8 @@ export const EndorsingAppCard = () => {
     return account?.address && !isXNodeDelegator
   }, [account?.address, isXNodeDelegator])
   return (
-    <Card variant="baseWithBorder" w="full" h="min-content">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full" h="min-content">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -111,8 +110,8 @@ export const EndorsingAppCard = () => {
             />
           ) : null}
           {isEndorsingApp ? (
-            <Card variant={"baseWithBorder"} p={4} rounded="lg">
-              <VStack align="stretch" spacing={6}>
+            <Card.Root variant={"baseWithBorder"} p={4} rounded="lg">
+              <VStack align="stretch" gap={6}>
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
                     <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
@@ -149,12 +148,12 @@ export const EndorsingAppCard = () => {
                     </Text>
                   </Stack>
                 </Stack>
-                <Divider />
+                <Separator />
                 <Stack
                   direction={["column", "column", "row"]}
                   alignItems={["flex-start", "flex-start", "center"]}
                   justifyContent={["flex-start", "flex-start", "space-between"]}
-                  spacing={4}
+                  gap={4}
                   w="full">
                   <Flex>
                     <EndorsementDetails
@@ -173,15 +172,15 @@ export const EndorsingAppCard = () => {
                     variant="dangerGhost"
                     onClick={unendorseAppModal.onOpen}
                     w={["full", "full", "auto"]}
-                    isDisabled={shouldDisableEndorsementButton}>
+                    disabled={shouldDisableEndorsementButton}>
                     {t("Remove endorsement")}
                   </Button>
                 </Stack>
               </VStack>
-            </Card>
+            </Card.Root>
           ) : (
             <Flex align="center" justify={"center"} p={["8", "8", "12"]} bg="#F8F8F8" rounded="2xl" mt="2">
-              <VStack align="center" spacing={2} maxW="27rem" textAlign={"center"}>
+              <VStack align="center" gap={2} maxW="27rem" textAlign={"center"}>
                 <UilSearch size={searchIconSize} color="#757575" />
                 <Heading fontSize="xl" color="#757575" fontWeight={"500"}>
                   {t("You’re not endorsing any app")}
@@ -208,8 +207,8 @@ export const EndorsingAppCard = () => {
             </Flex>
           )}
         </VStack>
-      </CardBody>
-      <UnendorseAppModal isOpen={unendorseAppModal.isOpen} onClose={unendorseAppModal.onClose} />
-    </Card>
+      </Card.Body>
+      <UnendorseAppModal isOpen={unendorseAppModal.open} onClose={unendorseAppModal.onClose} />
+    </Card.Root>
   )
 }

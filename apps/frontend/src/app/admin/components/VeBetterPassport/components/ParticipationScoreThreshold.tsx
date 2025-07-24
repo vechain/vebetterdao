@@ -1,40 +1,23 @@
 import { useParticipationScoreThreshold } from "@/api"
 import { useSetParticipationThreshold } from "@/hooks"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  HStack,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, HStack, NumberInput, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const ParticipationScoreThreshold = () => {
-  const [threshold, setThresholdPoPScore] = useState<number | undefined>()
+  const [threshold, setThresholdPoPScore] = useState<string>("")
   const [isThresholdFieldDirty, setIsThresholdFieldDirty] = useState<boolean>(false)
 
   const isThresholdValid = useMemo(() => {
     if (!threshold) return false
-    return threshold >= 0
+    return Number(threshold) >= 0
   }, [threshold])
 
   const { data: participationScoreThreshold } = useParticipationScoreThreshold()
   const { t } = useTranslation()
 
   const { sendTransaction, isTransactionPending, status } = useSetParticipationThreshold({
-    participationThreshold: threshold ?? 0,
+    participationThreshold: Number(threshold) ?? 0,
   })
 
   const handleSubmit = useCallback(
@@ -50,48 +33,45 @@ export const ParticipationScoreThreshold = () => {
   const isFormValid = useMemo(() => isThresholdValid, [isThresholdValid])
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Participation score threshold")}</Heading>
         <Text fontSize="sm">{t("Change the minimum participation score required to be considered a person.")}</Text>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <form onSubmit={handleSubmit}>
-          <VStack spacing={4} alignItems={"start"}>
+          <VStack gap={4} alignItems={"start"}>
             <VStack align={"start"}>
               <Text>
                 {t("Current participation score threshold:")} {participationScoreThreshold}
               </Text>
             </VStack>
 
-            <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
-              <FormControl isInvalid={!isThresholdValid && isThresholdFieldDirty} w={"full"}>
-                <FormLabel>
+            <HStack gap={4} w={"full"} justify={"space-between"} align={"start"}>
+              <Field.Root invalid={!isThresholdValid && isThresholdFieldDirty} w={"full"}>
+                <Field.Label>
                   <strong>{t("New threshold")}</strong>
-                </FormLabel>
-                <NumberInput
+                </Field.Label>
+                <NumberInput.Root
                   min={1}
                   value={threshold}
-                  isDisabled={isLoading}
-                  onChange={value => {
-                    setThresholdPoPScore(parseInt(value))
+                  disabled={isLoading}
+                  onValueChange={e => {
+                    setThresholdPoPScore(e.value)
                     setIsThresholdFieldDirty(true)
                   }}>
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-                <FormErrorMessage>{t("Invalid amount")}</FormErrorMessage>
-              </FormControl>
+                  <NumberInput.Input />
+                  <NumberInput.Control />
+                </NumberInput.Root>
+                <Field.ErrorText>{t("Invalid amount")}</Field.ErrorText>
+              </Field.Root>
             </HStack>
-            <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+            <Button disabled={!isFormValid} colorScheme="blue" type="submit" loading={isLoading}>
               {t("Update threshold")}
             </Button>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

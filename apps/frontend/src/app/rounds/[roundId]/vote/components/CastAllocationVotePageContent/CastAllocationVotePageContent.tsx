@@ -66,7 +66,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   return (
     <ResponsiveCard>
-      <VStack w="full" spacing={8} align={"flex-start"}>
+      <VStack w="full" gap={8} align={"flex-start"}>
         <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
           {t("Select the apps you want to vote")}
         </Heading>
@@ -80,7 +80,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           selectedApps={parsedVotes}
           onSelectedAppsChange={handleOnSelectedAppsChange}
           xApps={xAppsQuery.data}
-          isLoading={xAppsQuery.isLoading}
+          loading={xAppsQuery.isLoading}
         />
 
         <CastAllocationControlsBottomBar

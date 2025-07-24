@@ -1,16 +1,16 @@
-import { Card, CardBody, CardHeader, Heading, VStack } from "@chakra-ui/react"
+import { Card, Heading, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const ProposalsAdmin = () => {
   const { t } = useTranslation()
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Proposals and Governance")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack w={"full"} spacing={4} alignItems={"start"}></VStack>
-      </CardBody>
-    </Card>
+      </Card.Header>
+      <Card.Body>
+        <VStack w={"full"} gap={4} alignItems={"start"}></VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -1,20 +1,7 @@
 import { useUserBotSignals } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
 import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormLabel,
-  Heading,
-  HStack,
-  Input,
-  InputGroup,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, HStack, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -72,37 +59,37 @@ export const ManageUserSignals = () => {
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Manage User Signals")}</Heading>
         <Text fontSize="sm">
           {t(
             "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
           )}
         </Text>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <form>
-          <VStack spacing={4} alignItems={"start"}>
-            <HStack spacing={4} alignItems={"start"} w={"full"}>
-              <FormControl isRequired isInvalid={!isValidAddress}>
-                <FormLabel>
+          <VStack gap={4} alignItems={"start"}>
+            <HStack gap={4} alignItems={"start"} w={"full"}>
+              <Field.Root required invalid={!isValidAddress}>
+                <Field.Label>
                   <strong>{t("User address")}</strong>
-                </FormLabel>
+                </Field.Label>
                 <InputGroup>
                   <WalletAddressInput
                     placeholder={t("Enter the user address")}
-                    isDisabled={signalsLoading || isLoading}
+                    disabled={signalsLoading || isLoading}
                     onAddressResolved={address => setUser(address ?? "")}
                   />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             </HStack>
 
-            <FormControl isRequired>
-              <FormLabel>
+            <Field.Root required>
+              <Field.Label>
                 <strong>{t("Reason")}</strong>
-              </FormLabel>
+              </Field.Label>
               <InputGroup>
                 <Input
                   placeholder={t("Enter the reason for the action")}
@@ -111,7 +98,7 @@ export const ManageUserSignals = () => {
                   disabled={isLoading}
                 />
               </InputGroup>
-            </FormControl>
+            </Field.Root>
 
             {!signalsLoading && (
               <Text>
@@ -119,28 +106,28 @@ export const ManageUserSignals = () => {
               </Text>
             )}
 
-            <HStack spacing={4}>
+            <HStack gap={4}>
               {isSignalResetEnabled && (
                 <Button
-                  isDisabled={!isFormValid}
+                  disabled={!isFormValid}
                   colorScheme="red"
                   onClick={handleResetSignalsSubmit}
-                  isLoading={isResetTxLoading || isResetPending}>
+                  loading={isResetTxLoading || isResetPending}>
                   {t("Reset Signals")}
                 </Button>
               )}
 
               <Button
-                isDisabled={!isFormValid}
+                disabled={!isFormValid}
                 colorScheme="blue"
                 onClick={handleSignalUserSubmit}
-                isLoading={isSignalTxLoading || isSignalPending}>
+                loading={isSignalTxLoading || isSignalPending}>
                 {t("Signal User")}
               </Button>
             </HStack>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

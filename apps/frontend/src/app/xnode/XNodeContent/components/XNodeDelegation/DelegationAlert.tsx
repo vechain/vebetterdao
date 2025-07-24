@@ -1,4 +1,4 @@
-import { Alert, AlertIcon, Box, AlertTitle, Text } from "@chakra-ui/react"
+import { Alert } from "@chakra-ui/react"
 import { useXNode } from "@/api"
 import { useTranslation } from "react-i18next"
 
@@ -12,27 +12,27 @@ export const DelegationAlert = () => {
 
   if (isXNodeDelegator) {
     return (
-      <Alert status="warning" borderRadius="2xl">
-        <AlertIcon />
-        <Box lineHeight="1.20rem" fontSize="sm">
-          <AlertTitle as="span">{t("Your Node can be currently used only by the manager")}</AlertTitle>
-          <Text>
+      <Alert.Root status="warning" borderRadius="2xl">
+        <Alert.Indicator />
+        <Alert.Content lineHeight="1.20rem" fontSize="sm">
+          <Alert.Title as="span">{t("Your Node can be currently used only by the manager")}</Alert.Title>
+          <Alert.Description>
             {t(
               "You can't use your Node to endorse apps or to upgrade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.",
             )}
-          </Text>
-        </Box>
-      </Alert>
+          </Alert.Description>
+        </Alert.Content>
+      </Alert.Root>
     )
   }
 
   return (
-    <Alert status="info" borderRadius="2xl">
-      <AlertIcon />
-      <Box lineHeight="1.20rem" fontSize="sm">
-        <AlertTitle as="span">{t("You have been added as a manager for this node")}</AlertTitle>
-        <Text>{t("Only the owner can remove you as a manager.")}</Text>
-      </Box>
-    </Alert>
+    <Alert.Root status="info" borderRadius="2xl">
+      <Alert.Indicator />
+      <Alert.Content lineHeight="1.20rem" fontSize="sm">
+        <Alert.Title as="span">{t("You have been added as a manager for this node")}</Alert.Title>
+        <Alert.Description>{t("Only the owner can remove you as a manager.")}</Alert.Description>
+      </Alert.Content>
+    </Alert.Root>
   )
 }

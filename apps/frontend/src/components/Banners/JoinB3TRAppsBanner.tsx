@@ -12,14 +12,14 @@ export const JoinB3TRAppsBanner = () => {
   }
 
   return (
-    <Card
+    <Card.Root
       w={"full"}
       bg="#B1F16C"
       color="black"
       overflow={"hidden"}
       borderRadius={"12px"}
       bgImage="url('/assets/backgrounds/community-green-blob.webp')"
-      bgPosition="center"
+      backgroundPosition="center"
       bgSize="full">
       <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
         <VStack
@@ -61,6 +61,6 @@ export const JoinB3TRAppsBanner = () => {
           />
         )}
       </HStack>
-    </Card>
+    </Card.Root>
   )
 }

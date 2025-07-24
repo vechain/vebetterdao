@@ -71,7 +71,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
 
     if (leaderboardQuery.isError || !visibleRankings.length)
       return (
-        <VStack spacing={4} align="stretch" w="full" h="full" pos="relative">
+        <VStack gap={4} align="stretch" w="full" h="full" pos="relative">
           <VStack
             pos={"absolute"}
             backdropFilter="blur(10px)"
@@ -80,7 +80,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             left={0}
             w={"full"}
             justify={"center"}
-            spacing={1}
+            gap={1}
             p={4}
             h="full"
             zIndex={2}
@@ -133,7 +133,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
   }, [leaderboardQuery, account, visibleRankings])
 
   return (
-    <VStack spacing={8} data-testid="leaderboard-page" maxW={"container.md"} mx="auto" align="stretch" w="full">
+    <VStack gap={8} data-testid="leaderboard-page" maxW={"container.md"} mx="auto" align="stretch" w="full">
       {yourRaking && (
         <VStack
           pos="fixed"
@@ -152,7 +152,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           </VStack>
         </VStack>
       )}
-      <VStack spacing={8} align="flex-start" w="full">
+      <VStack gap={8} align="flex-start" w="full">
         <Button
           leftIcon={<FaAngleLeft />}
           variant="link"
@@ -169,7 +169,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             variant="link"
             colorScheme="primary"
             icon={<Icon as={FaAngleLeft} boxSize={5} />}
-            isDisabled={isFirstRound}
+            disabled={isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
           />
 
@@ -186,7 +186,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             variant="link"
             colorScheme="primary"
             icon={<Icon as={FaAngleRight} boxSize={5} />}
-            isDisabled={isLastRound}
+            disabled={isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
           />
         </HStack>

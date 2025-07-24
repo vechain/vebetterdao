@@ -26,7 +26,7 @@ export const XNodeContent = () => {
   return (
     <VStack align="stretch" flex="1" gap="4">
       <XNodePageHeader />
-      <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
+      <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         <VStack flex={3}>
           <MultipleXNodesAlert />
           <DelegateXNodeCard />

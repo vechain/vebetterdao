@@ -10,7 +10,6 @@ import {
   Box,
   Button,
   Card,
-  CardBody,
   Flex,
   Heading,
   HStack,
@@ -58,8 +57,8 @@ export const AttachGMNFTCard = () => {
   }
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -88,7 +87,7 @@ export const AttachGMNFTCard = () => {
               zIndex={0}
             />
             <HStack p="9px 12px" justify="space-between" gap={6} flex={1} zIndex={1} color="#FFFFFF">
-              <Skeleton isLoaded={!isGMLoading} w={"68px"} h={"68px"} rounded="8px">
+              <Skeleton loading={isGMLoading} w={"68px"} h={"68px"} rounded="8px">
                 <Box
                   w={"68px"}
                   h={"68px"}
@@ -101,7 +100,7 @@ export const AttachGMNFTCard = () => {
                 </Box>
               </Skeleton>
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} noOfLines={1}>
+                <Text fontWeight={700} lineClamp={1}>
                   {gmName}
                 </Text>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
@@ -110,7 +109,7 @@ export const AttachGMNFTCard = () => {
                       {gmRewardMultiplier}
                       {"x"}
                     </Text>
-                    <Text fontSize="sm" fontWeight={400} noOfLines={1}>
+                    <Text fontSize="sm" fontWeight={400} lineClamp={1}>
                       {t("GM reward weight")}
                     </Text>
                   </HStack>
@@ -124,7 +123,7 @@ export const AttachGMNFTCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
-              isDisabled={isXNodeDelegator}
+              disabled={isXNodeDelegator}
               onClick={() => handleDetachOnClick()}>
               {t("Detach")}
             </Button>
@@ -132,7 +131,7 @@ export const AttachGMNFTCard = () => {
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
               fallback={
-                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
+                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} disabled={true}>
                   {t("Coming soon!")}
                 </Button>
               }>
@@ -140,15 +139,15 @@ export const AttachGMNFTCard = () => {
                 leftIcon={<UilLink color="#004CFC" />}
                 variant={"primarySubtle"}
                 onClick={() => handleAttachOnClick()}
-                isDisabled={isXNodeDelegator}>
+                disabled={isXNodeDelegator}>
                 {t("Attach now!")}
               </Button>
             </FeatureFlagWrapper>
           )}
         </VStack>
-      </CardBody>
+      </Card.Body>
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
       <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
-    </Card>
+    </Card.Root>
   )
 }

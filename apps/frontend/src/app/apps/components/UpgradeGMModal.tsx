@@ -5,14 +5,9 @@ import {
   Button,
   Box,
   Image,
-  Modal,
-  ModalOverlay,
-  ModalCloseButton,
-  ModalHeader,
+  Dialog,
   Heading,
-  ModalBody,
   Text,
-  ModalFooter,
   VStack,
   HStack,
   Stack,
@@ -45,7 +40,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   onClose,
   sendTransaction,
 }) => {
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const { t } = useTranslation()
 
@@ -73,17 +68,17 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   }, [handleClose, sendTransaction])
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen} onOpenChange={handleClose} size={"xl"}>
+      <Dialog.Backdrop />
       <CustomModalContent p={{ base: 3, md: 5 }}>
-        <ModalCloseButton />
-        <ModalHeader>
+        <Dialog.CloseTrigger />
+        <Dialog.Header>
           <VStack gap={4} align="flex-start">
             <UilArrowCircleUp cursor="pointer" size="50px" color="#004CFC" />
             <Heading fontSize="xl">{t("Upgrade GM NFT")}</Heading>
           </VStack>
-        </ModalHeader>
-        <ModalBody gap={[0, 4]} pt={0}>
+        </Dialog.Header>
+        <Dialog.Body gap={[0, 4]} pt={0}>
           <Text fontSize={["16px"]} color="#6A6A6A">
             {t(
               "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
@@ -101,11 +96,11 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             </HStack>
           </VStack>
           <VStack align="stretch" py={[2, 5]}>
-            <Text color="#6A6A6A" size={"md"}>
+            <Text color="#6A6A6A" textStyle={"md"}>
               {t("You’re upgrading to")}
             </Text>
             {/*GM CARD */}
-            <Card>
+            <Card.Root>
               <Image
                 src={"/assets/backgrounds/nft-page-background.webp"}
                 alt="gm-nft-header"
@@ -118,7 +113,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                 direction={isAbove800 ? "row" : "column"}
                 p={isAbove800 ? "16px" : "12px"}
                 align={isAbove800 ? "stretch" : "flex-start"}
-                spacing={2}
+                gap={2}
                 zIndex={"2"}
                 h={"full"}>
                 <HStack
@@ -140,7 +135,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     alignSelf="center"
                     alignItems="center"
                     justifyContent="center">
-                    <Skeleton isLoaded={!nextLevelGMImageLoading}>
+                    <Skeleton loading={nextLevelGMImageLoading}>
                       <Image
                         src={nextLevelGMImage}
                         alt="gm"
@@ -151,7 +146,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     </Skeleton>
                   </Box>
                   <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
-                    <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "x-large" : "md"}>
+                    <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "x-large" : "md"}>
                       {`${nextLevelGM?.name} #${tokenId}`}
                     </Text>
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
@@ -159,7 +154,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                           {nextLevelGM?.multiplier}
                         </Text>
-                        <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                        <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
                           {t("GM reward weight").toLowerCase()}
                         </Text>
                       </HStack>
@@ -167,11 +162,11 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                   </VStack>
                 </HStack>
               </Stack>
-            </Card>
+            </Card.Root>
             {/*END GM CARD */}
           </VStack>
           <VStack align="stretch" w="full" py={[2, 5]}>
-            <Alert bg={"rgb(255, 250, 235)"} borderRadius="2xl">
+            <Alert.Root bg={"rgb(255, 250, 235)"} borderRadius="2xl">
               <UilInfoCircle color={"rgb(217, 119, 6)"} size={"50px"} />
               <Box lineHeight="1.20rem">
                 <Text px={3} color={"rgb(217, 119, 6)"} fontSize={["12px", "16px"]}>
@@ -180,11 +175,11 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                   )}
                 </Text>
               </Box>
-            </Alert>
+            </Alert.Root>
           </VStack>
-        </ModalBody>
+        </Dialog.Body>
 
-        <ModalFooter w="full" px={4} pt={1}>
+        <Dialog.Footer w="full" px={4} pt={1}>
           <VStack align="stretch" w="full">
             <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
@@ -193,8 +188,8 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               {t("Maybe later")}
             </Button>
           </VStack>
-        </ModalFooter>
+        </Dialog.Footer>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

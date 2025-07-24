@@ -1,18 +1,4 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  HStack,
-  Text,
-  VStack,
-  Modal,
-  ModalOverlay,
-  ModalCloseButton,
-  Input,
-  Skeleton,
-  Icon,
-  Select,
-} from "@chakra-ui/react"
+import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, Select } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
@@ -133,7 +119,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
   const reasonInput = useMemo(() => {
     return (
-      <VStack w="full" spacing={2}>
+      <VStack w="full" gap={2}>
         <Controller
           name="reason"
           control={control}
@@ -159,10 +145,10 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 h="full"
                 w="full"
                 align="flex-start"
-                spacing={12}
+                gap={12}
                 borderBottomWidth={2}
                 borderColor={"rgba(213, 213, 213, 1)"}>
-                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+                <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
@@ -185,7 +171,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
+        <Dialog.CloseTrigger />
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
@@ -198,7 +184,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
-              <Skeleton isLoaded={!isBalanceLoading}>
+              <Skeleton loading={isBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
                   {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
                 </Text>
@@ -212,8 +198,8 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
           <motion.div initial="initial" animate="animate" variants={containerVariants} style={{ width: "100%" }}>
             <motion.div layout transition={layoutTransition}>
-              <VStack py={3} h="full" w="full" align="flex-start" spacing={12}>
-                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+              <VStack py={3} h="full" w="full" align="flex-start" gap={12}>
+                <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={2}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
@@ -232,10 +218,10 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 h="full"
                 w="full"
                 align="flex-start"
-                spacing={12}
+                gap={12}
                 borderBottomWidth={2}
                 borderColor={"rgba(213, 213, 213, 1)"}>
-                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+                <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Text fontSize={14} fontWeight={400}>
@@ -262,7 +248,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             variant={"primaryAction"}
             w={"full"}
             rounded={"full"}
-            isDisabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
+            disabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
             size={"lg"}>
             <Icon as={IoWalletOutline} mr={2} />
             <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
@@ -286,13 +272,13 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   ])
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} trapFocus={true} placement="center">
+      <Dialog.Backdrop />
       <CustomModalContent w={"auto"} maxW={"container.md"}>
-        <Card rounded={20}>
-          <CardBody>{renderCardContent()}</CardBody>
-        </Card>
+        <Card.Root rounded={20}>
+          <Card.Body>{renderCardContent()}</Card.Body>
+        </Card.Root>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

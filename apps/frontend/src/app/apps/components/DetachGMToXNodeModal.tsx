@@ -4,19 +4,7 @@ import { CustomModalContent } from "@/components"
 import { useDetachGMFromXNode, useB3trDonated } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import {
-  Modal,
-  ModalOverlay,
-  ModalBody,
-  VStack,
-  Heading,
-  Text,
-  Button,
-  ModalCloseButton,
-  ModalHeader,
-  ModalFooter,
-  HStack,
-} from "@chakra-ui/react"
+import { Dialog, VStack, Heading, Text, Button, HStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
@@ -52,14 +40,14 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [detachGMFromXNodeMutation])
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={details => !details.open && handleClose()}>
+      <Dialog.Backdrop />
       <CustomModalContent p={{ base: 3, md: 5 }}>
-        <ModalCloseButton />
-        <ModalHeader>
+        <Dialog.CloseTrigger />
+        <Dialog.Header>
           <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
-        </ModalHeader>
-        <ModalBody>
+        </Dialog.Header>
+        <Dialog.Body>
           <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
             <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
             <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
@@ -70,9 +58,9 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
               />
             </Text>
           </HStack>
-        </ModalBody>
-        <ModalFooter w="full">
-          <VStack align="stretch" w="full">
+        </Dialog.Body>
+        <Dialog.Footer w="full">
+          <VStack alignItems="stretch" w="full">
             <Button variant={"primaryAction"} w={"full"} onClick={handleDetachment}>
               {t("Detach my Node")}
             </Button>
@@ -80,8 +68,8 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
               {t("Maybe later")}
             </Button>
           </VStack>
-        </ModalFooter>
+        </Dialog.Footer>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

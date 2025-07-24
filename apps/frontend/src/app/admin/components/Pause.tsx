@@ -2,7 +2,7 @@ import { useB3TRGovernorPaused, useB3trPaused, useVot3Paused } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
-import { Button, HStack, VStack, Text, Show, Card, CardHeader, Heading, CardBody } from "@chakra-ui/react"
+import { Button, HStack, VStack, Text, Show, Card, Heading, useMediaQuery } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
@@ -12,6 +12,7 @@ export const Pause: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
+  const aboveSm = useMediaQuery(["(min-width: 768px)"])
 
   const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
 
@@ -106,7 +107,7 @@ export const Pause: React.FC = () => {
       <Button
         colorScheme={`${isB3trPaused ? "blue" : "red"}`}
         onClick={handleToggleB3trPause}
-        isLoading={isToggleB3trPausedLoading}>
+        loading={isToggleB3trPausedLoading}>
         {isB3trPaused ? "Unpause B3TR" : "Pause B3TR"}
       </Button>
       <Text>{t("Pausing disables: Transfers, Minting, New Emissions, Swaps")}</Text>
@@ -118,7 +119,7 @@ export const Pause: React.FC = () => {
       <Button
         colorScheme={`${isVot3Paused ? "blue" : "red"}`}
         onClick={handleToggleVot3Pause}
-        isLoading={isToggleVot3PausedLoading}>
+        loading={isToggleVot3PausedLoading}>
         {isVot3Paused ? "Unpause VOT3" : "Pause VOT3"}
       </Button>
       <Text>{t("Pausing disables: Transfers, Minting, Swaps, Delegation of voting power")}</Text>
@@ -130,7 +131,7 @@ export const Pause: React.FC = () => {
       <Button
         colorScheme={`${isGalaxyMemberPaused ? "blue" : "red"}`}
         onClick={handleToggleGalaxyMemberPause}
-        isLoading={isToggleGalaxyMemberPausedLoading}>
+        loading={isToggleGalaxyMemberPausedLoading}>
         {isGalaxyMemberPaused ? "Unpause Galaxy Member" : "Pause Galaxy Member"}
       </Button>
       <Text>{t("Pausing disables: Transfers, Minting")}</Text>
@@ -142,7 +143,7 @@ export const Pause: React.FC = () => {
       <Button
         colorScheme={`${isB3TRGovernorPaused ? "blue" : "red"}`}
         onClick={handleToggleB3TRGovernorPause}
-        isLoading={isToggleB3TRGovernorPausedLoading}>
+        loading={isToggleB3TRGovernorPausedLoading}>
         {isB3TRGovernorPaused ? "Unpause B3TRGovernor" : "Pause B3TRGovernor"}
       </Button>
       <Text>
@@ -154,18 +155,18 @@ export const Pause: React.FC = () => {
   )
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Pausing")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={6} align={"flex-start"}>
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={6} align={"flex-start"}>
           {permissions?.isAdminOfVot3 && (
             <>
-              <Show above="sm">
+              <Show when={aboveSm}>
                 <HStack>{pauseB3TR}</HStack>
               </Show>
-              <Show below="sm">
+              <Show when={!aboveSm}>
                 <VStack align={"flex-start"}>{pauseB3TR}</VStack>
               </Show>
             </>
@@ -173,10 +174,10 @@ export const Pause: React.FC = () => {
 
           {permissions?.isAdminOfB3tr && (
             <>
-              <Show above="sm">
+              <Show when={aboveSm}>
                 <HStack>{pauseVOT3}</HStack>
               </Show>
-              <Show below="sm">
+              <Show when={!aboveSm}>
                 <VStack align={"flex-start"}>{pauseVOT3}</VStack>
               </Show>
             </>
@@ -184,10 +185,10 @@ export const Pause: React.FC = () => {
 
           {permissions?.isAdminOfGalaxyMember && (
             <>
-              <Show above="sm">
+              <Show when={aboveSm}>
                 <HStack>{pauseGalaxyMember}</HStack>
               </Show>
-              <Show below="sm">
+              <Show when={!aboveSm}>
                 <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
               </Show>
             </>
@@ -195,16 +196,16 @@ export const Pause: React.FC = () => {
 
           {permissions?.isAdminOfB3TRGovernor && (
             <>
-              <Show above="sm">
+              <Show when={aboveSm}>
                 <HStack>{pauseB3TRGovernor}</HStack>
               </Show>
-              <Show below="sm">
+              <Show when={!aboveSm}>
                 <VStack align={"flex-start"}>{pauseB3TRGovernor}</VStack>
               </Show>
             </>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

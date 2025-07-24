@@ -1,20 +1,7 @@
 import { useUserStatus } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
 import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormLabel,
-  Heading,
-  HStack,
-  InputGroup,
-  Select,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, HStack, InputGroup, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -55,52 +42,50 @@ export const ManageUserStatus = () => {
   const isFormValid = isValidAddress
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Manage User Status")}</Heading>
         <Text fontSize="sm">
           {t("Manage user participation by adding them to a whitelist, blacklist, or removing their status")}
         </Text>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <form onSubmit={handleSubmit}>
-          <VStack spacing={4} alignItems={"start"}>
-            <HStack spacing={4} alignItems={"start"} w={"full"}>
-              <FormControl isRequired isInvalid={!isValidAddress}>
-                <FormLabel>
+          <VStack gap={4} alignItems={"start"}>
+            <HStack gap={4} alignItems={"start"} w={"full"}>
+              <Field.Root required invalid={!isValidAddress}>
+                <Field.Label>
                   <strong>{t("User address")}</strong>
-                </FormLabel>
+                </Field.Label>
                 <InputGroup>
-                  <WalletAddressInput onAddressResolved={address => setUser(address ?? "")} isDisabled={isLoading} />
+                  <WalletAddressInput onAddressResolved={address => setUser(address ?? "")} disabled={isLoading} />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             </HStack>
 
-            <HStack spacing={4} alignItems="center" w="full">
-              <FormLabel>
+            <HStack gap={4} alignItems="center" w="full">
+              <Field.Label>
                 <strong>{t("Action")}</strong>
-              </FormLabel>
-              <Select
-                value={actionType}
-                onChange={handleSetActionType}
-                isDisabled={isLoading}
-                placeholder={t("Select action")}>
-                <option value={UserStatus.WHITELIST}>{t(UserStatus.WHITELIST as any)}</option>
-                <option value={UserStatus.BLACKLIST}>{t(UserStatus.BLACKLIST as any)}</option>
-                <option value={UserStatus.NONE}>{t(UserStatus.NONE as any)}</option>
-              </Select>
+              </Field.Label>
+              <NativeSelect.Root disabled={isLoading}>
+                <NativeSelect.Field value={actionType} onChange={handleSetActionType} placeholder={t("Select action")}>
+                  <option value={UserStatus.WHITELIST}>{t(UserStatus.WHITELIST as any)}</option>
+                  <option value={UserStatus.BLACKLIST}>{t(UserStatus.BLACKLIST as any)}</option>
+                  <option value={UserStatus.NONE}>{t(UserStatus.NONE as any)}</option>
+                </NativeSelect.Field>
+              </NativeSelect.Root>
             </HStack>
 
             <Button
-              isDisabled={!isFormValid || actionType === userStatus}
+              disabled={!isFormValid || actionType === userStatus}
               colorScheme={currentConfig.buttonColorScheme}
               type="submit"
-              isLoading={isLoading}>
+              loading={isLoading}>
               {currentConfig.buttonText}
             </Button>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

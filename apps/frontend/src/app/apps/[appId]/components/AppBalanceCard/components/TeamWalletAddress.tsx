@@ -19,7 +19,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
   }, [teamWalletAddress])
 
   return (
-    <VStack w={"full"} spacing={4} align={"flex-start"}>
+    <VStack w={"full"} gap={4} align={"flex-start"}>
       <VStack align={"stretch"} w={"full"} justify={"start"}>
         <BaseTooltip
           text={

@@ -1,22 +1,6 @@
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { useSetGMMaxLevel } from "@/hooks/useSetGMMaxLevel"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  InputGroup,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  VStack,
-} from "@chakra-ui/react" // Import the Button component
+import { Button, Card, Field, Heading, InputGroup, NumberInput, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -61,28 +45,28 @@ export const GMSetMaxLevel = () => {
     [currentMaxLevel, newMaxLevel],
   )
   return (
-    <Card>
-      <CardHeader>
+    <Card.Root>
+      <Card.Header>
         <Heading size="lg">{t("Set GM Max Level")}</Heading>
-      </CardHeader>
+      </Card.Header>
 
-      <CardBody>
-        <VStack spacing={8} align="start" w="full">
+      <Card.Body>
+        <VStack gap={8} align="start" w="full">
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-            <VStack spacing={4} align="start">
-              <FormControl isRequired isInvalid={Boolean(errors.newMaxLevel)}>
-                <FormLabel>
+            <VStack gap={4} align="start">
+              <Field.Root required invalid={Boolean(errors.newMaxLevel)}>
+                <Field.Label>
                   <strong>{t("GM New Max Level")}</strong>
-                </FormLabel>
+                </Field.Label>
                 <InputGroup>
-                  <NumberInput
+                  <NumberInput.Root
                     w="full"
                     min={GM_MIN_LEVEL_ALLOWED}
                     max={GM_MAX_LEVEL_ALLOWED}
-                    onChange={value =>
-                      setValue("newMaxLevel", Number(value ?? GM_MIN_LEVEL_ALLOWED), { shouldValidate: true })
+                    onValueChange={e =>
+                      setValue("newMaxLevel", Number(e.value ?? GM_MIN_LEVEL_ALLOWED), { shouldValidate: true })
                     }>
-                    <NumberInputField
+                    <NumberInput.Input
                       {...register("newMaxLevel", {
                         required: t("This field is required"),
                         valueAsNumber: true,
@@ -99,22 +83,19 @@ export const GMSetMaxLevel = () => {
                         },
                       })}
                     />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
+                    <NumberInput.Control />
+                  </NumberInput.Root>
                 </InputGroup>
-                {errors.newMaxLevel && <FormErrorMessage>{errors.newMaxLevel.message}</FormErrorMessage>}
-              </FormControl>
+                {errors.newMaxLevel && <Field.ErrorText>{errors.newMaxLevel.message}</Field.ErrorText>}
+              </Field.Root>
 
-              <Button isDisabled={!isFormValid || isTransactionPending} type="submit" colorScheme="blue" size="md">
+              <Button disabled={!isFormValid || isTransactionPending} type="submit" colorScheme="blue" size="md">
                 {t("Set Max Level")}
               </Button>
             </VStack>
           </form>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -1,16 +1,4 @@
-import {
-  Heading,
-  Text,
-  VStack,
-  Card,
-  CardBody,
-  HStack,
-  Image,
-  Button,
-  Show,
-  useMediaQuery,
-  Box,
-} from "@chakra-ui/react"
+import { Heading, Text, VStack, Card, HStack, Image, Button, Show, useMediaQuery, Box } from "@chakra-ui/react"
 import React from "react"
 
 type GenericBannerProps = {
@@ -46,7 +34,8 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   customButton,
   imagePosition = "center",
 }) => {
-  const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
+  const [isVerySmallMobile] = useMediaQuery(["(max-height: 667px)"])
+  const aboveSm = useMediaQuery(["(min-width: 768px)"])
   const isOutlineBtn = buttonVariant === "outline"
   const isIconLeft = buttonIconPosition === "left"
   const hasButton = buttonLabel ?? buttonIcon ?? customButton
@@ -80,7 +69,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   }
 
   return (
-    <Card
+    <Card.Root
       bg={backgroundColor}
       borderRadius="xl"
       w="full"
@@ -100,7 +89,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
           zIndex={0}
           bgImage={backgroundImageSrc ? `url(${backgroundImageSrc})` : undefined}
           bgSize="cover"
-          bgPosition={imagePosition}
+          backgroundPosition={imagePosition}
           bgRepeat="no-repeat"
           _before={{
             content: '""',
@@ -111,14 +100,14 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
           }}
         />
       )}
-      <CardBody
+      <Card.Body
         position="relative"
         zIndex={1}
         alignContent="center"
         justifyContent="center"
         borderRadius="xl"
         padding={{ base: 4, md: 6 }}>
-        <Show breakpoint="(min-width: 768px)">
+        <Show when={aboveSm}>
           <HStack align="stretch" position="relative" w="full">
             {logoSrc &&
               (typeof logoSrc === "string" ? (
@@ -128,7 +117,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
               ))}
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
-                <Text size="xs" color={titleColor} fontWeight="600">
+                <Text textStyle="xs" color={titleColor} fontWeight="600">
                   {title}
                 </Text>
                 {descriptionElement}
@@ -137,7 +126,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
             </HStack>
           </HStack>
         </Show>
-        <Show breakpoint="(max-width: 767px)">
+        <Show when={!aboveSm}>
           <HStack align="center" position="relative" w="full" alignItems="center">
             <VStack gap={2} align="stretch" justify="space-between">
               <Text fontSize={12} color={titleColor} fontWeight="600">
@@ -159,7 +148,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
               ))}
           </HStack>
         </Show>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

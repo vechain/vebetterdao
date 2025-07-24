@@ -1,6 +1,6 @@
 import { CheckableCard } from "@/components"
 import { GovernanceFeaturedFunction, notFoundImage, GovernanceFeaturedContractWithFunctions } from "@/constants"
-import { Grid, GridItem, VStack, Heading, Divider, Card, CardBody, HStack, Checkbox, Box, Text } from "@chakra-ui/react"
+import { Grid, GridItem, VStack, Heading, Separator, Card, HStack, Checkbox, Box, Text } from "@chakra-ui/react"
 
 /**
  * Map the number of functions to the grid size
@@ -73,21 +73,21 @@ export const ContractsWithFunctions: React.FC<Props> = ({
     }
   }
   return contractsWithFunctionsToRender.map(contract => (
-    <VStack key={contract.name} spacing={4} align="flex-start" w="full">
+    <VStack key={contract.name} gap={4} align="flex-start" w="full">
       <Box>
         <Heading size="sm">{contract.name}</Heading>
         <Text fontSize="sm" fontWeight={400} color={"gray.500"}>
           {contract.description}
         </Text>
       </Box>
-      <VStack spacing={4} align="flex-start" divider={<Divider />} w="full">
+      <VStack gap={4} align="flex-start" separator={<Separator />} w="full">
         {contract.functions.map(func => {
           const isSelectedIndex = actions?.findIndex(
             action => action.contractAddress === contract.contract.address && action.name === func.name,
           )
           const isSelected = isSelectedIndex !== -1
           return (
-            <Card
+            <Card.Root
               data-testid={`function-card__${contract.name}_${func.name}`}
               borderRadius={"xl"}
               w="full"
@@ -108,9 +108,9 @@ export const ContractsWithFunctions: React.FC<Props> = ({
                       description: func.description,
                     })
               }>
-              <CardBody>
+              <Card.Body>
                 <HStack w="full" justify={"space-between"}>
-                  <VStack spacing={0} align={"flex-start"}>
+                  <VStack gap={0} align={"flex-start"}>
                     <Heading size="sm" fontWeight={600}>
                       {func.name}
                     </Heading>
@@ -118,10 +118,12 @@ export const ContractsWithFunctions: React.FC<Props> = ({
                       {func.description}
                     </Text>
                   </VStack>
-                  <Checkbox pointerEvents={"none"} size="lg" colorScheme="primary" isChecked={isSelected} />
+                  <Checkbox.Root pointerEvents={"none"} size="lg" colorScheme="primary" checked={isSelected}>
+                    <Checkbox.Control />
+                  </Checkbox.Root>
                 </HStack>
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
           )
         })}
       </VStack>

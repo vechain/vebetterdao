@@ -23,7 +23,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const router = useRouter()
   const { t } = useTranslation()
   const { data, isLoading } = useAllocationsRound(roundId)
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
 
   const prevButtonDisabled = !data.roundId || data.roundId === "1"
   const goToPreviousRound = () => {
@@ -87,14 +87,14 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             size="sm"
             variant={"ghost"}
             aria-label="Go to previous round"
-            isDisabled={prevButtonDisabled}
+            disabled={prevButtonDisabled}
             onClick={goToPreviousRound}
             leftIcon={<FaArrowLeft />}>
             {t("Previous round")}
           </Button>
 
-          <Stack direction={["column", "column", "row"]} spacing={4} align={"center"}>
-            <Skeleton isLoaded={!isLoading}>
+          <Stack direction={["column", "column", "row"]} gap={4} align={"center"}>
+            <Skeleton loading={isLoading}>
               <Heading size="md" color={"#131313"}>
                 {t("Round #{{round}}", {
                   round: data?.roundId,
@@ -102,12 +102,12 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
               </Heading>
             </Skeleton>
             <Box w={1.5} h={1.5} borderRadius={"full"} bg={"#252525"} />
-            <HStack spacing={2} align={"center"}>
-              <Skeleton isLoaded={!isLoading}>
+            <HStack gap={2} align={"center"}>
+              <Skeleton loading={isLoading}>
                 <Text color={"#131313"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
               <Icon as={FaArrowRight} color={"#131313"} />
-              <Skeleton isLoaded={!isLoading}>
+              <Skeleton loading={isLoading}>
                 <Text color={"#131313"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
             </HStack>
@@ -119,7 +119,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             size="sm"
             color={nextButtonDisabled ? "#757575" : "#004CFC"}
             aria-label="Go to next round"
-            isDisabled={nextButtonDisabled}
+            disabled={nextButtonDisabled}
             onClick={goToNextRound}
             rightIcon={<FaArrowRight />}>
             {t("Next round")}
@@ -142,13 +142,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         color={prevButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
         icon={<FaArrowLeft />}
-        isDisabled={prevButtonDisabled}
+        disabled={prevButtonDisabled}
         onClick={goToPreviousRound}
         aria-label="Go to previous round"
       />
       <VStack w="full">
-        <HStack spacing={4}>
-          <Skeleton isLoaded={!isLoading}>
+        <HStack gap={4}>
+          <Skeleton loading={isLoading}>
             <Heading size="md" color={"#131313"}>
               {t("Round #{{round}}", {
                 round: data?.roundId ?? 0,
@@ -158,12 +158,12 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
         </HStack>
 
-        <HStack spacing={2} align={"center"}>
-          <Skeleton isLoaded={!isLoading}>
+        <HStack gap={2} align={"center"}>
+          <Skeleton loading={isLoading}>
             <Text color={"#131313"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
           <Icon as={FaArrowRight} color={"#131313"} />
-          <Skeleton isLoaded={!isLoading}>
+          <Skeleton loading={isLoading}>
             <Text color={"#131313"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
         </HStack>
@@ -175,7 +175,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         icon={<FaArrowRight />}
         aria-label="Go to next round"
         onClick={goToNextRound}
-        isDisabled={nextButtonDisabled}
+        disabled={nextButtonDisabled}
       />
     </HStack>
   )

@@ -14,7 +14,7 @@ export const AppImage = ({ appId, ...props }: Props) => {
   const borderRadius = props.borderRadius ?? "9px"
 
   return (
-    <Skeleton isLoaded={!isLogoLoading} boxSize={"64px"} borderRadius={borderRadius} {...props}>
+    <Skeleton loading={isLogoLoading} boxSize={"64px"} borderRadius={borderRadius} {...props}>
       <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"full"} borderRadius={borderRadius} />
     </Skeleton>
   )

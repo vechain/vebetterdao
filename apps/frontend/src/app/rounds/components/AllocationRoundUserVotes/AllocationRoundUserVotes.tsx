@@ -1,5 +1,5 @@
 import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useUserVotesInRound } from "@/api"
-import { Button, Card, CardBody, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
 import { useWallet } from "@vechain/vechain-kit"
@@ -89,20 +89,20 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
       <SeeVoteDetailsModal
         roundId={roundId}
         votes={parsedCastVotes}
-        isOpen={seeAllModal.isOpen}
+        isOpen={seeAllModal.open}
         onClose={seeAllModal.onClose}
       />
 
-      <Card
+      <Card.Root
         w="full"
         id="user-votes"
         maxH={[!account?.address ? "600px" : "auto", "auto"]}
         overflowY={"hidden"}
         variant="baseWithBorder"
         data-testid={"user-votes-card"}>
-        <CardBody>
-          <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
-            <VStack spacing={2} align="flex-start" w="full">
+        <Card.Body>
+          <VStack flex={1} w="full" gap={8} align={"flex-start"}>
+            <VStack gap={2} align="flex-start" w="full">
               <HStack w="full" justify="space-between">
                 <Heading fontSize="24px" fontWeight={700}>
                   {t("Your vote")}
@@ -115,7 +115,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
                   {t("See details")}
                 </Button>
               </HStack>
-              <Skeleton isLoaded={!castVotesEventLoading}>
+              <Skeleton loading={castVotesEventLoading}>
                 <Text fontSize="16px" fontWeight="400">
                   <Trans
                     i18nKey={"{{amount}} distributed among {{apps}} apps"}
@@ -131,8 +131,8 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
               minPercentageToNotMerge={minPercentageToNotMerge}
             />
           </VStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </>
   )
 }

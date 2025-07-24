@@ -1,18 +1,8 @@
 import { notFoundImage } from "@/constants"
-import {
-  Container,
-  Heading,
-  Image,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  useColorModeValue,
-  VStack,
-} from "@chakra-ui/react"
+import { Container, Heading, Image, Dialog, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 type Props = {
   images: string[]
@@ -24,13 +14,14 @@ export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
   const headerBg = useColorModeValue("white", "gray.700")
 
   return (
-    <Modal size={"100%"} isOpen={isOpen} onClose={onClose}>
-      <ModalContent m={0} h={"100vh"} borderRadius={0} overflow={"auto"}>
-        <ModalHeader pos="sticky" top={0} left={0} bg={headerBg}>
+    <Dialog.Root size={"full"} open={isOpen} onOpenChange={details => !details.open && onClose()}>
+      <Dialog.Backdrop />
+      <Dialog.Content m={0} h={"100vh"} borderRadius={0} overflow={"auto"}>
+        <Dialog.Header pos="sticky" top={0} left={0} bg={headerBg}>
           <Heading size={"md"}>{t("Screenshots")}</Heading>
-          <ModalCloseButton />
-        </ModalHeader>
-        <ModalBody>
+          <Dialog.CloseTrigger />
+        </Dialog.Header>
+        <Dialog.Body>
           <Container maxW={["full", "full", "container.xl"]}>
             <VStack gap={4}>
               {images.map((image, index) => (
@@ -46,8 +37,8 @@ export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
               ))}
             </VStack>
           </Container>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </Dialog.Body>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 }

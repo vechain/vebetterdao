@@ -1,8 +1,7 @@
-import { Circle, Heading, Step, StepIndicator, StepSeparator, StepStatus, Stepper, VStack } from "@chakra-ui/react"
+import { Heading, Timeline, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
-import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
 import { ProposalState } from "@/api"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
@@ -51,7 +50,7 @@ export const ProposalTimeline = () => {
     () =>
       isCanceled
         ? [
-            <ProposalCreatedTimelineItem key={0} />,
+            // <ProposalCreatedTimelineItem key={0} />,
             <TimelineItem key={1} title={t("Waiting for the round to start")} />,
             <TimelineItem
               key={3}
@@ -60,7 +59,7 @@ export const ProposalTimeline = () => {
             />,
           ]
         : [
-            <ProposalCreatedTimelineItem key={0} />,
+            // <ProposalCreatedTimelineItem key={0} />,
             <TimelineItem key={1} title={t("Waiting for the round to start")} />,
             <TimelineItem
               key={2}
@@ -105,20 +104,17 @@ export const ProposalTimeline = () => {
       <Heading fontSize={"20px"} fontWeight={700}>
         {t("Timeline")}
       </Heading>
-      <Stepper index={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
+      <Timeline.Root index={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
         {steps.map(step => (
-          <Step key={`proposal-timeline-step-${step.key}`} style={{ width: "100%" }}>
-            <StepIndicator>
-              <StepStatus
-                complete={<Circle bg="#004CFC" size={"30%"} />}
-                active={<Circle bg="#004CFC" size={"60%"} />}
-              />
-            </StepIndicator>
-            {step}
-            <StepSeparator />
-          </Step>
+          <Timeline.Item key={`proposal-timeline-step-${step.key}`} style={{ width: "100%" }}>
+            <Timeline.Indicator></Timeline.Indicator>
+            <Timeline.Content>
+              <Timeline.Title>{step}</Timeline.Title>
+            </Timeline.Content>
+            <Timeline.Separator />
+          </Timeline.Item>
         ))}
-      </Stepper>
+      </Timeline.Root>
     </VStack>
   )
 }

@@ -8,17 +8,11 @@ import {
   HStack,
   Input,
   InputGroup,
-  InputLeftElement,
   Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
   Text,
   VStack,
   useMediaQuery,
   useBreakpointValue,
-  PlacementWithLogical,
 } from "@chakra-ui/react"
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
@@ -55,11 +49,11 @@ export const DatePicker = ({
 }: DatePickerProps) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
-  const [isMobile] = useMediaQuery("(max-width: 768px)")
+  const [isMobile] = useMediaQuery(["(max-width: 768px)"])
 
   // Responsive placement based on screen size
-  const placement = useBreakpointValue<PlacementWithLogical>({
-    base: "auto",
+  const placement = useBreakpointValue<"right-end" | undefined>({
+    base: undefined,
     md: "right-end",
   })
 
@@ -185,32 +179,30 @@ export const DatePicker = ({
   }, [currentDate, minDate])
 
   return (
-    <Popover
-      isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
-      placement={placement}
-      closeOnBlur={false}
-      strategy="fixed"
-      modifiers={[
-        {
-          name: "flip",
-          options: {
-            fallbackPlacements: ["top", "bottom", "right", "left"],
-          },
-        },
-        {
-          name: "preventOverflow",
-          options: {
-            padding: 8,
-          },
-        },
-      ]}>
-      <PopoverTrigger>
-        <InputGroup size={size} w="full">
-          <InputLeftElement pointerEvents="none">
-            <FaCalendarAlt color="contrast-fg-on-muted" />
-          </InputLeftElement>
+    <Popover.Root
+      open={isOpen}
+      onOpenChange={details => setIsOpen(details.open)}
+      positioning={{ strategy: "fixed", placement }}
+      closeOnInteractOutside={false}
+      // modifiers={[
+      //   {
+      //     name: "flip",
+      //     options: {
+      //       fallbackPlacements: ["top", "bottom", "right", "left"],
+      //     },
+      //   },
+      //   {
+      //     name: "preventOverflow",
+      //     options: {
+      //       padding: 8,
+      //     },
+      //   },
+      // ]}
+    >
+      <Popover.Trigger>
+        <InputGroup w="full" startAddon={<FaCalendarAlt color="contrast-fg-on-muted" pointerEvents="none" />}>
           <Input
+            size={size}
             placeholder={t("Select date range")}
             value={displayValue}
             readOnly
@@ -219,20 +211,20 @@ export const DatePicker = ({
             borderRadius="md"
           />
         </InputGroup>
-      </PopoverTrigger>
-      <PopoverContent width={isMobile ? "280px" : "320px"} boxShadow="lg">
-        <PopoverArrow />
-        <PopoverBody p={isMobile ? 2 : 4}>
-          <VStack spacing={isMobile ? 2 : 4} align="stretch">
+      </Popover.Trigger>
+      <Popover.Content width={isMobile ? "280px" : "320px"} boxShadow="lg">
+        <Popover.Arrow />
+        <Popover.Body p={isMobile ? 2 : 4}>
+          <VStack gap={isMobile ? 2 : 4} align="stretch">
             {/* Calendar Header */}
             <Flex justify="space-between" align="center">
-              <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)} isDisabled={isPrevMonthDisabled}>
+              <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)} disabled={isPrevMonthDisabled}>
                 <FaChevronLeft />
               </Button>
               <Heading size="sm" textAlign="center">
                 {monthName.toUpperCase()}
               </Heading>
-              <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} isDisabled={isNextMonthDisabled}>
+              <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
                 <FaChevronRight />
               </Button>
             </Flex>
@@ -269,7 +261,7 @@ export const DatePicker = ({
                     h={isMobile ? "7" : "8"}
                     minW="0"
                     p="0"
-                    isDisabled={!isSelectable}
+                    disabled={!isSelectable}
                     variant="unstyled"
                     fontSize={isMobile ? "2xs" : "xs"}
                     fontWeight="medium"
@@ -303,8 +295,8 @@ export const DatePicker = ({
               </Text>
             )}
           </VStack>
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
+        </Popover.Body>
+      </Popover.Content>
+    </Popover.Root>
   )
 }

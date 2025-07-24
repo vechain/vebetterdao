@@ -39,7 +39,7 @@ export const StepModal = <T extends string>({
     // close the modal
     onClose()
   }
-  const [isDesktop] = useMediaQuery("(min-width: 1060px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
 
   const currentStepContent = steps[activeStep]
 

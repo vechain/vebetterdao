@@ -15,10 +15,7 @@ import {
   useMediaQuery,
   VStack,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
+  Dialog,
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -43,13 +40,13 @@ export const GmNFTPageHeader = () => {
     isLoading,
     b3trLeftover,
   } = useSelectedGmNft()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
 
   const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
 
   const actionDescription = useMemo(() => {
     if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
@@ -123,7 +120,7 @@ export const GmNFTPageHeader = () => {
         <HStack>
           <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
           <HStack gap={0} alignItems={"baseline"}>
-            <Skeleton isLoaded={!isB3trBalanceLoading}>
+            <Skeleton loading={isB3trBalanceLoading}>
               <Text color="#B1F16C" fontSize="lg" fontWeight={700}>
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
@@ -161,7 +158,7 @@ export const GmNFTPageHeader = () => {
   ])
 
   return (
-    <Card>
+    <Card.Root>
       <Image
         src={"/assets/backgrounds/nft-page-background.webp"}
         alt="gm-nft-header"
@@ -174,7 +171,7 @@ export const GmNFTPageHeader = () => {
         direction={isAbove800 ? "row" : "column"}
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
-        spacing={4}
+        gap={4}
         zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
@@ -185,7 +182,7 @@ export const GmNFTPageHeader = () => {
           color="#FFFFFF"
           flexGrow={4}>
           <Skeleton
-            isLoaded={!isGMLoading}
+            loading={isGMLoading}
             w={isAbove800 ? "132px" : "68px"}
             h={isAbove800 ? "132px" : "68px"}
             rounded="8px">
@@ -200,7 +197,7 @@ export const GmNFTPageHeader = () => {
               onClick={onOpen}
               cursor="pointer">
               <Skeleton
-                isLoaded={!isLoading}
+                loading={isLoading}
                 w={isAbove800 ? "126px" : "64px"}
                 h={isAbove800 ? "126px" : "64px"}
                 rounded={"7px"}>
@@ -215,10 +212,10 @@ export const GmNFTPageHeader = () => {
             </Box>
           </Skeleton>
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
+            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
               {t("LEVEL {{level}}", { level: gmLevel })}
             </Text>
-            <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "xl" : "md"}>
               {gmName}
             </Text>
             <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
@@ -226,7 +223,7 @@ export const GmNFTPageHeader = () => {
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                   {gmRewardMultiplier}
                 </Text>
-                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
                   {t("GM reward weight")}
                 </Text>
               </HStack>
@@ -255,9 +252,17 @@ export const GmNFTPageHeader = () => {
         </VStack>
       </Stack>
       {/* Modal for Image Preview */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
-        <ModalOverlay />
-        <ModalContent
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={details => {
+          if (!details.open) {
+            onClose()
+          }
+        }}
+        placement="center"
+        size="xl">
+        <Dialog.Backdrop />
+        <Dialog.Content
           as={motion.div}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -268,7 +273,7 @@ export const GmNFTPageHeader = () => {
           w="full"
           p={0}
           m={0}>
-          <ModalBody p={0}>
+          <Dialog.Body p={0}>
             <Box
               position="relative"
               display="flex"
@@ -280,9 +285,9 @@ export const GmNFTPageHeader = () => {
               rounded="16px">
               <Image src={gmImage} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
             </Box>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </Card>
+          </Dialog.Body>
+        </Dialog.Content>
+      </Dialog.Root>
+    </Card.Root>
   )
 }

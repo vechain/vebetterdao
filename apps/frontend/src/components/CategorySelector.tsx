@@ -14,21 +14,14 @@ import {
   VStack,
   HStack,
   Tag,
-  TagLabel,
-  TagCloseButton,
   Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverBody,
   Button,
   Input,
   InputGroup,
-  InputLeftElement,
   Flex,
   useDisclosure,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
+  Field,
+  CloseButton,
 } from "@chakra-ui/react"
 import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
@@ -62,7 +55,7 @@ export const CategorySelector = <T extends FieldValues>({
   registerOptions,
 }: CategorySelectorProps<T>) => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
   const [searchQuery, setSearchQuery] = useState<string>("")
 
   const selectedCategories: string[] = watch(fieldName) ?? []
@@ -113,8 +106,8 @@ export const CategorySelector = <T extends FieldValues>({
   )
 
   return (
-    <FormControl isInvalid={!!error}>
-      <FormLabel>{t("App Categories")}</FormLabel>
+    <Field.Root invalid={!!error}>
+      <Field.Label>{t("App Categories")}</Field.Label>
 
       <Text fontSize="xs" color="gray.500" mb={2}>
         {t("Select up to 2 categories that best describe your app.")}
@@ -122,15 +115,15 @@ export const CategorySelector = <T extends FieldValues>({
 
       <input type="hidden" {...registerField} />
 
-      <VStack align="flex-start" spacing={4} width="full">
-        <HStack spacing={3} flexWrap="wrap">
+      <VStack align="flex-start" gap={4} width="full">
+        <HStack gap={3} flexWrap="wrap">
           {!!selectedCategories?.length &&
             selectedCategories?.map(categoryId => {
               const category = getCategoryById(categoryId)
               if (!category) return null
 
               return (
-                <Tag
+                <Tag.Root
                   key={categoryId}
                   size="lg"
                   borderRadius="full"
@@ -138,27 +131,36 @@ export const CategorySelector = <T extends FieldValues>({
                   backgroundColor={category.color}
                   color="black"
                   mb={2}>
-                  <TagLabel>{category.name}</TagLabel>
-                  <TagCloseButton onClick={() => handleRemoveCategory(categoryId)} />
-                </Tag>
+                  <Tag.Label>{category.name}</Tag.Label>
+                  <Tag.CloseTrigger>
+                    <CloseButton onClick={() => handleRemoveCategory(categoryId)} />
+                  </Tag.CloseTrigger>
+                </Tag.Root>
               )
             })}
 
           {selectedCategories?.length < maxCategories && (
-            <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur={true}>
-              <PopoverTrigger>
-                <Button leftIcon={<FaPlus />} variant="outline" borderRadius="full" size="md">
+            <Popover.Root
+              open={isOpen}
+              onOpenChange={details => {
+                if (details.open) onOpen()
+                else onClose()
+              }}
+              positioning={{
+                placement: "bottom-start",
+              }}>
+              <Popover.Trigger>
+                <Button variant="outline" borderRadius="full" size="md">
+                  <FaPlus />
                   {t("Add Category")}
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent width="300px" maxH="400px" overflowY="auto">
-                <PopoverBody p={3}>
-                  <VStack spacing={3} align="stretch">
-                    <InputGroup size="md">
-                      <InputLeftElement pointerEvents="none">
-                        <FaSearch color="#6A6A6A" />
-                      </InputLeftElement>
+              </Popover.Trigger>
+              <Popover.Content width="300px" maxH="400px" overflowY="auto">
+                <Popover.Body p={3}>
+                  <VStack gap={3} align="stretch">
+                    <InputGroup startAddon={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
                       <Input
+                        size="md"
                         placeholder={t("Find a category")}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
@@ -187,14 +189,14 @@ export const CategorySelector = <T extends FieldValues>({
                       ))
                     )}
                   </VStack>
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
+                </Popover.Body>
+              </Popover.Content>
+            </Popover.Root>
           )}
         </HStack>
       </VStack>
 
-      {error && <FormErrorMessage>{error}</FormErrorMessage>}
-    </FormControl>
+      {error && <Field.ErrorText>{error}</Field.ErrorText>}
+    </Field.Root>
   )
 }

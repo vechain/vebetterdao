@@ -1,7 +1,7 @@
 import React from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { useToast } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
+import { toaster } from "@/components/ui/toaster"
 
 interface Props {
   data: { user: string; totalActions: number }[]
@@ -28,20 +28,17 @@ export const TopUsersChart: React.FC<Props> = ({ data }) => {
 const CustomizedAxisTick = (props: any) => {
   const { x, y, payload } = props
 
-  const toast = useToast()
-
   // Abbreviate the address
   const displayAddress = FormattingUtils.humanAddress(payload.value, 6, 8)
 
   // Click handler to copy full address
   const handleClick = () => {
     navigator.clipboard.writeText(payload.value)
-    toast({
+    toaster.success({
       title: "Address copied",
       description: `Copied ${payload.value} to clipboard.`,
-      status: "success",
       duration: 3000,
-      isClosable: true,
+      closable: true,
     })
   }
 

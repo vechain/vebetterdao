@@ -1,17 +1,5 @@
 import { useEffect } from "react"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import {
   Control,
   FieldErrors,
@@ -186,14 +174,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
   }
 
   return (
-    <Card w="full" borderRadius="xl">
-      <CardBody w="full" p={{ base: 2, md: 6 }}>
-        <VStack spacing={4} w="full">
-          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
+    <Card.Root w="full" borderRadius="xl">
+      <Card.Body w="full" p={{ base: 2, md: 6 }}>
+        <VStack gap={4} w="full">
+          <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
             <Heading size="md" pb={6}>
               {t("App Information")}
             </Heading>
-            <VStack w="full" spacing={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch">
               <FormItem
                 label={t("App Name")}
                 placeholder={t("App Name")}
@@ -270,8 +258,8 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 error={errors.projectUrl?.message}
                 onBlur={() => onBlur("projectUrl")}
               />
-              <FormControl isInvalid={!!errors.adminWalletAddress}>
-                <FormLabel>{t("Creator NFT Wallet Address")}</FormLabel>
+              <Field.Root invalid={!!errors.adminWalletAddress}>
+                <Field.Label>{t("Creator NFT Wallet Address")}</Field.Label>
                 <Text fontSize="xs" color="gray.500" mb={2}>
                   {t("The wallet address where you will receive your Creator NFT")}
                 </Text>
@@ -283,45 +271,45 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                   rounded={"xl"}
                   onBlur={() => onBlur("adminWalletAddress")}
                 />
-              </FormControl>
+              </Field.Root>
             </VStack>
-          </Card>
-          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
+          </Card.Root>
+          <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
             <Heading size="md" pb={6}>
               {t("Your Information")}
             </Heading>
-            <VStack w="full" spacing={4} align="stretch">
-              <FormControl isInvalid={!!errors.githubUsername}>
-                <FormLabel>{t("GitHub Username")}</FormLabel>
+            <VStack w="full" gap={4} align="stretch">
+              <Field.Root invalid={!!errors.githubUsername}>
+                <Field.Label>{t("GitHub Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
                   onClick={() => handleAuth("github")}
                   size="lg"
                   alignSelf="flex-end"
-                  borderRadius="full"
-                  leftIcon={<UilGithub size={30} />}>
+                  borderRadius="full">
+                  <UilGithub size={30} />
                   {watch("githubUsername") || t("Connect GitHub")}
                 </Button>
                 <Input type="hidden" {...register("githubUsername", { required: "GitHub Username is required" })} />
-                <FormErrorMessage>{errors.githubUsername?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors.githubUsername?.message}</Field.ErrorText>
+              </Field.Root>
 
-              <FormControl isInvalid={!!errors.twitterUsername}>
-                <FormLabel>{t("X Username")}</FormLabel>
+              <Field.Root invalid={!!errors.twitterUsername}>
+                <Field.Label>{t("X Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
                   onClick={() => handleAuth("twitter")}
                   size="lg"
                   alignSelf="flex-end"
-                  borderRadius="full"
-                  leftIcon={<FaXTwitter />}>
+                  borderRadius="full">
+                  <FaXTwitter />
                   {watch("twitterUsername") || t("Connect X")}
                 </Button>
                 <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
-                <FormErrorMessage>{errors.twitterUsername?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors.twitterUsername?.message}</Field.ErrorText>
+              </Field.Root>
               <FormItem
                 label={t("Email")}
                 placeholder={"Eg. admin@myapp.vet"}
@@ -352,13 +340,13 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 onBlur={() => onBlur("adminName")}
               />
             </VStack>
-          </Card>
+          </Card.Root>
 
-          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
+          <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
             <Heading size="md" pb={4}>
               {t("Testing Requirements")}
             </Heading>
-            <VStack w="full" spacing={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch">
               <FormItem
                 label={t("Testnet Project URL")}
                 placeholder={"Eg. https://www.testnet.myapp.vet"}
@@ -395,12 +383,12 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 onBlur={() => onBlur("testnetAppId")}
               />
             </VStack>
-          </Card>
-          <Card w="full" borderRadius="xl" borderColor="gray.200" p={4}>
+          </Card.Root>
+          <Card.Root w="full" borderRadius="xl" borderColor="gray.200" p={4}>
             <Heading size="md" pb={4}>
               {t("Security Requirements")}
             </Heading>
-            <VStack align="start" spacing={3}>
+            <VStack align="start" gap={3}>
               <FormCheckbox
                 register={{ ...register("securityApiSecurityMeasures") }}
                 label={t("API Security Measures (Optional)")}
@@ -440,10 +428,10 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 error={errors.securityAntiFarming?.message}
               />
             </VStack>
-          </Card>
+          </Card.Root>
         </VStack>
-      </CardBody>
-      <CardFooter display={"flex"} flexDir={"column"} w="full" alignItems="center" justify="center">
+      </Card.Body>
+      <Card.Footer display={"flex"} flexDir={"column"} w="full" alignItems="center" justifyContent="center">
         <Button
           variant="primaryAction"
           disabled={!!errors}
@@ -459,7 +447,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
           borderRadius={"full"}>
           {t("Send Application")}
         </Button>
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   )
 }

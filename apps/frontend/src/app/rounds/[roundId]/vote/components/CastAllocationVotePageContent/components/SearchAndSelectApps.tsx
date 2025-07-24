@@ -1,15 +1,5 @@
 import { CastAllocationVoteFormData } from "@/store"
-import {
-  VStack,
-  InputGroup,
-  InputLeftElement,
-  Icon,
-  Input,
-  HStack,
-  Skeleton,
-  Heading,
-  Checkbox,
-} from "@chakra-ui/react"
+import { VStack, InputGroup, Icon, Input, HStack, Skeleton, Heading, Checkbox } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
 import { useCallback, useMemo, useState } from "react"
 import { AppSelectableCard } from "./AppSelectableCard"
@@ -34,9 +24,9 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
   const [appsToSearch, setAppsToSearch] = useState("")
 
   const onCheckboxChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (checked: boolean) => {
       if (!xApps) return
-      if (e.target.checked) {
+      if (checked) {
         const data = xApps.map(xApp => ({ appId: xApp.id, ...splitEvenly(xApps.length) }))
         return onSelectedAppsChange(data)
       }
@@ -56,29 +46,32 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
   }, [appsToSearch, xApps])
 
   return (
-    <VStack w="full" spacing={6}>
-      <InputGroup size={"lg"}>
-        <InputLeftElement>
-          <Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />
-        </InputLeftElement>
+    <VStack w="full" gap={6}>
+      <InputGroup startAddon={<Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />}>
         <Input
+          size={"lg"}
           placeholder="Search for an app"
           value={appsToSearch}
           onChange={e => setAppsToSearch(e.target.value)}
           fontSize={"16px"}
         />
       </InputGroup>
-      <HStack w="full" spacing={4} justify={"space-between"}>
-        <Skeleton isLoaded={!isLoading}>
+      <HStack w="full" gap={4} justify={"space-between"}>
+        <Skeleton loading={isLoading}>
           <Heading fontSize={"20px"} fontWeight={700}>
             {t("{{amount}} participating apps", { amount: xApps?.length ?? "0" })}
           </Heading>
         </Skeleton>
-        <Checkbox colorScheme="primary" onChange={onCheckboxChange} isChecked={isSelectAllChecked} size="lg">
+        <Checkbox.Root
+          colorScheme="primary"
+          onCheckedChange={e => onCheckboxChange(!!e.checked)}
+          checked={isSelectAllChecked}
+          size="lg">
+          <Checkbox.Control />
           {t("Select all")}
-        </Checkbox>
+        </Checkbox.Root>
       </HStack>
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         {!filteredApps.length ? (
           <NoAppsCard onShowAllApps={() => setAppsToSearch("")} />
         ) : (

@@ -1,14 +1,9 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalHeader,
-  ModalCloseButton,
+  Dialog,
   Text,
   HStack,
   Button,
   Heading,
-  ModalContent,
-  ModalBody,
   VStack,
   Icon,
   Box,
@@ -181,17 +176,17 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
   }, [availableBalanceFormatted, rewardsBalanceFormatted])
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} isCentered={true} size={"xl"}>
-      <ModalOverlay />
-      <ModalContent borderRadius="20px">
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <ModalHeader>
+    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
+      <Dialog.Backdrop />
+      <Dialog.Content borderRadius="20px">
+        <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />
+        <Dialog.Header>
           <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
             {t("Refill Pools")}
           </Text>
-        </ModalHeader>
+        </Dialog.Header>
 
-        <ModalBody pb={6} gap={4}>
+        <Dialog.Body pb={6} gap={4}>
           <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
             <Text fontSize={14} fontWeight={400} color="#6A6A6A">
               {t(
@@ -310,15 +305,15 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
 
           <Button
             mt={8}
-            isDisabled={isTransferDisabled || isLoading}
+            disabled={isTransferDisabled || isLoading}
             onClick={handleTransfer}
             variant={"primaryAction"}
             borderRadius={"full"}
             w={"full"}>
             {t("Transfer token")}
           </Button>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </Dialog.Body>
+      </Dialog.Content>
+    </Dialog.Root>
   )
 }

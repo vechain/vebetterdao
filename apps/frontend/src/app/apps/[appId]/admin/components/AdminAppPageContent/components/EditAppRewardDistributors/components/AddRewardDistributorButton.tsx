@@ -1,17 +1,5 @@
 import { CustomModalContent } from "@/components"
-import {
-  Button,
-  FormControl,
-  HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalOverlay,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UilFileContract, UilPlus } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -27,7 +15,7 @@ type Props = {
 
 export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ distributorAddress: string }>()
   const { watch, setValue } = addressForm
   const distributorAddress = watch("distributorAddress")
@@ -49,11 +37,10 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose}>
-        <ModalOverlay />
+      <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
+        <Dialog.Backdrop />
         <CustomModalContent>
-          <ModalCloseButton />
-          <ModalBody p={"40px"}>
+          <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
               <UilFileContract size="54px" color="#004CFC" />
               <Heading fontSize="28px">{t("Add a new reward distributor")}</Heading>
@@ -68,7 +55,7 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
                   )}
                 </HStack>
 
-                <FormControl isRequired isInvalid={!distributorAddress}>
+                <Field.Root required invalid={!distributorAddress}>
                   <WalletAddressInput
                     onAddressResolved={address => setValue("distributorAddress", address ?? "")}
                     customValidation={({ address }) => {
@@ -80,12 +67,12 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
                         : ""
                     }}
                   />
-                </FormControl>
+                </Field.Root>
               </VStack>
               <VStack align="stretch">
                 <Button
                   variant="primaryAction"
-                  isDisabled={!distributorAddress}
+                  disabled={!distributorAddress}
                   type="submit"
                   onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add distributor")}
@@ -95,9 +82,9 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
                 </Button>
               </VStack>
             </VStack>
-          </ModalBody>
+          </Dialog.Body>
         </CustomModalContent>
-      </Modal>
+      </Dialog.Root>
       <Button
         mt={4}
         onClick={onOpen}

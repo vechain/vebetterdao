@@ -3,8 +3,7 @@ import { XAppStatus } from "@/types"
 import {
   Button,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   Flex,
   HStack,
   Heading,
@@ -43,7 +42,7 @@ export const AppDetailOverview = ({
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
   const {
-    isOpen: isDistributionStrategyModalOpen,
+    open: isDistributionStrategyModalOpen,
     onOpen: onDistributionStrategyModalOpen,
     onClose: onDistributionStrategyModalClose,
   } = useDisclosure()
@@ -60,12 +59,12 @@ export const AppDetailOverview = ({
 
   return (
     <>
-      <VStack spacing={4} align="stretch">
+      <VStack gap={4} align="stretch">
         {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
-        <Card variant="baseWithBorder">
-          <CardBody>
+        <Card.Root variant="baseWithBorder">
+          <Card.Body>
             <VStack align="stretch" gap={4}>
-              <Skeleton isLoaded={!isBannerLoading}>
+              <Skeleton loading={isBannerLoading}>
                 <Image
                   src={banner ?? notFoundImage}
                   alt={"banner"}
@@ -86,18 +85,16 @@ export const AppDetailOverview = ({
                       align={["stretch", "stretch", "center"]}
                       gap={[4, 4, 0]}>
                       <HStack gap={4}>
-                        <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+                        <Skeleton loading={isLogoLoading} alignContent={"start"}>
                           <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
                         </Skeleton>
-                        <Skeleton isLoaded={!appMetadataLoading && !!appMetadata}>
+                        <Skeleton loading={appMetadataLoading && !!appMetadata}>
                           <Heading fontSize={"28px"} fontWeight={700}>
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
                         </Skeleton>
                       </HStack>
-                      <Skeleton
-                        isLoaded={!isEndorsementStatusLoading}
-                        alignSelf={["flex-start", "flex-start", "center"]}>
+                      <Skeleton loading={isEndorsementStatusLoading} alignSelf={["flex-start", "flex-start", "center"]}>
                         <EndorsementStatusCallout
                           endorsementStatus={endorsementStatus}
                           showDescription={false}
@@ -106,7 +103,7 @@ export const AppDetailOverview = ({
                     </Stack>
                     <AppDetailSocials socialUrls={appMetadata?.social_urls || []} />
                   </HStack>
-                  <Skeleton isLoaded={!appMetadataLoading && !!appMetadata}>
+                  <Skeleton loading={appMetadataLoading || !appMetadata}>
                     <Text fontSize={"md"}>
                       {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                     </Text>
@@ -123,7 +120,7 @@ export const AppDetailOverview = ({
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
                       <AppReceiverAddress />
                       <Show below="md">
-                        <Divider />
+                        <Separator />
                       </Show>
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
@@ -181,8 +178,8 @@ export const AppDetailOverview = ({
                 <AppDetailAllocationInfo />
               </Flex>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </VStack>
       <DistributionStrategyModal
         isOpen={isDistributionStrategyModalOpen}

@@ -1,13 +1,4 @@
-import {
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  FormLabelProps,
-  Input,
-  InputProps,
-  Select,
-  SelectProps,
-} from "@chakra-ui/react"
+import { Field, FieldLabelProps, Input, NativeSelect, InputProps } from "@chakra-ui/react"
 import { Control, Controller, FieldError, FieldErrorsImpl, Merge, UseFormRegister } from "react-hook-form"
 import { AddressUtils } from "@repo/utils"
 import { useMemo } from "react"
@@ -34,8 +25,8 @@ type Props = {
   error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined
   register: UseFormRegister<ProposalFunctionFormData>
   inputProps?: InputProps
-  selectProps?: SelectProps
-  formLabelProps?: FormLabelProps
+  selectProps?: NativeSelect.RootProps
+  formLabelProps?: FieldLabelProps
   humanizeLabels?: boolean
   control: Control<ProposalFunctionFormData, any>
 }
@@ -53,6 +44,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   control,
 }) => {
   const { t } = useTranslation()
+
   const label = useMemo(() => {
     //TODO: handle this with humanName field in the featured fucntion param itself
     if (humanizeLabels) {
@@ -75,8 +67,8 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
   }, [field.name, field.type, humanizeLabels])
   if (field.type === "address") {
     return (
-      <FormControl isInvalid={!!error}>
-        <FormLabel {...formLabelProps}>{label}</FormLabel>
+      <Field.Root invalid={!!error}>
+        <Field.Label {...formLabelProps}>{label}</Field.Label>
         <Input
           data-testid={`generated-function-to-call-${index}`}
           type="text"
@@ -87,17 +79,17 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           })}
           {...inputProps}
         />
-        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error?.message?.toString()}
-        </FormErrorMessage>
-      </FormControl>
+        <Field.ErrorText>
+          <span data-testid={`generated-function-to-call-${index}-error`}>{error?.message?.toString()}</span>
+        </Field.ErrorText>
+      </Field.Root>
     )
   }
 
   if (field.type === "bytes32") {
     return (
-      <FormControl isInvalid={!!error}>
-        <FormLabel {...formLabelProps}>{label}</FormLabel>
+      <Field.Root invalid={!!error}>
+        <Field.Label {...formLabelProps}>{label}</Field.Label>
         <Input
           data-testid={`generated-function-to-call-${index}`}
           type="text"
@@ -108,16 +100,16 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           })}
           {...inputProps}
         />
-        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error?.message?.toString()}
-        </FormErrorMessage>
-      </FormControl>
+        <Field.ErrorText>
+          <span data-testid={`generated-function-to-call-${index}-error`}>{error?.message?.toString()}</span>
+        </Field.ErrorText>
+      </Field.Root>
     )
   }
   if (field.type === "uint256") {
     return (
-      <FormControl isInvalid={!!error}>
-        <FormLabel {...formLabelProps}>{label}</FormLabel>
+      <Field.Root invalid={!!error}>
+        <Field.Label {...formLabelProps}>{label}</Field.Label>
         <Input
           data-testid={`generated-function-to-call-${index}`}
           type="text"
@@ -133,41 +125,42 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           })}
           {...inputProps}
         />
-        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error?.message?.toString()}
-        </FormErrorMessage>
-      </FormControl>
+        <Field.ErrorText>
+          <span data-testid={`generated-function-to-call-${index}-error`}>{error?.message?.toString()}</span>
+        </Field.ErrorText>
+      </Field.Root>
     )
   }
   if (field.type === "bool") {
     return (
-      <FormControl isInvalid={!!error}>
-        <FormLabel {...formLabelProps}>{label}</FormLabel>
+      <Field.Root invalid={!!error}>
+        <Field.Label {...formLabelProps}>{label}</Field.Label>
         <Controller
           name={`actions.${actionIndex}.params.${index}.value`}
           control={control}
           defaultValue={false}
           render={({ field }) => (
-            <Select
-              placeholder="Select value..."
-              value={field.value}
-              onChange={e => field.onChange(e.target.value === "true" ? 1 : 0)}
-              {...selectProps}>
-              <option value="true">{t("True")}</option>
-              <option value="false">{t("False")}</option>
-            </Select>
+            <NativeSelect.Root {...selectProps}>
+              <NativeSelect.Field
+                placeholder="Select value..."
+                value={field.value}
+                onChange={e => field.onChange(e.target.value === "true" ? 1 : 0)}>
+                <option value="true">{t("True")}</option>
+                <option value="false">{t("False")}</option>
+              </NativeSelect.Field>
+            </NativeSelect.Root>
           )}
         />
-        <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-          {error?.message?.toString()}
-        </FormErrorMessage>
-      </FormControl>
+        <Field.ErrorText>
+          <span data-testid={`generated-function-to-call-${index}-error`}>{error?.message?.toString()}</span>
+        </Field.ErrorText>
+      </Field.Root>
     )
   }
 
   return (
-    <FormControl isInvalid={!!error}>
-      <FormLabel {...formLabelProps}>{label}</FormLabel>
+    <Field.Root invalid={!!error}>
+      <Field.Label {...formLabelProps}>{label}</Field.Label>
       <Input
         data-testid={`generated-function-to-call-${index}`}
         type="text"
@@ -175,9 +168,9 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
         {...register(`actions.${actionIndex}.params.${index}.value`, { required: "Field is required" })}
         {...inputProps}
       />
-      <FormErrorMessage data-testid={`generated-function-to-call-${index}-error`}>
-        {error?.message?.toString()}
-      </FormErrorMessage>
-    </FormControl>
+      <Field.ErrorText>
+        <span data-testid={`generated-function-to-call-${index}-error`}>{error?.message?.toString()}</span>
+      </Field.ErrorText>
+    </Field.Root>
   )
 }

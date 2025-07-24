@@ -1,17 +1,4 @@
-import {
-  Card,
-  CardBody,
-  VStack,
-  Heading,
-  HStack,
-  Box,
-  Text,
-  Button,
-  FormControl,
-  Select,
-  FormLabel,
-  Stack,
-} from "@chakra-ui/react"
+import { Card, VStack, Heading, HStack, Box, Text, Button, Field, NativeSelect, Stack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useProposalFormStore } from "@/store"
 import { useRouter } from "next/navigation"
@@ -82,26 +69,28 @@ export const FunctionsPageContent = () => {
   )
 
   return (
-    <Card w="full" variant="baseWithBorder">
-      <CardBody py={8}>
-        <VStack spacing={8} align="flex-start">
+    <Card.Root w="full" variant="baseWithBorder">
+      <Card.Body py={8}>
+        <VStack gap={8} align="flex-start">
           <Box>
             <Stack direction={["column", "row"]} w="full" justify={"space-between"}>
               <Heading size="lg">{t("What is your proposal about?")}</Heading>
               {devEnvs.includes(env) && (
-                <FormControl w="auto" data-testid="dev__select_env">
-                  <FormLabel>{t("Dev: Choose an environment")}</FormLabel>
-                  <Select
-                    placeholder={t("Select an environment")}
-                    value={featuredFunctionsEnv}
-                    onChange={e => setFeaturedFunctionsEnv(e.target.value as EnvConfig)}>
-                    {EnvConfigValues.map(env => (
-                      <option key={env} value={env}>
-                        {env}
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Field.Root w="auto" data-testid="dev__select_env">
+                  <Field.Label>{t("Dev: Choose an environment")}</Field.Label>
+                  <NativeSelect.Root>
+                    <NativeSelect.Field
+                      placeholder={t("Select an environment")}
+                      value={featuredFunctionsEnv}
+                      onChange={e => setFeaturedFunctionsEnv(e.target.value as EnvConfig)}>
+                      {EnvConfigValues.map(env => (
+                        <option key={env} value={env}>
+                          {env}
+                        </option>
+                      ))}
+                    </NativeSelect.Field>
+                  </NativeSelect.Root>
+                </Field.Root>
               )}
             </Stack>
             <Text fontSize="sm" fontWeight={400} color={"gray.500"} mt={4}>
@@ -121,7 +110,7 @@ export const FunctionsPageContent = () => {
             <Text color="red.500" fontSize="md" fontWeight={600}>
               {submitError}
             </Text>
-            <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+            <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
               <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
@@ -131,7 +120,7 @@ export const FunctionsPageContent = () => {
             </HStack>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

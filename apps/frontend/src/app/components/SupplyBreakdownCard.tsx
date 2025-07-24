@@ -1,5 +1,5 @@
 import { useB3trTokenDetails } from "@/api"
-import { Box, Card, CardBody, CardHeader, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -60,8 +60,8 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardHeader>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Header>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">{t("Supply breakdown")}</Heading>
           <BaseTooltip
@@ -73,25 +73,25 @@ export const SupplyBreakdownCard = () => {
             </span>
           </BaseTooltip>
         </HStack>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={4} align="flex-start">
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={4} align="flex-start">
           <Grid templateColumns={["repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
-            <VStack spacing={1} align="flex-start">
-              <Text size={["sm", "sm", "xs"]} fontWeight="400">
+            <VStack gap={1} align="flex-start">
+              <Text textStyle={["sm", "sm", "xs"]} fontWeight="400">
                 {t("B3TR in circulation")}
               </Text>
-              <Skeleton isLoaded={!!data}>
+              <Skeleton loading={!data}>
                 <Heading size={["lg", "lg", "md"]} color={"#004CFC"}>
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
-            <VStack spacing={1} align="flex-start">
-              <Text size={["sm", "sm", "xs"]} fontWeight="400">
+            <VStack gap={1} align="flex-start">
+              <Text textStyle={["sm", "sm", "xs"]} fontWeight="400">
                 {t("VOT3 in circulation")}
               </Text>
-              <Skeleton isLoaded={!!data}>
+              <Skeleton loading={!data}>
                 <Heading size={["lg", "lg", "md"]} color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
@@ -101,7 +101,7 @@ export const SupplyBreakdownCard = () => {
           {!data ? (
             <Skeleton h={10} w="full" />
           ) : (
-            <HStack spacing={1} w="full" h={5}>
+            <HStack gap={1} w="full" h={5}>
               <Box
                 as={motion.div}
                 initial={{
@@ -143,7 +143,7 @@ export const SupplyBreakdownCard = () => {
             </HStack>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

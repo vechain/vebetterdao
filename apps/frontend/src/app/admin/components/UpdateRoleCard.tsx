@@ -1,20 +1,5 @@
 import { useForm, Controller } from "react-hook-form"
-import {
-  Badge,
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  HStack,
-  Icon,
-  Select,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Badge, Button, Card, Field, Heading, HStack, Icon, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { useMemo, useEffect } from "react"
 import { useTranslation } from "react-i18next"
@@ -108,62 +93,66 @@ export const UpdateRoleCard = () => {
   }
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("Update Address Role")}</Heading>
         <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
-      </CardHeader>
+      </Card.Header>
 
-      <CardBody>
+      <Card.Body>
         <form onSubmit={handleSubmit(handleFormSubmit)}>
-          <VStack spacing={4} alignItems={"start"}>
-            <FormControl isInvalid={!!errors.contract} isRequired>
-              <FormLabel>{t("Select Contract")}</FormLabel>
+          <VStack gap={4} alignItems={"start"}>
+            <Field.Root invalid={!!errors.contract} required>
+              <Field.Label>{t("Select Contract")}</Field.Label>
               <Controller
                 name="contract"
                 control={control}
                 rules={{ required: t("This field is required") }}
                 render={({ field }) => (
-                  <Select {...field} placeholder={t("Select Contract")}>
-                    {CONTRACT_LIST.map(contract => (
-                      <option key={contract.contractAddress} value={contract.contractAddress}>
-                        {contract.name}
-                      </option>
-                    ))}
-                  </Select>
+                  <NativeSelect.Root>
+                    <NativeSelect.Field {...field} placeholder={t("Select Contract")}>
+                      {CONTRACT_LIST.map(contract => (
+                        <option key={contract.contractAddress} value={contract.contractAddress}>
+                          {contract.name}
+                        </option>
+                      ))}
+                    </NativeSelect.Field>
+                  </NativeSelect.Root>
                 )}
               />
-              <FormErrorMessage>{errors.contract?.message}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText>{errors.contract?.message}</Field.ErrorText>
+            </Field.Root>
 
             {selectedContractAddress && (
-              <FormControl isInvalid={!!errors.role} isRequired>
-                <FormLabel>{t("Select Role")}</FormLabel>
+              <Field.Root invalid={!!errors.role} required>
+                <Field.Label>{t("Select Role")}</Field.Label>
                 <Controller
                   name="role"
                   control={control}
                   rules={{ required: t("This field is required") }}
                   render={({ field }) => (
-                    <Select {...field} placeholder={t("Select Role")}>
-                      {selectedContractObject?.roles.map(role => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </Select>
+                    <NativeSelect.Root>
+                      <NativeSelect.Field {...field} placeholder={t("Select Role")}>
+                        {selectedContractObject?.roles.map(role => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </NativeSelect.Field>
+                    </NativeSelect.Root>
                   )}
                 />
-                <FormErrorMessage>{errors.role?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors.role?.message}</Field.ErrorText>
+              </Field.Root>
             )}
 
-            <FormControl>
-              <FormLabel>{t("Wallet Address")}</FormLabel>
+            <Field.Root>
+              <Field.Label>{t("Wallet Address")}</Field.Label>
               <WalletAddressInput
                 onAddressResolved={address => setValue("walletAddress", address ?? "")}
                 placeholder={t("Enter wallet address or domain to grant or revoke role")}
               />
-            </FormControl>
+            </Field.Root>
 
             {isFormValid && !hasRoleError && (
               <VStack w="full" align="stretch" flexWrap="wrap">
@@ -210,15 +199,15 @@ export const UpdateRoleCard = () => {
             )}
 
             <Button
-              isLoading={accessControlAction.isTransactionPending}
-              isDisabled={!isFormValid || !!hasRoleError}
+              loading={accessControlAction.isTransactionPending}
+              disabled={!isFormValid || !!hasRoleError}
               colorScheme={userAlreadyHasRole ? "red" : "green"}
               type="submit">
               {getButtonText()}
             </Button>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

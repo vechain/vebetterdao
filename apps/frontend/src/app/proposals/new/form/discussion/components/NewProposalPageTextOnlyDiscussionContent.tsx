@@ -1,4 +1,4 @@
-import { Card, CardBody, VStack, Heading, HStack, Button, CardFooter, Text } from "@chakra-ui/react"
+import { Card, VStack, Heading, HStack, Button, Text } from "@chakra-ui/react"
 import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
@@ -48,10 +48,10 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   )
 
   return (
-    <Card w="full" data-testid="new-proposal-textonly-page">
-      <CardBody py={8}>
-        <VStack spacing={[6, 8]} align="flex-start">
-          <VStack spacing={[4, 6]} align="flex-start">
+    <Card.Root w="full" data-testid="new-proposal-textonly-page">
+      <Card.Body py={8}>
+        <VStack gap={[6, 8]} alignItems="flex-start">
+          <VStack gap={[4, 6]} alignItems="flex-start">
             <Heading size={["md", "lg"]}>{t("General proposal")}</Heading>
             <Text fontSize={["sm", "md"]} color="gray.500">
               {t(
@@ -67,9 +67,9 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
             onSubmit={onSubmit}
           />
         </VStack>
-      </CardBody>
-      <CardFooter>
-        <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+      </Card.Body>
+      <Card.Footer>
+        <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
           <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
             {t("Go back")}
           </Button>
@@ -77,7 +77,7 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
             {t("Continue")}
           </Button>
         </HStack>
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   )
 }

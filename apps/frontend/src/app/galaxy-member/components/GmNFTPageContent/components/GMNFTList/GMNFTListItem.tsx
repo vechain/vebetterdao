@@ -2,7 +2,6 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import {
   Box,
   Card,
-  CardBody,
   HStack,
   Image,
   Skeleton,
@@ -11,10 +10,7 @@ import {
   useMediaQuery,
   VStack,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
+  Dialog,
 } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,7 +36,7 @@ interface GMNFTListItemProps {
 
 export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const { data: selectedTokenId } = useSelectedTokenId()
   const { isXNodeAttachedToGM: isXNodeAttachedToSelectedGM } = useSelectedGmNft()
@@ -48,7 +44,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const { xNodeName, xNodeImage, xNodeId: userXNodeId, attachedGMTokenId } = useXNode()
   const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
 
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
   const currentNFTAttachedToNode = nodeIdAttachedToToken === userXNodeId && attachedGMTokenId === token.tokenId
@@ -75,8 +71,8 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   }, [nftMetadata, token.tokenId, token.tokenLevel])
 
   return (
-    <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px" w="full">
-      <CardBody p={"4"}>
+    <Card.Root variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px" w="full">
+      <Card.Body p={"4"}>
         <VStack align="stretch" gap={4}>
           <HStack
             align={"center"}
@@ -86,7 +82,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
             flex={1}
             cursor={"pointer"}
             flexGrow={4}>
-            <Skeleton isLoaded={true} w={"68px"} h={"68px"} rounded="8px">
+            <Skeleton loading={false} w={"68px"} h={"68px"} rounded="8px">
               <Box
                 w={"68px"}
                 h={"68px"}
@@ -96,7 +92,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 alignItems="center"
                 justifyContent="center"
                 onClick={onOpen}>
-                <Skeleton isLoaded={!isMetadataLoading} w={"64px"} h={"64px"} rounded={"7px"}>
+                <Skeleton loading={isMetadataLoading} w={"64px"} h={"64px"} rounded={"7px"}>
                   <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
                 </Skeleton>
               </Box>
@@ -108,7 +104,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
               align={isAbove800 ? "center" : "flex-start"}
               gap={1}>
               <VStack align={"flex-start"}>
-                <Text fontSize={"xs"} fontWeight="400" noOfLines={1} color="#6DCB09">
+                <Text fontSize={"xs"} fontWeight="400" lineClamp={1} color="#6DCB09">
                   {isGMSelected && isXNodeAttachedToSelectedGM
                     ? t("Active and attached")
                     : isGMSelected
@@ -117,7 +113,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 </Text>
 
                 <Stack direction={isAbove800 ? "column" : "column-reverse"} align={"flex-start"}>
-                  <Text fontWeight={700} noOfLines={1} fontSize={"md"}>
+                  <Text fontWeight={700} lineClamp={1} fontSize={"md"}>
                     {gmName}
                   </Text>
                   {currentNFTAttachedToNode ? (
@@ -140,10 +136,10 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                     <Text
                       fontSize={"xs"}
                       fontWeight={400}
-                      noOfLines={{ base: 2, md: 1 }}
+                      lineClamp={{ base: 2, md: 1 }}
                       whiteSpace={["normal", "nowrap"]}
                       wordBreak="break-word"
-                      overflowWrap="break-word">
+                      overflowWrap="anywhere">
                       {t("GM reward weight")}
                     </Text>
                   </HStack>
@@ -154,11 +150,11 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
           </HStack>
           {!isAbove800 && actionButton}
         </VStack>
-      </CardBody>
+      </Card.Body>
       {/* Modal for Image Preview */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
-        <ModalOverlay />
-        <ModalContent
+      <Dialog.Root open={isOpen} onOpenChange={onClose} placement="center" size="xl">
+        <Dialog.Backdrop />
+        <Dialog.Content
           as={motion.div}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -169,7 +165,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
           w="full"
           p={0}
           m={0}>
-          <ModalBody p={0}>
+          <Dialog.Body p={0}>
             <Box
               position="relative"
               display="flex"
@@ -181,9 +177,9 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
               rounded="16px">
               <Image src={gmImage} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
             </Box>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </Card>
+          </Dialog.Body>
+        </Dialog.Content>
+      </Dialog.Root>
+    </Card.Root>
   )
 }

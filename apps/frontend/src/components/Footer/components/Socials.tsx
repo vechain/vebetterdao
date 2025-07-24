@@ -25,7 +25,7 @@ import {
 
 export const Socials: React.FC = () => {
   return (
-    <HStack color={"white"} spacing={4}>
+    <HStack color={"white"} gap={4}>
       <Link href={X_TWITTER_URL} isExternal>
         <FaXTwitter size={22} cursor={"pointer"} />
       </Link>

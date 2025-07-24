@@ -1,19 +1,4 @@
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  VStack,
-  useDisclosure,
-  Text,
-  Alert,
-  AlertIcon,
-  AlertDescription,
-  Box,
-} from "@chakra-ui/react"
+import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import { WithdrawModal } from "./WithdrawModal"
@@ -35,42 +20,42 @@ type Props = {
 export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
 
-  const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
-  const { isOpen: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
+  const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
+  const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
   const {
-    isOpen: isOpenFundsManagement,
+    open: isOpenFundsManagement,
     onOpen: onOpenFundsManagement,
     onClose: onCloseFundsManagement,
   } = useDisclosure()
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} isCentered={true} size={"xl"}>
-        <ModalOverlay />
-        <ModalContent borderRadius="20px">
-          <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-          <ModalHeader>
+      <Dialog.Root open={isOpen} onOpenChange={onClose} placement="center">
+        <Dialog.Backdrop />
+        <Dialog.Content borderRadius="20px">
+          <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />
+          <Dialog.Header>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
               {t("Transfer App Balance")}
             </Text>
-          </ModalHeader>
-          <ModalBody pb={6}>
+          </Dialog.Header>
+          <Dialog.Body pb={6}>
             <VStack justifyContent={"space-between"}>
               {isPaused && (
-                <Alert status="error" borderRadius={["xl", "xl", "3xl"]}>
-                  <AlertIcon w={5} h={5} />
+                <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
+                  <Alert.Indicator w={5} h={5} />
                   <Box lineHeight={"1.20rem"} fontSize="sm">
-                    <AlertDescription as="span">
+                    <Alert.Description as="span">
                       {t(
                         "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
                       )}
-                    </AlertDescription>
+                    </Alert.Description>
                   </Box>
-                </Alert>
+                </Alert.Root>
               )}
               <VStack
                 align="start"
-                spacing={4}
+                gap={4}
                 border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
@@ -83,7 +68,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Text>
                 <Button
                   mt={1}
-                  isDisabled={!isAppAdmin}
+                  disabled={!isAppAdmin}
                   onClick={() => {
                     onOpenWithdraw()
                     onClose()
@@ -96,7 +81,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
               </VStack>
               <VStack
                 align="start"
-                spacing={4}
+                gap={4}
                 border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
@@ -121,7 +106,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
               </VStack>
               <VStack
                 align="start"
-                spacing={4}
+                gap={4}
                 borderRadius="20px"
                 p="16px"
                 border={"1px solid #D5D5D5"}
@@ -137,7 +122,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Text>
                 <Button
                   mt={1}
-                  isDisabled={!isAppAdmin}
+                  disabled={!isAppAdmin}
                   onClick={() => {
                     onOpenFundsManagement()
                     onClose()
@@ -149,9 +134,9 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 </Button>
               </VStack>
             </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+          </Dialog.Body>
+        </Dialog.Content>
+      </Dialog.Root>
 
       <DepositModal appId={app?.id} isOpen={isOpenDeposit} onClose={onCloseDeposit} />
       <WithdrawModal

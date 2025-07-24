@@ -1,8 +1,7 @@
 import {
   Box,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   HStack,
   Heading,
   Skeleton,
@@ -35,13 +34,13 @@ export const ProposalOverview = () => {
   const proposerName = vnsData?.domain
 
   return (
-    <Card variant="baseWithBorder" w="full" borderRadius={"3xl"}>
-      <CardBody>
-        <Stack direction={["column", "row"]} justify="space-between" spacing={12} w="full" alignItems={"stretch"}>
-          <VStack spacing={4} align="flex-start" flex={2} justify={"space-between"}>
-            <VStack spacing={2} align="flex-start">
+    <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
+      <Card.Body>
+        <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
+          <VStack gap={4} align="flex-start" flex={2} justify={"space-between"}>
+            <VStack gap={2} align="flex-start">
               <HStack justify={"space-between"} align={"center"} w="full">
-                <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading}>
+                <Skeleton loading={proposal.isRoundIdVoteStartLoading}>
                   <Text color="#6A6A6A" fontSize={["md"]} textTransform={"uppercase"} fontWeight={600}>
                     {t("Round #{{round}}", {
                       round: proposal.roundIdVoteStart,
@@ -51,35 +50,35 @@ export const ProposalOverview = () => {
                 <ProposalShareButton />
               </HStack>
 
-              <Skeleton isLoaded={!proposal.isTitleLoading}>
+              <Skeleton loading={proposal.isTitleLoading}>
                 <Heading size={["lg", "xl"]}>{proposal.title}</Heading>
               </Skeleton>
-              <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
+              <Skeleton loading={proposal.isStateLoading} alignSelf={"flex-start"}>
                 <ProposalStatusBadge proposalId={proposal.id} proposalState={proposal.state} />
               </Skeleton>
               <Spacer h={"24px"} />
-              <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
+              <SkeletonText loading={proposal.isDescriptionLoading}>
                 <Text color="gray.500" fontSize={["sm", "md"]}>
                   {proposal.description}
                 </Text>
               </SkeletonText>
             </VStack>
 
-            <Divider color={"#D5D5D5"} />
+            <Separator color={"#D5D5D5"} />
             <Stack
               direction={["column", "column", "row"]}
               w="full"
               justify={["flex-start", "flex-start", "space-between"]}
-              spacing={8}>
+              gap={8}>
               <Stack
                 direction={["column", "column", "row"]}
-                spacing={[4, 4, 12]}
+                gap={[4, 4, 12]}
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Text fontWeight={"400"} color="#6A6A6A">
                     {t("Created by")}
                   </Text>
-                  <Skeleton isLoaded={!proposal.isProposerLoading}>
+                  <Skeleton loading={proposal.isProposerLoading}>
                     <HStack>
                       <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
                       {compareAddresses(proposal.proposer, account?.address || "") ? (
@@ -105,7 +104,7 @@ export const ProposalOverview = () => {
             <ProposalOverviewVotes proposalId={proposal.id} />
           </VStack>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

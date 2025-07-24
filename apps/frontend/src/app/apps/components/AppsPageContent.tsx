@@ -22,7 +22,7 @@ export type XAppInformations = {
 export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xAppsNotSorted, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
@@ -50,11 +50,11 @@ export const AppsPageContent = () => {
   const activeAppsWithoutGracePeriod = currentActiveApps.filter(app => !gracePeriodIds.has(app.id))
 
   return (
-    <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
+    <VStack alignItems={"flex-start"} position={"relative"} gap={8} w="full">
       <AppsBanner />
 
       {!isXNodeLoading && isEndorsingApp && (
-        <VStack alignItems={"flex-start"} spacing={4}>
+        <VStack alignItems={"flex-start"} gap={4}>
           <Heading size="lg">{t("Your endorsed app")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
@@ -68,7 +68,7 @@ export const AppsPageContent = () => {
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
       {!isAbove800 ? (
-        <VStack alignItems={"flex-start"} spacing={4} w="full">
+        <VStack alignItems={"flex-start"} gap={4} w="full">
           <Heading size="lg">{t("Sustainability apps")}</Heading>
           <AllApps
             newApps={newAppsEndorsedandUnendorsed}
@@ -79,7 +79,7 @@ export const AppsPageContent = () => {
           />
         </VStack>
       ) : (
-        <HStack w="full" alignItems={"flex-start"} spacing={0}>
+        <HStack w="full" alignItems={"flex-start"} gap={0}>
           <AllApps
             headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
             newApps={newAppsEndorsedandUnendorsed}

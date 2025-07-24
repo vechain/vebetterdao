@@ -1,4 +1,4 @@
-import { Card, CardBody, Heading, HStack, Text, VStack, Flex, Badge } from "@chakra-ui/react"
+import { Card, Heading, HStack, Text, VStack, Flex, Badge } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useGMPoolAmount } from "@/hooks"
 import { useCurrentAllocationsRoundId } from "@/api"
@@ -11,10 +11,10 @@ export const GmPoolAmountCard = () => {
   const { formatted: gmPoolAmount } = useGMPoolAmount(Number(currentRoundId))
 
   return (
-    <Card variant="primaryBoxShadow">
-      <CardBody>
+    <Card.Root variant="primaryBoxShadow">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
-          <HStack spacing={2}>
+          <HStack gap={2}>
             <Heading fontSize="lg">{t("GM Pool Amount")}</Heading>
           </HStack>
           <Flex p={4} borderRadius="md" justify="center" align="center" direction="column">
@@ -30,7 +30,7 @@ export const GmPoolAmountCard = () => {
             {t("Total B3TR in the GM Pool for the current round")}
           </Text>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -46,9 +46,9 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const { xNodeLevel, isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
 
   // Modal controls
-  const { isOpen: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
-  const { isOpen: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
-  const { isOpen: isAttachGMModalOpen, onOpen: onOpenAttachGMModal, onClose: onCloseAttachGMModal } = useDisclosure()
+  const { open: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
+  const { open: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
+  const { open: isAttachGMModalOpen, onOpen: onOpenAttachGMModal, onClose: onCloseAttachGMModal } = useDisclosure()
 
   // Computed values
   const canAttach = useMemo(
@@ -163,7 +163,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
             }}
             fontSize={"lg"}
             fontWeight={"bold"}
-            noOfLines={1}>
+            lineClamp={1}>
             {t("Max Level Reached!")}
           </Text>
         </HStack>
@@ -176,7 +176,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
           fallback={
-            <Button {...buttonProps} isDisabled={true}>
+            <Button {...buttonProps} disabled={true}>
               {t("Coming soon!")}
             </Button>
           }>
@@ -193,7 +193,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
           fallback={
-            <Button {...buttonProps} isDisabled={true}>
+            <Button {...buttonProps} disabled={true}>
               {t("Coming soon!")}
             </Button>
           }>
@@ -209,13 +209,13 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       <FeatureFlagWrapper
         feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
         fallback={
-          <Button {...buttonProps} isDisabled={true}>
+          <Button {...buttonProps} disabled={true}>
             {t("Coming soon!")}
           </Button>
         }>
         <Button
           {...buttonProps}
-          isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+          disabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
           onClick={() => handleOnClick("UPGRADE_GM")}>
           {t("Upgrade now!")}
         </Button>

@@ -3,14 +3,10 @@ import {
   Text,
   UseDisclosureProps,
   VStack,
-  FormControl,
-  FormLabel,
+  Field,
   Button,
   Box,
   Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
   useBreakpointValue,
   useSteps,
 } from "@chakra-ui/react"
@@ -38,10 +34,15 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { isTxModalOpen } = useTransactionModal()
   const { handleSubmit, setValue, watch } = useForm<FormData>()
   const { isEntity } = useAccountLinking()
-  const { isOpen = false, onClose } = modal
+  const { open: isOpen = false, onClose } = modal
 
-  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
-    index: 0,
+  const {
+    value: activeStep,
+    goToPrevStep: goToPrevious,
+    goToNextStep: goToNext,
+    setStep: setActiveStep,
+  } = useSteps({
+    defaultStep: 0,
     count: Object.keys(DelegationStep).length,
   })
 
@@ -77,12 +78,12 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         </Box>
         <VStack align="stretch">
           <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
-          <FormControl isInvalid={!delegatee}>
-            <FormLabel color="#6A6A6A" fontSize="sm">
+          <Field.Root invalid={!delegatee}>
+            <Field.Label color="#6A6A6A" fontSize="sm">
               {t("User wallet address")}
-            </FormLabel>
+            </Field.Label>
             <WalletAddressInput
-              isDisabled={isEntity}
+              disabled={isEntity}
               onAddressResolved={address => setValue("walletAddress", address ?? "")}
             />
             {isEntity ? (
@@ -90,10 +91,10 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
                 {t("You can't delegate from an account linked as a secondary account")}
               </Text>
             ) : null}
-          </FormControl>
+          </Field.Root>
         </VStack>
-        <VStack align="stretch">
-          <Button variant="primaryAction" type="submit" isDisabled={isEntity || !delegatee}>
+        <VStack alignItems="stretch">
+          <Button variant="primaryAction" type="submit" disabled={isEntity || !delegatee}>
             {t("Send request")}
           </Button>
 
@@ -119,13 +120,13 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           <Text fontWeight="600">{t("You're delegating it to")}</Text>
           <Text fontSize="sm">{delegatee}</Text>
         </VStack>
-        <Alert status="error" borderRadius="2xl">
-          <AlertIcon w={9} h={9} />
+        <Alert.Root status="error" borderRadius="2xl">
+          <Alert.Indicator w={9} h={9} />
           <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
-            <AlertTitle as="span">{t("You will not be able to vote until you remove the delegation")}</AlertTitle>
-            <AlertDescription as="span">{t("or you receive someone else’s voting qualification.")}</AlertDescription>
+            <Alert.Title as="span">{t("You will not be able to vote until you remove the delegation")}</Alert.Title>
+            <Alert.Description as="span">{t("or you receive someone else’s voting qualification.")}</Alert.Description>
           </Box>
-        </Alert>
+        </Alert.Root>
         <VStack>
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}

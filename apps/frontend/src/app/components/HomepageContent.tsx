@@ -1,5 +1,5 @@
 import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
-import { Grid, GridItem, Hide, Show, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Show, useMediaQuery, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
@@ -8,11 +8,12 @@ import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { GmNFTAndNodeCard } from "@/components/GmNFTAndNodeCard"
 
 export const HomePageContent = () => {
+  const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
   return (
     <>
-      <Hide above="md">
+      <Show when={!isAboveMd}>
         <RoundInfoBottomSheet />
-      </Hide>
+      </Show>
       <Grid
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap={"32px"}
@@ -27,11 +28,11 @@ export const HomePageContent = () => {
           <GmNFTAndNodeCard />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
-          <VStack justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
-            <Show above="md">
+          <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
+            <Show when={isAboveMd}>
               <CantVoteCard />
             </Show>
-            <Show above="md">
+            <Show when={isAboveMd}>
               <DashboardAllocationRounds />
             </Show>
             <DashboardXApps />

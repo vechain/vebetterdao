@@ -1,5 +1,5 @@
 import { useId, useState, useEffect, useRef, useCallback } from "react"
-import { Input, InputGroup, InputProps, FormControl, FormErrorMessage } from "@chakra-ui/react"
+import { Input, InputGroup, InputProps, Field } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { isValid as isWalletAddressValid } from "@repo/utils/AddressUtils"
@@ -8,14 +8,14 @@ type Props = InputProps & {
   onDomainResolved?: (domain?: string) => void
   onAddressResolved?: (address?: string) => void
   customValidation?: ({ address }: { address?: string }) => string
-  inputLeftElement?: React.ReactNode
+  startAddon?: React.ReactNode
 }
 
 export const WalletAddressInput = ({
   onDomainResolved,
   onAddressResolved,
   customValidation,
-  inputLeftElement,
+  startAddon,
   ...props
 }: Props) => {
   const id = useId()
@@ -123,20 +123,19 @@ export const WalletAddressInput = ({
   }, [inputValue, domain, address, t, notifyParentResolved, notifyInvalidInput, customValidation])
 
   return (
-    <FormControl isInvalid={!!errorMessage}>
-      <InputGroup>
-        {inputLeftElement}
+    <Field.Root invalid={!!errorMessage}>
+      <InputGroup startAddon={startAddon}>
         <Input
           {...props}
           id={id}
           value={inputValue}
           onChange={handleOnChange}
           placeholder={props?.placeholder ?? t("Enter a wallet address or domain")}
-          isDisabled={props?.isDisabled}
-          isRequired={props?.isRequired ?? true}
+          disabled={props?.disabled}
+          required={props?.required ?? true}
         />
       </InputGroup>
-      {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
-    </FormControl>
+      {errorMessage && <Field.ErrorText>{errorMessage}</Field.ErrorText>}
+    </Field.Root>
   )
 }

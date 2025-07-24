@@ -1,16 +1,5 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
-import {
-  Button,
-  Card,
-  CardBody,
-  Grid,
-  GridItem,
-  Heading,
-  Image,
-  Text,
-  useBreakpointValue,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Grid, GridItem, Heading, Image, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
@@ -56,8 +45,8 @@ export const CastYourVoteCard: React.FC = () => {
   if (!account?.address || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
 
   return (
-    <Card borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>
-      <CardBody p={6} pos="relative">
+    <Card.Root borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>
+      <Card.Body p={6} pos="relative">
         <Image
           transform={{ rotate: "180deg" }}
           src="/assets/backgrounds/cast-vote-card-bg.svg"
@@ -70,7 +59,7 @@ export const CastYourVoteCard: React.FC = () => {
         />
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={2} order={[2, 2, 1]}>
-            <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
+            <VStack gap={4} w="full" justifyContent={"start"} alignItems={"start"}>
               <Heading fontSize="16px" fontWeight={"700"} textTransform={"uppercase"} color="primary.500" zIndex={1}>
                 {t("Round #{{round}}", {
                   round: roundId,
@@ -117,7 +106,7 @@ export const CastYourVoteCard: React.FC = () => {
             />
           </GridItem>
         </Grid>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -128,7 +128,7 @@ type BadgeProps = {
 
 export const Badge = ({ containerProps, icon, text, textProps }: BadgeProps) => {
   return (
-    <HStack spacing={2} align="center" rounded={"full"} py={2} px={4} {...containerProps}>
+    <HStack gap={2} align="center" rounded={"full"} py={2} px={4} {...containerProps}>
       {icon}
       <Text fontSize="sm" color="gray.500" fontWeight={600} {...textProps} data-testid={`round-status`}>
         {text}

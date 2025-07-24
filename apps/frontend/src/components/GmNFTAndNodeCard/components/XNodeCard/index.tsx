@@ -41,7 +41,7 @@ export const XNodeCard = ({
       onClick={viewMode ? undefined : onCardClick}>
       <Image src={xNodeImage} alt="xnode" w={"68px"} h={"68px"} rounded="8px" />
       <VStack flex="1" align={"flex-start"}>
-        <Text fontWeight={700} noOfLines={1}>
+        <Text fontWeight={700} lineClamp={1}>
           {xNodeName}
         </Text>
         <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>

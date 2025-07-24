@@ -14,7 +14,7 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
     return (
       <MotionVStack
         w="full"
-        spacing={12}
+        gap={12}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{
@@ -28,7 +28,7 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
           w="full"
           justify="space-between"
           align={["stretch", "stretch", "flex-start"]}
-          spacing={12}>
+          gap={12}>
           {children}
         </Stack>
       </MotionVStack>
@@ -37,7 +37,7 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
   return (
     <MotionVStack
       w="full"
-      spacing={12}
+      gap={12}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{

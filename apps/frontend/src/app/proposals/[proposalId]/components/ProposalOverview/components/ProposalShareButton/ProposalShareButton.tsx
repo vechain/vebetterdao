@@ -1,15 +1,4 @@
-import {
-  Heading,
-  VStack,
-  ModalCloseButton,
-  Modal,
-  ModalOverlay,
-  IconButton,
-  useDisclosure,
-  Box,
-  Text,
-  HStack,
-} from "@chakra-ui/react"
+import { Heading, VStack, Dialog, IconButton, useDisclosure, Box, Text, HStack } from "@chakra-ui/react"
 import loadingAnimation from "./loading.json"
 import { motion } from "framer-motion"
 import { CustomModalContent } from "@/components"
@@ -36,7 +25,7 @@ const containerVariants = {
 }
 
 export const ProposalShareButton = () => {
-  const { onOpen, isOpen, onClose } = useDisclosure()
+  const { onOpen, open: isOpen, onClose } = useDisclosure()
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
@@ -54,21 +43,20 @@ export const ProposalShareButton = () => {
       <IconButton aria-label="share" rounded="full" bgColor="#E0E9FE" color="#004CFC" boxSize={"40px"} onClick={onOpen}>
         <UilShareAlt />
       </IconButton>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        trapFocus={false}
-        closeOnOverlayClick={
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={details => !details.open && onClose()}
+        closeOnInteractOutside={
           transactionModalState?.status !== "waitingConfirmation" && transactionModalState?.status !== "pending"
         }
-        isCentered={true}
+        placement="center"
         size={"xl"}>
-        <ModalOverlay />
+        <Dialog.Backdrop />
         <CustomModalContent>
           <ModalAnimation>
-            <ModalCloseButton top={4} right={4} />
+            <Dialog.CloseTrigger top={4} right={4} />
             <motion.div initial="initial" animate="animate" variants={containerVariants}>
-              <ModalCloseButton top={4} right={4} />
+              <Dialog.CloseTrigger top={4} right={4} />
               <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
                   {/* @ts-ignore eslint-disable-line */}
@@ -121,7 +109,7 @@ export const ProposalShareButton = () => {
             </motion.div>
           </ModalAnimation>
         </CustomModalContent>
-      </Modal>
+      </Dialog.Root>
     </>
   )
 }

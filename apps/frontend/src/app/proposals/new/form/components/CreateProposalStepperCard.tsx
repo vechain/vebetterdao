@@ -1,20 +1,5 @@
 import { useProposalFormStore } from "@/store"
-import {
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Circle,
-  Heading,
-  Step,
-  StepDescription,
-  StepIndicator,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
-  useSteps,
-} from "@chakra-ui/react"
+import { Box, Card, Circle, Heading, Steps, useSteps } from "@chakra-ui/react"
 import { TFunction } from "i18next"
 import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -56,8 +41,8 @@ export const CreateProposalStepperCard = () => {
   const { actions } = useProposalFormStore()
   const [steps, setSteps] = useState<CreateProposalStep[]>([])
 
-  const { activeStep, setActiveStep } = useSteps({
-    index: 1,
+  const { value: activeStep, setStep: setActiveStep } = useSteps({
+    defaultStep: 1,
     count: steps.length,
   })
 
@@ -83,12 +68,12 @@ export const CreateProposalStepperCard = () => {
   }, [steps])
 
   return (
-    <Card variant="baseWithBorder">
-      <CardHeader>
+    <Card.Root variant="baseWithBorder">
+      <Card.Header>
         <Heading size="md">{t("Progress")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <Stepper
+      </Card.Header>
+      <Card.Body>
+        <Steps.Root
           variant={"primaryVertical"}
           size="sm"
           index={activeStep}
@@ -97,25 +82,26 @@ export const CreateProposalStepperCard = () => {
           gap="0"
           height={height}
           mt={4}>
-          {steps.map(step => (
-            <Step key={step.key}>
-              <StepIndicator>
-                <StepStatus
-                  complete={<Circle bg="#004CFC" size={"30%"} />}
-                  active={<Circle bg="#004CFC" size={"60%"} />}
-                />
-              </StepIndicator>
-
-              <Box flexShrink="0">
-                <StepTitle>{step.title}</StepTitle>
-                <StepDescription>{step.description}</StepDescription>
-              </Box>
-
-              <StepSeparator />
-            </Step>
-          ))}
-        </Stepper>
-      </CardBody>
-    </Card>
+          <Steps.List>
+            {steps.map((step, index) => (
+              <Steps.Item key={step.key} index={index}>
+                <Steps.Indicator>
+                  <Steps.Status
+                    incomplete={<Circle bg="#004CFC" size={"30%"} />}
+                    complete={<Circle bg="#004CFC" size={"30%"} />}
+                    current={<Circle bg="#004CFC" size={"60%"} />}
+                  />
+                </Steps.Indicator>
+                <Box flexShrink="0">
+                  <Steps.Title>{step.title}</Steps.Title>
+                  <Steps.Description>{step.description}</Steps.Description>
+                </Box>
+                <Steps.Separator />
+              </Steps.Item>
+            ))}
+          </Steps.List>
+        </Steps.Root>
+      </Card.Body>
+    </Card.Root>
   )
 }

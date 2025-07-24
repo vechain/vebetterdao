@@ -123,11 +123,11 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     }
   }
 
-  const handleTabChange = useCallback((tab: Tab) => {
+  const handleTabChange = (tab: Tab) => {
     updateURLWithTab(tab)
     setActiveTab(tab)
     trackTabChange(tab)
-  }, [])
+  }
 
   // Go back to the home page
   const onGoBack = useCallback(() => {
@@ -135,7 +135,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   }, [router])
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
+    <VStack gap={6} alignItems="stretch" w="full" maxW={"container.md"} mx="auto">
       {!isConnectedUser && (
         <Button
           variant={"link"}
@@ -157,7 +157,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}>
-        <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
+        <HStack gap={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
           {tabs.map(({ tab, label }) => (
             <Button
               key={tab}

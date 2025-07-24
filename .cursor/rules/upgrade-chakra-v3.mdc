@@ -1,0 +1,769 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+
+<SYSTEM>Documentation for migrating to Chakra UI v3.</SYSTEM>
+
+# Migration to v3
+
+<FeaturedVideo />
+
+:::warning
+
+We recommend using the [LLMs.txt](/docs/get-started/llms) files to make the
+Chakra UI v3 documentation available to large language models.
+
+:::
+
+## Steps
+
+> The minimum node version required is Node.20.x
+
+:::steps
+
+### Update Packages
+
+Remove the unused packages: `@emotion/styled` and `framer-motion`. These
+packages are no longer required in Chakra UI.
+
+```bash
+npm uninstall @emotion/styled framer-motion
+```
+
+Install updated versions of the packages: `@chakra-ui/react` and
+`@emotion/react`.
+
+```bash
+npm install @chakra-ui/react@latest @emotion/react@latest
+```
+
+Next, install component snippets using the CLI snippets. Snippets provide
+pre-built compositions of Chakra components to save you time and put you in
+charge.
+
+```bash
+npx @chakra-ui/cli snippet add
+```
+
+### Refactor Custom Theme
+
+Move your custom theme to a dedicated `theme.js` or `theme.ts` file. Use
+`createSystem` and `defaultConfig` to configure your theme.
+
+**Before**
+
+```ts
+import { extendTheme } from "@chakra-ui/react"
+
+export const theme = extendTheme({
+  fonts: {
+    heading: `'Figtree', sans-serif`,
+    body: `'Figtree', sans-serif`,
+  },
+})
+```
+
+**After**
+
+```ts {3}
+import { createSystem, defaultConfig } from "@chakra-ui/react"
+
+export const system = createSystem(defaultConfig, {
+  theme: {
+    tokens: {
+      fonts: {
+        heading: { value: `'Figtree', sans-serif` },
+        body: { value: `'Figtree', sans-serif` },
+      },
+    },
+  },
+})
+```
+
+> All token values need to be wrapped in an object with a **value** key. Learn
+> more about tokens [here](/docs/theming/tokens).
+
+### Update ChakraProvider
+
+Update the ChakraProvider import from `@chakra-ui/react` to the one from the
+snippets. Next, rename the `theme` prop to `value` to match the new system-based
+theming approach.
+
+**Before**
+
+```tsx
+import { ChakraProvider } from "@chakra-ui/react"
+
+export const App = ({ Component }) => (
+  <ChakraProvider theme={theme}>
+    <Component />
+  </ChakraProvider>
+)
+```
+
+**After**
+
+```tsx {1,3}
+import { Provider } from "@/components/ui/provider"
+import { defaultSystem } from "@chakra-ui/react"
+
+export const App = ({ Component }) => (
+  <Provider>
+    <Component />
+  </Provider>
+)
+```
+
+```tsx {1,3}
+import { ColorModeProvider } from "@/components/ui/color-mode"
+import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
+
+export function Provider(props) {
+  return (
+    <ChakraProvider value={defaultSystem}>
+      <ColorModeProvider {...props} />
+    </ChakraProvider>
+  )
+}
+```
+
+> If you have a custom theme, replace `defaultSystem` with the custom `system`
+
+The Provider component compose the `ChakraProvider` from Chakra and
+`ThemeProvider` from `next-themes`
+
+:::
+
+## Improvements
+
+- **Performance:** Improved reconciliation performance by `4x` and re-render
+  performance by `1.6x`
+
+- **Namespaced imports:** Import components using the dot notation for more
+  concise imports
+
+  ```tsx
+  import { Accordion } from "@chakra-ui/react"
+
+  const Demo = () => {
+    return (
+      <Accordion.Root>
+        <Accordion.Item>
+          <Accordion.ItemTrigger />
+          <Accordion.ItemContent />
+        </Accordion.Item>
+      </Accordion.Root>
+    )
+  }
+  ```
+
+- **TypeScript:** Improved IntelliSense and type inference for style props and
+  tokens.
+
+- **Polymorphism:** Loosened the `as` prop typings in favor of using the
+  `asChild` prop. This pattern was inspired by Radix Primitives and Ark UI.
+
+## Removed Features
+
+### Color Mode
+
+- `ColorModeProvider` and `useColorMode` have been removed in favor of
+  `next-themes`
+- `LightMode`, `DarkMode` and `ColorModeScript` components have been removed.
+  You now have to use `className="light"` or `className="dark"` to force themes.
+- `useColorModeValue` has been removed in favor of `useTheme` from `next-themes`
+
+:::note
+
+We provide snippets for color mode via the CLI to help you set up color mode
+quickly using `next-themes`
+
+:::
+
+### Hooks
+
+We removed the hooks package in favor of using dedicated, robust libraries like
+`react-use` and `usehooks-ts`
+
+The only hooks we ship now are `useBreakpointValue`, `useCallbackRef`,
+`useDisclosure`, `useControllableState` and `useMediaQuery`.
+
+### Style Config
+
+We removed the `styleConfig` and `multiStyleConfig` concept in favor of recipes
+and slot recipes. This pattern was inspired by Panda CSS.
+
+### Next.js package
+
+We've removed the `@chakra-ui/next-js` package in favor of using the `asChild`
+prop for better flexibility.
+
+To style the Next.js image component, use the `asChild` prop on the `Box`
+component.
+
+```jsx
+<Box asChild>
+  <NextImage />
+</Box>
+```
+
+To style the Next.js link component, use the `asChild` prop on the `Link` component
+
+```jsx
+<Link isExternal asChild>
+  <NextLink />
+</Link>
+```
+
+### Theme Tools
+
+We've removed this package in favor using CSS color mix.
+
+**Before**
+
+We used JS to resolve the colors and then apply the transparency
+
+```jsx
+defineStyle({
+  bg: transparentize("blue.200", 0.16)(theme),
+  // -> rgba(0, 0, 255, 0.16)
+})
+```
+
+**After**
+
+We now use CSS color-mix
+
+```jsx
+defineStyle({
+  bg: "blue.200/16",
+  // -> color-mix(in srgb, var(--chakra-colors-200), transparent 16%)
+})
+```
+
+### forwardRef
+
+Due to the simplification of the `as` prop, we no longer provide a custom
+`forwardRef`. Prefer to use `forwardRef` from React directly.
+
+Before:
+
+```tsx {3}
+import { Button as ChakraButton, forwardRef } from "@chakra-ui/react"
+
+const Button = forwardRef<ButtonProps, "button">(function Button(props, ref) {
+  return <ChakraButton ref={ref} {...props} />
+})
+```
+
+After:
+
+```tsx {2, 4}
+import { Button as ChakraButton } from "@chakra-ui/react"
+import { forwardRef } from "react"
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(props, ref) {
+  return <ChakraButton ref={ref} {...props} />
+})
+```
+
+### Icons
+
+Removed `@chakra-ui/icons` package. Prefer to use `lucide-react` or
+`react-icons` instead.
+
+### Storybook Addon
+
+We're removed the storybook addon in favor of using `@storybook/addon-themes`
+and `withThemeByClassName` helper.
+
+```tsx
+import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
+import { withThemeByClassName } from "@storybook/addon-themes"
+import type { Preview, ReactRenderer } from "@storybook/react"
+
+const preview: Preview = {
+  decorators: [
+    withThemeByClassName<ReactRenderer>({
+      defaultTheme: "light",
+      themes: {
+        light: "",
+        dark: "dark",
+      },
+    }),
+    Story => (
+      <ChakraProvider value={defaultSystem}>
+        <Story />
+      </ChakraProvider>
+    ),
+  ],
+}
+
+export default preview
+```
+
+### Removed Components
+
+- **StackItem**: You don't need this anymore. Use `Box` instead.
+- **FocusLock**: We no longer ship a focus lock component. Install and use
+  `react-focus-lock` directly.
+- **FormControl**: Replace with the `Field` component.
+- **FormErrorMessage**: Replace with the `Field.ErrorText` component.
+
+Before:
+
+```tsx
+<FormControl>
+  <Input />
+  <FormErrorMessage>This field is required</FormErrorMessage>
+</FormControl>
+```
+
+After:
+
+```tsx
+<Field.Root>
+  <Input />
+  <Field.ErrorText>This field is required</Field.ErrorText>
+</Field.Root>
+```
+
+- **AlertDialog**
+  - Replace with the `Dialog` component and set `role=alertdialog`
+  - Set `leastDestructiveRef` prop to the `initialFocusEl` to the `Dialog.Root`
+    component
+
+- **Collapse**: Replace with the `Collapsible` component.
+
+Before:
+
+```tsx
+<Collapse in={isOpen} animateOpacity>
+  Some content
+</Collapse>
+```
+
+After:
+
+```tsx
+<Collapsible.Root open={isOpen}>
+  <Collapsible.Content>Some content</Collapsible.Content>
+</Collapsible.Root>
+```
+
+## Prop Changes
+
+### Boolean Props
+
+Changed naming convention for boolean properties from `is<X>` to `<x>`
+
+- `isOpen` -> `open`
+- `defaultIsOpen` -> `defaultOpen`
+- `isDisabled` -> `disabled`
+- `isInvalid` -> `invalid`
+- `isRequired` -> `required`
+
+### ColorScheme Prop
+
+The `colorScheme` prop has been changed to `colorPalette`
+
+**Before**
+
+- You could only use `colorScheme` in a component's theme
+- `colorScheme` clashes with the native `colorScheme` prop in HTML elements
+
+```tsx
+<Button colorScheme="blue">Click me</Button>
+```
+
+**After**
+
+- You can now use `colorPalette` anywhere
+
+```tsx
+<Button colorPalette="blue">Click me</Button>
+```
+
+Usage in any component, you can do something like:
+
+```tsx
+<Box colorPalette="red">
+  <Box bg="colorPalette.400">Some box</Box>
+  <Text color="colorPalette.600">Some text</Text>
+</Box>
+```
+
+If you are using custom colors, you must define two things to make
+`colorPalette` work:
+
+- **tokens**: For the 50-950 color palette
+- **semanticTokens**: For the `solid`, `contrast`, `fg`, `muted`, `subtle`,
+  `emphasized`, and `focusRing` color keys
+
+```tsx title="theme.ts" /brand: {/ /tokens: {/ /semanticTokens: {/
+import { createSystem, defaultConfig } from "@chakra-ui/react"
+
+export const system = createSystem(defaultConfig, {
+  theme: {
+    tokens: {
+      colors: {
+        brand: {
+          50: { value: "#e6f2ff" },
+          100: { value: "#e6f2ff" },
+          200: { value: "#bfdeff" },
+          300: { value: "#99caff" },
+          // ...
+          950: { value: "#001a33" },
+        },
+      },
+    },
+    semanticTokens: {
+      colors: {
+        brand: {
+          solid: { value: "{colors.brand.500}" },
+          contrast: { value: "{colors.brand.100}" },
+          fg: { value: "{colors.brand.700}" },
+          muted: { value: "{colors.brand.100}" },
+          subtle: { value: "{colors.brand.200}" },
+          emphasized: { value: "{colors.brand.300}" },
+          focusRing: { value: "{colors.brand.500}" },
+        },
+      },
+    },
+  },
+})
+```
+
+> Read more about it [here](/guides/theming-custom-colors).
+
+### Gradient Props
+
+Gradient style prop simplified to `gradient` and `gradientFrom` and `gradientTo`
+props. This reduces the runtime performance cost of parsing the gradient string,
+and allows for better type inference.
+
+**Before**
+
+```tsx
+<Box bgGradient="linear(to-r, red.200, pink.500)" />
+```
+
+**After**
+
+```tsx
+<Box bgGradient="to-r" gradientFrom="red.200" gradientTo="pink.500" />
+```
+
+### Color Palette
+
+- Default color palette is now `gray` for all components but you can configure
+  this in your theme.
+
+- Default theme color palette size has been increased to 11 shades to allow more
+  color variations.
+
+  **Before**
+
+  ```tsx
+  const colors = {
+    // ...
+    gray: {
+      50: "#F7FAFC",
+      100: "#EDF2F7",
+      200: "#E2E8F0",
+      300: "#CBD5E0",
+      400: "#A0AEC0",
+      500: "#718096",
+      600: "#4A5568",
+      700: "#2D3748",
+      800: "#1A202C",
+      900: "#171923",
+    },
+  }
+  ```
+
+  **After**
+
+  ```tsx
+  const colors = {
+    // ...
+    gray: {
+      50: { value: "#fafafa" },
+      100: { value: "#f4f4f5" },
+      200: { value: "#e4e4e7" },
+      300: { value: "#d4d4d8" },
+      400: { value: "#a1a1aa" },
+      500: { value: "#71717a" },
+      600: { value: "#52525b" },
+      700: { value: "#3f3f46" },
+      800: { value: "#27272a" },
+      900: { value: "#18181b" },
+      950: { value: "#09090b" },
+    },
+  }
+  ```
+
+### Style Props
+
+Changed the naming convention for some style props
+
+- `noOfLines` -> `lineClamp`
+- `truncated` -> `truncate`
+- `_activeLink` -> `_currentPage`
+- `_activeStep` -> `_currentStep`
+- `_mediaDark` -> `_osDark`
+- `_mediaLight` -> `_osLight`
+
+We removed the `apply` prop in favor of `textStyle` or `layerStyles`
+
+### Nested Styles
+
+We have changed the way you write nested styles in Chakra UI components.
+
+**Before**
+
+Write nested styles using the `sx` or `__css` prop, and you sometimes don't get
+auto-completion for nested styles.
+
+```tsx
+<Box
+  sx={{
+    svg: { color: "red.500" },
+  }}
+/>
+```
+
+**After**
+
+Write nested styles using the `css` prop. All nested selectors **require** the
+use of the ampersand `&` prefix
+
+```tsx
+<Box
+  css={{
+    "& svg": { color: "red.500" },
+  }}
+/>
+```
+
+This was done for two reasons:
+
+- **Faster style processing:** Before we had to check if a style key is a style
+  prop or a selector which is quite expensive overall.
+- **Better typings:** This makes it easier to type nested style props are
+  strongly typed
+
+## Component Changes
+
+### ChakraProvider
+
+- Removed `theme` prop in favor of passing the `system` prop instead. Import the
+  `defaultSystem` module instead of `theme`
+
+- Removed `resetCss` prop in favor of passing `preflight: false` to the
+  `createSystem` function
+
+Before
+
+```tsx
+<ChakraProvider resetCss={false}>
+  <Component />
+</ChakraProvider>
+```
+
+After
+
+```tsx
+const system = createSystem(defaultConfig, { preflight: false })
+
+<Provider value={system}>
+  <Component />
+</Provider>
+```
+
+- Removed support for configuring toast options. Pass it to the `createToaster`
+  function in `components/ui/toaster.tsx` file instead.
+
+### Modal
+
+- Renamed to `Dialog`
+- Remove `isCentered` prop in favor of using the `placement=center` prop
+- Removed `isOpen` and `onClose` props in favor of using the `open` and
+  `onOpenChange` props
+
+### Avatar
+
+- Remove `max` prop in favor of userland control
+- Remove excess label part
+- Move image related props to `Avatar.Image` component
+- Move fallback icon to `Avatar.Fallback` component
+- Move `name` prop to `Avatar.Fallback` component
+
+### Portal
+
+- Remove `appendToParentPortal` prop in favor of using the `containerRef`
+- Remove `PortalManager` component
+
+### Stack
+
+- Changed `spacing` to `gap`
+- Removed `StackItem` in favor of using the `Box` component directly
+
+### Collapse
+
+- Rename `Collapse` to `Collapsible` namespace
+- Rename `in` to `open`
+- `animateOpacity` has been removed, use keyframes animations `expand-height`
+  and `collapse-height` instead
+
+Before
+
+```tsx
+<Collapse in={isOpen} animateOpacity>
+  Some content
+</Collapse>
+```
+
+After
+
+```tsx
+<Collapsible.Root open={isOpen}>
+  <Collapsible.Content>Some content</Collapsible.Content>
+</Collapsible.Root>
+```
+
+### Image
+
+- Now renders a native `img` without any fallback
+- Remove `fallbackSrc` due to the SSR issues it causes
+- Remove `useImage` hook
+- Remove `Img` in favor of using the `Image` component directly
+
+### PinInput
+
+- Changed `value`, `defaultValue` to use `string[]` instead of `string`
+- `onChange` prop is now called `onValueChange`
+- Add new `PinInput.Control` and `PinInput.Label` component parts
+- `PinInput.Root` now renders a `div` element by default. Consider combining
+  with `Stack` or `Group` for better layout control
+
+### NumberInput
+
+- Rename `NumberInputStepper` to `NumberInput.Control`
+- Rename `NumberInputStepperIncrement` to `NumberInput.IncrementTrigger`
+- Rename `NumberInputStepperDecrement` to `NumberInput.DecrementTrigger`
+- `onChange` prop is now called `onValueChange`
+- Remove `focusBorderColor` and `errorBorderColor`, consider setting the
+  `--focus-color` and `--error-color` css variables instead
+
+Before
+
+```tsx
+<NumberInput>
+  <NumberInputField />
+  <NumberInputStepper>
+    <NumberIncrementStepper />
+    <NumberDecrementStepper />
+  </NumberInputStepper>
+</NumberInput>
+```
+
+After
+
+```tsx
+<NumberInput.Root>
+  <NumberInput.Input />
+  <NumberInput.Control>
+    <NumberInput.IncrementTrigger />
+    <NumberInput.DecrementTrigger />
+  </NumberInput.Control>
+</NumberInput.Root>
+```
+
+### Divider
+
+- Rename to `Separator`
+- Switch to `div` element for better layout control
+- Simplify component to rely on `borderTopWidth` and `borderInlineStartWidth`
+- To change the thickness reliably, set the `--divider-border-width` css
+  variable
+
+### Input, Select, Textarea
+
+- Removed `invalid` prop in favor of wrapping the component in a `Field`
+  component. This allows for adding a label, error text and asterisk easily.
+
+Before
+
+```tsx
+<Input invalid />
+```
+
+After
+
+```tsx
+<Field.Root invalid>
+  <Field.Label>Email</Field.Label>
+  <Input />
+  <Field.ErrorText>This field is required</Field.ErrorText>
+</Field.Root>
+```
+
+### Link
+
+- Removed `isExternal` prop in favor of explicitly setting the `target` and
+  `rel` props
+
+Before
+
+```tsx
+<Link isExternal>Click me</Link>
+```
+
+After
+
+```tsx
+<Link target="_blank" rel="noopener noreferrer">
+  Click me
+</Link>
+```
+
+### Button
+
+- Removed `isActive` in favor of passing `data-active`
+
+Before
+
+```tsx
+<Button isActive>Click me</Button>
+```
+
+After
+
+```tsx
+<Button data-active>Click me</Button>
+```
+
+### IconButton
+
+- Removed `icon` prop in favor of rendering the `children` prop directly
+- Removed `isRounded` in favor of using the `borderRadius=full` prop
+
+### Spinner
+
+- Change the `thickness` prop to `borderWidth`
+- Change the `speed` prop to `animationDuration`
+
+Before
+
+```tsx
+<Spinner thickness="2px" speed="0.5s" />
+```
+
+After
+
+```tsx
+<Spinner borderWidth="2px" animationDuration="0.5s" />
+```

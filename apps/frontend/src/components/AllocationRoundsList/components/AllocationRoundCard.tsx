@@ -1,17 +1,5 @@
 import { useAllocationAmount, useAllocationsRound, useMostVotedAppsInRound } from "@/api"
-import {
-  Box,
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  Icon,
-  Show,
-  Skeleton,
-  Stack,
-  Text,
-  useColorModeValue,
-} from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, Icon, Show, Skeleton, Stack, Text, useMediaQuery } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import { DotSymbol } from "@/components/DotSymbol"
@@ -21,6 +9,7 @@ import { AllocationStateBadge } from "@/components/AllocationStateBadge"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon } from "@/components/Icons"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+import { useTheme } from "next-themes"
 
 type Props = {
   roundId: string
@@ -31,6 +20,8 @@ const compactFormatter = getCompactFormatter()
 export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { theme } = useTheme()
+  const isSmallScreen = useMediaQuery(["(max-width: 768px)"])
 
   const { data: allocationRound, isLoading } = useAllocationsRound(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
@@ -53,12 +44,12 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const cardTextColor = isActive ? "black" : "inherit"
 
   //TODO: dark mode support
-  const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
+  const nonActiveBackgroundColor = theme === "light" ? "rgba(166, 217, 110, 0.12)" : "rgba(166, 217, 110, 0.12)"
 
   const mostVotedAppsQuery = useMostVotedAppsInRound(roundId)
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       borderRadius={"24px"}
       w="full"
@@ -74,19 +65,19 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
         transition: "all 0.2s ease-in-out",
       }}
       data-testid={`round-card-#${roundId}`}>
-      <CardBody py="20px">
+      <Card.Body py="20px">
         <HStack justify={"space-between"} w="full">
-          <Stack w="full" spacing={1} flex={2}>
-            <HStack spacing={2} w="fit-content" justify="space-between">
+          <Stack w="full" gap={1} flex={2}>
+            <HStack gap={2} w="fit-content" justify="space-between">
               <AllocationStateBadge
                 roundId={roundId}
                 data-testid={`round-card-#${roundId}`}
                 renderBadge={false}
                 renderIcon={isActive}
               />
-              <Show above="sm">
+              <Show when={!isSmallScreen}>
                 <DotSymbol color={"#6A6A6A"} size={"4px"} />
-                <Skeleton isLoaded={!isLoading}>
+                <Skeleton loading={isLoading}>
                   <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
                     {isActive
                       ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
@@ -104,7 +95,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
               </Heading>
             </HStack>
             <HStack w="fit-content" justify="space-between" fontSize={"12px"} fontWeight={400} color={cardTextColor}>
-              <Skeleton isLoaded={!isLoading}>
+              <Skeleton loading={isLoading}>
                 <Text>
                   {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
                   {allocationRound.voteEndTimestamp?.format("MMM D")}
@@ -112,15 +103,15 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
               </Skeleton>
             </HStack>
           </Stack>
-          <HStack spacing={4} justify="flex-end" flex={1}>
-            <Stack direction={["column", "column", "row"]} spacing={4} align={["flex-end", "flex-end", "center"]}>
+          <HStack gap={4} justify="flex-end" flex={1}>
+            <Stack direction={["column", "column", "row"]} gap={4} align={["flex-end", "flex-end", "center"]}>
               <Box width={"max-content"} justifyContent={"end"}>
-                <Skeleton isLoaded={!roundAmountLoading}>
+                <Skeleton loading={roundAmountLoading}>
                   {roundAmountError ? (
                     <Text color="red.500">{roundAmountError.message}</Text>
                   ) : (
                     <Box textAlign={"end"} color={cardTextColor}>
-                      <HStack spacing={1}>
+                      <HStack gap={1}>
                         <Heading fontSize="24px" fontWeight={700}>
                           {compactFormatter.format(Number(totalAmount))}
                         </Heading>
@@ -143,7 +134,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
             <Icon as={FaAngleRight} boxSize={"24px"} color={cardTextColor} data-testid={`round-link-#${roundId}`} />
           </HStack>
         </HStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

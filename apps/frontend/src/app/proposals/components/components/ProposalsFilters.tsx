@@ -90,12 +90,12 @@ export const ProposalsFilters = (props: Props) => {
       direction={["column", "column", "row"]}
       justify={["flex-start", "flex-start", "space-between"]}
       align={["flex-end", "flex-end", "center"]}
-      spacing={4}
+      gap={4}
       w="full">
       {!isStateFilter ? (
         <HStack
           justifyContent={"space-between"}
-          spacing={2}
+          gap={2}
           overflowY={"visible"}
           overflowX={"auto"}
           w="full"
@@ -141,7 +141,7 @@ export const ProposalsFilters = (props: Props) => {
                 _hover={{
                   bg: isSelected ? "contrast-bg-strong-hover" : "contrast-bg-muted-hover",
                 }}>
-                <HStack spacing={2} alignItems={"center"}>
+                <HStack gap={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                     {t("Filters")}
                   </Text>
@@ -169,7 +169,7 @@ export const ProposalsFilters = (props: Props) => {
           )}
         </HStack>
       ) : (
-        <HStack spacing={2} w="full" align={"center"}>
+        <HStack gap={2} w="full" align={"center"}>
           <IconButton
             lineHeight="inherit"
             h="auto"

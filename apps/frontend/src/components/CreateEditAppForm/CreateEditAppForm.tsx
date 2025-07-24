@@ -1,22 +1,5 @@
 import { XApp } from "@/api"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Image,
-  Text,
-  InputGroup,
-  InputLeftElement,
-  Stack,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, Image, Text, InputGroup, Stack, VStack } from "@chakra-ui/react"
 import {
   Control,
   Controller,
@@ -162,12 +145,12 @@ export const CreateEditAppForm = ({
     return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
   }
   return (
-    <Card>
-      <CardHeader>
+    <Card.Root>
+      <Card.Header>
         <Heading size="lg">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={8} w="full">
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={8} w="full">
           <FormItem
             label={t("Name")}
             placeholder={t("Name")}
@@ -252,51 +235,48 @@ export const CreateEditAppForm = ({
             error={errors.categories?.message}
           />
 
-          <FormControl isInvalid={!treasuryWalletAddress}>
-            <FormLabel>{t("Treasury address")}</FormLabel>
+          <Field.Root invalid={!treasuryWalletAddress}>
+            <Field.Label>{t("Treasury address")}</Field.Label>
             <Text fontSize="xs" color="gray.500" mb={2}>
               {t("The wallet address where you will receive your app's B3TR")}
             </Text>
             <InputGroup>
               <WalletAddressInput
-                inputLeftElement={
-                  <InputLeftElement pointerEvents="none">
-                    <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={treasuryWalletAddress} />
-                  </InputLeftElement>
+                startAddon={
+                  <AddressIcon
+                    pointerEvents="none"
+                    borderRadius={"full"}
+                    boxSize={6}
+                    minW={6}
+                    minH={6}
+                    address={treasuryWalletAddress}
+                  />
                 }
-                isDisabled={isReceiverAddressDisabled}
+                disabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("treasuryWalletAddress", address ?? "")}
               />
             </InputGroup>
-          </FormControl>
+          </Field.Root>
 
-          <FormControl isInvalid={!adminWalletAddress}>
-            <FormLabel>{t("Admin address")}</FormLabel>
+          <Field.Root invalid={!adminWalletAddress}>
+            <Field.Label>{t("Admin address")}</Field.Label>
             <Text fontSize="xs" color="gray.500" mb={2}>
               {t("The wallet address which will be used to manage your app")}
             </Text>
             <InputGroup>
               <WalletAddressInput
-                inputLeftElement={
-                  <InputLeftElement pointerEvents="none">
-                    <AddressIcon
-                      borderRadius={"full"}
-                      boxSize={6}
-                      minW={6}
-                      minH={6}
-                      address={adminWalletAddress ?? ""}
-                    />
-                  </InputLeftElement>
+                startAddon={
+                  <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={adminWalletAddress ?? ""} />
                 }
-                isDisabled={isReceiverAddressDisabled}
+                disabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("adminWalletAddress", address ?? "")}
               />
             </InputGroup>
-          </FormControl>
+          </Field.Root>
 
-          <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
+          <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} gap={4}>
             <Controller
               name="logo"
               control={control}
@@ -310,8 +290,8 @@ export const CreateEditAppForm = ({
                 },
               }}
               render={({ field: { value } }) => (
-                <FormControl isInvalid={!!errors.logo}>
-                  <FormLabel>{t("Logo")}</FormLabel>
+                <Field.Root invalid={!!errors.logo}>
+                  <Field.Label>{t("Logo")}</Field.Label>
                   <VStack w="full" align="flex-start">
                     <Image
                       alignSelf={"center"}
@@ -325,13 +305,13 @@ export const CreateEditAppForm = ({
                     />
 
                     {errors.logo ? (
-                      <FormErrorMessage>{errors.logo.message}</FormErrorMessage>
+                      <Field.ErrorText>{errors.logo.message}</Field.ErrorText>
                     ) : (
-                      <FormHelperText>{t(LOGO_UPLOAD_GUIDELINES)}</FormHelperText>
+                      <Field.HelperText>{t(LOGO_UPLOAD_GUIDELINES)}</Field.HelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
                   </VStack>
-                </FormControl>
+                </Field.Root>
               )}
             />
 
@@ -348,8 +328,8 @@ export const CreateEditAppForm = ({
                 },
               }}
               render={({ field: { value } }) => (
-                <FormControl isInvalid={!!errors.banner}>
-                  <FormLabel>{t("Banner")}</FormLabel>
+                <Field.Root invalid={!!errors.banner}>
+                  <Field.Label>{t("Banner")}</Field.Label>
                   <VStack w="full" align={"flex-start"}>
                     <Image
                       alignSelf={"center"}
@@ -363,13 +343,13 @@ export const CreateEditAppForm = ({
                       objectFit="cover"
                     />
                     {errors.banner ? (
-                      <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
+                      <Field.ErrorText>{errors.banner.message}</Field.ErrorText>
                     ) : (
-                      <FormHelperText>{t(BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
+                      <Field.HelperText>{t(BANNER_UPLOAD_GUIDELINES)}</Field.HelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                   </VStack>
-                </FormControl>
+                </Field.Root>
               )}
             />
           </Stack>
@@ -386,8 +366,8 @@ export const CreateEditAppForm = ({
               },
             }}
             render={({ field: { value } }) => (
-              <FormControl isInvalid={!!errors.ve_world_banner}>
-                <FormLabel>{t("VeWorld Banner")}</FormLabel>
+              <Field.Root invalid={!!errors.ve_world_banner}>
+                <Field.Label>{t("VeWorld Banner")}</Field.Label>
                 <VStack w="full" align="center">
                   <Image
                     onClick={openUploadVeWorldBanner}
@@ -398,22 +378,22 @@ export const CreateEditAppForm = ({
                     objectFit="cover"
                   />
                   {errors.ve_world_banner ? (
-                    <FormErrorMessage>{errors.ve_world_banner.message}</FormErrorMessage>
+                    <Field.ErrorText>{errors.ve_world_banner.message}</Field.ErrorText>
                   ) : (
-                    <FormHelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
+                    <Field.HelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</Field.HelperText>
                   )}
                   <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
                 </VStack>
-              </FormControl>
+              </Field.Root>
             )}
           />
         </VStack>
-      </CardBody>
-      <CardFooter display={"flex"} flexDir={"column"} w="full">
+      </Card.Body>
+      <Card.Footer display={"flex"} flexDir={"column"} w="full">
         <Button colorScheme="blue" type="submit" size="lg" alignSelf={"flex-end"} borderRadius={"full"}>
           {isEdit ? "Save" : "Submit"}
         </Button>
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   )
 }

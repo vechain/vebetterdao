@@ -61,6 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html
+      suppressHydrationWarning
       lang="en"
       style={{
         scrollBehavior: "smooth",

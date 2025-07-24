@@ -51,8 +51,8 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
       w={"full"}
       alignItems={"center"}
       justify={"space-between"}>
-      <VStack align="start" justifyContent={"flex-start"} spacing={0} flex={1}>
-        <Skeleton isLoaded={!endorserAddressLoading}>
+      <VStack align="start" justifyContent={"flex-start"} gap={0} flex={1}>
+        <Skeleton loading={endorserAddressLoading}>
           <HStack>
             <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress ?? "", 6, 3)}</Text>
             {showCopiedLink ? (
@@ -69,12 +69,12 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
           })}
         </Text>
       </VStack>
-      <VStack align="end" spacing={0} flex={1} w="full">
-        <HStack spacing={1} align="flex-start">
+      <VStack align="end" gap={0} flex={1} w="full">
+        <HStack gap={1} align="flex-start">
           <Text fontWeight={600} color={isEndorsingColor}>
             {`${isEndorsing ? "+" : "-"}`}
           </Text>
-          <Skeleton isLoaded={!nodePointsLoading}>
+          <Skeleton loading={nodePointsLoading}>
             <Text fontWeight={600} color={isEndorsingColor}>
               <Trans
                 i18nKey="{{value}} pts."

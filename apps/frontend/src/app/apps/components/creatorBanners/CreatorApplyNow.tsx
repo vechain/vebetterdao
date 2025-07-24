@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  Heading,
-  HStack,
-  Image,
-  Stack,
-  useDisclosure,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { Box, Button, Card, Heading, HStack, Image, Stack, useDisclosure, useMediaQuery } from "@chakra-ui/react"
 import { UilPlus } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -22,11 +11,11 @@ export const CreatorApplyNow = () => {
     router.push("/apps/creator/new")
   }
   const { onOpen, isOpen, onClose } = useDisclosure()
-  const [isMobile] = useMediaQuery("(max-width: 767px)")
+  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   return (
     <>
-      <Card
+      <Card.Root
         variant={"baseWithBorder"}
         w="full"
         maxW="100%"
@@ -35,7 +24,7 @@ export const CreatorApplyNow = () => {
           borderRadius: "20px",
           borderColor: "white",
         }}>
-        <CardBody p={0}>
+        <Card.Body p={0}>
           <HStack w="full" h="full">
             {/* Left Section: Image full height when mobile */}
             {isMobile && (
@@ -100,8 +89,8 @@ export const CreatorApplyNow = () => {
               </Stack>
             </Stack>
           </HStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
       <SubmitCreatorFormModal isOpen={isOpen} onClose={onClose} buttonAction={goToCreatorForm} />
     </>
   )

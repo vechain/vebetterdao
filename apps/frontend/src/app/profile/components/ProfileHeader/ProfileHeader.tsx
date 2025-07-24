@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react"
-import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton, Stack, Heading } from "@chakra-ui/react"
+import { Text, VStack, HStack, Card, useClipboard, IconButton, Stack, Heading } from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
@@ -12,7 +12,7 @@ type Props = {
 export const ProfileHeader = ({ address }: Props) => {
   const { data: vnsData } = useVechainDomain(address ?? "")
   const domain = vnsData?.domain
-  const { onCopy } = useClipboard(address ?? "")
+  const { copy } = useClipboard({ value: address ?? "" })
   const [isCopied, setIsCopied] = useState(false)
 
   useEffect(() => {
@@ -23,23 +23,23 @@ export const ProfileHeader = ({ address }: Props) => {
   }, [isCopied])
 
   const handleCopy = useCallback(() => {
-    onCopy()
+    copy()
     setIsCopied(true)
-  }, [onCopy])
+  }, [copy])
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={6}>
-          <HStack spacing={4}>
+          <HStack gap={4}>
             <AddressIcon address={address ?? ""} rounded={"full"} minW={14} minH={14} boxSize={14} />
             <Stack
               direction={["column", "column", "column"]}
               align={["flex-start", "flex-start", "column"]}
               w="full"
-              spacing={1}>
+              gap={1}>
               <Heading fontSize="xl">{humanDomain(domain ?? "", 15)}</Heading>
-              <HStack spacing={2}>
+              <HStack gap={2}>
                 <Text fontSize="xl" fontWeight="500">
                   {humanAddress(address ?? "", 6, 4)}
                 </Text>
@@ -47,15 +47,15 @@ export const ProfileHeader = ({ address }: Props) => {
                 <IconButton
                   variant="link"
                   colorScheme={isCopied ? "green" : "primary"}
-                  icon={isCopied ? <UilCheck /> : <UilCopy />}
                   onClick={handleCopy}
-                  aria-label="Copy Address"
-                />
+                  aria-label="Copy Address">
+                  {isCopied ? <UilCheck /> : <UilCopy />}
+                </IconButton>
               </HStack>
             </Stack>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

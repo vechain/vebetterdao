@@ -56,7 +56,7 @@ export const GalaxyRewardsCalculator = () => {
       return { potentialRewards, currentRewards }
     }
     return null
-  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards])
+  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards, currentRewards])
 
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
@@ -69,7 +69,7 @@ export const GalaxyRewardsCalculator = () => {
   if (!account || !hasVoted) return <></>
 
   return (
-    <Card
+    <Card.Root
       p={7}
       variant="baseWithBorder"
       alignItems="center"
@@ -92,9 +92,9 @@ export const GalaxyRewardsCalculator = () => {
         alignItems={"center"}>
         <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} usersGM={usersGM} />
 
-        <Stack spacing={4} p={4} alignItems="center" justifyContent="flex-end" w="full">
+        <Stack gap={4} p={4} alignItems="center" justifyContent="flex-end" w="full">
           {/* ESTIMATE CARD */}
-          <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
+          <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
               <Heading fontSize="x-large">{t("Potential Rewards")}</Heading>
               <BaseTooltip
@@ -114,11 +114,11 @@ export const GalaxyRewardsCalculator = () => {
                 {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
               </Text>
             </HStack>
-          </Card>
+          </Card.Root>
           {/* END ESTIMATED CARD */}
 
           {/* ACTUAL CARD */}
-          <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
+          <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
               <Heading fontSize="x-large">{t("Estimated Expected Rewards")}</Heading>
               <BaseTooltip
@@ -139,11 +139,11 @@ export const GalaxyRewardsCalculator = () => {
                 {compactFormatter.format(Number(estimatedRewards?.currentRewards ?? 0))}
               </Text>
             </HStack>
-          </Card>
+          </Card.Root>
           {/* END ACTUAL CARD */}
         </Stack>
       </Stack>
       <Text fontSize="xs" color="white" textAlign="center"></Text>
-    </Card>
+    </Card.Root>
   )
 }

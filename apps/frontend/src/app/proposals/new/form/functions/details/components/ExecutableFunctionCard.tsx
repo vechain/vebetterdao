@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardBody, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { Control, FieldArrayWithId, FieldError, FieldErrors, UseFormRegister } from "react-hook-form"
 import { GenerateFunctionToCallParamsInput } from "@/components"
 import { FormData } from "./NewProposalForm"
@@ -29,11 +29,14 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Card w="full" variant="filled" data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}`}>
-      <CardBody py={4}>
-        <VStack spacing={4} align="flex-start">
+    <Card.Root
+      w="full"
+      variant="filled"
+      data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}`}>
+      <Card.Body py={4}>
+        <VStack gap={4} align="flex-start">
           <HStack justify="space-between" w="full">
-            <HStack spacing={4}>
+            <HStack gap={4}>
               <Box p={4} bg="dark-contrast-on-card-bg" borderRadius="50%" lineHeight={0} pos="relative">
                 <Text
                   pos="absolute"
@@ -58,15 +61,15 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
                 data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}__remove-tx`}
                 color={"red.500"}
                 aria-label="Remove action"
-                icon={<FiTrash />}
                 size="md"
                 onClick={onRemoveTransactionClick}
                 variant={"ghost"}
-                rounded="full"
-              />
+                rounded="full">
+                <FiTrash />
+              </IconButton>
             )}
           </HStack>
-          <VStack spacing={4} align="flex-start" w="full">
+          <VStack gap={4} align="flex-start" w="full">
             {field.params.map((param, paramIndex) => {
               return (
                 <GenerateFunctionToCallParamsInput
@@ -81,12 +84,12 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
                   inputProps={{
                     bg: "dark-contrast-on-card-bg",
                     borderRadius: "lg",
-                    isDisabled: isDisabled,
+                    disabled: isDisabled,
                   }}
                   selectProps={{
                     bg: "dark-contrast-on-card-bg",
                     borderRadius: "lg",
-                    isDisabled: isDisabled,
+                    disabled: isDisabled,
                   }}
                   formLabelProps={{
                     fontWeight: 600,
@@ -108,7 +111,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
             </Button>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -47,14 +47,14 @@ export const DashboardAllocationRounds = () => {
 
   return (
     <ResponsiveCard>
-      <VStack spacing={8} w="full">
-        <HStack spacing={4} justifyContent="space-between" w="full">
+      <VStack gap={8} w="full">
+        <HStack gap={4} justifyContent="space-between" w="full">
           {isDesktop ? (
             <Button
               variant="link"
               colorScheme="primary"
               leftIcon={<FaAngleLeft />}
-              isDisabled={allocationRound.isFirstRound}
+              disabled={allocationRound.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
               {t("Previous round")}
             </Button>
@@ -65,17 +65,17 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               icon={<Icon as={FaAngleLeft} boxSize={5} />}
-              isDisabled={allocationRound.isFirstRound}
+              disabled={allocationRound.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
             />
           )}
 
-          <VStack spacing={2}>
+          <VStack gap={2}>
             <Heading fontSize="24px" fontWeight={400}>
               <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: selectedRoundId }} t={t} />
             </Heading>
-            <HStack spacing={2}>
-              <Skeleton isLoaded={!roundInfoLoading}>
+            <HStack gap={2}>
+              <Skeleton loading={roundInfoLoading}>
                 <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
                   {t("{{from}} to {{to}}", {
                     from: roundInfo.voteStartTimestamp?.format("MMM D"),
@@ -84,7 +84,7 @@ export const DashboardAllocationRounds = () => {
                 </Text>
               </Skeleton>
               <DotSymbol color="#6A6A6A" size="2px" />
-              <Skeleton isLoaded={!roundInfoLoading}>
+              <Skeleton loading={roundInfoLoading}>
                 <Text fontSize="14px" color="primary.500" fontWeight={600}>
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
@@ -96,7 +96,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               rightIcon={<FaAngleRight />}
-              isDisabled={allocationRound.isLastRound}
+              disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
               {t("Next round")}
             </Button>
@@ -107,19 +107,19 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               icon={<Icon as={FaAngleRight} boxSize={5} />}
-              isDisabled={allocationRound.isLastRound}
+              disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
             />
           )}
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
-        <VStack spacing={4} w="full">
+        <VStack gap={4} w="full">
           <Heading fontSize="24px" fontWeight={400}>
             {t("Proposals in this round or looking for support")}
           </Heading>
 
           {!!sortedProposals.length ? (
-            <VStack spacing={4} w="full">
+            <VStack gap={4} w="full">
               {sortedProposals.map(proposal => (
                 <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
               ))}

@@ -26,7 +26,7 @@ export const GmNFTPageContent = () => {
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader />
-      <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
+      <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         <VStack flex={3}>
           <MultipleXNodesAlert />
           <AttachXNodeCard />

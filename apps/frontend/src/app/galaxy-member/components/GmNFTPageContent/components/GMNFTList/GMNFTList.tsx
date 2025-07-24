@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Heading, HStack, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import InfiniteScroll from "react-infinite-scroll-component"
@@ -39,8 +39,8 @@ export const GMNFTList = () => {
 
   return (
     <>
-      <Card variant="baseWithBorder" w="full">
-        <CardBody>
+      <Card.Root variant="baseWithBorder" w="full">
+        <Card.Body>
           <VStack align="stretch" gap={6}>
             <VStack align="stretch">
               <HStack justify="space-between">
@@ -71,7 +71,9 @@ export const GMNFTList = () => {
                 hasMore={hasNextPage || false}
                 loader={<Skeleton height="100px" />}>
                 <VStack align="stretch" gap={4} p={[0, 3]}>
-                  {tokens?.map(token => <GMNFTListItem key={token.tokenId} token={token} />)}
+                  {tokens?.map(token => (
+                    <GMNFTListItem key={token.tokenId} token={token} />
+                  ))}
                 </VStack>
               </InfiniteScroll>
             </VStack>
@@ -85,8 +87,8 @@ export const GMNFTList = () => {
               </Button>
             )}
           </VStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
       <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
     </>
   )

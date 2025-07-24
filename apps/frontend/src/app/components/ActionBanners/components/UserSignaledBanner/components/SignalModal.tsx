@@ -15,7 +15,7 @@ export const SignalModal = ({ isOpen, onClose, signals }: Props) => {
 
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})}>
-      <VStack align="stretch" spacing={4}>
+      <VStack align="stretch" gap={4}>
         <Heading size="md">{t("You have been signalled")}</Heading>
         <Text color="#6A6A6A" fontWeight={400}>
           {t(

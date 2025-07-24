@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Heading, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UilCalculatorAlt } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -13,8 +13,8 @@ export const GalaxyRewardCalculatorCard = () => {
   }
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <Heading fontSize="lg">{t("GM Reward Calculator")}</Heading>
@@ -27,7 +27,7 @@ export const GalaxyRewardCalculatorCard = () => {
             {t("Estimate Rewards")}
           </Button>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

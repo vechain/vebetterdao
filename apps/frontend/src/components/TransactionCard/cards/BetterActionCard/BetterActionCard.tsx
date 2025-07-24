@@ -1,4 +1,4 @@
-import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { SustainabilityActionsResponse, useXApps } from "@/api"
 import dayjs from "dayjs"
 import { LeafIcon } from "../../../Icons/LeafIcon"
@@ -26,10 +26,10 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
   const actionModal = useDisclosure()
 
   return (
-    <Card variant={"filledSmall"} w="full" onClick={actionModal.onOpen} cursor="pointer">
-      <CardBody>
-        <HStack spacing={3} w="full" justify="space-between">
-          <HStack spacing={4}>
+    <Card.Root variant={"filledSmall"} w="full" onClick={actionModal.onOpen} cursor="pointer">
+      <Card.Body>
+        <HStack gap={3} w="full" justify="space-between">
+          <HStack gap={4}>
             <Flex
               w="fit-content"
               h="fit-content"
@@ -40,7 +40,7 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
               borderRadius={"full"}>
               <LeafIcon size={"1rem"} />
             </Flex>
-            <VStack spacing={0} align="stretch">
+            <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
                   {t("Better action on")}
@@ -54,7 +54,7 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
               </Text>
             </VStack>
           </HStack>
-          <HStack spacing={2}>
+          <HStack gap={2}>
             <Text fontWeight={600}>
               {"+"}
               {compactFormatter.format(Number(amountB3tr))}
@@ -64,7 +64,7 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
             </Text>
           </HStack>
         </HStack>
-      </CardBody>
+      </Card.Body>
       <ActionModal
         actionModal={actionModal}
         proof={proof}
@@ -73,6 +73,6 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
         blockTimestamp={blockTimestamp}
         b3trAmount={amountB3tr}
       />
-    </Card>
+    </Card.Root>
   )
 }

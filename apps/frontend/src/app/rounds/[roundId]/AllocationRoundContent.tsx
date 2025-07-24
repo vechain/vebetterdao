@@ -40,20 +40,20 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
 
   if (currentAllocationState.isLoading)
     return (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
+      <VStack w="full" gap={12} h="80vh" justify="center">
         <Spinner size={"lg"} />
       </VStack>
     )
   if (currentAllocationState.error) return null
 
   return (
-    <VStack w="full" spacing={8} data-testid={`allocation-${roundId}-page`}>
+    <VStack w="full" gap={8} data-testid={`allocation-${roundId}-page`}>
       <AllocationRoundNavbar roundId={roundId} />
       <CantVoteCard />
       <AllocationRoundHeaderCard roundId={roundId} />
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
-          <VStack spacing={8} w="full">
+          <VStack gap={8} w="full">
             <Show below="sm">
               <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
             </Show>

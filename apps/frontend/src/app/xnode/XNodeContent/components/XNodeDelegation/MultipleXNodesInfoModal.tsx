@@ -32,11 +32,11 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
               backgroundImage={"/assets/backgrounds/xnode-page-background.webp"}>
               <HStack align="stretch" gap={6}>
                 <Image src={node.image} w="68px" h="68px" rounded="8px" alt={node.nodeId} />
-                <VStack flex="1" align="flex-start" justify="center" spacing={2}>
+                <VStack flex="1" align="flex-start" justify="center" gap={2}>
                   <Text fontWeight={700} fontSize="md" color="#fff">
                     {node.name}
                   </Text>
-                  <HStack spacing={2}>
+                  <HStack gap={2}>
                     {!node.isXNodeDelegated && (
                       <Box bg="#FFFFFF4A" color="#fff" rounded="8px" padding="4px 8px">
                         <Text fontSize="xs">{t("Owned")}</Text>
@@ -58,7 +58,7 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
                       </Box>
                     )}
                     <Box bg="#FFFFFF4A" color="#fff" rounded="8px" padding="4px 8px">
-                      <HStack spacing={1}>
+                      <HStack gap={1}>
                         <Text fontSize="xs" fontWeight={600}>
                           {Number(nodeLevelToEndorsementScore?.data?.[node.nodeLevel ?? 0] ?? 0)}
                         </Text>

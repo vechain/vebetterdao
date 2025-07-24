@@ -41,7 +41,7 @@ export const GenericAlert = ({ isLoading = false, title, message, type }: Props)
   const colorScheme = colorSchemes[type] || colorSchemes["info"]
 
   return (
-    <Skeleton isLoaded={!isLoading}>
+    <Skeleton loading={isLoading}>
       <Alert bg={colorScheme.primaryColor} borderRadius="8px" my={3}>
         <Stack flexDir={title ? "column" : "row"}>
           <HStack w={title ? "full" : "auto"}>

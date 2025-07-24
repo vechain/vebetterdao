@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
@@ -92,18 +92,18 @@ export const LowOnVthoCard: React.FC = () => {
   if (!account?.address || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
-    <Card
+    <Card.Root
       borderColor={"#F29B32"}
       backgroundColor={"#FFF3E5"}
       variant={"baseWithBorder"}
       boxShadow={"0px 0px 5px #F29B32"}>
-      <CardBody>
+      <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={1} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
             <Image src="/assets/icons/alert.svg" boxSize={[16, 28]} alt="alert-icon" />
           </GridItem>
           <GridItem colSpan={3}>
-            <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
+            <VStack gap={4} w="full" justifyContent={"start"} alignItems={"start"}>
               <Heading fontSize={"24px"} fontWeight={"700"}>
                 {labels?.heading}
               </Heading>
@@ -123,7 +123,7 @@ export const LowOnVthoCard: React.FC = () => {
             </VStack>
           </GridItem>
         </Grid>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

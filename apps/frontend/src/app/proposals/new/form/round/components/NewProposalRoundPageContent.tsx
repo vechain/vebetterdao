@@ -1,16 +1,4 @@
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Button,
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Button, Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useProposalFormStore } from "@/store"
@@ -91,15 +79,15 @@ export const NewProposalRoundPageContent = () => {
 
     if (rounds.length === 0) {
       return (
-        <Alert status="error" borderRadius={"lg"}>
-          <AlertIcon />
-          <AlertTitle>{t("No rounds available")}</AlertTitle>
-          <AlertDescription>
+        <Alert.Root status="error" borderRadius={"lg"}>
+          <Alert.Indicator />
+          <Alert.Title>{t("No rounds available")}</Alert.Title>
+          <Alert.Description>
             {(currentRoundIdError as Error)?.message ??
               (canStartInNextRoundError as Error)?.message ??
               t("Emissions have propably not started yet")}
-          </AlertDescription>
-        </Alert>
+          </Alert.Description>
+        </Alert.Root>
       )
     }
 
@@ -116,10 +104,10 @@ export const NewProposalRoundPageContent = () => {
   }
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody py={8}>
-        <VStack spacing={8} align="flex-start">
-          <VStack spacing={[4, 6]} align="flex-start">
+    <Card.Root variant="baseWithBorder">
+      <Card.Body py={8}>
+        <VStack gap={8} align="flex-start">
+          <VStack gap={[4, 6]} align="flex-start">
             <Heading size={["md", "lg"]}>{t("Select a voting session date")}</Heading>
             <Text fontSize={["sm", "md"]}>
               {t("Choose the")}{" "}
@@ -134,7 +122,7 @@ export const NewProposalRoundPageContent = () => {
 
           {renderRoundContent()}
 
-          <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+          <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
               {t("Go back")}
             </Button>
@@ -142,13 +130,13 @@ export const NewProposalRoundPageContent = () => {
               data-testid="continue"
               variant="primaryAction"
               onClick={onContinue}
-              isDisabled={!votingStartRoundId}
+              disabled={!votingStartRoundId}
               form="new-proposal-form">
               {t("Continue")}
             </Button>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

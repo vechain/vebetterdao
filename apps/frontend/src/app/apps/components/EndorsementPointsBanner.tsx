@@ -30,7 +30,7 @@ export const EndorsementPointsBanner = () => {
   return (
     <Stack
       direction={["column", "column", "row"]}
-      spacing={4}
+      gap={4}
       w="full"
       p="24px"
       borderRadius={"16px"}
@@ -43,8 +43,8 @@ export const EndorsementPointsBanner = () => {
         borderRadius={"24px"}
       />
 
-      <VStack w="full" spacing={2} align="start">
-        <Skeleton isLoaded={!isLoading}>
+      <VStack w="full" gap={2} align="start">
+        <Skeleton loading={isLoading}>
           <Heading fontSize={"16px"} fontWeight={700} color="white">
             {t("As {{nodeType}} holder, you have {{value}} available points to endorse Apps", {
               nodeType,
@@ -52,7 +52,7 @@ export const EndorsementPointsBanner = () => {
             })}
           </Heading>
         </Skeleton>
-        <Skeleton isLoaded={!requiredPoints.isLoading}>
+        <Skeleton loading={requiredPoints.isLoading}>
           <Text fontSize={"14px"} fontWeight={400} color="white">
             {t("Help a project to reach {{value}} points and join the next allocation round and secure funding.", {
               value: requiredPoints.data,

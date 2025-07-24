@@ -84,9 +84,9 @@ export const EndorsersItem = ({
       justify={"space-between"}>
       <HStack alignItems={"center"} gap={4}>
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
-        <VStack align="start" justify={"center"} spacing={0}>
+        <VStack align="start" justify={"center"} gap={0}>
           <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress, 6, 3)}</Text>
-          <Skeleton isLoaded={!endorserNodesLoading}>
+          <Skeleton loading={endorserNodesLoading}>
             <Text fontSize="12" fontWeight={400} color="#6A6A6A">
               {t("Endorsing since {{date}}", { date: endorsingSince })}
             </Text>
@@ -94,7 +94,7 @@ export const EndorsersItem = ({
         </VStack>
       </HStack>
       <HStack alignItems={"center"} gap={4}>
-        <Skeleton isLoaded={!endorserNodesLoading && !nodePointsLoading}>
+        <Skeleton loading={endorserNodesLoading || nodePointsLoading}>
           <Text fontSize={"16px"} fontWeight={600}>
             <Trans
               i18nKey="{{value}} pts."
@@ -114,7 +114,7 @@ export const EndorsersItem = ({
           </PopoverTrigger>
           <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
             <PopoverBody p={2}>
-              <VStack alignItems="stretch" spacing={3}>
+              <VStack alignItems="stretch" gap={3}>
                 {isAppAdmin && (
                   <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
                     <UilTrash />

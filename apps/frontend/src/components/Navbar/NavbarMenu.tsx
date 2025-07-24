@@ -50,7 +50,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
   const { t } = useTranslation()
-  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
+  const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
 
   return (
     <>
@@ -77,7 +77,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           )
         })
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" variants={containerVariants} spacing={0}>
+        <MotionVStack initial={"hidden"} animate="visible" variants={containerVariants} gap={0}>
           {routesToRender.map((route, index) => {
             if (route.component) return route.component
 
@@ -103,7 +103,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
                   <Box p={0.5}>
                     <Icon as={route.icon} />
                   </Box>
-                  <VStack alignItems={"start"} spacing={0}>
+                  <VStack alignItems={"start"} gap={0}>
                     <Text fontSize={16} fontWeight={600}>
                       {route.name}
                     </Text>

@@ -1,4 +1,4 @@
-import { Alert, AlertIcon, Box, AlertTitle, Text, Button, useDisclosure } from "@chakra-ui/react"
+import { Alert, Box, AlertTitle, Text, Button, useDisclosure } from "@chakra-ui/react"
 import { useXNode } from "@/api"
 import { useTranslation } from "react-i18next"
 import { MultipleXNodesInfoModal } from "./MultipleXNodesInfoModal"
@@ -14,8 +14,8 @@ export const MultipleXNodesAlert = () => {
 
   return (
     <>
-      <Alert status="error" borderRadius="2xl">
-        <AlertIcon />
+      <Alert.Root status="error" borderRadius="2xl">
+        <Alert.Indicator />
         <Box lineHeight="1.20rem" fontSize="sm" flex={1}>
           <AlertTitle as="span">{t("You are controlling multiple Nodes")}</AlertTitle>
           <Text>
@@ -27,7 +27,7 @@ export const MultipleXNodesAlert = () => {
         <Button variant="ghost" size="sm" onClick={infoModal.onOpen} color="#C84968">
           {t("View Details")}
         </Button>
-      </Alert>
+      </Alert.Root>
       <MultipleXNodesInfoModal modal={infoModal} />
     </>
   )

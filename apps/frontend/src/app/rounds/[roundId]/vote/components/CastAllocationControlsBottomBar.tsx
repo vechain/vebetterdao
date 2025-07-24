@@ -17,7 +17,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
       <Stack
         direction={["column", "column", "row"]}
         w="full"
-        spacing={4}
+        gap={4}
         justify={"space-between"}
         align={"center"}
         pos="fixed"
@@ -32,7 +32,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         <HStack
           alignSelf={"flex-end"}
           justify={["space-between", "space-between", "flex-end"]}
-          spacing={4}
+          gap={4}
           w={["full", "full", "auto"]}>
           <Button
             borderRadius={"16px"}
@@ -60,12 +60,12 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
     )
 
   return (
-    <Stack direction={["column", "column", "row"]} w="full" spacing={4} justify={"space-between"} align={"center"}>
+    <Stack direction={["column", "column", "row"]} w="full" gap={4} justify={"space-between"} align={"center"}>
       {helperText}
       <HStack
         alignSelf={"flex-end"}
         justify={["space-between", "space-between", "flex-end"]}
-        spacing={4}
+        gap={4}
         w={["full", "full", "auto"]}>
         <Button
           //   borderRadius={"16px"}

@@ -1,8 +1,9 @@
 {
   "extends": "@repo/typescript-config/nextjs.json",
+  "skipLibCheck": true,
   "compilerOptions": {
     "types": ["vitest/globals"],
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "plugins": [
       {
         "name": "next"

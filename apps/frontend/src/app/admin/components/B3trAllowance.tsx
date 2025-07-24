@@ -1,26 +1,6 @@
 import { useB3trAllowance } from "@/api"
 import { useB3trApprove, useGetB3trBalance } from "@/hooks"
-import {
-  VStack,
-  HStack,
-  Button,
-  FormControl,
-  FormLabel,
-  InputGroup,
-  Input,
-  FormErrorMessage,
-  NumberInput,
-  NumberInputField,
-  NumberIncrementStepper,
-  NumberInputStepper,
-  NumberDecrementStepper,
-  InputRightAddon,
-  Card,
-  CardHeader,
-  Heading,
-  CardBody,
-  Text,
-} from "@chakra-ui/react"
+import { VStack, HStack, Button, Field, InputGroup, Input, NumberInput, Card, Heading, Text } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
@@ -30,7 +10,7 @@ import { WalletAddressInput } from "@/app/components/Input"
 export const B3trAllowance = () => {
   const { account } = useWallet()
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
-  const [amount, setAmount] = useState<number>(0)
+  const [amount, setAmount] = useState<string>("0")
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
   const { t } = useTranslation()
@@ -55,7 +35,7 @@ export const B3trAllowance = () => {
   const isAmountValid = useMemo(() => {
     if (b3trBalance === undefined) return false
 
-    return amount <= parseInt(b3trBalance?.scaled)
+    return parseInt(amount) <= parseInt(b3trBalance?.scaled)
   }, [amount, b3trBalance])
 
   const isFormValid = useMemo(() => isValidAddress && isAmountValid, [isValidAddress, isAmountValid])
@@ -73,101 +53,102 @@ export const B3trAllowance = () => {
   const isLoading = isTransactionPending || status === "pending"
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
+    <Card.Root w={"full"}>
+      <Card.Header>
         <Heading size="lg">{t("B3TR Token Allowance")}</Heading>
         <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <form onSubmit={handleSubmit}>
-          <VStack spacing={4} alignItems={"start"}>
-            <HStack spacing={4} alignItems={"start"}>
-              <FormControl>
-                <FormLabel>
+          <VStack gap={4} alignItems={"start"}>
+            <HStack gap={4} alignItems={"start"}>
+              <Field.Root>
+                <Field.Label>
                   <strong>{t("Balance")}</strong>
-                </FormLabel>
-                <InputGroup>
+                </Field.Label>
+                <InputGroup
+                  endAddon={
+                    <Text
+                      pointerEvents="none"
+                      pl={1}
+                      pr={1}
+                      ml={0}
+                      backgroundColor={"transparent"}
+                      borderColor={"inherit"}
+                      borderLeft={"none"}>
+                      {t("B3TR")}
+                    </Text>
+                  }>
                   <Input value={b3trBalance?.scaled} disabled={true} />
-                  <InputRightAddon
-                    pointerEvents="none"
-                    pl={1}
-                    pr={1}
-                    ml={0}
-                    backgroundColor={"transparent"}
-                    borderColor={"inherit"}
-                    borderLeft={"none"}>
-                    {t("B3TR")}
-                  </InputRightAddon>
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             </HStack>
 
-            <HStack spacing={4} alignItems={"start"} w={"full"}>
-              <FormControl isRequired>
-                <FormLabel>
+            <HStack gap={4} alignItems={"start"} w={"full"}>
+              <Field.Root required>
+                <Field.Label>
                   <strong>{t("Spender")}</strong>
-                </FormLabel>
+                </Field.Label>
                 <InputGroup>
                   <WalletAddressInput
                     onAddressResolved={address => setSpender(address ?? "")}
                     placeholder={t("Who should be able to use the tokens?")}
                   />
                 </InputGroup>
-                <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{t("Address not valid")}</Field.ErrorText>
+              </Field.Root>
             </HStack>
 
-            <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
-              <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
-                <FormLabel>
+            <HStack gap={4} w={"full"} justify={"space-between"} align={"start"}>
+              <Field.Root required invalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
+                <Field.Label>
                   <strong>{t("Amount to allow")}</strong>
-                </FormLabel>
-                <NumberInput
+                </Field.Label>
+                <NumberInput.Root
                   min={0}
                   value={allowedAmountLoading ? t("Loading...") : amount}
-                  isDisabled={isLoading}
-                  onChange={value => {
-                    setAmount(parseInt(value))
+                  disabled={isLoading}
+                  onValueChange={e => {
+                    setAmount(e.value)
                     setAmountFieldIsDirty(true)
                   }}>
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-                <FormErrorMessage>{t("Invalid amount")}</FormErrorMessage>
-              </FormControl>
+                  <NumberInput.Input />
+                  <NumberInput.Control />
+                </NumberInput.Root>
+                <Field.ErrorText>{t("Invalid amount")}</Field.ErrorText>
+              </Field.Root>
 
-              <FormControl w={"full"}>
-                <FormLabel>
+              <Field.Root w={"full"}>
+                <Field.Label>
                   <strong>{t("Current allowance")}</strong>
-                </FormLabel>
-                <InputGroup>
+                </Field.Label>
+                <InputGroup
+                  endAddon={
+                    <Text
+                      pointerEvents="none"
+                      pl={1}
+                      pr={1}
+                      ml={0}
+                      backgroundColor={"transparent"}
+                      borderColor={"inherit"}
+                      borderLeft={"none"}>
+                      {t("B3TR")}
+                    </Text>
+                  }>
                   <Input
                     placeholder={t("Amount of tokens the inserted address is already allowed to spend")}
                     value={allowedAmountScaled}
                     disabled={true}
                   />
-                  <InputRightAddon
-                    pointerEvents="none"
-                    pl={1}
-                    pr={1}
-                    ml={0}
-                    backgroundColor={"transparent"}
-                    borderColor={"inherit"}
-                    borderLeft={"none"}>
-                    {t("B3TR")}
-                  </InputRightAddon>
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
             </HStack>
-            <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+            <Button disabled={!isFormValid} colorScheme="blue" type="submit" loading={isLoading}>
               {t("Allow")}
             </Button>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

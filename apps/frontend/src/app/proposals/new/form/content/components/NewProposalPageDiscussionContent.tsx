@@ -1,20 +1,6 @@
 import "@uiw/react-md-editor/markdown-editor.css"
 
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  HStack,
-  Heading,
-  Stack,
-  Text,
-  VStack,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { Box, Button, Card, Field, HStack, Heading, Stack, Text, VStack, useMediaQuery } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store"
@@ -56,7 +42,7 @@ export const NewProposalPageDiscussionContent = () => {
     },
   })
 
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
 
   const { errors } = formState
 
@@ -96,10 +82,10 @@ export const NewProposalPageDiscussionContent = () => {
   }, [setData, setValue, account?.address, title, shortDescription, actions])
 
   return (
-    <Card w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
-      <CardBody py={8}>
-        <VStack spacing={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
-          <VStack spacing={[4, 6]} align="flex-start">
+    <Card.Root w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
+      <Card.Body py={8}>
+        <VStack gap={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
+          <VStack gap={[4, 6]} align="flex-start">
             <Heading size={["md", "lg"]}>{t("Share more about your idea")}</Heading>
             <Text fontSize={["sm", "md"]} color="gray.500">
               {t(
@@ -107,7 +93,7 @@ export const NewProposalPageDiscussionContent = () => {
               )}
             </Text>
           </VStack>
-          <FormControl isInvalid={!!errors.markdownDescription}>
+          <Field.Root invalid={!!errors.markdownDescription}>
             <Box w="full" h={500}>
               <Controller
                 name="markdownDescription"
@@ -144,23 +130,21 @@ export const NewProposalPageDiscussionContent = () => {
               w="full"
               justify={"space-between"}
               align={["flex-start", "flex-start", "center"]}
-              spacing={2}>
+              gap={2}>
               {errors.markdownDescription ? (
-                <FormErrorMessage data-testid="form-error-message">
-                  {errors.markdownDescription.message}
-                </FormErrorMessage>
+                <Field.ErrorText data-testid="form-error-message">{errors.markdownDescription.message}</Field.ErrorText>
               ) : (
-                <FormHelperText color="gray.500" fontSize="sm">
+                <Field.HelperText color="gray.500" fontSize="sm">
                   {t("Make sure to replace all the placeholders with your own content.")}
-                </FormHelperText>
+                </Field.HelperText>
               )}
               <Button data-testid="reset-markdown" variant={"primaryLink"} onClick={resetMarkdownToDefault}>
                 {t("Reset to default")}
               </Button>
             </Stack>
-          </FormControl>
+          </Field.Root>
 
-          <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+          <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack} disabled={isMetadataUploading}>
               {t("Go back")}
             </Button>
@@ -169,12 +153,12 @@ export const NewProposalPageDiscussionContent = () => {
               variant="primaryAction"
               type="submit"
               disabled={isMetadataUploading}
-              isLoading={isMetadataUploading}>
+              loading={isMetadataUploading}>
               {t("Continue")}
             </Button>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

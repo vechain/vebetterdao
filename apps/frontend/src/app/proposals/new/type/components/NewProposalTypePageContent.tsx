@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
+import { Button, Card, Grid, GridItem, HStack, Heading, Stack, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect, useState } from "react"
 import { CheckableCard, CheckableCardProps } from "@/components"
@@ -72,11 +72,11 @@ export const NewProposalTypePageContent = () => {
       w="full"
       data-testid="new-proposal-type-page">
       <GridItem colSpan={2}>
-        <Card variant="baseWithBorder">
-          <CardBody py={8}>
-            <VStack spacing={8} align="flex-start">
+        <Card.Root variant="baseWithBorder">
+          <Card.Body py={8}>
+            <VStack gap={8} align="flex-start">
               <Heading size={["md", "lg"]}>{t("Select proposal type")}</Heading>
-              <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
+              <Stack direction={["column", "column", "row"]} w="full" gap={4}>
                 {Steps(t).map(step => (
                   <CheckableCard
                     {...step}
@@ -89,7 +89,7 @@ export const NewProposalTypePageContent = () => {
                   />
                 ))}
               </Stack>
-              <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+              <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
                 <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                   {t("Go back")}
                 </Button>
@@ -98,8 +98,8 @@ export const NewProposalTypePageContent = () => {
                 </Button>
               </HStack>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </GridItem>
       <GridItem colSpan={1}></GridItem>
     </Grid>

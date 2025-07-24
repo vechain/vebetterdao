@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, Separator, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import {
   useCurrentAppAdmin,
   useCurrentAppCreators,
@@ -215,18 +215,18 @@ export const AdminAppPageContent = () => {
   }
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
           <Heading fontSize={"36px"} fontWeight={700}>
             {t("{{app}} settings", { app: appMetadata?.name })}
           </Heading>
           <EditAppCreatorNFT form={form} />
-          <Divider />
+          <Separator />
           <EditAppModerators form={form} />
-          <Divider />
+          <Separator />
           <EditAppSignalers form={form} />
-          <Divider />
+          <Separator />
           <EditAppAddresses
             form={form}
             editAdminAddress={editAdminAddress}
@@ -239,7 +239,7 @@ export const AdminAppPageContent = () => {
             <Button variant="primaryGhost" onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button variant="primaryAction" type="submit" isDisabled={disableSaveButton}>
+            <Button variant="primaryAction" type="submit" disabled={disableSaveButton}>
               {t("Save all changes")}
             </Button>
           </HStack>
@@ -251,7 +251,7 @@ export const AdminAppPageContent = () => {
           isAdminAddressChanged={isAdminAddressChanged}
           isTeamWalletAddressChanged={isTeamWalletAddressChanged}
         />
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -1,5 +1,5 @@
 "use client"
-import { useColorModeValue } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import Image from "next/image"
 import React from "react"
 

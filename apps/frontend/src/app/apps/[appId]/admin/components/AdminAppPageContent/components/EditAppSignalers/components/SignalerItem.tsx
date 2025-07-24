@@ -1,13 +1,12 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useBreakpoints } from "@/hooks"
 import {
   Button,
   Heading,
   HStack,
   IconButton,
-  Modal,
-  ModalBody,
-  ModalOverlay,
+  Dialog,
   Show,
   Text,
   useBreakpointValue,
@@ -26,16 +25,17 @@ type Props = {
 
 export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
+  const { isMobile } = useBreakpoints()
   const { data: vnsData } = useVechainDomain(signaler)
   const domain = vnsData?.domain
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
-        <ModalOverlay />
+      <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
+        <Dialog.Backdrop />
         <CustomModalContent>
-          <ModalBody p={"40px"}>
+          <Dialog.Body p={"40px"}>
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
               <Heading fontSize={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
@@ -58,11 +58,11 @@ export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
                 </Button>
               </VStack>
             </VStack>
-          </ModalBody>
+          </Dialog.Body>
         </CustomModalContent>
-      </Modal>
+      </Dialog.Root>
       <HStack gap={6} justify={"space-between"}>
-        <Show above={"sm"}>
+        <Show when={!isMobile}>
           <HStack>
             <AddressIcon address={signaler} h="48px" w="48px" rounded={"full"} />
             <VStack align="stretch" gap={0}>
@@ -78,7 +78,7 @@ export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
             {t("Remove")}
           </Button>
         </Show>
-        <Show below={"sm"}>
+        <Show when={isMobile}>
           <HStack>
             <AddressIcon address={signaler} h="36px" w="36px" rounded={"full"} />
             <VStack align="stretch" gap={0}>
@@ -90,12 +90,9 @@ export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
               </Text>
             </VStack>
           </HStack>
-          <IconButton
-            variant="dangerGhost"
-            aria-label="Remove"
-            icon={<UilTrash size={"14px"} color="#D23F63" />}
-            onClick={onOpen}
-          />
+          <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+            <UilTrash size={"14px"} color="#D23F63" />
+          </IconButton>
         </Show>
       </HStack>
     </>

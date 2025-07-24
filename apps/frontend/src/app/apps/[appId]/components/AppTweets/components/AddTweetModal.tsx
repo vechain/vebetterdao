@@ -1,16 +1,5 @@
 import { useTweet } from "@/api/twitter/hooks/useTweets"
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  VStack,
-  useSteps,
-} from "@chakra-ui/react"
+import { Button, Field, Heading, Input, InputGroup, VStack, useSteps } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -44,8 +33,13 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
   const form = useForm<TweetForm>()
   const { errors } = form.formState
   const { appMetadata } = useCurrentAppMetadata()
-  const { activeStep, setActiveStep, goToPrevious, goToNext } = useSteps({
-    index: 0,
+  const {
+    value: activeStep,
+    setStep: setActiveStep,
+    goToPrevStep: goToPrevious,
+    goToNextStep: goToNext,
+  } = useSteps({
+    defaultStep: 0,
     count: Object.keys(AddTweetModalStep).length + 1, // +1 for the upload metadata status
   })
 
@@ -86,12 +80,9 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
 
   const SubmitTwitterContent = (
     <VStack align="stretch" gap={6} pt={4} as="form" onSubmit={form.handleSubmit(onSubmit)}>
-      <FormControl isInvalid={!!errors.tweetUrl}>
-        <FormLabel>{t("X post URL")}</FormLabel>
-        <InputGroup>
-          <InputLeftElement>
-            <RiTwitterXFill />
-          </InputLeftElement>
+      <Field.Root invalid={!!errors.tweetUrl}>
+        <Field.Label>{t("X post URL")}</Field.Label>
+        <InputGroup startAddon={<RiTwitterXFill />}>
           <Input
             rounded={"full"}
             {...form.register("tweetUrl", {
@@ -104,8 +95,8 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
             })}
           />
         </InputGroup>
-        <FormErrorMessage>{errors.tweetUrl?.message}</FormErrorMessage>
-      </FormControl>
+        <Field.ErrorText>{errors.tweetUrl?.message}</Field.ErrorText>
+      </Field.Root>
       {tweetId && !errors.tweetUrl && !tweetError && (
         <VStack align="stretch">
           <Heading fontSize="20px" fontWeight={700}>

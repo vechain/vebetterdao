@@ -1,4 +1,4 @@
-import { Button, FormControl, InputGroup, InputRightElement, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Field, InputGroup, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../AdminAppPageContent"
@@ -51,16 +51,11 @@ export const EditAppAddresses = ({
           {t("Treasury address")}
         </Text>
         <Text fontSize="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
-        <FormControl>
-          <InputGroup>
-            <WalletAddressInput
-              onAddressResolved={address => form.setValue("teamWalletAddress", address ?? "")}
-              isDisabled={!editTeamWalletAddress}
-              isRequired={true}
-              defaultValue={app?.teamWalletAddress}
-            />
-            {!editTeamWalletAddress && (
-              <InputRightElement width="auto">
+        <Field.Root>
+          <InputGroup
+            w="auto"
+            endAddon={
+              editTeamWalletAddress ? null : (
                 <Button
                   variant="primaryGhost"
                   bg="#FFFFFF"
@@ -73,10 +68,16 @@ export const EditAppAddresses = ({
                   fontWeight={500}>
                   {t("Edit")}
                 </Button>
-              </InputRightElement>
-            )}
+              )
+            }>
+            <WalletAddressInput
+              onAddressResolved={address => form.setValue("teamWalletAddress", address ?? "")}
+              disabled={!editTeamWalletAddress}
+              required
+              defaultValue={app?.teamWalletAddress}
+            />
           </InputGroup>
-        </FormControl>
+        </Field.Root>
       </VStack>
       <VStack align="stretch">
         <Text fontSize="md" fontWeight={"800"}>
@@ -87,16 +88,11 @@ export const EditAppAddresses = ({
             "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
           )}
         </Text>
-        <FormControl>
-          <InputGroup>
-            <WalletAddressInput
-              onAddressResolved={address => form.setValue("adminAddress", address ?? "")}
-              isDisabled={!editAdminAddress}
-              isRequired={true}
-              defaultValue={admin}
-            />
-            {!editAdminAddress && (
-              <InputRightElement width="auto">
+        <Field.Root>
+          <InputGroup
+            w="auto"
+            endAddon={
+              editAdminAddress ? null : (
                 <Button
                   variant="primaryGhost"
                   bg="#FFFFFF"
@@ -109,10 +105,16 @@ export const EditAppAddresses = ({
                   fontWeight={500}>
                   {t("Edit")}
                 </Button>
-              </InputRightElement>
-            )}
+              )
+            }>
+            <WalletAddressInput
+              onAddressResolved={address => form.setValue("adminAddress", address ?? "")}
+              disabled={!editAdminAddress}
+              required
+              defaultValue={admin}
+            />
           </InputGroup>
-        </FormControl>
+        </Field.Root>
       </VStack>
       <ModalEditTeamWalletAddress
         handleEditTeamWalletAddress={handleEditTeamWalletAddress}

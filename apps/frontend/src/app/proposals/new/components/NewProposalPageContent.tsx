@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { StepCard, StepCardProps } from "@/components/StepCard"
 import { useTranslation } from "react-i18next"
@@ -68,10 +68,10 @@ export const NewProposalPageContent = () => {
       w="full"
       data-testid="new-proposal-page">
       <GridItem colSpan={2}>
-        <Card variant="baseWithBorder">
-          <CardBody>
-            <VStack spacing={[6, 8]} align="flex-start">
-              <VStack spacing={[4, 6]} align="flex-start">
+        <Card.Root variant="baseWithBorder">
+          <Card.Body>
+            <VStack gap={[6, 8]} align="flex-start">
+              <VStack gap={[4, 6]} align="flex-start">
                 <Heading size={["md", "lg"]}>{t("Create a new proposal")}</Heading>
                 <Text fontSize={["sm", "md"]}>
                   {t(
@@ -79,7 +79,7 @@ export const NewProposalPageContent = () => {
                   )}
                 </Text>
               </VStack>
-              <Stack direction={["column"]} w="full" spacing={4}>
+              <Stack direction={["column"]} w="full" gap={4}>
                 {Steps(t).map(step => (
                   <StepCard
                     {...step}
@@ -92,8 +92,8 @@ export const NewProposalPageContent = () => {
                   />
                 ))}
               </Stack>
-              <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} spacing={8}>
-                <HStack justify={"flex-end"} spacing={4} flex={1}>
+              <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} gap={8}>
+                <HStack justify={"flex-end"} gap={4} flex={1}>
                   <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                     {t("Go back")}
                   </Button>
@@ -103,8 +103,8 @@ export const NewProposalPageContent = () => {
                 </HStack>
               </Stack>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </GridItem>
       <GridItem colSpan={1}></GridItem>
     </Grid>

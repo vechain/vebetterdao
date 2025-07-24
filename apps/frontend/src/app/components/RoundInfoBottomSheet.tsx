@@ -24,7 +24,7 @@ import { useMemo } from "react"
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
 
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
@@ -77,12 +77,12 @@ export const RoundInfoBottomSheet = () => {
           cursor="pointer"
           zIndex={3}>
           <Box>
-            <Skeleton isLoaded={!isCardLoading}>
+            <Skeleton loading={isCardLoading}>
               <Heading fontSize={"20px"} fontWeight={400}>
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
-            <Skeleton isLoaded={!isCardLoading}>
+            <Skeleton loading={isCardLoading}>
               <Text fontSize={"14px"} fontWeight={400}>
                 {t("{{from}} to {{to}}", {
                   from: allocationRound.voteStartTimestamp?.format("MMM D"),
@@ -107,15 +107,15 @@ export const RoundInfoBottomSheet = () => {
         onClose={onClose}
         ariaTitle={t("Round #{{round}}", { round: allocationRound.roundId })}
         ariaDescription={t("Round #{{round}}", { round: allocationRound.roundId })}>
-        <VStack spacing={6} align="stretch" mx="auto">
-          <HStack spacing={4} justify="space-between" w="full">
+        <VStack gap={6} align="stretch" mx="auto">
+          <HStack gap={4} justify="space-between" w="full">
             <Box>
-              <Skeleton isLoaded={!roundLoading}>
+              <Skeleton loading={roundLoading}>
                 <Heading fontSize={"20px"} fontWeight={400} color="#252525">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
-              <Skeleton isLoaded={!isCardLoading}>
+              <Skeleton loading={isCardLoading}>
                 <Text fontSize={"14px"} fontWeight={400}>
                   {t("{{from}} to {{to}}", {
                     from: allocationRound.voteStartTimestamp?.format("MMM D"),
@@ -133,8 +133,8 @@ export const RoundInfoBottomSheet = () => {
               />
             )}
           </HStack>
-          <VStack spacing={4} w="full" align="flex-start">
-            <VStack spacing={2} w="full" align="flex-start">
+          <VStack gap={4} w="full" align="flex-start">
+            <VStack gap={2} w="full" align="flex-start">
               <Heading fontSize="18px" fontWeight={700}>
                 {t("Allocations voting")}
               </Heading>
@@ -149,9 +149,9 @@ export const RoundInfoBottomSheet = () => {
               bg="info-bg"
               p="12px"
               borderRadius={"md"}
-              spacing={4}>
+              gap={4}>
               <HStack w="full" justify="space-between">
-                <VStack spacing={2} align={"flex-start"}>
+                <VStack gap={2} align={"flex-start"}>
                   <AllocationStateBadge
                     roundId={allocationRound.roundId ?? ""}
                     data-testid={"round-#" + allocationRound.roundId + "-status"}
@@ -162,10 +162,10 @@ export const RoundInfoBottomSheet = () => {
                     {t("#{{round}} allocation round", { round: allocationRound.roundId })}
                   </Text>
                 </VStack>
-                <VStack align={"flex-end"} spacing={0}>
-                  <HStack spacing={1} align="center">
+                <VStack align={"flex-end"} gap={0}>
+                  <HStack gap={1} align="center">
                     <B3TRIcon boxSize="16px" colorVariant="dark" />
-                    <Skeleton isLoaded={!amountsLoading}>
+                    <Skeleton loading={amountsLoading}>
                       <Heading fontSize="16x" fontWeight={700}>
                         {getCompactFormatter(2).format(totalAmount)}
                       </Heading>
@@ -196,8 +196,8 @@ export const RoundInfoBottomSheet = () => {
               </HStack>
             </VStack>
           </VStack>
-          <VStack spacing={4} w="full" align="flex-start">
-            <VStack spacing={2} w="full" align="flex-start">
+          <VStack gap={4} w="full" align="flex-start">
+            <VStack gap={2} w="full" align="flex-start">
               <Heading fontSize="18px" fontWeight={700}>
                 {t("Proposals in this round or looking for support")}
               </Heading>
@@ -207,7 +207,7 @@ export const RoundInfoBottomSheet = () => {
             </VStack>
 
             {!!sortedProposals.length ? (
-              <VStack spacing={4} w="full">
+              <VStack gap={4} w="full">
                 {sortedProposals.map(proposal => (
                   <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
                 ))}

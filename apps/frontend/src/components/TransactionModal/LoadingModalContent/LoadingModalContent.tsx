@@ -35,7 +35,7 @@ export const LoadingModalContent = ({
       <Heading data-testid={"tx-modal-title"} size="md">
         {title}
       </Heading>
-      {description && <Text size="sm">{description}</Text>}
+      {description && <Text textStyle="sm">{description}</Text>}
       {txId && (
         <Link href={getExplorerTxLink(txId)} isExternal color="gray.500" fontSize={"14px"} textDecoration={"underline"}>
           {t("View it on the explorer")}

@@ -5,12 +5,10 @@ import {
   Box,
   Button,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   HStack,
   Heading,
   Image,
-  Radio,
   RadioGroup,
   Stack,
   Text,
@@ -103,8 +101,8 @@ export const ProposalVote = ({ proposalId }: Props) => {
   }
 
   return (
-    <Card variant={"baseWithBorder"} w="full">
-      <CardBody>
+    <Card.Root variant={"baseWithBorder"} w="full">
+      <Card.Body>
         <Stack flexDir={["column", "column", "row"]} gap={12} as="form" onSubmit={handleCastVote}>
           <VStack alignItems={"stretch"} flex={1} gap={4}>
             <Text fontSize="14px" color="#6A6A6A" wordBreak={"break-word"}>
@@ -116,10 +114,10 @@ export const ProposalVote = ({ proposalId }: Props) => {
               <b>{t("voting power")}</b>
               {t(" will be determined by the amount of VOT3 you had at the time of the snapshot.")}
             </Text>
-            <Card rounded="16px" bg="dark-contrast-on-card-bg" p={"24px"}>
+            <Card.Root rounded="16px" bg="dark-contrast-on-card-bg" p={"24px"}>
               <VStack alignItems={"stretch"} gap={4}>
                 <Stack
-                  spacing={[0, 0, 2]}
+                  gap={[0, 0, 2]}
                   alignItems={"baseline"}
                   direction={["column", "column", "row"]}
                   align={["flex-start", "flex-start", "center"]}>
@@ -134,16 +132,16 @@ export const ProposalVote = ({ proposalId }: Props) => {
 
                 {!isQuadraticVotingDisabled && ( // Show "equal to" only when quadratic voting is disabled
                   <HStack w="full" justify="center">
-                    <Divider flex={0.8} />
+                    <Separator flex={0.8} />
                     <Text fontSize={"12px"}>{t("equal to")}</Text>
-                    <Divider flex={0.8} />
+                    <Separator flex={0.8} />
                   </HStack>
                 )}
 
                 {!isQuadraticVotingDisabled && ( // Conditionally render voting power and related information when quadratic voting is enabled
                   <>
                     <Stack
-                      spacing={[0, 0, 2]}
+                      gap={[0, 0, 2]}
                       alignItems={"baseline"}
                       direction={["column", "column", "row"]}
                       align={["flex-start", "flex-start", "center"]}>
@@ -184,18 +182,18 @@ export const ProposalVote = ({ proposalId }: Props) => {
                   </>
                 )}
               </VStack>
-            </Card>
+            </Card.Root>
           </VStack>
           <VStack alignItems={"stretch"} flex={1} gap={6}>
             <Text fontSize={"20px"} fontWeight={700}>
               {t("Select your vote")}
             </Text>
-            <RadioGroup onChange={setSelectedVote} value={selectedVote}>
+            <RadioGroup.Root onValueChange={e => setSelectedVote(e.value)} value={selectedVote}>
               <VStack alignItems={"stretch"}>
                 {votes.map(vote => {
                   const selected = vote.id === selectedVote
                   return (
-                    <Card
+                    <Card.Root
                       key={vote.id}
                       onClick={handleSetSelectedVote(vote.id)}
                       rounded={"16px"}
@@ -210,13 +208,16 @@ export const ProposalVote = ({ proposalId }: Props) => {
                             {vote.title}
                           </Text>
                         </HStack>
-                        <Radio value={vote.id}></Radio>
+                        <RadioGroup.Item value={vote.id}>
+                          <RadioGroup.ItemHiddenInput />
+                          <RadioGroup.ItemIndicator />
+                        </RadioGroup.Item>
                       </HStack>
-                    </Card>
+                    </Card.Root>
                   )
                 })}
               </VStack>
-            </RadioGroup>
+            </RadioGroup.Root>
             <Text fontSize={"20px"} fontWeight={700}>
               {t("Add comment")}
             </Text>
@@ -226,12 +227,12 @@ export const ProposalVote = ({ proposalId }: Props) => {
               type="submit"
               variant="primaryAction"
               w="full"
-              isDisabled={!selectedVote}>
+              disabled={!selectedVote}>
               {t("Cast your vote")}
             </Button>
           </VStack>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

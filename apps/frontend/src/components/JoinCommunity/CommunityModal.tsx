@@ -1,4 +1,4 @@
-import { Card, CardBody, Modal, ModalCloseButton, ModalOverlay, VStack, Text } from "@chakra-ui/react"
+import { Card, Dialog, VStack, Text } from "@chakra-ui/react"
 import { CustomModalContent } from "../CustomModalContent"
 import { useCallback } from "react"
 import { DiscordButton, FreshDeskButton, TelegramButton } from "../Footer"
@@ -32,8 +32,8 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
 
   const renderCardContent = useCallback(() => {
     return (
-      <CardBody>
-        <ModalCloseButton top={6} right={4} />
+      <Card.Body>
+        <Dialog.CloseTrigger top={6} right={4} />
         <Text fontSize={20} fontWeight={700}>
           {t("Join Our Community!")}
         </Text>
@@ -44,7 +44,7 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
           align={"flex-start"}
           maxW={"590px"}
           minW={{ base: "90vw", md: "350px" }}
-          spacing={2}
+          gap={2}
           mt={6}>
           <motion.div variants={itemVariants} style={{ width: "100%" }}>
             <DiscordButton isFullWidth />
@@ -56,16 +56,22 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
             <FreshDeskButton isFullWidth />
           </motion.div>
         </MotionVStack>
-      </CardBody>
+      </Card.Body>
     )
   }, [t])
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
-      <ModalOverlay />
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={details => {
+        if (!details.open) onClose()
+      }}
+      placement="center"
+      trapFocus={true}>
+      <Dialog.Backdrop />
       <CustomModalContent w={"auto"} maxW={"container.md"}>
-        <Card rounded={20}>{renderCardContent()}</Card>
+        <Card.Root rounded={20}>{renderCardContent()}</Card.Root>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

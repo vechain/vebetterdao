@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Heading, VStack, Card, CardBody, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
+import { Heading, VStack, Card, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCanUserVote, useGetDelegatee, useGetPendingDelegationsDelegateePOV, useUserScore } from "@/api"
 import { UilArrowUpRight, UilCheck } from "@iconscout/react-unicons"
@@ -59,8 +59,8 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   if (isScoreLoading || isPendingDelegationsLoading) return null
 
   return (
-    <Card borderRadius="xl" w="full" border={border}>
-      <CardBody borderRadius="xl">
+    <Card.Root borderRadius="xl" w="full" border={border}>
+      <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={10}>
           <VStack align="stretch" gap={6}>
             <VStack align="stretch">
@@ -110,8 +110,8 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
           <DelegatorDelegations address={address} />
           <PendingDelegationDelegatorPOV address={address} />
         </VStack>
-      </CardBody>
+      </Card.Body>
       <DelegationModal modal={delegationModal} />
-    </Card>
+    </Card.Root>
   )
 }

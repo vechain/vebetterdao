@@ -58,7 +58,7 @@ export const AlphaTestnetBanner = () => {
         zIndex: 1,
       }}>
       <MotionHStack
-        spacing={gap}
+        gap={gap}
         initial={{ x: 0 }}
         animate={{ x: -width - gap }}
         transition={{

@@ -1,9 +1,10 @@
 import React, { useCallback } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from "recharts"
-import { Box, Text, useToast } from "@chakra-ui/react"
+import { Box, Text } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { Trans, useTranslation } from "react-i18next"
 import { AppUsersData } from "@/api"
+import { toaster } from "@/components/ui/toaster"
 
 interface Props {
   userId: string
@@ -14,8 +15,6 @@ interface Props {
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"]
 
 export const UserAppsChart: React.FC<Props> = ({ userId, appActions, type }) => {
-  const toast = useToast()
-
   const { t } = useTranslation()
 
   const dataType = type == "actions" ? "totalActions" : "totalRewardAmount"
@@ -23,13 +22,12 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions, type }) => 
   const onAddressClick = useCallback(() => {
     navigator.clipboard.writeText(userId)
 
-    toast({
+    toaster.success({
       title: "Address copied to clipboard",
-      status: "success",
       duration: 2000,
-      isClosable: true,
+      closable: true,
     })
-  }, [toast, userId])
+  }, [userId])
 
   return (
     <Box w="full" mb={8}>

@@ -14,7 +14,7 @@ import {
   Image,
   Heading,
   Center,
-  Divider,
+  Separator,
   Show,
   Button,
   useDisclosure,
@@ -27,6 +27,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
+import { useBreakpoints } from "@/hooks"
 
 type Props = {
   isOpen: boolean
@@ -37,6 +38,7 @@ type Props = {
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
 
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
@@ -73,7 +75,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
     resetSelectedEndorser()
   }
   const {
-    isOpen: isUnendorsementModalOpen,
+    open: isUnendorsementModalOpen,
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
   } = useDisclosure()
@@ -88,9 +90,10 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
       isOpen={isOpen}
       onClose={onClose}
       modalProps={{
-        size: "6xl",
+        size: "full",
+        // size: "6xl",
       }}>
-      <VStack spacing={6} align="flex-start" w="full">
+      <VStack gap={6} align="flex-start" w="full">
         <HStack w="full" justify="space-between">
           <Heading fontSize={"24px"}>{t("Endorsement history")}</Heading>
           <Flex>
@@ -101,8 +104,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
           </Flex>
         </HStack>
 
-        <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} spacing={5}>
-          <VStack flex={1.5} h="full" maxH={["auto", "auto", "50vh"]} minH={["auto", "auto", "50vh"]} spacing={4}>
+        <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} gap={5}>
+          <VStack flex={1.5} h="full" maxH={["auto", "auto", "50vh"]} minH={["auto", "auto", "50vh"]} gap={4}>
             <Stack
               direction={["column", "column", "row"]}
               w="full"
@@ -120,8 +123,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
 
-            <Show below="md">
-              <Divider w="full" />
+            <Show when={isMobile}>
+              <Separator w="full" />
             </Show>
 
             <VStack
@@ -130,7 +133,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
               justify={"space-between"}
               rounded={"16px"}
               p={[0, 0, 4]}
-              spacing={4}
+              gap={4}
               w={"full"}
               height={["auto", "auto", "40vh"]}
               overflowY="auto">
@@ -139,7 +142,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
               </Heading>
 
               {appEndorsers && appEndorsers.length > 0 ? (
-                <VStack flex={1} w="full" overflowY="auto" h="full" spacing={2}>
+                <VStack flex={1} w="full" overflowY="auto" h="full" gap={2}>
                   {isAppAdmin && isConfirmOpen && (
                     <VStack
                       border={"1px solid #EC9BAF"}
@@ -207,8 +210,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
             </VStack>
           </VStack>
 
-          <Show below="md">
-            <Divider w="full" />
+          <Show when={isMobile}>
+            <Separator w="full" />
           </Show>
 
           <VStack

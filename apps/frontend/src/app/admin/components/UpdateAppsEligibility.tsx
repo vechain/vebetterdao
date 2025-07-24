@@ -1,19 +1,7 @@
 import { useAppsEligibleInNextRound, useXApps } from "@/api"
 import { useSetVotingEligibility } from "@/hooks"
-import {
-  VStack,
-  FormControl,
-  FormLabel,
-  Heading,
-  Card,
-  CardHeader,
-  CardBody,
-  SimpleGrid,
-  Switch,
-  HStack,
-  Divider,
-} from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { VStack, Field, Heading, Card, SimpleGrid, Switch, HStack, Separator } from "@chakra-ui/react"
+import { useMemo } from "react"
 
 export const UpdateAppsEligibility = () => {
   const { data: eligibleAppsIds } = useAppsEligibleInNextRound()
@@ -31,18 +19,18 @@ export const UpdateAppsEligibility = () => {
   }, [eligibleAppsIds, x2EarnApps])
 
   return (
-    <Card>
-      <CardHeader>
+    <Card.Root>
+      <Card.Header>
         <Heading size="lg">{"Apps eligible in next round"}</Heading>
-      </CardHeader>
-      <CardBody>
-        <FormControl as={SimpleGrid} gap={3}>
+      </Card.Header>
+      <Card.Body>
+        <Field.Root as={SimpleGrid} gap={3}>
           {x2EarnAppsEligible?.map(app => (
             <AppEligibility key={app.id} id={app.id} name={app.name} isEligible={app.eligible ?? false} />
           ))}
-        </FormControl>
-      </CardBody>
-    </Card>
+        </Field.Root>
+      </Card.Body>
+    </Card.Root>
   )
 }
 
@@ -53,26 +41,27 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
     appName: name,
   })
 
-  const handleEligibilityChange = useCallback(
-    (event?: { preventDefault: () => void }) => {
-      if (event) event.preventDefault()
+  // const handleEligibilityChange = useCallback(
+  //   (event?: { preventDefault: () => void }) => {
+  //     if (event) event.preventDefault()
 
-      sendTransaction()
-    },
-    [sendTransaction],
-  )
+  //     sendTransaction()
+  //   },
+  //   [sendTransaction],
+  // )
 
   return (
     <VStack>
       <HStack w={"full"} justifyContent={"space-between"}>
-        <FormLabel>{name}</FormLabel>
-        <Switch
-          isChecked={isEligible}
-          onChange={event => handleEligibilityChange(event)}
-          disabled={isTransactionPending || status === "pending"}
-        />
+        <Field.Label>{name}</Field.Label>
+        <Switch.Root
+          checked={isEligible}
+          onCheckedChange={() => sendTransaction()}
+          disabled={isTransactionPending || status === "pending"}>
+          <Switch.Control />
+        </Switch.Root>
       </HStack>
-      <Divider />
+      <Separator />
     </VStack>
   )
 }

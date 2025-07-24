@@ -1,17 +1,5 @@
 import { CustomModalContent } from "@/components"
-import {
-  Button,
-  FormControl,
-  HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalOverlay,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -26,7 +14,7 @@ type Props = {
 }
 export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ creatorAddress: string }>()
   const { watch, setValue, handleSubmit, formState } = addressForm
 
@@ -52,11 +40,12 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={false}>
-        <ModalOverlay />
+      <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
+        <Dialog.Backdrop />
         <CustomModalContent>
-          <ModalCloseButton />
-          <ModalBody p={"40px"}>
+          <Dialog.CloseTrigger />
+
+          <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
               <UilUser size="54px" color="#004CFC" />
               <Heading fontSize="28px">{t("Add a new Creator NFT")}</Heading>
@@ -70,7 +59,7 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isRequired isInvalid={!isValid}>
+                <Field.Root required invalid={!isValid}>
                   <WalletAddressInput
                     onAddressResolved={address => setValue("creatorAddress", address ?? "")}
                     customValidation={({ address }) => {
@@ -80,11 +69,11 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
                         : ""
                     }}
                   />
-                </FormControl>
+                </Field.Root>
               </VStack>
               <VStack align="stretch">
                 <Button
-                  isDisabled={!isValid || !creatorAddress}
+                  disabled={!isValid || !creatorAddress}
                   variant="primaryAction"
                   type="submit"
                   onClick={handleSubmit(onSubmit)}>
@@ -95,15 +84,15 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
                 </Button>
               </VStack>
             </VStack>
-          </ModalBody>
+          </Dialog.Body>
         </CustomModalContent>
-      </Modal>
+      </Dialog.Root>
       <Button
         mt={4}
         onClick={onOpen}
         variant="primarySubtle"
         leftIcon={<UilPlus size="14px" />}
-        isDisabled={editAdminForm.getValues("creators").length >= 3}
+        disabled={editAdminForm.getValues("creators").length >= 3}
         alignSelf={"flex-start"}>
         {editAdminForm.getValues("creators").length >= 3 ? t("Max 3 creators") : t("Add a new Creator NFT")}
       </Button>

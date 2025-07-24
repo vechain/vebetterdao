@@ -49,17 +49,17 @@ export const ProposalsPageContent = () => {
 
   if (isLoading)
     return (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
+      <VStack w="full" gap={12} h="80vh" justify="center">
         <Spinner size={"lg"} />
       </VStack>
     )
 
   return (
-    <VStack w={"full"} spacing={4}>
+    <VStack w={"full"} gap={4}>
       <VStack w={"full"} alignContent={"flex-start"}>
-        <HStack spacing={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
+        <HStack gap={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
           <Box>
-            <HStack spacing={3} alignItems={"center"}>
+            <HStack gap={3} alignItems={"center"}>
               <Heading as="h1" size="xl">
                 {t("Proposals")}
               </Heading>
@@ -113,7 +113,7 @@ export const ProposalsPageContent = () => {
           )}
         </VStack>
         <Show above="sm">
-          <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
+          <VStack flex={2} alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
             {totalClaimableDeposits > 0 && (
               <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
             )}

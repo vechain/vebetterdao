@@ -36,15 +36,15 @@ export const AppVotedBox = ({ appVoted }: Props) => {
         bg: "hover-contrast-bg",
       }}
       p={{ base: 3, md: 4 }}>
-      <HStack spacing={2}>
-        <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
+      <HStack gap={2}>
+        <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
           <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
         </Skeleton>
         <Text fontSize={14} fontWeight={"600"}>
           {appVoted.appName}
         </Text>
       </HStack>
-      <VStack justifyContent={"center"} alignContent={"center"} spacing={0}>
+      <VStack justifyContent={"center"} alignContent={"center"} gap={0}>
         <HStack>
           <Image src="/assets/logos/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
           <Text fontSize={20} fontWeight={"700"}>

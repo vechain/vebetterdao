@@ -18,12 +18,12 @@ export const StartEmissionsButton = () => {
   if (parseInt(currentRoundId ?? "0") > 0) return null
 
   return (
-    <HStack spacing={12}>
+    <HStack gap={12}>
       <Button
-        isDisabled={parseInt(currentRoundId ?? "0") > 0}
+        disabled={parseInt(currentRoundId ?? "0") > 0}
         colorScheme="blue"
         onClick={handleStartEmissions}
-        isLoading={loading}
+        loading={loading}
         data-testid={"start-voting-round-button"}>
         {t("Start emissions")}
       </Button>

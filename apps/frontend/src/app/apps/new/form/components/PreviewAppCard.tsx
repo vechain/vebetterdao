@@ -1,5 +1,5 @@
 import { notFoundImage } from "@/constants"
-import { Box, Card, HStack, Image, VStack, Text, CardBody, Icon } from "@chakra-ui/react"
+import { Box, Card, HStack, Image, VStack, Text, Icon } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
@@ -21,7 +21,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
   }
 
   return (
-    <Card
+    <Card.Root
       variant={"base"}
       w={["70%", "60%"]}
       alignSelf={"center"}
@@ -43,7 +43,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
           left={5}
         />
       </Box>
-      <CardBody mt={5} px={[4, 6]}>
+      <Card.Body mt={5} px={[4, 6]}>
         <VStack w={"full"}>
           <HStack w={"full"} justifyContent={"space-between"} px={[1, 4]} pt={[1, 4]}>
             <Text fontWeight={"700"} fontSize={[10, 20]}>
@@ -87,7 +87,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             </VStack>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

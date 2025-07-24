@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Heading, Stack, Button } from "@chakra-ui/react"
+import { Card, Heading, Stack, Button } from "@chakra-ui/react"
 import { useAllocationsRound, useCurrentAllocationsRoundId, useMultipleXAppsTotalEarnings, useXApps } from "@/api"
 import { useMemo, useState } from "react"
 import { AppAmount } from "./components/AppAmount"
@@ -42,12 +42,12 @@ export const TotalAllocations = () => {
   }, [sortedTotalEarnings, displayLimit])
 
   return (
-    <Card flex={1} h="full" w="full" variant="baseWithBorder">
-      <CardHeader>
+    <Card.Root flex={1} h="full" w="full" variant="baseWithBorder">
+      <Card.Header>
         <Heading size="md">{t("Most voted apps")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <Stack spacing={5} w={"full"}>
+      </Card.Header>
+      <Card.Body>
+        <Stack gap={5} w={"full"}>
           {isTotalEarningsPerAppLoading
             ? activeApps
                 ?.slice(0, displayLimit)
@@ -67,7 +67,7 @@ export const TotalAllocations = () => {
             </Button>
           )}
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

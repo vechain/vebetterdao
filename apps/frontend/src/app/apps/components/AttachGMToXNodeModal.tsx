@@ -10,23 +10,17 @@ import { useAttachGMToXNode, useB3trDonated } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
   Box,
   Button,
   Flex,
   Heading,
-  Hide,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Dialog,
+  Show,
   Stack,
   Text,
   useBreakpointValue,
   VStack,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
@@ -43,6 +37,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { gmId } = useSelectedGmNft()
+  const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
 
   const { data: b3trDonated } = useB3trDonated(gmId)
 
@@ -94,14 +89,14 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   ]
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} size={"xl"}>
+      <Dialog.Backdrop />
       <CustomModalContent p={{ base: 3, md: 5 }}>
-        <ModalCloseButton />
-        <ModalHeader>
+        <Dialog.CloseTrigger />
+        <Dialog.Header>
           <Heading fontSize="lg">{t("Attaching Node to GM NFT")}</Heading>
-        </ModalHeader>
-        <ModalBody>
+        </Dialog.Header>
+        <Dialog.Body>
           <VStack align="stretch" gap={4}>
             <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
             <Stack align="stretch" direction={["column", "column", "row"]}>
@@ -124,39 +119,39 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
                       <Text fontSize="xl" fontWeight={700} color="#1E1E1E">
                         {step.title}
                       </Text>
-                      <Hide below="md">
+                      <Show when={isAboveMd}>
                         <Text fontSize="sm" color="#6A6A6A">
                           {step.description}
                         </Text>
-                      </Hide>
+                      </Show>
                     </VStack>
                   </Stack>
-                  <Hide above="md">
+                  <Show when={!isAboveMd}>
                     <Text fontSize="sm" color="#6A6A6A">
                       {step.description}
                     </Text>
-                  </Hide>
+                  </Show>
                 </VStack>
               ))}
             </Stack>
           </VStack>
-        </ModalBody>
-        <ModalFooter w="full">
+        </Dialog.Body>
+        <Dialog.Footer w="full">
           <VStack align="stretch" w="full">
-            <Alert status="info" borderRadius={["xl", "xl", "3xl"]}>
-              <AlertIcon w={5} h={5} />
+            <Alert.Root status="info" borderRadius={["xl", "xl", "3xl"]}>
+              <Alert.Indicator w={5} h={5} />
               <Box lineHeight={"1.20rem"} fontSize="sm">
-                <AlertDescription as="span">
+                <Alert.Description as="span">
                   {t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}
-                </AlertDescription>
+                </Alert.Description>
               </Box>
-            </Alert>
+            </Alert.Root>
             <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
               {t("Attach now!")}
             </Button>
           </VStack>
-        </ModalFooter>
+        </Dialog.Footer>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

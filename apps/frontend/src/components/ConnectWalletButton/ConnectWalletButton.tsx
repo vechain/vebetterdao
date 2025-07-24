@@ -1,5 +1,6 @@
 import { AnalyticsUtils } from "@/utils"
-import { ButtonProps, Fade, useMediaQuery, useColorModeValue, Box } from "@chakra-ui/react"
+import { ButtonProps, useMediaQuery, Box } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import { keyframes } from "@emotion/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { useEffect } from "react"
@@ -17,7 +18,7 @@ type Props = {
 
 export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {
   const { account, connection } = useWallet()
-  const [isDesktop] = useMediaQuery("(min-width: 1060px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
   const notLoggedIn = !account?.address
 
   const hoverBackground = useColorModeValue("#f8f8f8", "#2D2D2F")
@@ -49,49 +50,45 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
 
   if (notLoggedIn)
     return (
-      <Fade in={true}>
-        <WalletButton
-          buttonStyle={{
-            variant: "primaryAction",
-            size: "md",
-            borderRadius: "24px",
-            bg: buttonStyleProps?.bg ?? "#004CFC",
-            textColor: buttonStyleProps?.textColor ?? "white",
-            ...buttonStyleProps,
-          }}
-          connectionVariant={connectionVariant ?? "popover"}
-          data-testid="connect-wallet"
-        />
-      </Fade>
+      <WalletButton
+        buttonStyle={{
+          variant: "primaryAction",
+          size: "md",
+          borderRadius: "24px",
+          bg: buttonStyleProps?.bg ?? "#004CFC",
+          textColor: buttonStyleProps?.textColor ?? "white",
+          ...buttonStyleProps,
+        }}
+        connectionVariant={connectionVariant ?? "popover"}
+        data-testid="connect-wallet"
+      />
     )
 
   return (
-    <Fade in={true}>
-      <Box
-        background={`linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`}
-        border="2px solid transparent"
-        backgroundSize="300% 100%"
-        animation={`${rotateAnimation} 3s ease infinite`}
-        borderRadius={isDesktop ? "full" : "12px"}
-        padding="2px"
-        _hover={{
-          background: `linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`,
-          backgroundSize: "300% 100%",
+    <Box
+      background={`linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`}
+      border="2px solid transparent"
+      backgroundSize="300% 100%"
+      animation={`${rotateAnimation} 3s ease infinite`}
+      borderRadius={isDesktop ? "full" : "12px"}
+      padding="2px"
+      _hover={{
+        background: `linear-gradient(${hoverBackground}, ${hoverBackground}) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box`,
+        backgroundSize: "300% 100%",
+      }}
+      transition="all 0.3s ease">
+      <WalletButton
+        mobileVariant="icon"
+        desktopVariant="iconAndDomain"
+        buttonStyle={{
+          border: "none",
+          backgroundColor: "transparent",
+          color: textColor,
+          width: "100%",
+          height: "100%",
+          ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "10px" }),
         }}
-        transition="all 0.3s ease">
-        <WalletButton
-          mobileVariant="icon"
-          desktopVariant="iconAndDomain"
-          buttonStyle={{
-            border: "none",
-            backgroundColor: "transparent",
-            color: textColor,
-            width: "100%",
-            height: "100%",
-            ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "10px" }),
-          }}
-        />
-      </Box>
-    </Fade>
+      />
+    </Box>
   )
 }

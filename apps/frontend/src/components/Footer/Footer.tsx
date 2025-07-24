@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
 
   const desktopContent = (
     <VStack>
-      <HStack justifyContent={"space-between"} w="full" spacing={4} my={4}>
+      <HStack justifyContent={"space-between"} w="full" gap={4} my={4}>
         <Box my={14}>
           <BeBetterVeBetterIcon
             beBetterProps={{
@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             }}
           />
         </Box>
-        <VStack spacing={4} alignItems={"flex-end"}>
+        <VStack gap={4} alignItems={"flex-end"}>
           <DiscordButton />
           <TelegramButton />
           <FreshDeskButton />
@@ -50,7 +50,7 @@ export const Footer: React.FC = () => {
             {t("Version")} {packageJson.version}
           </Text>
         </VStack>
-        <HStack spacing={4}>
+        <HStack gap={4}>
           <Link href={PRIVACY_POLICY_LINK} isExternal>
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Privacy & Policy")}
@@ -69,7 +69,7 @@ export const Footer: React.FC = () => {
 
   const mobileContent = (
     <VStack>
-      <VStack spacing={4} my={4}>
+      <VStack gap={4} my={4}>
         <Box my={8}>
           <BeBetterVeBetterIcon
             beBetterProps={{
@@ -80,7 +80,7 @@ export const Footer: React.FC = () => {
             }}
           />
         </Box>
-        <VStack spacing={4} alignItems={"center"}>
+        <VStack gap={4} alignItems={"center"}>
           <DiscordButton />
           <TelegramButton />
           <FreshDeskButton />

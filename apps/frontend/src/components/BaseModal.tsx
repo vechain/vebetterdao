@@ -1,14 +1,4 @@
-import {
-  useMediaQuery,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalCloseButton,
-  ModalBody,
-  ModalProps,
-  ModalContentProps,
-  ModalBodyProps,
-} from "@chakra-ui/react"
+import { useMediaQuery, Dialog, Portal } from "@chakra-ui/react"
 import { BaseBottomSheet } from "./BaseBottomSheet"
 
 type Props = {
@@ -17,9 +7,9 @@ type Props = {
   children: React.ReactNode
   ariaTitle?: string
   ariaDescription?: string
-  modalProps?: Partial<ModalProps>
-  modalContentProps?: Partial<ModalContentProps>
-  modalBodyProps?: Partial<ModalBodyProps>
+  modalProps?: Partial<Dialog.RootProps>
+  modalContentProps?: Partial<Dialog.ContentProps>
+  modalBodyProps?: Partial<Dialog.BodyProps>
   showCloseButton?: boolean
   isCloseable?: boolean
 }
@@ -35,19 +25,34 @@ export const BaseModal = ({
   showCloseButton = false,
   isCloseable = true,
 }: Props) => {
-  const [isDesktop] = useMediaQuery("(min-width: 1060px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
 
   if (isDesktop)
     return (
-      <Modal variant="base" isOpen={isOpen} onClose={onClose} size="xl" isCentered trapFocus={false} {...modalProps}>
-        <ModalOverlay />
-        <ModalContent rounded={"2xl"} {...modalContentProps}>
-          {isCloseable && showCloseButton ? <ModalCloseButton /> : null}
-          <ModalBody p={10} rounded={"2xl"} {...modalBodyProps}>
-            {children}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      <Dialog.Root
+        variant="base"
+        open={isOpen}
+        onOpenChange={details => {
+          if (!details.open) {
+            onClose()
+          }
+        }}
+        size="xl"
+        placement="center"
+        trapFocus={false}
+        {...modalProps}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content rounded={"2xl"} {...modalContentProps}>
+              {isCloseable && showCloseButton ? <Dialog.CloseTrigger /> : null}
+              <Dialog.Body p={10} rounded={"2xl"} {...modalBodyProps}>
+                {children}
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     )
 
   return (
