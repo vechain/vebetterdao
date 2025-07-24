@@ -208,7 +208,7 @@ export const createGrantProposal = async (
   values: bigint[] = [],
   description: string,
   depositAmount: number,
-  milestones: any,
+  milestonesDetailsMetadataURI: string,
   contractToPassToMethods?: any[],
   roundId?: string,
 ) => {
@@ -218,9 +218,6 @@ export const createGrantProposal = async (
     roundId = await getRoundId(contractToPassToMethods)
   }
 
-  console.log("milestones", milestones)
-  console.log("milestonesDetailsMetadataURI", milestones.milestonesDetailsMetadataURI)
-  const milestonesDetailsMetadataURI = milestones.milestonesDetailsMetadataURI
   const tx = await governor
     .connect(proposer)
     .proposeGrant(targets, values, calldatas, description, roundId, depositAmount, milestonesDetailsMetadataURI, {
@@ -237,7 +234,7 @@ export const createMultiContractProposalGrant = async (
   targets: string[],
   description: string,
   depositAmount: any,
-  milestones: any,
+  milestonesDetailsMetadataURI: string,
   roundId?: string,
   contractToPassToMethods?: any[],
 ) => {
@@ -249,9 +246,18 @@ export const createMultiContractProposalGrant = async (
 
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(targets, values, calldatas, description, roundId.toString(), depositAmount, milestones, {
-      gasLimit: 10_000_000,
-    })
+    .proposeGrant(
+      targets,
+      values,
+      calldatas,
+      description,
+      roundId.toString(),
+      depositAmount,
+      milestonesDetailsMetadataURI,
+      {
+        gasLimit: 10_000_000,
+      },
+    )
   return tx
 }
 
@@ -264,7 +270,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
   functionsToCall: string[],
   args: any[][],
   depositAmount: any,
-  milestones?: any,
+  milestonesDetailsMetadataURI: string,
   contractToPassToMethods?: any[],
   roundId?: string,
 ) => {
@@ -304,7 +310,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
     targets,
     description,
     depositAmount,
-    milestones,
+    milestonesDetailsMetadataURI,
     roundId,
     contractToPassToMethods,
   )

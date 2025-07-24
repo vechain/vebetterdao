@@ -20,7 +20,7 @@ import {
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { ContractFactory } from "ethers"
+import { ContractFactory, keccak256 } from "ethers"
 import {
   createGrantProposal,
   createProposalWithMultipleFunctionsAndExecuteItGrant,
@@ -83,37 +83,29 @@ describe.only("Governance - Milestone Creation", function () {
   })
 
   //ok
-  describe.only("Milestone contract setup and creation", function () {
+  describe("Milestone contract setup and creation", function () {
     it("Should set the minimum milestone count", async function () {
       const minimumMilestoneCount = await grantsManager.getMinimumMilestoneCount()
       expect(minimumMilestoneCount).to.equal(2) // MINIMUM_MILESTONE_COUNT = 2
     })
 
-    it.only("Should not create the proposal if the number of milestones is less than the minimum milestone accepted", async function () {
+    it("Should not create the proposal if the number of milestones is less than the minimum milestone accepted", async function () {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
       const values = [ethers.parseEther("10000")]
-      const totalAmount = ethers.parseEther("10000")
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone: [], // Empty milestone array should fail
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...", // Add   the required field
-      }
 
       const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]])]
 
       expect(
         governor.connect(proposer).proposeGrant(
           [treasuryAddress], // Only Treasury targets for transfers
           [0], // transferb3tr is not payable
-          [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]])],
+          calldatas,
           description,
           roundId,
           0,
-          milestones.milestonesDetailsMetadataURI,
+          milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
         {
@@ -124,37 +116,22 @@ describe.only("Governance - Milestone Creation", function () {
     })
 
     it("Should not create the proposal if the number of milestones is not equal to the number of values", async function () {
-      const description = "Create milestones for my new 1M user DApp"
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
       const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
-      const totalAmount = values.reduce((a, b) => a + b, 0n)
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone: [
-          // Only one milestone for 2 registered values
-          {
-            amount: values[0],
-            status: 0, // Pending
-          },
-        ], // Empty milestone array should fail
-        descriptionHash: ethers.keccak256(ethers.toUtf8Bytes(description)),
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...", // Add the required field
-      }
 
       const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]])]
 
       expect(
         governor.connect(proposer).proposeGrant(
           [treasuryAddress], // Only Treasury targets for transfers
           [0], // transferb3tr is not payable
-          [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]])],
+          calldatas,
           description,
           roundId,
           0,
-          milestones.milestonesDetailsMetadataURI,
+          milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
         {
@@ -165,26 +142,11 @@ describe.only("Governance - Milestone Creation", function () {
     })
 
     it("Should emit MilestonesCreated event when proposal is created", async function () {
-      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
       const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
-      const totalAmount = values.reduce((a, b) => a + b, 0n)
-
-      const milestoneArray = values.map(amount => ({
-        amount: amount,
-        status: 0, // Pending
-      }))
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone: milestoneArray,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...", // project details metadata URI
-      }
 
       const roundId = await getRoundId(contractToPassToMethods)
-
       const calldatas = [
         treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
         treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[1]]),
@@ -193,48 +155,35 @@ describe.only("Governance - Milestone Creation", function () {
       expect(
         governor.connect(proposer).proposeGrant(
           [treasuryAddress], // Only Treasury for now
-          [0], // transferb3tr is not payable
+          [0n, 0n], // transferb3tr is not payable
           calldatas,
           description,
           roundId,
           0,
-          milestones,
+          milestonesDetailsMetadataURI,
         ),
       ).to.emit(grantsManager, "MilestonesCreated")
     })
 
-    it.only("Should create milestones on proposal creation", async function () {
-      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI
-      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")] // 2 milestones minimum set in the contract
+    it("Should create milestones on proposal creation", async function () {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
       const totalAmount = values.reduce((a, b) => a + b, 0n)
-
-      // Milestone array storing the amount and status of each of them
-      const milestone = values.map(amount => ({
-        amount: amount,
-        status: 0, // Pending
-      }))
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
 
       const calldatas = [
         treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
         treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[1]]),
       ]
+
       const tx = await createGrantProposal(
         proposer,
-        [treasuryAddress, treasuryAddress],
+        [treasuryAddress, treasuryAddress], // n time = lenght of the calldatas
         calldatas,
         [0n, 0n],
         description,
         0,
-        milestones,
+        milestonesDetailsMetadataURI,
         contractToPassToMethods,
       )
 
@@ -257,116 +206,44 @@ describe.only("Governance - Milestone Creation", function () {
       expect(storedMilestones.milestone[1].amount).to.equal(values[1])
       expect(storedMilestones.milestone[0].status).to.equal(0) // Pending
       expect(storedMilestones.milestone[1].status).to.equal(0) // Pending
-      expect(storedMilestones.milestonesDetailsMetadataURI).to.equal(milestones.milestonesDetailsMetadataURI)
+      expect(storedMilestones.milestonesDetailsMetadataURI).to.equal(milestonesDetailsMetadataURI)
     })
 
-    it("Cannot create the milestone if it is missing one of the required fields of the Milestone", async () => {
-      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI
+    it("Cannot create the milestone if the function executable is not transferB3TR", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
       const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
-      const totalAmount = values.reduce((a, b) => a + b, 0n)
-
-      const milestone = values.map(amount => ({
-        amount: amount,
-        status: 0, // Pending
-      }))
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: "0x0000000000000000000000000000000000000000", // passing an empty string should fail
-        milestone,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
 
       // get the roundId
       const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [treasury.interface.encodeFunctionData("transferVET", [grantsManagerAddress, values[0]])]
 
       expect(
         governor.connect(proposer).proposeGrant(
           [treasuryAddress], // Only Treasury for now
           [0], // Transfer total amount
-          [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, totalAmount])],
+          calldatas,
           description,
           roundId,
           0,
-          milestones,
+          milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
         {
           interface: GrantsManager__factory.createInterface(),
         },
-        "MilestoneRecipientZeroAddress",
-      )
-    })
-
-    it("Should create milestone with the correct total amount", async () => {
-      const description = "My new project"
-      const totalAmount = ethers.parseEther("2")
-
-      const milestone = [
-        {
-          amount: ethers.parseEther("1"),
-          status: 0, // Pending
-        },
-      ]
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
-
-      const roundId = await getRoundId(contractToPassToMethods)
-
-      expect(
-        governor.connect(proposer).proposeGrant(
-          [treasuryAddress], // Only Treasury for now
-          [0], // transferb3tr is not payable
-          [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, totalAmount])],
-          description,
-          roundId,
-          0,
-          milestones,
-        ),
-      ).to.be.revertedWithCustomError(
-        {
-          interface: GrantsManager__factory.createInterface(),
-        },
-        "MilestoneTotalAmountMismatch",
+        "InvalidFunctionSelector",
       )
     })
   })
 
-  describe("Milestone execution", function () {
+  describe.only("Milestone execution", function () {
     it("Should send the total amount of the proposal from the treasury to the grants manager", async () => {
-      const description = "My new project"
-      const totalAmount = ethers.parseEther("2")
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
 
-      const milestone = [
-        {
-          amount: ethers.parseEther("1"),
-          status: 0, // Pending
-        },
-        {
-          amount: ethers.parseEther("1"),
-          status: 0, // Pending
-        },
-      ]
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
-
-      await createProposalWithMultipleFunctionsAndExecuteItGrant(
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
         owner, // proposer
         owner, // voter
         [treasury, treasury], // targets ( 2 transfers )
@@ -374,83 +251,56 @@ describe.only("Governance - Milestone Creation", function () {
         description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
         ["transferB3TR", "transferB3TR"], // functionToCall
         [
-          [grantsManagerAddress, ethers.parseEther("1")],
-          [grantsManagerAddress, ethers.parseEther("1")],
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         "0", // deposit amount
-        milestones, // milestones
+        milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
 
-      expect(await b3tr.balanceOf(grantsManagerAddress)).to.equal(ethers.parseEther("2"))
+      const totalAmountFromProposal = await grantsManager.getTotalAmountForMilestones(proposalId)
+      expect(totalAmountFromProposal).to.equal(values.reduce((a, b) => a + b, 0n))
+
+      expect(await b3tr.balanceOf(grantsManagerAddress)).to.equal(totalAmountFromProposal)
     })
 
-    // test that the total amount is correct if above, the sum of the values is not equal to the total amount
-    it("Cannot create a milestone with state different than pending", async () => {
-      const description = "My new project"
-      const totalAmount = ethers.parseEther("2")
-      const milestone = [
-        {
-          amount: ethers.parseEther("1"),
-          status: 1, // Validated
-        },
-        {
-          amount: ethers.parseEther("1"),
-          status: 0, // Pending
-        },
-      ]
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
+    it("Should create a milestone in pending state", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
-      expect(
-        governor.connect(proposer).proposeGrant(
-          [treasuryAddress], // Only Treasury for now
-          [0, 0], // transferb3tr is not payable
-          [
-            treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
-            treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
-          ],
-          description,
-          1, // startRoundId
-          0, // depositAmount
-          milestones,
-        ),
-      ).to.be.revertedWithCustomError(
-        {
-          interface: GrantsManager__factory.createInterface(),
-        },
-        "MilestoneStateNotPending",
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+      ]
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      const tx = await governor.connect(proposer).proposeGrant(
+        [treasuryAddress, treasuryAddress], // Only Treasury for now
+        [0, 0], // transferb3tr is not payable
+        calldatas,
+        description,
+        roundId,
+        0, // depositAmount
+        milestonesDetailsMetadataURI,
       )
+
+      const receipt = await tx.wait()
+      const { proposalId } = await validateProposalEvents(
+        governor,
+        receipt,
+        Number(GRANT_PROPOSAL_TYPE),
+        proposer.address,
+        description,
+      )
+
+      const milestone = await grantsManager.getMilestone(proposalId, 0)
+      expect(milestone.status).to.equal(0)
     })
 
     it("Once the proposal is executed, the milestone can be validated by the admin or the grantsManager", async () => {
       const description = "My new project"
-      const totalAmount = ethers.parseEther("2")
-
-      const milestone = [
-        {
-          amount: ethers.parseEther("1"),
-          status: 0, // Pending
-        },
-        {
-          amount: ethers.parseEther("1"),
-          status: 0, // Pending
-        },
-      ]
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone,
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
       const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
         owner, // proposer
@@ -464,7 +314,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, ethers.parseEther("1")],
         ], // args of transferb3tr
         "0", // deposit amount
-        milestones, // milestones
+        milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
 
@@ -480,22 +330,10 @@ describe.only("Governance - Milestone Creation", function () {
 
     it("Should not be able to validate the milestone if the proposal is not executed or did not pass the deposit or voting threshold", async () => {
       const description = "My new project"
-      const totalAmount = ethers.parseEther("1")
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+
       // set to 1 milestone for simplicity
       await grantsManager.setMinimumMilestoneCount(1)
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone: [
-          {
-            amount: ethers.parseEther("1"),
-            status: 0, // Pending
-          },
-        ],
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
 
       const roundId = await getRoundId(contractToPassToMethods)
       const tx = await governor.connect(proposer).proposeGrant(
@@ -505,7 +343,7 @@ describe.only("Governance - Milestone Creation", function () {
         description,
         roundId,
         0,
-        milestones,
+        milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
 
@@ -529,23 +367,11 @@ describe.only("Governance - Milestone Creation", function () {
 
     it("Only owner or the grantsManager can approve the milestones", async () => {
       const description = "My new project"
-      const totalAmount = ethers.parseEther("1")
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
       // set to 1 milestone for simplicity
       await grantsManager.setMinimumMilestoneCount(1)
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposer.address,
-        milestone: [
-          {
-            amount: ethers.parseEther("1"),
-            status: 0, // Pending
-          },
-        ],
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
+
       const roundId = await getRoundId(contractToPassToMethods)
       const tx = await governor.connect(proposer).proposeGrant(
         [treasuryAddress], // Only Treasury for now
@@ -554,7 +380,7 @@ describe.only("Governance - Milestone Creation", function () {
         description,
         roundId,
         0,
-        milestones,
+        milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
 
@@ -574,30 +400,10 @@ describe.only("Governance - Milestone Creation", function () {
       )
     })
 
-    it.only("Milestone should be claimed by the proposal owner once the proposal is executed and the milestone is validated", async () => {
+    it("Milestone should be claimed by the proposal owner once the proposal is executed and the milestone is validated", async () => {
       const description = "My new project"
-      const totalAmount = ethers.parseEther("20000")
-      const proposerAddress = await proposer.getAddress()
       const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
-
-      // set to 1 milestone for simplicity
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposerAddress,
-        milestone: [
-          {
-            amount: values[0],
-            status: 0, // Pending
-          },
-          {
-            amount: values[1],
-            status: 0, // Pending
-          },
-        ],
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
       const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
         proposer, // proposer
@@ -611,7 +417,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr( should have a revert if the amount is not equal)
         "0", // deposit amount
-        milestones, // milestones
+        milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
 
@@ -676,29 +482,10 @@ describe.only("Governance - Milestone Creation", function () {
       expect(balanceAfterClaiming).to.equal(balanceBeforeClaiming + ethers.parseEther("20000"))
     })
 
-    it.only("Cannot claim twice the same milestone", async () => {
+    it("Cannot claim twice the same milestone", async () => {
       const description = "My new project"
-      const totalAmount = ethers.parseEther("20000")
-      const proposerAddress = await proposer.getAddress()
       const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
-
-      const milestones = {
-        id: 0, // proposalId = 0 at the beginning
-        totalAmount: totalAmount,
-        claimedAmount: 0n,
-        recipient: proposerAddress,
-        milestone: [
-          {
-            amount: values[0],
-            status: 0, // Pending
-          },
-          {
-            amount: values[1],
-            status: 0, // Pending
-          },
-        ],
-        milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-      }
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
       const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
         proposer, // proposer
@@ -712,7 +499,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr( should have a revert if the amount is not equal)
         "0", // deposit amount
-        milestones, // milestones
+        milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
 

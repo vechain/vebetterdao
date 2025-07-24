@@ -106,6 +106,7 @@ contract GrantsManager is
     $.treasury = ITreasury(_treasury);
     $.b3tr = IB3TR(_b3tr);
     $.minimumMilestoneCount = 2;
+    // Here we should set a max amount for grants ( make it per type ? appGrants? infraGrants? )
   }
 
   // ------------------ MODIFIERS ------------------ //
@@ -193,12 +194,16 @@ contract GrantsManager is
       if (recipient != address(this)) {
         revert InvalidTarget(recipient);
       }
+      if (amount == 0) {
+        revert InvalidAmount();
+      }
 
       totalAmount += amount;
 
       $.proposalMilestones[_milestoneId].milestone.push(Milestone({ amount: amount, status: MilestoneState.Pending }));
     }
 
+    // check the total amount is not depassing the amount max per proposal 
     m.id = _milestoneId;
     m.proposer = proposer;
     m.milestonesDetailsMetadataURI = milestonesDetailsMetadataURI;
