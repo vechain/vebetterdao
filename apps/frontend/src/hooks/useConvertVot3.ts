@@ -10,6 +10,10 @@ import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
 const config = getConfig()
 
+// Extra 5% to mitigate sporadic wrong estimation of gas
+// Check https://vechain-foundation.slack.com/archives/C060FHDHG2J/p1753095056679039?thread_ts=1753093780.802499&cid=C060FHDHG2J
+const GAS_PADDING = 0.05
+
 type useMintB3trProps = {
   amount?: string | number
   onSuccess?: () => void
@@ -51,5 +55,6 @@ export const useConvertVot3 = ({ amount, onSuccess, transactionModalCustomUI }: 
     refetchQueryKeys,
     onSuccess,
     transactionModalCustomUI,
+    gasPadding: GAS_PADDING,
   })
 }

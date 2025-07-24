@@ -902,6 +902,10 @@ export async function deployAll(config: ContractsConfig) {
           grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
           grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
           standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+          standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+          grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+          galaxyMember: await galaxyMember.getAddress(), //GalaxyMember contract
+          grantsManager: TEMP_ADMIN, //GrantsManager contract
         },
       ],
     ],
@@ -1087,6 +1091,10 @@ export async function deployAll(config: ContractsConfig) {
   const GOVERNANCE_ROLE = await treasury.GOVERNANCE_ROLE()
   await treasury.connect(deployer).grantRole(GOVERNANCE_ROLE, TEMP_ADMIN)
   console.log("Governance role granted to treasury contract admin")
+
+  // Grant GrantsManager admin role to GrantsManager contract
+  await governor.connect(deployer).setGrantsManager(await grantsManager.getAddress())
+  console.log("GrantsManager address set in B3TRGovernor contract")
 
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards

@@ -319,18 +319,18 @@ library GovernorProposalLogic {
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
-   * @param milestones The milestones of the proposal.
+   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
    * @return The proposal id.
    */
   function proposeGrant(
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas,
-    string memory description, // project details metadata URI cannot be changed or it will break the proposal id.
+    bytes[] memory calldatas, // encodefunction(transferb3tr(grants, value[i]))
+    string memory description, // metadata URI of the project
     uint256 startRoundId,
     uint256 depositAmount,
-    IGrantsManager.Milestones memory milestones
+    string memory milestonesDetailsMetadataURI// --> not the big struct anymore 
   ) external returns (uint256) {
     address proposer = msg.sender;
     uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
@@ -349,9 +349,11 @@ library GovernorProposalLogic {
     );
 
     grantsManager.createMilestones(
-      description, // IPNS URI ( cannot be changed or it will break the proposal id)
-      milestones,
-      proposalId
+      description,
+      milestonesDetailsMetadataURI,
+      proposalId,
+      proposer,
+      calldatas
     );
 
     return
@@ -680,17 +682,15 @@ library GovernorProposalLogic {
         revert GovernorInvalidStartRound(startRoundId);
       }
     }
-
     // check description restriction
-    if (!isValidDescriptionForProposer(proposer, description)) {
-      revert GovernorRestrictedProposer(proposer);
-    }
-
-    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
-      if (targets.length != calldatas.length) {
-        revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
+    if (proposalTypeValue == GovernorTypes.ProposalType.Standard) {
+      if (!isValidDescriptionForProposer(proposer, description)) {
+        revert GovernorRestrictedProposer(proposer);
       }
-    } else if (targets.length != values.length || targets.length != calldatas.length) {
+    }
+    // TODO : Add a check to see if it's a good IPFS hash for Grant proposals
+
+    if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);
     }
 
@@ -824,10 +824,6 @@ library GovernorProposalLogic {
    */
   function _cancel(GovernorStorageTypes.GovernorStorage storage self, uint256 proposalId) private returns (uint256) {
     self.proposals[proposalId].canceled = true;
-    // if (self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
-    //   IGrantsManager(self.grantsManager).rejectMilestone(proposalId);
-    // }
-
     emit ProposalCanceled(proposalId);
 
     return proposalId;
