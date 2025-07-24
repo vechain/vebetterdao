@@ -247,7 +247,7 @@ library GovernorVotesLogic {
       revert GovernorPersonhoodVerificationFailed(voter, explanation);
     }
 
-    uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
+    uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot); // aka voting power without quadratic voting
     uint256 power = Math.sqrt(weight) * 1e9;
     GovernorTypes.ProposalType proposalType = GovernorProposalLogic.proposalType(self, proposalId);
 

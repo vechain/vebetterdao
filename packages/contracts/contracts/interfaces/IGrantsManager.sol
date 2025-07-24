@@ -95,6 +95,17 @@ interface IGrantsManager {
   error InvalidTarget(address target);
 
   /**
+   * @notice Error thrown when a milestone amount is invalid
+   */
+  error InvalidAmount();
+
+  /**
+   * @notice Error thrown when a function selector is invalid
+   * @param selector The invalid selector
+   */
+  error InvalidFunctionSelector(bytes4 selector);
+
+  /**
    * @notice Error thrown when a milestone is already validated
    * @param proposalId The ID of the proposal
    * @param milestoneIndex The index of the milestone
@@ -213,14 +224,6 @@ interface IGrantsManager {
    * @param requiredFunds The required funds
    */
   error InsufficientFunds(uint256 availableFunds, uint256 requiredFunds);
-
-  /**
-   * @notice Error thrown when milestone total amount is not equal to the sum of the milestones amounts
-   * @param totalAmount The total amount of the proposal
-   * @param milestoneAmount The amount of the milestone
-   */
-  error MilestoneTotalAmountMismatch(uint256 totalAmount, uint256 milestoneAmount);
-
 
   // ------------------ Structs and Enums ------------------ //
   /**
