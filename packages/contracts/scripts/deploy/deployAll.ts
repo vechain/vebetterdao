@@ -1578,6 +1578,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodeManagement: nodeManagementMock,
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
+    grantsManager: grantsManager,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,
