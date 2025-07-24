@@ -6,7 +6,7 @@ import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
 import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
-import { useBuildTransaction } from "./useBuildTransaction"
+import { useBuildTransaction } from "@/hooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
@@ -27,7 +27,7 @@ export type ProposalAction = {
 /**
  * Data required to create a proposal. Multiple actions could be provided in case we want multiple function to be executed
  */
-export type useCreateProposalProps = {
+export type useCreateStandardProposalProps = {
   onSuccess?: () => void
   transactionModalCustomUI?: TransactionCustomUI
 }
@@ -50,7 +50,7 @@ type BuildClausesProps = {
  * @param transactionModalCustomUI custom UI for the transaction modal
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useCreateProposal = ({ onSuccess, transactionModalCustomUI }: useCreateProposalProps) => {
+export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI }: useCreateStandardProposalProps) => {
   const { account } = useWallet()
 
   const buildClauses = useCallback(

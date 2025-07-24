@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle, UilThumbsUp, UilThumbsDown } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, Card, GridItem } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, Card, GridItem, Button } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
@@ -9,6 +9,7 @@ import { GrantsProposalCard, ProposalInteractions, Proposal } from "./GrantsProp
 import { ProposalState } from "@/api/contracts/governance"
 import { FaRegHeart } from "react-icons/fa6"
 import { AbstainedIcon } from "@/components"
+import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -67,7 +68,15 @@ const mockProposal: Proposal = {
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true })
+  const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
+    onSuccess: () => {
+      window.alert("Grant proposal created")
+    },
+  })
 
+  const handleCreateGrantProposal = () => {
+    createGrantProposal()
+  }
   const stepsArray = useMemo(
     () => [
       {
@@ -150,6 +159,7 @@ export const GrantsPageContent = () => {
           <Card w="full" variant="ghost" p={8}></Card>
         </GridItem>
       </Grid>
+      <Button onClick={handleCreateGrantProposal}>{"Create Grant Proposal"}</Button>
     </VStack>
   )
 }
