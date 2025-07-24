@@ -7,6 +7,7 @@ import { EditAppForm } from ".."
 import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { Reorder, useDragControls } from "framer-motion"
+import { IMAGE_REQUIREMENTS } from "@/constants"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -21,6 +22,7 @@ export const EditScreenshots = ({ form }: Props) => {
   const screenshots = form.watch("screenshots")
   const toast = useToast()
   const [loadingScreenshot, setLoadingScreenshot] = useState(false)
+  const accept = IMAGE_REQUIREMENTS.screenshot.mimeType
 
   const handleImageUpload = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +71,7 @@ export const EditScreenshots = ({ form }: Props) => {
         <Controller
           name="screenshots"
           render={() => (
-            <Input type="file" ref={inputFile} display="none" multiple accept="image/*" onChange={handleImageUpload} />
+            <Input type="file" ref={inputFile} display="none" multiple accept={accept} onChange={handleImageUpload} />
           )}
           control={form.control}
         />
