@@ -1,11 +1,28 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react"
 import { keyframes } from "@emotion/react"
 import { darkThemeColors, lightThemeColors } from "./colors"
-import "@fontsource-variable/instrument-sans"
-import "@fontsource-variable/inter"
+// import "@fontsource-variable/instrument-sans"
+// import "@fontsource-variable/inter"
+import { cardSlotRecipe } from "./card"
+
+import { buttonRecipe } from "./button"
+import { inputRecipe } from "./input"
+import { nativeSelectRecipe } from "./native-select"
+import { stepsRecipe } from "./steps"
 
 const baseThemeConfig = {
   theme: {
+    recipes: {
+      button: buttonRecipe,
+      input: inputRecipe,
+      steps: stepsRecipe,
+      nativeSelect: nativeSelectRecipe,
+    },
+
+    slotRecipes: {
+      card: cardSlotRecipe,
+    },
+
     tokens: {
       fonts: {
         heading: { value: `"Instrument Sans Variable", sans-serif` },

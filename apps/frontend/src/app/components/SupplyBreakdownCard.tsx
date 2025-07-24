@@ -4,7 +4,6 @@ import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
-import { motion } from "framer-motion"
 import { BaseTooltip } from "../../components/BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
@@ -103,39 +102,15 @@ export const SupplyBreakdownCard = () => {
           ) : (
             <HStack gap={1} w="full" h={5}>
               <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.b3trCirculatingSupply.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
                 zIndex={2}
-                w={data.b3trCirculatingSupply.percentage}
+                w={`${data.b3trCirculatingSupply.percentage}%`}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #004CFC , #447CFF)"}
                 borderRadius={"md"}
               />
               <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.vot3CirculatingSupply.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
                 zIndex={1}
-                w={data.vot3CirculatingSupply.percentage}
+                w={`${data.vot3CirculatingSupply.percentage}%`}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
                 borderRadius={"md"}

@@ -308,7 +308,7 @@ export const AllApps = ({
         <HStack gap={4} ml={headingComponent ? "auto" : 0}>
           <InputGroup
             w={headingComponent ? "300px" : "full"}
-            startAddon={<UilSearch pointerEvents="none" color={searchIconColor} />}>
+            startElement={<UilSearch pointerEvents="none" color={searchIconColor} />}>
             <Input
               placeholder="Search apps..."
               value={searchQuery}
