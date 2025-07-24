@@ -20,18 +20,19 @@ export async function waitForRoundStart(thor: ThorClient, config: AppConfig) {
   const targetBlock = Number(nextRoundBlock.result?.array?.[0])
 
   // Create a promise that resolves when the block is reached
-  const blockWaitPromise = thor.blocks.waitForBlockCompressed(targetBlock, { intervalMs: 10000 })
+  const blockWaitPromise = thor.blocks.waitForBlockCompressed(targetBlock, { intervalMs: 10000 }) // Check every 10 seconds
 
   // Create a timeout promise
   const timeoutPromise = new Promise((_, reject) => {
     setTimeout(
       () => {
-        reject(new Error(`Timeout waiting for block ${targetBlock} after 5 minutes`))
+        reject(new Error(`Timeout waiting for block ${targetBlock} after 2 minutes`))
       },
-      5 * 60 * 1000, // 5 minutes in milliseconds
+      2 * 60 * 1000, // 2 minutes in milliseconds
     )
   })
 
-  // // Race the two promises - whichever completes first wins
+  // Race the two promises - whichever completes first wins
+  // If the blockWaitPromise hangs for 2 minutes, the timeoutPromise will win the race and throw an error.
   await Promise.race([blockWaitPromise, timeoutPromise])
 }
