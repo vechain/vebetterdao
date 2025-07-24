@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Box, Circle, Flex, Image, Input, useToast, Text, VStack } from "@chakra-ui/react"
-import { LOGO_UPLOAD_GUIDELINES, notFoundImage } from "@/constants"
+import { LOGO_UPLOAD_GUIDELINES, IMAGE_REQUIREMENTS, notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -19,6 +19,7 @@ export const EditAppLogo = ({ form }: Props) => {
   const { t } = useTranslation()
 
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
+  const accept = IMAGE_REQUIREMENTS.logo.mimeType
 
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +60,7 @@ export const EditAppLogo = ({ form }: Props) => {
           objectFit={"cover"}
           objectPosition={"center"}
         />
-        <Input type="file" accept="image/*" display={"none"} ref={inputRef} onChange={handleUpload} />
+        <Input type="file" accept={accept} display={"none"} ref={inputRef} onChange={handleUpload} />
         <Box>
           <Flex
             rounded="16px"
