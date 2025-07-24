@@ -52,17 +52,17 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
     const clauses: EnhancedClause[] = []
 
     const calldatas = [
-      treasuryInterface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+      treasuryInterface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("150000")]),
     ]
 
     const argszada = [
       [treasuryAddress],
       [0], //TODO: REMOVE MOCK VALUE
       calldatas,
-      "aosndiuasniujda",
-      7,
+      "bafkreigegkllgrware3br2y64frqre4zlmz7es7s7rogs6lrs22x7jo55y",
+      4,
       0,
-      "aksbdaijsd",
+      "bafkreigegkllgrware3br2y64frqre4zlmz7es7s7rogs6lrs22x7jo55y",
     ]
     console.log("argszada", argszada)
     const createProposalClause = buildClause({
