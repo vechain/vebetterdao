@@ -1,7 +1,8 @@
 import { Box, VStack, Heading, Text, Image, Grid, GridItem, Card } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 interface StatsCardProps {
   icon: string
-  value: string
+  value: number | string
   label: string
   alt: string
 }
@@ -40,14 +41,21 @@ export const GrantsStatsCards = ({
   totalApproved,
   totalFunds,
 }: {
-  totalApplications: string
-  totalApproved: string
-  totalFunds: string
+  totalApplications: number
+  totalApproved: number
+  totalFunds: number
 }) => {
+  const compactFormatter = getCompactFormatter(4)
+  console.log("totalFunds", totalFunds)
   const statsUI = [
     { icon: "/assets/icons/proposal.svg", value: totalApplications, label: "Applications", alt: "applications-icon" },
     { icon: "/assets/icons/vote.svg", value: totalApproved, label: "Grants Approved", alt: "approved-icon" },
-    { icon: "/assets/icons/handshake.svg", value: totalFunds, label: "Distributed in grants", alt: "total-icon" },
+    {
+      icon: "/assets/icons/handshake.svg",
+      value: `${compactFormatter.format(totalFunds)} B3TR`,
+      label: "Distributed in grants",
+      alt: "total-icon",
+    },
   ]
   return (
     <Box

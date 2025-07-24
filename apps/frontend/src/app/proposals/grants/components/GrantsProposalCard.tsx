@@ -4,44 +4,10 @@ import { UilLink, UilClock } from "@iconscout/react-unicons"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
-import { ProposalState } from "@/api/contracts/governance"
 import { useRouter } from "next/navigation"
 import { PiTelegramLogo } from "react-icons/pi"
-
-export type PhaseInfo = {
-  startAt: string
-  endAt: string
-}
-
-export type CommunityInteraction = {
-  percentage: number
-  icon: JSX.Element
-}
-
-export type ProposalPhases = {
-  [key in ProposalState]?: PhaseInfo
-}
-
-export type ProposalInteractions = {
-  [key in ProposalState]?: CommunityInteraction[]
-}
-
-export type Proposal = {
-  id: string
-  title: string
-  b3tr: string
-  dAppGrant: string
-  proposer: {
-    profilePicture: string
-    addressOrDomain: string
-  }
-  state: ProposalState
-  phases: {
-    [ProposalState.Pending]: PhaseInfo
-    [ProposalState.Active]: PhaseInfo
-  }
-  communityInteractions: ProposalInteractions
-}
+import { Proposal } from "@/hooks/proposals/grants/types"
+import { ProposalState } from "@/api"
 
 type GrantsProposalCardProps = {
   proposal: Proposal
@@ -97,7 +63,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
         {/* Footer */}
         <HStack w="full" pt={5} justify="space-between" align="center">
           <GrantsProposalStatusBadge state={proposal.state} />
-          <HStack>
+          {/* <HStack>
             {proposal.communityInteractions[proposal.state as keyof typeof proposal.communityInteractions]?.map(
               interaction => (
                 <HStack key={interaction.percentage} fontSize={{ base: "14px", md: "16px" }} gap={1}>
@@ -106,7 +72,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 </HStack>
               ),
             )}
-          </HStack>
+          </HStack> */}
         </HStack>
       </VStack>
     </Card>
