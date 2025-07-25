@@ -22,7 +22,8 @@
   "devDependencies": {
     "@slack/web-api": "^7.0.4",
     "@types/aws-lambda": "^8.10.136",
-    "@vechain/sdk-core": "1.2.0-rc.2",
+    "@vechain/sdk-core": "2.0.0",
+    "@vechain/sdk-network": "2.0.0",
     "aws-lambda": "^1.0.7",
     "eslint-plugin-prettier": "^5.2.1",
     "ethers": "^6.11.1",

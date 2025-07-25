@@ -1,4 +1,4 @@
-import { useSelectedGmNft } from "@/api"
+import { useGetUserGMs, useGMMaxLevel, UserGM } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { Tooltip } from "@/components/ui/tooltip"
 import { gmNfts } from "@/constants/gmNfts"
@@ -12,22 +12,24 @@ import { useTranslation } from "react-i18next"
 const compactFormatter = getCompactFormatter(0)
 
 export const GalaxyLevelsCard = () => {
-  const { gmLevel, maxGmLevel = 0 } = useSelectedGmNft()
+  const { data: userGms } = useGetUserGMs()
+  const { data: maxGMLevel = 0 } = useGMMaxLevel()
+  const { tokenLevel } = userGms?.find(gm => gm.isSelected) || ({ tokenLevel: "0" } as UserGM)
   const { t } = useTranslation()
   const [showShortened, setShowShortened] = useState(false)
   const gmNftsShortened = useMemo(() => {
-    const level = Number(gmLevel)
+    const level = Number(tokenLevel)
     if (level === 1) {
-      return gmNfts.slice(0, Math.min(4, maxGmLevel))
+      return gmNfts.slice(0, Math.min(4, maxGMLevel))
     }
-    if (level >= 2 && level <= maxGmLevel - 2) {
-      return gmNfts.slice(level - 1, Math.min(level + 3, maxGmLevel))
+    if (level >= 2 && level <= maxGMLevel - 2) {
+      return gmNfts.slice(level - 1, Math.min(level + 3, maxGMLevel))
     }
-    if (level === maxGmLevel - 1) {
-      return gmNfts.slice(maxGmLevel - 5, maxGmLevel - 1)
+    if (level === maxGMLevel - 1) {
+      return gmNfts.slice(maxGMLevel - 5, maxGMLevel - 1)
     }
-    return gmNfts.slice(maxGmLevel - 4, maxGmLevel)
-  }, [gmLevel, maxGmLevel])
+    return gmNfts.slice(maxGMLevel - 4, maxGMLevel)
+  }, [tokenLevel, maxGMLevel])
 
   const getLevelText = (level: number, maxLevel: number, currentLevel: number) => {
     if (level === maxLevel) {
@@ -86,8 +88,8 @@ export const GalaxyLevelsCard = () => {
               {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
             </Text>
           </VStack>
-          {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGmLevel)).map(gmNft => {
-            const isCurrentLevel = gmNft.level === gmLevel
+          {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGMLevel)).map(gmNft => {
+            const isCurrentLevel = gmNft.level === tokenLevel
             return (
               <HStack key={gmNft.level} justify="space-between" opacity={isCurrentLevel ? 1 : 0.6}>
                 <HStack gap="4">
@@ -104,14 +106,14 @@ export const GalaxyLevelsCard = () => {
                       {gmNft.name}
                     </Text>
                     <Text fontSize="sm" color="#6A6A6A">
-                      {getLevelText(Number(gmNft.level), maxGmLevel, Number(gmLevel))}
+                      {getLevelText(Number(gmNft.level), maxGMLevel, Number(tokenLevel))}
                     </Text>
                   </VStack>
                 </HStack>
                 {isCurrentLevel ? (
                   <Heading
                     fontSize="2xl"
-                    bg={getLevelGradient(Number(gmLevel))}
+                    bg={getLevelGradient(Number(tokenLevel))}
                     style={{
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
@@ -126,7 +128,7 @@ export const GalaxyLevelsCard = () => {
               </HStack>
             )
           })}
-          {showShortened && gmNfts.slice(0, maxGmLevel).length > gmNftsShortened.length && (
+          {showShortened && gmNfts.slice(0, maxGMLevel).length > gmNftsShortened.length && (
             <Button variant={"primaryLink"} onClick={() => setShowShortened(false)} fontSize="lg">
               {t("See all levels")}
             </Button>

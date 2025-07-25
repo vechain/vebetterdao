@@ -4,22 +4,20 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useRevokeXNodeDelegation } from "@/hooks"
-import { useXNode } from "@/api"
+import { UserNode } from "@/api"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
-  const { t } = useTranslation()
-  const { isXNodeAttachedToGM } = useXNode()
-  const { isTxModalOpen } = useTransactionModal()
 
+export const RevokeXNodeDelegationModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
+  const { t } = useTranslation()
+  const { isTxModalOpen } = useTransactionModal()
   const { open = false, onClose } = modal
+  const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
 
   const handleClose = useCallback(() => {
     onClose?.()
   }, [onClose])
 
-  const revokeXNodeDelegation = useRevokeXNodeDelegation({
-    onSuccess: handleClose,
-  })
+  const revokeXNodeDelegation = useRevokeXNodeDelegation({ xNode, onSuccess: handleClose })
   const handleRevoke = useCallback(() => {
     revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })
   }, [revokeXNodeDelegation, isXNodeAttachedToGM])

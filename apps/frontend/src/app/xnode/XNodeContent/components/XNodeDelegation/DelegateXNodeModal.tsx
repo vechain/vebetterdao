@@ -1,5 +1,4 @@
-import { useXNode } from "@/api"
-import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
+import { UserNode } from "@/api"
 import { ExclamationTriangle } from "@/components"
 import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import {
@@ -15,8 +14,8 @@ import {
   VStack,
   useSteps,
 } from "@chakra-ui/react"
-import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
-import { useWallet, useThor, useVechainDomain } from "@vechain/vechain-kit"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -32,13 +31,12 @@ enum DelegateXNodeStep {
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
 
-export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => {
+export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { account } = useWallet()
-  const thor = useThor()
-  const { isXNodeAttachedToGM } = useXNode()
   const { open: isOpen = false, onClose } = modal
+  const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
 
   const {
     value: activeStep,
@@ -65,6 +63,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   }, [onClose, setActiveStep])
 
   const delegateXNode = useDelegateXNode({
+    xNode,
     onSuccess: handleClose,
   })
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
@@ -99,14 +98,6 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                 {t("The manager won't be able to transfer or sell your Node.")}
               </Text>
             </Box>
-            <Alert.Root status="warning" borderRadius="2xl">
-              <Alert.Indicator />
-              <Alert.Content>
-                <Alert.Description as="span" fontSize="sm">
-                  {t("Currently, we only support one Node per account.")}
-                </Alert.Description>
-              </Alert.Content>
-            </Alert.Root>
             <VStack align="stretch">
               <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
               <Field.Root invalid={!!errors.walletAddress}>
@@ -121,17 +112,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                         return t("Please enter a valid wallet address")
                       }
 
-                      const address = isValid(value) ? value : delegateeAddress
-                      try {
-                        const hasExistingXNode = await getIsNodeHolder(thor, address ?? "")
-                        if (hasExistingXNode) {
-                          return t("This address already has a Node. Please choose another address.")
-                        }
-                        return true
-                      } catch (error) {
-                        console.error("Error checking node holder status:", error)
-                        return t("Error checking node holder status. Please try again.")
-                      }
+                      return true
                     },
                   })}
                 />
@@ -202,7 +183,6 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
       handleDelegate,
       goToPrevious,
       account?.address,
-      thor,
       delegateeAddress,
     ],
   )

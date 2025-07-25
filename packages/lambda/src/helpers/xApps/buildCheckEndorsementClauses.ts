@@ -1,4 +1,4 @@
-import mainnetConfig from "@repo/config/mainnet"
+import { AppConfig } from "@repo/config"
 import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 import { Clause } from "@vechain/sdk-core"
 import { Address } from "@vechain/sdk-core"
@@ -9,10 +9,10 @@ import { ABIContract } from "@vechain/sdk-core"
  * @param xappIds - The xApp IDs to build the check endorsement clauses for.
  * @returns an array of check endorsement clauses for the specified xApps.
  */
-export const buildCheckEndorsementClauses = (xappIds: string[]) => {
+export const buildCheckEndorsementClauses = (xappIds: string[], config: AppConfig) => {
   const clauses = xappIds.map(xappId =>
     Clause.callFunction(
-      Address.of(mainnetConfig.x2EarnAppsContractAddress),
+      Address.of(config.x2EarnAppsContractAddress),
       ABIContract.ofAbi(X2EarnApps.abi).getFunction("checkEndorsement"),
       [xappId],
     ),

@@ -191,9 +191,7 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   // Legacy Node banners logic
-  const isLegacyNode = useMemo(() => {
-    return userNodes?.some(node => node.isLegacyNode)
-  }, [userNodes])
+  const isLegacyNode = useMemo(() => (userNodes?.legacyNodes?.length ?? 0) > 0, [userNodes])
   // Remove the banner for every user at the end of this round
   const showStargateBanner = currentRoundId < 55 || isLegacyNode
 
@@ -229,6 +227,7 @@ export const ActionBanner = () => {
 
     return bannerComponents
   }, [
+    isLegacyNode,
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,

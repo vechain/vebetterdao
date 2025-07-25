@@ -20,7 +20,7 @@ import {
   Flex,
   Portal,
 } from "@chakra-ui/react"
-import { XApp, UnendorsedApp, useXNode } from "@/api"
+import { XApp, UnendorsedApp, useGetUserNodes, useNodesEndorsedApps } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
@@ -51,8 +51,10 @@ export const AllApps = ({
   headingComponent,
 }: Props) => {
   const { t } = useTranslation()
-  const { isEndorsingApp } = useXNode()
   const { colorMode } = useColorMode()
+  const { data: nodes } = useGetUserNodes()
+  const { data: endorsedApps } = useNodesEndorsedApps(nodes?.allNodes?.map(node => node.nodeId) ?? [])
+  const isEndorsingApp = endorsedApps?.length && endorsedApps?.length > 0
 
   // Color mode responsive colors
   const searchIconColor = colorMode === "light" ? "#3B3B3B" : "#E4E4E4"
@@ -109,7 +111,7 @@ export const AllApps = ({
             <>
               {showCreatorBanner ? <CreatorBanner /> : undefined}
               {displayAppsRestricted.map(xApp => (
-                <UnendorsedAppCard key={xApp.id} xApp={xApp} layout={layout} />
+                <UnendorsedAppCard key={xApp.id} appId={xApp.id} isNewApp={xApp.isNew} layout={layout} />
               ))}
             </>
           )}

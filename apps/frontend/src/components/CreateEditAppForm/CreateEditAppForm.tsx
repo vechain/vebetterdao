@@ -12,7 +12,7 @@ import {
 } from "react-hook-form"
 import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
-import { useCallback } from "react"
+import { ChangeEvent, useCallback, useRef } from "react"
 import {
   BANNER_UPLOAD_GUIDELINES,
   LOGO_UPLOAD_GUIDELINES,
@@ -21,7 +21,6 @@ import {
   notFoundImage,
   VE_WOLRD_SCALING_FACTOR,
 } from "@/constants"
-import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
@@ -92,12 +91,15 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
+  const uploadLogoRef = useRef<HTMLLabelElement>(null)
+  const uploadBannerRef = useRef<HTMLLabelElement>(null)
+  const uploadVeWorldBannerRef = useRef<HTMLLabelElement>(null)
   const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner" | "ve_world_banner") => async (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0]
+    (image: "logo" | "banner" | "ve_world_banner") => async (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
       if (!file) return
 
       if (image === "logo") {
@@ -123,12 +125,6 @@ export const CreateEditAppForm = ({
     },
     [setError, setValue, clearErrors],
   )
-
-  const { open: openUploadLogo } = useDropzone({ onDrop: onDrop("logo") })
-
-  const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
-
-  const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world_banner") })
 
   const treasuryWalletAddress = watch("treasuryWalletAddress")
   const adminWalletAddress = watch("adminWalletAddress")
@@ -295,7 +291,7 @@ export const CreateEditAppForm = ({
                   <VStack w="full" align="flex-start">
                     <Image
                       alignSelf={"center"}
-                      onClick={openUploadLogo}
+                      onClick={() => uploadLogoRef.current?.click()}
                       _hover={{ cursor: "pointer" }}
                       src={value ?? notFoundImage}
                       alt="logo"
@@ -309,7 +305,7 @@ export const CreateEditAppForm = ({
                     ) : (
                       <Field.HelperText>{t(LOGO_UPLOAD_GUIDELINES)}</Field.HelperText>
                     )}
-                    <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
+                    <UploadFileButton mt={4} alignSelf={"flex-end"} onChange={onDrop("logo")} ref={uploadLogoRef} />
                   </VStack>
                 </Field.Root>
               )}
@@ -333,7 +329,7 @@ export const CreateEditAppForm = ({
                   <VStack w="full" align={"flex-start"}>
                     <Image
                       alignSelf={"center"}
-                      onClick={openUploadBanner}
+                      onClick={() => uploadBannerRef.current?.click()}
                       _hover={{ cursor: "pointer" }}
                       src={value ?? notFoundImage}
                       alt="banner"
@@ -347,7 +343,7 @@ export const CreateEditAppForm = ({
                     ) : (
                       <Field.HelperText>{t(BANNER_UPLOAD_GUIDELINES)}</Field.HelperText>
                     )}
-                    <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
+                    <UploadFileButton mt={4} alignSelf={"flex-end"} onChange={onDrop("banner")} ref={uploadBannerRef} />
                   </VStack>
                 </Field.Root>
               )}
@@ -370,7 +366,7 @@ export const CreateEditAppForm = ({
                 <Field.Label>{t("VeWorld Banner")}</Field.Label>
                 <VStack w="full" align="center">
                   <Image
-                    onClick={openUploadVeWorldBanner}
+                    onClick={() => uploadVeWorldBannerRef.current?.click()}
                     _hover={{ cursor: "pointer" }}
                     src={value ?? notFoundImage}
                     alt="ve_world_banner"
@@ -382,7 +378,12 @@ export const CreateEditAppForm = ({
                   ) : (
                     <Field.HelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</Field.HelperText>
                   )}
-                  <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
+                  <UploadFileButton
+                    mt={4}
+                    alignSelf={"flex-end"}
+                    onChange={onDrop("ve_world_banner")}
+                    ref={uploadVeWorldBannerRef}
+                  />
                 </VStack>
               </Field.Root>
             )}

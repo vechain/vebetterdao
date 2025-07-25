@@ -86,7 +86,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
               position: "relative",
               opacity: 1,
             }}>
-            <UnendorsedAppCard xApp={xApp} />
+            <UnendorsedAppCard appId={xApp.id} isNewApp={xApp.isNew} />
           </SwiperSlide>
         ))}
 

@@ -1,4 +1,4 @@
-import { useEndorsementScoreThreshold, useNodesEndorsedApps, useNodesEndorsementScore, useXNode } from "@/api"
+import { useEndorsementScoreThreshold, useGetUserNodes, useNodesEndorsedApps, useNodesEndorsementScore } from "@/api"
 import { MinXNodeLevel } from "@/constants/XNode"
 import { Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
@@ -6,23 +6,23 @@ import { useTranslation } from "react-i18next"
 
 export const EndorsementPointsBanner = () => {
   const { t } = useTranslation()
-  const userXNodes = useXNode()
+  const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const nodesEndorsementScore = useNodesEndorsementScore()
-  const endorsedApps = useNodesEndorsedApps(userXNodes.allNodes?.map(node => node.nodeId) ?? [])
+  const endorsedApps = useNodesEndorsedApps(nodes?.allNodes?.map(node => node.nodeId) ?? [])
   const requiredPoints = useEndorsementScoreThreshold()
 
-  const isLoading = userXNodes.isXNodeLoading || nodesEndorsementScore.isLoading || endorsedApps.isLoading
+  const isLoading = isUserNodesLoading || nodesEndorsementScore.isLoading || endorsedApps.isLoading
   const availablePoints = useMemo(() => {
-    if (!userXNodes.allNodes || !endorsedApps.data || !nodesEndorsementScore.data) return 0
+    if (!nodes?.allNodes || !endorsedApps.data || !nodesEndorsementScore.data) return 0
 
-    const availableNodes = userXNodes.allNodes?.filter((_node, index) => !endorsedApps.data[index]?.endorsedApp)
+    const availableNodes = nodes?.allNodes?.filter((_node, index) => !endorsedApps.data[index]?.endorsedApp)
     return (
       availableNodes?.reduce((acc, node) => acc + Number(nodesEndorsementScore.data[Number(node.nodeLevel)]), 0) ?? 0
     )
-  }, [nodesEndorsementScore.data, endorsedApps.data, userXNodes.allNodes])
+  }, [nodesEndorsementScore.data, endorsedApps.data, nodes?.allNodes])
 
   //TODO: Support multiple nodes
-  const nodeToDisplay = userXNodes.allNodes?.[0]
+  const nodeToDisplay = nodes?.allNodes?.[0]
   const nodeType = (nodeToDisplay?.nodeLevel ?? 0) >= MinXNodeLevel ? "XNode" : "Node"
 
   if (!availablePoints) return null

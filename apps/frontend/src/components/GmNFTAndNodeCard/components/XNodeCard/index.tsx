@@ -1,5 +1,4 @@
 import { HStack, Image, Text, VStack } from "@chakra-ui/react"
-import { FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 
 interface XNodeCardProps {
@@ -53,7 +52,6 @@ export const XNodeCard = ({
           </Text>
         </HStack>
       </VStack>
-      <FaChevronRight size={"24px"} />
     </HStack>
   )
 }

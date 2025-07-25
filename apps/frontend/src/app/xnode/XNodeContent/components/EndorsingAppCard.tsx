@@ -3,7 +3,8 @@ import {
   useAppEndorsementStatus,
   useAppEndorsers,
   useCurrentAllocationsRoundId,
-  useXNode,
+  UserNode,
+  useNodesEndorsedApps,
 } from "@/api"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
@@ -32,26 +33,29 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-export const EndorsingAppCard = () => {
+export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator, isXNodeOnCooldown } =
-    useXNode()
+  const isEndorsingApp = !!xNode.endorsedAppId
+
+  const { data: endorsedApps } = useNodesEndorsedApps([xNode.nodeId])
+  const endorsedApp = endorsedApps?.[0]?.endorsedApp
+
   // get the number of endorsers for the endorsed app
-  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedApp?.id ?? "")
+  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(xNode.endorsedAppId ?? "")
   // get app status and score
   const {
     score: endorsementScore,
     status: endorsementStatus,
     threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
-  } = useAppEndorsementStatus(endorsedApp?.id ?? "")
+  } = useAppEndorsementStatus(xNode.endorsedAppId ?? "")
 
   // get the last endorsement event for the endorsed app
   const { data: appEndorsedEvents } = useAppEndorsedEvents({
-    nodeId: xNodeId,
-    appId: endorsedApp?.id,
+    nodeId: xNode.nodeId,
+    appId: xNode.endorsedAppId,
     endorsed: true,
   })
 
@@ -69,18 +73,19 @@ export const EndorsingAppCard = () => {
 
   const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
   const shouldDisableEndorsementButton = useMemo(() => {
-    return isXNodeDelegator || isXNodeOnCooldown
-  }, [isXNodeDelegator, isXNodeOnCooldown])
+    return xNode.isXNodeDelegated || xNode.isXNodeOnCooldown
+  }, [xNode.isXNodeDelegated, xNode.isXNodeOnCooldown])
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account?.address && !isXNodeDelegator
-  }, [account?.address, isXNodeDelegator])
+    return account?.address && !xNode.isXNodeDelegated
+  }, [account?.address, xNode.isXNodeDelegated])
+
   return (
     <Card.Root variant="baseWithBorder" w="full" h="min-content">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Endorsing app")}</Heading>
+              <Heading fontSize="lg">{t("Endorsed app")}</Heading>
               {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
             </HStack>
             {!isEndorsingApp && (
@@ -93,10 +98,10 @@ export const EndorsingAppCard = () => {
           </VStack>
           {shouldDisplayCooldownAlert ? (
             <GenericAlert
-              type={!isXNodeOnCooldown ? "warning" : "error"}
+              type={!xNode.isXNodeOnCooldown ? "warning" : "error"}
               isLoading={roundInfoLoading}
               message={
-                isXNodeOnCooldown
+                xNode.isXNodeOnCooldown
                   ? t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
                       roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
                     })
@@ -114,7 +119,7 @@ export const EndorsingAppCard = () => {
               <VStack align="stretch" gap={6}>
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
-                    <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                    <Image src={endorsedApp?.metadata.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
                     <Heading fontSize="lg" fontWeight={"600"}>
                       {endorsedApp?.name}
                     </Heading>
@@ -157,13 +162,12 @@ export const EndorsingAppCard = () => {
                   w="full">
                   <Flex>
                     <EndorsementDetails
+                      appId={xNode.endorsedAppId ?? ""}
                       endorsementScore={endorsementScore}
                       endorsementStatus={endorsementStatus}
                       endorsementThreshold={endorsementThreshold}
                       isEndorsementStatusLoading={isEndorsementStatusLoading}
-                      xNodePoints={xNodePoints}
                       isUserAppEndorser={true}
-                      isXNodeLoading={isXNodeLoading}
                       endorsers={appEndorsers || []}
                       isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   </Flex>
@@ -185,7 +189,7 @@ export const EndorsingAppCard = () => {
                 <Heading fontSize="xl" color="#757575" fontWeight={"500"}>
                   {t("You’re not endorsing any app")}
                 </Heading>
-                {isXNodeDelegator ? (
+                {xNode.isXNodeDelegator ? (
                   <Text color="#757575">
                     {t(
                       "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
@@ -208,7 +212,7 @@ export const EndorsingAppCard = () => {
           )}
         </VStack>
       </Card.Body>
-      <UnendorseAppModal isOpen={unendorseAppModal.open} onClose={unendorseAppModal.onClose} />
+      <UnendorseAppModal xNodeId={xNode.nodeId} isOpen={unendorseAppModal.open} onClose={unendorseAppModal.onClose} />
     </Card.Root>
   )
 }

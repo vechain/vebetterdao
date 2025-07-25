@@ -75,7 +75,8 @@
     "complete-translations": "dotenv -e .env -- turbo complete-translations",
     "prepare": "husky install",
     "contracts:verify:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run verify:testnet --filter=@repo/contracts -- ",
-    "contracts:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run verify:mainnet --filter=@repo/contracts -- "
+    "contracts:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run verify:mainnet --filter=@repo/contracts -- ",
+    "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@repo/contracts"
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",
