@@ -154,10 +154,10 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                   <Skeleton key={day} h="10" loading={currentMonthOverviewQuery.isLoading}>
                     <Button
                       key={day}
+                      unstyled
                       onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
                       w="full"
                       disabled={isDisabled}
-                      variant="unstyled"
                       fontSize="sm"
                       fontWeight="medium"
                       bg={getActivityColor(activityNumber)}

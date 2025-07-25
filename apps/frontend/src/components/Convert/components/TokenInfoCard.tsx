@@ -63,7 +63,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       gap={{ base: 2, md: 5 }}
       maxW={"360px"}
       h={"full"}
-      textColor={color}
+      color={color}
       borderRadius={"8px"}>
       {isB3TRToVOT3 ? (
         <Image src="/assets/tokens/b3tr-to-vot3.webp" alt="B3TR to VOT3" h={{ base: "50px", md: "87px" }} w="auto" />

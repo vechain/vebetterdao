@@ -124,7 +124,7 @@ export const AttachXNodeCard = () => {
             </HStack>
           )}
           {isXNodeAttachedToGM ? (
-            <Button color="#C84968" variant={"link"} onClick={() => handleDetachOnClick()}>
+            <Button color="#C84968" variant={"plain"} onClick={() => handleDetachOnClick()}>
               <UilLinkBroken color="#C84968" />
               {t("Detach")}
             </Button>
@@ -174,8 +174,8 @@ export const AttachXNodeCard = () => {
           )}
         </VStack>
       </Card.Body>
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
-      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
+      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.open} onClose={attachGmToXNodeModal.onClose} />
+      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.open} onClose={detachGmToXNodeModal.onClose} />
     </Card.Root>
   )
 }

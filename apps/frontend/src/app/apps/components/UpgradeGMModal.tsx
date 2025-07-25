@@ -184,7 +184,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
             </Button>
-            <Button variant={"secondaryAction"} color={"#004CFC"} w={"full"} onClick={handleClose}>
+            <Button color={"#004CFC"} w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

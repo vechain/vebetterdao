@@ -37,7 +37,13 @@ export const LoadingModalContent = ({
       </Heading>
       {description && <Text textStyle="sm">{description}</Text>}
       {txId && (
-        <Link href={getExplorerTxLink(txId)} isExternal color="gray.500" fontSize={"14px"} textDecoration={"underline"}>
+        <Link
+          href={getExplorerTxLink(txId)}
+          target="_blank"
+          rel="noopener noreferrer"
+          color="gray.500"
+          fontSize={"14px"}
+          textDecoration={"underline"}>
           {t("View it on the explorer")}
         </Link>
       )}

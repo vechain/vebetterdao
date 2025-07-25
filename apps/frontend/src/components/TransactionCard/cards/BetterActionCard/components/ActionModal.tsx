@@ -79,7 +79,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
     if (proof?.proof?.text) return <Text fontSize="sm">{proof?.proof?.text}</Text>
 
     return (
-      <Link href={proof?.proof?.link} isExternal>
+      <Link href={proof?.proof?.link} target="_blank" rel="noopener noreferrer">
         <Text fontSize="sm">{proof?.proof?.link}</Text>
       </Link>
     )
@@ -93,7 +93,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
 
   return (
     <BaseModal
-      isOpen={actionModal.isOpen ?? false}
+      isOpen={actionModal.open ?? false}
       onClose={actionModal.onClose ?? (() => {})}
       ariaTitle="ActionModal"
       ariaDescription="ActionModal">

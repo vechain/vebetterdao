@@ -8,45 +8,43 @@ type Props = {
 } & StackProps
 
 export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps }: Props) => {
-  const MotionVStack = motion(VStack)
+  const MotionDiv = motion.div
 
   if (renderInnerStack)
     return (
-      <MotionVStack
-        w="full"
-        gap={12}
+      <MotionDiv
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{
           duration: 0.5,
           delay: 0.2,
           ease: [0, 0.71, 0.2, 1.01],
-        }}
-        {...otherProps}>
-        <Stack
-          direction={["column-reverse", "column-reverse", "row"]}
-          w="full"
-          justify="space-between"
-          align={["stretch", "stretch", "flex-start"]}
-          gap={12}>
-          {children}
-        </Stack>
-      </MotionVStack>
+        }}>
+        <VStack w="full" gap={12} {...otherProps}>
+          <Stack
+            direction={["column-reverse", "column-reverse", "row"]}
+            w="full"
+            justify="space-between"
+            align={["stretch", "stretch", "flex-start"]}
+            gap={12}>
+            {children}
+          </Stack>
+        </VStack>
+      </MotionDiv>
     )
 
   return (
-    <MotionVStack
-      w="full"
-      gap={12}
+    <MotionDiv
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
         duration: 0.5,
         delay: 0.2,
         ease: [0, 0.71, 0.2, 1.01],
-      }}
-      {...otherProps}>
-      {children}
-    </MotionVStack>
+      }}>
+      <VStack w="full" gap={12} {...otherProps}>
+        {children}
+      </VStack>
+    </MotionDiv>
   )
 }

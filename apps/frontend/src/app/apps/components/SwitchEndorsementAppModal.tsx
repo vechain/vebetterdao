@@ -171,7 +171,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
           </Button>
         </Skeleton>
 
-        <Button variant={"link"} colorPalette="primary" w={"full"} onClick={onClose}>
+        <Button variant={"ghost"} colorPalette="primary" w={"full"} onClick={onClose}>
           {t("Cancel")}
         </Button>
       </VStack>

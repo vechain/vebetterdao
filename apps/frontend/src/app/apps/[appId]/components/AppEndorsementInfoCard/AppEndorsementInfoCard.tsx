@@ -188,7 +188,7 @@ export const AppEndorsementInfoCard = ({
       buttonComponents.push(
         <Button
           key="removeEndorsementButton"
-          variant="link"
+          variant="ghost"
           colorPalette="red"
           onClick={onOpenUnendorsementModal}
           w="full"

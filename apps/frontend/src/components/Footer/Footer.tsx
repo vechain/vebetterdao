@@ -10,10 +10,12 @@ import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "./components/LanguageSelector"
 import packageJson from "../../../package.json"
 import dayjs from "dayjs"
+import { useBreakpoints } from "@/hooks"
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
   const currentYear = dayjs().format("YYYY")
+  const { isMobile } = useBreakpoints()
 
   const desktopContent = (
     <VStack>
@@ -51,12 +53,12 @@ export const Footer: React.FC = () => {
           </Text>
         </VStack>
         <HStack gap={4}>
-          <Link href={PRIVACY_POLICY_LINK} isExternal>
+          <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Privacy & Policy")}
             </Text>
           </Link>
-          <Link href={TERMS_AND_CONDITIONS_LINK} isExternal>
+          <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Terms & Conditions")}
             </Text>
@@ -91,12 +93,12 @@ export const Footer: React.FC = () => {
         </VStack>
       </VStack>
       <VStack borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
-        <Link href={PRIVACY_POLICY_LINK} isExternal>
+        <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
           <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Privacy & Policy")}
           </Text>
         </Link>
-        <Link href={TERMS_AND_CONDITIONS_LINK} isExternal>
+        <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
           <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Terms & Conditions")}
           </Text>
@@ -119,8 +121,9 @@ export const Footer: React.FC = () => {
         alignItems={"stretch"}
         justifyContent={"flex-start"}
         flexDirection={"column"}>
-        <Show above="md">{desktopContent}</Show>
-        <Show below="md">{mobileContent}</Show>
+        <Show when={isMobile} fallback={desktopContent}>
+          {mobileContent}
+        </Show>
       </Container>
     </Flex>
   )

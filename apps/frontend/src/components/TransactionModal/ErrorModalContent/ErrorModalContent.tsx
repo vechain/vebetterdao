@@ -59,7 +59,8 @@ export const ErrorModalContent = ({
           {showExplorerButton && txId && (
             <Link
               href={getExplorerTxLink(txId)}
-              isExternal
+              target="_blank"
+              rel="noopener noreferrer"
               color="gray.500"
               fontSize={"14px"}
               textDecoration={"underline"}>

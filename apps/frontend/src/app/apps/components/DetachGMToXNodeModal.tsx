@@ -64,7 +64,7 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
             <Button variant={"primaryAction"} w={"full"} onClick={handleDetachment}>
               {t("Detach my Node")}
             </Button>
-            <Button variant={"secondaryAction"} w={"full"} onClick={handleClose}>
+            <Button w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

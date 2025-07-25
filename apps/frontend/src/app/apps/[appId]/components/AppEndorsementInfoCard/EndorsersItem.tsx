@@ -1,15 +1,5 @@
 import { useRouter } from "next/navigation"
-import {
-  Text,
-  HStack,
-  VStack,
-  Box,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  PopoverBody,
-  Skeleton,
-} from "@chakra-ui/react"
+import { Text, HStack, VStack, Box, Popover, Skeleton } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
@@ -106,14 +96,19 @@ export const EndorsersItem = ({
           </Text>
         </Skeleton>
 
-        <Popover placement="bottom-end" isOpen={isPopoverOpen} onClose={() => setIsPopoverOpen(false)}>
-          <PopoverTrigger>
+        <Popover.Root
+          positioning={{
+            placement: "bottom-end",
+          }}
+          open={isPopoverOpen}
+          onOpenChange={details => setIsPopoverOpen(details.open)}>
+          <Popover.Trigger>
             <Box as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
               <HiDotsVertical />
             </Box>
-          </PopoverTrigger>
-          <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
-            <PopoverBody p={2}>
+          </Popover.Trigger>
+          <Popover.Content width="auto" boxShadow="md" border="1px solid #EFEFEF">
+            <Popover.Body p={2}>
               <VStack alignItems="stretch" gap={3}>
                 {isAppAdmin && (
                   <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
@@ -128,9 +123,9 @@ export const EndorsersItem = ({
                   <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
                 </HStack>
               </VStack>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+            </Popover.Body>
+          </Popover.Content>
+        </Popover.Root>
       </HStack>
     </HStack>
   )

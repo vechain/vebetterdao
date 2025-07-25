@@ -105,12 +105,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                 )}
                 {!domain && (
                   <AddressButton
+                    unstyled
                     fontSize="sm"
                     fontWeight={600}
                     h="auto"
                     address={ranking.address}
                     size={"sm"}
-                    variant={"unstyled"}
                     onClick={e => e.preventDefault()}
                     showAddressIcon={false}
                     showCopyIcon={false}

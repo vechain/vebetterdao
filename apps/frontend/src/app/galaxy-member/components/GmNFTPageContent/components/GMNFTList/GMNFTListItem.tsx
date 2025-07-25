@@ -23,7 +23,6 @@ import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
 import { useLevelMultiplier, useSelectedGmNft, useXNode } from "@/api"
 import { useGetNodeIdAttached } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
-import { motion } from "framer-motion"
 
 interface GMNFTListItemProps {
   token: {
@@ -151,20 +150,9 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
           {!isAbove800 && actionButton}
         </VStack>
       </Card.Body>
-      {/* Modal for Image Preview */}
       <Dialog.Root open={isOpen} onOpenChange={onClose} placement="center" size="xl">
         <Dialog.Backdrop />
-        <Dialog.Content
-          as={motion.div}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: "0.3", ease: "easeOut" }}
-          boxShadow="none"
-          background="transparent"
-          maxW="500px"
-          w="full"
-          p={0}
-          m={0}>
+        <Dialog.Content boxShadow="none" background="transparent" maxW="500px" w="full" p={0} m={0}>
           <Dialog.Body p={0}>
             <Box
               position="relative"

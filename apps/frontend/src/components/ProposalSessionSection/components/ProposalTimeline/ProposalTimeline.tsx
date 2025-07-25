@@ -1,4 +1,4 @@
-import { Heading, Timeline, VStack } from "@chakra-ui/react"
+import { Heading, Steps, Circle, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
@@ -104,17 +104,23 @@ export const ProposalTimeline = () => {
       <Heading fontSize={"20px"} fontWeight={700}>
         {t("Timeline")}
       </Heading>
-      <Timeline.Root index={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
-        {steps.map(step => (
-          <Timeline.Item key={`proposal-timeline-step-${step.key}`} style={{ width: "100%" }}>
-            <Timeline.Indicator></Timeline.Indicator>
-            <Timeline.Content>
-              <Timeline.Title>{step}</Timeline.Title>
-            </Timeline.Content>
-            <Timeline.Separator />
-          </Timeline.Item>
-        ))}
-      </Timeline.Root>
+      <Steps.Root step={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
+        <Steps.List>
+          {steps.map((step, index) => (
+            <Steps.Item key={`proposal-timeline-step-${step.key}`} index={index} style={{ width: "100%" }}>
+              <Steps.Indicator>
+                <Steps.Status
+                  incomplete={<Circle bg="#004CFC" size={"30%"} />}
+                  complete={<Circle bg="#004CFC" size={"30%"} />}
+                  current={<Circle bg="#004CFC" size={"60%"} />}
+                />
+              </Steps.Indicator>
+              {step}
+              <Steps.Separator />
+            </Steps.Item>
+          ))}
+        </Steps.List>
+      </Steps.Root>
     </VStack>
   )
 }

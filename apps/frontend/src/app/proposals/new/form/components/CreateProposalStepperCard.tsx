@@ -76,7 +76,7 @@ export const CreateProposalStepperCard = () => {
         <Steps.Root
           variant={"primaryVertical"}
           size="sm"
-          index={activeStep}
+          step={activeStep}
           orientation="vertical"
           colorPalette="primary"
           gap="0"

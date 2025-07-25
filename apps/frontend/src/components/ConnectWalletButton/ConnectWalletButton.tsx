@@ -1,5 +1,5 @@
 import { AnalyticsUtils } from "@/utils"
-import { ButtonProps, useMediaQuery, Box } from "@chakra-ui/react"
+import { useMediaQuery, Box } from "@chakra-ui/react"
 import { useColorModeValue } from "@/components/ui/color-mode"
 import { keyframes } from "@emotion/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
@@ -13,7 +13,7 @@ const rotateAnimation = keyframes`
 
 type Props = {
   connectionVariant?: WalletButtonProps["connectionVariant"]
-  buttonStyleProps?: ButtonProps
+  buttonStyleProps?: WalletButtonProps["buttonStyle"]
 }
 
 export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {

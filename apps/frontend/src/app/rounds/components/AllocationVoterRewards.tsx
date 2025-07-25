@@ -159,7 +159,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           borderRadius={"full"}
           w={"full"}
           bg={canClaim ? "primary" : "#abb0b0"}
-          textColor={canClaim ? "white" : "black"}>
+          color={canClaim ? "white" : "black"}>
           {!isFinished ? <FaRegClock /> : undefined}
           <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
         </Button>

@@ -12,12 +12,14 @@ import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard
 import { useWallet } from "@vechain/vechain-kit"
 import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
+import { useBreakpoints } from "@/hooks"
 
 type Props = {
   roundId: string
 }
 export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
 
   const userVoteMinPercentageToNotMerge = useBreakpointValue(
     {
@@ -54,7 +56,7 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
           <VStack gap={8} w="full">
-            <Show below="sm">
+            <Show when={isMobile}>
               <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
             </Show>
             {hasVoted && (
@@ -65,7 +67,7 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} w="full" alignSelf={"start"}>
           <AllocationRoundSessionInfoCard roundId={roundId} />
-          <Show above="sm">
+          <Show when={!isMobile}>
             <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
           </Show>
         </GridItem>

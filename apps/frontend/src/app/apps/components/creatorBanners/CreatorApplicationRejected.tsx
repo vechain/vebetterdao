@@ -9,7 +9,7 @@ export const CreatorApplicationRejected = () => {
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
   }
-  const { onOpen, isOpen, onClose } = useDisclosure()
+  const { onOpen, open: isOpen, onClose } = useDisclosure()
   return (
     <>
       <Card.Root
@@ -53,7 +53,8 @@ export const CreatorApplicationRejected = () => {
               w={{ base: "100%", md: "30%" }}
               alignSelf="center">
               <Link
-                isExternal
+                target="_blank"
+                rel="noopener noreferrer"
                 href="https://support.vechain.org/support/home"
                 fontSize="14px"
                 fontWeight={600}

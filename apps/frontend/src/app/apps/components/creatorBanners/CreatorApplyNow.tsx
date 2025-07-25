@@ -10,7 +10,7 @@ export const CreatorApplyNow = () => {
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
   }
-  const { onOpen, isOpen, onClose } = useDisclosure()
+  const { onOpen, open: isOpen, onClose } = useDisclosure()
   const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   return (

@@ -52,7 +52,7 @@ type Props = {
 export const ProposalVote = ({ proposalId }: Props) => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
-  const [selectedVote, setSelectedVote] = useState("")
+  const [selectedVote, setSelectedVote] = useState<string | null>(null)
   const [comment, setComment] = useState("")
   const router = useRouter()
   const { account } = useWallet()

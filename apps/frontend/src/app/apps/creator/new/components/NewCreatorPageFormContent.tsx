@@ -37,7 +37,7 @@ export const NewCreatorPageFormContent = () => {
 
   const { errors } = formState
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const { clearData } = useCreatorSubmissionFormStore()
   const router = useRouter()
   const [submitStatus, setSubmitStatus] = useState<"success" | "error">("success")
@@ -95,7 +95,7 @@ export const NewCreatorPageFormContent = () => {
           borderTopRadius="12px"
           bgImage={"/assets/backgrounds/cloud-background.webp"}
           bgSize="cover"
-          bgPosition="center"
+          backgroundPosition="center"
           bgRepeat="no-repeat"
           px={4}>
           {/* Text Container */}

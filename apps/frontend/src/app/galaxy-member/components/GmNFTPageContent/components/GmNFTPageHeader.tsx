@@ -22,7 +22,6 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { motion } from "framer-motion"
 import { useGetB3trBalance } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
@@ -262,17 +261,7 @@ export const GmNFTPageHeader = () => {
         placement="center"
         size="xl">
         <Dialog.Backdrop />
-        <Dialog.Content
-          as={motion.div}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: "0.3", ease: "easeOut" }}
-          boxShadow="none"
-          background="transparent"
-          maxW="500px"
-          w="full"
-          p={0}
-          m={0}>
+        <Dialog.Content boxShadow="none" background="transparent" maxW="500px" w="full" p={0} m={0}>
           <Dialog.Body p={0}>
             <Box
               position="relative"

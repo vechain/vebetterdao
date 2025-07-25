@@ -10,12 +10,14 @@ import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
+import { useBreakpoints } from "@/hooks"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const router = useRouter()
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoints()
 
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
@@ -65,7 +67,7 @@ export const ProposalsPageContent = () => {
               </Heading>
             </HStack>
           </Box>
-          <Show below="sm">
+          <Show when={isMobile}>
             {filteredProposals.length > 0 && (
               <Button onClick={onNewClick} variant={"primaryAction"}>
                 {t("Create proposal")}
@@ -75,7 +77,7 @@ export const ProposalsPageContent = () => {
         </HStack>
       </VStack>
       <ProposalsFilters alignSelf={"flex-start"} w="full" />
-      <Show below="sm">
+      <Show when={isMobile}>
         {totalClaimableDeposits > 0 && (
           <Box mb={2} mt={3}>
             <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
@@ -112,7 +114,7 @@ export const ProposalsPageContent = () => {
             />
           )}
         </VStack>
-        <Show above="sm">
+        <Show when={!isMobile}>
           <VStack flex={2} alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
             {totalClaimableDeposits > 0 && (
               <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
@@ -122,7 +124,7 @@ export const ProposalsPageContent = () => {
           </VStack>
         </Show>
       </HStack>
-      <Show below="sm">
+      <Show when={isMobile}>
         <Box mt={2} w={"full"}>
           <JoinCommunity />
         </Box>

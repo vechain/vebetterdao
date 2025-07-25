@@ -1,5 +1,5 @@
 "use-client"
-import { Button, useClipboard, Link, VStack, Skeleton, Dialog } from "@chakra-ui/react"
+import { Button, useClipboard, VStack, Skeleton, Dialog } from "@chakra-ui/react"
 import { FaCopy, FaRegImage } from "react-icons/fa6"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { FaExternalLinkAlt } from "react-icons/fa"
@@ -26,7 +26,7 @@ export const AppCardOptionsMobileModal = ({
   xAppId,
   showViewDetails = false,
 }: Props) => {
-  const { onCopy } = useClipboard(teamWalletAddress ?? "")
+  const { copy: onCopy } = useClipboard({ value: teamWalletAddress ?? "" })
   const { t } = useTranslation()
   const handleOnCopy = () => {
     onCopy()
@@ -65,14 +65,16 @@ export const AppCardOptionsMobileModal = ({
             </Button>
             <Skeleton loading={isLoading} w="full">
               <Button
-                as={Link}
-                href={externalUrl ?? ""}
-                isExternal
                 variant={"solid"}
                 size="lg"
                 disabled={!externalUrl}
                 colorPalette="gray"
-                w="full">
+                w="full"
+                onClick={() => {
+                  if (externalUrl) {
+                    window.open(externalUrl, "_blank")
+                  }
+                }}>
                 <FaExternalLinkAlt />
                 {externalUrl ? "Go to the App" : "No App link available"}
               </Button>

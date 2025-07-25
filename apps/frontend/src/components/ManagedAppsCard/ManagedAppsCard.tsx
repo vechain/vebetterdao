@@ -40,7 +40,7 @@ export const ManagedAppsCard = () => {
 
             {userAppRoles.length > 1 && (
               <HStack justifyContent={"flex-end"}>
-                <Button variant="link" colorPalette="primary" onClick={onOpen}>
+                <Button variant="ghost" colorPalette="primary" onClick={onOpen}>
                   {t("See all") + ` (${userAppRoles.length})`}
                 </Button>
               </HStack>

@@ -15,8 +15,13 @@ enum CommunitySupportStep {
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { t } = useTranslation()
   const { proposal } = useProposalDetail()
-  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
-    index: 0,
+  const {
+    value: activeStep,
+    goToPrevStep: goToPrevious,
+    goToNextStep: goToNext,
+    setStep: setActiveStep,
+  } = useSteps({
+    defaultStep: 0,
     count: Object.keys(CommunitySupportStep).length,
   })
 

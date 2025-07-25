@@ -102,7 +102,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
               </Alert.Description>
             </Alert.Root>
             {onTryAgain && (
-              <Button onClick={onTryAgain} variant="link">
+              <Button onClick={onTryAgain} variant="ghost">
                 {t("Try again")}
               </Button>
             )}

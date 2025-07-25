@@ -9,7 +9,7 @@ import {
   X_TWITTER_URL,
   YOUTUBE_URL,
 } from "@/constants"
-import { HStack, Link } from "@chakra-ui/react"
+import { HStack, Icon, Link } from "@chakra-ui/react"
 import React from "react"
 import {
   FaDiscord,
@@ -23,36 +23,26 @@ import {
   FaYoutube,
 } from "react-icons/fa6"
 
+const socialLinks = [
+  { href: X_TWITTER_URL, icon: FaXTwitter },
+  { href: INSTAGRAM_URL, icon: FaInstagram },
+  { href: DISCORD_URL, icon: FaDiscord },
+  { href: TELEGRAM_URL, icon: FaTelegram },
+  { href: TIKTOK_URL, icon: FaTiktok },
+  { href: YOUTUBE_URL, icon: FaYoutube },
+  { href: LINKEDIN_URL, icon: FaLinkedinIn },
+  { href: FACEBOOK_URL, icon: FaFacebookF },
+  { href: EMAIL_URL, icon: FaEnvelope },
+]
+
 export const Socials: React.FC = () => {
   return (
     <HStack color={"white"} gap={4}>
-      <Link href={X_TWITTER_URL} isExternal>
-        <FaXTwitter size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={INSTAGRAM_URL} isExternal>
-        <FaInstagram size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={DISCORD_URL} isExternal>
-        <FaDiscord size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={TELEGRAM_URL} isExternal>
-        <FaTelegram size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={TIKTOK_URL} isExternal>
-        <FaTiktok size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={YOUTUBE_URL} isExternal>
-        <FaYoutube size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={LINKEDIN_URL} isExternal>
-        <FaLinkedinIn size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={FACEBOOK_URL} isExternal>
-        <FaFacebookF size={22} cursor={"pointer"} />
-      </Link>
-      <Link href={EMAIL_URL} isExternal>
-        <FaEnvelope size={22} cursor={"pointer"} />
-      </Link>
+      {socialLinks.map(({ href, icon }) => (
+        <Link key={href} href={href} target="_blank" rel="noopener noreferrer">
+          <Icon as={icon} boxSize="22px" cursor={"pointer"} />
+        </Link>
+      ))}
     </HStack>
   )
 }

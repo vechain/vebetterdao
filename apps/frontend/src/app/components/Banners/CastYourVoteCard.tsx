@@ -48,7 +48,7 @@ export const CastYourVoteCard: React.FC = () => {
     <Card.Root borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>
       <Card.Body p={6} pos="relative">
         <Image
-          transform={{ rotate: "180deg" }}
+          rotate="180deg"
           src="/assets/backgrounds/cast-vote-card-bg.svg"
           alt="Rewards background"
           pos="absolute"

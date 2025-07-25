@@ -14,7 +14,7 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
   const nodeLevelToEndorsementScore = useNodesEndorsementScore()
 
   return (
-    <BaseModal isOpen={modal.isOpen ?? false} onClose={modal.onClose ?? (() => {})}>
+    <BaseModal isOpen={modal.open ?? false} onClose={modal.onClose ?? (() => {})}>
       <VStack align="stretch" gap={6}>
         <Heading fontSize="2xl">{t("Your Nodes")}</Heading>
         <Text>

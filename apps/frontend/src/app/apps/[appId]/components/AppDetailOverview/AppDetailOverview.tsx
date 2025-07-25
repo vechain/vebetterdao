@@ -28,6 +28,7 @@ import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
 import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 import { DistributionStrategyModal } from "./components/DistributionStrategyModal"
+import { useBreakpoints } from "@/hooks"
 
 export const AppDetailOverview = ({
   endorsementStatus,
@@ -46,6 +47,7 @@ export const AppDetailOverview = ({
     onOpen: onDistributionStrategyModalOpen,
     onClose: onDistributionStrategyModalClose,
   } = useDisclosure()
+  const { isMobile } = useBreakpoints()
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -119,7 +121,7 @@ export const AppDetailOverview = ({
                       w={{ base: "full", md: "auto" }}
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
                       <AppReceiverAddress />
-                      <Show below="md">
+                      <Show when={!isMobile}>
                         <Separator />
                       </Show>
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
@@ -157,7 +159,7 @@ export const AppDetailOverview = ({
                       justifyContent={{ base: "space-between", md: "flex-end" }}
                       w={{ base: "full", md: "auto" }}
                       mt={{ base: 4, md: 0 }}>
-                      <Show above="sm">
+                      <Show when={!isMobile}>
                         <EditAppPageButton />
                         <AdminAppPageButton />
                       </Show>
@@ -165,7 +167,7 @@ export const AppDetailOverview = ({
                         {t("Go to Website")}
                         <UilArrowUpRight color="#FFFFFF" size={"16px"} />
                       </Button>
-                      <Show below="sm">
+                      <Show when={isMobile}>
                         <EditAppPageButton />
                         <AdminAppPageButton />
                       </Show>

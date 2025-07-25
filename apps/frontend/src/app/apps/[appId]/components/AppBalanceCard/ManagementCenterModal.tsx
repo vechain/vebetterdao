@@ -30,8 +30,13 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   const { data: isEnabled } = useIsRewardsPoolEnabled(appId)
   const { data: isPaused } = useIsDistributionPaused(appId)
   const { isTxModalOpen } = useTransactionModal()
-  const { activeStep, goToPrevious, setActiveStep, goToNext } = useSteps({
-    index: 0,
+  const {
+    value: activeStep,
+    goToPrevStep: goToPrevious,
+    setStep: setActiveStep,
+    goToNextStep: goToNext,
+  } = useSteps({
+    defaultStep: 0,
     count: Object.keys(ManagementStep).length,
   })
 

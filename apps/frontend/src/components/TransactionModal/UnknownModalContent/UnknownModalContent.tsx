@@ -57,7 +57,8 @@ export const UnknownModalContent = ({
         {txId && showExplorerButton && (
           <Link
             href={getExplorerTxLink(txId)}
-            isExternal
+            target="_blank"
+            rel="noopener noreferrer"
             color="gray.500"
             fontSize={"14px"}
             textDecoration={"underline"}>

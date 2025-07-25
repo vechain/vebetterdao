@@ -1,4 +1,4 @@
-import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, Select } from "@chakra-ui/react"
+import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, NativeSelect } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
@@ -124,15 +124,17 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           name="reason"
           control={control}
           render={({ field: { onChange } }) => (
-            <Select placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
-              <option value="Team allocation share">{t("Team allocation share")}</option>
-              <option value="Marketing">{t("Marketing")}</option>
-              <option value="Development">{t("Development")}</option>
-              <option value="Reward distribution">{t("Reward distribution")}</option>
-              <option value="Community airdrop">{t("Community airdrop")}</option>
-              <option value="Endorsers reward">{t("Endorsers reward")}</option>
-              <option value="Other">{t("Other")}</option>
-            </Select>
+            <NativeSelect.Root>
+              <NativeSelect.Field placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
+                <option value="Team allocation share">{t("Team allocation share")}</option>
+                <option value="Marketing">{t("Marketing")}</option>
+                <option value="Development">{t("Development")}</option>
+                <option value="Reward distribution">{t("Reward distribution")}</option>
+                <option value="Community airdrop">{t("Community airdrop")}</option>
+                <option value="Endorsers reward">{t("Endorsers reward")}</option>
+                <option value="Other">{t("Other")}</option>
+              </NativeSelect.Field>
+            </NativeSelect.Root>
           )}
         />
         {reason === "Other" && (

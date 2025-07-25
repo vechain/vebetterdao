@@ -10,12 +10,14 @@ import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassport
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
+import { useBreakpoints } from "@/hooks"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
+  const { isMobile } = useBreakpoints()
   const { data: vnsData } = useVechainDomain(account)
   const domain = vnsData?.domain
   const isUserAccountCard = compareAddresses(account, userAccount?.address ?? "")
@@ -76,7 +78,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
               </Badge>
             )}
           </Stack>
-          <Show below="md">
+          <Show when={isMobile}>
             <HStack gap={1}>
               <LeafIcon color="#448300" size="24" />
               <Heading fontWeight="700" fontSize={"xl"}>
@@ -87,7 +89,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
         </HStack>
       </HStack>
       <HStack gap={2} flex={[1, 1, 0]}>
-        <Show above="md">
+        <Show when={!isMobile}>
           <HStack gap={1}>
             <LeafIcon color="#448300" size="24" />
             <Heading fontWeight="700" fontSize={"xl"}>

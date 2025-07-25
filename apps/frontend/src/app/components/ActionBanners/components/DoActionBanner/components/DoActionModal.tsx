@@ -1,7 +1,7 @@
 import { useUserScore } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 import { useMissingActionsLabel } from "@/hooks"
-import { UseDisclosureProps, Card, VStack, Flex, Text, Heading, Button, Image, Link } from "@chakra-ui/react"
+import { UseDisclosureProps, Card, VStack, Flex, Text, Heading, Button, Image } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -29,7 +29,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
   if (isLoading) return null
 
   return (
-    <BaseModal isOpen={doActionModal.isOpen || false} onClose={doActionModal.onClose || (() => {})}>
+    <BaseModal isOpen={doActionModal.open || false} onClose={doActionModal.onClose || (() => {})}>
       <VStack align="stretch" gap={4}>
         <Card.Root bg="#FFD979" borderRadius="xl">
           <Card.Body pb={2} position="relative" overflow="hidden" borderRadius="xl">
@@ -77,9 +77,9 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Button
           variant="primarySubtle"
           _hover={{ textDecoration: "none" }}
-          as={Link}
-          href={VEPASSPORT_DOCS_URL}
-          isExternal>
+          onClick={() => {
+            window.open(VEPASSPORT_DOCS_URL, "_blank")
+          }}>
           <UilInfoCircle />
           {t("Know more")}
         </Button>

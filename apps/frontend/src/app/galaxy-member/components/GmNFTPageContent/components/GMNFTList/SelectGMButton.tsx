@@ -1,9 +1,10 @@
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Button, useDisclosure, Tooltip } from "@chakra-ui/react"
+import { Button, useDisclosure } from "@chakra-ui/react"
 import { useSelectGM } from "@/hooks"
 import { useSelectedGmNft } from "@/api"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { Tooltip } from "@/components/ui/tooltip"
 
 interface SelectGMButtonProps {
   tokenId: string
@@ -24,9 +25,7 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
   return (
     <>
       <Tooltip
-        p={"2"}
-        rounded="10px"
-        label={t(isXNodeAttachedToGM ? "Detach the node from the NFT before activating a new one" : "", {
+        content={t(isXNodeAttachedToGM ? "Detach the node from the NFT before activating a new one" : "", {
           defaultValue: "",
         })}
         disabled={isSelected}>
@@ -35,7 +34,7 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         </Button>
       </Tooltip>
 
-      <DetachGMToXNodeModal isOpen={detachGMModal.isOpen} onClose={detachGMModal.onClose} />
+      <DetachGMToXNodeModal isOpen={detachGMModal.open} onClose={detachGMModal.onClose} />
     </>
   )
 }

@@ -116,7 +116,7 @@ export const CantVoteCard = () => {
           </HStack>
           {!!cantVoteReasonText?.onLearnMoreClick && (
             <Button
-              variant="link"
+              variant="plain"
               alignSelf={"flex-end"}
               textDecoration="underline"
               color="#AF5F00"
