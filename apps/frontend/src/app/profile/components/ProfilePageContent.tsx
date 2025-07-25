@@ -111,28 +111,34 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   }
 
   // Update the URL with the new tab
-  const updateURLWithTab = (tab: Tab): void => {
-    // Guard against SSR
-    if (typeof window === "undefined") {
-      console.warn("Cannot update URL during server-side rendering")
-      return
-    }
+  const updateURLWithTab = useCallback(
+    (tab: Tab): void => {
+      // Guard against SSR
+      if (typeof window === "undefined") {
+        console.warn("Cannot update URL during server-side rendering")
+        return
+      }
 
-    try {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set("tab", tab)
-      // Update URL without triggering a navigation that causes the page to flicker
-      window.history.replaceState(null, "", `?${params.toString()}`)
-    } catch (error) {
-      console.error("Error updating URL with tab:", error)
-    }
-  }
+      try {
+        const params = new URLSearchParams(searchParams.toString())
+        params.set("tab", tab)
+        // Update URL without triggering a navigation that causes the page to flicker
+        window.history.replaceState(null, "", `?${params.toString()}`)
+      } catch (error) {
+        console.error("Error updating URL with tab:", error)
+      }
+    },
+    [searchParams],
+  )
 
-  const handleTabChange = useCallback((tab: Tab) => {
-    updateURLWithTab(tab)
-    setActiveTab(tab)
-    trackTabChange(tab)
-  }, [])
+  const handleTabChange = useCallback(
+    (tab: Tab) => {
+      updateURLWithTab(tab)
+      setActiveTab(tab)
+      trackTabChange(tab)
+    },
+    [updateURLWithTab],
+  )
 
   // Go back to the home page
   const onGoBack = useCallback(() => {

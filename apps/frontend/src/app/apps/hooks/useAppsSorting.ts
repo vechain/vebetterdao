@@ -103,7 +103,7 @@ export function useAppsSorting(
         return () => cancelAnimationFrame(animationFrame)
       }
     }
-  }, [pendingSortOption, isSorting])
+  }, [pendingSortOption, isSorting, isRewardsLoading])
 
   const isLoadingState = isSorting || (isRewardsLoading && sortOption === "rewards")
 
