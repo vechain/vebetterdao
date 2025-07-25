@@ -78,7 +78,7 @@ export const ManageUserStatus = () => {
 
             <Button
               disabled={!isFormValid || actionType === userStatus}
-              colorScheme={currentConfig.buttonColorScheme}
+              colorPalette={currentConfig.buttonColorScheme}
               type="submit"
               loading={isLoading}>
               {currentConfig.buttonText}

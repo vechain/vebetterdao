@@ -5,13 +5,13 @@ import { useTranslation } from "react-i18next"
 type Props = {
   handleEditAdminAddress: () => void
   onClose: () => void
-  isOpen: boolean
+  open: boolean
 }
 
-export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, isOpen }: Props) => {
+export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }: Props) => {
   const { t } = useTranslation()
   return (
-    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
+    <Dialog.Root open={open} onOpenChange={details => !details.open && onClose()} size={"xl"}>
       <Dialog.Backdrop />
       <CustomModalContent>
         <Dialog.Body p={"40px"}>

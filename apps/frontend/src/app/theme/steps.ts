@@ -1,6 +1,11 @@
-import { defineRecipe } from "@chakra-ui/react"
+import { defineSlotRecipe } from "@chakra-ui/react"
+import { stepsAnatomy } from "@chakra-ui/react/anatomy"
 
-export const stepsRecipe = defineRecipe({
+export const stepsSlotRecipe = defineSlotRecipe({
+  slots: stepsAnatomy.keys(),
+  defaultVariants: {
+    variant: "primaryVertical",
+  },
   variants: {
     variant: {
       primaryVertical: {

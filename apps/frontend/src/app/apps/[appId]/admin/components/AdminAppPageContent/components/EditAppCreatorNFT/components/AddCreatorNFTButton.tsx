@@ -91,9 +91,9 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
         mt={4}
         onClick={onOpen}
         variant="primarySubtle"
-        leftIcon={<UilPlus size="14px" />}
         disabled={editAdminForm.getValues("creators").length >= 3}
         alignSelf={"flex-start"}>
+        <UilPlus size="14px" />
         {editAdminForm.getValues("creators").length >= 3 ? t("Max 3 creators") : t("Add a new Creator NFT")}
       </Button>
     </>

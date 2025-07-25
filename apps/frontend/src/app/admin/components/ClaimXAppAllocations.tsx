@@ -164,7 +164,7 @@ export const ClaimXAppAllocations = () => {
 
               <Button
                 disabled={!isFormValid || claimedResponse?.claimed}
-                colorScheme="blue"
+                colorPalette="blue"
                 type="submit"
                 loading={isLoading}>
                 {claimedResponse?.claimed ? "Already claimed" : "Claim"}

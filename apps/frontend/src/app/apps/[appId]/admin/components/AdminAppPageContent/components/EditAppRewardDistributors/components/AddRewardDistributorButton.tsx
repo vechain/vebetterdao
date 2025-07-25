@@ -85,12 +85,8 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
           </Dialog.Body>
         </CustomModalContent>
       </Dialog.Root>
-      <Button
-        mt={4}
-        onClick={onOpen}
-        variant="primarySubtle"
-        leftIcon={<UilPlus size="14px" />}
-        alignSelf={"flex-start"}>
+      <Button mt={4} onClick={onOpen} variant="primarySubtle" alignSelf={"flex-start"}>
+        <UilPlus size="14px" />
         {t("Add distributor")}
       </Button>
     </>

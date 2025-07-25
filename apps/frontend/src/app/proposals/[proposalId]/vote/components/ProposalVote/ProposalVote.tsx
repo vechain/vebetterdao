@@ -222,12 +222,8 @@ export const ProposalVote = ({ proposalId }: Props) => {
               {t("Add comment")}
             </Text>
             <Textarea resize={"none"} onChange={handleChangeComment} />
-            <Button
-              leftIcon={<VoteIcon boxSize={"20px"} color="white" />}
-              type="submit"
-              variant="primaryAction"
-              w="full"
-              disabled={!selectedVote}>
+            <Button type="submit" variant="primaryAction" w="full" disabled={!selectedVote}>
+              <VoteIcon boxSize={"20px"} color="white" />
               {t("Cast your vote")}
             </Button>
           </VStack>

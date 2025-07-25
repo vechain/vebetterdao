@@ -210,7 +210,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   return (
     <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={details => !details.open && handleClose()}>
       <Dialog.Backdrop />
-      <CustomModalContent w={"auto"} maxW={"container.md"}>
+      <CustomModalContent w={"auto"} maxW="breakpoint-md">
         <Card.Root rounded={20}>
           <Card.Body>{renderCardContent()}</Card.Body>
         </Card.Root>

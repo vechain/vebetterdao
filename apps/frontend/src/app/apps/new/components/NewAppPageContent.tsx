@@ -64,10 +64,10 @@ export const NewAppPageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} gap={4}>
-                <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorScheme="primary" size="lg">
+                <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorPalette="primary" size="lg">
                   {t("More info")}
                 </Button>
-                <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>
+                <Button rounded="full" colorPalette="primary" size="lg" onClick={onContinueClick}>
                   {t("Continue")}
                 </Button>
               </HStack>

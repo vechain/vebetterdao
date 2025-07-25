@@ -13,16 +13,15 @@ export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
   return (
     <Link
       href={TELEGRAM_URL}
-      isExternal
       w={isFullWidth ? "full" : undefined}
       onClick={() => AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_TELEGRAM))}>
       <Button
-        leftIcon={<FaTelegram size={24} />}
-        textColor={"white"}
+        color={"white"}
         bgColor={`#27a6e7`}
         _hover={{ bg: "#0088cc" }}
         borderRadius={22}
         w={isFullWidth ? "full" : undefined}>
+        <FaTelegram size={24} />
         <Text fontWeight={500} fontSize="16px" lineHeight="19px">
           {t("Join Telegram")}
         </Text>

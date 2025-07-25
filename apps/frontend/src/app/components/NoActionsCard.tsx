@@ -12,12 +12,8 @@ export const NoActionsCard = () => {
       <Text fontSize={"16px"} fontWeight={500} color={"#757575"} textAlign="center">
         {t("Use the Apps to do some Better Actions and earn tokens!")}
       </Text>
-      <Button
-        rounded={"full"}
-        variant={"outline"}
-        colorScheme="primary"
-        leftIcon={<Icon as={PiSquaresFourFill} />}
-        onClick={() => router.push("/apps")}>
+      <Button rounded={"full"} variant={"outline"} colorPalette="primary" onClick={() => router.push("/apps")}>
+        <Icon as={PiSquaresFourFill} />
         {t("Explore Apps")}
       </Button>
     </VStack>

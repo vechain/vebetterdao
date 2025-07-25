@@ -207,7 +207,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 borderRadius="full"
                 color="#C84968"
                 w="200px"
-                colorScheme="red"
+                colorPalette="red"
                 onClick={() => handleShowConfirmation("resume")}>
                 {t("Resume Distribution")}
               </Button>
@@ -225,7 +225,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 borderRadius="full"
                 w="200px"
                 color="#C84968"
-                colorScheme="red"
+                colorPalette="red"
                 onClick={() => handleShowConfirmation("pause")}>
                 {t("Pause Distribution")}
               </Button>

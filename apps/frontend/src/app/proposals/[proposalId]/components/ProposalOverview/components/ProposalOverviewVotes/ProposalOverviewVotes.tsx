@@ -140,7 +140,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
             <VStack alignItems={"stretch"} gap={6}>
               {Object.entries(votes).map(([key, value]) => (
                 <ProposalVotesProgressBar
-                  loading={proposalVotesLoading}
+                  isLoading={proposalVotesLoading}
                   key={key}
                   text={value.text}
                   percentage={value.percentage}

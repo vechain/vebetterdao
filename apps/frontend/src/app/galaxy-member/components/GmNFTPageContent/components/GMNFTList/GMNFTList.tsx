@@ -6,7 +6,8 @@ import { useGetTokensInfoByOwner } from "@/api/contracts/galaxyMember/hooks/useG
 import { useWallet } from "@vechain/vechain-kit"
 import { GMNFTListItem } from "./GMNFTListItem"
 import { useMemo } from "react"
-import { FeatureFlagWrapper, BaseTooltip } from "@/components"
+import { FeatureFlagWrapper } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { FeatureFlag } from "@/constants"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { useIsXNodeAttachedWhileTransferred } from "@/hooks"
@@ -46,11 +47,11 @@ export const GMNFTList = () => {
               <HStack justify="space-between">
                 <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
 
-                <BaseTooltip text={t("The active NFT is selected for rewards multiplier.")}>
+                <Tooltip content={t("The active NFT is selected for rewards multiplier.")}>
                   <span>
                     <UilInfoCircle color="#004CFC" />
                   </span>
-                </BaseTooltip>
+                </Tooltip>
               </HStack>
               <FeatureFlagWrapper
                 feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -78,18 +79,15 @@ export const GMNFTList = () => {
               </InfiniteScroll>
             </VStack>
             {isXNodeAttachedWhileTransferred && (
-              <Button
-                leftIcon={<UilLinkBroken color="#C84968" />}
-                color="#C84968"
-                variant={"link"}
-                onClick={() => handleDetachOnClick()}>
+              <Button color="#C84968" variant={"ghost"} onClick={() => handleDetachOnClick()}>
+                <UilLinkBroken color="#C84968" />
                 {t("Detach")}
               </Button>
             )}
           </VStack>
         </Card.Body>
       </Card.Root>
-      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
+      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.open} onClose={detachGmToXNodeModal.onClose} />
     </>
   )
 }

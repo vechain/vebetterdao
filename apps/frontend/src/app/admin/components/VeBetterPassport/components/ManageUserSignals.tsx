@@ -110,7 +110,7 @@ export const ManageUserSignals = () => {
               {isSignalResetEnabled && (
                 <Button
                   disabled={!isFormValid}
-                  colorScheme="red"
+                  colorPalette="red"
                   onClick={handleResetSignalsSubmit}
                   loading={isResetTxLoading || isResetPending}>
                   {t("Reset Signals")}
@@ -119,7 +119,7 @@ export const ManageUserSignals = () => {
 
               <Button
                 disabled={!isFormValid}
-                colorScheme="blue"
+                colorPalette="blue"
                 onClick={handleSignalUserSubmit}
                 loading={isSignalTxLoading || isSignalPending}>
                 {t("Signal User")}

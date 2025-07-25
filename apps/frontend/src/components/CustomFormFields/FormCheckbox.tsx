@@ -12,7 +12,7 @@ type FormCheckboxProps = {
 export const FormCheckbox = ({ label, description, register, error, onBlur }: FormCheckboxProps) => {
   return (
     <Field.Root invalid={!!error}>
-      <Checkbox.Root {...register} onBlur={onBlur} colorScheme="primary" size="lg">
+      <Checkbox.Root {...register} onBlur={onBlur} colorPalette="primary" size="lg">
         <Checkbox.Control />
         <Checkbox.Label>
           <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>

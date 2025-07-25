@@ -22,7 +22,7 @@ export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
           <Dialog.CloseTrigger />
         </Dialog.Header>
         <Dialog.Body>
-          <Container maxW={["full", "full", "container.xl"]}>
+          <Container maxW={["full", "full", "breakpoint-xl"]}>
             <VStack gap={4}>
               {images.map((image, index) => (
                 <Image

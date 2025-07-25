@@ -47,7 +47,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
 
   return (
     <VStack w="full" gap={6}>
-      <InputGroup startAddon={<Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />}>
+      <InputGroup startElement={<Icon as={UilSearch} boxSize={"24px"} color="#6A6A6A" />}>
         <Input
           size={"lg"}
           placeholder="Search for an app"
@@ -63,7 +63,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
           </Heading>
         </Skeleton>
         <Checkbox.Root
-          colorScheme="primary"
+          colorPalette="primary"
           onCheckedChange={e => onCheckboxChange(!!e.checked)}
           checked={isSelectAllChecked}
           size="lg">

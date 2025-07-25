@@ -219,7 +219,7 @@ export const AppealSteps = () => {
   }
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto" data-testid="appeal-page">
+    <VStack gap={6} align="stretch" w="full" maxW="breakpoint-md" mx="auto" data-testid="appeal-page">
       <Heading size={"xl"}>{t("Wallet Restriction Appeal")}</Heading>
 
       <Text>

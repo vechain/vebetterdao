@@ -135,16 +135,17 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   }, [router])
 
   return (
-    <VStack gap={6} alignItems="stretch" w="full" maxW={"container.md"} mx="auto">
+    <VStack gap={6} alignItems="stretch" w="full" maxW="breakpoint-md" mx="auto">
       {!isConnectedUser && (
         <Button
-          variant={"link"}
-          colorScheme="primary"
+          variant={"ghost"}
+          colorPalette="primary"
           onClick={onGoBack}
-          leftIcon={<FaAngleLeft />}
           size="sm"
+          alignItems="center"
           alignSelf={"flex-start"}>
-          {t("Go back")}
+          <FaAngleLeft />
+          {t("Go back")} {"AA"}
         </Button>
       )}
       <ProfileHeader address={parsedAddress} />

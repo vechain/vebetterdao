@@ -1,10 +1,10 @@
-import { Alert, Box, Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Card, HStack, Heading, Link, VStack } from "@chakra-ui/react"
 import { useAllocationsRoundsEvents } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useCallback, useMemo, useState } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
-import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
+import NextLink from "next/link"
 
 type Props = {
   maxRoundsToShow?: number
@@ -21,7 +21,6 @@ export const AllocationRoundsList: React.FC<Props> = ({
   renderInsideCard = false,
 }) => {
   const { t } = useTranslation()
-  const router = useRouter()
 
   const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(maxRoundsToShow)
 
@@ -45,13 +44,12 @@ export const AllocationRoundsList: React.FC<Props> = ({
           <HStack w="full" justify="space-between" alignItems={"baseline"}>
             <Heading size={headingSize}>{t("Allocations")}</Heading>
             {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-              <Button
-                variant="link"
-                colorScheme="primary"
-                rightIcon={<FiArrowUpRight />}
-                onClick={() => router.push("/rounds")}>
-                {t("See all rounds")}
-              </Button>
+              <Link asChild variant="plain" colorPalette="primary">
+                <NextLink href="/rounds">
+                  {t("See all rounds")}
+                  <FiArrowUpRight />
+                </NextLink>
+              </Link>
             )}
           </HStack>
         )}
@@ -67,7 +65,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           )}
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
-            <Button variant="link" colorScheme="blue" onClick={loadMore}>
+            <Button variant="ghost" colorScheme="blue" onClick={loadMore}>
               {t("Load more")}
             </Button>
           )}
@@ -83,9 +81,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
     headingSize,
     showViewAll,
     showLoadMore,
-    loadMore,
     renderRounds,
-    router,
     t,
   ])
 
@@ -97,13 +93,12 @@ export const AllocationRoundsList: React.FC<Props> = ({
             <HStack w="full" justify="space-between" alignItems={"baseline"}>
               <Heading size={headingSize}>{t("Allocations")}</Heading>
               {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-                <Button
-                  variant="link"
-                  colorScheme="primary"
-                  rightIcon={<FiArrowUpRight />}
-                  onClick={() => router.push("/rounds")}>
-                  {t("See all rounds")}
-                </Button>
+                <Link asChild variant="plain" colorPalette="primary">
+                  <NextLink href="/rounds">
+                    {t("See all rounds")}
+                    <FiArrowUpRight />
+                  </NextLink>
+                </Link>
               )}
             </HStack>
           </Card.Header>

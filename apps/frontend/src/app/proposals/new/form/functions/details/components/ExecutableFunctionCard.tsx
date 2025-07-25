@@ -105,8 +105,8 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               onClick={onAddAnotherTransactionClick}
               variant="primarySubtle"
               alignSelf={"flex-start"}
-              rounded="full"
-              leftIcon={<FaPlus />}>
+              rounded="full">
+              <FaPlus />
               {t("Add another transaction")}
             </Button>
           )}

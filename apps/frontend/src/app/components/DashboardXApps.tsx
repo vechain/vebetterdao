@@ -7,13 +7,14 @@ import {
 } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Card, HStack, Heading, Image, Skeleton, Text, VStack, Grid, Button } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
+import { Card, HStack, Heading, Image, Skeleton, Text, VStack, Grid, Link } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { v4 as uuid } from "uuid"
 import { useTheme } from "next-themes"
+import NextLink from "next/link"
+import { useRouter } from "next/navigation"
 
 type Props = {
   maxApps?: number
@@ -21,7 +22,6 @@ type Props = {
 
 export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
-  const router = useRouter()
   // Apps are listed based on the votes they received in the previous round and are eligible in the next round
   const { data: previousRoundId } = usePreviousAllocationRoundId()
   const { data: allMostVotedXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
@@ -42,13 +42,12 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
           <HStack w="full" justify={"space-between"}>
             <Heading size="md">{t("Explore Apps")}</Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Button
-                variant="link"
-                colorScheme="primary"
-                rightIcon={<FiArrowUpRight />}
-                onClick={() => router.push("/apps")}>
-                {t("See all")}
-              </Button>
+              <Link asChild variant="plain" colorPalette="primary">
+                <NextLink href="/apps">
+                  {t("See all")}
+                  <FiArrowUpRight />
+                </NextLink>
+              </Link>
             )}
           </HStack>
 

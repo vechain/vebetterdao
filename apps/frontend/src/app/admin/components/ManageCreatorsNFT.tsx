@@ -83,7 +83,7 @@ export const ManageCreatorsNFT = () => {
     <Badge
       textTransform="none"
       fontSize="sm"
-      colorScheme={colorScheme}
+      colorPalette={colorScheme}
       display="flex"
       alignItems="center"
       borderRadius="12px"
@@ -197,7 +197,7 @@ export const ManageCreatorsNFT = () => {
 
               {!check.includes(actionType) && (
                 <Button
-                  colorScheme="blue"
+                  colorPalette="blue"
                   type="submit"
                   disabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
                   {t(actionType === "mint" ? "Mint" : "Burn")}

@@ -38,7 +38,7 @@ export const StartRoundButton = () => {
         </VStack>
         <VStack>
           <Button
-            colorScheme="blue"
+            colorPalette="blue"
             disabled={isCurrentRoundActive}
             onClick={handleSubmit}
             loading={distributionLoading}

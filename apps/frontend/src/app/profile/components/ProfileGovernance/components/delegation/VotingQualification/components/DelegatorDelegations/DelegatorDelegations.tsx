@@ -66,11 +66,8 @@ export const DelegatorDelegations = ({ address }: Props) => {
           </HStack>
           <HStack>
             {isConnectedUser && (
-              <Button
-                variant={"dangerGhost"}
-                p={3}
-                leftIcon={<UilTimes color="#C84968" />}
-                onClick={revokeDelegationModal.onOpen}>
+              <Button variant={"dangerGhost"} p={3} onClick={revokeDelegationModal.onOpen}>
+                <UilTimes color="#C84968" />
                 {t("Remove delegation")}
               </Button>
             )}

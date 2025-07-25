@@ -1,26 +1,30 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react"
 import { keyframes } from "@emotion/react"
 import { darkThemeColors, lightThemeColors } from "./colors"
+
 // import "@fontsource-variable/instrument-sans"
 // import "@fontsource-variable/inter"
+
 import { cardSlotRecipe } from "./card"
+import { dialogSlotRecipe } from "./dialog"
+import { stepsSlotRecipe } from "./steps"
 
 import { buttonRecipe } from "./button"
 import { inputRecipe } from "./input"
 import { nativeSelectRecipe } from "./native-select"
-import { stepsRecipe } from "./steps"
 
 const baseThemeConfig = {
   theme: {
     recipes: {
       button: buttonRecipe,
       input: inputRecipe,
-      steps: stepsRecipe,
       nativeSelect: nativeSelectRecipe,
     },
 
     slotRecipes: {
       card: cardSlotRecipe,
+      dialog: dialogSlotRecipe,
+      steps: stepsSlotRecipe,
     },
 
     tokens: {

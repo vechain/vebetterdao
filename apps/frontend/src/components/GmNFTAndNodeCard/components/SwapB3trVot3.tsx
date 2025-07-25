@@ -106,18 +106,16 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
           <Button
             disabled={isSwapDisabled}
             onClick={onOpen}
-            leftIcon={
-              <UilExchangeAlt
-                size={"16px"}
-                style={{
-                  transform: "rotate(90deg)",
-                }}
-              />
-            }
             variant={"whiteAction"}
             rounded={"full"}
             fontWeight={500}
             px="24px">
+            <UilExchangeAlt
+              size={"16px"}
+              style={{
+                transform: "rotate(90deg)",
+              }}
+            />
             {t("Convert tokens")}
           </Button>
         )}

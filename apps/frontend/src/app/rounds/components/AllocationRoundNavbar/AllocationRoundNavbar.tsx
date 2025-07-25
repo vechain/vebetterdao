@@ -74,7 +74,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         py={3}
         data-testid={`allocation-round-${roundId}-nav-desktop`}>
         <Container
-          maxW={"container.xl"}
+          maxW="breakpoint-xl"
           display={"flex"}
           flex={1}
           alignItems={"center"}
@@ -88,8 +88,8 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             variant={"ghost"}
             aria-label="Go to previous round"
             disabled={prevButtonDisabled}
-            onClick={goToPreviousRound}
-            leftIcon={<FaArrowLeft />}>
+            onClick={goToPreviousRound}>
+            <FaArrowLeft />
             {t("Previous round")}
           </Button>
 
@@ -120,9 +120,9 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             color={nextButtonDisabled ? "#757575" : "#004CFC"}
             aria-label="Go to next round"
             disabled={nextButtonDisabled}
-            onClick={goToNextRound}
-            rightIcon={<FaArrowRight />}>
+            onClick={goToNextRound}>
             {t("Next round")}
+            <FaArrowRight />
           </Button>
         </Container>
       </HStack>
@@ -141,11 +141,11 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         data-testid="prev-round-button"
         color={prevButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
-        icon={<FaArrowLeft />}
         disabled={prevButtonDisabled}
         onClick={goToPreviousRound}
-        aria-label="Go to previous round"
-      />
+        aria-label="Go to previous round">
+        <FaArrowLeft />
+      </IconButton>
       <VStack w="full">
         <HStack gap={4}>
           <Skeleton loading={isLoading}>
@@ -172,11 +172,11 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
         data-testid="next-round-button"
         color={nextButtonDisabled ? "#757575" : "#004CFC"}
         variant={"ghost"}
-        icon={<FaArrowRight />}
         aria-label="Go to next round"
         onClick={goToNextRound}
-        disabled={nextButtonDisabled}
-      />
+        disabled={nextButtonDisabled}>
+        <FaArrowRight />
+      </IconButton>
     </HStack>
   )
 }

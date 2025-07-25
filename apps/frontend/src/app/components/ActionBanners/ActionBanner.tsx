@@ -286,10 +286,10 @@ export const ActionBanner = () => {
             left={5}
             top={"50%"}
             transform={"translateY(-50%)"}
-            icon={<FaChevronLeft />}
             onClick={() => swiperRef.current?.slidePrev()}
-            aria-label="Prev slide"
-          />
+            aria-label="Prev slide">
+            <FaChevronLeft />
+          </IconButton>
         )}
       </Show>
       <Show when={!isAboveMd}>
@@ -301,10 +301,10 @@ export const ActionBanner = () => {
             right={5}
             top={"50%"}
             transform={"translateY(-50%)"}
-            icon={<FaChevronRight />}
             onClick={() => swiperRef.current?.slideNext()}
-            aria-label="Next slide"
-          />
+            aria-label="Next slide">
+            <FaChevronRight />
+          </IconButton>
         )}
       </Show>
     </Swiper>

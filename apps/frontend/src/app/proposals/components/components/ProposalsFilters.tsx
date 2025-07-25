@@ -163,7 +163,7 @@ export const ProposalsFilters = (props: Props) => {
             )
           })}
           {hasNonDefaultFilters && (
-            <Button variant="link" colorScheme="primary" onClick={clearFilter}>
+            <Button variant="ghost" colorPalette="primary" onClick={clearFilter}>
               {t("Reset filters")}
             </Button>
           )}
@@ -181,9 +181,9 @@ export const ProposalsFilters = (props: Props) => {
             borderRadius={"full"}
             borderWidth={1}
             borderColor={"#EFEFEF"}
-            onClick={() => setIsStateFilter(false)}
-            icon={<MdClose size={18} />}
-          />
+            onClick={() => setIsStateFilter(false)}>
+            <MdClose size={18} />
+          </IconButton>
 
           <HStack
             overflowX={{ base: "scroll", md: "hidden" }}

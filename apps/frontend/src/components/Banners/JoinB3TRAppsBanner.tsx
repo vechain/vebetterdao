@@ -45,7 +45,8 @@ export const JoinB3TRAppsBanner = () => {
               "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!",
             )}
           </Text>
-          <Button variant="applyButton" onClick={openGrantPage} leftIcon={<FaPlus />}>
+          <Button variant="applyButton" onClick={openGrantPage}>
+            <FaPlus />
             {t("Apply now")}
           </Button>
         </VStack>

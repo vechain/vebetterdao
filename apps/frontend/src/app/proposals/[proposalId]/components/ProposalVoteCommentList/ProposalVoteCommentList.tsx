@@ -113,7 +113,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
                     fontWeight="medium">
                     {status}{" "}
                     {activeFilter === status && (
-                      <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
+                      <Badge ml={1} colorPalette="white" borderRadius="full" px={2}>
                         {visibleComments.length}
                       </Badge>
                     )}

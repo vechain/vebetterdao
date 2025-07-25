@@ -96,7 +96,7 @@ export const UpdateReceiverAddress = () => {
                 </InputGroup>
               </Field.Root>
 
-              <Button disabled={!isFormValid} colorScheme="blue" type="submit" loading={isLoading}>
+              <Button disabled={!isFormValid} colorPalette="blue" type="submit" loading={isLoading}>
                 {t("Save")}
               </Button>
             </VStack>

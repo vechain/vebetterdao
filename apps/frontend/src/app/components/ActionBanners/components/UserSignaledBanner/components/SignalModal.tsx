@@ -29,7 +29,7 @@ export const SignalModal = ({ isOpen, onClose, signals }: Props) => {
           )}
         </Text>
 
-        <Button as={Link} href="/appeal" colorScheme="blue" borderRadius="full" width="">
+        <Button as={Link} href="/appeal" colorPalette="blue" borderRadius="full" width="">
           {t("File an appeal")}
         </Button>
 

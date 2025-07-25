@@ -146,7 +146,8 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
                 </Alert.Description>
               </Box>
             </Alert.Root>
-            <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
+            <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment}>
+              <UilLink />
               {t("Attach now!")}
             </Button>
           </VStack>

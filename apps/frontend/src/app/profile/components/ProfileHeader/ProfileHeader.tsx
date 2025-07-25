@@ -46,7 +46,7 @@ export const ProfileHeader = ({ address }: Props) => {
 
                 <IconButton
                   variant="link"
-                  colorScheme={isCopied ? "green" : "primary"}
+                  colorPalette={isCopied ? "green" : "primary"}
                   onClick={handleCopy}
                   aria-label="Copy Address">
                   {isCopied ? <UilCheck /> : <UilCopy />}

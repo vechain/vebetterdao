@@ -80,10 +80,10 @@ export const CreatorApplyNow = () => {
                   fontSize={{ base: "14px" }}
                   variant="secondary"
                   borderRadius="full"
-                  leftIcon={<UilPlus />}
                   onClick={onOpen}
                   _hover={{ opacity: "0.6", transition: "all 0.3s" }}
                   w={{ base: "80%", md: "auto" }}>
+                  <UilPlus />
                   {t("Apply now")}
                 </Button>
               </Stack>

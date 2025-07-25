@@ -80,7 +80,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           selectedApps={parsedVotes}
           onSelectedAppsChange={handleOnSelectedAppsChange}
           xApps={xAppsQuery.data}
-          loading={xAppsQuery.isLoading}
+          isLoading={xAppsQuery.isLoading}
         />
 
         <CastAllocationControlsBottomBar

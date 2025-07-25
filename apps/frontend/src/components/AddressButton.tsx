@@ -44,7 +44,7 @@ export const AddressButton: React.FC<IAddressButton> = ({
     <Button
       data-cy={`address-button-${address}`}
       size={buttonSize}
-      colorScheme={"gray"}
+      colorPalette={"gray"}
       onClick={onClickHandler}
       {...(showAddressIcon && { paddingLeft: 0 })}
       paddingY={0}

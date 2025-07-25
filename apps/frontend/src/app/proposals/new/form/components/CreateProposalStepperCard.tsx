@@ -78,7 +78,7 @@ export const CreateProposalStepperCard = () => {
           size="sm"
           index={activeStep}
           orientation="vertical"
-          colorScheme="primary"
+          colorPalette="primary"
           gap="0"
           height={height}
           mt={4}>

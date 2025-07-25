@@ -142,13 +142,13 @@ export const AppDetailOverview = ({
                             h="auto"
                             p={0}
                             m={0}
-                            variant={"link"}
+                            variant={"ghost"}
                             color="#6A6A6A"
-                            rightIcon={<UilArrowUpRight />}
                             onClick={() => {
                               onDistributionStrategyModalOpen()
                             }}>
                             {t("View Details")}
+                            <UilArrowUpRight />
                           </Button>
                         </VStack>
                       ) : null}
@@ -161,12 +161,9 @@ export const AppDetailOverview = ({
                         <EditAppPageButton />
                         <AdminAppPageButton />
                       </Show>
-                      <Button
-                        w={["full", "full", "auto"]}
-                        variant={"primaryAction"}
-                        rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
-                        onClick={goToWebsite}>
+                      <Button w={["full", "full", "auto"]} variant={"primaryAction"} onClick={goToWebsite}>
                         {t("Go to Website")}
+                        <UilArrowUpRight color="#FFFFFF" size={"16px"} />
                       </Button>
                       <Show below="sm">
                         <EditAppPageButton />

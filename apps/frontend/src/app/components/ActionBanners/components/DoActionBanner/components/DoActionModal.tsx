@@ -70,16 +70,17 @@ export const DoActionModal = ({ doActionModal }: Props) => {
             "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
           )}
         </Text>
-        <Button variant="primaryAction" leftIcon={<IoGridOutline />} onClick={goToApps}>
+        <Button variant="primaryAction" onClick={goToApps}>
+          <IoGridOutline />
           {t("Explore apps")}
         </Button>
         <Button
           variant="primarySubtle"
-          leftIcon={<UilInfoCircle />}
           _hover={{ textDecoration: "none" }}
           as={Link}
           href={VEPASSPORT_DOCS_URL}
           isExternal>
+          <UilInfoCircle />
           {t("Know more")}
         </Button>
       </VStack>

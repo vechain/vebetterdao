@@ -3,8 +3,9 @@ import {
   useSustainabilitySingleUserOverview,
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
+import NextLink from "next/link"
 
-import { Button, Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 
 import { useWallet } from "@vechain/vechain-kit"
@@ -12,7 +13,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
-import { useRouter } from "next/navigation"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
 export const MockLeaderboard = [
@@ -26,7 +26,6 @@ export const MockLeaderboard = [
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const router = useRouter()
   const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
@@ -78,10 +77,6 @@ export const Leaderboard = () => {
     address: entry?.entity as string,
     score: entry?.actionsRewarded as number,
   }))
-
-  const onSeeAllClick = () => {
-    router.push(`/leaderboard/${selectedRoundId}`)
-  }
 
   const renderRankings = useMemo(() => {
     if (leaderboardQuery.isLoading)
@@ -146,8 +141,8 @@ export const Leaderboard = () => {
                 minW={0}
                 size={"lg"}
                 aria-label="Next round"
-                variant="link"
-                colorScheme="primary"
+                variant="ghost"
+                colorPalette="primary"
                 disabled={isFirstRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
                 <Icon as={FaAngleLeft} boxSize={5} />
@@ -163,8 +158,8 @@ export const Leaderboard = () => {
                 minW={0}
                 size={"lg"}
                 aria-label="Next round"
-                variant="link"
-                colorScheme="primary"
+                variant="ghost"
+                colorPalette="primary"
                 disabled={isLastRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
                 <Icon as={FaAngleRight} boxSize={5} />
@@ -186,9 +181,9 @@ export const Leaderboard = () => {
             )}
           </VStack>
           <Separator w="full" h={1} />
-          <Button size="md" variant={"link"} colorScheme="primary" w="full" onClick={onSeeAllClick}>
-            {t("See full leaderboard")}
-          </Button>
+          <Link asChild variant={"plain"} colorPalette="primary" mx="auto">
+            <NextLink href={`/leaderboard/${selectedRoundId}`}>{t("See full leaderboard")}</NextLink>
+          </Link>
         </VStack>
       </Card.Body>
     </Card.Root>

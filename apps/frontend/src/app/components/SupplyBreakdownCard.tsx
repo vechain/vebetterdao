@@ -4,10 +4,10 @@ import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
-import { BaseTooltip } from "../../components/BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useGetB3trBalance } from "@/hooks"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()
@@ -63,14 +63,18 @@ export const SupplyBreakdownCard = () => {
       <Card.Header>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">{t("Supply breakdown")}</Heading>
-          <BaseTooltip
-            text={t(
-              `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
-            )}>
+          <Tooltip
+            content={
+              <Text>
+                {t(
+                  `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
+                )}
+              </Text>
+            }>
             <span>
               <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
             </span>
-          </BaseTooltip>
+          </Tooltip>
         </HStack>
       </Card.Header>
       <Card.Body>

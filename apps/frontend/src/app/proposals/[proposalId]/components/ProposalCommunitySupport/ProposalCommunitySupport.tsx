@@ -7,7 +7,7 @@ import { useMemo } from "react"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export const ProposalCommunitySupport = () => {
   const { proposal } = useProposalDetail()
@@ -45,11 +45,9 @@ export const ProposalCommunitySupport = () => {
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("Community Support")}
           </Heading>
-          <BaseTooltip text={t("You will not be able to vote on this proposal with the tokens used for support.")}>
-            <span>
-              <UilInfoCircle size="24px" color={"#004CFC"} />
-            </span>
-          </BaseTooltip>
+          <Tooltip content={t("You will not be able to vote on this proposal with the tokens used for support.")}>
+            <UilInfoCircle size="24px" color={"#004CFC"} />
+          </Tooltip>
         </HStack>
         <Text fontSize={"14px"}>
           {isDepositNotMet

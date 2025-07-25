@@ -148,7 +148,7 @@ export const BulkClaimXAppsAllocations = () => {
                 </InputGroup>
               </Field.Root>
 
-              <Button disabled={allClaimed} colorScheme="blue" type="submit" loading={isLoading}>
+              <Button disabled={allClaimed} colorPalette="blue" type="submit" loading={isLoading}>
                 {allClaimed ? "Already claimed" : "Claim for all"}
               </Button>
             </VStack>

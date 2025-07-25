@@ -50,20 +50,12 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
       </HStack>
       {isConnectedUser && (
         <HStack gap={4}>
-          <Button
-            variant={"dangerGhost"}
-            flex={1}
-            p={3}
-            leftIcon={<UilTimes color="#C84968" />}
-            onClick={rejectLinkingModal.onOpen}>
+          <Button variant={"dangerGhost"} flex={1} p={3} onClick={rejectLinkingModal.onOpen}>
+            <UilTimes color="#C84968" />
             {t("Reject")}
           </Button>
-          <Button
-            variant={"primaryGhost"}
-            flex={1}
-            p={3}
-            leftIcon={<UilCheck color="#004CFC" />}
-            onClick={acceptLinkingModal.onOpen}>
+          <Button variant={"primaryGhost"} flex={1} p={3} onClick={acceptLinkingModal.onOpen}>
+            <UilCheck color="#004CFC" />
             {t("Accept")}
           </Button>
         </HStack>

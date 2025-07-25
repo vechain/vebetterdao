@@ -187,7 +187,7 @@ export const RoundInfoBottomSheet = () => {
                 {canVote && (
                   <Button
                     onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
-                    colorScheme="primary"
+                    colorPalette="primary"
                     w="full"
                     rounded={"full"}>
                     {t("Vote now")}
@@ -216,7 +216,7 @@ export const RoundInfoBottomSheet = () => {
               <NoActiveProposalCard />
             )}
           </VStack>
-          <Button onClick={() => router.push("/proposals")} variant="link" colorScheme="primary">
+          <Button onClick={() => router.push("/proposals")} variant="link" colorPalette="primary">
             {t("View all proposals")}
           </Button>
         </VStack>

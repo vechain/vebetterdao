@@ -64,14 +64,14 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
           return (
             <Button
-              colorScheme={selected ? "primary" : "gray"}
+              colorPalette={selected ? "primary" : "gray"}
               rounded={"full"}
               w={["full", "full", "auto"]}
-              leftIcon={<Icon as={route.icon} />}
               key={route.name}
               variant={selected ? "primaryAction" : "ghost"}
               onClick={onClick}
               data-testid={selected ? "current-section" : ""}>
+              <Icon as={route.icon} />
               {route.name}
             </Button>
           )

@@ -119,35 +119,29 @@ export const AttachGMNFTCard = () => {
             </HStack>
           </Flex>
           {isXNodeAttachedToGM ? (
-            <Button
-              leftIcon={<UilLinkBroken color="#C84968" />}
-              color="#C84968"
-              variant={"link"}
-              disabled={isXNodeDelegator}
-              onClick={() => handleDetachOnClick()}>
+            <Button color="#C84968" variant={"ghost"} disabled={isXNodeDelegator} onClick={() => handleDetachOnClick()}>
+              <UilLinkBroken color="#C84968" />
               {t("Detach")}
             </Button>
           ) : (
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
               fallback={
-                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} disabled={true}>
+                <Button variant={"primarySubtle"} disabled={true}>
+                  <UilLink color="#004CFC" />
                   {t("Coming soon!")}
                 </Button>
               }>
-              <Button
-                leftIcon={<UilLink color="#004CFC" />}
-                variant={"primarySubtle"}
-                onClick={() => handleAttachOnClick()}
-                disabled={isXNodeDelegator}>
+              <Button variant={"primarySubtle"} onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
+                <UilLink color="#004CFC" />
                 {t("Attach now!")}
               </Button>
             </FeatureFlagWrapper>
           )}
         </VStack>
       </Card.Body>
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
-      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
+      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.open} onClose={attachGmToXNodeModal.onClose} />
+      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.open} onClose={detachGmToXNodeModal.onClose} />
     </Card.Root>
   )
 }

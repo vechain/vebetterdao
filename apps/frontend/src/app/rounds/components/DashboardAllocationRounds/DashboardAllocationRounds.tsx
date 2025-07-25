@@ -51,23 +51,23 @@ export const DashboardAllocationRounds = () => {
         <HStack gap={4} justifyContent="space-between" w="full">
           {isDesktop ? (
             <Button
-              variant="link"
-              colorScheme="primary"
-              leftIcon={<FaAngleLeft />}
+              variant="ghost"
+              colorPalette="primary"
               disabled={allocationRound.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+              <FaAngleLeft />
               {t("Previous round")}
             </Button>
           ) : (
             <IconButton
               size={"lg"}
               aria-label="Previous round"
-              variant="link"
-              colorScheme="primary"
-              icon={<Icon as={FaAngleLeft} boxSize={5} />}
+              variant="ghost"
+              colorPalette="primary"
               disabled={allocationRound.isFirstRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-            />
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+              <Icon as={FaAngleLeft} boxSize={5} />
+            </IconButton>
           )}
 
           <VStack gap={2}>
@@ -93,23 +93,24 @@ export const DashboardAllocationRounds = () => {
           </VStack>
           {isDesktop ? (
             <Button
-              variant="link"
-              colorScheme="primary"
-              rightIcon={<FaAngleRight />}
+              variant="ghost"
+              colorPalette="primary"
               disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
               {t("Next round")}
+
+              <FaAngleRight />
             </Button>
           ) : (
             <IconButton
               size={"lg"}
               aria-label="Next round"
-              variant="link"
-              colorScheme="primary"
-              icon={<Icon as={FaAngleRight} boxSize={5} />}
+              variant="ghost"
+              colorPalette="primary"
               disabled={allocationRound.isLastRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
-            />
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+              <Icon as={FaAngleRight} boxSize={5} />
+            </IconButton>
           )}
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
@@ -128,7 +129,7 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Button onClick={() => router.push("/proposals")} variant="link" colorScheme="primary">
+        <Button onClick={() => router.push("/proposals")} variant="ghost" colorPalette="primary">
           {t("View all proposals")}
         </Button>
       </VStack>

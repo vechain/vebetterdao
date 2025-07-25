@@ -89,7 +89,7 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
       size="sm"
       step={activeStep}
       orientation="vertical"
-      colorScheme="primary"
+      colorPalette="primary"
       gap="0"
       height="200px"
       mt={4}

@@ -89,7 +89,7 @@ export const GMSetMaxLevel = () => {
                 {errors.newMaxLevel && <Field.ErrorText>{errors.newMaxLevel.message}</Field.ErrorText>}
               </Field.Root>
 
-              <Button disabled={!isFormValid || isTransactionPending} type="submit" colorScheme="blue" size="md">
+              <Button disabled={!isFormValid || isTransactionPending} type="submit" colorPalette="blue" size="md">
                 {t("Set Max Level")}
               </Button>
             </VStack>

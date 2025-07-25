@@ -84,7 +84,7 @@ export const AppSecurity = () => {
                 </NativeSelect.Root>
               </Field.Root>
             </HStack>
-            <Button disabled={!isFormValid} colorScheme="blue" type="submit" loading={isLoading}>
+            <Button disabled={!isFormValid} colorPalette="blue" type="submit" loading={isLoading}>
               {t("Update security level")}
             </Button>
           </VStack>

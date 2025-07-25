@@ -32,8 +32,12 @@ export const cardSlotRecipe = defineSlotRecipe({
       filled: {
         root: {
           bg: {
-            base: "#2D2D2F",
+            base: "#F8F8F8",
+            _dark: "#2D2D2F",
           },
+        },
+        body: {
+          padding: "24px",
         },
       },
       filledSmall: {
@@ -68,6 +72,11 @@ export const cardSlotRecipe = defineSlotRecipe({
           bg: {
             base: "#FFF",
             _dark: "#1E1E1E",
+          },
+          borderWidth: "1px",
+          borderColor: {
+            base: "#D5D5D5",
+            _dark: "#2D2D2F",
           },
         },
       },

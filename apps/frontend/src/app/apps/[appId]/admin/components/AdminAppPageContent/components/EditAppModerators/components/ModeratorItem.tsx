@@ -73,7 +73,8 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
               </Text>
             </VStack>
           </HStack>
-          <Button variant="dangerGhost" leftIcon={<UilTrash size={"14px"} color="#D23F63" />} onClick={onOpen}>
+          <Button variant="dangerGhost" onClick={onOpen}>
+            <UilTrash size={"14px"} color="#D23F63" />
             {t("Remove")}
           </Button>
         </Show>

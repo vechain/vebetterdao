@@ -108,7 +108,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Container
                 mt={{ base: 2, md: 10 }}
                 mb={[20, 20, 20]}
-                maxW={"container.xl"}
+                maxW="breakpoint-xl"
                 display={"flex"}
                 flex={1}
                 alignItems={"center"}

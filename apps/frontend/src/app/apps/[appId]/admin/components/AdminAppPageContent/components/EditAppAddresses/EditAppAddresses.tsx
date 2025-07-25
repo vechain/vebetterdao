@@ -63,9 +63,9 @@ export const EditAppAddresses = ({
                   borderRight="1px solid #f4f6f9"
                   borderLeftRadius={0}
                   onClick={modalEditTeamWalletAddress.onOpen}
-                  leftIcon={<UilPen size="16px" />}
                   rounded="8px"
                   fontWeight={500}>
+                  <UilPen size="16px" />
                   {t("Edit")}
                 </Button>
               )
@@ -100,9 +100,9 @@ export const EditAppAddresses = ({
                   borderRight="1px solid #f4f6f9"
                   borderLeftRadius={0}
                   onClick={modalEditAdminAddress.onOpen}
-                  leftIcon={<UilPen size="16px" />}
                   rounded="8px"
                   fontWeight={500}>
+                  <UilPen size="16px" />
                   {t("Edit")}
                 </Button>
               )

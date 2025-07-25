@@ -28,7 +28,7 @@ import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
 import { TransferAppFundsModal } from "./TransferAppFundsModal"
 import { ManagementCenterModal } from "./ManagementCenterModal"
 
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { FiInfo } from "react-icons/fi"
 import { useMemo } from "react"
 import { FaArrowUpRightFromSquare } from "react-icons/fa6"
@@ -82,14 +82,18 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"start"} gap={0}>
               <HStack>
                 <Text textStyle="md">{t("Balance")}</Text>
-                <BaseTooltip
-                  text={t(
-                    "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
-                  )}>
+                <Tooltip
+                  content={
+                    <Text>
+                      {t(
+                        "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
+                      )}
+                    </Text>
+                  }>
                   <span>
                     <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
                   </span>
-                </BaseTooltip>
+                </Tooltip>
               </HStack>
               <Skeleton loading={isBalanceLoading}>
                 <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
@@ -117,11 +121,11 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"start"} gap={0}>
               <HStack>
                 <Text textStyle="md">{t("Rewards Pool")}</Text>
-                <BaseTooltip text={t("Amount of B3TR available for rewards distribution")}>
+                <Tooltip content={<Text>{t("Amount of B3TR available for rewards distribution")}</Text>}>
                   <span>
                     <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
                   </span>
-                </BaseTooltip>
+                </Tooltip>
               </HStack>
               <Skeleton loading={isRewardsBalanceLoading}>
                 <Heading size={{ base: "2xl", md: "xl" }} color={rewardsPoolColor}>

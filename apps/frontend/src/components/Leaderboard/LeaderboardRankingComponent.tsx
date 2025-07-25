@@ -99,7 +99,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                 )}
 
                 {domain && (
-                  <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
+                  <Text fontSize="md" fontWeight={600} h="auto" colorPalette={"gray"}>
                     {domain}
                   </Text>
                 )}

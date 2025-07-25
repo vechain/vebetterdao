@@ -119,15 +119,15 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
       <Flex justify="center" align="center" mt={12} gap={4}>
         <IconButton
           aria-label="Previous card"
-          icon={<FaChevronLeft size={16} />}
           onClick={prevCard}
           variant="solid"
           bg="white"
           color="black"
           size="sm"
           _hover={{ bg: "whiteAlpha.400" }}
-          borderRadius="full"
-        />
+          borderRadius="full">
+          <FaChevronLeft size={16} />
+        </IconButton>
 
         <Flex gap={2}>
           {upgradableNfts.map((nft, index) => {
@@ -150,15 +150,15 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
 
         <IconButton
           aria-label="Next card"
-          icon={<FaChevronRight size={16} />}
           onClick={nextCard}
           variant="solid"
           bg="white"
           color="black"
           size="sm"
           _hover={{ bg: "whiteAlpha.400" }}
-          borderRadius="full"
-        />
+          borderRadius="full">
+          <FaChevronRight size={16} />
+        </IconButton>
       </Flex>
     </Box>
   )

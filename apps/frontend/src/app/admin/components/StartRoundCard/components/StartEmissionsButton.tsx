@@ -21,7 +21,7 @@ export const StartEmissionsButton = () => {
     <HStack gap={12}>
       <Button
         disabled={parseInt(currentRoundId ?? "0") > 0}
-        colorScheme="blue"
+        colorPalette="blue"
         onClick={handleStartEmissions}
         loading={loading}
         data-testid={"start-voting-round-button"}>

@@ -1,6 +1,6 @@
 import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { gmNfts } from "@/constants/gmNfts"
 import { Button, Card, Flex, Heading, HStack, Image, Table, VStack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
@@ -48,8 +48,8 @@ export const GalaxyLevelsCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("Reward Weight")}</Heading>
-              <BaseTooltip
-                text={
+              <Tooltip
+                content={
                   <Table.ScrollArea maxW="280px" maxH="400px" overflowY="auto">
                     <Table.Root variant="line" size="sm">
                       <Table.Header position="sticky" top={0}>
@@ -80,7 +80,7 @@ export const GalaxyLevelsCard = () => {
                 <span>
                   <UilInfoCircle color="#004CFC" />
                 </span>
-              </BaseTooltip>
+              </Tooltip>
             </HStack>
             <Text fontSize="sm" color="#6A6A6A">
               {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}

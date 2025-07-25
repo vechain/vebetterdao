@@ -8,7 +8,8 @@ export const UploadFileButton = ({ onDrop, ...props }: Props) => {
   const { open } = useDropzone({ onDrop: onDrop })
   const { t } = useTranslation()
   return (
-    <Button variant="outline" colorScheme="primary" rounded="full" onClick={open} leftIcon={<FaFile />} {...props}>
+    <Button variant="outline" colorPalette="primary" rounded="full" onClick={open} {...props}>
+      <FaFile />
       {t("Upload File")}
     </Button>
   )

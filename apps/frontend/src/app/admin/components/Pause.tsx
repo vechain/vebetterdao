@@ -105,7 +105,7 @@ export const Pause: React.FC = () => {
   const pauseB3TR = (
     <>
       <Button
-        colorScheme={`${isB3trPaused ? "blue" : "red"}`}
+        colorPalette={`${isB3trPaused ? "blue" : "red"}`}
         onClick={handleToggleB3trPause}
         loading={isToggleB3trPausedLoading}>
         {isB3trPaused ? "Unpause B3TR" : "Pause B3TR"}
@@ -117,7 +117,7 @@ export const Pause: React.FC = () => {
   const pauseVOT3 = (
     <>
       <Button
-        colorScheme={`${isVot3Paused ? "blue" : "red"}`}
+        colorPalette={`${isVot3Paused ? "blue" : "red"}`}
         onClick={handleToggleVot3Pause}
         loading={isToggleVot3PausedLoading}>
         {isVot3Paused ? "Unpause VOT3" : "Pause VOT3"}
@@ -129,7 +129,7 @@ export const Pause: React.FC = () => {
   const pauseGalaxyMember = (
     <>
       <Button
-        colorScheme={`${isGalaxyMemberPaused ? "blue" : "red"}`}
+        colorPalette={`${isGalaxyMemberPaused ? "blue" : "red"}`}
         onClick={handleToggleGalaxyMemberPause}
         loading={isToggleGalaxyMemberPausedLoading}>
         {isGalaxyMemberPaused ? "Unpause Galaxy Member" : "Pause Galaxy Member"}
@@ -141,7 +141,7 @@ export const Pause: React.FC = () => {
   const pauseB3TRGovernor = (
     <>
       <Button
-        colorScheme={`${isB3TRGovernorPaused ? "blue" : "red"}`}
+        colorPalette={`${isB3TRGovernorPaused ? "blue" : "red"}`}
         onClick={handleToggleB3TRGovernorPause}
         loading={isToggleB3TRGovernorPausedLoading}>
         {isB3TRGovernorPaused ? "Unpause B3TRGovernor" : "Pause B3TRGovernor"}

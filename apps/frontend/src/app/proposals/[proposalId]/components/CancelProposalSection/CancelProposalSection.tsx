@@ -84,7 +84,8 @@ export const CancelProposalSection = () => {
                 <Button variant={"primaryGhost"} onClick={handleCloseConfirmationModal}>
                   {t("Go back")}
                 </Button>
-                <Button variant={"dangerFilled"} leftIcon={<UilBan size="18px" />} onClick={handleCancelProposal}>
+                <Button variant={"dangerFilled"} onClick={handleCancelProposal}>
+                  <UilBan size="18px" />
                   {t("Cancel this proposal")}
                 </Button>
               </HStack>

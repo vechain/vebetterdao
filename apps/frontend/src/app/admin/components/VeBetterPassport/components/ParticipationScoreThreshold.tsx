@@ -66,7 +66,7 @@ export const ParticipationScoreThreshold = () => {
                 <Field.ErrorText>{t("Invalid amount")}</Field.ErrorText>
               </Field.Root>
             </HStack>
-            <Button disabled={!isFormValid} colorScheme="blue" type="submit" loading={isLoading}>
+            <Button disabled={!isFormValid} colorPalette="blue" type="submit" loading={isLoading}>
               {t("Update threshold")}
             </Button>
           </VStack>

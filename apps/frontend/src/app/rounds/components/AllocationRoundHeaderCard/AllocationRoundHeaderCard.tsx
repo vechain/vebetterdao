@@ -170,9 +170,9 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   variant={"primaryAction"}
                   onClick={navigateToVote}
                   size={"lg"}
-                  colorScheme={"primary"}
-                  w={["full", "auto"]}
-                  leftIcon={<Icon as={MdHowToVote} boxSize={4} />}>
+                  colorPalette={"primary"}
+                  w={["full", "auto"]}>
+                  <Icon as={MdHowToVote} boxSize={4} />
                   {t("Cast your vote")}
                 </Button>
               )}

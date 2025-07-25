@@ -54,12 +54,12 @@ export const AppCardOptionsMobileModal = ({
         <Dialog.Body>
           <VStack gap={4} w="full">
             {showViewDetails && (
-              <Button w="full" size="lg" colorScheme="gray" variant={"solid"} onClick={navigateToAppDetail}>
+              <Button w="full" size="lg" colorPalette="gray" variant={"solid"} onClick={navigateToAppDetail}>
                 <FaRegImage />
                 {t("View details")}
               </Button>
             )}
-            <Button w="full" size="lg" colorScheme="gray" variant={"solid"} onClick={handleOnCopy}>
+            <Button w="full" size="lg" colorPalette="gray" variant={"solid"} onClick={handleOnCopy}>
               <FaCopy />
               {t("Copy team wallet address")}
             </Button>
@@ -71,9 +71,9 @@ export const AppCardOptionsMobileModal = ({
                 variant={"solid"}
                 size="lg"
                 disabled={!externalUrl}
-                leftIcon={<FaExternalLinkAlt />}
-                colorScheme="gray"
+                colorPalette="gray"
                 w="full">
+                <FaExternalLinkAlt />
                 {externalUrl ? "Go to the App" : "No App link available"}
               </Button>
             </Skeleton>

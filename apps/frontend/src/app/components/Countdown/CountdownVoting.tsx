@@ -39,7 +39,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
     return (
       <Skeleton
         as={HStack}
-        justify={"space-between"}
+        justifyContent={"space-between"}
         px={3}
         py={1}
         rounded={"full"}
@@ -69,7 +69,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
             px={3}
             py={1}
             rounded={"full"}
-            textColor={isNearEndText}
+            color={isNearEndText}
             bg={isNearEndBg}
             borderColor={"#F2F2F2"}
             fontSize={isAbove500 ? "13px" : "10px"}

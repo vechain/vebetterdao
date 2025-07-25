@@ -230,7 +230,8 @@ export const EditAppPageContent = () => {
             <Button variant="primaryGhost" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
-            <Button variant="primaryAction" type="submit" leftIcon={<UilCheck size="16px" />} disabled={!isFormChanged}>
+            <Button variant="primaryAction" type="submit" disabled={!isFormChanged}>
+              <UilCheck size="16px" />
               {t("Save changes")}
             </Button>
           </HStack>

@@ -124,18 +124,16 @@ export const AttachXNodeCard = () => {
             </HStack>
           )}
           {isXNodeAttachedToGM ? (
-            <Button
-              leftIcon={<UilLinkBroken color="#C84968" />}
-              color="#C84968"
-              variant={"link"}
-              onClick={() => handleDetachOnClick()}>
+            <Button color="#C84968" variant={"link"} onClick={() => handleDetachOnClick()}>
+              <UilLinkBroken color="#C84968" />
               {t("Detach")}
             </Button>
           ) : (
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
               fallback={
-                <Button leftIcon={<UilLinkBroken color="#004CFC" />} variant={"primarySubtle"} disabled={true}>
+                <Button variant={"primarySubtle"} disabled={true}>
+                  <UilLinkBroken color="#004CFC" />
                   {t("Coming soon!")}
                 </Button>
               }>
@@ -167,11 +165,8 @@ export const AttachXNodeCard = () => {
                   </Text>
                 </HStack>
               ) : (
-                <Button
-                  leftIcon={<UilLinkBroken color="#004CFC" />}
-                  variant={"primarySubtle"}
-                  disabled={isXNodeDelegator}
-                  onClick={() => handleAttachOnClick()}>
+                <Button variant={"primarySubtle"} disabled={isXNodeDelegator} onClick={() => handleAttachOnClick()}>
+                  <UilLinkBroken color="#004CFC" />
                   {t("Attach now!")}
                 </Button>
               )}

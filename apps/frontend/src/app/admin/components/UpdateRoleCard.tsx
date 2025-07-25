@@ -164,7 +164,7 @@ export const UpdateRoleCard = () => {
                     alignItems="center"
                     borderRadius="12px"
                     p={2}
-                    colorScheme={"green"}>
+                    colorPalette={"green"}>
                     <HStack>
                       <Icon as={UilCheckCircle} color="green" />
                       <Text>
@@ -183,7 +183,7 @@ export const UpdateRoleCard = () => {
                     alignItems="center"
                     borderRadius="12px"
                     p={2}
-                    colorScheme={"red"}>
+                    colorPalette={"red"}>
                     <HStack>
                       <Icon as={UilExclamationCircle} color="red" />
                       <Text>
@@ -201,7 +201,7 @@ export const UpdateRoleCard = () => {
             <Button
               loading={accessControlAction.isTransactionPending}
               disabled={!isFormValid || !!hasRoleError}
-              colorScheme={userAlreadyHasRole ? "red" : "green"}
+              colorPalette={userAlreadyHasRole ? "red" : "green"}
               type="submit">
               {getButtonText()}
             </Button>

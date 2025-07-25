@@ -107,12 +107,9 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
                 <Heading fontSize="24px" fontWeight={700}>
                   {t("Your vote")}
                 </Heading>
-                <Button
-                  variant="link"
-                  colorScheme="primary"
-                  rightIcon={<FiArrowUpRight />}
-                  onClick={seeAllModal.onOpen}>
+                <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
                   {t("See details")}
+                  <FiArrowUpRight />
                 </Button>
               </HStack>
               <Skeleton loading={castVotesEventLoading}>

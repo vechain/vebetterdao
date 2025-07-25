@@ -66,10 +66,10 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
           <Button
             bg={"#E0E9FE"}
             color="#004CFC"
-            leftIcon={<VeBetterIcon size={20} />}
             rounded={"full"}
             _hover={{ bg: "#E0E9FEDD" }}
             onClick={handleConnectWallet}>
+            <VeBetterIcon size={20} />
             {t("Connect Wallet")}
           </Button>
         </VStack>

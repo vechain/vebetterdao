@@ -158,9 +158,9 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           variant={"primaryAction"}
           borderRadius={"full"}
           w={"full"}
-          leftIcon={!isFinished ? <FaRegClock /> : undefined}
           bg={canClaim ? "primary" : "#abb0b0"}
           textColor={canClaim ? "white" : "black"}>
+          {!isFinished ? <FaRegClock /> : undefined}
           <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
         </Button>
       </VStack>

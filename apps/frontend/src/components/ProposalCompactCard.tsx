@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Skeleton, IconButton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
@@ -87,7 +87,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
               }}
             />
             <VStack w="full" gap={1} align={"flex-start"}>
-              <SkeletonText
+              <Skeleton
                 loading={proposalMetadata.isLoading}
                 lineClamp={3}
                 flex={2.5}
@@ -96,11 +96,11 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                 <Text fontSize={"14px"} fontWeight={600}>
                   {proposalMetadata.data?.title}
                 </Text>
-              </SkeletonText>
+              </Skeleton>
               {!!account?.address && hasVotedText}
             </VStack>
           </VStack>
-          <IconButton aria-label="Go to proposal" onClick={goToProposal} variant={"link"} colorScheme="primary">
+          <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
             <FaAngleRight />
           </IconButton>
         </HStack>

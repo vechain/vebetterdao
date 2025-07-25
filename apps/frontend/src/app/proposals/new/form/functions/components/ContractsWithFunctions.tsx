@@ -118,7 +118,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
                       {func.description}
                     </Text>
                   </VStack>
-                  <Checkbox.Root pointerEvents={"none"} size="lg" colorScheme="primary" checked={isSelected}>
+                  <Checkbox.Root pointerEvents={"none"} size="lg" colorPalette="primary" checked={isSelected}>
                     <Checkbox.Control />
                   </Checkbox.Root>
                 </HStack>

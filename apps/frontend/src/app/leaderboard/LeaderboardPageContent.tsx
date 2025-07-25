@@ -133,7 +133,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
   }, [leaderboardQuery, account, visibleRankings])
 
   return (
-    <VStack gap={8} data-testid="leaderboard-page" maxW={"container.md"} mx="auto" align="stretch" w="full">
+    <VStack gap={8} data-testid="leaderboard-page" maxW="breakpoint-md" mx="auto" align="stretch" w="full">
       {yourRaking && (
         <VStack
           pos="fixed"
@@ -153,12 +153,8 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button
-          leftIcon={<FaAngleLeft />}
-          variant="link"
-          colorScheme="primary"
-          size="sm"
-          onClick={() => router.push("/")}>
+        <Button px={0} variant="ghost" colorPalette="primary" size="sm" onClick={() => router.push("/")}>
+          <FaAngleLeft />
           {t("Go back")}
         </Button>
         <HStack justify={"space-between"} w="full">
@@ -166,12 +162,12 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             minW={0}
             size={"lg"}
             aria-label="Next round"
-            variant="link"
-            colorScheme="primary"
-            icon={<Icon as={FaAngleLeft} boxSize={5} />}
+            variant="ghost"
+            colorPalette="primary"
             disabled={isFirstRound}
-            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-          />
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+            <Icon as={FaAngleLeft} boxSize={5} />
+          </IconButton>
 
           <Heading size={["sm", "sm", "md"]}>
             {t("Round {{id}} leaderboard", {
@@ -183,12 +179,12 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             minW={0}
             size={"lg"}
             aria-label="Next round"
-            variant="link"
-            colorScheme="primary"
-            icon={<Icon as={FaAngleRight} boxSize={5} />}
+            variant="ghost"
+            colorPalette="primary"
             disabled={isLastRound}
-            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
-          />
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+            <Icon as={FaAngleRight} boxSize={5} />
+          </IconButton>
         </HStack>
       </VStack>
       {renderRankings}

@@ -148,12 +148,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                   <Heading fontSize={["20px", "20px", "24px"]} fontWeight={700}>
                     {t("Your vote")}
                   </Heading>
-                  <Button
-                    variant="link"
-                    colorScheme="primary"
-                    onClick={seeAllModal.onOpen}
-                    rightIcon={<FiArrowUpRight />}>
+                  <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
                     {t("See details")}
+                    <FiArrowUpRight />
                   </Button>
                 </HStack>
                 <Skeleton loading={votesAtSnapshotLoading}>

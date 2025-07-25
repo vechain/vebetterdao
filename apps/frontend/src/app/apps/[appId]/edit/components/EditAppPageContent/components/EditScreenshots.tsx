@@ -58,11 +58,8 @@ export const EditScreenshots = ({ form }: Props) => {
         <Heading fontSize="24px" fontWeight="700">
           {t("Edit screenshots")}
         </Heading>
-        <Button
-          variant="primaryAction"
-          onClick={handleUpload}
-          leftIcon={<UilUpload size="16px" />}
-          loading={loadingScreenshot}>
+        <Button variant="primaryAction" onClick={handleUpload} loading={loadingScreenshot}>
+          <UilUpload size="16px" />
           {t("Upload")}
         </Button>
         <Controller

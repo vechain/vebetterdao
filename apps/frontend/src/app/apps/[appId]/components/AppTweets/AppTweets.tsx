@@ -133,34 +133,28 @@ export const AppTweets = () => {
             <>
               {editMode ? (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-                  <Button
-                    variant="primaryGhost"
-                    leftIcon={<UilTimes color="#004CFC" fontSize="16px" />}
-                    onClick={handleCancelEdit}>
+                  <Button variant="primaryGhost" onClick={handleCancelEdit}>
+                    <UilTimes color="#004CFC" fontSize="16px" />
                     {t("Cancel")}
                   </Button>
                   <Button
                     variant="primaryAction"
-                    leftIcon={<UilCheckCircle color="#FFFFFF" fontSize="16px" />}
                     disabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
+                    <UilCheckCircle color="#FFFFFF" fontSize="16px" />
                     {t("Save changes")}
                   </Button>
                 </HStack>
               ) : (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
                   {!isListEmpty && (
-                    <Button
-                      variant="primaryGhost"
-                      leftIcon={<UilPen color="#004CFC" fontSize="16px" />}
-                      onClick={handleEdit}>
+                    <Button variant="primaryGhost" onClick={handleEdit}>
+                      <UilPen color="#004CFC" fontSize="16px" />
                       {t("Edit feed")}
                     </Button>
                   )}
-                  <Button
-                    variant="primaryAction"
-                    leftIcon={<UilPlus color="#FFFFFF" fontSize="16px" />}
-                    onClick={onNewTweetModalOpen}>
+                  <Button variant="primaryAction" onClick={onNewTweetModalOpen}>
+                    <UilPlus color="#FFFFFF" fontSize="16px" />
                     {t("Add X post")}
                   </Button>
                 </HStack>

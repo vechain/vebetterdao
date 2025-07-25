@@ -34,13 +34,14 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
             {app.name}
           </Text>
         </HStack>
-        <Checkbox
+        <Checkbox.Root
           pointerEvents={"none"}
-          isChecked={isSelected}
-          onChange={onSelect}
-          colorScheme="primary"
-          data-testid={`select-app-checkbox-${app.name}`}
-        />
+          checked={isSelected}
+          onCheckedChange={onSelect}
+          colorPalette="primary"
+          data-testid={`select-app-checkbox-${app.name}`}>
+          <Checkbox.Control />
+        </Checkbox.Root>
       </HStack>
     </Box>
   )

@@ -112,13 +112,9 @@ export const LowOnVthoCard: React.FC = () => {
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 
-              <Button
-                onClick={handleOnPress}
-                mt={2}
-                colorScheme="blue"
-                borderRadius={"full"}
-                rightIcon={<FiArrowUpRight />}>
+              <Button onClick={handleOnPress} mt={2} colorPalette="blue" borderRadius={"full"}>
                 {t("Get more VTHO")}
+                <FiArrowUpRight />
               </Button>
             </VStack>
           </GridItem>
