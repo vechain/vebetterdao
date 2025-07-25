@@ -128,9 +128,6 @@ export async function distributeEmissions(thor: ThorClient) {
   const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
 
-  // Wait for the next round to start before proceeding
-  await waitForRoundStart(thor, CONFIG)
-
   // Prepare the contract function call with necessary parameters
   const clause = Clause.callFunction(
     Address.of(CONFIG.emissionsContractAddress),
@@ -275,6 +272,23 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     const thorClient = ThorClient.at(NODE_URL, {
       isPollingEnabled: false,
     })
+
+    // Wait for the next round to start before proceeding
+    // If the round does not start within 2 minutes, we will retry 5 times with a 3 second delay
+    try {
+      await withRetry(() => waitForRoundStart(thorClient, CONFIG), maxRetries, delayMs, "Wait for Round Start")
+    } catch (error) {
+      console.log("Failed to wait for round start after all retries:", error)
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: Failed to wait for round start after multiple attempts: ${error}`,
+      )
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: `Failed to wait for round start: ${error}` }),
+      }
+    }
 
     // Distribute the emissions to the VeBetterDAO and start the next round with retry
     let emissionsResult
