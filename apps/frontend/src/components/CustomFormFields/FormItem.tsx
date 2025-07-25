@@ -23,7 +23,7 @@ export const FormItem = ({
   const InputComponent = type === "textarea" ? Textarea : Input
 
   return (
-    <FormControl isInvalid={!!error}>
+    <FormControl isInvalid={!!error} textAlign="right">
       <FormLabel mb={description ? 0 : undefined} color="#252525">
         {label}
       </FormLabel>
@@ -32,7 +32,13 @@ export const FormItem = ({
           {description}
         </Text>
       )}
-      <InputComponent placeholder={placeholder} {...register} onBlur={onBlur} rounded="xl" />
+      <InputComponent
+        placeholder={placeholder}
+        {...register}
+        {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
+        onBlur={onBlur}
+        rounded="xl"
+      />
       {error && <FormErrorMessage>{error}</FormErrorMessage>}
     </FormControl>
   )

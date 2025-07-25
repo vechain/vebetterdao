@@ -46,7 +46,6 @@ export const GrantsStatsCards = ({
   totalFunds: number
 }) => {
   const compactFormatter = getCompactFormatter(4)
-  console.log("totalFunds", totalFunds)
   const statsUI = [
     { icon: "/assets/icons/proposal.svg", value: totalApplications, label: "Applications", alt: "applications-icon" },
     { icon: "/assets/icons/vote.svg", value: totalApproved, label: "Grants Approved", alt: "approved-icon" },
