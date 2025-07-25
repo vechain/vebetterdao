@@ -54,7 +54,7 @@ export const EditAppAddresses = ({
         <Field.Root>
           <InputGroup
             w="auto"
-            endAddon={
+            endElement={
               editTeamWalletAddress ? null : (
                 <Button
                   variant="primaryGhost"
@@ -91,7 +91,7 @@ export const EditAppAddresses = ({
         <Field.Root>
           <InputGroup
             w="auto"
-            endAddon={
+            endElement={
               editAdminAddress ? null : (
                 <Button
                   variant="primaryGhost"

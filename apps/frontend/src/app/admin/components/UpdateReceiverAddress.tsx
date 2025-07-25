@@ -58,7 +58,8 @@ export const UpdateReceiverAddress = () => {
                 <Field.Label>
                   <strong>{"App"}</strong>
                 </Field.Label>
-                <NativeSelect.Root disabled={isLoading}>
+                <NativeSelect.Root disabled={isLoading} rounded="full">
+                  <NativeSelect.Indicator />
                   <NativeSelect.Field
                     placeholder="Select app"
                     value={appId}
@@ -79,13 +80,14 @@ export const UpdateReceiverAddress = () => {
                   <strong>{"Current Address"}</strong>
                 </Field.Label>
                 <InputGroup>
-                  <Input value={currentAddress} disabled />
+                  <Input variant="subtle" value={currentAddress} disabled />
                 </InputGroup>
               </Field.Root>
 
               <Field.Root required invalid={!isValidAddress}>
                 <Field.Label>
                   <strong>{"New Address"}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <InputGroup>
                   <WalletAddressInput

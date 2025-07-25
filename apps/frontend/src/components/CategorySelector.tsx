@@ -158,7 +158,7 @@ export const CategorySelector = <T extends FieldValues>({
               <Popover.Content width="300px" maxH="400px" overflowY="auto">
                 <Popover.Body p={3}>
                   <VStack gap={3} align="stretch">
-                    <InputGroup startAddon={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
+                    <InputGroup startElement={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
                       <Input
                         size="md"
                         placeholder={t("Find a category")}

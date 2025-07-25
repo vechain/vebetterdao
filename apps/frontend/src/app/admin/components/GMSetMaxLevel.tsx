@@ -54,7 +54,7 @@ export const GMSetMaxLevel = () => {
         <VStack gap={8} align="start" w="full">
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
             <VStack gap={4} align="start">
-              <Field.Root required invalid={Boolean(errors.newMaxLevel)}>
+              <Field.Root required invalid={!!errors.newMaxLevel}>
                 <Field.Label>
                   <strong>{t("GM New Max Level")}</strong>
                 </Field.Label>
@@ -86,7 +86,7 @@ export const GMSetMaxLevel = () => {
                     <NumberInput.Control />
                   </NumberInput.Root>
                 </InputGroup>
-                {errors.newMaxLevel && <Field.ErrorText>{errors.newMaxLevel.message}</Field.ErrorText>}
+                <Field.ErrorText>{errors?.newMaxLevel?.message}</Field.ErrorText>
               </Field.Root>
 
               <Button disabled={!isFormValid || isTransactionPending} type="submit" colorPalette="blue" size="md">

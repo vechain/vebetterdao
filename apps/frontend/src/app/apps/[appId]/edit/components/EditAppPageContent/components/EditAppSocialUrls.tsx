@@ -88,7 +88,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
       </Text>
       {inputData.map(({ inputKey, url, error, placeholder, icon }) => (
         <Field.Root invalid={!!error} key={inputKey}>
-          <InputGroup startAddon={icon}>
+          <InputGroup startElement={icon}>
             <Input
               rounded="full"
               fontSize={"14px"}

@@ -13,40 +13,28 @@ import {
   InputGroup,
   Input,
   Heading,
-  Select,
   HStack,
   Text,
   NumberInput,
   Card,
-  Portal,
-  createListCollection,
+  NativeSelect,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const ClaimXAppAllocations = () => {
-  const [appId, setAppId] = useState<string[]>([])
+  const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<string>("1")
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
-  const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId[0] || "")
-  const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId[0] ?? "")
-
-  const appsCollection = useMemo(() => {
-    return createListCollection({
-      items:
-        xApps?.active.map(item => ({
-          label: item.name + " - id: " + item.id,
-          value: item.id,
-        })) ?? [],
-    })
-  }, [xApps])
+  const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId || "")
+  const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId || "")
 
   const { sendTransaction, isTransactionPending, status } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
-    appIds: appId[0] ? [appId[0]] : [],
+    appIds: appId ? [appId] : [],
   })
   const isLoading = isTransactionPending || status === "pending"
 
@@ -87,34 +75,17 @@ export const ClaimXAppAllocations = () => {
                   <Field.Label>
                     <strong>{"App"}</strong>
                   </Field.Label>
-                  <Select.Root
-                    disabled={isLoading}
-                    collection={appsCollection}
-                    onValueChange={e => setAppId(e.value)}
-                    value={appId}>
-                    <Select.HiddenSelect />
-
-                    <Select.Control>
-                      <Select.Trigger>
-                        <Select.ValueText placeholder="Select app" />
-                      </Select.Trigger>
-                      <Select.IndicatorGroup>
-                        <Select.Indicator />
-                      </Select.IndicatorGroup>
-                    </Select.Control>
-                    <Portal>
-                      <Select.Positioner>
-                        <Select.Content>
-                          {appsCollection.items.map(item => (
-                            <Select.Item item={item} key={item.value}>
-                              {item.label}
-                              <Select.ItemIndicator />
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Portal>
-                  </Select.Root>
+                  <NativeSelect.Root disabled={isLoading}>
+                    <NativeSelect.Field placeholder="Select app" onChange={e => setAppId(e.target.value)} value={appId}>
+                      {xApps?.active.map(item => {
+                        return (
+                          <option key={item.id} value={item.id}>
+                            {item.name + " - id: " + item.id}
+                          </option>
+                        )
+                      })}
+                    </NativeSelect.Field>
+                  </NativeSelect.Root>
                 </Field.Root>
 
                 <Field.Root required invalid={!isRoundValid}>
@@ -141,7 +112,7 @@ export const ClaimXAppAllocations = () => {
                   <strong>{"Reserved amount"}</strong>
                 </Field.Label>
                 <InputGroup
-                  endAddon={
+                  endElement={
                     <Text
                       pointerEvents="none"
                       pl={1}

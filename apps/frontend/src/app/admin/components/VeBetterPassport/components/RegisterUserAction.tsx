@@ -68,6 +68,7 @@ export const RegisterUserAction = () => {
               <Field.Root required invalid={!isValidAddress}>
                 <Field.Label>
                   <strong>{t("User address")}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <InputGroup>
                   <WalletAddressInput
@@ -83,6 +84,7 @@ export const RegisterUserAction = () => {
               <Field.Root required>
                 <Field.Label>
                   <strong>{"App"}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
                   <NativeSelect.Field
@@ -108,6 +110,7 @@ export const RegisterUserAction = () => {
                 </Field.Label>
                 <NumberInput.Root
                   min={1}
+                  defaultValue="1"
                   value={round}
                   disabled={isLoading}
                   onValueChange={e => {

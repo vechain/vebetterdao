@@ -64,16 +64,21 @@ export const ManageUserStatus = () => {
             </HStack>
 
             <HStack gap={4} alignItems="center" w="full">
-              <Field.Label>
-                <strong>{t("Action")}</strong>
-              </Field.Label>
-              <NativeSelect.Root disabled={isLoading}>
-                <NativeSelect.Field value={actionType} onChange={handleSetActionType} placeholder={t("Select action")}>
-                  <option value={UserStatus.WHITELIST}>{t(UserStatus.WHITELIST as any)}</option>
-                  <option value={UserStatus.BLACKLIST}>{t(UserStatus.BLACKLIST as any)}</option>
-                  <option value={UserStatus.NONE}>{t(UserStatus.NONE as any)}</option>
-                </NativeSelect.Field>
-              </NativeSelect.Root>
+              <Field.Root>
+                <Field.Label>
+                  <strong>{t("Action")}</strong>
+                </Field.Label>
+                <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Field
+                    value={actionType}
+                    onChange={handleSetActionType}
+                    placeholder={t("Select action")}>
+                    <option value={UserStatus.WHITELIST}>{t(UserStatus.WHITELIST as any)}</option>
+                    <option value={UserStatus.BLACKLIST}>{t(UserStatus.BLACKLIST as any)}</option>
+                    <option value={UserStatus.NONE}>{t(UserStatus.NONE as any)}</option>
+                  </NativeSelect.Field>
+                </NativeSelect.Root>
+              </Field.Root>
             </HStack>
 
             <Button

@@ -61,13 +61,13 @@ export const B3trAllowance = () => {
       <Card.Body>
         <form onSubmit={handleSubmit}>
           <VStack gap={4} alignItems={"start"}>
-            <HStack gap={4} alignItems={"start"}>
+            <HStack gap={4} alignItems={"start"} w={"full"}>
               <Field.Root>
                 <Field.Label>
                   <strong>{t("Balance")}</strong>
                 </Field.Label>
                 <InputGroup
-                  endAddon={
+                  endElement={
                     <Text
                       pointerEvents="none"
                       pl={1}
@@ -88,6 +88,7 @@ export const B3trAllowance = () => {
               <Field.Root required>
                 <Field.Label>
                   <strong>{t("Spender")}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <InputGroup>
                   <WalletAddressInput
@@ -103,6 +104,7 @@ export const B3trAllowance = () => {
               <Field.Root required invalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
                 <Field.Label>
                   <strong>{t("Amount to allow")}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <NumberInput.Root
                   min={0}
@@ -123,7 +125,7 @@ export const B3trAllowance = () => {
                   <strong>{t("Current allowance")}</strong>
                 </Field.Label>
                 <InputGroup
-                  endAddon={
+                  endElement={
                     <Text
                       pointerEvents="none"
                       pl={1}

@@ -77,11 +77,11 @@ export const NewProposalSupportPageContent = () => {
                 <InputGroup
                   w="full"
                   mt={4}
-                  startAddon={<VOT3Icon colorVariant="dark" />}
+                  startElement={<VOT3Icon colorVariant="dark" />}
                   startAddonProps={{
                     pointerEvents: "none",
                   }}
-                  endAddon={
+                  endElement={
                     <Skeleton loading={thresholdLoading}>
                       <Heading w="auto" size={["sm", "sm", "lg"]} color="gray.500" fontWeight={400}>
                         {`/ ${compactFormatter.format(Number(threshold))}`}

@@ -120,7 +120,9 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
                 <Popover.Content width="300px" maxH="400px" overflowY="auto">
                   <Popover.Body p={3}>
                     <VStack gap={3} align="stretch">
-                      <InputGroup startAddon={<FaSearch color="#6A6A6A" />} startAddonProps={{ pointerEvents: "none" }}>
+                      <InputGroup
+                        startElement={<FaSearch color="#6A6A6A" />}
+                        startAddonProps={{ pointerEvents: "none" }}>
                         <Input
                           size="md"
                           placeholder={t("Find a category")}

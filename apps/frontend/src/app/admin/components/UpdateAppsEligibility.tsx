@@ -57,7 +57,9 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         <Switch.Root
           checked={isEligible}
           onCheckedChange={() => sendTransaction()}
-          disabled={isTransactionPending || status === "pending"}>
+          disabled={isTransactionPending || status === "pending"}
+          colorPalette="primary">
+          <Switch.HiddenInput />
           <Switch.Control />
         </Switch.Root>
       </HStack>

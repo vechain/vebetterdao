@@ -82,7 +82,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
     <VStack align="stretch" gap={6} pt={4} as="form" onSubmit={form.handleSubmit(onSubmit)}>
       <Field.Root invalid={!!errors.tweetUrl}>
         <Field.Label>{t("X post URL")}</Field.Label>
-        <InputGroup startAddon={<RiTwitterXFill />}>
+        <InputGroup startElement={<RiTwitterXFill />}>
           <Input
             rounded={"full"}
             {...form.register("tweetUrl", {

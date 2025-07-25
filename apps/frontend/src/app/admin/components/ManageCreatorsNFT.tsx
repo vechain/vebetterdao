@@ -105,19 +105,31 @@ export const ManageCreatorsNFT = () => {
 
       <Card.Body>
         <VStack gap={8} align="start" w="full">
-          <RadioGroup.Root defaultValue="mint">
+          <RadioGroup.Root
+            defaultValue="mint"
+            onValueChange={details => {
+              if (details.value) setValue("actionType", details.value)
+            }}>
             <VStack align="start">
               <RadioGroup.Item {...register("actionType", { required: true })} value="mint">
-                {t("Mint NFT")}
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Mint NFT")}</RadioGroup.ItemText>
               </RadioGroup.Item>
               <RadioGroup.Item {...register("actionType", { required: true })} value="burn">
-                {t("Burn NFT")}
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Burn NFT")}</RadioGroup.ItemText>
               </RadioGroup.Item>
               <RadioGroup.Item {...register("actionType", { required: true })} value="check-ownership">
-                {t("Check Ownership")}
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Check Ownership")}</RadioGroup.ItemText>
               </RadioGroup.Item>
               <RadioGroup.Item {...register("actionType", { required: true })} value="check-submitted-apps">
-                {t("Check submitted apps")}
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Check submitted apps")}</RadioGroup.ItemText>
               </RadioGroup.Item>
             </VStack>
           </RadioGroup.Root>

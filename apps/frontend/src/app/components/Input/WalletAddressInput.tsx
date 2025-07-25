@@ -124,7 +124,7 @@ export const WalletAddressInput = ({
 
   return (
     <Field.Root invalid={!!errorMessage}>
-      <InputGroup startAddon={startAddon}>
+      <InputGroup startElement={startAddon}>
         <Input
           {...props}
           id={id}

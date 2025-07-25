@@ -242,7 +242,7 @@ export const CreateEditAppForm = ({
             </Text>
             <InputGroup>
               <WalletAddressInput
-                startAddon={
+                startElement={
                   <AddressIcon
                     pointerEvents="none"
                     borderRadius={"full"}
@@ -266,7 +266,7 @@ export const CreateEditAppForm = ({
             </Text>
             <InputGroup>
               <WalletAddressInput
-                startAddon={
+                startElement={
                   <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={adminWalletAddress ?? ""} />
                 }
                 disabled={isReceiverAddressDisabled}

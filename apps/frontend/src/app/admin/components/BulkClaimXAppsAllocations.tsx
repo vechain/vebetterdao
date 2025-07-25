@@ -111,7 +111,7 @@ export const BulkClaimXAppsAllocations = () => {
                   <strong>{"Total"}</strong>
                 </Field.Label>
                 <InputGroup
-                  endAddon={
+                  endElement={
                     <Text
                       pointerEvents="none"
                       pl={1}
@@ -132,7 +132,7 @@ export const BulkClaimXAppsAllocations = () => {
                   <strong>{"Remaining"}</strong>
                 </Field.Label>
                 <InputGroup
-                  endAddon={
+                  endElement={
                     <Text
                       pointerEvents="none"
                       pl={1}

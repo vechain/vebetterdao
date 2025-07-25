@@ -49,7 +49,7 @@ export const AdminPageContent = () => {
   const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember
   return (
     <Stack gap={12} w={"full"} data-testid="admin-page">
-      <Tabs.Root lazyMount>
+      <Tabs.Root lazyMount defaultValue="emissions">
         <Tabs.List
           overflowY="hidden"
           css={{
