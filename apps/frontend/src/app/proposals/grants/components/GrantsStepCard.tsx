@@ -14,6 +14,7 @@ import {
   Image,
   ListIcon,
   List,
+  Card,
 } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
@@ -103,13 +104,7 @@ export const GrantsStepsCard = ({
   }
 
   return (
-    <Box
-      display={isOpen ? "block" : "none"}
-      w="full"
-      h="full"
-      bg="contrast-bg-muted"
-      borderRadius="xl"
-      overflow="hidden">
+    <Card display={isOpen ? "block" : "none"} w="full" h="full" borderRadius="xl" overflow="hidden">
       <Flex h="full">
         <Box flex="1">
           <Box pl={8} pt={8} pb={4}>
@@ -171,6 +166,6 @@ export const GrantsStepsCard = ({
           </motion.div>
         </Box>
       </Flex>
-    </Box>
+    </Card>
   )
 }
