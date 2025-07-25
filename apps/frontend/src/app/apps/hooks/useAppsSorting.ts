@@ -12,14 +12,15 @@ import { useAppsSustainabilityData } from "./useAppsSustainabilityData"
 
 export const DEFAULT_SORT_OPTION: SortOption = "default"
 
-export type SortedAppsWithStatus = {
-  [key in SortOption]: {
+export type SortedAppsWithStatus = Record<
+  SortOption,
+  {
     currentActiveApps: XApp[]
     newApps: AllApps[]
     gracePeriodApps: UnendorsedApp[]
     endorsementLostApps: UnendorsedApp[]
   }
-}
+>
 
 export function useAppsSorting(
   currentActiveApps: XApp[],
