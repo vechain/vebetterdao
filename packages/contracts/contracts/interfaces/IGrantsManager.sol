@@ -205,6 +205,11 @@ interface IGrantsManager {
   error CallerIsNotTheGovernor(address caller, address governor);
 
   /**
+   * @notice Error thrown when milestone proposer is zero address
+   */
+  error MilestoneProposerZeroAddress();
+
+  /**
    * @notice Error thrown when caller is not the grant proposer
    * @param caller The address of the caller
    * @param recipient The address of the recipient
@@ -224,6 +229,16 @@ interface IGrantsManager {
    * @param requiredFunds The required funds
    */
   error InsufficientFunds(uint256 availableFunds, uint256 requiredFunds);
+
+  /**
+   * @notice Error thrown when milestone details metadata URI is empty
+   */
+  error MilestoneDetailsMetadataURIEmpty();
+
+  /**
+   * @notice Error thrown when project details metadata URI is empty  
+   */
+  error ProjectDetailsMetadataURIEmpty();
 
   // ------------------ Structs and Enums ------------------ //
   /**
