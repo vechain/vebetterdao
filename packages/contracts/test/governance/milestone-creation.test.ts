@@ -16,18 +16,21 @@ import {
   Emissions,
   XAllocationVoting,
   GrantsManager__factory,
+  GovernorProposalLogic__factory,
 } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { ContractFactory, keccak256 } from "ethers"
+import { ContractFactory, Interface } from "ethers"
 import {
   createGrantProposal,
   createProposalWithMultipleFunctionsAndExecuteItGrant,
   getRoundId,
+  moveBlocks,
+  waitForCurrentRoundToEnd,
 } from "../helpers/common"
 
-describe.only("Governance - Milestone Creation", function () {
+describe("Governance - Milestone Creation", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -45,6 +48,8 @@ describe.only("Governance - Milestone Creation", function () {
   let xAllocationVoting: XAllocationVoting
   let contractToPassToMethods: any[]
   let treasuryContract: ContractFactory
+  let grantsManagerInterface: Interface
+  let governorProposalLogicInterface: Interface
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
     governor = fixture.governor
@@ -80,9 +85,11 @@ describe.only("Governance - Milestone Creation", function () {
       timeLock, //[9]
       grantsManager, //[10]
     ]
+
+    grantsManagerInterface = GrantsManager__factory.createInterface()
+    governorProposalLogicInterface = GovernorProposalLogic__factory.createInterface()
   })
 
-  //ok
   describe("Milestone contract setup and creation", function () {
     it("Should set the minimum milestone count", async function () {
       const minimumMilestoneCount = await grantsManager.getMinimumMilestoneCount()
@@ -109,7 +116,7 @@ describe.only("Governance - Milestone Creation", function () {
         ),
       ).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "InvalidNumberOfMilestones",
       )
@@ -135,7 +142,7 @@ describe.only("Governance - Milestone Creation", function () {
         ),
       ).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "InvalidNumberOfMilestones",
       )
@@ -230,14 +237,128 @@ describe.only("Governance - Milestone Creation", function () {
         ),
       ).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "InvalidFunctionSelector",
       )
     })
+
+    it("Cannot create milestone if the value passed is 0", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("0")]
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]])]
+
+      expect(
+        governor.connect(proposer).proposeGrant(
+          [treasuryAddress], // Only Treasury for now
+          [0], // transferb3tr is not payable
+          calldatas,
+          description,
+          roundId,
+          0,
+          milestonesDetailsMetadataURI,
+        ),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "InvalidAmount",
+      )
+    })
+
+    it("Should not create grant proposal with invalid data", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
+
+      const roundId = await getRoundId(contractToPassToMethods)
+
+      // 2 calldatas, but only 1 target -> should revert
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[1]]),
+      ]
+      expect(
+        governor.connect(proposer).proposeGrant(
+          [treasuryAddress], // Only Treasury for now
+          [0], // 2 calldatas, but only 1 value -> should revert
+          calldatas,
+          description,
+          roundId,
+          0,
+          milestonesDetailsMetadataURI,
+        ),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: governorProposalLogicInterface,
+        },
+        "GovernorInvalidProposalLength",
+      )
+    })
+
+    it("Should create proposal respecting the minVotingDelay", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
+      await governor.setMinVotingDelay(3) // normally set to 1
+
+      await moveBlocks(17)
+      let currentBlock = await governor.clock()
+      let currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
+      let minVotingDelay = await governor.minVotingDelay()
+      expect(minVotingDelay).to.be.greaterThan(currentRoundsEndsAt - currentBlock)
+
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[1]]),
+      ]
+
+      let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+      expect(
+        governor.connect(proposer).proposeGrant(
+          [treasuryAddress, treasuryAddress], // Only Treasury for now
+          [0, 0], // transferb3tr is not payable
+          calldatas,
+          description,
+          voteStartsInRoundId,
+          0,
+          milestonesDetailsMetadataURI,
+        ),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: governorProposalLogicInterface,
+        },
+        "GovernorInvalidStartRound",
+      )
+      // simulate start of new round with enough voting delay
+      await waitForCurrentRoundToEnd()
+      await emissions.distribute()
+
+      //not moving blocks, so the proposal should be in the next round
+      currentBlock = await governor.clock()
+      currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
+      minVotingDelay = await governor.minVotingDelay()
+      expect(minVotingDelay).to.not.be.greaterThan(currentRoundsEndsAt - currentBlock)
+
+      // Now if we create a proposal it should not revert ( within the voting window )
+      voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+
+      await governor.connect(proposer).proposeGrant(
+        [treasuryAddress, treasuryAddress], // Only Treasury for now
+        [0, 0], // transferb3tr is not payable
+        calldatas,
+        description,
+        voteStartsInRoundId,
+        0,
+        milestonesDetailsMetadataURI,
+      )
+    })
   })
 
-  describe.only("Milestone execution", function () {
+  describe("Milestone execution", function () {
     it("Should send the total amount of the proposal from the treasury to the grants manager", async () => {
       const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
@@ -359,7 +480,7 @@ describe.only("Governance - Milestone Creation", function () {
 
       await expect(grantsManager.connect(owner).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "ProposalNotQueuedOrExecuted",
       )
@@ -394,7 +515,7 @@ describe.only("Governance - Milestone Creation", function () {
 
       await expect(grantsManager.connect(voter).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "NotAuthorized",
       )
@@ -426,14 +547,14 @@ describe.only("Governance - Milestone Creation", function () {
       // try to approve with someone else than the governor roles
       await expect(grantsManager.connect(proposer).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "NotAuthorized",
       )
       // try to claim will it have not been approve by any governor role
       await expect(grantsManager.connect(voter).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "MilestoneNotApprovedByAdmin",
       )
@@ -441,7 +562,7 @@ describe.only("Governance - Milestone Creation", function () {
       // try to approve the 2nd milestone before approving the first one
       await expect(grantsManager.connect(owner).approveMilestones(proposalId, 1)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "PreviousMilestoneNotValidated",
       )
@@ -451,7 +572,7 @@ describe.only("Governance - Milestone Creation", function () {
       // try to claim with someone else than the proposal owner
       await expect(grantsManager.connect(voter).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "CallerIsNotTheGrantProposer",
       )
@@ -459,7 +580,7 @@ describe.only("Governance - Milestone Creation", function () {
       // try to claim the 2nd milestone before approving the first one
       await expect(grantsManager.connect(voter).claimMilestone(proposalId, 1)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "MilestoneNotApprovedByAdmin",
       )
@@ -470,7 +591,6 @@ describe.only("Governance - Milestone Creation", function () {
 
       // check the state of the milestone 0
       const milestone0 = await grantsManager.getMilestone(proposalId, 0)
-      console.log("milestone0.status", milestone0.status)
       expect(milestone0.status).to.equal(2) // Claimed
 
       // approve the second milestone
@@ -510,18 +630,106 @@ describe.only("Governance - Milestone Creation", function () {
       // claim the milestone again
       await expect(grantsManager.connect(proposer).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
         {
-          interface: GrantsManager__factory.createInterface(),
+          interface: grantsManagerInterface,
         },
         "MilestoneAlreadyClaimed",
       )
     })
   })
 
-  // the description will be an ipns hash, so that, even if the description is changed, the proposalId and milestoneId will be the same
   describe("Proposal and milestone description modification", function () {
-    // it should change the proposal description, without changing the ipns hash
-    // it should update the milestone description ( data, amount)
-    // it should not change the milestone status
+    it("Cannot create milestone if the milestone details metadata URI is empty", async () => {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = ""
+      const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]])]
+
+      expect(
+        governor.connect(proposer).proposeGrant(
+          [treasuryAddress], // Only Treasury for now
+          [0], // transferb3tr is not payable
+          calldatas,
+          description,
+          roundId,
+          0,
+          milestonesDetailsMetadataURI,
+        ),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "MilestoneDetailsMetadataURIEmpty",
+      )
+    })
+
+    it("Cannot create milestone if the project details metadata URI is empty", async () => {
+      const description = "" // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+      ]
+
+      expect(
+        governor.connect(proposer).proposeGrant(
+          [treasuryAddress], // Only Treasury for now
+          [0], // transferb3tr is not payable
+          calldatas,
+          description,
+          roundId,
+          0,
+          milestonesDetailsMetadataURI,
+        ),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "ProjectDetailsMetadataURIEmpty",
+      )
+    })
+
+    it("Should be able to update the milestone details metadata URI", async () => {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const newMilestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qp..." // milestones details can be changed later
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      const calldatas = [
+        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+      ]
+
+      // set to 1 milestone for simplicity
+      await grantsManager.setMinimumMilestoneCount(1)
+
+      const tx = await governor.connect(proposer).proposeGrant(
+        [treasuryAddress], // Only Treasury for now
+        [0], // transferb3tr is not payable
+        calldatas,
+        description,
+        roundId,
+        0,
+        milestonesDetailsMetadataURI,
+      )
+
+      const receipt = await tx.wait()
+      const { proposalId } = await validateProposalEvents(
+        governor,
+        receipt,
+        Number(GRANT_PROPOSAL_TYPE),
+        proposer.address,
+        description,
+      )
+
+      await grantsManager
+        .connect(proposer)
+        .updateMilestoneDescriptionMetadataURI(proposalId, newMilestonesDetailsMetadataURI)
+
+      const milestones = await grantsManager.getMilestones(proposalId)
+      expect(milestones.milestonesDetailsMetadataURI).to.equal(newMilestonesDetailsMetadataURI)
+    })
   })
 
   describe("Milestone deposit", function () {

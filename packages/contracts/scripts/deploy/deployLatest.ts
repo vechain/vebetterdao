@@ -181,7 +181,7 @@ export async function deployLatest(config: ContractsConfig) {
 
   // Deploy NodeManagement
   const nodeManagement = (await deployAndInitializeLatest(
-    "NodeManagement",
+    "NodeManagementV3",
     [
       {
         name: "initialize",
@@ -512,7 +512,7 @@ export async function deployLatest(config: ContractsConfig) {
         args: [await veBetterPassport.getAddress()],
       },
       {
-        name: "initializeV6",
+        name: "initializeV7",
         args: [
           {
             grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
@@ -523,6 +523,7 @@ export async function deployLatest(config: ContractsConfig) {
             standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
             grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
             galaxyMember: await galaxyMember.getAddress(),
+            grantsManager: TEMP_ADMIN,
           },
         ],
       },
@@ -691,6 +692,11 @@ export async function deployLatest(config: ContractsConfig) {
     .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
     .then(async tx => await tx.wait())
 
+  await x2EarnApps
+    .connect(deployer)
+    .setVeBetterPassportContract(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+
   // Setup XAllocationPool addresses
   await xAllocationPool
     .connect(deployer)
@@ -726,6 +732,13 @@ export async function deployLatest(config: ContractsConfig) {
     .connect(deployer)
     .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnApps.getAddress())
     .then(async tx => await tx.wait())
+
+  //Setup Governor
+  await governor
+    .connect(deployer)
+    .setGrantsManager(await grantsManager.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("GrantsManager address set in Governor contract")
 
   // Set up X2EarnApps contract
   await x2EarnCreator.grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())

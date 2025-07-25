@@ -1,0 +1,3 @@
+src/*/local.lambda.ts
+src/*/*/local.lambda.ts
+src/*/*/*/local.lambda.ts

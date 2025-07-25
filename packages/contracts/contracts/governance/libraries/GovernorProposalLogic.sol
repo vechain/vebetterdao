@@ -688,7 +688,6 @@ library GovernorProposalLogic {
         revert GovernorRestrictedProposer(proposer);
       }
     }
-    // TODO : Add a check to see if it's a good IPFS hash for Grant proposals
 
     if (targets.length != values.length || targets.length != calldatas.length) {
       revert GovernorInvalidProposalLength(targets.length, calldatas.length, values.length);

@@ -384,7 +384,7 @@ export const createProposalWithMultipleFunctions = async (
   }
 
   // create a new proposal
-  const tx = await governor.connect(proposer).proposeWithType(
+  const tx = await governor.connect(proposer).propose(
     contractToCalls,
     Array(functionsToCall.length).fill(0),
     functionsToCall.map((func, index) => {
@@ -395,7 +395,7 @@ export const createProposalWithMultipleFunctions = async (
     args[0],
     roundId,
   )
-  console.log("tx", tx)
+
   return tx
 }
 
@@ -681,9 +681,6 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
 
   // change the all function to be compatible with grants proposal
   const proposalId = await getProposalIdFromGrantsProposalTx(tx)
-  const proposalThresholdInCreate = await governor.getProposalTypeDepositThresholdPercentage(1) // GRANT TO CHECK OK WQITH THE PERCENTAGE
-  console.log("proposalThresholdInCreate", proposalThresholdInCreate)
-  console.log("proposalId", proposalId)
   await payDeposit(proposalId, proposer)
 
   // wait

@@ -177,12 +177,9 @@ contract GrantsManager is
       assembly {
         selector := mload(add(data, 32))
       }
-
       if (selector != bytes4(keccak256("transferB3TR(address,uint256)"))) {
         revert InvalidFunctionSelector(selector);
       }
-
-      // Slice off the first 4 bytes (selector) manually
       bytes memory slicedData = new bytes(data.length - 4);
       for (uint256 j = 0; j < slicedData.length; j++) {
         slicedData[j] = data[j + 4];
@@ -199,11 +196,9 @@ contract GrantsManager is
       }
 
       totalAmount += amount;
-
       $.proposalMilestones[_milestoneId].milestone.push(Milestone({ amount: amount, status: MilestoneState.Pending }));
     }
 
-    // check the total amount is not depassing the amount max per proposal 
     m.id = _milestoneId;
     m.proposer = proposer;
     m.milestonesDetailsMetadataURI = milestonesDetailsMetadataURI;
@@ -211,7 +206,7 @@ contract GrantsManager is
     m.totalAmount = totalAmount;
     m.claimedAmount = 0; // 0 because the milestone is not claimed yet
 
-    // _validateMilestones(m);
+    _validateMilestones(m);
     emit MilestonesRegistered(_milestoneId, m, projectDetailsMetadataURI, proposer);
   }
 
@@ -462,16 +457,6 @@ contract GrantsManager is
 
   // ------------------ Metadata Functions ------------------ //
 
-  // /**
-  //  * @notice Returns the project details metadata URI
-  //  * @param proposalId The ID of the proposal
-  //  * @return The project details metadata URI
-  //  */
-  // function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory) {
-  //   GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-  //   return $.proposalMilestones[proposalId].projectDetailsMetadataURI;
-  // }
-
   /**
    * @notice Updates the description metadata URI for a milestone
    * @param proposalId The ID of the proposal
@@ -509,49 +494,52 @@ contract GrantsManager is
   }
 
   // ------------------  Internal Functions ------------------ //
-  // /**
-  //  * @notice Validates the milestones
-  //  * @param milestones The milestones to validate
-  //  */
-  // function _validateMilestones(Milestones memory milestones) internal view {
-  //   GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+  /**
+   * @notice Validates the milestones
+   * @param milestones The milestones to validate
+   */
+  function _validateMilestones(Milestones memory milestones) internal view {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-  //   // Check the status of the first milestone
-  //   if (milestones.milestone[0].status != MilestoneState.Pending) {
-  //     revert MilestoneNotPending(milestones.milestone[0].status);
-  //   }
+    // Check the proposal metadata
+    if (milestones.proposer == address(0)) {
+      revert MilestoneProposerZeroAddress();
+    }
 
-  //   // Check the proposal metadata
-  //   if (milestones.proposer == address(0)) {
-  //     revert MilestoneproposerZeroAddress();
-  //   }
+    if (msg.sender != address($.governor)) {
+      revert CallerIsNotTheGovernor(msg.sender, address($.governor));
+    }
 
-  //   if (msg.sender != address($.governor)) {
-  //     revert CallerIsNotTheGovernor(msg.sender, address($.governor));
-  //   }
+    // Check the milestones details metadata URI
+    if (bytes(milestones.milestonesDetailsMetadataURI).length == 0) {
+      revert MilestoneDetailsMetadataURIEmpty();
+    }
 
-  //   // Check the milestones details metadata URI
+    // Check the project details metadata URI
+    if (bytes(milestones.projectDetailsMetadataURI).length == 0) {
+      revert ProjectDetailsMetadataURIEmpty();
+    }
 
-  //   // Check the milestones amounts
-  //   for (uint256 i = 0; i < milestones.milestone.length; i++) {
-  //     if (milestones.milestone[i].amount == 0) {
-  //       revert MilestoneAmountZero(i);
-  //     }
-  //   }
+    // Check the milestones amounts
+    for (uint256 i = 0; i < milestones.milestone.length; i++) {
+      if (milestones.milestone[i].amount == 0) {
+        revert MilestoneAmountZero(i);
+      }
+    }
 
-  //   if (milestones.totalAmount == 0) {
-  //     revert MilestoneTotalAmountZero();
-  //   }
+    if (milestones.totalAmount == 0) {
+      revert MilestoneTotalAmountZero();
+    }
 
-  //   if (milestones.claimedAmount > milestones.totalAmount) {
-  //     revert MilestoneClaimedAmountExceedsTotalAmount(milestones.claimedAmount, milestones.totalAmount);
-  //   }
+    if (milestones.claimedAmount > milestones.totalAmount) {
+      revert MilestoneClaimedAmountExceedsTotalAmount(milestones.claimedAmount, milestones.totalAmount);
+    }
 
-  //   // Check the minimum milestone count
-  //   if (milestones.milestone.length < $.minimumMilestoneCount) {
-  //     revert InvalidNumberOfMilestones(milestones.milestone.length, $.minimumMilestoneCount);
-  //   }
-  // }
+    // Check the minimum milestone count
+    if (milestones.milestone.length < $.minimumMilestoneCount) {
+      revert InvalidNumberOfMilestones(milestones.milestone.length, $.minimumMilestoneCount);
+    }
+  }
 
   /**
    * @dev Sets the status of a milestone.
