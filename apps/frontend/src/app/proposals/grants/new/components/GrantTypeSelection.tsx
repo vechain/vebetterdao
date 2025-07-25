@@ -1,7 +1,7 @@
 import { VStack, Text, Grid, Card, CardBody, List, ListItem, ListIcon, useColorModeValue } from "@chakra-ui/react"
 import { UilCheck } from "@iconscout/react-unicons"
 import { Control, Controller } from "react-hook-form"
-import { GrantFormData } from "./GrantsNewPageContent"
+import { GrantFormData } from "./form/GrantsNewFormStepCard"
 import { useTranslation } from "react-i18next"
 
 interface GrantTypeSelectionProps {
