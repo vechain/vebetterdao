@@ -16,46 +16,42 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
-import { useAppEndorsementStatus, useXAppMetadata, useIpfsImage, useXNode, UnendorsedApp, XApp } from "@/api"
+import { useAppEndorsementStatus, useGetUserNodes, useIpfsImage, useXAppMetadata } from "@/api"
 import { notFoundImage } from "@/constants"
 import { useXAppStatusConfig } from "../[appId]/hooks"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
-  xApp: XApp | UnendorsedApp
+  appId: string
+  isNewApp: boolean
   layout?: "endorser" | "default"
 }
 
-export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
+export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
+  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+  const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)
 
   const {
     score: endorsementScore,
     threshold: endorsementThreshold,
     status: endorsementStatus,
     isLoading: isEndorsementStatusLoading,
-  } = useAppEndorsementStatus(xApp.id)
+  } = useAppEndorsementStatus(appId)
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
 
-  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
   const isUserAppEndorser = useMemo(() => {
-    if (!xApp || isXNodeLoading) return false
-    return isXNodeHolder && isEndorsingApp && compareAddresses(xApp.id, endorsedApp?.id)
-  }, [xApp, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
+    if (!appId) return false
+    return nodeEndorsingApp?.isXNodeHolder
+  }, [appId, nodeEndorsingApp])
 
   const onCardClick = useCallback(() => {
-    router.push(`/apps/${xApp.id}`)
-  }, [router, xApp.id])
-
-  const isNewApp = useMemo(() => {
-    if (!xApp) return false
-    return xApp.isNew
-  }, [xApp])
+    router.push(`/apps/${appId}`)
+  }, [router, appId])
 
   return (
     <Card
@@ -155,9 +151,9 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
 
               {isUserAppEndorser && (
                 <VStack gap={0} alignItems="flex-start">
-                  <Skeleton isLoaded={!isXNodeLoading}>
+                  <Skeleton isLoaded={!isUserNodesLoading}>
                     <Text fontSize="24px" fontWeight="700" color="#004CFC">
-                      {xNodePoints}
+                      {nodeEndorsingApp?.xNodePoints}
                     </Text>
                   </Skeleton>
                   <Text fontSize="12px" color="#6A6A6A">

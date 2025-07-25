@@ -1,58 +1,80 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-import { abi } from "thor-devkit"
+import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
+import { getXAppMetadata } from "../../getXAppMetadata"
+import { isNewApp, XApp, XAppWithMetadata } from "../../getXApps"
+import { useXAppsMetadataBaseUri } from "../useXAppsMetadataBaseUri"
 
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-const nodeToEndorsementAppFragment = X2EarnApps__factory.createInterface()
-  .getFunction("nodeToEndorsedApp")
-  .format("json")
+const abi = X2EarnApps__factory.abi
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 
-const nodeToEndorsementAppFragmentAbi = new abi.Function(JSON.parse(nodeToEndorsementAppFragment))
+const UNENDORSED_APP_ID = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-// NOTE: one node can endorse one app
-type NodeEndorsedApp = {
-  // node id
-  id: string
-  endorsedApp?: string | null
-}
+export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], baseURI: string) => {
+  const apps = await executeMultipleClausesCall({
+    thor,
+    calls: nodeIds.map(
+      nodeId =>
+        ({
+          abi,
+          address,
+          functionName: "nodeToEndorsedApp",
+          args: [nodeId as `0x${string}`],
+        }) as const,
+    ),
+  })
 
-/**
- * Returns a mapping between node ids and the endorsed apps from the contract
- * one node can endorse one app
- * @param thor  the thor client
- * @param nodeIds  the node ids to fetch the endorsed apps for
- * @returns  the endorsed apps for the nodes
- */
-export const getNodesEndorsedApps = async (thor: Connex.Thor, nodeIds: string[]): Promise<NodeEndorsedApp[]> => {
-  const clauses = nodeIds.map(nodeId => ({
-    to: X2EARNAPPS_CONTRACT,
-    value: 0,
-    data: nodeToEndorsementAppFragmentAbi.encode(nodeId),
-  }))
+  if (apps.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
 
-  const res = await thor.explain(clauses).execute()
+  const appToNodeIndexMap = apps.reduce(
+    (acc, app, index) => {
+      if (app !== UNENDORSED_APP_ID) acc[app] = index
 
-  const error = res.find(r => r.reverted)?.revertReason
+      return acc
+    },
+    {} as Record<`0x${string}`, number>,
+  )
 
-  if (error) throw new Error(error ?? "Error fetching endorsed apps")
-
-  if (res.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
-
-  return res.map((r, index) => {
-    let decoded = nodeToEndorsementAppFragmentAbi.decode(r.data)[0]
-    // if not endorsed app, address is 0x0
-    if (decoded === "0x0000000000000000000000000000000000000000000000000000000000000000") decoded = null
+  const appDetails = (
+    await executeMultipleClausesCall({
+      thor,
+      calls: Object.keys(appToNodeIndexMap).map(
+        appId =>
+          ({
+            abi,
+            address,
+            functionName: "app",
+            args: [appId as `0x${string}`],
+          }) as const,
+      ),
+    })
+  ).map(app => {
+    const appStringified = { ...app, createdAtTimestamp: app.createdAtTimestamp.toString() }
 
     return {
-      id: nodeIds[index] as string,
-      endorsedApp: decoded as string | null,
+      ...appStringified,
+      isNew: isNewApp(appStringified),
+    } as XApp
+  })
+
+  const appsMetadata = await Promise.all(appDetails.map(app => getXAppMetadata(`${baseURI}${app.metadataURI}`)))
+
+  return appDetails.map((app, index) => {
+    return {
+      nodeId: appToNodeIndexMap[app.id as `0x${string}`],
+      endorsedApp: {
+        ...appDetails[index],
+        metadata: {
+          ...appsMetadata[index],
+          logo: `https://api.gateway-proxy.vechain.org/ipfs/${appsMetadata[index]?.logo.replace("ipfs://", "")}`,
+        },
+      } as XAppWithMetadata,
     }
   })
 }
 
-export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", ...nodeIds, "ENDORSED_APPS"]
+export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", nodeIds, "ENDORSED_APPS"]
 
 /**
  *  Hook to get the endorsed apps for a user's nodes
@@ -60,12 +82,15 @@ export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", ..
  * @returns  the endorsed apps for the nodes
  */
 export const useNodesEndorsedApps = (nodeIds: string[]) => {
-  const { thor } = useConnex()
+  const thor = useThor()
+  const { data: baseURI } = useXAppsMetadataBaseUri()
 
   return useQuery({
     queryKey: getNodesEndorsedAppsQueryKey(nodeIds),
-    queryFn: async () => await getNodesEndorsedApps(thor, nodeIds),
-    enabled: !!thor && !!nodeIds?.length,
+    queryFn: async () => await getNodesEndorsedApps(thor, nodeIds, baseURI ?? ""),
+    enabled: !!thor && !!nodeIds?.length && !!baseURI,
+    // filter unendorsed apps
+    select: data => data.filter(node => node.endorsedApp?.id !== UNENDORSED_APP_ID),
   })
 }
 

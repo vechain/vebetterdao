@@ -32,7 +32,10 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const currentVotesQuery = useAllocationVotes(roundId)
   const quorumQuery = useAllocationRoundQuorum(roundId)
   const votesAtSnapshotQuery = useVot3PastSupply(roundInfo.voteStart)
-  const userVotesAtSnapshotQuery = useGetVotesOnBlock(Number(roundInfo.voteStart), account?.address ?? "")
+  const userVotesAtSnapshotQuery = useGetVotesOnBlock(
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
+    account?.address ?? "",
+  )
 
   const isRoundActive = useMemo(() => {
     return roundInfo?.state === 0

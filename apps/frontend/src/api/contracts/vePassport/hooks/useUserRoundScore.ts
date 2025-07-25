@@ -1,11 +1,11 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/vechain-kit"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
+const address = getConfig().veBetterPassportContractAddress as `0x${string}`
+const abi = VeBetterPassport__factory.abi
+const method = "userRoundScore" as const
 
 /**
  * Returns the query key for fetching the user round score.
@@ -14,7 +14,7 @@ const vePassportInterface = VeBetterPassport__factory.createInterface()
  * @returns The query key for fetching the user round score.
  */
 export const getUserRoundScoreQueryKey = (user: string, round: number) => {
-  return getCallKey({ method: "userRoundScore", keyArgs: [user, round] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [user as `0x${string}`, BigInt(round)] })
 }
 
 /**
@@ -24,12 +24,15 @@ export const getUserRoundScoreQueryKey = (user: string, round: number) => {
  * @returns The user round score.
  */
 export const useUserRoundScore = (user?: string | null, round?: number) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
-    method: "userRoundScore",
-    args: [user, round],
-    enabled: !!user && !!round,
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [user as `0x${string}`, BigInt(round ?? 0)],
+    queryOptions: {
+      enabled: !!user && !!round,
+      select: data => data[0],
+    },
   })
 }
 

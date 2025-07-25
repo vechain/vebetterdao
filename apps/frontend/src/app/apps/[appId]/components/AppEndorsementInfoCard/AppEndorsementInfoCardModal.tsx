@@ -1,4 +1,4 @@
-import { useAppEndorsers, useAppEndorsementStatus, useXNode, useIsAppAdmin } from "@/api"
+import { useAppEndorsers, useAppEndorsementStatus, useIsAppAdmin, UserNode } from "@/api"
 import { EndorsersItem } from "./EndorsersItem"
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
@@ -32,9 +32,10 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   appId: string
+  userNode?: UserNode
 }
 
-export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) => {
+export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -51,12 +52,10 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   // User roles data
   const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account?.address ?? "")
 
-  // User xnodes, TODO support multiple xnodes
-  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
   const isUserAppEndorser = useMemo(() => {
-    if (!appId || isXNodeLoading) return false
-    return isXNodeHolder && isEndorsingApp && compareAddresses(appId, endorsedApp?.id)
-  }, [appId, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
+    if (!appId) return false
+    return userNode?.isXNodeHolder && compareAddresses(appId, userNode?.endorsedAppId)
+  }, [appId, userNode])
 
   // Confirm unendorsement, unendorsement modal controls
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -109,13 +108,12 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
               justify="space-between"
               alignItems={["center", "center", "center"]}>
               <EndorsementDetails
+                appId={appId}
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
                 endorsementThreshold={endorsementThreshold}
                 isEndorsementStatusLoading={isEndorsementStatusLoading}
-                xNodePoints={xNodePoints}
-                isUserAppEndorser={isUserAppEndorser}
-                isXNodeLoading={isXNodeLoading}
+                isUserAppEndorser={isUserAppEndorser ?? false}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
@@ -185,6 +183,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                     .reverse()
                     .map(endorser => (
                       <EndorsersItem
+                        appId={appId}
                         key={endorser}
                         isAppAdmin={isAppAdmin || false}
                         endorserAddress={endorser}

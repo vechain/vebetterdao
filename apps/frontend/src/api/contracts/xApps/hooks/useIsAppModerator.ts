@@ -1,26 +1,18 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
+import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 
-/**
- * Check if the given address is the moderator of the app
- * @param appId  the id of the app
- * @param address  the address to check
- * @returns a boolean indicating if the address is the moderator of the app
- */
-export const getIsAppModerator = async (thor: Connex.Thor, appId: string, address: string): Promise<boolean> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("isAppModerator").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call(appId, address)
+const abi = X2EarnApps__factory.abi
+const contractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
+const method = "isAppModerator" as const
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
-}
-
-export const getIsAppModeratorQueryKey = (appId: string, address: string) => ["isAppModerator", appId, address]
+export const getIsAppModeratorQueryKey = (appId: string, address: string) =>
+  getCallClauseQueryKeyWithArgs({
+    abi,
+    address: contractAddress as `0x${string}`,
+    method,
+    args: [appId as `0x${string}`, address as `0x${string}`],
+  })
 
 /**
  * Check if the given address is the moderator of the app
@@ -29,11 +21,14 @@ export const getIsAppModeratorQueryKey = (appId: string, address: string) => ["i
  * @returns a boolean indicating if the address is the moderator of the app
  */
 export const useIsAppModerator = (appId: string, address: string) => {
-  const { thor } = useConnex()
-
-  return useQuery({
-    queryKey: getIsAppModeratorQueryKey(appId, address),
-    queryFn: async () => await getIsAppModerator(thor, appId, address),
-    enabled: !!thor && !!address && !!appId,
+  return useCallClause({
+    abi,
+    address: contractAddress,
+    method,
+    args: [appId as `0x${string}`, address as `0x${string}`],
+    queryOptions: {
+      enabled: !!address && !!appId,
+      select: data => data[0],
+    },
   })
 }

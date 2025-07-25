@@ -16,6 +16,7 @@ import sv from "./languages/sv.json"
 import tw from "./languages/tw.json"
 import tr from "./languages/tr.json"
 import hi from "./languages/hi.json"
+import pt from "./languages/pt.json"
 
 import { initReactI18next } from "react-i18next"
 
@@ -36,6 +37,7 @@ export const translations: { [key: string]: any } = {
   tw,
   tr,
   hi,
+  pt,
 }
 
 export const languages = [
@@ -108,6 +110,11 @@ export const languages = [
     name: "Chinese",
     code: "zh",
     flag: "🇨🇳",
+  },
+  {
+    name: "Portuguese (Brazil)",
+    code: "pt",
+    flag: "🇧🇷",
   },
 ]
 

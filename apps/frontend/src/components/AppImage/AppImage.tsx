@@ -1,7 +1,7 @@
-import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { Image, Skeleton, SkeletonProps } from "@chakra-ui/react"
+import { useXAppMetadata } from "@/api"
 
 type Props = {
   appId: string

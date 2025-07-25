@@ -1,10 +1,7 @@
-import mainnetConfig from "@repo/config/mainnet"
-import { EmissionsContractJson } from "@repo/contracts"
-import { FunctionFragment, coder } from "@vechain/sdk-core"
+import { AppConfig } from "@repo/config"
+import { Emissions__factory } from "@repo/contracts"
+import { ABIContract } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
-
-// Serialize the ABI of the Emissions contract for use in contract interaction
-const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
 
 /**
  * Asynchronously waits for the start of the next emissions round by checking the next cycle block
@@ -12,14 +9,30 @@ const emissionsABI = JSON.stringify(EmissionsContractJson.abi)
  *
  * @param {ThorClient} thor - An initialized Thor client for blockchain interactions.
  */
-export async function waitForRoundStart(thor: ThorClient) {
+export async function waitForRoundStart(thor: ThorClient, config: AppConfig) {
   // Execute a contract call to get the block number of the next cycle
-  const nextRoundBlock = await thor.contracts.executeContractCall(
-    mainnetConfig.emissionsContractAddress,
-    coder.createInterface(emissionsABI).getFunction("getNextCycleBlock") as FunctionFragment,
+  const nextRoundBlock = await thor.contracts.executeCall(
+    config.emissionsContractAddress,
+    ABIContract.ofAbi(Emissions__factory.abi).getFunction("getNextCycleBlock"),
     [],
   )
 
-  // Wait for the blockchain to reach the specified block number
-  await thor.blocks.waitForBlockCompressed(Number(nextRoundBlock[0]), { intervalMs: 10000 })
+  const targetBlock = Number(nextRoundBlock.result?.array?.[0])
+
+  // Create a promise that resolves when the block is reached
+  const blockWaitPromise = thor.blocks.waitForBlockCompressed(targetBlock, { intervalMs: 10000 }) // Check every 10 seconds
+
+  // Create a timeout promise
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(
+      () => {
+        reject(new Error(`Timeout waiting for block ${targetBlock} after 2 minutes`))
+      },
+      2 * 60 * 1000, // 2 minutes in milliseconds
+    )
+  })
+
+  // Race the two promises - whichever completes first wins
+  // If the blockWaitPromise hangs for 2 minutes, the timeoutPromise will win the race and throw an error.
+  await Promise.race([blockWaitPromise, timeoutPromise])
 }

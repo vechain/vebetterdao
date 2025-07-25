@@ -1,10 +1,10 @@
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
-const vePassportInterface = VeBetterPassport__factory.createInterface()
-const method = "getPendingDelegations"
+const address = getConfig().veBetterPassportContractAddress
+const abi = VeBetterPassport__factory.abi
+const method = "getPendingDelegations" as const
 
 /**
  * Returns the query key for fetching pending delegations.
@@ -12,7 +12,7 @@ const method = "getPendingDelegations"
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegateePOV = (delegatee: string) => {
-  return getCallKey({ method, keyArgs: ["incoming", delegatee] })
+  return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegatee as `0x${string}`] })
 }
 
 /**
@@ -21,13 +21,14 @@ export const getPendingDelegationsQueryKeyDelegateePOV = (delegatee: string) => 
  * @returns An array of addresses representing delegators with pending delegations for the delegatee.
  */
 export const useGetPendingDelegationsDelegateePOV = (delegatee?: string | null) => {
-  return useCall({
-    contractInterface: vePassportInterface,
-    contractAddress: VEPASSPORT_CONTRACT,
+  return useCallClause({
+    abi,
+    address,
     method,
-    keyArgs: ["incoming", delegatee],
-    args: [delegatee],
-    mapResponse: response => response.decoded[0] ?? [],
-    enabled: !!delegatee,
+    args: [(delegatee ?? "0x") as `0x${string}`],
+    queryOptions: {
+      enabled: !!delegatee,
+      select: data => data[0],
+    },
   })
 }

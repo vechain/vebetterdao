@@ -1,5 +1,4 @@
-import { useConnex } from "@vechain/vechain-kit"
-
+import { useThor } from "@vechain/vechain-kit"
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsCreatedEvents } from ".."
 
@@ -10,7 +9,7 @@ export const getUserProposalsCreatedEventsQueryKey = (user?: string) => ["PROPOS
  * @returns An object containing information about the created proposals.
  */
 export const useUserProposalsCreatedEvents = (user?: string) => {
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getUserProposalsCreatedEventsQueryKey(user ?? undefined),

@@ -36,7 +36,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
       const url = new URL(proof?.proof?.link ?? "")
       const allowedHosts = ["twitter.com", "x.com"]
       return allowedHosts.includes(url.host)
-    } catch (e) {
+    } catch {
       return false
     }
   }, [proof?.proof?.link])

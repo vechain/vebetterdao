@@ -6,10 +6,10 @@ import { UseQueryResult } from "@tanstack/react-query"
 import { UilClock } from "@iconscout/react-unicons"
 
 type Props = {
-  quorumQuery: UseQueryResult<string, Error>
-  currentVotesQuery: UseQueryResult<string, Error>
-  votesAtSnapshotQuery: UseQueryResult<string, Error>
-  userVotesAtSnapshotQuery: UseQueryResult<string, Error>
+  quorumQuery: UseQueryResult<string, unknown>
+  currentVotesQuery: UseQueryResult<string, unknown>
+  votesAtSnapshotQuery: UseQueryResult<string, unknown>
+  userVotesAtSnapshotQuery: UseQueryResult<string, unknown>
   renderQuroum?: "none" | "upcoming" | "active"
   isEnded?: boolean
   renderTimeline?: React.ReactNode

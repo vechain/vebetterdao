@@ -1,7 +1,6 @@
 import { Box, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilPolygon } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
-import { FaChevronRight } from "react-icons/fa6"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
@@ -13,7 +12,7 @@ interface GmNFTCardProps {
   gmImage?: string
   gmName?: string
   gmLevel?: string
-  gmRewardMultiplier?: string
+  gmRewardMultiplier?: number
   nodeAttachedColor: string
   viewMode?: boolean
   onCardClick?: () => void
@@ -99,7 +98,6 @@ export const GmNFTCard = ({
           </HStack>
         </FeatureFlagWrapper>
       </VStack>
-      <FaChevronRight size={"24px"} />
     </HStack>
   )
 }

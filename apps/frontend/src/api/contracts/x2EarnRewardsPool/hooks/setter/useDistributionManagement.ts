@@ -7,7 +7,6 @@ import {
   getIsDistributionPausedQueryKey,
   getIsRewardsPoolEnabledQueryKey,
   getAppAvailableFundsQueryKey,
-  getAppBalanceQueryKey,
 } from "@/api/contracts/x2EarnRewardsPool"
 import { buildClause } from "@/utils/buildClause"
 
@@ -70,7 +69,8 @@ export const useDistributionManagement = ({ xAppId, onSuccess, isEnabled }: Prop
       getAppRewardsBalanceQueryKey(xAppId),
       getIsRewardsPoolEnabledQueryKey(xAppId),
       getAppAvailableFundsQueryKey(xAppId),
-      getAppBalanceQueryKey(xAppId),
+      // TODO: check if this is needed cause hook is not used anywhere
+      // getAppBalanceQueryKey(xAppId),
     ],
     [xAppId],
   )

@@ -1,0 +1,199 @@
+---
+description: 
+globs: **/src/api/**/*.ts
+alwaysApply: false
+---
+# Cursor Rules for @hooks Directory
+
+## useCallClause Hook Pattern
+
+When creating hooks that use `useCallClause` from `@vechain/vechain-kit`, follow this template:
+
+### 1. File Structure Template
+
+```typescript
+import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+import { getConfig } from "@repo/config" // if using contract addresses from config
+
+const address = getConfig().contractAddress // or pass as parameter
+const abi = ContractFactory__factory.abi
+const method = "methodName" as const
+
+export const getMethodNameQueryKey = (param1: string, param2?: number) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [param1, param2] })
+
+/**
+ * Hook description explaining what it does
+ * @param param1 Description of parameter
+ * @param param2 Optional parameter description
+ * @returns Description of return value
+ */
+export const useHookName = (param1: string, param2?: number) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [param1, param2 ? BigInt(param2) : BigInt(0)],
+    queryOptions: {
+      enabled: !!param1, // Add conditions for when query should run
+      select: data => data[0], // Transform data if needed
+    },
+  })
+}
+```
+
+### 2. Naming Conventions
+
+- Hook files: `use[FeatureName].ts`
+- Hook functions: `use[FeatureName]`
+- Query key functions: `get[MethodName]QueryKey`
+- Method constants: `"methodName" as const`
+
+### 3. Required Patterns
+
+#### Import Structure
+
+```typescript
+// 1. Contract factory imports first
+import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+// 2. VeChain kit imports
+import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
+// 3. Config imports if needed
+import { getConfig } from "@repo/config"
+// 4. Other utility imports
+```
+
+#### Constants Declaration
+
+```typescript
+const address = getConfig().contractAddress // or parameter
+const abi = ContractFactory__factory.abi
+const method = "methodName" as const
+```
+
+#### Query Key Export
+
+Always export a query key function for external cache management:
+
+```typescript
+export const getMethodNameQueryKey = (params...) =>
+  getCallClauseQueryKey<typeof abi>({ address, method, args: [...] })
+```
+
+#### Hook Function
+
+```typescript
+export const useHookName = (params...) => {
+  return useCallClause({
+    abi,
+    address,
+    method,
+    args: [...], // Convert numbers to BigInt when needed
+    queryOptions: {
+      enabled: /* condition */, // Always include enabled condition
+      select: data => /* transform */, // Transform if needed
+    },
+  })
+}
+```
+
+### 4. Type Handling
+
+- Use `BigInt()` for numeric parameters that represent blockchain values
+- Use `!!param` for enabled conditions to ensure boolean
+- Use `data[0]` for single return values, or destructure for multiple
+- Add proper TypeScript types for parameters and return values
+
+### 5. Documentation
+
+- Always include JSDoc comments for hooks
+- Document all parameters with `@param`
+- Document return values with `@returns`
+- Include brief description of what the hook does
+
+### 6. Error Handling
+
+- Let `useCallClause` handle errors internally
+- Use `enabled` option to prevent unnecessary calls
+- Provide sensible defaults for optional parameters
+
+### 7. Data Transformation
+
+- Use `select` in `queryOptions` for data transformation
+- Keep transformations simple and focused
+- For complex transformations, consider separate utility functions
+
+### 8. Export Pattern
+
+All hooks must be exported from `index.ts`:
+
+```typescript
+export * from "./useHookName"
+```
+
+### 9. Examples of Common Patterns
+
+#### Simple Read Hook
+
+```typescript
+export const useContractVersion = (contractAddress: string) => {
+  return useCallClause({
+    abi: ContractFactory__factory.abi,
+    address: contractAddress,
+    method: "version",
+    args: [],
+    queryOptions: {
+      select: data => data[0],
+    },
+  })
+}
+```
+
+#### Hook with Parameters
+
+```typescript
+export const useUserBalance = (userAddress: string, tokenId?: number) => {
+  return useCallClause({
+    abi: ERC20__factory.abi,
+    address: getConfig().tokenAddress,
+    method: "balanceOf",
+    args: [userAddress, tokenId ? BigInt(tokenId) : BigInt(0)],
+    queryOptions: {
+      enabled: !!userAddress,
+      select: data => ethers.formatEther(data[0]),
+    },
+  })
+}
+```
+
+#### Hook with Data Processing
+
+```typescript
+export const useFormattedAmount = (roundId: number) => {
+  const { data } = useCallClause({
+    abi: Contract__factory.abi,
+    address: getConfig().contractAddress,
+    method: "getAmount",
+    args: [BigInt(roundId)],
+    queryOptions: {
+      enabled: !!roundId,
+    },
+  })
+
+  const amount = data?.[0]
+  const scaled = ethers.formatEther(amount ?? 0)
+  const formatted = FormattingUtils.humanNumber(scaled)
+
+  return { original: amount, scaled, formatted }
+}
+```
+
+### 10. Common Mistakes to Avoid
+
+- Don't forget to use `BigInt()` for numeric blockchain values
+- Don't omit the `enabled` condition for conditional queries
+- Don't forget to export the query key function
+- Don't forget to add the hook to `index.ts`
+- Don't use complex logic inside the hook - extract to utilities
+- Don't forget JSDoc documentation

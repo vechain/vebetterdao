@@ -4,8 +4,8 @@ import { UseQueryResult } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 
 type Props = {
-  votesAtSnapshotQuery: UseQueryResult<string, Error>
-  userVotesAtSnapshotQuery: UseQueryResult<string, Error>
+  votesAtSnapshotQuery: UseQueryResult<string, unknown>
+  userVotesAtSnapshotQuery: UseQueryResult<string, unknown>
 }
 export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQuery }: Props) => {
   const { t } = useTranslation()

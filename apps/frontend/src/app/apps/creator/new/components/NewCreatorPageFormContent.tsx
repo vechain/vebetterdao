@@ -43,7 +43,7 @@ export const NewCreatorPageFormContent = () => {
   const [submitStatus, setSubmitStatus] = useState<"success" | "error">("success")
   const [submitErrorMessage, setSubmitErrorMessage] = useState("")
   const { account } = useWallet()
-  const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
+  const { data: hasCreatorNft } = useHasCreatorNFT(account?.address ?? "")
   const queryClient = useQueryClient()
   useEffect(() => {
     //Users with Creator NFT should be redirected to the new app page

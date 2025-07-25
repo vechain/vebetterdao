@@ -16,14 +16,15 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
-import { useXNodes } from "@/api"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useState } from "react"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 
 type Props = {
+  appId: string
   isAppAdmin: boolean
   endorserAddress: string
   endorsementEvents: AppEndorsedEvent[]
@@ -34,6 +35,7 @@ type Props = {
 }
 
 export const EndorsersItem = ({
+  appId,
   isAppAdmin,
   endorserAddress,
   endorsementEvents,
@@ -45,10 +47,8 @@ export const EndorsersItem = ({
   const { t } = useTranslation()
   const router = useRouter()
 
-  // Get the endorser's first node and the node endorsement score
-  const { data: endorserNodes, isLoading: endorserNodesLoading } = useXNodes(endorserAddress)
-  // TODO support multiple nodes
-  const endorserNodeId = endorserNodes?.[0]?.id
+  const { data: userNodes, isLoading: endorserNodesLoading } = useGetUserNodes(endorserAddress)
+  const endorserNodeId = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.nodeId
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
 
   // Find the first element in events (ie most recent) where the endorser endorsed the app

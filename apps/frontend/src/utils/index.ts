@@ -6,7 +6,7 @@ export * from "./media"
 export * from "./ipfs"
 export * from "./date"
 export * from "./filterAmountInput"
-export * from "./getNodeJsConnex"
+export * from "./getNodeJsThorClient"
 export * from "./dayjsConfig"
 
 export { AddressUtils, AnalyticsUtils, HexUtils }

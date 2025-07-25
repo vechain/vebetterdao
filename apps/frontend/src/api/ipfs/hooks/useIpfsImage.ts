@@ -34,6 +34,7 @@ export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
     "image/tiff",
     "image/webp",
     "image/svg+xml",
+    "application/json",
   ]
   if (!allowedMimeTypes.includes(response.data.type)) {
     throw new Error(`Unsupported MIME type: ${response.data.type}`)
@@ -82,12 +83,23 @@ export const useIpfsImage = (imageIpfsUri?: null | string) => {
  * @returns An array of queries for each IPFS image URI.
  */
 export const useIpfsImageList = (imageIpfsUriList: string[]) => {
-  return useQueries({
-    queries: imageIpfsUriList.map(imageIpfsUri => ({
-      queryKey: getIpfsImageQueryKey(imageIpfsUri),
-      queryFn: () => getIpfsImage(imageIpfsUri),
-      enabled: !!imageIpfsUri,
+  // Ensure unique URIs to avoid duplicate query keys
+  const uniqueUris = Array.from(new Set(imageIpfsUriList.filter(Boolean)))
+
+  // Run useQueries once per unique URI
+  const uniqueResults = useQueries({
+    queries: uniqueUris.map(uri => ({
+      queryKey: ["ipfs-image-list", getIpfsImageQueryKey(uri)],
+      queryFn: () => getIpfsImage(uri),
+      enabled: !!uri,
       staleTime: Infinity,
     })),
   })
+
+  // Map from URI to the query result
+  const uriMap = new Map()
+  uniqueUris.forEach((uri, i) => uriMap.set(uri, uniqueResults[i]))
+
+  // Return results aligned to the original input order
+  return imageIpfsUriList.map(uri => uriMap.get(uri))
 }

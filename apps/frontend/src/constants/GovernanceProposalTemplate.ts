@@ -22,6 +22,9 @@ export const CONCLUSION_PLACEHOLDER =
 export const REFERENCES_PLACEHOLDER = "[List any sources, documents, or links that are referenced in the proposal.]"
 export const NAME_PLACEHOLDER = "[Your Name]"
 export const CONTACT_INFORMATION_PLACEHOLDER = "[Your Contact Information]"
+export const REMOVED_PLACEHOLDER = "[Removed]"
+export const MODIFIED_PLACEHOLDER = "[Modified]"
+export const ADDED_FEATURES_PLACEHOLDER = "[Added]"
 
 /**
  * Governance markdown Proposal Template for VebetterDAO
@@ -36,6 +39,11 @@ ${SUMMARY_PLACEHOLDER}
 Specify the type of proposal:
 - [${ONCHAIN_ACTION_PLACEHOLDER}] On-chain Action
 - [${TEXT_ONLY_PLACEHOLDER}] Text-only Proposal
+
+## Proposal Changes
+- Removed : ${REMOVED_PLACEHOLDER}
+- Modified: ${MODIFIED_PLACEHOLDER}
+- Added: ${ADDED_FEATURES_PLACEHOLDER}
 
 ## Motivation
 ${MOTIVATION_PLACEHOLDER}
@@ -165,6 +173,16 @@ export const validateProposalTemplate = (template: string): string[] => {
   if (template.includes(DATE_PLACEHOLDER)) {
     errors.push("Date ")
   }
+
+  if (template.includes(REMOVED_PLACEHOLDER)) {
+    errors.push("Proposal Changes - Removed")
+  }
+  if (template.includes(MODIFIED_PLACEHOLDER)) {
+    errors.push("Proposal Changes - Modified")
+  }
+  if (template.includes(ADDED_FEATURES_PLACEHOLDER)) {
+    errors.push("Proposal Changes - Added")
+  }
   return errors
 }
 
@@ -189,4 +207,7 @@ export const removePlaceholders = (template: string): string => {
     .replace(CONTACT_INFORMATION_PLACEHOLDER, "")
     .replace(ADDRESS_PLACEHOLDER, "")
     .replace(DATE_PLACEHOLDER, "")
+    .replace(REMOVED_PLACEHOLDER, "")
+    .replace(MODIFIED_PLACEHOLDER, "")
+    .replace(ADDED_FEATURES_PLACEHOLDER, "")
 }

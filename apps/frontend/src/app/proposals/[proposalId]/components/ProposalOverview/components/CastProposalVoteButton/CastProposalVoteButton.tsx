@@ -35,7 +35,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const { data: threhsold } = useVotingThreshold()
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(userSnapshot ?? 0) >= (threhsold ?? 0)
+    return Number(userSnapshot ?? 0) >= Number(threhsold ?? 0)
   }, [userSnapshot, threhsold])
 
   const goToProposalVote = useCallback(() => {

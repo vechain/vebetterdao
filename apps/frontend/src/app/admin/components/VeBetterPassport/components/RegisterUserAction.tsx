@@ -1,5 +1,5 @@
-import { useXApps } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
+import { useXApps } from "@/api"
 import { useRegisterUserAction } from "@/hooks"
 import {
   Button,

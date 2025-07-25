@@ -13,7 +13,7 @@ import {
   Icon,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useDepositToAppBalance } from "@/hooks"
+import { useDepositToAppBalance, useGetB3trBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { CustomModalContent, B3TRIcon } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
@@ -21,10 +21,11 @@ import { motion } from "framer-motion"
 import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useXApp } from "@/api"
+
 export type Props = {
   appId: string
   isOpen: boolean
@@ -59,7 +60,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const { data: app } = useXApp(appId)
 
-  const { data: availableBalanceToDeposit } = useB3trBalance(account?.address ?? "")
+  const { data: availableBalanceToDeposit } = useGetB3trBalance(account?.address ?? "")
 
   const { data: appBalance, isLoading: isAppBalanceLoading } = useAppAvailableFunds(appId)
 

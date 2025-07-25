@@ -3,17 +3,17 @@ import { useTranslation } from "react-i18next"
 import { EndorsersIcon } from "./EndorsersIcon"
 import { XAppStatus } from "@/types"
 import { useXAppStatusConfig } from "../../hooks"
+import { useGetUserNodes } from "@/api"
 
 type Props = {
   endorsementScore?: string
   endorsementStatus: XAppStatus
   endorsementThreshold?: string
   isEndorsementStatusLoading: boolean
-  xNodePoints: number
   isUserAppEndorser: boolean
-  isXNodeLoading: boolean
   endorsers: string[]
   isAppEndorsersLoading: boolean
+  appId: string
 }
 
 export const EndorsementDetails = ({
@@ -21,13 +21,14 @@ export const EndorsementDetails = ({
   endorsementStatus,
   endorsementThreshold,
   isEndorsementStatusLoading,
-  xNodePoints,
   isUserAppEndorser,
-  isXNodeLoading,
   endorsers,
   isAppEndorsersLoading,
+  appId,
 }: Props) => {
   const { t } = useTranslation()
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const yourScore = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.xNodePoints
 
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }
@@ -50,9 +51,9 @@ export const EndorsementDetails = ({
 
       {isUserAppEndorser && (
         <VStack gap={0} alignItems="center">
-          <Skeleton isLoaded={!isXNodeLoading}>
+          <Skeleton isLoaded={!isUserNodesLoading}>
             <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
-              {xNodePoints}
+              {yourScore}
             </Text>
           </Skeleton>
           <Text fontSize="12px" color="#6A6A6A">

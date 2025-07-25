@@ -1,18 +1,24 @@
+import { executeCallClause, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
-import { XApp } from "./getXApps"
+import { X2EarnApps__factory } from "@repo/contracts"
+
+const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
+const abi = X2EarnApps__factory.abi
+const method = "baseURI" as const
 
 /**
  *  Returns the baseUri of the xApps metadata
  * @param thor  the thor client
  * @returns  the baseUri of the xApps metadata
  */
-export const getXAppsMetadataBaseUri = async (thor: Connex.Thor): Promise<XApp[]> => {
-  const functionFragment = X2EarnApps.createInterface().getFunction("baseURI").format("json")
-  const res = await thor.account(X2EARNAPPS_CONTRACT).method(JSON.parse(functionFragment)).call()
+export const getXAppsMetadataBaseUri = async (thor: ThorClient): Promise<string> => {
+  const [uri] = await executeCallClause({
+    thor,
+    abi,
+    contractAddress: address,
+    method,
+    args: [],
+  })
 
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res.decoded[0]
+  return uri
 }

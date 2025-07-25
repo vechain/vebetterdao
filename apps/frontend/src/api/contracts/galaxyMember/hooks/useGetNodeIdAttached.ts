@@ -1,12 +1,13 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-const contractAddress = getConfig().galaxyMemberContractAddress
-const contractInterface = GalaxyMember__factory.createInterface()
-const method = "getNodeIdAttached"
+const address = getConfig().galaxyMemberContractAddress
+const abi = GalaxyMember__factory.abi
+const method = "getNodeIdAttached" as const
 
-export const getNodeIdAttachedQueryKey = (tokenId?: string) => getCallKey({ method, keyArgs: [tokenId] })
+export const getNodeIdAttachedQueryKey = (tokenId?: string) =>
+  getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(tokenId || "0")] })
 
 /**
  * Custom hook that retrieves the Vechain Node Token ID attached to the given GM Token ID.
@@ -14,12 +15,15 @@ export const getNodeIdAttachedQueryKey = (tokenId?: string) => getCallKey({ meth
  * @param tokenId - The GM Token ID to check for attached node.
  * @returns The Vechain Node Token ID attached to the given GM Token ID.
  */
-export const useGetNodeIdAttached = (tokenId: string | null) => {
-  return useCall({
-    contractInterface,
-    contractAddress,
+export const useGetNodeIdAttached = (tokenId?: string) => {
+  return useCallClause({
+    abi,
+    address,
     method,
-    args: [tokenId],
-    enabled: !!tokenId,
+    args: [BigInt(tokenId || "0")],
+    queryOptions: {
+      select: data => data[0].toString(),
+      enabled: !!tokenId,
+    },
   })
 }

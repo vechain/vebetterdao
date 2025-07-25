@@ -1,4 +1,4 @@
-import { useXApps, useXNode, useIsCreatorOfAnyApp, useSortXappAlphabetically } from "@/api"
+import { useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps, useGetUserNodes, useNodesEndorsedApps } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -24,7 +24,13 @@ export const AppsPageContent = () => {
   const { account } = useWallet()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
-  const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
+  const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
+  const { data: endorsedApps, isLoading: isEndorsedAppsLoading } = useNodesEndorsedApps(
+    nodes?.allNodes?.map(node => node.nodeId) ?? [],
+  )
+  const isXNodeLoading = isUserNodesLoading || isEndorsedAppsLoading
+  const isEndorsingApp = endorsedApps?.length && endorsedApps?.length > 0
+
   const { data: xAppsNotSorted, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
   const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
@@ -41,7 +47,8 @@ export const AppsPageContent = () => {
   const newAppsEndorsedandUnendorsed = [...(xApps?.newApps ?? []), ...newApps]
 
   // Apps tabs
-  const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
+  const currentActiveApps =
+    xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id as unknown as `0x${string}`)) ?? []
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
 
@@ -54,11 +61,20 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && isEndorsingApp && (
         <VStack alignItems={"flex-start"} spacing={4}>
-          <Heading size="lg">{t("Your endorsed app")}</Heading>
+          <Heading size="lg">{t("Your endorsed apps")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
           </Text>
-          <UnendorsedAppCard xApp={endorsedApp} layout="endorser" />
+          <VStack gap={4}>
+            {endorsedApps?.map(endorsedApp => (
+              <UnendorsedAppCard
+                key={endorsedApp.endorsedApp.id}
+                appId={endorsedApp.endorsedApp.id}
+                isNewApp={endorsedApp.endorsedApp.isNew}
+                layout="endorser"
+              />
+            ))}
+          </VStack>
         </VStack>
       )}
 

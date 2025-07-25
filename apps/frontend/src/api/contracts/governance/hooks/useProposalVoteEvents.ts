@@ -2,7 +2,7 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useThor } from "@vechain/vechain-kit"
 
 export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS", proposalId, "VOTES"]
 
@@ -13,7 +13,7 @@ export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS
  */
 export const useProposalVoteEvents = (proposalId: string) => {
   const { account } = useWallet()
-  const { thor } = useConnex()
+  const thor = useThor()
 
   return useQuery({
     queryKey: getProposalVoteEventsQueryKey(proposalId),

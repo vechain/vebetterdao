@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { TimeLock__factory } from "@repo/contracts"
-import { getCallKey, useCall } from "@/hooks"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { useProposalOperationId } from "./useProposalOperationId"
 import { useMemo } from "react"
 
@@ -11,15 +11,16 @@ export enum ProposalOperationState {
   Done,
 }
 
-const contractAddress = getConfig().timelockContractAddress
-const contractInterface = TimeLock__factory.createInterface()
+const address = getConfig().timelockContractAddress
+const abi = TimeLock__factory.abi
 
 export const getProposalOperationStateQueryKey = (operationId: string) => {
-  getCallKey({ method: "getOperationState", keyArgs: [operationId] })
-}
-
-export const getProposalOperationTimestampQueryKey = (operationId: string) => {
-  getCallKey({ method: "getTimestamp", keyArgs: [operationId] })
+  return getCallClauseQueryKeyWithArgs({
+    abi,
+    address,
+    method: "isOperation",
+    args: [operationId as `0x${string}`],
+  })
 }
 
 /**
@@ -29,43 +30,47 @@ export const getProposalOperationTimestampQueryKey = (operationId: string) => {
  */
 export const useProposalOperationState = (proposalId?: string, enabled = true) => {
   const proposalOperationIdCall = useProposalOperationId(proposalId)
-  const proposalOperationStateCall = useCall({
-    contractInterface,
-    contractAddress,
+  const proposalOperationStateCall = useCallClause({
+    abi,
+    address,
     method: "getOperationState",
-    args: [proposalOperationIdCall.data],
-    enabled: !!proposalOperationIdCall.data && !proposalOperationIdCall.isLoading && enabled,
+    args: [proposalOperationIdCall.data?.[0] as `0x${string}`],
+    queryOptions: {
+      enabled: !!proposalOperationIdCall.data?.[0] && !proposalOperationIdCall.isLoading && enabled,
+    },
   })
 
   const isOperationWaiting = useMemo(
-    () => Number(proposalOperationStateCall.data) === ProposalOperationState.Waiting,
+    () => Number(proposalOperationStateCall.data?.[0]) === ProposalOperationState.Waiting,
     [proposalOperationStateCall.data],
   )
   const isOperationReady = useMemo(
-    () => Number(proposalOperationStateCall.data) === ProposalOperationState.Ready,
+    () => Number(proposalOperationStateCall.data?.[0]) === ProposalOperationState.Ready,
     [proposalOperationStateCall.data],
   )
   const isOperationDone = useMemo(
-    () => Number(proposalOperationStateCall.data) === ProposalOperationState.Done,
+    () => Number(proposalOperationStateCall.data?.[0]) === ProposalOperationState.Done,
     [proposalOperationStateCall.data],
   )
 
-  const proposalOperationTimestampCall = useCall({
-    contractInterface,
-    contractAddress,
+  const proposalOperationTimestampCall = useCallClause({
+    abi,
+    address,
     method: "getTimestamp",
-    args: [proposalOperationIdCall.data],
-    enabled: !proposalOperationIdCall.isLoading && enabled,
+    args: [proposalOperationIdCall.data?.[0] as `0x${string}`],
+    queryOptions: {
+      enabled: !proposalOperationIdCall.isLoading && enabled,
+    },
   })
 
   return {
-    proposalOperationId: proposalOperationIdCall.data,
+    proposalOperationId: proposalOperationIdCall.data?.[0],
     isLoading:
       proposalOperationStateCall.isLoading ||
       proposalOperationIdCall.isLoading ||
       proposalOperationTimestampCall.isLoading,
-    operationState: proposalOperationStateCall.data,
-    readyTimestamp: proposalOperationTimestampCall.data || 0,
+    operationState: proposalOperationStateCall.data?.[0],
+    readyTimestamp: proposalOperationTimestampCall.data?.[0] ? Number(proposalOperationTimestampCall.data?.[0]) : 0,
     isOperationWaiting,
     isOperationReady,
     isOperationDone,

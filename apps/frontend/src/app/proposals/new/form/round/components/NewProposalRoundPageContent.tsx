@@ -95,8 +95,8 @@ export const NewProposalRoundPageContent = () => {
           <AlertIcon />
           <AlertTitle>{t("No rounds available")}</AlertTitle>
           <AlertDescription>
-            {currentRoundIdError?.message ??
-              canStartInNextRoundError?.message ??
+            {(currentRoundIdError as Error)?.message ??
+              (canStartInNextRoundError as Error)?.message ??
               t("Emissions have propably not started yet")}
           </AlertDescription>
         </Alert>

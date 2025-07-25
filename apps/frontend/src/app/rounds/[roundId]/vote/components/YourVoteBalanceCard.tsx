@@ -18,7 +18,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? undefined,
   )
   const { data: isQuadraticFundingDisabled } = useIsQuadraticFundingDisabled()

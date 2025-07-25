@@ -1,4 +1,3 @@
-import { useXNode } from "@/api"
 import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
@@ -10,11 +9,13 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 import { DelegationAlert } from "./DelegationAlert"
 import { useState, useCallback } from "react"
+import { UserNode } from "@/api"
 
-export const DelegateXNodeCard = () => {
+export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { isXNodeDelegator, isXNodeDelegated, delegatee, xNodeOwner } = useXNode()
+
+  const { delegatee, xNodeOwner, isXNodeDelegated, isXNodeDelegator } = xNode
 
   const delegateModal = useDisclosure()
   const revokeModal = useDisclosure()
@@ -25,7 +26,7 @@ export const DelegateXNodeCard = () => {
   const ownerDomain = vnsOwnerData?.domain
 
   const isOwner = compareAddresses(account?.address ?? "", xNodeOwner ?? "")
-  const displayAddress = isOwner ? delegateeDomain ?? delegatee : ownerDomain ?? xNodeOwner
+  const displayAddress = isOwner ? (delegateeDomain ?? delegatee) : (ownerDomain ?? xNodeOwner)
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
@@ -33,22 +34,27 @@ export const DelegateXNodeCard = () => {
       <CardBody>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
-            <Heading fontSize="lg">{t("Delegation")}</Heading>
+            <Heading fontSize="lg">{t("Node Management")}</Heading>
             {isXNodeDelegated ? (
               <Text fontSize="sm">
-                {isXNodeDelegator ? t("Node is currently delegated to:") : t("Node is currently delegated to you by:")}
+                {isXNodeDelegator ? t("Node is currently managed by:") : t("Node managed for:")}
               </Text>
             ) : (
-              <Text fontSize="sm">
-                {t(
-                  "Delegate your Node to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
-                )}
-              </Text>
+              <>
+                <Text fontSize="sm">{t("Assign a manager to help operate this node.")}</Text>
+                <Text fontSize="sm">
+                  {t(
+                    "Managers can claim rewards and access third-party apps that verify NFT ownership (like VeBetterDAO or VeVote), but cannot transfer, unstake, or burn the NFT.",
+                  )}
+                </Text>
+                <Text fontSize="sm">{t("You can revoke access anytime.")}</Text>
+              </>
             )}
           </VStack>
 
           {isXNodeDelegated ? (
             <DelegatedNodeDisplay
+              isXNodeDelegator={isXNodeDelegator}
               displayAddress={displayAddress ?? ""}
               isDomain={isDomain}
               onRevoke={revokeModal.onOpen}
@@ -58,31 +64,32 @@ export const DelegateXNodeCard = () => {
               leftIcon={<UilArrowUpRight color="#004CFC" />}
               variant="primarySubtle"
               onClick={delegateModal.onOpen}>
-              {t("Delegate Node")}
+              {t("Add node manager")}
             </Button>
           )}
 
-          <DelegationAlert />
+          <DelegationAlert isXNodeDelegator={isXNodeDelegator} isXNodeDelegated={isXNodeDelegated} />
         </VStack>
       </CardBody>
 
-      <DelegateXNodeModal modal={delegateModal} />
-      <RevokeXNodeDelegationModal modal={revokeModal} />
+      <DelegateXNodeModal xNode={xNode} modal={delegateModal} />
+      <RevokeXNodeDelegationModal xNode={xNode} modal={revokeModal} />
     </Card>
   )
 }
 
 const DelegatedNodeDisplay = ({
+  isXNodeDelegator,
   displayAddress,
   isDomain,
   onRevoke,
 }: {
+  isXNodeDelegator: boolean
   displayAddress: string
   isDomain: boolean
   onRevoke: () => void
 }) => {
   const { t } = useTranslation()
-  const { isXNodeDelegator } = useXNode()
 
   // Allow users to copy delegation addresses to clipboard
   const [showCopiedLink, setShowCopiedLink] = useState(false)

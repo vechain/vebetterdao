@@ -1,15 +1,20 @@
 import { EnhancedClause } from "@vechain/vechain-kit"
-import { Interface } from "ethers"
+
+// Define interface for contract interface objects that have the required methods
+interface ContractInterface {
+  encodeFunctionData(functionFragment: string, values?: any[]): string
+  getFunction(nameOrSignature: string): any
+}
 
 // Define a type to infer method names from the function definition
-type MethodName<T> = T extends (nameOrSignature: infer U) => any ? U : never
+type MethodName<T> = T extends { getFunction: (nameOrSignature: infer U) => any } ? U : string
 
 /**
  * Parameters for building a clause.
  */
-export type BuildClauseParams<T extends Interface> = {
+export type BuildClauseParams<T extends ContractInterface> = {
   contractInterface: T // The contract interface
-  method: MethodName<T["getFunction"]> // The method name
+  method: MethodName<T> // The method name
   args?: unknown[] // Optional arguments for the method
   value?: number // The value to be sent with the transaction
 } & Omit<EnhancedClause, "data" | "abi" | "value">
@@ -22,7 +27,7 @@ export type BuildClauseParams<T extends Interface> = {
  * @param value The value to be sent with the transaction.
  * @returns The built clause.
  */
-export const buildClause = <T extends Interface>({
+export const buildClause = <T extends ContractInterface>({
   value = 0,
   contractInterface,
   args = [],

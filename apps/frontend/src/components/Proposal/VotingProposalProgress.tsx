@@ -107,6 +107,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
         </Box>
         <ProposalYourVote
           proposalId={proposalId}
+          proposalState={proposalState}
           renderTitle={false}
           textProps={{
             fontSize: "12px",
