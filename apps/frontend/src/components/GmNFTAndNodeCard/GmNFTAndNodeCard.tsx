@@ -9,9 +9,7 @@ import {
   Box,
   Text,
   Image,
-  CardBody,
   LinkOverlay,
-  CardFooter,
   LinkBox,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -109,7 +107,7 @@ export const GmNFTAndNodeCard = () => {
             align={isAbove800 ? "center" : "stretch"}
             justify="center">
             <LinkBox flex={1}>
-              <Card
+              <Card.Root
                 direction={"row"}
                 gap="8px"
                 border="none"
@@ -117,18 +115,18 @@ export const GmNFTAndNodeCard = () => {
                 borderColor={"#FFFFFF33"}
                 p="12px 16px"
                 rounded="8px">
-                <CardBody p="0">
+                <Card.Body p="0">
                   <LinkOverlay href={`/profile?tab=gm`} as={NextLink}>
                     <Text fontSize="sm" color="#FFFFFFB2">
                       {t("NFTs")}
                     </Text>
                   </LinkOverlay>
-                  <Heading fontSize="1.75rem" textColor="white">
+                  <Heading fontSize="1.75rem" color="white">
                     {userGMs?.length || 0}
                   </Heading>
                   {selectedGmMultiplier !== undefined && (
                     <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                      <Text fontSize="xs" color="#FFFFFFB2" textColor="white" noOfLines={1}>
+                      <Text fontSize="xs" color="white" lineClamp={1}>
                         {t("Active NFT {{gmName}}: {{multiplier}}x multiplier", {
                           gmName: userGMs?.find(gm => gm.isSelected)?.metadata?.name,
                           multiplier: selectedGmMultiplier,
@@ -136,11 +134,11 @@ export const GmNFTAndNodeCard = () => {
                       </Text>
                     </Box>
                   )}
-                </CardBody>
-                <CardFooter alignItems="center" p="0">
+                </Card.Body>
+                <Card.Footer alignItems="center" p="0">
                   <FaChevronRight color="white" />
-                </CardFooter>
-              </Card>
+                </Card.Footer>
+              </Card.Root>
             </LinkBox>
             <Image
               src="/assets/icons/arrow-connection.svg"
@@ -150,7 +148,7 @@ export const GmNFTAndNodeCard = () => {
               alignSelf="center"
             />
             <LinkBox flex={1}>
-              <Card
+              <Card.Root
                 direction={"row"}
                 flex={1}
                 gap="8px"
@@ -159,25 +157,25 @@ export const GmNFTAndNodeCard = () => {
                 borderColor={"#FFFFFF33"}
                 p="12px 16px"
                 rounded="8px">
-                <CardBody p="0">
+                <Card.Body p="0">
                   <LinkOverlay href={`/profile?tab=nodes`} as={NextLink}>
                     <Text fontSize="sm" color="#FFFFFFB2">
                       {t("Nodes")}
                     </Text>
                   </LinkOverlay>
-                  <Heading fontSize="1.75rem" textColor="white">
+                  <Heading fontSize="1.75rem" color="white">
                     {nodes?.allNodes?.length}
                   </Heading>
                   <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                    <Text fontSize="xs" color="#FFFFFFB2" textColor="white">
+                    <Text fontSize="xs" color="white">
                       {t("Total: {{value}} points", { value: totalPoints })}
                     </Text>
                   </Box>
-                </CardBody>
-                <CardFooter alignItems="center" p="0">
+                </Card.Body>
+                <Card.Footer alignItems="center" p="0">
                   <FaChevronRight color="white" />
-                </CardFooter>
-              </Card>
+                </Card.Footer>
+              </Card.Root>
             </LinkBox>
           </Stack>
         </VStack>

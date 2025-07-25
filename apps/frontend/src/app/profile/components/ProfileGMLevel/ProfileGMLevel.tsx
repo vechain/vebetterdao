@@ -1,5 +1,5 @@
 import { useGetUserGMs } from "@/api"
-import { Card, VStack, CardBody, CardHeader, Heading, Text, Skeleton } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, Skeleton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
 import { GMNftCard } from "./GMNftCard"
@@ -11,13 +11,13 @@ export const ProfileGMLevel = ({ address }: { address: string }) => {
 
   return (
     <VStack gap="4" align="stretch">
-      <Card variant="baseWithBorder">
-        <CardHeader p="1.25rem" pb="0">
+      <Card.Root variant="baseWithBorder">
+        <Card.Header p="1.25rem" pb="0">
           <Heading fontSize="1.25rem">{t("Galaxy Member")}</Heading>
-        </CardHeader>
+        </Card.Header>
 
-        <CardBody>
-          <Skeleton isLoaded={!isUserGMsLoading}>
+        <Card.Body>
+          <Skeleton loading={isUserGMsLoading}>
             {userGMs.length === 0 ? (
               <Text>{t("No GM NFTs found.")}</Text>
             ) : (
@@ -28,8 +28,8 @@ export const ProfileGMLevel = ({ address }: { address: string }) => {
               </VStack>
             )}
           </Skeleton>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </VStack>
   )
 }

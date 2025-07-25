@@ -8,14 +8,14 @@ type Props = InputProps & {
   onDomainResolved?: (domain?: string) => void
   onAddressResolved?: (address?: string) => void
   customValidation?: ({ address }: { address?: string }) => string
-  startAddon?: React.ReactNode
+  startElement?: React.ReactNode
 }
 
 export const WalletAddressInput = ({
   onDomainResolved,
   onAddressResolved,
   customValidation,
-  startAddon,
+  startElement,
   ...props
 }: Props) => {
   const id = useId()
@@ -124,7 +124,7 @@ export const WalletAddressInput = ({
 
   return (
     <Field.Root invalid={!!errorMessage}>
-      <InputGroup startElement={startAddon}>
+      <InputGroup startElement={startElement}>
         <Input
           {...props}
           id={id}

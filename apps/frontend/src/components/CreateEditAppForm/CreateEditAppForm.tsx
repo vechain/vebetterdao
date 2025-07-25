@@ -91,9 +91,9 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
-  const uploadLogoRef = useRef<HTMLLabelElement>(null)
-  const uploadBannerRef = useRef<HTMLLabelElement>(null)
-  const uploadVeWorldBannerRef = useRef<HTMLLabelElement>(null)
+  const uploadLogoRef = useRef<HTMLButtonElement>(null)
+  const uploadBannerRef = useRef<HTMLButtonElement>(null)
+  const uploadVeWorldBannerRef = useRef<HTMLButtonElement>(null)
   const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   // handle image uploads with validation
