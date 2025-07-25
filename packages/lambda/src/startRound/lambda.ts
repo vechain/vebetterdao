@@ -12,6 +12,8 @@ import { waitForRoundStart } from "../helpers/emissions"
 import { publishMessage } from "../helpers/slack"
 import { Emissions__factory } from "@repo/contracts"
 import { buildTxBody, buildGasEstimate } from "../helpers"
+import { slackIds } from "../helpers/slack/slackIds"
+import { withRetry } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -20,7 +22,7 @@ interface NetworkConfig {
 
 interface SecretsConfig {
   secretId: string
-  privateKeyKey: string
+  privateKeyId: string
 }
 
 interface SlackConfig {
@@ -62,20 +64,20 @@ const getSecretsConfig = (): SecretsConfig => {
     case AppEnv.MAINNET:
       return {
         secretId: "start_emissions_pk",
-        privateKeyKey: "start-emissions-pk",
+        privateKeyId: "start-emissions-pk",
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
         secretId: "start_emissions_pk",
-        privateKeyKey: "start-emissions-pk",
+        privateKeyId: "start-emissions-pk",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
         secretId: "start_emissions_pk",
-        privateKeyKey: "start-emissions-pk",
+        privateKeyId: "start-emissions-pk",
       }
   }
 }
@@ -89,27 +91,27 @@ const getSlackConfig = (): SlackConfig => {
   switch (environment) {
     case AppEnv.MAINNET:
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: slackIds.b3trDev,
         messagePrefix: "",
       }
 
     case AppEnv.TESTNET_STAGING:
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: slackIds.b3trLambda,
         messagePrefix: "[STAGING] ",
       }
 
     default:
       // Fallback to testnet for any other environment
       return {
-        channelId: "C06BLEJE5SA",
+        channelId: slackIds.b3trLambda,
         messagePrefix: "[STAGING] ",
       }
   }
 }
 
 const { nodeUrl: NODE_URL, config: CONFIG } = getNetworkConfig()
-const { secretId: SECRET_ID, privateKeyKey: PRIVATE_KEY_KEY } = getSecretsConfig()
+const { secretId: SECRET_ID, privateKeyId: PRIVATE_KEY_KEY } = getSecretsConfig()
 const { channelId: SLACK_CHANNEL_ID, messagePrefix: SLACK_MESSAGE_PREFIX } = getSlackConfig()
 
 const client = new SecretsManagerClient({
@@ -122,12 +124,9 @@ const client = new SecretsManagerClient({
  * @param thor - The ThorClient instance
  * @returns the transaction receipt of the distribution of emissions if successful and the gas result
  */
-async function distributeEmissions(thor: ThorClient) {
+export async function distributeEmissions(thor: ThorClient) {
   const privateKey = Buffer.from(await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY), "hex")
   const signerAddress = Address.ofPrivateKey(privateKey).toString()
-
-  // Wait for the next round to start before proceeding
-  await waitForRoundStart(thor, CONFIG)
 
   // Prepare the contract function call with necessary parameters
   const clause = Clause.callFunction(
@@ -174,7 +173,7 @@ async function distributeEmissions(thor: ThorClient) {
  * @param thor - The ThorClient instance
  * @returns the transaction receipt of the distribution of X-Allocations if successful and the gas result
  */
-async function distributeXAllocations(thor: ThorClient) {
+export async function distributeXAllocations(thor: ThorClient) {
   const privateKey = await getSecret(client, SECRET_ID, PRIVATE_KEY_KEY)
 
   if (!privateKey) {
@@ -265,22 +264,69 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   console.log(`Environment: ${process.env.LAMBDA_ENV}`)
   console.log(`Network: ${NODE_URL}`)
 
+  const maxRetries = 5
+  const delayMs = 3000
+
   try {
     // Initialize the Thor client with the environment-specific URL and disable polling
     const thorClient = ThorClient.at(NODE_URL, {
       isPollingEnabled: false,
     })
 
-    // Distribute the emissions to the VeBetterDAO and start the next round
-    const { receipt: receiptEmissions, gasResult: gasResultEmissions } = await distributeEmissions(thorClient)
+    // Wait for the next round to start before proceeding
+    // If the round does not start within 2 minutes, we will retry 5 times with a 3 second delay
+    try {
+      await withRetry(() => waitForRoundStart(thorClient, CONFIG), maxRetries, delayMs, "Wait for Round Start")
+    } catch (error) {
+      console.log("Failed to wait for round start after all retries:", error)
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: Failed to wait for round start after multiple attempts: ${error}`,
+      )
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: `Failed to wait for round start: ${error}` }),
+      }
+    }
 
-    if (!receiptEmissions)
+    // Distribute the emissions to the VeBetterDAO and start the next round with retry
+    let emissionsResult
+    try {
+      emissionsResult = await withRetry(
+        () => distributeEmissions(thorClient),
+        maxRetries,
+        delayMs,
+        "Distribute Emissions",
+      )
+    } catch (error) {
+      console.log("Failed to distribute emissions after all retries:", error)
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute emissions after multiple attempts: ${error}`,
+      )
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: `Failed to distribute emissions: ${error}` }),
+      }
+    }
+
+    const { receipt: receiptEmissions, gasResult: gasResultEmissions } = emissionsResult
+
+    if (!receiptEmissions) {
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
+      )
       return {
         statusCode: 500,
         body: JSON.stringify({
           error: `Transaction reverted: ${gasResultEmissions.revertReasons}, ${gasResultEmissions.vmErrors}`,
         }),
       }
+    }
 
     // Log the transaction receipt for debugging and verification
     console.log("Receipt:", receiptEmissions)
@@ -292,16 +338,43 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       `${SLACK_MESSAGE_PREFIX}:white_check_mark: Round started successfully`,
     )
 
-    // Distribute the X-Allocations to the X-App addresses that have not yet claimed them
-    const { receipt: receiptClaim, gasResult: gasResultXallocations } = await distributeXAllocations(thorClient)
+    // Distribute the X-Allocations to the X-App addresses that have not yet claimed them with retry
+    let xAllocationsResult
+    try {
+      xAllocationsResult = await withRetry(
+        () => distributeXAllocations(thorClient),
+        maxRetries,
+        delayMs,
+        "Distribute X-Allocations",
+      )
+    } catch (error) {
+      console.log("Failed to distribute X-Allocations after all retries:", error)
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: Failed to distribute X-Allocations after multiple attempts: ${error}`,
+      )
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: `Failed to distribute X-Allocations: ${error}` }),
+      }
+    }
 
-    if (!receiptClaim)
+    const { receipt: receiptClaim, gasResult: gasResultXallocations } = xAllocationsResult
+
+    if (!receiptClaim) {
+      await publishMessage(
+        client,
+        SLACK_CHANNEL_ID,
+        `${SLACK_MESSAGE_PREFIX}:alert: X-Allocations transaction reverted: ${gasResultXallocations.revertReasons}, ${gasResultXallocations.vmErrors}`,
+      )
       return {
         statusCode: 500,
         body: JSON.stringify({
           error: `Transaction reverted: ${gasResultXallocations.revertReasons}, ${gasResultXallocations.vmErrors}`,
         }),
       }
+    }
 
     // Log the transaction receipt for debugging and verification
     console.log("Receipt:", receiptClaim)
