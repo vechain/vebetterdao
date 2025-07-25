@@ -12,7 +12,7 @@ import {
   Treasury,
   X2EarnRewardsPool,
   X2EarnApps,
-  NodeManagement,
+  NodeManagementV3,
   VeBetterPassport,
   X2EarnCreator,
 } from "../../typechain-types"
@@ -189,7 +189,7 @@ export async function deployLatest(config: ContractsConfig) {
     ],
     {},
     true, // logOutput
-  )) as NodeManagement
+  )) as NodeManagementV3
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddressTemp = TEMP_ADMIN
@@ -696,6 +696,12 @@ export async function deployLatest(config: ContractsConfig) {
     .grantRole(roundStarterRole, await emissions.getAddress())
     .then(async tx => await tx.wait())
   console.log("Round starter role granted to emissions contract")
+
+  await xAllocationVoting
+    .connect(deployer)
+    .setVeBetterPassport(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in XAllocationVoting contract")
 
   // Grant the ACTION_SCORE_MANAGER_ROLE to X2Earn contract
   await veBetterPassport
