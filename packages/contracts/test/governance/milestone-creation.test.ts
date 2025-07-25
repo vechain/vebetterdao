@@ -309,11 +309,7 @@ describe("Governance - Milestone Creation", function () {
       let currentBlock = await governor.clock()
       let currentRoundsEndsAt = await xAllocationVoting.currentRoundDeadline()
       let minVotingDelay = await governor.minVotingDelay()
-
-      console.log("currentBlock", currentBlock)
-      console.log("currentRoundsEndsAt", currentRoundsEndsAt)
       expect(minVotingDelay).to.be.greaterThan(currentRoundsEndsAt - currentBlock)
-      console.log("votingDelay", await governor.minVotingDelay())
 
       const calldatas = [
         treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, values[0]]),
@@ -321,7 +317,6 @@ describe("Governance - Milestone Creation", function () {
       ]
 
       let voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
-      console.log("voteStartsInRoundId", voteStartsInRoundId)
       expect(
         governor.connect(proposer).proposeGrant(
           [treasuryAddress, treasuryAddress], // Only Treasury for now
