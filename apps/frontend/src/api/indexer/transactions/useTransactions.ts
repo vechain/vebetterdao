@@ -24,8 +24,9 @@ export const TransactionsResponseSchema = z.object({
         proof: z
           .object({
             version: z.number(),
-            description: z.string(),
+            description: z.string().optional(),
             proof: z.object({
+              description: z.string().optional(),
               image: z.string().optional(),
               link: z.string().optional(),
               text: z.string().optional(),
@@ -44,6 +45,9 @@ export const TransactionsResponseSchema = z.object({
                 timber: z.number().optional(),
                 plastic: z.number().optional(),
                 learning_time: z.number().optional(),
+                trees_planted: z.number().optional(),
+                calories_burned: z.number().optional(),
+                clean_energy_production_wh: z.number().optional(),
               })
               .optional(),
           })
