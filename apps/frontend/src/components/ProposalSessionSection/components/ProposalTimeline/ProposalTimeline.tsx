@@ -9,6 +9,7 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimeLineItem"
 
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()
@@ -50,7 +51,7 @@ export const ProposalTimeline = () => {
     () =>
       isCanceled
         ? [
-            // <ProposalCreatedTimelineItem key={0} />,
+            <ProposalCreatedTimelineItem key={0} />,
             <TimelineItem key={1} title={t("Waiting for the round to start")} />,
             <TimelineItem
               key={3}
@@ -59,7 +60,7 @@ export const ProposalTimeline = () => {
             />,
           ]
         : [
-            // <ProposalCreatedTimelineItem key={0} />,
+            <ProposalCreatedTimelineItem key={0} />,
             <TimelineItem key={1} title={t("Waiting for the round to start")} />,
             <TimelineItem
               key={2}
@@ -104,8 +105,15 @@ export const ProposalTimeline = () => {
       <Heading fontSize={"20px"} fontWeight={700}>
         {t("Timeline")}
       </Heading>
-      <Steps.Root step={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
-        <Steps.List>
+      <Steps.Root
+        size="sm"
+        step={activeStep}
+        orientation="vertical"
+        w="full"
+        height={height}
+        gap="0"
+        variant="primaryVertical">
+        <Steps.List flex={1}>
           {steps.map((step, index) => (
             <Steps.Item key={`proposal-timeline-step-${step.key}`} index={index} style={{ width: "100%" }}>
               <Steps.Indicator>

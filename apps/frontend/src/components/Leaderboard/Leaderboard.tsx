@@ -181,7 +181,7 @@ export const Leaderboard = () => {
             )}
           </VStack>
           <Separator w="full" h={1} />
-          <Link asChild variant={"plain"} colorPalette="primary" mx="auto">
+          <Link asChild variant={"plain"} color="primary" mx="auto">
             <NextLink href={`/leaderboard/${selectedRoundId}`}>{t("See full leaderboard")}</NextLink>
           </Link>
         </VStack>
