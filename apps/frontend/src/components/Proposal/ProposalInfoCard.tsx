@@ -45,7 +45,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
       alignSelf={"flex-start"}
       w={"full"}>
       <Card.Header>
-        <HStack hideBelow="md" w={"full"} justifyContent={"space-between"} mb={2}>
+        <HStack hideFrom="md" w={"full"} justifyContent={"space-between"} mb={2}>
           <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
             {t("Round #{{round}}", {
               round: roundIdVoteStart,
@@ -60,11 +60,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
         </HStack>
 
         <HStack justifyContent="space-between" alignItems="center" w={"full"}>
-          <Skeleton
-            loading={proposalMetadata.data !== undefined}
-            minH={"20px"}
-            flex={2.5}
-            maxW={{ base: "300px", md: "full" }}>
+          <Skeleton loading={proposalMetadata.isLoading} minH={"20px"} flex={2.5} maxW={{ base: "300px", md: "full" }}>
             <Text fontSize={20} fontWeight={700} lineClamp={2}>
               {proposalMetadata.data?.title}
             </Text>
@@ -87,16 +83,13 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
       </Card.Header>
       <Card.Body py={2} mb={4}>
         <Stack direction={["column", "row"]} w="full" justifyContent={"space-between"} gap={4}>
-          <SkeletonText
-            loading={proposalMetadata.isLoading}
-            minW={"300px"}
-            lineClamp={3}
-            flex={2}
-            alignSelf={"flex-start"}>
-            <Text fontSize={16} fontWeight={400} lineClamp={3}>
+          {proposalMetadata.isLoading ? (
+            <SkeletonText noOfLines={3} flex={2} />
+          ) : (
+            <Text fontSize={16} fontWeight={400} minW={"300px"} flex={2} alignSelf={"flex-start"}>
               {descriptionText}
             </Text>
-          </SkeletonText>
+          )}
 
           <Box flex={1}>
             <VotingProposalProgress proposalId={proposalId} proposalState={proposalState ?? ProposalState.Pending} />

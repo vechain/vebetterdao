@@ -67,10 +67,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
 
         total = total.plus(rewards)
 
-        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter || ""), {
-          roundId,
-          rewards: formattedRewards,
-        })
+        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter || ""), [rewards])
 
         return {
           roundId,

@@ -118,7 +118,7 @@ export const ProposalsPageContent = () => {
           <JoinCommunity />
         </VStack>
       </HStack>
-      <Box hideBelow="md" mt={2} w={"full"}>
+      <Box hideFrom="md" mt={2} w={"full"}>
         <JoinCommunity />
       </Box>
     </VStack>

@@ -32,7 +32,7 @@ export const useAllProposalsDepositReached = (proposalsIds: string[]) => {
 
       const depositsReached = depositsReachedResult.map((depositReached, index) => {
         const proposalId = proposalsIds[index] as string
-        queryClient.setQueryData(getIsDepositReachedQueryKey(proposalId), depositReached)
+        queryClient.setQueryData(getIsDepositReachedQueryKey(proposalId), [depositReached])
         return { proposalId, depositReached }
       })
 

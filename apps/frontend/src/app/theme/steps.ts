@@ -23,11 +23,11 @@ export const stepsSlotRecipe = defineSlotRecipe({
             bg: "#004CFC",
           },
           "&[data-orientation=vertical]": {
-            maxHeight: "calc(100% - var(--stepper-indicator-size))",
-            top: "calc(var(--stepper-indicator-size))",
+            maxHeight: "calc(100% - var(--steps-size))",
+            top: "calc(var(--steps-size))",
             "&[data-status=complete]": {
               maxHeight: "100%",
-              top: "calc(var(--stepper-indicator-size)/2)",
+              top: "var(--steps-size)",
               zIndex: 1,
             },
           },
@@ -55,11 +55,11 @@ export const stepsSlotRecipe = defineSlotRecipe({
 //           bg: "#004CFC",
 //         },
 //         "&[data-orientation=vertical]": {
-//           maxHeight: "calc(100% - var(--stepper-indicator-size))",
-//           top: "calc(var(--stepper-indicator-size))",
+//           maxHeight: "calc(100% - var(--steps-gutter))",
+//           top: "calc(var(--steps-gutter))",
 //           "&[data-status=complete]": {
 //             maxHeight: "100%",
-//             top: "calc(var(--stepper-indicator-size)/2)",
+//             top: "calc(var(--steps-gutter)/2)",
 //             zIndex: 1,
 //           },
 //         },

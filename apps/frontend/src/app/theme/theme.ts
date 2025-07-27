@@ -37,10 +37,10 @@ const config = defineConfig({
     },
 
     keyframes: {
-      pulse: {
-        "0%": { transform: "scale(1, 1)", opacity: 1 },
-        "100%": { transform: "scale(1.5, 1.5)", opacity: 0 },
-      },
+      // pulse: {
+      //   "0%": { transform: "scale(1, 1)", opacity: 1 },
+      //   "100%": { transform: "scale(1.5, 1.5)", opacity: 0 },
+      // },
       rotateBgPosition: {
         "0%": { backgroundPosition: "0% 50%" },
         "100%": { backgroundPosition: "100% 50%" },

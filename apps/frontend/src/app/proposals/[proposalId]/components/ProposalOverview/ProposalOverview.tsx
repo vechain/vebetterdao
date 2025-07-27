@@ -1,16 +1,4 @@
-import {
-  Box,
-  Card,
-  Separator,
-  HStack,
-  Heading,
-  Skeleton,
-  SkeletonText,
-  Spacer,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Card, Separator, HStack, Heading, Skeleton, Spacer, Stack, Text, VStack } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
@@ -57,11 +45,11 @@ export const ProposalOverview = () => {
                 <ProposalStatusBadge proposalId={proposal.id} proposalState={proposal.state} />
               </Skeleton>
               <Spacer h={"24px"} />
-              <SkeletonText loading={proposal.isDescriptionLoading}>
+              <Skeleton loading={proposal.isDescriptionLoading}>
                 <Text color="gray.500" fontSize={["sm", "md"]}>
                   {proposal.description}
                 </Text>
-              </SkeletonText>
+              </Skeleton>
             </VStack>
 
             <Separator color={"#D5D5D5"} />

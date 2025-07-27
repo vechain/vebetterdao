@@ -65,28 +65,28 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
             rounded="full"
             aria-label={t("Filters")}
             border="1px solid #D5D5D5"
-            color={"contrast-fg-on-muted"}>
+            color={"contrast-fg-on-muted"}
+            gap={2}>
             <UilFilter />
+            {activeFiltersCount > 0 && (
+              <Flex
+                position="absolute"
+                top="-8px"
+                right="-8px"
+                bg="black"
+                color="white"
+                borderRadius="full"
+                w="20px"
+                h="20px"
+                justify="center"
+                align="center"
+                fontSize="xs"
+                fontWeight="bold"
+                boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
+                {activeFiltersCount}
+              </Flex>
+            )}
           </IconButton>
-
-          {activeFiltersCount > 0 && (
-            <Flex
-              position="absolute"
-              top="-8px"
-              right="-8px"
-              bg="black"
-              color="white"
-              borderRadius="full"
-              w="20px"
-              h="20px"
-              justify="center"
-              align="center"
-              fontSize="xs"
-              fontWeight="bold"
-              boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
-              {activeFiltersCount}
-            </Flex>
-          )}
         </Menu.Trigger>
         <Portal>
           <Menu.Positioner>
@@ -113,7 +113,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
                     fontWeight="medium">
                     {status}{" "}
                     {activeFilter === status && (
-                      <Badge ml={1} colorPalette="white" borderRadius="full" px={2}>
+                      <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
                         {visibleComments.length}
                       </Badge>
                     )}

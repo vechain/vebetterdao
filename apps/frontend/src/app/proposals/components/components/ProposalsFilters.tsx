@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import { HStack, StackProps, IconButton, Button, Text, Stack } from "@chakra-ui/react"
+import { HStack, StackProps, IconButton, Button, Text, Stack, Badge } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
 import { useProposalFilters, ProposalFilter, StateFilter } from "@/store"
 import { useTranslation } from "react-i18next"
@@ -119,51 +119,34 @@ export const ProposalsFilters = (props: Props) => {
               }
             }
 
-            const isSelected = selectedFilter?.includes(filterKey as ProposalFilter)
-
             const stateCount = selectedFilter?.filter(f => stateFilters.includes(f)).length
 
             return (
               <Button
+                rounded="full"
                 lineHeight="inherit"
                 h="auto"
                 minW={"auto"}
-                variant="ghost"
+                variant="outline"
                 px={4}
                 py={3}
-                borderRadius={78}
                 key={filterKey}
-                bg={isSelected ? "contrast-bg-strong" : "contrast-bg-muted"}
-                color={isSelected ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
-                onClick={onClick}
-                borderWidth={1}
-                borderColor={"contrast-border"}
-                _hover={{
-                  bg: isSelected ? "contrast-bg-strong-hover" : "contrast-bg-muted-hover",
-                }}>
+                onClick={onClick}>
                 <HStack gap={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                     {t("Filters")}
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
-                    <Text
-                      bg={"contrast-bg-strong"}
-                      color={"contrast-fg-on-strong"}
-                      borderRadius={"50%"}
-                      fontSize={12}
-                      fontWeight={600}
-                      lineHeight={1}
-                      py={1}
-                      px={2}>
+                    <Badge variant="solid" rounded="full" size="sm" fontSize={12} fontWeight={600} lineHeight={1}>
                       {stateCount}
-                    </Text>
+                    </Badge>
                   )}
                 </HStack>
               </Button>
             )
           })}
           {hasNonDefaultFilters && (
-            <Button variant="ghost" colorPalette="primary" onClick={clearFilter}>
+            <Button variant="plain" color="primary" onClick={clearFilter} _hover={{ textDecoration: "underline" }}>
               {t("Reset filters")}
             </Button>
           )}
@@ -174,13 +157,10 @@ export const ProposalsFilters = (props: Props) => {
             lineHeight="inherit"
             h="auto"
             minW={"auto"}
-            variant={"ghost"}
+            variant={"outline"}
             aria-label="Clear filter"
             p={3}
-            bg={"contrast-on-dark-bg"}
-            borderRadius={"full"}
-            borderWidth={1}
-            borderColor={"#EFEFEF"}
+            rounded="full"
             onClick={() => setIsStateFilter(false)}>
             <MdClose size={18} />
           </IconButton>
@@ -205,19 +185,12 @@ export const ProposalsFilters = (props: Props) => {
                   lineHeight="inherit"
                   h="auto"
                   minW={"auto"}
-                  variant={"ghost"}
                   px={4}
                   py={3}
-                  borderRadius={78}
+                  rounded="full"
                   key={optionKey}
-                  bg={isSelected ? "contrast-bg-strong" : "contrast-bg-muted"}
-                  color={isSelected ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
-                  onClick={() => handleFilterClick(optionKey as StateFilter)}
-                  borderWidth={1}
-                  borderColor={"#EFEFEF"}
-                  _hover={{
-                    bg: isSelected ? "contrast-bg-strong-hover" : "contrast-bg-muted-hover",
-                  }}>
+                  variant={isSelected ? "solid" : "outline"}
+                  onClick={() => handleFilterClick(optionKey as StateFilter)}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
                     {optionKey}
                   </Text>
