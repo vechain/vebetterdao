@@ -11,6 +11,7 @@ import dynamic from "next/dynamic"
 import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
 import { Analytics } from "@vercel/analytics/react"
 import { TransactionModalProvider } from "@/providers/TransactionModalProvider"
+
 const VechainKitProviderWrapper = dynamic(
   async () => (await import("../providers/VechainKitProviderWrapper")).VechainKitProviderWrapper,
   {

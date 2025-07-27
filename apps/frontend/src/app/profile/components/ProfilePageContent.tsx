@@ -143,14 +143,14 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     <VStack gap={6} alignItems="stretch" w="full" maxW="breakpoint-md" mx="auto">
       {!isConnectedUser && (
         <Button
-          variant={"ghost"}
+          variant={"plain"}
           colorPalette="primary"
           onClick={onGoBack}
           size="sm"
           alignItems="center"
           alignSelf={"flex-start"}>
           <FaAngleLeft />
-          {t("Go back")} {"AA"}
+          {t("Go back")}
         </Button>
       )}
       <ProfileHeader address={parsedAddress} />
