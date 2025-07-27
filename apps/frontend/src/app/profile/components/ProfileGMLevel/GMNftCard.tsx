@@ -1,4 +1,4 @@
-import { Box, Button, Card, Image, LinkBox, LinkOverlay, Text, useMediaQuery, HStack } from "@chakra-ui/react"
+import { Box, Button, Card, Image, LinkBox, LinkOverlay, Text, HStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
@@ -7,10 +7,11 @@ import { UserGM } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
 import { useSelectGM } from "@/hooks/useSelectGM"
 import { useCallback } from "react"
+import { useBreakpoints } from "@/hooks"
 
 export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boolean }) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
+  const { isMobile } = useBreakpoints()
   const selectGMMutation = useSelectGM({ tokenId: gm?.tokenId })
 
   const handleSelectGM = useCallback(
@@ -26,7 +27,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
       <Card.Root
         variant={gm?.isSelected ? "primaryBoxShadow" : "outline"}
         alignItems="center"
-        direction="row"
+        flexDirection="row"
         gap="8px"
         p="16px"
         rounded="8px"
@@ -57,7 +58,13 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
                 {gm?.metadata?.name}
               </Text>
 
-              <Box display="inline-block" bg="#F8F8F8" _dark={{ bg: "#FFFFFF4A" }} rounded="8px" padding="4px 8px">
+              <Box
+                w="fit-content"
+                display="inline-block"
+                bg="#F8F8F8"
+                _dark={{ bg: "#FFFFFF4A" }}
+                rounded="8px"
+                padding="4px 8px">
                 <Text fontSize={"xs"} fontWeight={400} lineClamp={1}>
                   {t("{{value}}x reward weight", { value: gm.multiplier || 0 })}
                 </Text>
@@ -72,12 +79,12 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
 
         {isClickable && (
           <Card.Footer p="0">
-            <HStack gap="4" w="full" justifyContent={isAbove800 ? "flex-start" : "center"}>
+            <HStack gap="4" w="full" justifyContent={!isMobile ? "flex-start" : "center"}>
               <Button variant="primarySubtle" w="7rem" disabled={gm?.isSelected} onClick={handleSelectGM}>
                 {t(gm?.isSelected ? "Active" : "Activate")}
               </Button>
 
-              {isAbove800 && <FaChevronRight />}
+              {!isMobile && <FaChevronRight />}
             </HStack>
           </Card.Footer>
         )}

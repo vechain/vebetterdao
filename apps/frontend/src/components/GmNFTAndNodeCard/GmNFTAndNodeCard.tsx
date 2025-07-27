@@ -108,7 +108,7 @@ export const GmNFTAndNodeCard = () => {
             justify="center">
             <LinkBox flex={1}>
               <Card.Root
-                direction={"row"}
+                flexDirection={"row"}
                 gap="8px"
                 border="none"
                 bg="#FFFFFF26"
@@ -149,7 +149,7 @@ export const GmNFTAndNodeCard = () => {
             />
             <LinkBox flex={1}>
               <Card.Root
-                direction={"row"}
+                flexDirection={"row"}
                 flex={1}
                 gap="8px"
                 border="none"

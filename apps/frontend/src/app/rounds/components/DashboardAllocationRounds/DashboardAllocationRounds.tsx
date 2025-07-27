@@ -51,8 +51,8 @@ export const DashboardAllocationRounds = () => {
         <HStack gap={4} justifyContent="space-between" w="full">
           {isDesktop ? (
             <Button
-              variant="ghost"
-              colorPalette="primary"
+              variant="plain"
+              color="primary"
               disabled={allocationRound.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
               <FaAngleLeft />
@@ -93,8 +93,8 @@ export const DashboardAllocationRounds = () => {
           </VStack>
           {isDesktop ? (
             <Button
-              variant="ghost"
-              colorPalette="primary"
+              variant="plain"
+              color="primary"
               disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
               {t("Next round")}

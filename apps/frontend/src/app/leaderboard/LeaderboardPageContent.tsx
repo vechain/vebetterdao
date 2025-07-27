@@ -147,13 +147,13 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           right={0}
           borderTopWidth={1}
           borderColor="gray.200">
-          <VStack w="full" maxW={"container.md"} mx="auto" align="stretch">
+          <VStack w="full" maxW={"breakpoint-md"} mx="auto" align="stretch">
             <LeaderboardRankingComponent ranking={yourRaking} isYourRanking={true} />
           </VStack>
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button px={0} variant="ghost" colorPalette="primary" size="sm" onClick={() => router.push("/")}>
+        <Button px={0} variant="plain" color="primary" size="sm" onClick={() => router.push("/")}>
           <FaAngleLeft />
           {t("Go back")}
         </Button>
@@ -162,14 +162,14 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             minW={0}
             size={"lg"}
             aria-label="Next round"
-            variant="ghost"
-            colorPalette="primary"
+            variant="plain"
+            color="primary"
             disabled={isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
             <Icon as={FaAngleLeft} boxSize={5} />
           </IconButton>
 
-          <Heading size={["sm", "sm", "md"]}>
+          <Heading size={["sm", "sm", "xl"]} fontWeight="bold">
             {t("Round {{id}} leaderboard", {
               id: selectedRoundId ?? "",
             })}
@@ -179,8 +179,8 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             minW={0}
             size={"lg"}
             aria-label="Next round"
-            variant="ghost"
-            colorPalette="primary"
+            variant="plain"
+            color="primary"
             disabled={isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
             <Icon as={FaAngleRight} boxSize={5} />

@@ -60,9 +60,10 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
           bg: "transparent",
           border: "1px solid #5F4400",
           _hover: { bg: "#5F440020" },
-        })}
-        {...(isIconLeft ? { leftIcon: buttonIcon } : { rightIcon: buttonIcon })}>
+        })}>
+        {isIconLeft && buttonIcon}
         <Text fontWeight="500">{buttonLabel}</Text>
+        {!isIconLeft && buttonIcon}
       </Button>
     )
   }

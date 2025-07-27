@@ -113,7 +113,9 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">
-              <Heading size="md">{t("Actions History")}</Heading>
+              <Heading size="xl" fontWeight="bold">
+                {t("Actions History")}
+              </Heading>
               <Button variant="primaryLink" size="sm" onClick={handleSetListView}>
                 {t("List View")}
               </Button>
@@ -157,6 +159,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                       unstyled
                       onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
                       w="full"
+                      h="full"
                       disabled={isDisabled}
                       fontSize="sm"
                       fontWeight="medium"

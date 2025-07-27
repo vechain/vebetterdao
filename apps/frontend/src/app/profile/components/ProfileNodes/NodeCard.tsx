@@ -1,20 +1,21 @@
-import { Box, Card, Image, LinkBox, LinkOverlay, Text, useMediaQuery } from "@chakra-ui/react"
+import { Box, Card, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { FaChevronRight } from "react-icons/fa"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
+import { useBreakpoints } from "@/hooks"
 
 export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
+  const { isMobile } = useBreakpoints()
 
   return (
     <LinkBox flex={1}>
       <Card.Root
         variant="outline"
         alignItems="center"
-        direction="row"
+        flexDirection="row"
         gap="8px"
         borderStyle={node ? "solid" : "dashed"}
         _dark={{
@@ -45,7 +46,13 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                 {`${node.name} #${node.nodeId}`}
               </Text>
 
-              <Box display="inline-block" bg="#F8F8F8" _dark={{ bg: "#FFFFFF4A" }} rounded="8px" padding="4px 8px">
+              <Box
+                w="fit-content"
+                display="inline-block"
+                bg="#F8F8F8"
+                _dark={{ bg: "#FFFFFF4A" }}
+                rounded="8px"
+                padding="4px 8px">
                 <Text fontSize={"xs"} fontWeight={400} lineClamp={1}>
                   {t("{{value}} points", { value: node.xNodePoints })}
                 </Text>
@@ -58,7 +65,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
           )}
         </Card.Body>
 
-        {isClickable && isAbove800 && (
+        {isClickable && !isMobile && (
           <Card.Footer p="0">
             <FaChevronRight />
           </Card.Footer>

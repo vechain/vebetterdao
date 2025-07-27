@@ -56,7 +56,7 @@ export const StepModal = <T extends string>({
       ariaTitle={currentStepContent.title}
       ariaDescription={currentStepContent.description}
       modalContentProps={{
-        maxW: "container.md",
+        maxW: "breakpoint-md",
         w: "auto",
         p: 6,
         pt: 2,

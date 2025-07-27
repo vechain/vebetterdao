@@ -144,7 +144,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
       {!isConnectedUser && (
         <Button
           variant={"plain"}
-          colorPalette="primary"
+          color="primary"
           onClick={onGoBack}
           size="sm"
           alignItems="center"
