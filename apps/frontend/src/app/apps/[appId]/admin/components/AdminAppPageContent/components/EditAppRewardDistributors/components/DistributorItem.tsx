@@ -1,13 +1,11 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
-import { useBreakpoints } from "@/hooks"
 import {
   Button,
   Heading,
   HStack,
   IconButton,
   Dialog,
-  Show,
   Text,
   useBreakpointValue,
   useDisclosure,
@@ -25,7 +23,6 @@ type Props = {
 
 export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props) => {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { data: vnsData } = useVechainDomain(distributor)
   const domain = vnsData?.domain
@@ -66,38 +63,35 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         </Dialog.Root>
       )}
       <HStack gap={6} justify={"space-between"}>
-        <Show when={!isMobile}>
-          <HStack>
-            <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
-            <VStack align="stretch" gap={0}>
-              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
-                {domain}
-              </Text>
-              <Text fontSize={"14px"} color="#6A6A6A">
-                {distributor}
-              </Text>
-            </VStack>
-          </HStack>
-          {isDeleteable && (
-            <Button variant="dangerGhost" onClick={onOpen}>
-              <UilTrash size={"14px"} color="#D23F63" />
-              {t("Remove")}
-            </Button>
-          )}
-        </Show>
-        <Show when={isMobile}>
-          <HStack>
-            <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
-            <Text fontSize={"14px"} color="#6A6A6A">
-              {humanAddress(distributor, 8, 6)}
+        <HStack hideBelow="md">
+          <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
+          <VStack align="stretch" gap={0}>
+            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+              {domain}
             </Text>
-          </HStack>
-          {isDeleteable && (
-            <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
-              <UilTrash size={"14px"} color="#D23F63" />
-            </IconButton>
-          )}
-        </Show>
+            <Text fontSize={"14px"} color="#6A6A6A">
+              {distributor}
+            </Text>
+          </VStack>
+        </HStack>
+        {isDeleteable && (
+          <Button variant="dangerGhost" onClick={onOpen}>
+            <UilTrash size={"14px"} color="#D23F63" />
+            {t("Remove")}
+          </Button>
+        )}
+
+        <HStack hideBelow="md">
+          <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
+          <Text fontSize={"14px"} color="#6A6A6A">
+            {humanAddress(distributor, 8, 6)}
+          </Text>
+        </HStack>
+        {isDeleteable && (
+          <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+            <UilTrash size={"14px"} color="#D23F63" />
+          </IconButton>
+        )}
       </HStack>
     </>
   )

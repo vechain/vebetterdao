@@ -1,6 +1,6 @@
 "use client"
 
-import { ClientOnly, IconButton, Skeleton, Span, IconButtonProps, SpanProps } from "@chakra-ui/react"
+import { ClientOnly, Button, Skeleton, Span, IconButtonProps, SpanProps } from "@chakra-ui/react"
 import { ThemeProvider, useTheme, ThemeProviderProps } from "next-themes"
 import * as React from "react"
 import { LuMoon, LuSun } from "react-icons/lu"
@@ -42,32 +42,37 @@ export function ColorModeIcon() {
   return colorMode === "dark" ? <LuMoon /> : <LuSun />
 }
 
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
+interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {
+  withText?: boolean
+}
 
-export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButtonProps>(
-  function ColorModeButton(props, ref) {
-    const { toggleColorMode } = useColorMode()
-    return (
-      <ClientOnly fallback={<Skeleton boxSize="8" />}>
-        <IconButton
-          onClick={toggleColorMode}
-          variant="ghost"
-          aria-label="Toggle color mode"
-          size="sm"
-          ref={ref}
-          {...props}
-          css={{
-            _icon: {
-              width: "5",
-              height: "5",
-            },
-          }}>
-          <ColorModeIcon />
-        </IconButton>
-      </ClientOnly>
-    )
-  },
-)
+export const ColorModeButton = React.forwardRef<HTMLButtonElement, ColorModeButtonProps>(function ColorModeButton(
+  { withText, ...props },
+  ref,
+) {
+  const { toggleColorMode, colorMode } = useColorMode()
+  return (
+    <ClientOnly fallback={<Skeleton boxSize="8" />}>
+      <Button
+        onClick={toggleColorMode}
+        variant="ghost"
+        alignItems="center"
+        aria-label="Toggle color mode"
+        size="sm"
+        ref={ref}
+        {...props}
+        css={{
+          _icon: {
+            width: "5",
+            height: "5",
+          },
+        }}>
+        <ColorModeIcon />
+        {withText && (colorMode === "dark" ? "Dark" : "Light")}
+      </Button>
+    </ClientOnly>
+  )
+})
 
 export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(function LightMode(props, ref) {
   return <Span color="fg" display="contents" className="chakra-theme light" colorPalette="light" ref={ref} {...props} />

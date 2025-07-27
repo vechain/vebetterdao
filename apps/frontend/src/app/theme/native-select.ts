@@ -1,6 +1,8 @@
-import { defineRecipe } from "@chakra-ui/react"
+import { defineSlotRecipe } from "@chakra-ui/react"
+import { nativeSelectAnatomy } from "@chakra-ui/react/anatomy"
 
-export const nativeSelectRecipe = defineRecipe({
+export const nativeSelectSlotRecipe = defineSlotRecipe({
+  slots: nativeSelectAnatomy.keys(),
   variants: {
     variant: {
       filled: {
@@ -18,7 +20,7 @@ export const nativeSelectRecipe = defineRecipe({
             color: "gray.800",
           },
         },
-        icon: {
+        indicator: {
           color: "gray.400",
           _dark: {
             color: "gray.300",
@@ -26,6 +28,9 @@ export const nativeSelectRecipe = defineRecipe({
         },
       },
     },
+  },
+  defaultVariants: {
+    variant: "filled",
   },
 })
 

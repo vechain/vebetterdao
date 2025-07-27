@@ -2,7 +2,7 @@ import { useAccountLinking, useSustainabilityCurrentRoundOverview } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
-import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack, Show } from "@chakra-ui/react"
+import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack } from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
@@ -10,14 +10,12 @@ import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassport
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
-import { useBreakpoints } from "@/hooks"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
-  const { isMobile } = useBreakpoints()
   const { data: vnsData } = useVechainDomain(account)
   const domain = vnsData?.domain
   const isUserAccountCard = compareAddresses(account, userAccount?.address ?? "")
@@ -78,25 +76,21 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
               </Badge>
             )}
           </Stack>
-          <Show when={isMobile}>
-            <HStack gap={1}>
-              <LeafIcon color="#448300" size="24" />
-              <Heading fontWeight="700" fontSize={"xl"}>
-                {userOverview?.actionsRewarded ?? 0}
-              </Heading>
-            </HStack>
-          </Show>
-        </HStack>
-      </HStack>
-      <HStack gap={2} flex={[1, 1, 0]}>
-        <Show when={!isMobile}>
-          <HStack gap={1}>
+          <HStack hideFrom="md" gap={1}>
             <LeafIcon color="#448300" size="24" />
             <Heading fontWeight="700" fontSize={"xl"}>
               {userOverview?.actionsRewarded ?? 0}
             </Heading>
           </HStack>
-        </Show>
+        </HStack>
+      </HStack>
+      <HStack gap={2} flex={[1, 1, 0]}>
+        <HStack hideBelow="md" gap={1}>
+          <LeafIcon color="#448300" size="24" />
+          <Heading fontWeight="700" fontSize={"xl"}>
+            {userOverview?.actionsRewarded ?? 0}
+          </Heading>
+        </HStack>
         {canUnlinkAccount && (
           <Button
             flex={1}

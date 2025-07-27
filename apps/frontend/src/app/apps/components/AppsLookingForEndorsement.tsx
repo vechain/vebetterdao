@@ -1,5 +1,5 @@
 import React, { useRef } from "react"
-import { VStack, HStack, Heading, Text, IconButton, Show, useBreakpointValue, useMediaQuery } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -16,8 +16,6 @@ type Props = {
 export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   const { t } = useTranslation()
   const swiperRef = useRef<SwiperClass | null>(null)
-
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const swiperStyle = useBreakpointValue({
     base: {
@@ -90,30 +88,30 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
           </SwiperSlide>
         ))}
 
-        <Show when={isAbove800}>
-          <IconButton
-            pos={"absolute"}
-            zIndex={2}
-            variant={"primarySubtle"}
-            left={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            onClick={() => swiperRef.current?.slidePrev()}
-            aria-label="Previous app">
-            <FaChevronLeft />
-          </IconButton>
-          <IconButton
-            pos={"absolute"}
-            zIndex={2}
-            variant={"primarySubtle"}
-            right={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            onClick={() => swiperRef.current?.slideNext()}
-            aria-label="Next app">
-            <FaChevronRight />
-          </IconButton>
-        </Show>
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2}
+          variant={"primarySubtle"}
+          left={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slidePrev()}
+          aria-label="Previous app">
+          <FaChevronLeft />
+        </IconButton>
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2}
+          variant={"primarySubtle"}
+          right={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slideNext()}
+          aria-label="Next app">
+          <FaChevronRight />
+        </IconButton>
       </Swiper>
     </VStack>
   )

@@ -15,6 +15,7 @@ export const LanguageSelector: React.FC = () => {
   return (
     <Box>
       <NativeSelect.Root variant="filled">
+        <NativeSelect.Indicator />
         <NativeSelect.Field
           defaultValue={i18n.resolvedLanguage}
           onChange={handleChange}

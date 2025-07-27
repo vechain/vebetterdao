@@ -1,17 +1,4 @@
-import {
-  Card,
-  Separator,
-  Heading,
-  HStack,
-  Image,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  Show,
-  Icon,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, Image, Skeleton, Stack, Text, VStack, Icon } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
@@ -33,7 +20,6 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)
 
   const {
@@ -121,12 +107,8 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
             </Stack>
           </Stack>
 
-          <Show when={isAbove800}>
-            <Separator orientation="vertical" h="100%" />
-          </Show>
-          <Show when={!isAbove800}>
-            <Separator orientation="horizontal" h="100%" />
-          </Show>
+          <Separator hideBelow="md" orientation="vertical" h="100%" />
+          <Separator hideFrom="md" orientation="horizontal" h="100%" />
 
           {/* Right Section: Score */}
           <Stack direction="row" align="center" justify="center">
@@ -163,9 +145,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                 </VStack>
               )}
             </Stack>
-            <Show when={isAbove800}>
-              <Icon as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
-            </Show>
+            <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
           </Stack>
         </Stack>
       </Card.Body>

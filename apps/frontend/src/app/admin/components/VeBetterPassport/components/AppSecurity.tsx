@@ -47,6 +47,7 @@ export const AppSecurity = () => {
                   <strong>{"App"}</strong>
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Indicator />
                   <NativeSelect.Field
                     placeholder={t("Select app")}
                     onChange={e => setAppId(e.target.value)}
@@ -69,6 +70,7 @@ export const AppSecurity = () => {
                   <strong>{"Security level"}</strong>
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Indicator />
                   <NativeSelect.Field
                     placeholder={t("Select app security level")}
                     onChange={e => setAppSecurityLevel(Number(e.target.value))}

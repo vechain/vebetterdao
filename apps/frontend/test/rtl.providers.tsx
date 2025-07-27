@@ -2,7 +2,7 @@ import React from "react"
 
 import { ChakraProvider } from "@chakra-ui/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { lightTheme } from "@/app/theme"
+import theme from "@/app/theme/theme"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import dynamic from "next/dynamic"
 
@@ -24,7 +24,7 @@ export const AllTheProviders = ({ children }: { children: React.ReactNode }) => 
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <ChakraProvider value={lightTheme}>
+      <ChakraProvider value={theme}>
         <VechainKitProviderWrapper>{children}</VechainKitProviderWrapper>
       </ChakraProvider>
     </QueryClientProvider>

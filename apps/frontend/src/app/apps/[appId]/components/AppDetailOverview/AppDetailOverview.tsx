@@ -8,7 +8,6 @@ import {
   HStack,
   Heading,
   Image,
-  Show,
   Skeleton,
   Stack,
   Text,
@@ -121,9 +120,9 @@ export const AppDetailOverview = ({
                       w={{ base: "full", md: "auto" }}
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
                       <AppReceiverAddress />
-                      <Show when={!isMobile}>
-                        <Separator />
-                      </Show>
+
+                      <Separator hideBelow="md" />
+
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
                           <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
@@ -159,18 +158,22 @@ export const AppDetailOverview = ({
                       justifyContent={{ base: "space-between", md: "flex-end" }}
                       w={{ base: "full", md: "auto" }}
                       mt={{ base: 4, md: 0 }}>
-                      <Show when={!isMobile}>
-                        <EditAppPageButton />
-                        <AdminAppPageButton />
-                      </Show>
+                      {!isMobile && (
+                        <>
+                          <EditAppPageButton />
+                          <AdminAppPageButton />
+                        </>
+                      )}
                       <Button w={["full", "full", "auto"]} variant={"primaryAction"} onClick={goToWebsite}>
                         {t("Go to Website")}
                         <UilArrowUpRight color="#FFFFFF" size={"16px"} />
                       </Button>
-                      <Show when={isMobile}>
-                        <EditAppPageButton />
-                        <AdminAppPageButton />
-                      </Show>
+                      {isMobile && (
+                        <>
+                          <EditAppPageButton />
+                          <AdminAppPageButton />
+                        </>
+                      )}
                     </HStack>
                   </Stack>
                 </VStack>

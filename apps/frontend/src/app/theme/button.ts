@@ -1,6 +1,9 @@
 import { defineRecipe } from "@chakra-ui/react"
 
 export const buttonRecipe = defineRecipe({
+  base: {
+    rounded: "md",
+  },
   variants: {
     variant: {
       primarySubtle: {

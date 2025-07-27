@@ -79,6 +79,7 @@ export const FunctionsPageContent = () => {
                 <Field.Root w="auto" data-testid="dev__select_env">
                   <Field.Label>{t("Dev: Choose an environment")}</Field.Label>
                   <NativeSelect.Root>
+                    <NativeSelect.Indicator />
                     <NativeSelect.Field
                       placeholder={t("Select an environment")}
                       value={featuredFunctionsEnv}

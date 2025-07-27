@@ -1,6 +1,6 @@
 "use client"
 
-import { Grid, GridItem, Show, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
+import { Grid, GridItem, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
@@ -56,9 +56,7 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
           <VStack gap={8} w="full">
-            <Show when={isMobile}>
-              <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
-            </Show>
+            {isMobile && <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />}
             {hasVoted && (
               <AllocationRoundUserVotes roundId={roundId} minPercentageToNotMerge={userVoteMinPercentageToNotMerge} />
             )}
@@ -67,9 +65,8 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} w="full" alignSelf={"start"}>
           <AllocationRoundSessionInfoCard roundId={roundId} />
-          <Show when={!isMobile}>
-            <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
-          </Show>
+
+          {!isMobile && <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />}
         </GridItem>
       </Grid>
     </VStack>

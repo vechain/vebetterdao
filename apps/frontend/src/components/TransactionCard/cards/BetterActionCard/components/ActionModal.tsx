@@ -2,7 +2,7 @@
 import { SustainabilityProof, useXApps } from "@/api"
 import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
@@ -85,12 +85,6 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
     )
   }, [proof, isTweet, tweet])
 
-  const onTransactionDetailClick = useCallback(() => {
-    if (!txId) return
-
-    window.open(getExplorerTxLink(txId), "_blank")
-  }, [txId])
-
   return (
     <BaseModal
       isOpen={actionModal.open ?? false}
@@ -138,22 +132,24 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
           </HStack>
         </VStack>
         {txId && (
-          <VStack
-            align="stretch"
+          <Link
+            display="flex"
+            justifyContent={"center"}
+            variant="plain"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={getExplorerTxLink(txId)}
             gap={4}
             w={"full"}
             alignItems={"center"}
             mt={4}
             color={"rgba(0, 76, 252, 1)"}
-            cursor={"pointer"}
-            onClick={onTransactionDetailClick}>
-            <HStack align="stretch" gap={4} alignItems={"center"}>
-              <Text fontSize={16} fontWeight={500}>
-                {t("See more details on")} Vechain Stats
-              </Text>
-              <UilArrowUpRight size={16} />
-            </HStack>
-          </VStack>
+            cursor={"pointer"}>
+            <Text fontSize={16} fontWeight={500}>
+              {t("See more details on")} Vechain Stats
+            </Text>
+            <UilArrowUpRight size={16} />
+          </Link>
         )}
       </VStack>
     </BaseModal>

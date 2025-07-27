@@ -1,17 +1,5 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import {
-  Box,
-  Button,
-  HStack,
-  Heading,
-  Dialog,
-  Show,
-  Text,
-  VStack,
-  Separator,
-  useBreakpointValue,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { Box, Button, HStack, Heading, Dialog, Text, VStack, Separator, useBreakpointValue } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../AdminAppPageContent"
@@ -41,7 +29,6 @@ export const UpdateConfirmationModal = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { admin } = useCurrentAppAdmin()
-  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const handleSubmit = useCallback(() => {
     onSubmit()
@@ -117,11 +104,10 @@ export const UpdateConfirmationModal = ({
                     <Text as="span" fontSize="14px" fontWeight={600}>
                       {t("You will not be able to manage the app anymore.")}
                     </Text>
-                    <Show when={isAbove800}>
-                      <Text as="span" fontSize="14px">
-                        {t("This change is applied when the new address logs in.")}
-                      </Text>
-                    </Show>
+
+                    <Text hideBelow="md" as="span" fontSize="14px">
+                      {t("This change is applied when the new address logs in.")}
+                    </Text>
                   </Box>
                 </HStack>
               </VStack>

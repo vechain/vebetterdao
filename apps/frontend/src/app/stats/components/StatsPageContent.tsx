@@ -259,6 +259,7 @@ export const StatsPageContent = () => {
         <VStack alignItems="flex-start" w="full">
           <Text>{t("Start Round:")}</Text>
           <NativeSelect.Root>
+            <NativeSelect.Indicator />
             <NativeSelect.Field value={startRound} onChange={onStartRoundChange} placeholder={t("Select start round")}>
               {startRoundOptions.map(round => (
                 <option key={round} value={round}>
@@ -271,6 +272,7 @@ export const StatsPageContent = () => {
         <VStack alignItems="flex-start" w="full">
           <Text>{t("End Round:")}</Text>
           <NativeSelect.Root>
+            <NativeSelect.Indicator />
             <NativeSelect.Field value={endRound} onChange={onEndRoundChange} placeholder={t("Select end round")}>
               {endRoundOptions.map(round => (
                 <option key={round} value={round}>
@@ -364,6 +366,7 @@ export const StatsPageContent = () => {
         <VStack alignItems="flex-start" w="full">
           <Text>{t("Select App:")}</Text>
           <NativeSelect.Root>
+            <NativeSelect.Indicator />
             <NativeSelect.Field
               value={selectedAppId}
               onChange={event => setSelectedAppId(event.target.value)}

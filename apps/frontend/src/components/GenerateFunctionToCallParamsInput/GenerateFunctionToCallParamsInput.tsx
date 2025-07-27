@@ -141,6 +141,7 @@ export const GenerateFunctionToCallParamsInput: React.FC<Props> = ({
           defaultValue={false}
           render={({ field }) => (
             <NativeSelect.Root {...selectProps}>
+              <NativeSelect.Indicator />
               <NativeSelect.Field
                 placeholder="Select value..."
                 value={field.value}

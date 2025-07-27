@@ -1,5 +1,5 @@
 "use client"
-import { VStack, Text, Container, HStack, Box, Show, Link, Flex } from "@chakra-ui/react"
+import { VStack, Text, Container, HStack, Box, Link, Flex } from "@chakra-ui/react"
 import { BeBetterVeBetterIcon } from "../Icons"
 import { DiscordButton } from "./components/DiscordButton"
 import { TelegramButton } from "./components/TelegramButton"
@@ -10,15 +10,13 @@ import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "./components/LanguageSelector"
 import packageJson from "../../../package.json"
 import dayjs from "dayjs"
-import { useBreakpoints } from "@/hooks"
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
   const currentYear = dayjs().format("YYYY")
-  const { isMobile } = useBreakpoints()
 
   const desktopContent = (
-    <VStack>
+    <VStack hideBelow="md">
       <HStack justifyContent={"space-between"} w="full" gap={4} my={4}>
         <Box my={14}>
           <BeBetterVeBetterIcon
@@ -70,7 +68,7 @@ export const Footer: React.FC = () => {
   )
 
   const mobileContent = (
-    <VStack>
+    <VStack hideFrom="md">
       <VStack gap={4} my={4}>
         <Box my={8}>
           <BeBetterVeBetterIcon
@@ -121,9 +119,8 @@ export const Footer: React.FC = () => {
         alignItems={"stretch"}
         justifyContent={"flex-start"}
         flexDirection={"column"}>
-        <Show when={isMobile} fallback={desktopContent}>
-          {mobileContent}
-        </Show>
+        {desktopContent}
+        {mobileContent}
       </Container>
     </Flex>
   )

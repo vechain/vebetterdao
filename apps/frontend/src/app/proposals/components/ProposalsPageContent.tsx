@@ -1,6 +1,6 @@
 import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Box, Button, Spinner, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,14 +10,12 @@ import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
-import { useBreakpoints } from "@/hooks"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const router = useRouter()
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
 
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
@@ -67,23 +65,20 @@ export const ProposalsPageContent = () => {
               </Heading>
             </HStack>
           </Box>
-          <Show when={isMobile}>
-            {filteredProposals.length > 0 && (
-              <Button onClick={onNewClick} variant={"primaryAction"}>
-                {t("Create proposal")}
-              </Button>
-            )}
-          </Show>
+
+          {filteredProposals.length > 0 && (
+            <Button hideFrom="md" onClick={onNewClick} variant={"primaryAction"}>
+              {t("Create proposal")}
+            </Button>
+          )}
         </HStack>
       </VStack>
       <ProposalsFilters alignSelf={"flex-start"} w="full" />
-      <Show when={isMobile}>
-        {totalClaimableDeposits > 0 && (
-          <Box mb={2} mt={3}>
-            <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
-          </Box>
-        )}
-      </Show>
+      {totalClaimableDeposits > 0 && (
+        <Box hideFrom="md" mb={2} mt={3}>
+          <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
+        </Box>
+      )}
       <HStack w={"full"} gap={8} mt={3}>
         <VStack
           flex={{ base: undefined, md: 4.5 }}
@@ -114,21 +109,18 @@ export const ProposalsPageContent = () => {
             />
           )}
         </VStack>
-        <Show when={!isMobile}>
-          <VStack flex={2} alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
-            {totalClaimableDeposits > 0 && (
-              <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
-            )}
-            {sortedProposals.length > 0 && <CreateProposalCard />}
-            <JoinCommunity />
-          </VStack>
-        </Show>
-      </HStack>
-      <Show when={isMobile}>
-        <Box mt={2} w={"full"}>
+
+        <VStack hideBelow="md" flex={2} alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
+          {totalClaimableDeposits > 0 && (
+            <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
+          )}
+          {sortedProposals.length > 0 && <CreateProposalCard />}
           <JoinCommunity />
-        </Box>
-      </Show>
+        </VStack>
+      </HStack>
+      <Box hideBelow="md" mt={2} w={"full"}>
+        <JoinCommunity />
+      </Box>
     </VStack>
   )
 }

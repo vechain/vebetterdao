@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, Box, SkeletonText, Show, Skeleton, Stack, useMediaQuery } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Box, SkeletonText, Skeleton, Stack } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
@@ -16,7 +16,6 @@ type Props = Pick<ProposalCreatedEvent, "proposalId" | "description" | "roundIdV
 
 export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, roundIdVoteStart, proposalState }) => {
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
-  const [isBelowSm] = useMediaQuery(["(max-width: 600px)"])
 
   const router = useRouter()
 
@@ -46,8 +45,32 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
       alignSelf={"flex-start"}
       w={"full"}>
       <Card.Header>
-        <Show when={isBelowSm}>
-          <HStack w={"full"} justifyContent={"space-between"} mb={2}>
+        <HStack hideBelow="md" w={"full"} justifyContent={"space-between"} mb={2}>
+          <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
+            {t("Round #{{round}}", {
+              round: roundIdVoteStart,
+            })}
+          </Text>
+          <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
+            <Text color="#979797" fontWeight="400">
+              {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
+            </Text>
+            <Text color="#979797" fontWeight="400"></Text>
+          </HStack>
+        </HStack>
+
+        <HStack justifyContent="space-between" alignItems="center" w={"full"}>
+          <Skeleton
+            loading={proposalMetadata.data !== undefined}
+            minH={"20px"}
+            flex={2.5}
+            maxW={{ base: "300px", md: "full" }}>
+            <Text fontSize={20} fontWeight={700} lineClamp={2}>
+              {proposalMetadata.data?.title}
+            </Text>
+          </Skeleton>
+
+          <VStack hideBelow="md" alignItems="flex-end" gap={0} flex={1}>
             <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
               {t("Round #{{round}}", {
                 round: roundIdVoteStart,
@@ -59,33 +82,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
               </Text>
               <Text color="#979797" fontWeight="400"></Text>
             </HStack>
-          </HStack>
-        </Show>
-        <HStack justifyContent="space-between" alignItems="center" w={"full"}>
-          <Skeleton
-            loading={proposalMetadata.data !== undefined}
-            minH={"20px"}
-            flex={2.5}
-            maxW={{ base: "300px", md: "full" }}>
-            <Text fontSize={20} fontWeight={700} lineClamp={2}>
-              {proposalMetadata.data?.title}
-            </Text>
-          </Skeleton>
-          <Show when={!isBelowSm}>
-            <VStack alignItems="flex-end" gap={0} flex={1}>
-              <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
-                {t("Round #{{round}}", {
-                  round: roundIdVoteStart,
-                })}
-              </Text>
-              <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
-                <Text color="#979797" fontWeight="400">
-                  {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
-                </Text>
-                <Text color="#979797" fontWeight="400"></Text>
-              </HStack>
-            </VStack>
-          </Show>
+          </VStack>
         </HStack>
       </Card.Header>
       <Card.Body py={2} mb={4}>

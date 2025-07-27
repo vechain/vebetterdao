@@ -29,7 +29,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
 
             <HStack>
               <B3TRIcon boxSize={"20px"} />
-              <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
+              <Text fontSize={20} fontWeight={700} fontFamily="var(--font-instrument-sans)">
                 {compactFormatter.format(Number(b3trBalanceAfterSwap))}
               </Text>
             </HStack>
@@ -43,7 +43,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
 
             <HStack>
               <Image src="/assets/tokens/vot3-token.webp" boxSize={"20px"} alt="VOT3 Icon" />
-              <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
+              <Text fontSize={20} fontWeight={700} fontFamily="var(--font-instrument-sans)">
                 {compactFormatter.format(Number(vot3BalanceAfterSwap))}
               </Text>
             </HStack>

@@ -76,6 +76,7 @@ export const ClaimXAppAllocations = () => {
                     <strong>{"App"}</strong>
                   </Field.Label>
                   <NativeSelect.Root disabled={isLoading}>
+                    <NativeSelect.Indicator />
                     <NativeSelect.Field placeholder="Select app" onChange={e => setAppId(e.target.value)} value={appId}>
                       {xApps?.active.map(item => {
                         return (

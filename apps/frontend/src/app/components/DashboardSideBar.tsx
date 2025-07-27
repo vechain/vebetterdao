@@ -1,4 +1,4 @@
-import { Show, Spinner, VStack } from "@chakra-ui/react"
+import { Spinner, VStack } from "@chakra-ui/react"
 import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
@@ -21,9 +21,7 @@ export const DashboardSideBar = () => {
   const { isMobile } = useBreakpoints()
   return (
     <VStack gap={4} position="relative" pos={"sticky"} top={24} left={0}>
-      <Show when={isMobile}>
-        <CantVoteCard />
-      </Show>
+      {isMobile && <CantVoteCard />}
       <YourBetterActionsCard address={account?.address ?? ""} />
       <Leaderboard />
       <ManagedAppsCard />

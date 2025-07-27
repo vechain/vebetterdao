@@ -110,6 +110,7 @@ export const UpdateRoleCard = () => {
                 rules={{ required: t("This field is required") }}
                 render={({ field }) => (
                   <NativeSelect.Root>
+                    <NativeSelect.Indicator />
                     <NativeSelect.Field {...field} placeholder={t("Select Contract")}>
                       {CONTRACT_LIST.map(contract => (
                         <option key={contract.contractAddress} value={contract.contractAddress}>
@@ -125,13 +126,17 @@ export const UpdateRoleCard = () => {
 
             {selectedContractAddress && (
               <Field.Root invalid={!!errors.role} required>
-                <Field.Label>{t("Select Role")}</Field.Label>
+                <Field.Label>
+                  {t("Select Role")}
+                  <Field.RequiredIndicator />
+                </Field.Label>
                 <Controller
                   name="role"
                   control={control}
                   rules={{ required: t("This field is required") }}
                   render={({ field }) => (
                     <NativeSelect.Root>
+                      <NativeSelect.Indicator />
                       <NativeSelect.Field {...field} placeholder={t("Select Role")}>
                         {selectedContractObject?.roles.map(role => (
                           <option key={role} value={role}>

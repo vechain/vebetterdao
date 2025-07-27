@@ -1,5 +1,5 @@
 import { useAllocationAmount, useAllocationsRound, useMostVotedAppsInRound } from "@/api"
-import { Box, Card, HStack, Heading, Icon, Show, Skeleton, Stack, Text, useMediaQuery } from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, Icon, Skeleton, Stack, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import { DotSymbol } from "@/components/DotSymbol"
@@ -21,7 +21,6 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { theme } = useTheme()
-  const isSmallScreen = useMediaQuery(["(max-width: 768px)"])
 
   const { data: allocationRound, isLoading } = useAllocationsRound(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
@@ -75,16 +74,15 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                 renderBadge={false}
                 renderIcon={isActive}
               />
-              <Show when={!isSmallScreen}>
-                <DotSymbol color={"#6A6A6A"} size={"4px"} />
-                <Skeleton loading={isLoading}>
-                  <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
-                    {isActive
-                      ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
-                      : allocationRound.voteEndTimestamp?.fromNow()}
-                  </Text>
-                </Skeleton>
-              </Show>
+
+              <DotSymbol boxProps={{ hideBelow: "md" }} color={"#6A6A6A"} size={"4px"} />
+              <Skeleton hideBelow="md" loading={isLoading}>
+                <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
+                  {isActive
+                    ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
+                    : allocationRound.voteEndTimestamp?.fromNow()}
+                </Text>
+              </Skeleton>
             </HStack>
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>

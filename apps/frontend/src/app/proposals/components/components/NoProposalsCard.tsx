@@ -29,11 +29,7 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
         zIndex={0}
       />
       <VStack w={{ base: "100%", md: "60%" }} alignContent={"flex-start"} zIndex={2} position={"relative"}>
-        <Text
-          fontSize={24}
-          fontWeight={700}
-          style={{ fontFamily: "Instrument Sans, sans-serif" }}
-          alignSelf={"flex-start"}>
+        <Text fontSize={24} fontWeight={700} fontFamily="var(--font-instrument-sans)" alignSelf={"flex-start"}>
           {t("No Proposals Found")}
         </Text>
         {description}

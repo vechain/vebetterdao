@@ -125,6 +125,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           control={control}
           render={({ field: { onChange } }) => (
             <NativeSelect.Root>
+              <NativeSelect.Indicator />
               <NativeSelect.Field placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
                 <option value="Team allocation share">{t("Team allocation share")}</option>
                 <option value="Marketing">{t("Marketing")}</option>

@@ -1,13 +1,11 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
-import { useBreakpoints } from "@/hooks"
 import {
   Button,
   Heading,
   HStack,
   IconButton,
   Dialog,
-  Show,
   Text,
   useBreakpointValue,
   useDisclosure,
@@ -25,7 +23,6 @@ type Props = {
 
 export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { data: vnsData } = useVechainDomain(creator)
   const domain = vnsData?.domain
@@ -63,39 +60,36 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         </CustomModalContent>
       </Dialog.Root>
       <HStack gap={6} justify={"space-between"}>
-        <Show when={isMobile}>
-          <HStack>
-            <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
-            <VStack align="stretch" gap={0}>
-              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
-                {domain}
-              </Text>
-              <Text fontSize={"14px"} color="#6A6A6A">
-                {creator}
-              </Text>
-            </VStack>
-          </HStack>
-          <Button variant="dangerGhost" onClick={onOpen}>
-            <UilTrash size={"14px"} color="#D23F63" />
-            {t("Remove")}
-          </Button>
-        </Show>
-        <Show when={!isMobile}>
-          <HStack>
-            <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
-            <VStack align="stretch" gap={0}>
-              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
-                {domain}
-              </Text>
-              <Text fontSize={"14px"} color="#6A6A6A">
-                {humanAddress(creator, 8, 6)}
-              </Text>
-            </VStack>
-          </HStack>
-          <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
-            <UilTrash size={"14px"} color="#D23F63" />
-          </IconButton>
-        </Show>
+        <HStack hideFrom="md">
+          <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
+          <VStack align="stretch" gap={0}>
+            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+              {domain}
+            </Text>
+            <Text fontSize={"14px"} color="#6A6A6A">
+              {creator}
+            </Text>
+          </VStack>
+        </HStack>
+        <Button variant="dangerGhost" onClick={onOpen}>
+          <UilTrash size={"14px"} color="#D23F63" />
+          {t("Remove")}
+        </Button>
+
+        <HStack hideBelow="md">
+          <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
+          <VStack align="stretch" gap={0}>
+            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+              {domain}
+            </Text>
+            <Text fontSize={"14px"} color="#6A6A6A">
+              {humanAddress(creator, 8, 6)}
+            </Text>
+          </VStack>
+        </HStack>
+        <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+          <UilTrash size={"14px"} color="#D23F63" />
+        </IconButton>
       </HStack>
     </>
   )

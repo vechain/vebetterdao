@@ -1,5 +1,5 @@
 import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
-import { Grid, GridItem, Show, useMediaQuery, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, useMediaQuery, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
@@ -11,9 +11,8 @@ export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
   return (
     <>
-      <Show when={!isAboveMd}>
-        <RoundInfoBottomSheet />
-      </Show>
+      {!isAboveMd && <RoundInfoBottomSheet />}
+
       <Grid
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap={"32px"}
@@ -29,12 +28,7 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
-            <Show when={isAboveMd}>
-              <CantVoteCard />
-            </Show>
-            <Show when={isAboveMd}>
-              <DashboardAllocationRounds />
-            </Show>
+            {isAboveMd ? <CantVoteCard /> : <DashboardAllocationRounds />}
             <DashboardXApps />
           </VStack>
         </GridItem>

@@ -2,7 +2,7 @@ import { useB3TRGovernorPaused, useB3trPaused, useVot3Paused } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
-import { Button, HStack, VStack, Text, Show, Card, Heading, useMediaQuery } from "@chakra-ui/react"
+import { Button, HStack, VStack, Text, Card, Heading } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
@@ -12,7 +12,6 @@ export const Pause: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
-  const aboveSm = useMediaQuery(["(min-width: 768px)"])
 
   const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
 
@@ -163,45 +162,37 @@ export const Pause: React.FC = () => {
         <VStack gap={6} align={"flex-start"}>
           {permissions?.isAdminOfVot3 && (
             <>
-              <Show when={aboveSm}>
-                <HStack>{pauseB3TR}</HStack>
-              </Show>
-              <Show when={!aboveSm}>
-                <VStack align={"flex-start"}>{pauseB3TR}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseB3TR}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseB3TR}
+              </VStack>
             </>
           )}
 
           {permissions?.isAdminOfB3tr && (
             <>
-              <Show when={aboveSm}>
-                <HStack>{pauseVOT3}</HStack>
-              </Show>
-              <Show when={!aboveSm}>
-                <VStack align={"flex-start"}>{pauseVOT3}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseVOT3}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseVOT3}
+              </VStack>
             </>
           )}
 
           {permissions?.isAdminOfGalaxyMember && (
             <>
-              <Show when={aboveSm}>
-                <HStack>{pauseGalaxyMember}</HStack>
-              </Show>
-              <Show when={!aboveSm}>
-                <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseGalaxyMember}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseGalaxyMember}
+              </VStack>
             </>
           )}
 
           {permissions?.isAdminOfB3TRGovernor && (
             <>
-              <Show when={aboveSm}>
-                <HStack>{pauseB3TRGovernor}</HStack>
-              </Show>
-              <Show when={!aboveSm}>
-                <VStack align={"flex-start"}>{pauseB3TRGovernor}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseB3TRGovernor}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseB3TRGovernor}
+              </VStack>
             </>
           )}
         </VStack>

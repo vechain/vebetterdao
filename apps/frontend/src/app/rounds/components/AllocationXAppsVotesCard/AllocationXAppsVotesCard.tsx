@@ -1,6 +1,5 @@
 import { Alert, Card, Flex, HStack, Heading, Spinner, VStack } from "@chakra-ui/react"
 import { useAllocationsRound, useRoundXApps, useXAppsShares } from "@/api"
-import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { useTranslation } from "react-i18next"
 import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
@@ -88,7 +87,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
       {(isLoading || error) && (
         <Flex
           backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
+          animation="backdropBlur"
           position={"absolute"}
           h={"100%"}
           w={"100%"}

@@ -6,21 +6,9 @@ import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
-import { useAttachGMToXNode, useB3trDonated, useBreakpoints } from "@/hooks"
+import { useAttachGMToXNode, useB3trDonated } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import {
-  Alert,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Dialog,
-  Show,
-  Stack,
-  Text,
-  useBreakpointValue,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Box, Button, Flex, Heading, Dialog, Stack, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -38,7 +26,6 @@ type Props = {
 export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-  const { isMobile } = useBreakpoints()
 
   const { data: b3trDonated } = useB3trDonated(gmId)
   const { data: gmMaxLevel } = useGMMaxLevel()
@@ -123,18 +110,14 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                       <Text fontSize="xl" fontWeight={700} color="#1E1E1E">
                         {step.title}
                       </Text>
-                      <Show when={!isMobile}>
-                        <Text fontSize="sm" color="#6A6A6A">
-                          {step.description}
-                        </Text>
-                      </Show>
+                      <Text hideBelow="md" fontSize="sm" color="#6A6A6A">
+                        {step.description}
+                      </Text>
                     </VStack>
                   </Stack>
-                  <Show when={isMobile}>
-                    <Text fontSize="sm" color="#6A6A6A">
-                      {step.description}
-                    </Text>
-                  </Show>
+                  <Text hideFrom="md" fontSize="sm" color="#6A6A6A">
+                    {step.description}
+                  </Text>
                 </VStack>
               ))}
             </Stack>

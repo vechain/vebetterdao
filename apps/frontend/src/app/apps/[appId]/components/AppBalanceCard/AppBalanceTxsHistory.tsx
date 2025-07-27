@@ -127,6 +127,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                     {t("Type")}
                   </Text>
                   <NativeSelect.Root size="sm">
+                    <NativeSelect.Indicator />
                     <NativeSelect.Field
                       rounded={"md"}
                       value={transactionTypeFilter}

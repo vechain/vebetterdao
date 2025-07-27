@@ -87,6 +87,7 @@ export const RegisterUserAction = () => {
                   <Field.RequiredIndicator />
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Indicator />
                   <NativeSelect.Field
                     placeholder={t("Select app")}
                     onChange={e => setAppId(e.target.value)}

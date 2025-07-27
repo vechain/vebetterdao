@@ -69,6 +69,7 @@ export const ManageUserStatus = () => {
                   <strong>{t("Action")}</strong>
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Indicator />
                   <NativeSelect.Field
                     value={actionType}
                     onChange={handleSetActionType}

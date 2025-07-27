@@ -15,7 +15,7 @@ import {
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
-import { Show, IconButton, useMediaQuery } from "@chakra-ui/react"
+import { IconButton } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -52,7 +52,6 @@ export const ActionBanner = () => {
   const swiperRef = useRef<SwiperClass | null>(null) // Create a ref for the Swiper instance with type
   const [isSliderEnd, setIsSliderEnd] = useState(false)
   const [isSliderStart, setIsSliderStart] = useState(true)
-  const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
 
   const handleSliderChange = useCallback((_swiper: SwiperClass) => {
     setIsSliderEnd(_swiper.isEnd)
@@ -240,7 +239,6 @@ export const ActionBanner = () => {
     showCreatorNftBanners,
     CreatorNftBanner,
     showStargateBanner,
-    isLegacyNode,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
@@ -276,36 +274,36 @@ export const ActionBanner = () => {
       ))}
 
       {/* Custom Navigation Buttons */}
-      <Show when={!isAboveMd}>
-        {!isSliderStart && (
-          <IconButton
-            pos={"absolute"}
-            zIndex={2} // Ensure it's above the slides
-            variant={"primarySubtle"}
-            left={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            onClick={() => swiperRef.current?.slidePrev()}
-            aria-label="Prev slide">
-            <FaChevronLeft />
-          </IconButton>
-        )}
-      </Show>
-      <Show when={!isAboveMd}>
-        {!isSliderEnd && slides.length > 1 && (
-          <IconButton
-            pos={"absolute"}
-            zIndex={2} // Ensure it's above the slides
-            variant={"primarySubtle"}
-            right={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            onClick={() => swiperRef.current?.slideNext()}
-            aria-label="Next slide">
-            <FaChevronRight />
-          </IconButton>
-        )}
-      </Show>
+
+      {!isSliderStart && (
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2} // Ensure it's above the slides
+          variant={"primarySubtle"}
+          left={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slidePrev()}
+          aria-label="Prev slide">
+          <FaChevronLeft />
+        </IconButton>
+      )}
+
+      {!isSliderEnd && slides.length > 1 && (
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2} // Ensure it's above the slides
+          variant={"primarySubtle"}
+          right={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slideNext()}
+          aria-label="Next slide">
+          <FaChevronRight />
+        </IconButton>
+      )}
     </Swiper>
   )
 }

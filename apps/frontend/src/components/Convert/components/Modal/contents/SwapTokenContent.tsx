@@ -29,6 +29,7 @@ export const SwapTokenContent = ({
   vot3BalanceScaled,
   disableSubmitButton,
 }: Props) => {
+  console.log("aaa", !isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR)
   return (
     <>
       <Flex
@@ -39,15 +40,17 @@ export const SwapTokenContent = ({
         w={"full"}
         gap={4}
         mt={{ base: 2, md: 4 }}
+        hideBelow={!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR ? "md" : "none"}
         // hide if below 667px height
-        css={
-          !isB3trToVot3 &&
-          isVOT3BalanceMoreThanStakedB3TR && {
-            "@media (max-height: 667px)": {
-              display: "none",
-            },
-          }
-        }>
+        // css={
+        //   !isB3trToVot3 &&
+        //   isVOT3BalanceMoreThanStakedB3TR && {
+        //     "@media (max-height: 667px)": {
+        //       display: "none",
+        //     },
+        //   }
+        // }
+      >
         <BalanceInfo isB3TR={true} balanceScaled={b3trBalanceScaled} />
         <BalanceInfo isB3TR={false} balanceScaled={vot3BalanceScaled} />
       </Flex>

@@ -3,7 +3,7 @@
   "version": "1.24.2",
   "private": true,
   "scripts": {
-    "postinstall": "npx @chakra-ui/cli typegen src/app/theme/theme.tsx",
+    "postinstall": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
     "typecheck": "tsc --noEmit",
     "dev": "next dev",
     "dev:staging": "next dev",

@@ -38,16 +38,15 @@ const MobileMenuDrawer: React.FC<Omit<Drawer.RootProps & Props, "children">> = (
             borderTopLeftRadius={16}
             borderBottomLeftRadius={16}
             background={"contrast-on-dark-bg"}>
-            {/* <Drawer.CloseTrigger
-          position={"absolute"}
-          top={4}
-          right={4}
-          color={"gray.500"}
-          _hover={{ color: "gray.700" }}
-        /> */}
-
             <Drawer.CloseTrigger asChild>
-              <CloseButton size="sm" />
+              <CloseButton
+                position={"absolute"}
+                top={4}
+                right={4}
+                color={"gray.500"}
+                _hover={{ color: "gray.700" }}
+                size="sm"
+              />
             </Drawer.CloseTrigger>
 
             <Drawer.Header>
@@ -58,7 +57,7 @@ const MobileMenuDrawer: React.FC<Omit<Drawer.RootProps & Props, "children">> = (
                 <ProfileButton onMenuClose={() => props.onOpenChange?.({ open: false })} />
                 <NavbarMenu routesToRender={routesToRender} onMenuClick={() => props.onOpenChange?.({ open: true })} />
               </VStack>
-              {/* <ColorModeButton w={"full"} withText={true} /> */}
+              <ColorModeButton w={"full"} withText={true} />
             </Drawer.Body>
           </Drawer.Content>
         </Drawer.Positioner>

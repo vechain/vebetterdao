@@ -15,7 +15,6 @@ import {
   Heading,
   Center,
   Separator,
-  Show,
   Button,
   useDisclosure,
   Flex,
@@ -27,7 +26,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
-import { useBreakpoints } from "@/hooks"
 
 type Props = {
   isOpen: boolean
@@ -39,7 +37,6 @@ type Props = {
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { isMobile } = useBreakpoints()
 
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
@@ -120,11 +117,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
-
-            <Show when={isMobile}>
-              <Separator w="full" />
-            </Show>
-
+            <Separator hideFrom="md" w="full" />
             <VStack
               display={"flex"}
               bg="info-bg"
@@ -208,11 +201,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               )}
             </VStack>
           </VStack>
-
-          <Show when={isMobile}>
-            <Separator w="full" />
-          </Show>
-
+          <Separator hideFrom="md" w="full" />
           <VStack
             bg="info-bg"
             flex={1}
