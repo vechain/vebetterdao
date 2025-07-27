@@ -11,6 +11,7 @@ import { headingRecipe } from "./heading"
 
 const config = defineConfig({
   preflight: true,
+  cssVarsPrefix: "vbd",
   // globalCss: {
   //   "html,body": {
   //     fontFamily: "var(--font-inter)",
@@ -50,26 +51,20 @@ const config = defineConfig({
       },
     },
 
-    tokens: {
+    semanticTokens: {
       fonts: {
         body: { value: "var(--font-inter)" },
         heading: { value: "var(--font-instrument-sans)" },
       },
 
       colors: {
-        // layout
-        "layout-bg": {
-          _light: { value: "#F7F7F7" },
-          _dark: { value: "#131313" },
-        },
-
         // Chakra Colors
         "chakra-body-text": {
-          _light: { value: "#1E1E1E" },
+          base: { value: "#1E1E1E" },
           _dark: { value: "#E4E4E4" },
         },
         "chakra-body-bg": {
-          _light: { value: "#F7F7F7" },
+          base: { value: "#F7F7F7" },
           _dark: { value: "#131313" },
         },
 
