@@ -65,7 +65,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           )}
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
-            <Button variant="ghost" colorScheme="blue" onClick={loadMore}>
+            <Button size="md" variant="ghost" color="primary" onClick={loadMore}>
               {t("Load more")}
             </Button>
           )}

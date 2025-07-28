@@ -42,7 +42,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
           <HStack w="full" justify={"space-between"}>
             <Heading size="md">{t("Explore Apps")}</Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Link asChild variant="plain" colorPalette="primary">
+              <Link asChild variant="plain" color="primary">
                 <NextLink href="/apps">
                   {t("See all")}
                   <FiArrowUpRight />

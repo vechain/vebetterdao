@@ -132,20 +132,7 @@ export const AllApps = ({
     return (
       <Menu.Root closeOnSelect={true} positioning={{ placement: "bottom" }}>
         <Menu.Trigger asChild>
-          <IconButton
-            rounded="full"
-            aria-label={t("Sort by")}
-            bg={"transparent"}
-            transition="all 0.3s ease-in-out"
-            color={"contrast-fg-on-muted"}
-            _hover={{
-              bg: "hover-contrast-bg",
-              color: "contrast-fg-on-muted",
-              transition: "all 0.3s ease-in-out",
-            }}
-            border={`1px solid #252525`}
-            borderRadius={"24px"}
-            size="md">
+          <IconButton variant="outline" rounded="full" aria-label={t("Sort by")} borderRadius={"24px"} size="md">
             <UilSortAmountDown />
           </IconButton>
         </Menu.Trigger>
@@ -200,17 +187,7 @@ export const AllApps = ({
     return (
       <Menu.Root closeOnSelect={false} positioning={{ placement: "bottom" }} lazyMount>
         <Menu.Trigger>
-          <IconButton
-            rounded="full"
-            aria-label={t("Filters")}
-            border={`1px solid #252525`}
-            bg={"transparent"}
-            color={"contrast-fg-on-muted"}
-            _hover={{
-              bg: "hover-contrast-bg",
-              color: "contrast-fg-on-muted",
-              transition: "all 0.3s ease-in-out",
-            }}>
+          <IconButton rounded="full" aria-label={t("Filters")} variant="outline">
             <UilFilter />
           </IconButton>
 
@@ -312,18 +289,11 @@ export const AllApps = ({
             w={headingComponent ? "300px" : "full"}
             startElement={<UilSearch pointerEvents="none" color={searchIconColor} />}>
             <Input
+              variant="outline"
+              rounded="full"
               placeholder="Search apps..."
               value={searchQuery}
-              border={`1px solid #252525`}
-              opacity={0.6}
               onChange={handleSearchChange}
-              borderRadius={"24px"}
-              _hover={{ borderColor: "hover-contrast-bg", opacity: 0.9 }}
-              _focus={{
-                borderColor: "hover-contrast-bg",
-                boxShadow: `0px 0px 3px 0px ${"hover-contrast-bg"}`,
-                opacity: 0.8,
-              }}
             />
           </InputGroup>
           <HStack gap={2}>
