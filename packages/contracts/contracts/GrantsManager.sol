@@ -574,6 +574,14 @@ contract GrantsManager is
     emit MilestoneRejectedAndFundsReturnedToTreasury(proposalId, remainingAmount);
   }
 
+  /**
+   * @notice Returns the version of the contract
+   * @return The version of the contract
+   */
+  function version() external pure returns (uint256) {
+    return 1;
+  }
+
   // ------------------ OVERRIDES ------------------ //
   /**
    * @notice Implements IERC721Receiver interface

@@ -22,7 +22,7 @@ import {
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
 import { ethers } from "hardhat"
-import { bootstrapAndStartEmissions, createProposal, waitForCurrentRoundToEnd } from "../helpers/common"
+import { bootstrapAndStartEmissions, waitForCurrentRoundToEnd } from "../helpers/common"
 
 //Constants for proposal types
 export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
@@ -181,36 +181,6 @@ export async function startNewRoundAndGetRoundId(
   return ((await xAllocationVoting.currentRoundId()) + 1n).toString()
 }
 
-// TODO : might be redundant
-export async function createUniqueTestProposal(
-  account: SignerWithAddress,
-  b3tr: B3TR,
-  b3trContract: ContractFactory,
-  useTypeMethod: boolean = false,
-  proposalType: number = 0,
-) {
-  const unixTimestamp = Math.floor(Date.now() / 1000)
-  const blockNumber = await ethers.provider.getBlockNumber()
-  const functionToCall = "tokenDetails"
-  const description = `Get token details ${unixTimestamp} ${blockNumber}`
-
-  if (useTypeMethod) {
-    const tx = await createProposalWithType(
-      b3tr,
-      b3trContract,
-      account,
-      description,
-      [functionToCall],
-      [],
-      proposalType,
-    )
-    return { tx, description, functionToCall }
-  } else {
-    const tx = await createProposal(b3tr, b3trContract, account, description, functionToCall, [])
-    return { tx, description, functionToCall }
-  }
-}
-
 export async function validateProposalEvents(
   governor: B3TRGovernor,
   receipt: ContractTransactionReceipt | null,
@@ -222,74 +192,55 @@ export async function validateProposalEvents(
     throw new Error("Receipt is null")
   }
 
-  // Find the ProposalCreated event in the logs
-  const proposalCreatedEvent = receipt.logs.find(log => {
+  // Define required events based on proposal type
+  const requiredEvents = ["ProposalCreated", "ProposalCreatedWithType"]
+  if (expectedType === Number(GRANT_PROPOSAL_TYPE)) {
+    requiredEvents.push("MilestonesCreated")
+  }
+
+  // Find all relevant events in one pass
+  const foundEvents: Record<string, any> = {}
+  for (const log of receipt.logs) {
     try {
       const decoded = governor.interface.parseLog({
         topics: [...log.topics],
         data: log.data,
       })
-      return decoded?.name === "ProposalCreated"
-    } catch (e) {
-      return false
+      if (decoded && requiredEvents.includes(decoded.name)) {
+        foundEvents[decoded.name] = decoded
+      }
+    } catch {
+      // Skip logs that can't be decoded
     }
-  })
+  }
 
-  // Find the MilestonesCreated event in the logs
-  const milestonesCreatedEvent = receipt.logs.find(log => {
-    try {
-      const decoded = governor.interface.parseLog({
-        topics: [...log.topics],
-        data: log.data,
-      })
-      return decoded?.name === "MilestonesCreated"
-    } catch (e) {
-      return false
+  // Validate all required events are present
+  for (const eventName of requiredEvents) {
+    if (!foundEvents[eventName]) {
+      throw new Error(`Required event ${eventName} not found`)
     }
-  })
-
-  if (!proposalCreatedEvent || (!milestonesCreatedEvent && expectedType === 1)) {
-    throw new Error("ProposalCreated event not found")
   }
 
-  const decodedProposalCreatedEvent = governor.interface.parseLog({
-    topics: [...proposalCreatedEvent.topics],
-    data: proposalCreatedEvent.data,
-  })
-
-  const decodedMilestonesCreatedEvent = governor.interface.parseLog({
-    topics: [...(milestonesCreatedEvent?.topics as string[])],
-    data: milestonesCreatedEvent?.data as string,
-  })
-
-  if (!decodedProposalCreatedEvent) {
-    throw new Error("Failed to decode ProposalCreated event")
+  // Validate ProposalCreated event details
+  const proposalCreated = foundEvents["ProposalCreated"]
+  if (proposalCreated.args[1] !== proposerAddress) {
+    throw new Error(`Expected proposer ${proposerAddress}, got ${proposalCreated.args[1]}`)
+  }
+  if (proposalCreated.args[6] !== description) {
+    throw new Error(`Expected description ${description}, got ${proposalCreated.args[6]}`)
   }
 
-  if (decodedProposalCreatedEvent.name !== "ProposalCreated") {
-    throw new Error(`Expected ProposalCreated event, got ${decodedProposalCreatedEvent.name}`)
-  }
-
-  if (decodedProposalCreatedEvent?.args[1] !== proposerAddress) {
-    throw new Error(`Expected proposer ${proposerAddress}, got ${decodedProposalCreatedEvent.args[1]}`)
-  }
-
-  if (decodedProposalCreatedEvent.args[6] !== description) {
-    throw new Error(`Expected description ${description}, got ${decodedProposalCreatedEvent.args[6]}`)
-  }
-
-  if (decodedMilestonesCreatedEvent?.name !== "MilestonesCreated") {
-    throw new Error(`Expected MilestonesCreated event, got ${decodedMilestonesCreatedEvent?.name}`)
-  }
-
-  if (decodedMilestonesCreatedEvent?.args[1] !== ethers.toBigInt(expectedType)) {
-    throw new Error(`Expected type ${expectedType}, got ${decodedMilestonesCreatedEvent?.args[1]}`)
+  // Validate ProposalCreatedWithType event details
+  const proposalCreatedWithType = foundEvents["ProposalCreatedWithType"]
+  if (proposalCreatedWithType.args[1] !== ethers.toBigInt(expectedType)) {
+    throw new Error(`Expected type ${expectedType}, got ${proposalCreatedWithType.args[1]}`)
   }
 
   return {
-    proposalId: decodedProposalCreatedEvent.args[0],
-    decodedProposalCreatedEvent,
-    decodedMilestonesCreatedEvent,
+    proposalId: proposalCreated.args[0],
+    decodedProposalCreatedEvent: proposalCreated,
+    decodedProposalCreatedWithTypeEvent: proposalCreatedWithType,
+    decodedMilestonesCreatedEvent: foundEvents["MilestonesCreated"] || null,
   }
 }
 

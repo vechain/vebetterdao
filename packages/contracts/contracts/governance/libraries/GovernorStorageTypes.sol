@@ -76,7 +76,7 @@ library GovernorStorageTypes {
     IVOT3 vot3;
     // ------------------------------- Desposits Storage -------------------------------
     // mapping to track deposits made to proposals by address
-    mapping(uint256 => mapping(address => uint256)) deposits;
+    mapping(uint256 proposalId => mapping(address user => uint256 amount)) deposits;
     // percentage of the total supply of B3TR tokens that need to be deposited in VOT3 to create a proposal
     // @dev This is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
     uint256 depositThresholdPercentage_DEPRECATED;
@@ -117,5 +117,7 @@ library GovernorStorageTypes {
     IGalaxyMember galaxyMember;
     // mapping to store the GM weight required for each proposal type
     mapping(GovernorTypes.ProposalType => uint256) proposalTypeGMWeight;
+    // Checkpoints to store the deposits user
+    mapping(address user => Checkpoints.Trace208 timepoint) depositsVotingPower;
   }
 }

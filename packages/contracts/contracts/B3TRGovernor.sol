@@ -315,7 +315,9 @@ contract B3TRGovernor is
    * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
    * @return uint256 The deposit threshold percentage
    */
-  function getProposalTypeDepositThresholdPercentage(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function getProposalTypeDepositThresholdPercentage(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.proposalTypeDepositThresholdPercentage[proposalTypeValue];
   }
@@ -521,7 +523,7 @@ contract B3TRGovernor is
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorVotesLogic.hasVoted($, proposalId, account);
   }
- 
+
   /**
    * @notice Returns the amount of deposits made to a proposal.
    * @param proposalId The id of the proposal.
@@ -764,7 +766,7 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
    */
-  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue  ) external view returns (uint256) {
+  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorConfigurator.getDepositThresholdCap($, proposalTypeValue);
   }
@@ -1098,7 +1100,7 @@ contract B3TRGovernor is
     address[] memory targets,
     uint256[] memory values,
     bytes[] memory calldatas,
-    string memory description, 
+    string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
     string memory milestonesDetailsMetadataURI
@@ -1202,9 +1204,23 @@ contract B3TRGovernor is
    * @param newGMWeight The new GM weight for the proposal type
    * @notice e.g. setProposalTypeGMWeight(0, 1) = GM level 1 is required to create a standard proposal
    */
-  function setProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+  function setProposalTypeGMWeight(
+    GovernorTypes.ProposalType proposalTypeValue,
+    uint256 newGMWeight
+  ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.setProposalTypeGMWeight($, proposalTypeValue, newGMWeight);
+  }
+
+  /**
+   * @notice Get the deposit voting power for a given account at a given timepoint
+   * @param account The address of the account
+   * @param timepoint The timepoint
+   * @return The deposit voting power
+   */
+  function getDepositVotingPower(address account, uint256 timepoint) public view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorDepositLogic.getDepositVotingPower($, account, timepoint);
   }
 
   // ------------------ Overrides ------------------ //

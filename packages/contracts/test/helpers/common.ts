@@ -158,49 +158,6 @@ export const createProposal = async (
   return tx
 }
 
-// export const createProposalWithType = async (
-//   contractToCall: BaseContract,
-//   ContractFactory: ContractFactory,
-//   proposer: HardhatEthersSigner,
-//   description: string = "",
-//   functionTocall: string[] = ["tokenDetails"],
-//   values: any[] = [],
-//   type: string | BigInt | number,
-//   roundId?: string | BigInt | number,
-// ): Promise<ContractTransactionResponse> => {
-//   const deployInstances = await getOrDeployContractInstances({})
-
-//   const xAllocationVoting = deployInstances?.xAllocationVoting
-//   const governor = deployInstances?.governor
-//   const emissions = deployInstances?.emissions
-//   if (!xAllocationVoting || !governor || !emissions) throw new Error("Deploy instances are not correctly set")
-
-//   if (!roundId) {
-//     // to ensure that test will work correctly before creating a proposal we wait for current round to end
-//     // and start a new one
-//     if ((await emissions.nextCycle()) === 0n) {
-//       // if emissions are not started yet, we need to bootstrap and start them
-//       await bootstrapAndStartEmissions()
-//     } else {
-//       // otherwise we need to wait for the current round to end and start the next one
-//       await waitForCurrentRoundToEnd()
-//       await emissions.distribute()
-//     }
-//     roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
-//   }
-
-//   const address = await contractToCall.getAddress()
-//   const encodedFunctionCall = functionTocall.map((func, index) => {
-//     return ContractFactory.interface.encodeFunctionData(func, [values[index]])
-//   })
-
-//   const tx = await governor
-//     .connect(proposer)
-//     .proposeWithType([address], [0, 0], encodedFunctionCall, description, roundId.toString(), 0, Number(type))
-
-//   return tx
-// }
-
 export const createGrantProposal = async (
   proposer: HardhatEthersSigner,
   targets: string[],

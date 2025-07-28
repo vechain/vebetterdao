@@ -232,14 +232,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when a proposal is created with type information.
    */
-  event ProposalCreatedWithType(
-    uint256 indexed proposalId,
-    GovernorTypes.ProposalType proposalType,
-    address[] targets,
-    uint256[] values,
-    bytes[] calldatas,
-    string description
-  );
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
 
   /**
    * @dev Emitted when the quorum numerator for a specific proposal type is updated.
@@ -637,4 +630,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @return uint256 The deposit threshold cap for the proposal type.
    */
   function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+
+  /**
+   * @notice Get the deposit voting power for a given account at a given timepoint
+   * @param account The address of the account
+   * @param timepoint The timepoint
+   * @return The deposit voting power
+   */
+  function getDepositVotingPower(address account, uint256 timepoint) external view returns (uint256);
 }

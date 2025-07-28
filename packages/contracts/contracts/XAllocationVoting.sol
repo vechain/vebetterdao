@@ -151,6 +151,14 @@ contract XAllocationVoting is
     __ExternalContracts_init_v2(_veBetterPassport);
   }
 
+  /**
+   * @dev Initializes the contract with the B3TRGovernor contract.
+   * @param _b3trGovernor The address of the B3TRGovernor contract.
+   */
+  function initializeV3(IB3TRGovernor _b3trGovernor) public reinitializer(3) {
+    __ExternalContracts_init_v3(_b3trGovernor);
+  }
+
   // ---------- Setters ---------- //
   /**
    * @dev Set the address of the X2EarnApps contract
@@ -224,6 +232,13 @@ contract XAllocationVoting is
    */
   function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external onlyRole(GOVERNANCE_ROLE) {
     _setVeBetterPassport(newVeBetterPassport);
+  }
+
+  /**
+   * @dev Set the B3TRGovernor contract
+   */
+  function setB3TRGovernor(IB3TRGovernor newB3TRGovernor) external onlyRole(GOVERNANCE_ROLE) {
+    _setB3TRGovernor(newB3TRGovernor);
   }
 
   // ---------- Getters ---------- //
