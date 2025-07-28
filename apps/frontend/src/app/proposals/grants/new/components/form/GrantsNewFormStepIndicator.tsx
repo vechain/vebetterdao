@@ -13,7 +13,7 @@ import {
 import { BsCheck, BsChevronRight } from "react-icons/bs"
 import { GrantStep } from "./GrantsNewFormStepCard"
 
-export const GrantsNewFormStepper = ({ activeStep, steps }: { activeStep: number; steps: GrantStep[] }) => {
+export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: number; steps: GrantStep[] }) => {
   return (
     <Stepper index={activeStep} variant="grants">
       {steps.map((step, index) => (

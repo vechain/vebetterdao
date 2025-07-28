@@ -17,6 +17,19 @@ interface AboutProjectProps {
 
 export const AboutProject = ({ register, setValue, watch, errors }: AboutProjectProps) => {
   const { t } = useTranslation()
+
+  // Custom validation function to ensure at least one social account is connected
+  const validateAtLeastOneSocial = (_value: string): string | boolean => {
+    const twitterUsername = watch("twitterUsername")
+    const githubUsername = watch("githubUsername")
+    const discordUsername = watch("discordUsername")
+
+    if (!twitterUsername && !githubUsername && !discordUsername) {
+      return t("Please, connect minimum one account of your company or project or your personal one.")
+    }
+    return true
+  }
+
   // Handle social media auth
   const handleAuth = (platform: "github" | "twitter" | "discord") => {
     const usernameField = {
@@ -99,7 +112,9 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                   <GridItem>
                     <FormSocialConnectButton
                       label={t("Connect X")}
-                      register={register("twitterUsername", { required: "X Username is required" })}
+                      register={register("twitterUsername", {
+                        validate: validateAtLeastOneSocial,
+                      })}
                       error={errors.twitterUsername?.message}
                       handleAuth={() => handleAuth("twitter")}
                       leftIcon={<FaXTwitter size={30} />}
@@ -109,7 +124,9 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                   <GridItem>
                     <FormSocialConnectButton
                       label={t("Connect GitHub")}
-                      register={register("githubUsername", { required: "GitHub Username is required" })}
+                      register={register("githubUsername", {
+                        validate: validateAtLeastOneSocial,
+                      })}
                       error={errors.githubUsername?.message}
                       handleAuth={() => handleAuth("github")}
                       leftIcon={<UilGithub size={30} />}
@@ -119,7 +136,9 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                   <GridItem>
                     <FormSocialConnectButton
                       label={t("Connect Discord")}
-                      register={register("discordUsername", { required: "Discord Username is required" })}
+                      register={register("discordUsername", {
+                        validate: validateAtLeastOneSocial,
+                      })}
                       error={errors.discordUsername?.message}
                       handleAuth={() => handleAuth("discord")}
                       leftIcon={<AiOutlineDiscord size={30} />}

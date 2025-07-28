@@ -1,2 +1,2 @@
 export * from "./GrantsNewPageContent"
-export * from "./form/GrantsNewFormStepper"
+export * from "./form/GrantsNewFormStepIndicator"

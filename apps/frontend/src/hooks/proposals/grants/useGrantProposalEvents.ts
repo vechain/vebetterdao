@@ -19,6 +19,7 @@ export const useGrantProposalEvents = () => {
   const events = useEvents({
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreated",
+    filterParams: { type: 1 },
     abi,
     mapResponse: response => {
       const grantAmount = getAndDecodeGrantAmount(response.decodedData.args.calldatas[0])
@@ -36,6 +37,7 @@ export const useGrantProposalEvents = () => {
       }
     },
   })
+  console.log({ events: events.data })
 
   return events
 }

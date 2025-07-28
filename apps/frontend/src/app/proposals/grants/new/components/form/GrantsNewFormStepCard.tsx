@@ -1,11 +1,10 @@
 import { useTranslation } from "react-i18next"
 import { VStack, CardHeader, CardBody, Card, useSteps, Button, HStack, Text } from "@chakra-ui/react"
-import { GrantsNewFormStepper } from "."
+import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutApplicant, AboutProject } from "./steps"
-import { useForm, FormProvider } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
 
 export type GrantFormData = {
   grantType: string
@@ -66,7 +65,7 @@ export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  const methods = useForm<GrantFormData>({
+  const { handleSubmit, control, register, formState, setValue, watch } = useForm<GrantFormData>({
     defaultValues: {
       grantType: "dapp",
       applicantName: "",
@@ -97,38 +96,30 @@ export const GrantsNewFormStepCard = () => {
     },
   })
 
-  const steps = useMemo<GrantStep[]>(
-    () => [
-      {
-        key: GrantFormStep.GRANT_TYPE,
-        content: <GrantTypeSelection control={methods.control} />,
-        title: t("Type of grant"),
-      },
-      {
-        key: GrantFormStep.ABOUT_APPLICANT,
-        content: <AboutApplicant register={methods.register} errors={methods.formState.errors} />,
-        title: t("About applicant"),
-      },
-      {
-        key: GrantFormStep.ABOUT_PROJECT,
-        content: (
-          <AboutProject
-            register={methods.register}
-            setValue={methods.setValue}
-            watch={methods.watch}
-            errors={methods.formState.errors}
-          />
-        ),
-        title: t("About project"),
-      },
-      {
-        key: GrantFormStep.GRANT_MILESTONES,
-        content: <Text>{"lorem ipsum"}</Text>,
-        title: t("Grant Milestones"),
-      },
-    ],
-    [methods.control, methods.register, methods.formState.errors, t],
-  )
+  const { errors } = formState
+
+  const steps = [
+    {
+      key: GrantFormStep.GRANT_TYPE,
+      content: <GrantTypeSelection control={control} />,
+      title: t("Type of grant"),
+    },
+    {
+      key: GrantFormStep.ABOUT_APPLICANT,
+      content: <AboutApplicant register={register} errors={errors} />,
+      title: t("About applicant"),
+    },
+    {
+      key: GrantFormStep.ABOUT_PROJECT,
+      content: <AboutProject register={register} setValue={setValue} watch={watch} errors={errors} />,
+      title: t("About project"),
+    },
+    {
+      key: GrantFormStep.GRANT_MILESTONES,
+      content: <Text>{"lorem ipsum"}</Text>,
+      title: t("Grant Milestones"),
+    },
+  ]
 
   const { activeStep, goToNext } = useSteps({
     index: 0,
@@ -137,17 +128,11 @@ export const GrantsNewFormStepCard = () => {
   const firstStep = 0
   const lastStep = steps.length - 1
 
-  const onSubmit = (data: GrantFormData) => {
-    // Handle form submission
-    console.log("Form submitted:", data)
-  }
-
-  const handleNext = () => {
-    if (activeStep === steps.length - 1) {
-      methods.handleSubmit(onSubmit)()
-    } else {
+  const onSubmit = async (data: GrantFormData) => {
+    if (activeStep !== lastStep) {
       goToNext()
     }
+    console.log("Form submitted:", data)
   }
 
   const handleSaveDraft = () => {
@@ -159,14 +144,12 @@ export const GrantsNewFormStepCard = () => {
   return (
     <Card>
       <CardHeader>
-        <GrantsNewFormStepper activeStep={activeStep} steps={steps} />
+        <GrantsNewFormStepIndicator activeStep={activeStep} steps={steps} />
       </CardHeader>
       <CardBody>
-        <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
           <VStack spacing={4} w="full" align="flex-start">
-            <form onSubmit={methods.handleSubmit(onSubmit)} style={{ width: "100%" }}>
-              {currentStep?.content}
-            </form>
+            {currentStep?.content}
             <HStack spacing={4} w="full" justify="flex-start">
               {activeStep !== firstStep && (
                 <Button onClick={handleSaveDraft} variant="secondary" px={8}>
@@ -174,14 +157,18 @@ export const GrantsNewFormStepCard = () => {
                 </Button>
               )}
 
-              {activeStep !== lastStep && (
-                <Button onClick={handleNext} variant="primaryAction" px={8}>
+              {activeStep === lastStep ? (
+                <Button type="submit" variant="primaryAction" px={8}>
+                  {t("Apply")}
+                </Button>
+              ) : (
+                <Button type="submit" variant="primaryAction" px={8}>
                   {t("Continue")}
                 </Button>
               )}
             </HStack>
           </VStack>
-        </FormProvider>
+        </form>
       </CardBody>
     </Card>
   )

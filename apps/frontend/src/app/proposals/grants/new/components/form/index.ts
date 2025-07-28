@@ -1,3 +1,3 @@
 export * from "./steps"
-export * from "./GrantsNewFormStepper"
+export * from "./GrantsNewFormStepIndicator"
 export * from "./GrantsNewFormStepCard"
