@@ -62,6 +62,11 @@ library GovernorProposalLogic {
   );
 
   /**
+   * @dev Emitted when a proposal is created with type information.
+   */
+  event ProposalCreatedWithType(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType);
+
+  /**
    * @dev Emitted when a proposal is executed.
    */
   event ProposalExecuted(uint256 proposalId);
@@ -326,8 +331,8 @@ library GovernorProposalLogic {
     GovernorStorageTypes.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
-    bytes[] memory calldatas, 
-    string memory description, 
+    bytes[] memory calldatas,
+    string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
     string memory milestonesDetailsMetadataURI
@@ -348,13 +353,7 @@ library GovernorProposalLogic {
       GovernorTypes.ProposalType.Grant
     );
 
-    grantsManager.createMilestones(
-      description,
-      milestonesDetailsMetadataURI,
-      proposalId,
-      proposer,
-      calldatas
-    );
+    grantsManager.createMilestones(description, milestonesDetailsMetadataURI, proposalId, proposer, calldatas);
 
     return
       _propose(
@@ -638,6 +637,9 @@ library GovernorProposalLogic {
       startRoundId,
       depositThresholdAmount
     );
+
+    // Emit event just for the proposal type
+    emit ProposalCreatedWithType(proposalId, proposalTypeValue);
 
     if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
       emit MilestonesCreated(proposalId, proposalTypeValue, description);
