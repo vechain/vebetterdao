@@ -77,6 +77,9 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   /// @dev Error thrown when trying to vote for the same app multiple times in one transaction
   error DuplicateAppVote();
 
+  //@notice emitted when a voter votes with deposits voting power
+  event VotedWithDepositsVotingPower(address voter, uint256 voterAvailableVotesWithDeposit, uint256 voterAvailableVotes);
+
   /**
    * @dev Initializes the contract
    */
@@ -162,7 +165,11 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
     // Get the total voting power of the voter to use in the for loop to check
     // if the total weight of votes cast by the voter is greater than the voter's available voting power
-    uint256 voterAvailableVotes = getVotes(voter, roundStart);
+    uint256 voterAvailableVotes = getVotes(voter, roundStart) + getDepositVotingPower(voter, roundStart);
+
+    if (getDepositVotingPower(voter, roundStart) > 0) {
+      emit VotedWithDepositsVotingPower(voter, getDepositVotingPower(voter, roundStart), voterAvailableVotes);
+    }
 
     // Iterate through the apps and weights to calculate the total weight of votes cast by the voter
     for (uint256 i; i < apps.length; i++) {

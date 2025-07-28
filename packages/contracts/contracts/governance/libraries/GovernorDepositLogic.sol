@@ -27,11 +27,14 @@ import { GovernorStorageTypes } from "./GovernorStorageTypes.sol";
 import { GovernorStateLogic } from "./GovernorStateLogic.sol";
 import { GovernorTypes } from "./GovernorTypes.sol";
 import { GovernorConfigurator } from "./GovernorConfigurator.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
 /// @dev This library provides functions to deposit and withdraw tokens for proposals, and to get deposit-related information.
 library GovernorDepositLogic {
+  using Checkpoints for Checkpoints.Trace208;
   /// @dev Emitted when a deposit is made to a proposal.
   event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
@@ -99,6 +102,7 @@ library GovernorDepositLogic {
     }
 
     self.deposits[proposalId][depositer] = 0;
+    self.depositsVotingPower[depositer].push(SafeCast.toUint48(block.timestamp), 0); // remove the deposit record to not count as the voting power
 
     require(self.vot3.transfer(depositer, amount), "B3TRGovernor: transfer failed");
 
@@ -106,7 +110,7 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @notice Internal function to deposit tokens to a proposal.
+   * @notice Internal function to deposit tokens to a proposal and store the deposit in the deposits checkpoint.
    * @dev Emits a {ProposalDeposit} event.
    * @param self The storage reference for the GovernorStorage.
    * @param amount The amount of tokens to deposit.
@@ -122,6 +126,7 @@ library GovernorDepositLogic {
     require(self.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");
 
     self.deposits[proposalId][depositor] += amount;
+    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), SafeCast.toUint208(amount));
 
     emit ProposalDeposit(depositor, proposalId, amount);
   }
@@ -234,5 +239,20 @@ library GovernorDepositLogic {
   function _depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
     // deposit threshold is a percentage of the total supply of B3TR tokens
     return _depositThresholdByProposalType(self, GovernorTypes.ProposalType.Standard);
+  }
+
+  /**
+   * @notice Returns the deposit voting power for a given account at a given timepoint.
+   * @param self The storage reference for the GovernorStorage.
+   * @param account The address of the account.
+   * @param timepoint The timepoint.
+   * @return The deposit voting power.
+   */
+  function getDepositVotingPower(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address account,
+    uint256 timepoint
+  ) public view returns (uint256) {
+    return self.depositsVotingPower[account].upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 }

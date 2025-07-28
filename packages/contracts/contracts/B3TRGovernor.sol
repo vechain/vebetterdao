@@ -1212,6 +1212,17 @@ contract B3TRGovernor is
     GovernorConfigurator.setProposalTypeGMWeight($, proposalTypeValue, newGMWeight);
   }
 
+  /**
+   * @notice Get the deposit voting power for a given account at a given timepoint
+   * @param account The address of the account
+   * @param timepoint The timepoint
+   * @return The deposit voting power
+   */
+  function getDepositVotingPower(address account, uint256 timepoint) public view returns (uint256) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorDepositLogic.getDepositVotingPower($, account, timepoint);
+  }
+
   // ------------------ Overrides ------------------ //
 
   /**
