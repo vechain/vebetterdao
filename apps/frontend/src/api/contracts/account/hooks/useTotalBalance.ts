@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
 import { ethers } from "ethers"
 import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { useWallet } from "@vechain/vechain-kit"
 
 /**
  * return the total balance of Vot3 + B3tr
@@ -10,8 +11,9 @@ import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
  */
 
 export const useTotalBalance = (address?: string) => {
-  const { data: b3trBalance } = useGetB3trBalance(address)
-  const { data: vot3Balance } = useGetVot3Balance(address)
+  const { account } = useWallet()
+  const { data: b3trBalance } = useGetB3trBalance(address ?? account?.address)
+  const { data: vot3Balance } = useGetVot3Balance(address ?? account?.address)
 
   return useMemo(() => {
     if (!b3trBalance || !vot3Balance) {

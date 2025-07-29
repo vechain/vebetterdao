@@ -3,7 +3,7 @@ import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
-import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey } from "@/api"
+import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey } from "@/api"
 import { getB3trDonatedQueryKey } from "./useB3trDonated"
 import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
 
@@ -53,6 +53,7 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
       getB3trBalanceQueryKey(account?.address ?? ""),
       getB3trDonatedQueryKey(tokenId),
       getNFTMetadataUriQueryKey(tokenId),
+      getUserGMsQueryKey(account?.address ?? ""),
     ],
     [account, tokenId],
   )
