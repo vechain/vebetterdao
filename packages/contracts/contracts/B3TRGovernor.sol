@@ -794,9 +794,9 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function getRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.proposalTypeGMWeight[proposalTypeValue];
+    return $.requiredGMLevelByProposalType[proposalTypeValue];
   }
 
   // ------------------ SETTERS ------------------ //
@@ -1202,14 +1202,14 @@ contract B3TRGovernor is
    * @notice Set the GM weight for a proposal type
    * @param proposalTypeValue The type of the proposal
    * @param newGMWeight The new GM weight for the proposal type
-   * @notice e.g. setProposalTypeGMWeight(0, 1) = GM level 1 is required to create a standard proposal
+   * @notice e.g. setRequiredGMLevelByProposalType(0, 1) = GM level 1 is required to create a standard proposal
    */
-  function setProposalTypeGMWeight(
+  function setRequiredGMLevelByProposalType(
     GovernorTypes.ProposalType proposalTypeValue,
     uint256 newGMWeight
   ) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setProposalTypeGMWeight($, proposalTypeValue, newGMWeight);
+    GovernorConfigurator.setRequiredGMLevelByProposalType($, proposalTypeValue, newGMWeight);
   }
 
   /**

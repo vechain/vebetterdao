@@ -116,7 +116,7 @@ library GovernorStorageTypes {
     // GalaxyMember contract
     IGalaxyMember galaxyMember;
     // mapping to store the GM weight required for each proposal type
-    mapping(GovernorTypes.ProposalType => uint256) proposalTypeGMWeight;
+    mapping(GovernorTypes.ProposalType => uint256) requiredGMLevelByProposalType;
     // Checkpoints to store the deposits user
     mapping(address user => Checkpoints.Trace208 timepoint) depositsVotingPower;
   }

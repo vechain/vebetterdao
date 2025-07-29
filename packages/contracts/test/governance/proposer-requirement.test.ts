@@ -2,6 +2,7 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { setupGovernanceFixtureWithEmissions, setupProposer } from "./fixture.test"
 import { B3TRGovernor, VOT3, B3TR, Treasury, GrantsManager, VeBetterPassport } from "../../typechain-types"
 import { ethers } from "ethers"
+import { describe, it, beforeEach } from "mocha"
 
 describe("Proposal - Proposer requirement", function () {
   let governor: B3TRGovernor
@@ -37,10 +38,6 @@ describe("Proposal - Proposer requirement", function () {
 
     it("Should correctly set the GM for the grant proposal", async function () {})
 
-    it("Should not create a proposal if the proposer does not have the correct GM", async function () {
-      const description = "Create milestones for my new 1M user DApp"
-      const values = [ethers.parseEther("10000")]
-      const totalAmount = ethers.parseEther("10000")
-    })
+    it("Should not create a proposal if the proposer does not have the correct GM", async function () {})
   })
 })
