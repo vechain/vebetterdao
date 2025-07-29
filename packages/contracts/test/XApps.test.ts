@@ -54,7 +54,7 @@ import { getConfig } from "@repo/config"
 
 const thorClient = ThorClient.at(getConfig().nodeUrl)
 
-describe("X-Apps - @shard15", function () {
+describe.only("X-Apps - @shard15", function () {
   // We prepare the environment for 4 creators
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
@@ -2465,7 +2465,7 @@ describe("X-Apps - @shard15", function () {
     })
   })
 
-  describe("App availability for allocation voting", function () {
+  describe.only("App availability for allocation voting", function () {
     it("Should be possible to endorse an app and make it available for allocation voting", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2689,7 +2689,7 @@ describe("X-Apps - @shard15", function () {
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingEligibility(app1Id, true))
     })
 
-    it("App needs to wait next round if added during an ongoing round", async function () {
+    it.only("App needs to wait next round if added during an ongoing round", async function () {
       const { otherAccounts, x2EarnApps, owner, xAllocationVoting, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,

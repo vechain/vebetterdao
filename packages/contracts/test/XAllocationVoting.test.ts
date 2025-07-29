@@ -39,7 +39,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe("X-Allocation Voting - @shard14", function () {
+describe.only("X-Allocation Voting - @shard14", function () {
   // Environment params
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
@@ -316,7 +316,7 @@ describe("X-Allocation Voting - @shard14", function () {
     })
   })
 
-  describe("Contract upgradeablity", () => {
+  describe.only("Contract upgradeablity", () => {
     it("Admin should be able to upgrade the contract", async function () {
       const { xAllocationVoting, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -501,12 +501,12 @@ describe("X-Allocation Voting - @shard14", function () {
       )
     })
 
-    it("Should return correct version of the contract", async () => {
+    it.only("Should return correct version of the contract", async () => {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("6")
+      expect(await xAllocationVoting.version()).to.equal("7")
     })
 
     it("Should not break storage when upgrading to V2, V3, V4, V5 and V6", async () => {

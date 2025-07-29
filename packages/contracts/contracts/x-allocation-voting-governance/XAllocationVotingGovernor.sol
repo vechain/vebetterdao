@@ -54,6 +54,9 @@ import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
  *
  * ----- Version 5 -----
  * - Fixed duplicate app voting in same transaction in {RoundVotesCountingUpgradeable._countVote}
+ *
+ * ----- Version 7 -----
+ * - Added B3TRGovernor contract to the contract
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
@@ -171,7 +174,7 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the version of the governor.
    */
   function version() public view virtual returns (string memory) {
-    return "6";
+    return "7";
   }
 
   /**

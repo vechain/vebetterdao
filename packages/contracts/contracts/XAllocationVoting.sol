@@ -56,6 +56,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * ----- Version 6 -----
  *  - Align IVoterRewards and IEmissions interfaces with the new contracts
+ *
+ * ----- Version 7 -----
+ * - Added B3TRGovernor contract to the contract
+ *
  */
 contract XAllocationVoting is
   XAllocationVotingGovernor,
@@ -155,7 +159,7 @@ contract XAllocationVoting is
    * @dev Initializes the contract with the B3TRGovernor contract.
    * @param _b3trGovernor The address of the B3TRGovernor contract.
    */
-  function initializeV3(IB3TRGovernor _b3trGovernor) public reinitializer(3) {
+  function initializeV7(IB3TRGovernor _b3trGovernor) public reinitializer(7) {
     __ExternalContracts_init_v3(_b3trGovernor);
   }
 

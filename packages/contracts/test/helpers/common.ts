@@ -706,8 +706,12 @@ export const waitForBlock = async (blockNumber: number) => {
   }
 }
 
-export const waitForNextCycle = async (emissions: Emissions) => {
-  const blockNextCycle = await emissions.getNextCycleBlock()
+export const waitForNextCycle = async (emission?: Emissions) => {
+  if (!emission) {
+    const { emissions } = await getContractInstances()
+    emission = emissions as Emissions
+  }
+  const blockNextCycle = await emission.getNextCycleBlock()
 
   await waitForBlock(Number(blockNextCycle))
 }

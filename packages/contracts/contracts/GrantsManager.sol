@@ -56,7 +56,7 @@ contract GrantsManager is
   // ------------------ ROLES ------------------ //
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-  bytes32 public constant MILESTONE_EDITOR_ROLE = keccak256("MILESTONE_EDITOR_ROLE");
+  // bytes32 public constant MILESTONE_EDITOR_ROLE = keccak256("MILESTONE_EDITOR_ROLE"); TBD
   // bytes32 public constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
   // bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
@@ -90,6 +90,7 @@ contract GrantsManager is
   function initialize(address _governor, address _treasury, address defaultAdmin, address _b3tr) external initializer {
     require(_governor != address(0), "Governor address cannot be 0");
     require(_treasury != address(0), "Treasury address cannot be 0");
+    require(_b3tr != address(0), "B3TR address cannot be 0");
     require(defaultAdmin != address(0), "Default admin address cannot be 0");
 
     __UUPSUpgradeable_init();
@@ -111,16 +112,8 @@ contract GrantsManager is
 
   // ------------------ MODIFIERS ------------------ //
   modifier onlyAdminOrGovernanceRole() {
-    // todo: is it safe ? Do we need a specific role for this contract ?
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     if (!(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(GOVERNANCE_ROLE, _msgSender()))) {
-      revert NotAuthorized();
-    }
-    _;
-  }
-
-  modifier onlyAdminOrProposer() {
-    if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) && !hasRole(GOVERNANCE_ROLE, _msgSender())) {
       revert NotAuthorized();
     }
     _;
