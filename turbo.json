@@ -179,16 +179,24 @@
       "cache": false
     },
     "upgrade:contract:local": {
-      "dependsOn": ["upgrade:contract"]
-    },
-    "upgrade:contract:testnet-staging": {
-      "dependsOn": ["upgrade:contract"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
     },
     "upgrade:contract:testnet": {
-      "dependsOn": ["upgrade:contract"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
+    },
+    "upgrade:contract:testnet-staging": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
     },
     "upgrade:contract:mainnet": {
-      "dependsOn": ["upgrade:contract"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
     },
     "deploy:contract": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
