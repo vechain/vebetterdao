@@ -1737,5 +1737,6 @@
   "Only one node can be attached to a GM": "Only one node can be attached to a GM",
   "No galaxy members found.": "No galaxy members found.",
   "No nodes found.": "No nodes found.",
-  "No GM NFTs found.": "No GM NFTs found."
+  "No GM NFTs found.": "No GM NFTs found.",
+  "Not enough balance to upgrade your GM NFT to the next level.": "Not enough balance to upgrade your GM NFT to the next level."
 }

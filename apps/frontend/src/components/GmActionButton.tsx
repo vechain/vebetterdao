@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useGetB3trBalance, useMintNFT, useUpgradeGM } from "@/hooks"
+import { useMintNFT, useUpgradeGM } from "@/hooks"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useGMMaxLevel, useGetUserGMs } from "@/api"
 import { useTranslation } from "react-i18next"
@@ -10,8 +10,19 @@ import { MintNFTModal } from "./MintNFTModal"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { BaseTooltip } from "./BaseTooltip"
 
-export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
+export const GmActionButton = ({
+  buttonProps,
+  b3trBalance,
+}: {
+  buttonProps: ButtonProps
+  b3trBalance?: {
+    original: string
+    scaled: string
+    formatted: string
+  }
+}) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { resetModal: resetTransactionModal, onClose: closeTransactionModal } = useTransactionModal()
@@ -20,7 +31,6 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: b3trBalance } = useGetB3trBalance()
 
   // GM NFT data
   const { data: maxGMLevel } = useGMMaxLevel()
@@ -125,23 +135,30 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
     // Default case: Upgrade GM
     return (
-      <Button
-        {...buttonProps}
-        isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-        onClick={handleOnUpgrade}>
-        {t("Upgrade now!")}
-      </Button>
+      <BaseTooltip
+        placement="top"
+        showTooltip={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+        text={t("Not enough balance to upgrade your GM NFT to the next level.")}>
+        <span>
+          <Button
+            {...buttonProps}
+            isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+            onClick={handleOnUpgrade}>
+            {t("Upgrade now!")}
+          </Button>
+        </span>
+      </BaseTooltip>
     )
   }, [
-    hasUserVoted,
-    isGMOwned,
-    isMaxGmLevelReached,
     buttonProps,
-    t,
-    isEnoughBalanceToUpgradeGM,
     goToVote,
     handleMintGM,
     handleOnUpgrade,
+    hasUserVoted,
+    isEnoughBalanceToUpgradeGM,
+    isGMOwned,
+    isMaxGmLevelReached,
+    t,
   ])
 
   return (
