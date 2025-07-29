@@ -22,7 +22,7 @@ import { UseFormReturn } from "react-hook-form"
 import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 import { EditAppForm } from "../../EditAppPageContent"
-import { APP_CATEGORIES, DEPRECATED_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+import { APP_CATEGORIES, DEPRECATED_CATEGORIES, DEPRECATED_IDS, MAX_CATEGORIES } from "@/types/appDetails"
 
 type EditAppCategoriesProps = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -41,6 +41,8 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  console.log("selectedCategories within the metadata", selectedCategories)
+
   // Count how many deprecated categories the app has in its metadata
   const deprecatedCategoriesCount = selectedCategories.filter(cat => DEPRECATED_CATEGORIES.includes(cat)).length
 
@@ -51,7 +53,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
     if (selectedCategories.includes(categoryId)) {
       setValue(
         "categories",
-        selectedCategories.filter(id => id !== categoryId),
+        selectedCategories.filter(id => id !== categoryId).filter(id => !DEPRECATED_IDS.includes(id)), // remove the deprecated category
         { shouldDirty: true },
       )
     } else if (selectedCategories.length < maxAllowedCategories) {
@@ -65,7 +67,9 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const handleRemoveCategory = (categoryId: string) => {
     setValue(
       "categories",
-      selectedCategories.filter(id => id !== categoryId),
+      selectedCategories
+        .filter(id => !DEPRECATED_IDS.includes(id)) // remove the deprecated category
+        .filter(id => id !== categoryId), // remove the selected category
       { shouldDirty: true },
     )
   }

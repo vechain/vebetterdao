@@ -23,7 +23,7 @@ export const APP_CATEGORIES = [
   { id: "others", name: "Others", color: "#feeab6" },
   { id: "education-learning", name: "Learning", color: "#E5E9F0" },
   { id: "fitness-wellness", name: "Lifestyle", color: "#D1E2FF" },
-  { id: "green-finance-defi", name: "Web3", color: "##ffe0cd" },
+  { id: "green-finance-defi", name: "Web3", color: "#ffe0cd" },
   { id: "green-mobility-travel", name: "Transportation", color: "#FAD1FC" },
   { id: "nutrition", name: "Food & Drinks", color: "#CEF5D1" },
   { id: "plastic-waste-recycling", name: "Recycling", color: "#FFD4E0" },
@@ -34,6 +34,7 @@ export const APP_CATEGORIES = [
 
 // Track deprecated categories that should not count towards the category limit if present in metadata
 export const DEPRECATED_CATEGORIES = ["social-community-activism", "carbon-footprint"]
+export const DEPRECATED_IDS = ["carbon-footprint"]
 
 // SORTING
 export type SortOption = "newest" | "rewards" | "alphabetical" | "default"
