@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.24.2",
+  "version": "1.24.4",
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -22,7 +22,8 @@
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
-    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts"
+    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
+    "check-unused-translations": "node ./scripts/check-unused-translations.js"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",

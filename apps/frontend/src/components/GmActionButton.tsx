@@ -52,7 +52,7 @@ export const GmActionButton = ({
     onOpenMintNftModal()
     onCloseGetFreeNFTModal()
     closeTransactionModal()
-  }, [onOpenMintNftModal, closeTransactionModal])
+  }, [onOpenMintNftModal, onCloseGetFreeNFTModal, closeTransactionModal])
 
   const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
     transactionModalCustomUI: {
@@ -153,15 +153,15 @@ export const GmActionButton = ({
       </BaseTooltip>
     )
   }, [
+    buttonProps,
+    goToVote,
+    handleOnUpgrade,
     hasUserVoted,
+    isEnoughBalanceToUpgradeGM,
     isGMOwned,
     isMaxGmLevelReached,
-    buttonProps,
+    onOpenGetFreeNFTModal,
     t,
-    isEnoughBalanceToUpgradeGM,
-    goToVote,
-    handleMintGM,
-    handleOnUpgrade,
   ])
 
   return (
