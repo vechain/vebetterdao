@@ -12,14 +12,6 @@ import { nativeSelectSlotRecipe } from "./native-select"
 const config = defineConfig({
   preflight: true,
   cssVarsPrefix: "vbd",
-  // globalCss: {
-  //   "html,body": {
-  //     fontFamily: "var(--font-inter)",
-  //   },
-  //   "h1,h2,h3,h4,h5,h6": {
-  //     fontFamily: "var(--font-instrument-sans)",
-  //   },
-  // },
 
   theme: {
     recipes: {
@@ -218,6 +210,11 @@ const config = defineConfig({
 
         // Background Colors
         bg: {
+          layout: {
+            _dark: { value: "#131313" },
+            base: { value: "#F7F7F7" },
+          },
+
           primary: {
             _dark: { value: "#1D1D1D" },
             base: { value: "#FFFFFF" },

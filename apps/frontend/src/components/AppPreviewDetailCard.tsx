@@ -49,7 +49,7 @@ export const AppPreviewDetailCard = ({
     <Card.Root variant={"baseWithBorder"} w="full">
       <Card.Body>
         <VStack w="full" gap={4} align="flex-start">
-          <Skeleton w="full" h={200} loading={isBannerLoading} rounded={"3xl"}>
+          <Skeleton asChild w="full" h={200} loading={!!isBannerLoading} rounded={"3xl"}>
             <Image
               w="full"
               src={app.banner ?? notFoundImage}
@@ -61,7 +61,7 @@ export const AppPreviewDetailCard = ({
           </Skeleton>
           <HStack w="full" justify={"space-between"}>
             <HStack gap={4} mt={4}>
-              <Skeleton loading={isLogoLoading} alignContent={"start"}>
+              <Skeleton loading={!!isLogoLoading} alignContent={"start"}>
                 <Image src={app.logo ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
               </Skeleton>
               <Skeleton loading={appMetadataLoading}>

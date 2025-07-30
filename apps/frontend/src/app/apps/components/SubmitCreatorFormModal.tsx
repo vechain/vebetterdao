@@ -10,7 +10,7 @@ type Props = {
 
 export const SubmitCreatorFormModal = ({ isOpen, onClose, buttonAction }: Props) => {
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen} onClose={onClose} modalProps={{ size: "md" }}>
       <VStack gap={6} align="flex-start" w="full" p={3}>
         <Heading fontSize={"24px"}>{t("Get a Creator’s NFT to submit your app to VeBetterDAO!")}</Heading>
 

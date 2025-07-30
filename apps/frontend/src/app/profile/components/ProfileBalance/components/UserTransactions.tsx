@@ -34,19 +34,24 @@ export const UserTransactions = ({ address }: Props) => {
       <Card.Body>
         <VStack gap={4} align="stretch">
           <VStack gap={2} align="stretch">
-            <Heading size="md">{t("Last Transactions")}</Heading>
+            <Heading size="xl" fontWeight="bold">
+              {t("Last Transactions")}
+            </Heading>
           </VStack>
-          <VStack gap={4} align="stretch">
-            {last5Transactions.map(transaction => (
-              <TransactionCard key={transaction.txId} transaction={transaction} />
-            ))}
-          </VStack>
+
           {transactions.length > 0 ? (
-            <Flex justify="center">
-              <Button variant={"primaryGhost"} onClick={handleSeeAll}>
-                {t("See all")}
-              </Button>
-            </Flex>
+            <>
+              <VStack gap={4} align="stretch">
+                {last5Transactions.map(transaction => (
+                  <TransactionCard key={transaction.txId} transaction={transaction} />
+                ))}
+              </VStack>
+              <Flex justify="center">
+                <Button variant={"primaryGhost"} onClick={handleSeeAll}>
+                  {t("See all")}
+                </Button>
+              </Flex>
+            </>
           ) : (
             <Text>{t("No transactions found")}</Text>
           )}

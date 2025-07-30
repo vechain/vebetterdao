@@ -18,6 +18,7 @@ import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
 import AppUtils from "@/utils/AppUtils"
 import { FormCheckbox, FormItem } from "../CustomFormFields"
+
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string
@@ -47,9 +48,40 @@ type Props = {
   setValue: UseFormSetValue<SubmitCreatorFormData>
 }
 
-export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) => {
+export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }: Props) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
+
+  const checkboxList = [
+    {
+      label: t("API Security Measures (Optional)"),
+      description: t("Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting."),
+      name: "securityApiSecurityMeasures",
+      required: false,
+    },
+    {
+      label: t("Action Verification"),
+      description: t("Uses AI validation or unique identifiers to verify sustainable actions."),
+      name: "securityActionVerification",
+    },
+    {
+      label: t("Device Fingerprinting (Optional)"),
+      description: t("Implements device identification to prevent multiple installations."),
+      name: "securityDeviceFingerprint",
+      required: false,
+    },
+    {
+      label: t("Secure Key Management (Optional)"),
+      description: t("Ensures secure storage and handling of private keys and sensitive data."),
+      name: "securitySecureKeyManagement",
+      required: false,
+    },
+    {
+      label: t("Anti-Farming Measures (Optional)"),
+      description: t("Implements progressive unlocking, reward scaling, or other anti-farming strategies."),
+      name: "securityAntiFarming",
+    },
+  ] as const
 
   const {
     setData,
@@ -178,7 +210,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
       <Card.Body w="full" p={{ base: 2, md: 6 }}>
         <VStack gap={4} w="full">
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={6}>
+            <Heading size="xl" fontWeight="bold" pb={6}>
               {t("App Information")}
             </Heading>
             <VStack w="full" gap={4} align="stretch">
@@ -275,18 +307,17 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
             </VStack>
           </Card.Root>
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={6}>
+            <Heading size="xl" fontWeight="bold" pb={6}>
               {t("Your Information")}
             </Heading>
             <VStack w="full" gap={4} align="stretch">
               <Field.Root invalid={!!errors.githubUsername}>
-                <Field.Label>{t("GitHub Username")}</Field.Label>
+                <Field.Label fontSize="md">{t("GitHub Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
                   onClick={() => handleAuth("github")}
-                  size="lg"
-                  alignSelf="flex-end"
+                  size="xl"
                   borderRadius="full">
                   <UilGithub size={30} />
                   {watch("githubUsername") || t("Connect GitHub")}
@@ -296,15 +327,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               </Field.Root>
 
               <Field.Root invalid={!!errors.twitterUsername}>
-                <Field.Label>{t("X Username")}</Field.Label>
+                <Field.Label fontSize="md">{t("X Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
                   onClick={() => handleAuth("twitter")}
-                  size="lg"
-                  alignSelf="flex-end"
+                  size="xl"
                   borderRadius="full">
-                  <FaXTwitter />
+                  <FaXTwitter size={30} />
                   {watch("twitterUsername") || t("Connect X")}
                 </Button>
                 <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
@@ -343,7 +373,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
           </Card.Root>
 
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={4}>
+            <Heading size="xl" fontWeight="bold" pb={4}>
               {t("Testing Requirements")}
             </Heading>
             <VStack w="full" gap={4} align="stretch">
@@ -385,48 +415,20 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
             </VStack>
           </Card.Root>
           <Card.Root w="full" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={4}>
+            <Heading size="xl" fontWeight="bold" pb={4}>
               {t("Security Requirements")}
             </Heading>
             <VStack align="start" gap={3}>
-              <FormCheckbox
-                register={{ ...register("securityApiSecurityMeasures") }}
-                label={t("API Security Measures (Optional)")}
-                description={t("Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.")}
-                error={errors.securityApiSecurityMeasures?.message}
-              />
-
-              <FormCheckbox
-                register={{
-                  ...register("securityActionVerification", {
-                    required: "Action Verification is required",
-                  }),
-                }}
-                label={t("Action Verification")}
-                description={t("Uses AI validation or unique identifiers to verify sustainable actions.")}
-                error={errors.securityActionVerification?.message}
-              />
-
-              <FormCheckbox
-                register={{ ...register("securityDeviceFingerprint") }}
-                label={t("Device Fingerprinting (Optional)")}
-                description={t("Implements device identification to prevent multiple installations.")}
-                error={errors.securityDeviceFingerprint?.message}
-              />
-
-              <FormCheckbox
-                register={{ ...register("securitySecureKeyManagement") }}
-                label={t("Secure Key Management (Optional)")}
-                description={t("Ensures secure storage and handling of private keys and sensitive data.")}
-                error={errors.securitySecureKeyManagement?.message}
-              />
-
-              <FormCheckbox
-                register={{ ...register("securityAntiFarming") }}
-                label={t("Anti-Farming Measures (Optional)")}
-                description={t("Implements progressive unlocking, reward scaling, or other anti-farming strategies.")}
-                error={errors.securityAntiFarming?.message}
-              />
+              {checkboxList.map(checkbox => (
+                <FormCheckbox
+                  key={checkbox.name}
+                  name={checkbox.name}
+                  label={checkbox.label}
+                  description={checkbox.description}
+                  control={control}
+                  error={errors[checkbox.name]?.message}
+                />
+              ))}
             </VStack>
           </Card.Root>
         </VStack>

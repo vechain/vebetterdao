@@ -143,7 +143,9 @@ export const CreateEditAppForm = ({
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="lg">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
+        <Heading size="3xl" fontWeight="bold">
+          {isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}
+        </Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} w="full">

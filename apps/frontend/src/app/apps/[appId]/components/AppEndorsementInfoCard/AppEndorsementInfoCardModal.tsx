@@ -119,7 +119,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               variant="subtle"
               bg="info-bg"
               rounded={"16px"}
-              p={[0, 0, 4]}
+              p={4}
               gap={4}
               w={"full"}
               height={["auto", "auto", "40vh"]}
@@ -205,7 +205,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
           <Card.Root
             variant="subtle"
             flex={1}
-            p={[0, 0, 4]}
+            p={4}
             rounded={"16px"}
             overflowY="auto"
             minHeight={["auto", "auto", "50vh"]}

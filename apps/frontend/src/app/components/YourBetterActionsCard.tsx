@@ -37,7 +37,9 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
         <VStack gap={4} align="stretch">
           <VStack gap={2} align="stretch">
             <VStack w="full" align={"flex-start"}>
-              <Heading size="md">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
+              <Heading size="xl" fontWeight="bold">
+                {isConnectedUser ? t("Your better actions") : t("Better actions")}
+              </Heading>
             </VStack>
             {isConnectedUser && (
               <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
