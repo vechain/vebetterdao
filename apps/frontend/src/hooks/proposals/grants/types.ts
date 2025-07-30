@@ -1,5 +1,10 @@
 import { ProposalState } from "@/api"
 
+export enum ProposalType {
+  Standard,
+  Grant,
+}
+
 export type PhaseInfo = {
   startAt: string
   endAt: string
@@ -18,8 +23,7 @@ export type ProposalInteractions = {
   [key in ProposalState]?: CommunityInteraction[]
 }
 
-export type Proposal = {
-  id: string
+export type ProposalEnriched = Proposal & {
   title: string
   description: string
   b3tr: string
@@ -34,4 +38,18 @@ export type Proposal = {
     [ProposalState.Active]: PhaseInfo
   }
   // communityInteractions: ProposalInteractions
+}
+
+export type Proposal = {
+  id: string
+  type: ProposalType
+  ipfsDescription: string
+  grantAmount?: BigNumber | undefined
+  votingRoundId: string
+  depositThreshold: string
+  proposerAddress: string
+  calldatas: readonly `0x${string}`[]
+  targets: readonly string[]
+  createdAt: number
+  createdAtBlock: number
 }

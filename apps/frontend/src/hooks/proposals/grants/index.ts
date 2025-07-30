@@ -1,5 +1,1 @@
 export * from "./useCreateGrantProposal"
-export * from "./useGrantProposalEvents"
-export * from "./useGrantProposals"
-export * from "./useGrantProposalStates"
-export * from "./useGrantProposalDetails"
