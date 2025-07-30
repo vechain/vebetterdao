@@ -17,7 +17,7 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
   }
 
   // Check dimensions
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const img = new Image()
     const objectUrl = URL.createObjectURL(file)
 
@@ -49,10 +49,7 @@ export const validateImage = async (file: File, type: keyof typeof IMAGE_REQUIRE
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl)
-      resolve({
-        isValid: false,
-        error: "Invalid image file",
-      })
+      reject(new Error("Invalid image file"))
     }
 
     img.src = objectUrl
