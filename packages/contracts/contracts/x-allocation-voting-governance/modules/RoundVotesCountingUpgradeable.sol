@@ -76,10 +76,7 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
   /// @dev Error thrown when trying to vote for the same app multiple times in one transaction
   error DuplicateAppVote();
-
-  //@notice emitted when a voter votes with deposits voting power
-  event VotedWithDepositsVotingPower(address voter, uint256 voterAvailableVotesWithDeposit, uint256 voterAvailableVotes);
-
+  
   /**
    * @dev Initializes the contract
    */
@@ -228,10 +225,6 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   function _getVotingPower(address voter, uint256 roundStart) internal virtual returns (uint256) {
     uint256 voterAvailableVotesWithDeposit = getDepositVotingPower(voter, roundStart);
     uint256 voterAvailableVotes = getVotes(voter, roundStart) + voterAvailableVotesWithDeposit;
-
-    if (voterAvailableVotesWithDeposit > 0) {
-      emit VotedWithDepositsVotingPower(voter, voterAvailableVotesWithDeposit, voterAvailableVotes);
-    }
 
     return voterAvailableVotes;
   }

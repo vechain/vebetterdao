@@ -989,10 +989,11 @@ export async function deployAll(config: ContractsConfig) {
 
   // Deploy GrantsManager
   const grantsManager = (await deployProxy("GrantsManager", [
-    await governor.getAddress(),
-    await treasury.getAddress(),
-    TEMP_ADMIN,
-    await b3tr.getAddress(),
+    await governor.getAddress(), // governor address
+    await treasury.getAddress(), // treasury address
+    TEMP_ADMIN, // admin
+    await b3tr.getAddress(), // b3tr address
+    2, // minimum milestone count
   ])) as GrantsManager
 
   const date = new Date(performance.now() - start)

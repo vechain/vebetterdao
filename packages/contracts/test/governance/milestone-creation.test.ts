@@ -90,10 +90,23 @@ describe.only("Governance - Milestone Creation", function () {
     governorProposalLogicInterface = GovernorProposalLogic__factory.createInterface()
   })
 
-  describe("Milestone contract setup and creation", function () {
+  describe.only("Milestone contract setup and creation", function () {
     it("Should set the minimum milestone count", async function () {
       const minimumMilestoneCount = await grantsManager.getMinimumMilestoneCount()
       expect(minimumMilestoneCount).to.equal(2) // MINIMUM_MILESTONE_COUNT = 2
+    })
+
+    it("Should have the correct governor role setup", async function () {
+      const governorProxyAddress = await governor.getAddress()
+
+      // Check if the governor proxy has the GOVERNANCE_ROLE
+      const GOVERNANCE_ROLE = await grantsManager.GOVERNANCE_ROLE()
+      const hasRole = await grantsManager.hasRole(GOVERNANCE_ROLE, governorProxyAddress)
+      ;(expect(hasRole).to.be.true, "Governor proxy should have GOVERNANCE_ROLE")
+
+      // Verify that the governor is correctly set in the GrantsManager
+      const storedGovernor = await grantsManager.getGovernorContract()
+      expect(storedGovernor).to.equal(governorProxyAddress, "GrantsManager should have the correct governor address")
     })
 
     it("Should not create the proposal if the number of milestones is less than the minimum milestone accepted", async function () {
@@ -356,6 +369,22 @@ describe.only("Governance - Milestone Creation", function () {
         milestonesDetailsMetadataURI,
       )
     })
+
+    it.only("Should not be able to call createMilestone if it's not the governor", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+
+      await expect(
+        grantsManager
+          .connect(owner)
+          .createMilestones(description, milestonesDetailsMetadataURI, 0, owner.address, [], {}),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+    })
   })
 
   describe("Milestone execution", function () {
@@ -419,7 +448,7 @@ describe.only("Governance - Milestone Creation", function () {
       expect(milestone.status).to.equal(0)
     })
 
-    it("Once the proposal is executed, the milestone can be validated by the admin or the grantsManager", async () => {
+    it("Once the proposal is executed, the milestone can be validated by the GRANTS_APPROVER_ROLE or the governor", async () => {
       const description = "My new project"
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
@@ -439,6 +468,15 @@ describe.only("Governance - Milestone Creation", function () {
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
 
+      // try to approve without having the GRANTS_APPROVER_ROLE
+      await expect(grantsManager.connect(owner).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await grantsManager.connect(owner).approveMilestones(proposalId, 0)
       const milestonseRegistered = await grantsManager.getMilestone(proposalId, 0) // the first one should be validated
       expect(milestonseRegistered.status).to.equal(1) // Validated
@@ -478,6 +516,8 @@ describe.only("Governance - Milestone Creation", function () {
       const milestone = await grantsManager.getMilestone(proposalId, 0)
       expect(milestone.status).to.equal(0) // Pending
 
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await expect(grantsManager.connect(owner).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -513,6 +553,8 @@ describe.only("Governance - Milestone Creation", function () {
         description,
       )
 
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await expect(grantsManager.connect(voter).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -545,6 +587,8 @@ describe.only("Governance - Milestone Creation", function () {
       const balanceBeforeClaiming = await b3tr.balanceOf(proposer.address)
 
       // try to approve with someone else than the governor roles
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await expect(grantsManager.connect(proposer).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -559,6 +603,8 @@ describe.only("Governance - Milestone Creation", function () {
         "MilestoneNotApprovedByAdmin",
       )
 
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       // try to approve the 2nd milestone before approving the first one
       await expect(grantsManager.connect(owner).approveMilestones(proposalId, 1)).to.be.revertedWithCustomError(
         {
@@ -732,8 +778,8 @@ describe.only("Governance - Milestone Creation", function () {
     })
   })
 
-  describe.only("Milestone deposit", function () {
-    it.only("Proposer should be able to deposit funds for its own proposal", async function () {
+  describe("Milestone deposit", function () {
+    it("Proposer should be able to deposit funds for its own proposal", async function () {
       // proposer should be able to deposit funds for a milestone and consider in the totalAmount of the milestone
       const description = "My new project"
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later s

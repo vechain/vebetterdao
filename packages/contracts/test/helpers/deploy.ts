@@ -973,10 +973,11 @@ export const getOrDeployContractInstances = async ({
   // Set the TEMP governor address before deploying the governor
   const TEMP_GOVERNOR_ADDRESS = owner.address
   const grantsManager = (await deployProxy("GrantsManager", [
-    TEMP_GOVERNOR_ADDRESS,
-    await treasury.getAddress(),
-    owner.address,
-    await b3tr.getAddress(),
+    TEMP_GOVERNOR_ADDRESS, // governor address
+    await treasury.getAddress(), // treasury address
+    owner.address, // admin
+    await b3tr.getAddress(), // b3tr address
+    2, // minimum milestone count
   ])) as GrantsManager
 
   const governor = (await deployAndUpgrade(
@@ -1210,6 +1211,8 @@ export const getOrDeployContractInstances = async ({
 
   // Set up the GrantsManager
   await grantsManager.connect(owner).setGovernorContract(await governor.getAddress())
+  await grantsManager.connect(owner).grantRole(await grantsManager.GOVERNANCE_ROLE(), await governor.getAddress()) // prev initialized with (TEMP_GOVERNOR_ADDRESS= owner.address)
+  await grantsManager.connect(owner).grantRole(await grantsManager.DEFAULT_ADMIN_ROLE(), owner.address)
 
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
