@@ -33,8 +33,7 @@ export const APP_CATEGORIES = [
 ]
 
 // Track deprecated categories that should not count towards the category limit if present in metadata
-export const DEPRECATED_CATEGORIES = ["social-community-activism", "carbon-footprint"]
-export const DEPRECATED_IDS = ["carbon-footprint"]
+export const DEPRECATED_IDS = ["social-community-activism", "carbon-footprint"]
 
 // SORTING
 export type SortOption = "newest" | "rewards" | "alphabetical" | "default"

@@ -22,7 +22,7 @@ import { UseFormReturn } from "react-hook-form"
 import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 import { EditAppForm } from "../../EditAppPageContent"
-import { APP_CATEGORIES, DEPRECATED_CATEGORIES, DEPRECATED_IDS, MAX_CATEGORIES } from "@/types/appDetails"
+import { APP_CATEGORIES, DEPRECATED_IDS, MAX_CATEGORIES } from "@/types/appDetails"
 
 type EditAppCategoriesProps = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -44,7 +44,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   console.log("selectedCategories within the metadata", selectedCategories)
 
   // Count how many deprecated categories the app has in its metadata
-  const deprecatedCategoriesCount = selectedCategories.filter(cat => DEPRECATED_CATEGORIES.includes(cat)).length
+  const deprecatedCategoriesCount = selectedCategories.filter(cat => DEPRECATED_IDS.includes(cat)).length
 
   // Adjust max categories based on deprecated categories
   const maxAllowedCategories = MAX_CATEGORIES + deprecatedCategoriesCount
