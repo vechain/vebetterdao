@@ -31,7 +31,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
     t("Complete 3 sustainable actions before the snapshot."),
     t("Swap B3TR for VOT3 tokens so you’re ready to vote."),
     t("Vote in an allocation or proposal round."),
-    t("Mint your free GM Moon NFT after voting."),
+    t("Mint your free GM Earth NFT after voting."),
   ] as string[]
 
   const handleClose = useCallback(() => {
@@ -52,7 +52,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
         <ModalBody gap={[0, 4]} pt={0}>
           <Text fontSize={["16px"]}>
             {t(
-              "A GM Moon NFT is your entry pass into DAO governance and rewards. It gives you access to extra features, and you can later upgrade it to boost your rewards with multipliers.",
+              "A GM Earth NFT is your entry pass into DAO governance and rewards. It gives you access to extra features, and you can later upgrade it to boost your rewards with multipliers.",
             )}
           </Text>
           <br />
