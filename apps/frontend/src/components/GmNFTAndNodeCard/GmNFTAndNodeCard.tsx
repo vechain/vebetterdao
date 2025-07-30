@@ -100,7 +100,7 @@ export const GmNFTAndNodeCard = () => {
               justify="center">
               {userGMs && userGMs?.length > 0 ? (
                 <GmCard
-                  subtitle={t("NFT active")}
+                  subtitle={t("Galaxy Member")}
                   title={selectedGM?.metadata?.name || "name"}
                   footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
                   images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
