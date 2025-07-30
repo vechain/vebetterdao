@@ -5,8 +5,8 @@ import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsProposalCard } from "./GrantsProposalCard"
-import { useGrantProposals } from "@/hooks"
-import { Proposal } from "@/hooks/proposals/grants/types"
+import { useProposalEnriched } from "@/hooks/proposals/common"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -18,7 +18,7 @@ enum GrantsStep {
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true })
-  const { proposals, totalGrantAmount } = useGrantProposals()
+  const { proposals, totalGrantAmount } = useProposalEnriched()
 
   const stepsArray = useMemo(
     () => [
@@ -101,7 +101,7 @@ export const GrantsPageContent = () => {
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
           {proposals &&
-            proposals.map((proposal: Proposal) => <GrantsProposalCard key={proposal.id} proposal={proposal} />)}
+            proposals.map((proposal: ProposalEnriched) => <GrantsProposalCard key={proposal.id} proposal={proposal} />)}
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
           <Card w="full" variant="ghost" p={8}></Card>
