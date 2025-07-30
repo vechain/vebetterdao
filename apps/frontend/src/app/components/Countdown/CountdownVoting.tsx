@@ -28,7 +28,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
     // For accuracy in the UI, we round to the nearest minute
     const endTime = allocationRound?.voteEndTimestamp?.toDate()
     return endTime
-  }, [allocationRound?.voteEnd, allocationRound?.state, currentRoundId])
+  }, [allocationRound?.voteEndTimestamp, allocationRound?.state])
 
   const countdownKey = `countdown-${allocationRound?.roundId ?? "initial"}`
 

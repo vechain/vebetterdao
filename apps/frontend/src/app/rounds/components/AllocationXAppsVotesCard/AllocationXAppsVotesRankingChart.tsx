@@ -43,9 +43,9 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: { roundId: string 
 
   return (
     <VStack spacing={8} align={"flex-start"} w="full">
-      {sortedData.map((app, index) => (
+      {sortedData.map(app => (
         <AppVotesHorizontalChart
-          key={`app-votes-chart-${roundId}-${app.app}-${index}`}
+          key={`app-votes-chart-${roundId}-${app.app}`}
           data={app}
           roundId={roundId}
           showReceived={true}

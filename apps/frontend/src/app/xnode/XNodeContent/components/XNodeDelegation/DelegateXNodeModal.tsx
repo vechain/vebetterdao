@@ -183,7 +183,6 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
       handleDelegate,
       goToPrevious,
       account?.address,
-      delegateeAddress,
     ],
   )
 

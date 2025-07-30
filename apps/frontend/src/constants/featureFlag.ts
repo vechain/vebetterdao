@@ -3,12 +3,13 @@ export enum FeatureFlag {
   VECHAIN_KIT = "vechainKit",
 }
 
-type FeatureFlagConfig = {
-  [key in FeatureFlag]: {
+type FeatureFlagConfig = Record<
+  FeatureFlag,
+  {
     enabled: boolean
     comingSoonText?: string
   }
-}
+>
 
 export const featureFlags: FeatureFlagConfig = {
   [FeatureFlag.GALAXY_MEMBER_UPGRADES]: {
