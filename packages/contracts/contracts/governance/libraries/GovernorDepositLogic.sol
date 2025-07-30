@@ -102,7 +102,10 @@ library GovernorDepositLogic {
     }
 
     self.deposits[proposalId][depositer] = 0;
-    self.depositsVotingPower[depositer].push(SafeCast.toUint48(block.timestamp), 0); // remove the deposit record to not count as the voting power
+
+    uint208 currentVotes = self.depositsVotingPower[depositer].upperLookupRecent(SafeCast.toUint48(block.timestamp));
+    uint208 newVotes = SafeCast.toUint208(currentVotes - amount); 
+    self.depositsVotingPower[depositer].push(SafeCast.toUint48(block.timestamp), newVotes);
 
     require(self.vot3.transfer(depositer, amount), "B3TRGovernor: transfer failed");
 
@@ -126,7 +129,9 @@ library GovernorDepositLogic {
     require(self.vot3.transferFrom(depositor, address(this), amount), "B3TRGovernor: transfer failed");
 
     self.deposits[proposalId][depositor] += amount;
-    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), SafeCast.toUint208(amount));
+
+    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(SafeCast.toUint48(block.timestamp));
+    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), currentVotes + SafeCast.toUint208(amount));
 
     emit ProposalDeposit(depositor, proposalId, amount);
   }
