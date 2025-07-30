@@ -47,6 +47,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
     <HStack
       p={2}
       borderRadius={"16px"}
+      border="none"
       borderBottom={"1px solid #EFEFEF"}
       w={"full"}
       alignItems={"center"}

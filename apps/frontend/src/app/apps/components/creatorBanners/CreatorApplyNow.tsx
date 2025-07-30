@@ -76,12 +76,12 @@ export const CreatorApplyNow = () => {
                 px={2}
                 py={isMobile ? 4 : 2}>
                 <Button
+                  variant="primarySubtle"
                   alignSelf="center"
                   fontSize={{ base: "14px" }}
-                  variant="secondary"
+                  fontWeight={600}
                   borderRadius="full"
                   onClick={onOpen}
-                  _hover={{ opacity: "0.6", transition: "all 0.3s" }}
                   w={{ base: "80%", md: "auto" }}>
                   <UilPlus />
                   {t("Apply now")}

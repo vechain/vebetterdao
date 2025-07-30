@@ -29,7 +29,6 @@ import { APP_CATEGORIES, sortOptions, FILTER_ACTIVE_APPS } from "@/types/appDeta
 
 import { useAppsSorting, useAppsSearch, useAppsFiltering } from "../hooks"
 import { usePagination } from "@/hooks"
-import { useColorMode } from "@/components/ui/color-mode"
 
 type Props = {
   currentActiveApps: XApp[]
@@ -51,14 +50,9 @@ export const AllApps = ({
   headingComponent,
 }: Props) => {
   const { t } = useTranslation()
-  const { colorMode } = useColorMode()
   const { data: nodes } = useGetUserNodes()
   const { data: endorsedApps } = useNodesEndorsedApps(nodes?.allNodes?.map(node => node.nodeId) ?? [])
   const isEndorsingApp = endorsedApps?.length && endorsedApps?.length > 0
-
-  // Color mode responsive colors
-  const searchIconColor = colorMode === "light" ? "#3B3B3B" : "#E4E4E4"
-  const statusHoverBg = colorMode === "light" ? "blackAlpha.800" : "whiteAlpha.800"
 
   const { sortOption, sortedApps, appWithStatusCounts, isSorting, onSortChange } = useAppsSorting(
     currentActiveApps,
@@ -230,16 +224,10 @@ export const AllApps = ({
                 {statusFilterOptions.map(status => (
                   <Button
                     key={status}
+                    rounded="full"
+                    variant={statusFilter === status ? "solid" : "outline"}
                     size="sm"
                     onClick={() => setStatusFilter(status)}
-                    bg={statusFilter === status ? "contrast-fg-on-muted" : "contrast-bg-muted"}
-                    color={statusFilter === status ? "contrast-fg-on-strong" : "contrast-fg-on-muted"}
-                    borderRadius="16px"
-                    border="1px solid"
-                    borderColor={statusFilter === status ? "contrast-fg-on-muted" : "hover-contrast-bg"}
-                    _hover={{
-                      bg: statusFilter === status ? statusHoverBg : "hover-contrast-bg",
-                    }}
                     px={3}
                     py={1}
                     fontWeight="medium">
@@ -264,7 +252,8 @@ export const AllApps = ({
                   <Checkbox.Root
                     key={category.id}
                     checked={selectedCategories.includes(category.id)}
-                    onCheckedChange={() => handleCategoryChange(category.id)}>
+                    onCheckedChange={() => handleCategoryChange(category.id)}
+                    colorPalette="blue">
                     <Checkbox.HiddenInput />
                     <Checkbox.Control />
                     <Checkbox.Label fontWeight={selectedCategories.includes(category.id) ? "semibold" : "normal"}>
@@ -285,9 +274,7 @@ export const AllApps = ({
       <HStack w="full" mt={0}>
         {headingComponent && <Box>{headingComponent}</Box>}
         <HStack gap={4} ml={headingComponent ? "auto" : 0}>
-          <InputGroup
-            w={headingComponent ? "300px" : "full"}
-            startElement={<UilSearch pointerEvents="none" color={searchIconColor} />}>
+          <InputGroup w={headingComponent ? "300px" : "full"} startElement={<UilSearch pointerEvents="none" />}>
             <Input
               variant="outline"
               rounded="full"

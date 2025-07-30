@@ -142,7 +142,7 @@ export const Leaderboard = () => {
                 size={"lg"}
                 aria-label="Next round"
                 variant="ghost"
-                colorPalette="primary"
+                color="primary"
                 disabled={isFirstRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
                 <Icon as={FaAngleLeft} boxSize={5} />
@@ -159,7 +159,7 @@ export const Leaderboard = () => {
                 size={"lg"}
                 aria-label="Next round"
                 variant="ghost"
-                colorPalette="primary"
+                color="primary"
                 disabled={isLastRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
                 <Icon as={FaAngleRight} boxSize={5} />

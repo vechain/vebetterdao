@@ -7,7 +7,7 @@ import { stepsSlotRecipe } from "./steps"
 import { buttonRecipe } from "./button"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
-import { headingRecipe } from "./heading"
+// import { headingRecipe } from "./heading"
 
 const config = defineConfig({
   preflight: true,
@@ -23,7 +23,7 @@ const config = defineConfig({
 
   theme: {
     recipes: {
-      heading: headingRecipe,
+      // heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
     },
@@ -51,10 +51,34 @@ const config = defineConfig({
       },
     },
 
+    tokens: {
+      colors: {
+        primary: {
+          DEFAULT: { value: "#3237FF" },
+          100: { value: "#98A3FF" },
+          200: { value: "#7F8CFF" },
+          300: { value: "#6575FF" },
+          400: { value: "#4C5EFF" },
+          500: { value: "#3237FF" },
+          600: { value: "#373EDF" },
+          700: { value: "#2428B6" },
+          800: { value: "#001665" },
+          900: { value: "#000B3C" },
+        },
+      },
+    },
+
     semanticTokens: {
       fonts: {
-        body: { value: "var(--font-inter)" },
-        heading: { value: "var(--font-instrument-sans)" },
+        // body: { value: "var(--font-inter)" },
+        // heading: { value: "var(--font-instrument-sans)" },
+
+        body: {
+          value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
+        },
+        heading: {
+          value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
+        },
       },
 
       colors: {
@@ -74,19 +98,19 @@ const config = defineConfig({
           base: { value: "#004CFC" },
         },
 
-        // Brand Colors
-        primary: {
-          _dark: { value: "#277CDF" },
-          base: { value: "#004CFC" },
-        },
-        secondary: {
-          _dark: { value: "#B4EA82" },
-          base: { value: "#B1F16C" },
-        },
-        tertiary: {
-          _dark: { value: "#FFFFFF" },
-          base: { value: "#000000" },
-        },
+        // // Brand Colors
+        // primary: {
+        //   _dark: { value: "#277CDF" },
+        //   base: { value: "#004CFC" },
+        // },
+        // secondary: {
+        //   _dark: { value: "#B4EA82" },
+        //   base: { value: "#B1F16C" },
+        // },
+        // tertiary: {
+        //   _dark: { value: "#FFFFFF" },
+        //   base: { value: "#000000" },
+        // },
         "secondary-strong": {
           _dark: { value: "#4F5945" },
           base: { value: "#6DCB09" },

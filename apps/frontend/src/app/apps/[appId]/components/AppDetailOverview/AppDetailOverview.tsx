@@ -105,7 +105,7 @@ export const AppDetailOverview = ({
                     <AppDetailSocials socialUrls={appMetadata?.social_urls || []} />
                   </HStack>
                   <Skeleton loading={appMetadataLoading || !appMetadata}>
-                    <Text fontSize={"md"}>
+                    <Text textStyle={"md"}>
                       {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                     </Text>
                   </Skeleton>

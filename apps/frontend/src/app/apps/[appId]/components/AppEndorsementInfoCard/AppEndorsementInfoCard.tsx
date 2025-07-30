@@ -179,15 +179,15 @@ export const AppEndorsementInfoCard = ({
     <>
       <Card.Root w={"full"} variant="baseWithBorder">
         <Card.Header>
-          <HStack justifyContent="space-between" alignItems="flex-end" w="full">
-            <Heading size="md">{t("Endorsement")}</Heading>
+          <HStack justifyContent="space-between" alignItems="center" w="full">
+            <Heading size="xl">{t("Endorsement")}</Heading>
             <Link fontSize="16px" fontWeight={600} color="#004CFC" onClick={onOpenEndorsementInfoModal}>
               {t("History")}
             </Link>
           </HStack>
         </Card.Header>
 
-        <Card.Body py={0}>
+        <Card.Body>
           <Stack gap={4} w="full">
             <Skeleton loading={isEndorsementStatusLoading}>
               <EndorsementStatusCallout endorsementStatus={endorsementStatus}></EndorsementStatusCallout>
@@ -206,13 +206,15 @@ export const AppEndorsementInfoCard = ({
             </Stack>
           </Stack>
         </Card.Body>
-        <Card.Footer>
-          <Skeleton loading={isUserRolesDataLoading || isEndorsementStatusLoading || isUserNodesLoading} w="full">
-            <VStack gap={2} w={"full"}>
-              {actionButtons}
-            </VStack>
-          </Skeleton>
-        </Card.Footer>
+        {actionButtons.length > 0 && (
+          <Card.Footer>
+            <Skeleton loading={isUserRolesDataLoading || isEndorsementStatusLoading || isUserNodesLoading} w="full">
+              <VStack gap={2} w={"full"}>
+                {actionButtons}
+              </VStack>
+            </Skeleton>
+          </Card.Footer>
+        )}
       </Card.Root>
 
       <EndorseAppModal xApp={app} isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} />

@@ -40,9 +40,9 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       <Card.Header>
         <VStack w="full" justify={"flex-start"} align={"start"}>
           <HStack w="full" justify={"space-between"}>
-            <Heading size="md">{t("Explore Apps")}</Heading>
+            <Heading size="xl">{t("Explore Apps")}</Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Link asChild variant="plain" color="primary">
+              <Link asChild variant="plain" color="primary" fontWeight="semibold">
                 <NextLink href="/apps">
                   {t("See all")}
                   <FiArrowUpRight />
