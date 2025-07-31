@@ -723,7 +723,7 @@
   "Select the Moderators and Creators NFT for the app. You can choose up to 3 members for each role or they can share both.": "Select the Moderators and Creators NFT for the app. You can choose up to 3 members for each role or they can share both.",
   "Description": "Description",
   "Logo": "Logo",
-  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio.": "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio.",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.",
   "Banner": "Banner",
   "Recommended size: 1240×460. Keep key content centered for consistent display.": "Recommended size: 1240×460. Keep key content centered for consistent display.",
   "Recommended size: 686×515. Maintain a 4:3 aspect ratio.": "Recommended size: 686×515. Maintain a 4:3 aspect ratio.",

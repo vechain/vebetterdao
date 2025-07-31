@@ -1,6 +1,7 @@
 export const VE_WOLRD_SCALING_FACTOR = 2.7
 export const AVG_PHONE_WIDTH = 400
-export const LOGO_UPLOAD_GUIDELINES = "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio."
+export const LOGO_UPLOAD_GUIDELINES =
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background."
 export const BANNER_UPLOAD_GUIDELINES = "Recommended size: 1240×460. Keep key content centered for consistent display."
 export const VEWORLD_BANNER_UPLOAD_GUIDELINES =
   "To be displayed on the VeWorld mobile wallet. Recommended size: 800×400. Maintain a 2:1 aspect ratio."
