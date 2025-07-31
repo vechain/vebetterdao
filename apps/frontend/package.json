@@ -22,8 +22,7 @@
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
-    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts",
-    "check-unused-translations": "node ./scripts/check-unused-translations.js"
+    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
