@@ -1,4 +1,4 @@
-import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey } from "@/api"
+import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey, getUserGMsQueryKey } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
@@ -42,6 +42,7 @@ export const useMintNFT = ({ onFailure, onSuccess, transactionModalCustomUI }: u
       getSelectedTokenIdQueryKey(account?.address),
       getTokenIdByAccountQueryKey(account?.address ?? "", 0),
       getGMbalanceQueryKey(account?.address ?? ""),
+      getUserGMsQueryKey(account?.address ?? ""),
     ],
     [account?.address],
   )
