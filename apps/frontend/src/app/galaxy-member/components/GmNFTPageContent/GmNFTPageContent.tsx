@@ -63,7 +63,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         {userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
-          <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"}>
+          <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
             <Card.Header p="1.25rem" pb="0">
               <Heading fontSize="lg" lineHeight={1}>
                 {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
@@ -88,7 +88,13 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                       p="16px"
                       rounded="8px">
                       <Card.Header p="0">
-                        <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
+                        <Image
+                          src={node?.image}
+                          // fallbackSrc="/assets/icons/not-found-image-fallback.svg"
+                          alt={node?.name}
+                          boxSize="62px"
+                          rounded="8px"
+                        />
                       </Card.Header>
 
                       <Card.Body p="0" gap="8px">
@@ -119,29 +125,33 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                           </Button>
                         ) : nodesAttachedToGMs?.[node.nodeId] ? (
                           <Tooltip content={t("This node is already attached to another GM")}>
-                            <Button
-                              disabled={!!nodesAttachedToGMs?.[node.nodeId]}
-                              variant="whiteAction"
-                              size={isAbove800 ? "sm" : "xs"}
-                              onClick={() => {
-                                setSelectedNode(node)
-                                onAttachGMToXNodeModalOpen()
-                              }}>
-                              {t("Attached")}
-                            </Button>
+                            <span>
+                              <Button
+                                disabled={!!nodesAttachedToGMs?.[node.nodeId]}
+                                variant="whiteAction"
+                                size={isAbove800 ? "sm" : "xs"}
+                                onClick={() => {
+                                  setSelectedNode(node)
+                                  onAttachGMToXNodeModalOpen()
+                                }}>
+                                {t("Attached")}
+                              </Button>
+                            </span>
                           </Tooltip>
                         ) : (
                           <Tooltip disabled={!attachedNode} content={t("Only one node can be attached to a GM")}>
-                            <Button
-                              disabled={!!attachedNode}
-                              variant="whiteAction"
-                              size={isAbove800 ? "sm" : "xs"}
-                              onClick={() => {
-                                setSelectedNode(node)
-                                onAttachGMToXNodeModalOpen()
-                              }}>
-                              {t("Attach")}
-                            </Button>
+                            <span>
+                              <Button
+                                disabled={!!attachedNode}
+                                variant="whiteAction"
+                                size={isAbove800 ? "sm" : "xs"}
+                                onClick={() => {
+                                  setSelectedNode(node)
+                                  onAttachGMToXNodeModalOpen()
+                                }}>
+                                {t("Attach")}
+                              </Button>
+                            </span>
                           </Tooltip>
                         )}
                       </Card.Footer>

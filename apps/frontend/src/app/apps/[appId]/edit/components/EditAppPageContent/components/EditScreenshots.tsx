@@ -7,6 +7,8 @@ import { EditAppForm } from ".."
 import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { Reorder, useDragControls } from "framer-motion"
+import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "@/constants"
+import { validateImage } from "@/utils"
 import { toaster } from "@/components/ui/toaster"
 
 type Props = {
@@ -16,20 +18,37 @@ type Props = {
 export const EditScreenshots = ({ form }: Props) => {
   const { t } = useTranslation()
   const inputFile = useRef<HTMLInputElement>(null)
+  const screenshots = form.watch("screenshots")
+  const [loadingScreenshot, setLoadingScreenshot] = useState(false)
+  const [invalidFormat, setInvalidFormat] = useState(false)
+  const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
+  const accept = IMAGE_REQUIREMENTS.screenshot.mimeType
+
   const handleUpload = useCallback(() => {
     inputFile.current?.click()
   }, [])
-  const screenshots = form.watch("screenshots")
-  const [loadingScreenshot, setLoadingScreenshot] = useState(false)
 
   const handleImageUpload = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       try {
         setLoadingScreenshot(true)
         const files = Array.from(e.target.files || [])
+
+        // Validate each file
+        for (const file of files) {
+          const validation = await validateImage(file, "screenshot")
+          setInvalidFormat(!validation.isValid)
+          if (!validation.isValid) {
+            setInvalidMessage(validation.error ?? "Invalid image format")
+            setLoadingScreenshot(false)
+            return
+          }
+        }
+
         const compressedFiles = await imageListCompression(files)
         const base64Files = await Promise.all(compressedFiles.map(blobToBase64))
         form.setValue("screenshots", [...screenshots, ...base64Files])
+        setInvalidFormat(false)
       } catch (error) {
         toaster.error({
           title: "Error",
@@ -38,6 +57,8 @@ export const EditScreenshots = ({ form }: Props) => {
           closable: true,
         })
         console.error(error)
+        setInvalidFormat(true)
+        setInvalidMessage("Error uploading images")
       } finally {
         setLoadingScreenshot(false)
       }
@@ -55,9 +76,14 @@ export const EditScreenshots = ({ form }: Props) => {
   return (
     <VStack align="stretch" gap={6}>
       <HStack justify={"space-between"} flexWrap={"wrap"}>
-        <Heading fontSize="24px" fontWeight="700">
-          {t("Edit screenshots")}
-        </Heading>
+        <VStack align="flex-start" gap={1}>
+          <Heading fontSize="24px" fontWeight="700">
+            {t("Edit screenshots")}
+          </Heading>
+          <Text fontSize={14} color={invalidFormat ? "red" : "gray"}>
+            {invalidFormat ? invalidMessage : t(SCREENSHOT_UPLOAD_GUIDELINES)}
+          </Text>
+        </VStack>
         <Button variant="primaryAction" onClick={handleUpload} loading={loadingScreenshot}>
           <UilUpload size="16px" />
           {t("Upload")}
@@ -65,7 +91,7 @@ export const EditScreenshots = ({ form }: Props) => {
         <Controller
           name="screenshots"
           render={() => (
-            <Input type="file" ref={inputFile} display="none" multiple accept="image/*" onChange={handleImageUpload} />
+            <Input type="file" ref={inputFile} display="none" multiple accept={accept} onChange={handleImageUpload} />
           )}
           control={form.control}
         />

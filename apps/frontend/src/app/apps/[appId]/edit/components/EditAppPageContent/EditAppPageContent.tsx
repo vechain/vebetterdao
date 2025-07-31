@@ -29,6 +29,7 @@ import { StepModal } from "@/components/StepModal/StepModal"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import Lottie from "react-lottie"
+import { DEPRECATED_IDS } from "@/types/appDetails"
 
 export type EditAppForm = {
   name: string
@@ -85,7 +86,7 @@ export const EditAppPageContent = () => {
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
       ve_world_bannerImage: veWorldBanner,
-      categories: appMetadata?.categories ?? [],
+      categories: (appMetadata?.categories ?? []).filter(id => !DEPRECATED_IDS.includes(id)), // remove the deprecated categories
     },
   })
   const {

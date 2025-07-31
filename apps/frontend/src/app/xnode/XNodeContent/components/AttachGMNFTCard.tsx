@@ -37,7 +37,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
     if (isXNodeDelegator) return
 
     router.push(`/galaxy-member/${attachedGMNFT?.tokenId}`)
-  }, [router, isXNodeDelegator])
+  }, [router, isXNodeDelegator, attachedGMNFT?.tokenId])
 
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()

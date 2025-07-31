@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { BANNER_UPLOAD_GUIDELINES, notFoundImage } from "@/constants"
+import { BANNER_UPLOAD_GUIDELINES, IMAGE_REQUIREMENTS, notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -18,6 +18,7 @@ export const EditAppBanner = ({ form }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const { t } = useTranslation()
 
+  const accept = IMAGE_REQUIREMENTS.banner.mimeType
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
 
   const handleUpload = useCallback(
@@ -58,7 +59,7 @@ export const EditAppBanner = ({ form }: Props) => {
           objectFit={"cover"}
           objectPosition={"center"}
         />
-        <Input type="file" accept="image/*" display={"none"} ref={inputRef} onChange={handleUpload} />
+        <Input type="file" accept={accept} display={"none"} ref={inputRef} onChange={handleUpload} />
         <Flex
           rounded="16px"
           top={0}

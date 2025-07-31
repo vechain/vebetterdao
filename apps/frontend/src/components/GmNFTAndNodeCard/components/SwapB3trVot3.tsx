@@ -106,6 +106,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
           <Button
             disabled={isSwapDisabled}
             onClick={onOpen}
+            mt="auto"
             variant={"whiteAction"}
             rounded={"full"}
             fontWeight={500}

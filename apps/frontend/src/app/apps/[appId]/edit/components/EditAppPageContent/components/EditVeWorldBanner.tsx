@@ -1,7 +1,13 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { VEWORLD_BANNER_UPLOAD_GUIDELINES, AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
+import {
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
+  AVG_PHONE_WIDTH,
+  notFoundImage,
+  VE_WOLRD_SCALING_FACTOR,
+  IMAGE_REQUIREMENTS,
+} from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -19,7 +25,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
   const { t } = useTranslation()
 
   const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
-
+  const accept = IMAGE_REQUIREMENTS.ve_world_banner.mimeType
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
 
   const handleUpload = useCallback(
@@ -56,7 +62,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
           style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
           objectFit="cover"
         />
-        <Input type="file" accept="image/*" display={"none"} ref={inputRef} onChange={handleUpload} />
+        <Input type="file" accept={accept} display={"none"} ref={inputRef} onChange={handleUpload} />
         <Flex
           rounded="12px"
           top={0}
