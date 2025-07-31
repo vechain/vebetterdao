@@ -1,4 +1,4 @@
-import { Button, FormControl, FormErrorMessage, Input } from "@chakra-ui/react"
+import { Button, FormControl, FormErrorMessage, Input, Text } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
 import { UilCheck } from "@iconscout/react-unicons"
 
@@ -21,17 +21,26 @@ export const FormSocialConnectButton = ({
   leftIcon,
   value,
 }: FormSocialConnectButtonProps) => {
+  const isConnected = !!value
+  const backgroundColor = isConnected ? "black" : "white"
+  const color = isConnected ? "white" : "black"
+  const borderColor = isConnected ? "black" : "gray.200"
   return (
     <FormControl isInvalid={!!error}>
       <Button
-        backgroundColor={"black"}
-        color={"white"}
+        backgroundColor={backgroundColor}
+        color={color}
+        border="1px solid"
+        borderColor={borderColor}
         onClick={handleAuth}
-        alignSelf="flex-end"
         borderRadius="md"
-        leftIcon={leftIcon}
-        {...(value && { rightIcon: <UilCheck /> })}>
-        {value || label}
+        w="full"
+        {...(isConnected && { rightIcon: <UilCheck /> })}
+        alignItems="center"
+        justifyContent="center"
+        gap={2}>
+        {leftIcon}
+        <Text isTruncated>{label}</Text>
       </Button>
       <Input type="hidden" {...register} />
       <FormErrorMessage>{error}</FormErrorMessage>
