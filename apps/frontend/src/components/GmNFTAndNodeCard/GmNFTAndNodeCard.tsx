@@ -19,7 +19,6 @@ import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { useMemo } from "react"
 import { useBreakpoints, useGetB3trBalance } from "@/hooks"
 import { useGetUserGMs, useGetUserNodes } from "@/api"
-import { UilPolygon } from "@iconscout/react-unicons"
 import { GmEmptyStateCard } from "./GmEmptyStateCard"
 import { GmActionButton } from "../GmActionButton"
 import { GmCard } from "./GmCard"
@@ -80,7 +79,7 @@ export const GmNFTAndNodeCard = () => {
         direction={isAbove1200 ? "row" : "column-reverse"}>
         <VStack flex="3" align={"stretch"} gap="24px">
           <HStack gap="40px" align={"baseline"} justify={"space-between"}>
-            <Heading fontSize="xl" fontWeight={600}>
+            <Heading fontSize="xl" fontWeight={600} lineHeight={"30px"}>
               {t("Your NFTs")}
             </Heading>
           </HStack>
@@ -123,7 +122,7 @@ export const GmNFTAndNodeCard = () => {
                 />
               ) : (
                 <GmEmptyStateCard
-                  icon={<UilPolygon size={"36px"} color={"#FFFFFF80"} style={{ transform: "rotate(90deg)" }} />}
+                  icon={<Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />}
                   text={t("You have no nodes yet.")}
                   onCardClick={onOpenGetGMAndNodeModal}
                 />

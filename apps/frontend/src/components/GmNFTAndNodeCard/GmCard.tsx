@@ -46,17 +46,18 @@ export const GmCard = ({
         <AvatarGroup
           size="md"
           max={2}
-          spacing={"-1.25rem"}
+          spacing={"-1.5rem"}
           sx={{
             ".chakra-avatar__excess": {
               borderRadius: "8px",
               border: "1px solid #E5EEFF",
-              background: "#FFFFFF26",
+              background: "#6194F5",
               fontSize: "12px",
+              zIndex: 1000,
             },
           }}>
-          {images?.map(image => (
-            <Avatar key={image} name={image} src={image} border="none" borderRadius="8px" />
+          {images?.map((image, index) => (
+            <Avatar key={image} name={image} src={image} border="none" borderRadius="8px" zIndex={100 + index} />
           ))}
         </AvatarGroup>
 

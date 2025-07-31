@@ -12,8 +12,8 @@ import {
   ModalFooter,
   VStack,
   Stack,
+  Image,
 } from "@chakra-ui/react"
-import { UilPolygon } from "@iconscout/react-unicons"
 
 interface UpgradeGMModalProps {
   isOpen: boolean
@@ -35,7 +35,7 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
         <ModalCloseButton />
         <ModalHeader>
           <VStack gap={4} align="flex-start">
-            <UilPolygon size={"80px"} style={{ transform: "rotate(90deg)" }} />
+            <Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />
 
             <Heading fontSize="2xl">{t("Become a node holder")}</Heading>
           </VStack>
