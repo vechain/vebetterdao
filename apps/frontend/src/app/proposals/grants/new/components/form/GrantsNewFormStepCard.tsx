@@ -24,7 +24,7 @@ export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
   const { setData, ...formData } = useGrantProposalFormStore()
 
-  const { handleSubmit, control, register, formState, setValue, watch } = useForm<GrantFormData>({
+  const { handleSubmit, control, register, formState, setValue, getValues, watch } = useForm<GrantFormData>({
     defaultValues: formData,
   })
 
@@ -48,7 +48,17 @@ export const GrantsNewFormStepCard = () => {
     },
     {
       key: GrantFormStep.GRANT_MILESTONES,
-      content: <GrantMilestones register={register} errors={errors} />,
+      content: (
+        <GrantMilestones
+          register={register}
+          setValue={setValue}
+          watch={watch}
+          getValues={getValues}
+          setData={setData}
+          errors={errors}
+          formData={formData}
+        />
+      ),
       title: t("Grant Milestones"),
     },
   ]
@@ -70,6 +80,8 @@ export const GrantsNewFormStepCard = () => {
   }
 
   const handleSaveDraft = () => {
+    //TODO: Move it to a generic useLocalStorage hook
+    //TODO: Add a unique id to the draft proposal by pre computing the hash
     //Get the form data from the store
     //Save in a array of objects in local storage with the key "draft-grant-proposals"
     const draftProposals = JSON.parse(localStorage.getItem("draft-grant-proposals") || "[]")

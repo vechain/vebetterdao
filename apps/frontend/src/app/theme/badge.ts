@@ -76,6 +76,16 @@ export const BadgeStyle: ComponentStyleConfig = {
         color: "#99E0B1",
       },
     },
+    outline: {
+      bg: "transparent",
+      color: "black",
+      border: "1px solid",
+      borderColor: "#D5D5D5", //TODO: Use a variable
+      _dark: {
+        borderColor: "#2D2D2F", //TODO: Use a variable
+        color: "white",
+      },
+    },
   },
 
   defaultProps: {

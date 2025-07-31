@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
+import dayjs from "dayjs"
 
 export type GrantFormStoreState = GrantFormData & {
   setData: (data: Partial<GrantFormStoreState>) => void
@@ -40,7 +41,16 @@ const initialState: GrantFormData = {
   revenueModel: "",
   highLevelRoadmap: "",
   // Milestones
-  milestones: [],
+  milestones: [
+    {
+      description: "",
+      deliverables: "",
+      fundingAmount: "",
+      durationFrom: dayjs().unix(), //TODO: This should be the current date
+      durationTo: dayjs().add(1, "month").unix(), //TODO: This should be the current date + 1 month
+    },
+  ],
+  termsOfService: false,
 }
 
 /**

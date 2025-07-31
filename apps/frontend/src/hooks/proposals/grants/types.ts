@@ -88,10 +88,12 @@ export type GrantFormData = {
   highLevelRoadmap: string
   // Milestones
   milestones: Array<{
-    title: string
     description: string
     deliverables: string
-    timeline: string
-    fundingAmount: string
+    fundingAmount: number
+    durationFrom: number //Unix timestamp in seconds
+    durationTo: number //Unix timestamp in seconds
   }>
+  // Terms of service
+  termsOfService: boolean
 }
