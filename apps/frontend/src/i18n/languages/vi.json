@@ -1756,5 +1756,7 @@
   "Become a node holder": "Trở thành người giữ nút",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "Nhận NFT và bắt đầu nhận phần thưởng. Sau khi bạn bỏ phiếu lần đầu tiên, bạn sẽ nhận được NFT Thành viên Thiên hà - Trái đất miễn phí.",
   "Get NFT and start receiving rewards.": "Nhận NFT và bắt đầu nhận phần thưởng.",
-  "You have no nodes yet.": "Bạn chưa có nút nào."
+  "You have no nodes yet.": "Bạn chưa có nút nào.",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Kích thước đề xuất: 512x512 px. Giữ tỷ lệ khung hình 1:1. Logo phải là một hình vuông đầy đủ và phải có nền.",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Kích thước đề xuất: 686×515. Giữ tỷ lệ khung hình 4:3. Tài sản không nên chứa các logo, thương hiệu, văn bản, hoặc bất kỳ đối tượng/phần tử nào không liên quan đến mục đích của ứng dụng."
 }

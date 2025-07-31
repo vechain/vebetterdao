@@ -1756,5 +1756,7 @@
   "Become a node holder": "Bir düğüm sahibi olun",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "NFT alın ve ödüller kazanmaya başlayın. İlk kez oy kullandıktan sonra ücretsiz Galaxy Member - Earth NFT kazanacaksınız.",
   "Get NFT and start receiving rewards.": "NFT alın ve ödüller kazanmaya başlayın.",
-  "You have no nodes yet.": "Henüz düğümünüz yok."
+  "You have no nodes yet.": "Henüz düğümünüz yok.",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Önerilen boyut: 512x512 piksel. 1:1 en-boy oranını koruyun. Logo, tam kare bir görüntü olmalı ve bir arka plana sahip olmalıdır.",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Önerilen boyut: 686×515. 4:3 en-boy oranını koruyun. Varlıklar, uygulamanın amacına ve uygun olmayan logolar, markalar, metin veya diğer nesneler/unsurlar içermemelidir."
 }

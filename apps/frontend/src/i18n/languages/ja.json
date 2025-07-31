@@ -1756,5 +1756,7 @@
   "Become a node holder": "ノードホルダーになる",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "NFTを入手して報酬を受け取り始めましょう。最初に投票すると、無料でGalaxy Member-Earth NFTを受け取ります。",
   "Get NFT and start receiving rewards.": "NFTを入手して報酬を受け取り始めましょう。",
-  "You have no nodes yet.": "まだノードがありません。"
+  "You have no nodes yet.": "まだノードがありません。",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "推奨サイズ: 512x512 px。1:1 のアスペクト比を維持してください。ロゴは完全な正方形の画像で、背景が必要です。",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "推奨サイズ: 686×515。4:3 のアスペクト比を維持してください。アセットには、アプリの目的に関係ないロゴ、ブランド、テキスト、またはオブジェクト/要素を含めないでください。"
 }

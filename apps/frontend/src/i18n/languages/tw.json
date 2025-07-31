@@ -1756,5 +1756,7 @@
   "Become a node holder": "成為節點持有者",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "獲得NFT並開始獲取獎勵。首次投票後，您將獲得免費的Galaxy Member - 地球NFT。",
   "Get NFT and start receiving rewards.": "獲得NFT並開始獲取獎勵。",
-  "You have no nodes yet.": "您還沒有節點。"
+  "You have no nodes yet.": "您還沒有節點。",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "建議大小：512x512 像素。保持 1:1 的縱橫比。標誌必須是完整的正方形圖像，並且必須有背景。",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "建議大小：686×515。維持 4:3 的縱橫比。資產不應包含標誌、品牌、文字或與應用程序目的無關的任何物體/元素。"
 }

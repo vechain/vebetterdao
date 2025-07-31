@@ -1756,5 +1756,7 @@
   "Become a node holder": "Diventa un titolare di nodo",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "Ottieni NFT e inizia a ricevere ricompense. Dopo aver votato per la prima volta riceverai il Galaxy Member - Earth NFT gratuito.",
   "Get NFT and start receiving rewards.": "Ottieni NFT e inizia a ricevere ricompense.",
-  "You have no nodes yet.": "Non hai ancora nodi."
+  "You have no nodes yet.": "Non hai ancora nodi.",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Dimensioni consigliate: 512x512 px. Mantenere un rapporto d'aspetto di 1:1. Il logo deve essere un'immagine a quadrato pieno e deve avere uno sfondo.",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Dimensioni consigliate: 686×515. Mantenere un rapporto d'aspetto di 4:3. Gli asset non devono contenere loghi, marchi, testo o alcun oggetto/elemento non correlato allo scopo dell'app."
 }

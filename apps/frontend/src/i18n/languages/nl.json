@@ -1756,5 +1756,7 @@
   "Become a node holder": "Word een node-eigenaar",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "Verkrijg NFT en begin beloningen te ontvangen. Nadat je de eerste keer hebt gestemd, ontvang je gratis Galaxy Member - Earth NFT.",
   "Get NFT and start receiving rewards.": "Verkrijg NFT en begin beloningen te ontvangen.",
-  "You have no nodes yet.": "Je hebt nog geen nodes."
+  "You have no nodes yet.": "Je hebt nog geen nodes.",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Aanbevolen grootte: 512x512 px. Handhaaf een 1:1 beeldverhouding. Het logo moet een volledig vierkante afbeelding zijn en moet een achtergrond hebben.",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Aanbevolen grootte: 686×515. Handhaaf een 4:3 beeldverhouding. Middelen mogen geen logo's, merken, tekst of andere niet-gerelateerde objecten/elementen met het doel van de app bevatten."
 }

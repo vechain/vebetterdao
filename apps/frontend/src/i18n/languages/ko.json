@@ -1755,5 +1755,9 @@
   "Become a node holder": "노드 홀더 되기",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "NFT를 받고 보상을 받기 시작하세요. 첫 투표 후 무료 갤럭시 멤버 - 어스 NFT를 받게 됩니다.",
   "Get NFT and start receiving rewards.": "NFT를 받고 보상을 받기 시작하세요.",
-  "You have no nodes yet.": "아직 노드가 없습니다."
+  "You have no nodes yet.": "아직 노드가 없습니다.",
+  ".": "앱",
+  "App preview": "앱 미리보기",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "권장 크기: 512x512 픽셀. 1:1 비율을 유지하세요. 로고는 완전한 정사각형 이미지이며 배경이 있어야 합니다.",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "권장 크기: 686x515. 4:3 비율을 유지하세요. 에셋에는 앱의 목적과 관련 없는 로고, 브랜드, 텍스트 또는 기타 객체/요소가 포함되어서는 안 됩니다."
 }

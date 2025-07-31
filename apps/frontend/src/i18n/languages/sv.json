@@ -1756,5 +1756,7 @@
   "Become a node holder": "Bli nodinnehavare",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "Skaffa NFT och börja ta emot belöningar. Efter du röstar första gången kommer du att få en gratis Galaxy Member - Earth NFT.",
   "Get NFT and start receiving rewards.": "Skaffa NFT och börja ta emot belöningar.",
-  "You have no nodes yet.": "Du har inga noder än."
+  "You have no nodes yet.": "Du har inga noder än.",
+  "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Rekommenderad storlek: 512x512 px. Bibehåll ett 1:1 bildförhållande. Logotypen måste vara en full kvadratisk bild och den måste ha en bakgrund.",
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Rekommenderad storlek: 686×515. Bibehåll ett 4:3 bildförhållande. Tillgångar ska inte innehålla logotyper, varumärken, text eller några orelaterade objekt/element till appens syfte."
 }
