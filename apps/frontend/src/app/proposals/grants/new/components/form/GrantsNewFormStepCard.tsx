@@ -4,7 +4,7 @@ import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutApplicant, AboutProject } from "./steps"
 import { useForm } from "react-hook-form"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { useGrantProposalFormStore } from "@/store/useGrantProposalFormStore"
 import { GrantMilestones } from "./steps/GrantMilestones"
 export enum GrantFormStep {

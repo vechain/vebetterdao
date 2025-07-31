@@ -2,7 +2,7 @@ import { VStack, Text, Grid, GridItem, Divider } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
-import { GrantFormData } from "../GrantsNewFormStepCard"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 
 interface AboutApplicantProps {
   register: UseFormRegister<GrantFormData>

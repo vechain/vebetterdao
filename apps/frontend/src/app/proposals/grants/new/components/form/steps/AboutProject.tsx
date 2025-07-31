@@ -2,7 +2,7 @@ import { VStack, Text, Grid, GridItem, Divider } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
-import { GrantFormData } from "../GrantsNewFormStepCard"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
@@ -109,7 +109,7 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                 </VStack>
 
                 <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={6}>
-                  <GridItem>
+                  <GridItem w="full">
                     <FormSocialConnectButton
                       label={t("Connect X")}
                       register={register("twitterUsername", {
@@ -117,11 +117,11 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                       })}
                       error={errors.twitterUsername?.message}
                       handleAuth={() => handleAuth("twitter")}
-                      leftIcon={<FaXTwitter size={30} />}
+                      leftIcon={<FaXTwitter size={20} />}
                       value={watch("twitterUsername")}
                     />
                   </GridItem>
-                  <GridItem>
+                  <GridItem w="full">
                     <FormSocialConnectButton
                       label={t("Connect GitHub")}
                       register={register("githubUsername", {
@@ -129,11 +129,11 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                       })}
                       error={errors.githubUsername?.message}
                       handleAuth={() => handleAuth("github")}
-                      leftIcon={<UilGithub size={30} />}
+                      leftIcon={<UilGithub size={20} />}
                       value={watch("githubUsername")}
                     />
                   </GridItem>
-                  <GridItem>
+                  <GridItem w="full">
                     <FormSocialConnectButton
                       label={t("Connect Discord")}
                       register={register("discordUsername", {
@@ -141,7 +141,7 @@ export const AboutProject = ({ register, setValue, watch, errors }: AboutProject
                       })}
                       error={errors.discordUsername?.message}
                       handleAuth={() => handleAuth("discord")}
-                      leftIcon={<AiOutlineDiscord size={30} />}
+                      leftIcon={<AiOutlineDiscord size={20} />}
                       value={watch("discordUsername")}
                     />
                   </GridItem>

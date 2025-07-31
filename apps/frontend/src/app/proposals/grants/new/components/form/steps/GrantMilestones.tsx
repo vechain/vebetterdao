@@ -19,7 +19,7 @@ import {
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { UilPlus, UilTrash, UilArrowRight } from "@iconscout/react-unicons"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import dayjs from "dayjs"
