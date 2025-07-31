@@ -15,6 +15,7 @@ import {
   AccordionPanel,
   Badge,
   HStack,
+  useMediaQuery,
 } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
@@ -46,21 +47,27 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
   const { t } = useTranslation()
   const milestoneNumber = index + 1
   const isFirst = index === 0
+  const [isMobile] = useMediaQuery("(max-width: 767px)")
+
+  const formatDuration = (duration: number | string) => {
+    const durationInMiliseconds = Number(duration) * 1000 //Convert to miliseconds
+    return dayjs(durationInMiliseconds).format("MM/DD/YYYY")
+  }
 
   return (
     <AccordionItem key={index} {...(isFirst && { borderTop: "none" })}>
       {({ isExpanded }) => {
         const currentMilestone = getValues(`milestones.${index}`)
         const hasDurationInfo = currentMilestone.durationFrom && currentMilestone.durationTo
-        const formattedDurationFrom = dayjs(Number(currentMilestone.durationFrom)).format("MM/DD/YYYY")
-        const formattedDurationTo = dayjs(Number(currentMilestone.durationTo)).format("MM/DD/YYYY")
-
+        const formattedDurationFrom = formatDuration(currentMilestone.durationFrom)
+        const formattedDurationTo = formatDuration(currentMilestone.durationTo)
+        const showDurationBadge = !isExpanded && hasDurationInfo && !isMobile
         return (
           <>
             <AccordionButton w="full" py={4} textAlign="left" justifyContent="space-between">
               <HStack w="full" spacing={4}>
                 <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
-                {!isExpanded && hasDurationInfo && (
+                {showDurationBadge && (
                   <Badge variant="outline" size="sm">
                     <Text fontSize="sm">{formattedDurationFrom}</Text>
                     <UilArrowRight />
@@ -75,7 +82,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                 {t("Define the milestones for your project. Funds will be released as milestones are completed.")}
               </Text>
 
-              <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+              <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
                   <FormItem
                     label={t("Amount")}
@@ -86,7 +93,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                     error={errors.milestones?.[index]?.fundingAmount?.message}
                   />
                 </GridItem>
-                <GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
                   <FormItem
                     label={t("Duration")}
                     placeholder={t("From")}
@@ -97,7 +104,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                   />
                 </GridItem>
 
-                <GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
                   <FormItem
                     placeholder={t("To")}
                     register={register(`milestones.${index}.durationTo`, {
@@ -106,7 +113,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                     error={errors.milestones?.[index]?.durationTo?.message}
                   />
                 </GridItem>
-                <GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
                   <FormItem
                     label={t("Description")}
                     type="textarea"
@@ -117,7 +124,8 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                     error={errors.milestones?.[index]?.description?.message}
                   />
                 </GridItem>
-                <GridItem bg="#F8F8F8" p={4} borderRadius="xl" mt={10}>
+                {/*TODO: Use theme instead of hardcoded color*/}
+                <GridItem bg="#F8F8F8" p={4} borderRadius="xl" mt={{ base: 0, md: 10 }}>
                   <Heading size="sm">{t("Tips")}</Heading>
                   <Text fontSize="sm" color="gray.500">
                     {t("Explain integration and launch on VeBetterDAO, like:")}
@@ -129,7 +137,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                   </UnorderedList>
                 </GridItem>
                 {!isFirst && ( //TODO: This information should come from the Smart Contract, to know the minimal amount of milestones
-                  <GridItem colSpan={2}>
+                  <GridItem colSpan={{ base: 1, md: 2 }}>
                     <Button
                       variant="primarySubtle"
                       leftIcon={<Icon as={UilTrash} />}
@@ -159,8 +167,12 @@ export const GrantMilestones = ({ register, setValue, getValues, setData, errors
       description: "",
       deliverables: "",
       fundingAmount: 0,
-      durationFrom: dayjs(lastMilestone.durationTo).add(1, "month").unix(),
-      durationTo: dayjs(lastMilestone.durationTo).add(2, "month").unix(),
+      durationFrom: dayjs(lastMilestone.durationTo * 1000)
+        .add(1, "month")
+        .unix(),
+      durationTo: dayjs(lastMilestone.durationTo * 1000)
+        .add(2, "month")
+        .unix(),
     })
     setValue("milestones", milestones)
     //Persist the new milestone in the form data
@@ -196,7 +208,7 @@ export const GrantMilestones = ({ register, setValue, getValues, setData, errors
           )
         })}
       </Accordion>
-      <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+      <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
         <GridItem>
           <Button leftIcon={<Icon as={UilPlus} />} variant="primaryLink" onClick={handleAddMilestone}>
             {t("Add milestone")}
