@@ -53,3 +53,45 @@ export type Proposal = {
   createdAt: number
   createdAtBlock: number
 }
+
+export type GrantFormData = {
+  grantType: string
+  // About applicant
+  applicantName: string
+  applicantSurname: string
+  applicantRole: string
+  applicantProfileUrl: string
+  applicantCountry?: string
+  applicantCity?: string
+  applicantStreet?: string
+  applicantPostalCode?: string
+  applicantBackground?: string
+  // About project
+  projectName: string
+  companyName: string
+  appTestnetUrl: string
+  projectWebsite: string
+  githubUsername: string
+  twitterUsername: string
+  discordUsername: string
+  // Project details
+  problemDescription: string
+  solutionDescription: string
+  targetUsers: string
+  competitiveEdge: string
+  // Outcomes
+  benefitsToUsers: string
+  benefitsToDApps: string
+  benefitsToVeChainEcosystem: string
+  x2EModel: string
+  revenueModel: string
+  highLevelRoadmap: string
+  // Milestones
+  milestones: Array<{
+    title: string
+    description: string
+    deliverables: string
+    timeline: string
+    fundingAmount: string
+  }>
+}
