@@ -20,7 +20,7 @@ export const AboutApplicant = ({ register, errors }: AboutApplicantProps) => {
             {t("Member")}
           </Text>
 
-          <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
             <GridItem>
               <FormItem
                 label={t("Name")}
@@ -84,7 +84,7 @@ export const AboutApplicant = ({ register, errors }: AboutApplicantProps) => {
             </Text>
           </VStack>
 
-          <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
             <GridItem>
               <FormItem
                 label={t("Country")}
