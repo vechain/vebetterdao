@@ -5,12 +5,10 @@ export const PopoverStyle: ComponentStyleConfig = {
   baseStyle: {
     content: {
       rounded: "2xl",
-      border: "1px solid",
-      borderColor: "gray.100",
+      border: "none",
       boxShadow: "lg",
       _dark: {
-        borderColor: "gray.700",
-        bg: "gray.800",
+        bg: "#1D1D1D", //TODO: Change to theme color
       },
     },
     body: {
