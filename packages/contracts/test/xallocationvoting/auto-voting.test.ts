@@ -156,6 +156,116 @@ describe("AutoVoting - @shard14a", function () {
       )
     })
 
+    it("should count total auto-voting users", async function () {
+      const config = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const { xAllocationVoting, emissions, minterAccount, otherAccounts, x2EarnApps, owner } = config!
+
+      const user = otherAccounts[0]
+      const user2 = otherAccounts[1]
+      const user3 = otherAccounts[2]
+
+      await bootstrapAndStartEmissions()
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(user.address))
+      await x2EarnApps.connect(owner).submitApp(user.address, user.address, user.address, "metadataURI")
+      await endorseApp(app1Id, user)
+
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user2).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user3).setUserVotingPreferences([app1Id])
+
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user2).toggleAutoVoting()
+      await xAllocationVoting.connect(user3).toggleAutoVoting()
+
+      // Still disabled until the next cycle
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user2.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user3.address)).to.be.false
+      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(0)
+
+      // Wait for the next cycle to be distributable
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user2.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user3.address)).to.be.true
+      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(3)
+
+      await xAllocationVoting.connect(user3).toggleAutoVoting()
+      // remaining 3 until the next cycle
+      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(3)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user3.address)).to.be.false
+      expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(2)
+    })
+
+    it.only("should prevent transfer below 1 VOT3 when autovoting is enabled", async function () {
+      const config = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const { owner, x2EarnApps, xAllocationVoting, vot3, otherAccounts, emissions, minterAccount } = config!
+
+      const user = otherAccounts[0]
+      const recipient = otherAccounts[1]
+      const appOwner = otherAccounts[2]
+
+      await bootstrapAndStartEmissions()
+
+      // Create a test app
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Give user exactly 2 VOT3 tokens
+      await getVot3Tokens(user, "2")
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("2"))
+
+      // Enable autovoting and set preferences
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
+      expect(await vot3.version()).to.equal("2")
+      // Try to transfer 1.5 VOT3 (would leave user with 0.5 VOT3)
+      await expect(vot3.connect(user).transfer(recipient.address, ethers.parseEther("1.5"))).to.be.revertedWith(
+        "VOT3: cannot transfer below 1 VOT3 while autovoting is enabled",
+      )
+
+      // Should be able to transfer exactly 1 VOT3 (leaving user with 1 VOT3)
+      await expect(vot3.connect(user).transfer(recipient.address, ethers.parseEther("1"))).to.not.be.reverted
+
+      // Verify final balance
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("1"))
+
+      // Now trying to transfer any amount should fail
+      await expect(
+        vot3.connect(user).transfer(recipient.address, 1), // even 1 wei
+      ).to.be.revertedWith("VOT3: cannot transfer below 1 VOT3 while autovoting is enabled")
+
+      // Disable autovoting should allow transfer below 1 VOT3 when the next round starts
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Should now be able to transfer the remaining balance
+      await expect(vot3.connect(user).transfer(recipient.address, ethers.parseEther("1"))).to.not.be.reverted
+
+      expect(await vot3.balanceOf(user.address)).to.equal(0)
+    })
+
     describe("castVoteOnBehalfOf function", function () {
       it("should successfully cast vote on behalf of user with single app", async function () {
         const config = await getOrDeployContractInstances({

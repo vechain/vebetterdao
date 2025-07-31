@@ -22,6 +22,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   struct AutoVotingStorage {
     mapping(address => Checkpoints.Trace208) _autoVotingEnabled;
     mapping(address => bytes32[]) _userVotingPreferences;
+    Checkpoints.Trace208 _totalAutoVotingUsers;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.AutoVotingLogic")) - 1)) & ~bytes32(uint256(0xff))
@@ -59,11 +60,18 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   /**
    * @dev Toggles autovoting for an account
    * @param account The address to toggle autovoting for
+   * @notice
+   * User Enabled: false ──────────────────────→ true
+   * Total Count:  100   ──────────────────────→ 101
+   * User Prefs:   [existing preferences kept]
+   *
+   * User Enabled: true ──────────────────────→ false
+   * Total Count:  101   ──────────────────────→ 100
+   * User Prefs:   [app1, app2] ────────────────→ [] (deleted)
    */
   function _toggleAutovoting(address account) internal virtual {
     AutoVotingStorage storage $ = _getAutoVotingStorage();
 
-    // Get current status using checkpoint
     bool currentStatus = $._autoVotingEnabled[account].upperLookupRecent(_clock()) == 1;
     bool newStatus = !currentStatus;
 
@@ -74,6 +82,10 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
 
     // Push new checkpoint with toggled status
     $._autoVotingEnabled[account].push(_clock(), newStatus ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
+
+    uint208 currentTotal = $._totalAutoVotingUsers.upperLookupRecent(_clock());
+    uint208 newTotal = newStatus ? currentTotal + 1 : currentTotal - 1;
+    $._totalAutoVotingUsers.push(_clock(), newTotal);
 
     emit AutoVotingToggled(account, newStatus);
   }
@@ -115,9 +127,9 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   }
 
   /**
-   * @dev Checks if autovoting is enabled for an account
+   * @dev Checks if autovoting is enabled for an account at the current timepoint
    * @param account The address to check
-   * @return Whether autovoting is enabled for the account
+   * @return Whether autovoting is enabled for the account at the current timepoint
    */
   function _isAutoVotingEnabled(address account) internal view virtual override returns (bool) {
     AutoVotingStorage storage $ = _getAutoVotingStorage();
@@ -146,5 +158,24 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   function _getUserVotingPreferences(address account) internal view virtual override returns (bytes32[] memory) {
     AutoVotingStorage storage $ = _getAutoVotingStorage();
     return $._userVotingPreferences[account];
+  }
+
+  /**
+   * @dev Gets the total number of users who enabled autovoting at a specific timepoint
+   * @param timepoint The timepoint to check
+   * @return The total number of users who enabled autovoting at the specific timepoint
+   */
+  function _getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) internal view virtual override returns (uint208) {
+    AutoVotingStorage storage $ = _getAutoVotingStorage();
+    return $._totalAutoVotingUsers.upperLookupRecent(timepoint);
+  }
+
+  /**
+   * @dev Gets the total number of users who enabled autovoting at the current timepoint
+   * @return The total number of users who enabled autovoting at the current timepoint
+   */
+  function _getTotalAutoVotingUsers() internal view virtual returns (uint208) {
+    AutoVotingStorage storage $ = _getAutoVotingStorage();
+    return $._totalAutoVotingUsers.upperLookupRecent(_clock());
   }
 }

@@ -529,8 +529,8 @@ export const getOrDeployContractInstances = async ({
   const B3trContract = await ethers.getContractFactory("B3TR")
   const b3tr = await B3trContract.deploy(owner, minterAccount, owner)
 
-  // Deploy VOT3
-  const vot3 = (await deployProxy("VOT3", [
+  // Deploy VOT3 version 1
+  let vot3 = (await deployProxy("VOT3V1", [
     owner.address,
     owner.address,
     owner.address,
@@ -839,6 +839,11 @@ export const getOrDeployContractInstances = async ({
       logOutput: false,
     },
   )) as XAllocationVoting
+
+  // Upgrade VOT3 to version 2 latest
+  vot3 = (await upgradeProxy("VOT3V1", "VOT3", await vot3.getAddress(), [await xAllocationVoting.getAddress()], {
+    version: 2,
+  })) as VOT3
 
   const veBetterPassportV1 = (await initializeProxy(
     veBetterPassportContractAddress,
