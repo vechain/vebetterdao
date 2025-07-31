@@ -5,7 +5,8 @@ export const LOGO_UPLOAD_GUIDELINES =
 export const BANNER_UPLOAD_GUIDELINES = "Recommended size: 1240×460. Keep key content centered for consistent display."
 export const VEWORLD_BANNER_UPLOAD_GUIDELINES =
   "To be displayed on the VeWorld mobile wallet. Recommended size: 800×400. Maintain a 2:1 aspect ratio."
-export const SCREENSHOT_UPLOAD_GUIDELINES = "Recommended size: 686×515. Maintain a 4:3 aspect ratio."
+export const SCREENSHOT_UPLOAD_GUIDELINES =
+  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose"
 
 export const IMAGE_REQUIREMENTS = {
   logo: {

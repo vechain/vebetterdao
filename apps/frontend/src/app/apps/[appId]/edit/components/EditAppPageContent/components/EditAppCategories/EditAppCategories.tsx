@@ -36,14 +36,10 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const { setValue, watch, register } = form
   const selectedCategories = watch("categories") ?? []
 
-  // Filter categories based on search query
   const filteredCategories = APP_CATEGORIES.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  console.log("selectedCategories within the metadata", selectedCategories)
-
-  // Adjust max categories based on deprecated categories
   const maxAllowedCategories = MAX_CATEGORIES
 
   const handleSelectCategory = (categoryId: string) => {
