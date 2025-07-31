@@ -25,28 +25,24 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
         "-ms-overflow-style": "none",
         "scrollbar-width": "none",
       }}>
-      <Stepper index={activeStep} variant="grants" display="flex" flexWrap="nowrap" gap={isMobile ? 4 : 8}>
+      <Stepper index={activeStep} variant="grants" display="flex" overflowX="hidden" w="full" maxW="80vw">
         {steps.map((step, index) => {
           const isActiveStep = activeStep === index
           const showStepTitle = (isMobile && isActiveStep) || !isMobile
 
           return (
-            <Flex key={step.key} align="center" flexShrink={0}>
+            <Flex key={step.key} align="center">
               <Step>
-                <StepIndicator flexShrink={0}>
+                <StepIndicator>
                   <StepStatus
-                    complete={<Icon as={BsCheck} boxSize={4} />}
+                    complete={<Icon as={BsCheck} boxSize={7} />}
                     incomplete={<StepNumber />}
                     active={<StepNumber />}
                   />
                 </StepIndicator>
 
                 {showStepTitle && (
-                  <StepTitle
-                    fontSize={{ base: "sm", md: "sm" }}
-                    isTruncated
-                    noOfLines={1}
-                    maxWidth={isMobile ? "120px" : "auto"}>
+                  <StepTitle fontSize={{ base: "sm", md: "sm" }} isTruncated noOfLines={1}>
                     {step.title}
                   </StepTitle>
                 )}
@@ -56,9 +52,8 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
                 <Icon
                   as={BsChevronRight}
                   boxSize={4}
-                  ml={2}
+                  mx={{ base: 2, md: 4 }}
                   color={index < activeStep ? "blue.500" : "gray.400"}
-                  flexShrink={0}
                 />
               )}
             </Flex>
