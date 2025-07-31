@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { VStack, CardHeader, CardBody, Card, useSteps, Button, HStack } from "@chakra-ui/react"
+import { VStack, CardHeader, CardBody, Card, useSteps, Button, HStack, Stack } from "@chakra-ui/react"
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutApplicant, AboutProject } from "./steps"
@@ -98,16 +98,16 @@ export const GrantsNewFormStepCard = () => {
       </CardHeader>
       <CardBody>
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-          <VStack spacing={4} w="full" align="flex-start">
+          <VStack direction={{ base: "column", md: "row" }} spacing={4} w="full" align="flex-start">
             {currentStep?.content}
-            <HStack w="full" justify="space-between">
-              <HStack spacing={4}>
+            <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
+              <HStack spacing={4} w="full">
                 {activeStep !== firstStep && (
-                  <Button onClick={goToPrevious} variant="secondary" px={8}>
+                  <Button onClick={goToPrevious} variant="secondary" px={8} size="lg" w={{ base: "full", md: "auto" }}>
                     {t("Back")}
                   </Button>
                 )}
-                <Button type="submit" variant="primaryAction" px={8}>
+                <Button type="submit" variant="primaryAction" px={8} size="lg" w={{ base: "full", md: "auto" }}>
                   {activeStep === lastStep ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>
@@ -116,7 +116,7 @@ export const GrantsNewFormStepCard = () => {
                   {t("Save draft")}
                 </Button>
               )}
-            </HStack>
+            </Stack>
           </VStack>
         </form>
       </CardBody>
