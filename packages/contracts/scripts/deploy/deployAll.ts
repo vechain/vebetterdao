@@ -993,7 +993,7 @@ export async function deployAll(config: ContractsConfig) {
     await treasury.getAddress(), // treasury address
     TEMP_ADMIN, // admin
     await b3tr.getAddress(), // b3tr address
-    2, // minimum milestone count
+    config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
   ])) as GrantsManager
 
   const date = new Date(performance.now() - start)

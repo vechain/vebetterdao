@@ -977,7 +977,7 @@ export const getOrDeployContractInstances = async ({
     await treasury.getAddress(), // treasury address
     owner.address, // admin
     await b3tr.getAddress(), // b3tr address
-    2, // minimum milestone count
+    config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
   ])) as GrantsManager
 
   const governor = (await deployAndUpgrade(

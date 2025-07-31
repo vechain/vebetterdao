@@ -39,7 +39,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe.only("X-Allocation Voting - @shard14", function () {
+describe("X-Allocation Voting - @shard14", function () {
   // Environment params
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
@@ -316,7 +316,7 @@ describe.only("X-Allocation Voting - @shard14", function () {
     })
   })
 
-  describe.only("Contract upgradeablity", () => {
+  describe("Contract upgradeablity", () => {
     it("Admin should be able to upgrade the contract", async function () {
       const { xAllocationVoting, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -501,7 +501,7 @@ describe.only("X-Allocation Voting - @shard14", function () {
       )
     })
 
-    it.only("Should return correct version of the contract", async () => {
+    it("Should return correct version of the contract", async () => {
       const { xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })

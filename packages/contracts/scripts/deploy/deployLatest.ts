@@ -551,7 +551,7 @@ export async function deployLatest(config: ContractsConfig) {
           await treasury.getAddress(),
           TEMP_ADMIN,
           await b3tr.getAddress(),
-          2, // minimum milestone count
+          config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
         ],
       },
     ],
