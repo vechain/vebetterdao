@@ -506,7 +506,7 @@ describe("X-Allocation Voting - @shard14", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("6")
+      expect(await xAllocationVoting.version()).to.equal("7")
     })
 
     it("Should not break storage when upgrading to V2, V3, V4, V5 and V6", async () => {

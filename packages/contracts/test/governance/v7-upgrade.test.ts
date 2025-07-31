@@ -1062,10 +1062,10 @@ describe("Governance - Upgrades", function () {
     expect(v7QuorumNumeratorByType).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE))
 
     //Check if the GM weight is the same as the GM weight initialized in previous version
-    const v7StandardGMWeight = await governorV7.getProposalTypeGMWeight(STANDARD_PROPOSAL_TYPE)
+    const v7StandardGMWeight = await governorV7.getRequiredGMLevelByProposalType(STANDARD_PROPOSAL_TYPE)
     expect(v7StandardGMWeight).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT))
 
-    const v7GrantGMWeight = await governorV7.getProposalTypeGMWeight(GRANT_PROPOSAL_TYPE)
+    const v7GrantGMWeight = await governorV7.getRequiredGMLevelByProposalType(GRANT_PROPOSAL_TYPE)
     expect(v7GrantGMWeight).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_GRANT_GM_WEIGHT))
 
     // Check if the grantsManager is the same as the grantsManager initialized in previous version

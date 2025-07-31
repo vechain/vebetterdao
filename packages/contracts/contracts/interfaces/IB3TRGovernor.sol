@@ -42,6 +42,16 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorDisabledDeposit();
 
   /**
+   * @dev Thrown when the proposer does not fit the requirement (GM weight ATM)
+   */
+  error GMLevelAboveMaxLevel(uint256 gmLevel);
+
+  /**
+   * @dev The GM level is not in the valid range - 0 to max level.
+   */
+  error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
+
+  /**
    * @dev The `account` is not a proposer.
    */
   error GovernorOnlyProposer(address account);
@@ -614,15 +624,15 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function getRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice Set the GM weight for a proposal type
    * @param proposalTypeValue The type of the proposal
    * @param newGMWeight The new GM weight for the proposal type
-   * @notice e.g. setProposalTypeGMWeight(0, 1) = GM level 1 is required to create a standard proposal
+   * @notice e.g. setRequiredGMLevelByProposalType(0, 1) = GM level 1 is required to create a standard proposal
    */
-  function setProposalTypeGMWeight(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external;
+  function setRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external;
 
   /**
    * @notice Returns the deposit threshold cap for a proposal type.

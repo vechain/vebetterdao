@@ -39,6 +39,7 @@ import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.so
 import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import { console } from "hardhat/console.sol";
 
 /**
  * @title GrantsManager
@@ -55,25 +56,23 @@ contract GrantsManager is
 {
   // ------------------ ROLES ------------------ //
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
-  bytes32 public constant MILESTONE_EDITOR_ROLE = keccak256("MILESTONE_EDITOR_ROLE");
-  // bytes32 public constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
-  // bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE"); // TBD
+  bytes32 public constant GRANTS_APPROVER_ROLE = keccak256("GRANTS_APPROVER_ROLE");
 
   // ------------------ STORAGE MANAGEMENT ------------------ //
   /// @notice Storage structure for GrantsManager
   /// @custom:storage-location erc7201:b3tr.storage.GrantsManager
   struct GrantsManagerStorage {
     mapping(uint256 => Milestones) proposalMilestones; // proposalId => milestones
-    uint256 minimumMilestoneCount;
-    ITreasury treasury;
     IB3TRGovernor governor;
+    ITreasury treasury;
     IB3TR b3tr;
+    uint256 minimumMilestoneCount;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.GrantsManager")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GrantsManagerStorageLocation =
-    0x5e9e1c17086de7a6e077aa6f5e7f4e07cc54a96e4c9d8c0a468e334b50d62f00;
+    0x827ef7a586340a0afd9df4d10dcd47e35ee20572dbc95830311fcb8284606d00;
 
   function _getGrantsManagerStorage() private pure returns (GrantsManagerStorage storage $) {
     assembly {
@@ -87,10 +86,18 @@ contract GrantsManager is
     _disableInitializers();
   }
 
-  function initialize(address _governor, address _treasury, address defaultAdmin, address _b3tr) external initializer {
+  function initialize(
+    address _governor,
+    address _treasury,
+    address defaultAdmin,
+    address _b3tr,
+    uint256 _minimumMilestoneCount
+  ) external initializer {
     require(_governor != address(0), "Governor address cannot be 0");
     require(_treasury != address(0), "Treasury address cannot be 0");
+    require(_b3tr != address(0), "B3TR address cannot be 0");
     require(defaultAdmin != address(0), "Default admin address cannot be 0");
+    require(_minimumMilestoneCount > 0, "Minimum milestone count cannot be 0");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -98,20 +105,18 @@ contract GrantsManager is
     __ReentrancyGuard_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
-    _grantRole(UPGRADER_ROLE, msg.sender);
     _grantRole(GOVERNANCE_ROLE, _governor);
+    _grantRole(GRANTS_APPROVER_ROLE, _governor);
 
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     $.governor = IB3TRGovernor(_governor);
     $.treasury = ITreasury(_treasury);
     $.b3tr = IB3TR(_b3tr);
-    $.minimumMilestoneCount = 2;
-    // Here we should set a max amount for grants ( make it per type ? appGrants? infraGrants? )
+    $.minimumMilestoneCount = _minimumMilestoneCount;
   }
 
   // ------------------ MODIFIERS ------------------ //
   modifier onlyAdminOrGovernanceRole() {
-    // todo: is it safe ? Do we need a specific role for this contract ?
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     if (!(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) || hasRole(GOVERNANCE_ROLE, _msgSender()))) {
       revert NotAuthorized();
@@ -119,8 +124,17 @@ contract GrantsManager is
     _;
   }
 
-  modifier onlyAdminOrProposer() {
-    if (!hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) && !hasRole(GOVERNANCE_ROLE, _msgSender())) {
+  modifier onlyRoleOrGovernance(bytes32 role) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    if (!(hasRole(role, _msgSender()) || hasRole(GOVERNANCE_ROLE, _msgSender()))) {
+      revert NotAuthorized();
+    }
+    _;
+  }
+
+  modifier onlyGovernor() {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    if (!(hasRole(GOVERNANCE_ROLE, _msgSender()))) {
       revert NotAuthorized();
     }
     _;
@@ -162,7 +176,7 @@ contract GrantsManager is
     uint256 proposalId,
     address proposer,
     bytes[] memory calldatas
-  ) external {
+  ) external onlyGovernor {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     uint256 _milestoneId = proposalId;
@@ -237,7 +251,10 @@ contract GrantsManager is
    * @param proposalId The ID of the proposal
    * @param milestoneIndex The index of the milestone
    */
-  function approveMilestones(uint256 proposalId, uint256 milestoneIndex) external onlyAdminOrGovernanceRole {
+  function approveMilestones(
+    uint256 proposalId,
+    uint256 milestoneIndex
+  ) external onlyRoleOrGovernance(GRANTS_APPROVER_ROLE) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     MilestoneState currentState = $.proposalMilestones[proposalId].milestone[milestoneIndex].status;
 
@@ -501,13 +518,13 @@ contract GrantsManager is
   function _validateMilestones(Milestones memory milestones) internal view {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-    // Check the proposal metadata
-    if (milestones.proposer == address(0)) {
-      revert MilestoneProposerZeroAddress();
+    if (msg.sender != address($.governor)) {
+      revert NotAuthorized();
     }
 
-    if (msg.sender != address($.governor)) {
-      revert CallerIsNotTheGovernor(msg.sender, address($.governor));
+    // Check the proposer
+    if (milestones.proposer == address(0)) {
+      revert MilestoneProposerZeroAddress();
     }
 
     // Check the milestones details metadata URI

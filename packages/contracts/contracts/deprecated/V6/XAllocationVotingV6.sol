@@ -23,15 +23,15 @@
 
 pragma solidity 0.8.20;
 
-import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/VotesUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/VotingSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
+import "./x-allocation-voting-governance/XAllocationVotingGovernorV6.sol";
+import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/VotesUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/VotingSettingsUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeableV6.sol";
+import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeableV6.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -56,21 +56,17 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * ----- Version 6 -----
  *  - Align IVoterRewards and IEmissions interfaces with the new contracts
- *
- * ----- Version 7 -----
- * - Added B3TRGovernor contract to the contract
- *
  */
-contract XAllocationVoting is
-  XAllocationVotingGovernor,
-  VotingSettingsUpgradeable,
-  RoundVotesCountingUpgradeable,
-  VotesUpgradeable,
-  VotesQuorumFractionUpgradeable,
-  RoundEarningsSettingsUpgradeable,
-  ExternalContractsUpgradeable,
-  RoundsStorageUpgradeable,
-  RoundFinalizationUpgradeable,
+contract XAllocationVotingV6 is
+  XAllocationVotingGovernorV6,
+  VotingSettingsUpgradeableV6,
+  RoundVotesCountingUpgradeableV6,
+  VotesUpgradeableV6,
+  VotesQuorumFractionUpgradeableV6,
+  RoundEarningsSettingsUpgradeableV6,
+  ExternalContractsUpgradeableV6,
+  RoundsStorageUpgradeableV6,
+  RoundFinalizationUpgradeableV6,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -155,14 +151,6 @@ contract XAllocationVoting is
     __ExternalContracts_init_v2(_veBetterPassport);
   }
 
-  /**
-   * @dev Initializes the contract with the B3TRGovernor contract.
-   * @param _b3trGovernor The address of the B3TRGovernor contract.
-   */
-  function initializeV7(IB3TRGovernor _b3trGovernor) public reinitializer(7) {
-    __ExternalContracts_init_v3(_b3trGovernor);
-  }
-
   // ---------- Setters ---------- //
   /**
    * @dev Set the address of the X2EarnApps contract
@@ -238,13 +226,6 @@ contract XAllocationVoting is
     _setVeBetterPassport(newVeBetterPassport);
   }
 
-  /**
-   * @dev Set the B3TRGovernor contract
-   */
-  function setB3TRGovernor(IB3TRGovernor newB3TRGovernor) external onlyRole(GOVERNANCE_ROLE) {
-    _setB3TRGovernor(newB3TRGovernor);
-  }
-
   // ---------- Getters ---------- //
 
   /**
@@ -256,19 +237,19 @@ contract XAllocationVoting is
 
   // ---------- Required overrides ---------- //
 
-  function votingPeriod() public view override(XAllocationVotingGovernor, VotingSettingsUpgradeable) returns (uint256) {
+  function votingPeriod() public view override(XAllocationVotingGovernorV6, VotingSettingsUpgradeableV6) returns (uint256) {
     return super.votingPeriod();
   }
 
   function quorum(
     uint256 blockNumber
-  ) public view override(XAllocationVotingGovernor, VotesQuorumFractionUpgradeable) returns (uint256) {
+  ) public view override(XAllocationVotingGovernorV6, VotesQuorumFractionUpgradeableV6) returns (uint256) {
     return super.quorum(blockNumber);
   }
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(AccessControlUpgradeable, XAllocationVotingGovernor) returns (bool) {
+  ) public view override(AccessControlUpgradeable, XAllocationVotingGovernorV6) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 

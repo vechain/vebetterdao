@@ -700,6 +700,7 @@ library GovernorProposalLogic {
       revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogic._state(self, proposalId), bytes32(0));
     }
 
+  
     GovernorFunctionRestrictionsLogic.checkFunctionsRestriction(self, targets, calldatas);
   }
 
@@ -749,7 +750,7 @@ library GovernorProposalLogic {
     address proposer,
     GovernorTypes.ProposalType proposalTypeValue
   ) private view {
-    uint256 requiredWeight = self.proposalTypeGMWeight[proposalTypeValue];
+    uint256 requiredWeight = self.requiredGMLevelByProposalType[proposalTypeValue];
     uint256 level = self.galaxyMember.levelOf(self.galaxyMember.getSelectedTokenId(proposer)); // 1 for earth
     if (level < requiredWeight) {
       revert GovernorInvalidProposer(proposer, requiredWeight);

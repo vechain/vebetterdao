@@ -18,6 +18,8 @@ import {
   VeBetterPassport,
   Treasury,
   GrantsManager,
+  X2EarnApps,
+  GalaxyMember,
 } from "../../typechain-types"
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
@@ -54,6 +56,9 @@ interface GovernanceFixture {
   minterAccount: SignerWithAddress
   otherAccount: SignerWithAddress
   grantsManager: GrantsManager
+  x2EarnApps: X2EarnApps
+  creators: SignerWithAddress[]
+  galaxyMember: GalaxyMember
 }
 
 export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
@@ -83,6 +88,10 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
   const veBetterPassport = deployInstances?.veBetterPassport
   const minterAccount = deployInstances?.minterAccount
   const grantsManager = deployInstances?.grantsManager
+  const x2EarnApps = deployInstances?.x2EarnApps
+  const creators = deployInstances?.creators
+  const galaxyMember = deployInstances?.galaxyMember
+
   //Setup other accounts
   const otherAccounts = deployInstances?.otherAccounts
   const otherAccount = deployInstances?.otherAccount
@@ -117,7 +126,10 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     !veBetterPassport ||
     !minterAccount ||
     !otherAccount ||
-    !grantsManager
+    !grantsManager ||
+    !x2EarnApps ||
+    !creators ||
+    !galaxyMember
   ) {
     throw new Error("Deploy instances are not correctly set")
   }
@@ -148,6 +160,9 @@ export async function setupGovernanceFixture(): Promise<GovernanceFixture> {
     minterAccount,
     otherAccount,
     grantsManager,
+    x2EarnApps,
+    creators,
+    galaxyMember,
   }
 }
 

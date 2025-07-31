@@ -68,6 +68,7 @@ describe("Governance - Milestone Creation", function () {
 
     // Setup proposer for all tests
     await setupProposer(proposer, b3tr, vot3, minterAccount)
+    await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
     grantsManagerAddress = await grantsManager.getAddress()
     treasuryAddress = await treasury.getAddress()
@@ -94,6 +95,19 @@ describe("Governance - Milestone Creation", function () {
     it("Should set the minimum milestone count", async function () {
       const minimumMilestoneCount = await grantsManager.getMinimumMilestoneCount()
       expect(minimumMilestoneCount).to.equal(2) // MINIMUM_MILESTONE_COUNT = 2
+    })
+
+    it("Should have the correct governor role setup", async function () {
+      const governorProxyAddress = await governor.getAddress()
+
+      // Check if the governor proxy has the GOVERNANCE_ROLE
+      const GOVERNANCE_ROLE = await grantsManager.GOVERNANCE_ROLE()
+      const hasRole = await grantsManager.hasRole(GOVERNANCE_ROLE, governorProxyAddress)
+      ;(expect(hasRole).to.be.true, "Governor proxy should have GOVERNANCE_ROLE")
+
+      // Verify that the governor is correctly set in the GrantsManager
+      const storedGovernor = await grantsManager.getGovernorContract()
+      expect(storedGovernor).to.equal(governorProxyAddress, "GrantsManager should have the correct governor address")
     })
 
     it("Should not create the proposal if the number of milestones is less than the minimum milestone accepted", async function () {
@@ -356,6 +370,22 @@ describe("Governance - Milestone Creation", function () {
         milestonesDetailsMetadataURI,
       )
     })
+
+    it("Should not be able to call createMilestone if it's not the governor", async () => {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+
+      await expect(
+        grantsManager
+          .connect(owner)
+          .createMilestones(description, milestonesDetailsMetadataURI, 0, owner.address, [], {}),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+    })
   })
 
   describe("Milestone execution", function () {
@@ -419,7 +449,7 @@ describe("Governance - Milestone Creation", function () {
       expect(milestone.status).to.equal(0)
     })
 
-    it("Once the proposal is executed, the milestone can be validated by the admin or the grantsManager", async () => {
+    it("Once the proposal is executed, the milestone can be validated by the GRANTS_APPROVER_ROLE or the governor", async () => {
       const description = "My new project"
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
@@ -439,6 +469,15 @@ describe("Governance - Milestone Creation", function () {
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
 
+      // try to approve without having the GRANTS_APPROVER_ROLE (owner already have it in deploy.ts)
+      await expect(grantsManager.connect(proposer).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await grantsManager.connect(owner).approveMilestones(proposalId, 0)
       const milestonseRegistered = await grantsManager.getMilestone(proposalId, 0) // the first one should be validated
       expect(milestonseRegistered.status).to.equal(1) // Validated
@@ -478,6 +517,8 @@ describe("Governance - Milestone Creation", function () {
       const milestone = await grantsManager.getMilestone(proposalId, 0)
       expect(milestone.status).to.equal(0) // Pending
 
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await expect(grantsManager.connect(owner).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -486,7 +527,7 @@ describe("Governance - Milestone Creation", function () {
       )
     })
 
-    it("Only owner or the grantsManager can approve the milestones", async () => {
+    it("Only admin can approve the milestones", async () => {
       const description = "My new project"
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
@@ -513,6 +554,8 @@ describe("Governance - Milestone Creation", function () {
         description,
       )
 
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await expect(grantsManager.connect(voter).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -545,6 +588,8 @@ describe("Governance - Milestone Creation", function () {
       const balanceBeforeClaiming = await b3tr.balanceOf(proposer.address)
 
       // try to approve with someone else than the governor roles
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       await expect(grantsManager.connect(proposer).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -559,6 +604,8 @@ describe("Governance - Milestone Creation", function () {
         "MilestoneNotApprovedByAdmin",
       )
 
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
       // try to approve the 2nd milestone before approving the first one
       await expect(grantsManager.connect(owner).approveMilestones(proposalId, 1)).to.be.revertedWithCustomError(
         {
@@ -733,54 +780,37 @@ describe("Governance - Milestone Creation", function () {
   })
 
   describe("Milestone deposit", function () {
-    // it.only("Proposer should be able to deposit funds for its own proposal", async function () {
-    //   // proposer should be able to deposit funds for a milestone and consider in the totalAmount of the milestone
-    //   const description = "My new project"
-    //   const totalAmount = ethers.parseEther("2")
-    //   const milestones = {
-    //     id: 0, // proposalId = 0 at the beginning
-    //     totalAmount: totalAmount,
-    //     claimedAmount: 0n,
-    //     recipient: proposer.address,
-    //     milestone: [
-    //       {
-    //         amount: ethers.parseEther("1"),
-    //         status: 0, // Pending
-    //       },
-    //       {
-    //         amount: ethers.parseEther("1"),
-    //         status: 0, // Pending
-    //       },
-    //     ],
-    //     milestonesDetailsMetadataURI: "https://ipfs.io/ipfs/Qm...",
-    //   }
-    //   const balanceBeforeDeposit = await b3tr.balanceOf(proposer.address)
-    //   // increase allowance for the proposer
-    //   await b3tr.connect(proposer).approve(grantsManagerAddress, ethers.parseEther("10000"))
-    //   const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
-    //     proposer, // proposer
-    //     owner, // voter
-    //     [treasury, treasury], // targets ( 3 transfers )
-    //     treasuryContract, // contract to pass to avoid re-deploying the contracts
-    //     description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
-    //     ["transferB3TR", "transferB3TR"], // functionToCall
-    //     [
-    //       [grantsManagerAddress, ethers.parseEther("1")],
-    //       [grantsManagerAddress, ethers.parseEther("1")],
-    //     ], // args of transferb3tr( should have a revert if the amount is not equal)
-    //     ethers.parseEther("1"), // deposit amount
-    //     milestones, // milestones
-    //     contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
-    //   )
-    //   // check the state of the milestone
-    //   const milestone = await grantsManager.getMilestone(proposalId, 0)
-    //   expect(milestone.status).to.equal(2) // Claimed
-    //   // check the balance of the proposer
-    //   const balanceAfterDeposit2 = await b3tr.balanceOf(proposer.address)
-    //   expect(balanceAfterDeposit2).to.equal(balanceBeforeDeposit - ethers.parseEther("1"))
-    //   // check the balance of the grants manager
-    //   const balanceAfterDeposit3 = await b3tr.balanceOf(grantsManagerAddress)
-    //   expect(balanceAfterDeposit3).to.equal(balanceBeforeDeposit + ethers.parseEther("1"))
-    // })
+    it("Proposer should be able to deposit funds for its own proposal", async function () {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later s
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      const userDepositAmount = ethers.parseEther("3") // treshold is 15k in local and 3.5M in mainnet
+
+      const tx = await governor.connect(proposer).proposeGrant(
+        [treasuryAddress, treasuryAddress], // Only Treasury for now
+        [0, 0], // transferb3tr is not payable
+        [
+          treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+          treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
+        ],
+        description,
+        roundId,
+        userDepositAmount,
+        milestonesDetailsMetadataURI,
+      )
+      const receipt = await tx.wait()
+      const { proposalId } = await validateProposalEvents(
+        governor,
+        receipt,
+        Number(GRANT_PROPOSAL_TYPE),
+        proposer.address,
+        description,
+      )
+
+      // get the deposit amount
+      const depositAmount = await governor.getProposalDeposits(proposalId)
+      expect(depositAmount).to.equal(ethers.parseEther("3"))
+    })
   })
 })

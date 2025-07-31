@@ -546,7 +546,13 @@ export async function deployLatest(config: ContractsConfig) {
     [
       {
         name: "initialize",
-        args: [await governor.getAddress(), await treasury.getAddress(), TEMP_ADMIN, await b3tr.getAddress()],
+        args: [
+          await governor.getAddress(),
+          await treasury.getAddress(),
+          TEMP_ADMIN,
+          await b3tr.getAddress(),
+          config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+        ],
       },
     ],
     {},

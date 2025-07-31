@@ -63,6 +63,9 @@ library GovernorConfigurator {
   /// @dev The deposit threshold is not in the valid range for a percentage - 0 to 100.
   error GovernorDepositThresholdNotInRange(uint256 depositThreshold);
 
+  /// @dev The GM level is not in the valid range - 0 to max level.
+  error GMLevelAboveMaxLevel(uint256 gmLevel);
+
   /// @dev Emitted when the `votingThreshold` for a proposal type is set.
   event VotingThresholdSetV2(
     GovernorTypes.ProposalType proposalType,
@@ -400,8 +403,8 @@ library GovernorConfigurator {
    * @param proposalTypeValue The proposal type.
    * @return The current GM weight for the proposal type.
    */
-  function getProposalTypeGMWeight(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue) internal view returns (uint256) {
-    return self.proposalTypeGMWeight[proposalTypeValue];
+  function getRequiredGMLevelByProposalType(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue) internal view returns (uint256) {
+    return self.requiredGMLevelByProposalType[proposalTypeValue];
   }
 
   /**
@@ -410,7 +413,11 @@ library GovernorConfigurator {
    * @param proposalTypeValue The proposal type.
    * @param newGMWeight The new GM weight for the proposal type.
    */ 
-  function setProposalTypeGMWeight(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) internal {
-    self.proposalTypeGMWeight[proposalTypeValue] = newGMWeight;
+  function setRequiredGMLevelByProposalType(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) internal {
+    uint256 maxGMWeight = self.galaxyMember.MAX_LEVEL();
+    if (newGMWeight > maxGMWeight) {
+      revert GMLevelAboveMaxLevel(newGMWeight);
+    }
+    self.requiredGMLevelByProposalType[proposalTypeValue] = newGMWeight;
   }
 }

@@ -26,25 +26,24 @@ pragma solidity 0.8.20;
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import { IXAllocationVotingGovernor, IERC6372 } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { IXAllocationPool } from "../interfaces/IXAllocationPool.sol";
+import { IXAllocationVotingGovernorV6, IERC6372 } from "../interfaces/IXAllocationVotingGovernorV6.sol";
+import { IXAllocationPool } from "../../../interfaces/IXAllocationPool.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
-import { IEmissions } from "../interfaces/IEmissions.sol";
-import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
+import { IEmissions } from "../../../interfaces/IEmissions.sol";
+import { IVoterRewards } from "../../../interfaces/IVoterRewards.sol";
+import { IVeBetterPassport } from "../../../interfaces/IVeBetterPassport.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 
 /**
- * @title XAllocationVotingGovernor
+ * @title XAllocationVotingGovernorV6
  * @dev Core of the voting system of allocation rounds, designed to be extended through various modules.
  *
  * This contract is abstract and requires several functions to be implemented in various modules:
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, and {_countVote}
  * - A voting module must implement {_getVotes}, {clock}, and {CLOCK_MODE}
  * - A settings module must implement {votingPeriod}
- * - An external contracts module must implement {x2EarnApps}, {emissions}, {voterRewards} and {b3trGovernor}
+ * - An external contracts module must implement {x2EarnApps}, {emissions} and {voterRewards}
  * - A rounds storage module must implement {_startNewRound}, {roundSnapshot}, {roundDeadline}, and {currentRoundId}
  * - A rounds finalization module must implement {finalize}
  * - A earnings settings module must implement {_snapshotRoundEarningsCap}
@@ -54,15 +53,12 @@ import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
  *
  * ----- Version 5 -----
  * - Fixed duplicate app voting in same transaction in {RoundVotesCountingUpgradeable._countVote}
- *
- * ----- Version 7 -----
- * - Added B3TRGovernor contract to the contract
  */
-abstract contract XAllocationVotingGovernor is
+abstract contract XAllocationVotingGovernorV6 is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
-  IXAllocationVotingGovernor
+  IXAllocationVotingGovernorV6
 {
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
 
@@ -159,7 +155,7 @@ abstract contract XAllocationVotingGovernor is
   function supportsInterface(
     bytes4 interfaceId
   ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
-    return interfaceId == type(IXAllocationVotingGovernor).interfaceId || super.supportsInterface(interfaceId);
+    return interfaceId == type(IXAllocationVotingGovernorV6).interfaceId || super.supportsInterface(interfaceId);
   }
 
   /**
@@ -174,7 +170,7 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the version of the governor.
    */
   function version() public view virtual returns (string memory) {
-    return "7";
+    return "6";
   }
 
   /**
@@ -343,16 +339,4 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the VoterRewards contract.
    */
   function voterRewards() public view virtual returns (IVoterRewards);
-
-  /**
-   * @dev Returns the B3TRGovernor contract.
-   */
-  function b3trGovernor() public view virtual returns (IB3TRGovernor);
-
-  /**
-   * @dev Returns the deposit voting power for a given account at a given timepoint.
-   */
-  function getDepositVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
-    return b3trGovernor().getDepositVotingPower(account, timepoint);
-  }
 }

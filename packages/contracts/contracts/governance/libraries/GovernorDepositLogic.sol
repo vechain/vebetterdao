@@ -131,7 +131,9 @@ library GovernorDepositLogic {
     self.deposits[proposalId][depositor] += amount;
 
     uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(SafeCast.toUint48(block.timestamp));
-    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), currentVotes + SafeCast.toUint208(amount));
+    uint208 newVotes = currentVotes + SafeCast.toUint208(amount);
+
+    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), newVotes);
 
     emit ProposalDeposit(depositor, proposalId, amount);
   }
