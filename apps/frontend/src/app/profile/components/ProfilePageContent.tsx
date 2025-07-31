@@ -146,7 +146,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   }, [router])
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
+    <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
         <Button variant="primaryLink" onClick={onGoBack} size="sm" alignSelf={"flex-start"}>
           <FaAngleLeft />

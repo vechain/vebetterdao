@@ -1,4 +1,4 @@
-import { Dialog, Heading, VStack, HStack, Text, Image, Box, Button, Portal } from "@chakra-ui/react"
+import { Dialog, Heading, VStack, Text, Image, Box, Button, Portal, CloseButton, Card } from "@chakra-ui/react"
 import { t } from "i18next"
 
 interface Props {
@@ -7,6 +7,21 @@ interface Props {
 }
 
 export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
+  const steps = [
+    {
+      title: t("Convert your B3TR to VOT3"),
+      image: "/assets/tokens/b3tr-to-vot3.webp",
+    },
+    {
+      title: t("Cast your vote to your favorite app"),
+      image: "/assets/icons/vote-icon.webp",
+    },
+    {
+      title: t("Claim your rewards"),
+      image: "/assets/icons/claim-b3tr-icon.webp",
+    },
+  ]
+
   const LINK_TO_DOCS = () => {
     window.open("https://docs.vebetterdao.org/vebetterdao/x2earn-allocations", "_blank", "noopener")
   }
@@ -18,15 +33,17 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
   )
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onClose} size={"xl"}>
-      <Dialog.Backdrop />
+    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"lg"}>
       <Portal>
+        <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content rounded={"20px"} pt={10} px={3}>
-            <VStack px={5} alignItems={"start"} gap={6}>
-              <Heading size={["lg", "xl"]}>{t("What is a snapshot ?")}</Heading>
-            </VStack>
-
+            <Dialog.CloseTrigger asChild>
+              <CloseButton size="sm" />
+            </Dialog.CloseTrigger>
+            <Dialog.Header pt={0}>
+              <Heading size={["2xl", "4xl"]}>{t("What is a snapshot ?")}</Heading>
+            </Dialog.Header>
             <Dialog.CloseTrigger py={10} />
             <Dialog.Body alignItems={"center"}>
               <VStack alignItems={"center"} gap={8}>
@@ -45,45 +62,27 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                   justifyContent={"space-between"}
                   alignItems={"flex-start"}
                   gap={[2, 2, 4]}>
-                  <HStack w="full" justifyContent="start" p={2} bg={"info-bg"} borderRadius={"9px"}>
-                    <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                      <Image boxSize={["70px", "100px"]} src="/assets/tokens/b3tr-to-vot3.webp" alt="B3TR to VOT3" />
-                    </Box>
-                    <VStack gap={0} alignItems={"start"} p={1}>
-                      {renderStep(1)}
-                      <Text fontSize={["12px", "16px"]} fontWeight={700}>
-                        {t("Convert your B3TR to VOT3")}
-                      </Text>
-                    </VStack>
-                  </HStack>
-
-                  <HStack w="full" justifyContent="start" p={2} bg={"info-bg"} borderRadius={"9px"}>
-                    <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                      <Image boxSize={["70px", "100px"]} src="/assets/icons/vote-icon.webp" alt="Cast your vote" />
-                    </Box>
-                    <VStack gap={0} alignItems={"start"} p={1}>
-                      {renderStep(2)}
-                      <Text fontSize={["12px", "16px"]} fontWeight={700}>
-                        {t("Cast your vote to your favorite app")}
-                      </Text>
-                    </VStack>
-                  </HStack>
-
-                  <HStack w="full" justifyContent="start" p={2} bg={"info-bg"} borderRadius={"9px"}>
-                    <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                      <Image
-                        boxSize={["70px", "100px"]}
-                        src="/assets/icons/claim-b3tr-icon.webp"
-                        alt="Receive your rewards"
-                      />
-                    </Box>
-                    <VStack gap={0} alignItems={"start"} p={1}>
-                      {renderStep(3)}
-                      <Text fontSize={["12px", "16px"]} fontWeight={700}>
-                        {t("Claim your rewards")}
-                      </Text>
-                    </VStack>
-                  </HStack>
+                  {steps.map(step => (
+                    <Card.Root
+                      key={step.title}
+                      flexDirection={"row"}
+                      variant="subtle"
+                      w="full"
+                      alignItems="center"
+                      p={2}
+                      bg={"info-bg"}
+                      borderRadius={"9px"}>
+                      <Box boxSize={["70px", "100px"]} alignItems={"start"}>
+                        <Image boxSize={["70px", "100px"]} src={step.image} alt={step.title} />
+                      </Box>
+                      <VStack gap={0} alignItems={"start"} p={1}>
+                        {renderStep(1)}
+                        <Text fontSize={["12px", "16px"]} fontWeight={700}>
+                          {step.title}
+                        </Text>
+                      </VStack>
+                    </Card.Root>
+                  ))}
                 </VStack>
 
                 <Button variant="primaryAction" w={"full"} onClick={LINK_TO_DOCS}>

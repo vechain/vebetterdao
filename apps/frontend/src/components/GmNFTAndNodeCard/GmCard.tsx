@@ -45,21 +45,16 @@ export const GmCard = ({
       </HStack>
 
       <HStack alignItems="start">
-        <AvatarGroup shape="square" size="md" stacking="first-on-top" spaceX={"-1.5rem"}>
-          {images?.slice(0, 2)?.map((image, index) => (
-            <Avatar.Root key={image} border="none" borderRadius="8px" zIndex={100 + index}>
-              <Avatar.Image src={image} />
+        <AvatarGroup rounded="8px" shape="square" size="md" stacking="last-on-top" spaceX={"-1.5rem"}>
+          {images?.slice(0, 2)?.map(image => (
+            <Avatar.Root key={image} border="none" rounded="8px">
+              <Avatar.Image rounded="8px" src={image} />
             </Avatar.Root>
           ))}
 
           {plusCount > 0 && (
-            <Avatar.Root
-              borderRadius="8px"
-              border="1px solid #E5EEFF"
-              background="#6194F5"
-              fontSize="12px"
-              zIndex={1000}>
-              <Avatar.Fallback>{`+${plusCount}`}</Avatar.Fallback>
+            <Avatar.Root rounded="8px" border="1px solid #E5EEFF" background="#6194F5">
+              <Avatar.Fallback fontSize="12px">{`+${plusCount}`}</Avatar.Fallback>
             </Avatar.Root>
           )}
         </AvatarGroup>

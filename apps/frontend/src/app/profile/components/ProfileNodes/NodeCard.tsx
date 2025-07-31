@@ -27,7 +27,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
           <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
         </Card.Header>
 
-        <Card.Body p="0" gap="8px">
+        <Card.Body p="0" gap="0">
           {node ? (
             <>
               <ConditionalWrapper
