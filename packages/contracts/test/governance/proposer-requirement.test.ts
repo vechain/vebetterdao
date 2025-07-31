@@ -1,20 +1,19 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { setupGovernanceFixtureWithEmissions, setupProposer } from "./fixture.test"
-import { B3TRGovernor, VOT3, B3TR, Treasury, GrantsManager, VeBetterPassport } from "../../typechain-types"
+import { B3TRGovernor, VOT3, B3TR, GalaxyMember } from "../../typechain-types"
 import { ethers } from "ethers"
 import { describe, it, beforeEach } from "mocha"
+import { expect } from "chai"
+import { getRoundId, getVot3Tokens } from "../helpers"
 
-describe("Proposal - Proposer requirement", function () {
+describe.only("Proposal - Proposer requirement", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
   let minterAccount: SignerWithAddress
   let proposer: SignerWithAddress
-  let treasury: Treasury
-  let grantsManager: GrantsManager
   let owner: SignerWithAddress
-  let voter: SignerWithAddress
-  let veBetterPassport: VeBetterPassport
+  let galaxyMember: GalaxyMember
 
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
@@ -23,21 +22,63 @@ describe("Proposal - Proposer requirement", function () {
     b3tr = fixture.b3tr
     minterAccount = fixture.minterAccount
     proposer = fixture.proposer
-    treasury = fixture.treasury
-    grantsManager = fixture.grantsManager
     owner = fixture.owner
-    voter = fixture.voter
-    veBetterPassport = fixture.veBetterPassport
-
+    galaxyMember = fixture.galaxyMember
     // Setup proposer for all tests
     await setupProposer(proposer, b3tr, vot3, minterAccount)
   })
 
   describe("Proposer requirement", function () {
-    it("Should correctly set the GM for the standard governance proposal", async function () {})
+    it("Should correctly set the GM for the standard governance proposal", async function () {
+      await governor.connect(owner).setRequiredGMLevelByProposalType(0, 1) // 0 = standard proposal with earth required
+      const requiredGMLevel = await governor.getRequiredGMLevelByProposalType(0)
+      expect(requiredGMLevel).to.equal(1)
+    })
 
-    it("Should correctly set the GM for the grant proposal", async function () {})
+    it("Should correctly set the GM for the grant proposal", async function () {
+      await governor.connect(owner).setRequiredGMLevelByProposalType(1, 1) // 1 = grant proposal with earth required
+      const requiredGMLevel = await governor.getRequiredGMLevelByProposalType(1)
+      expect(requiredGMLevel).to.equal(1)
+    })
 
-    it("Should not create a proposal if the proposer does not have the correct GM", async function () {})
+    it("Should not create a proposal (0 or 1) if the proposer does not have the correct GM", async function () {
+      // set max GM level to 2
+      await galaxyMember.connect(owner).setMaxLevel(2)
+      await governor.connect(owner).setRequiredGMLevelByProposalType(0, 2) // 0 = standard proposal with earth required
+      const requiredGMLevel = await governor.getRequiredGMLevelByProposalType(0)
+      expect(requiredGMLevel).to.equal(2)
+
+      await getVot3Tokens(proposer, "1000")
+      // grant approval to the governor contract
+      await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
+
+      // get the roundId
+      const roundId = await getRoundId()
+
+      // GM level of the proposer = 1 (earth)
+      const tokenId = await galaxyMember.getSelectedTokenId(proposer.address)
+      const gmLevel = await galaxyMember.levelOf(tokenId)
+      expect(gmLevel).to.equal(1)
+
+      await expect(governor.connect(proposer).propose([], [], [], "", roundId, 0)).to.be.revertedWithCustomError(
+        governor,
+        "GovernorInvalidProposer",
+      )
+    })
+
+    it("Should not set the required GM level above the max level", async function () {
+      const maxGMWeight = await galaxyMember.MAX_LEVEL()
+      await expect(
+        governor.connect(owner).setRequiredGMLevelByProposalType(0, Number(maxGMWeight) + 1),
+      ).to.be.revertedWithCustomError(governor, "GMLevelAboveMaxLevel")
+    })
+  })
+
+  describe("Permissions", function () {
+    it("Should not be able set the required GM level if not admin", async function () {
+      await expect(
+        governor.connect(minterAccount).setRequiredGMLevelByProposalType(0, 1),
+      ).to.be.revertedWithCustomError(governor, "GovernorOnlyExecutor")
+    })
   })
 })

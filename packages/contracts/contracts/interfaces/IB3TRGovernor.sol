@@ -42,6 +42,16 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorDisabledDeposit();
 
   /**
+   * @dev Thrown when the proposer does not fit the requirement (GM weight ATM)
+   */
+  error GMLevelAboveMaxLevel(uint256 gmLevel);
+
+  /**
+   * @dev The GM level is not in the valid range - 0 to max level.
+   */
+  error GovernorInvalidProposer(address proposer, uint256 requiredWeight);
+
+  /**
    * @dev The `account` is not a proposer.
    */
   error GovernorOnlyProposer(address account);
