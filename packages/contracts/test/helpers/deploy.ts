@@ -830,6 +830,7 @@ export const getOrDeployContractInstances = async ({
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
 
+  const tempB3trGovernorAddress = owner.address
   const xAllocationVoting = (await deployAndUpgrade(
     [
       "XAllocationVotingV1",
@@ -837,6 +838,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV3",
       "XAllocationVotingV4",
       "XAllocationVotingV5",
+      "XAllocationVotingV6",
       "XAllocationVoting",
     ],
     [
@@ -862,9 +864,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [tempB3trGovernorAddress], // b3tr address
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       logOutput: false,
     },
   )) as XAllocationVoting
@@ -1164,6 +1167,8 @@ export const getOrDeployContractInstances = async ({
 
   // Grant admin role to voter rewards for registering x allocation voting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
+  await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
+  await xAllocationVoting.connect(owner).setB3TRGovernor(await governor.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())

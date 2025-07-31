@@ -425,6 +425,10 @@ export async function deployLatest(config: ContractsConfig) {
         name: "initializeV2",
         args: [veBetterPassportContractAddressTemp],
       },
+      {
+        name: "initializeV7",
+        args: [TEMP_ADMIN],
+      },
     ],
     {},
     true,
@@ -826,6 +830,13 @@ export async function deployLatest(config: ContractsConfig) {
     await transferContractsAddressManagerRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
+    // Grant GOVERNANCE_ROLE to admin and set B3TRGovernor in XAllocationVoting
+    await xAllocationVoting
+      .connect(deployer)
+      .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
+      .then(async tx => await tx.wait())
+    console.log("Governance role granted to admin in ", await xAllocationVoting.getAddress())
+    await xAllocationVoting.connect(deployer).setB3TRGovernor(await governor.getAddress())
     await xAllocationVoting
       .connect(deployer)
       .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), config.CONTRACTS_ADMIN_ADDRESS)

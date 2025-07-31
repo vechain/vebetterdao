@@ -712,6 +712,7 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as VoterRewards
 
+  const tempB3trGovernorAddress = TEMP_ADMIN
   const xAllocationVoting = (await deployAndUpgrade(
     [
       "XAllocationVotingV1",
@@ -719,6 +720,7 @@ export async function deployAll(config: ContractsConfig) {
       "XAllocationVotingV3",
       "XAllocationVotingV4",
       "XAllocationVotingV5",
+      "XAllocationVotingV6",
       "XAllocationVoting",
     ],
     [
@@ -744,9 +746,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [tempB3trGovernorAddress],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       logOutput: true,
     },
   )) as XAllocationVoting
@@ -1228,6 +1231,14 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferContractsAddressManagerRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+
+    // grant to the deployer the GOVERNANCE_ROLE in XAllocationVoting
+    await xAllocationVoting
+      .connect(deployer)
+      .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
+      .then(async tx => await tx.wait())
+    console.log("Governance role granted to admin in ", await xAllocationVoting.getAddress())
+    await xAllocationVoting.connect(deployer).setB3TRGovernor(await governor.getAddress())
 
     await xAllocationVoting
       .connect(deployer)
