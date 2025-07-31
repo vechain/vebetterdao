@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import dayjs from "dayjs"
 
 export type GrantFormStoreState = GrantFormData & {
@@ -45,7 +45,7 @@ const initialState: GrantFormData = {
     {
       description: "",
       deliverables: "",
-      fundingAmount: "",
+      fundingAmount: 0,
       durationFrom: dayjs().unix(), //TODO: This should be the current date
       durationTo: dayjs().add(1, "month").unix(), //TODO: This should be the current date + 1 month
     },
