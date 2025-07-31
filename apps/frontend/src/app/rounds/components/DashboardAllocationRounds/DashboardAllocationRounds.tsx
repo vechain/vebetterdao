@@ -51,6 +51,7 @@ export const DashboardAllocationRounds = () => {
         <HStack gap={4} justifyContent="space-between" w="full">
           {isDesktop ? (
             <Button
+              fontSize={"md"}
               variant="plain"
               color="primary"
               disabled={allocationRound.isFirstRound}
@@ -60,7 +61,7 @@ export const DashboardAllocationRounds = () => {
             </Button>
           ) : (
             <IconButton
-              size={"lg"}
+              fontSize={"md"}
               aria-label="Previous round"
               variant="ghost"
               colorPalette="primary"
@@ -94,6 +95,7 @@ export const DashboardAllocationRounds = () => {
           {isDesktop ? (
             <Button
               variant="plain"
+              fontSize={"md"}
               color="primary"
               disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
@@ -103,7 +105,7 @@ export const DashboardAllocationRounds = () => {
             </Button>
           ) : (
             <IconButton
-              size={"lg"}
+              fontSize={"md"}
               aria-label="Next round"
               variant="ghost"
               colorPalette="primary"

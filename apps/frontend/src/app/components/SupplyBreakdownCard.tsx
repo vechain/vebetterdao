@@ -1,5 +1,5 @@
 import { useB3trTokenDetails } from "@/api"
-import { Box, Card, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, Icon, Skeleton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
@@ -62,7 +62,9 @@ export const SupplyBreakdownCard = () => {
     <Card.Root variant="baseWithBorder" w="full">
       <Card.Header>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">{t("Supply breakdown")}</Heading>
+          <Heading size="xl" fontWeight="bold">
+            {t("Supply breakdown")}
+          </Heading>
           <Tooltip
             content={
               <Text>
@@ -79,28 +81,28 @@ export const SupplyBreakdownCard = () => {
       </Card.Header>
       <Card.Body>
         <VStack gap={4} align="flex-start">
-          <Grid templateColumns={["repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
+          <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
-              <Text textStyle={["sm", "sm", "xs"]} fontWeight="400">
+              <Text textStyle={["sm", "sm", "md"]} fontWeight="400">
                 {t("B3TR in circulation")}
               </Text>
               <Skeleton loading={!data}>
-                <Heading size={["lg", "lg", "md"]} color={"#004CFC"}>
+                <Heading size={["lg", "xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack gap={1} align="flex-start">
-              <Text textStyle={["sm", "sm", "xs"]} fontWeight="400">
+              <Text textStyle={["sm", "sm", "md"]} fontWeight="400">
                 {t("VOT3 in circulation")}
               </Text>
               <Skeleton loading={!data}>
-                <Heading size={["lg", "lg", "md"]} color={"#3DBA67"}>
+                <Heading size={["lg", "xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
-          </Grid>
+          </SimpleGrid>
           {!data ? (
             <Skeleton h={10} w="full" />
           ) : (

@@ -28,7 +28,11 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
-            {isAboveMd ? <CantVoteCard /> : <DashboardAllocationRounds />}
+            {isAboveMd && (
+              <>
+                <CantVoteCard /> <DashboardAllocationRounds />
+              </>
+            )}
             <DashboardXApps />
           </VStack>
         </GridItem>
