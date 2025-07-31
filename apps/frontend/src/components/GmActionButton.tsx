@@ -10,18 +10,15 @@ import { MintNFTModal } from "./MintNFTModal"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
 import { BaseTooltip } from "./BaseTooltip"
 
 export const GmActionButton = ({
+  b3trBalanceScaled,
   buttonProps,
-  b3trBalance,
 }: {
+  b3trBalanceScaled?: string
   buttonProps: ButtonProps
-  b3trBalance?: {
-    original: string
-    scaled: string
-    formatted: string
-  }
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -39,17 +36,23 @@ export const GmActionButton = ({
   const isGMOwned = userGms && userGms?.length > 0
   const isMaxGmLevelReached = selectedGM && maxGMLevel === Number(selectedGM.tokenLevel)
   const isEnoughBalanceToUpgradeGM =
-    b3trBalance && Number(b3trBalance?.scaled || 0) >= Number(selectedGM?.b3trToUpgrade)
+    b3trBalanceScaled && Number(b3trBalanceScaled || 0) >= Number(selectedGM?.b3trToUpgrade)
 
   // Modal controls
   const { isOpen: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
   const { isOpen: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
+  const {
+    isOpen: isGetFreeNFTModalOpen,
+    onOpen: onOpenGetFreeNFTModal,
+    onClose: onCloseGetFreeNFTModal,
+  } = useDisclosure()
 
   // Mint NFT handlers
   const handleMintSuccess = useCallback(() => {
     onOpenMintNftModal()
+    onCloseGetFreeNFTModal()
     closeTransactionModal()
-  }, [onOpenMintNftModal, closeTransactionModal])
+  }, [onOpenMintNftModal, onCloseGetFreeNFTModal, closeTransactionModal])
 
   const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
     transactionModalCustomUI: {
@@ -100,7 +103,7 @@ export const GmActionButton = ({
     if (!hasUserVoted && !isGMOwned) {
       return (
         <Button {...buttonProps} onClick={goToVote}>
-          {t("Vote now!")}
+          {t("Vote")}
         </Button>
       )
     }
@@ -108,8 +111,8 @@ export const GmActionButton = ({
     // Case 2: User doesn't own GM NFT
     if (!isGMOwned) {
       return (
-        <Button {...buttonProps} onClick={handleMintGM}>
-          {t("Mint now!")}
+        <Button {...buttonProps} onClick={onOpenGetFreeNFTModal}>
+          {t("Get free NFT")}
         </Button>
       )
     }
@@ -144,7 +147,7 @@ export const GmActionButton = ({
             {...buttonProps}
             isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
             onClick={handleOnUpgrade}>
-            {t("Upgrade now!")}
+            {t("Upgrade NFT")}
           </Button>
         </span>
       </BaseTooltip>
@@ -152,12 +155,12 @@ export const GmActionButton = ({
   }, [
     buttonProps,
     goToVote,
-    handleMintGM,
     handleOnUpgrade,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,
     isGMOwned,
     isMaxGmLevelReached,
+    onOpenGetFreeNFTModal,
     t,
   ])
 
@@ -173,6 +176,7 @@ export const GmActionButton = ({
         onClose={onCloseUpgradeGMModal}
         sendTransaction={handleUpgradeGM}
       />
+      <GetFreeNFTModal isOpen={isGetFreeNFTModalOpen} onClose={onCloseGetFreeNFTModal} onCtaClick={handleMintGM} />
     </>
   )
 }

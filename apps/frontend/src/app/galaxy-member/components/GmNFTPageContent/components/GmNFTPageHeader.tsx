@@ -161,7 +161,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           flexGrow={1}>
           {actionDescription}
           <GmActionButton
-            b3trBalance={b3trBalance}
+            b3trBalanceScaled={b3trBalance?.scaled}
             buttonProps={{
               variant: "whiteAction",
               w: "full",
