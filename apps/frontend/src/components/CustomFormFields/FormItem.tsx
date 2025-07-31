@@ -1,8 +1,8 @@
-import { FormControl, FormErrorMessage, FormLabel, Input, Text, Textarea } from "@chakra-ui/react"
+import { FormControl, FormErrorMessage, FormLabel, VStack, Input, Text, Textarea } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
 
 type FormItemProps = {
-  label: string
+  label?: string
   description?: string
   placeholder?: string
   type?: "text" | "textarea" | "email" | "url"
@@ -23,23 +23,28 @@ export const FormItem = ({
   const InputComponent = type === "textarea" ? Textarea : Input
 
   return (
-    <FormControl isInvalid={!!error} textAlign="right">
-      <FormLabel mb={description ? 0 : undefined} color="#252525">
-        {label}
-      </FormLabel>
-      {description && (
-        <Text fontSize="xs" color="gray.500" mb={2}>
-          {description}
-        </Text>
-      )}
-      <InputComponent
-        placeholder={placeholder}
-        {...register}
-        {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
-        onBlur={onBlur}
-        rounded="xl"
-      />
-      {error && <FormErrorMessage>{error}</FormErrorMessage>}
+    <FormControl isInvalid={!!error} h="full" w="full">
+      <VStack textAlign="left" alignItems="flex-start" justifyContent="flex-end" h="full">
+        {label && (
+          <FormLabel mb={description ? 0 : undefined} color="#252525">
+            {label}
+          </FormLabel>
+        )}
+        {description && (
+          <Text fontSize="xs" color="gray.500" mb={2}>
+            {description}
+          </Text>
+        )}
+        <InputComponent
+          placeholder={placeholder}
+          {...register}
+          {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
+          {...(type === "textarea" && { h: "full" })}
+          onBlur={onBlur}
+          rounded="xl"
+        />
+        {error && <FormErrorMessage>{error}</FormErrorMessage>}
+      </VStack>
     </FormControl>
   )
 }
