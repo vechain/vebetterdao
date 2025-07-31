@@ -41,6 +41,11 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  console.log("selectedCategories within the metadata", selectedCategories)
+
+  // Adjust max categories based on deprecated categories
+  const maxAllowedCategories = MAX_CATEGORIES
+
   const handleSelectCategory = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
       setValue(
@@ -48,10 +53,10 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
         selectedCategories.filter(id => id !== categoryId),
         { shouldDirty: true },
       )
-    } else if (selectedCategories.length < MAX_CATEGORIES) {
+    } else if (selectedCategories.length < maxAllowedCategories) {
       setValue("categories", [...selectedCategories, categoryId], { shouldDirty: true })
     }
-    if (selectedCategories.length + 1 >= MAX_CATEGORIES && !selectedCategories.includes(categoryId)) {
+    if (selectedCategories.length + 1 >= maxAllowedCategories && !selectedCategories.includes(categoryId)) {
       onClose()
     }
   }
@@ -104,7 +109,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
           )
         })}
 
-        {selectedCategories.length < MAX_CATEGORIES && (
+        {selectedCategories.length < maxAllowedCategories && (
           <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur={true}>
             <PopoverTrigger>
               <Button leftIcon={<FaPlus />} variant="outline" fontSize="14px" borderRadius="full" size="sm">
@@ -138,8 +143,12 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
                         borderRadius="md"
                         alignItems="center"
                         cursor="pointer"
-                        bg={selectedCategories.includes(category.id) ? "blue.50" : "transparent"}
-                        _hover={{ bg: "#F5F5F5" }}
+                        bg={selectedCategories.includes(category.id) ? "primary.50" : "transparent"}
+                        _hover={{ bg: "gray.100" }}
+                        _dark={{
+                          bg: selectedCategories.includes(category.id) ? "primary.900" : "transparent",
+                          _hover: { bg: "gray.900" },
+                        }}
                         onClick={() => handleSelectCategory(category.id)}>
                         <Box width="12px" height="12px" borderRadius="full" bg={category.color} mr={3} />
                         <Text>{category.name}</Text>
