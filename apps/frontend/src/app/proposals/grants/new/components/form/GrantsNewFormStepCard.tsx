@@ -10,6 +10,8 @@ import { GrantMilestones } from "./steps/GrantMilestones"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 import { useCurrentAllocationsRoundId } from "@/api"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
+import { useRouter } from "next/navigation"
+
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
   ABOUT_APPLICANT = "ABOUT_APPLICANT",
@@ -26,7 +28,7 @@ export type GrantStep = {
 export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
   const { setData, ...formData } = useGrantProposalFormStore()
-
+  const router = useRouter()
   const { handleSubmit, control, register, formState, setValue, getValues, watch } = useForm<GrantFormData>({
     defaultValues: formData,
   })
@@ -73,8 +75,7 @@ export const GrantsNewFormStepCard = () => {
   const { onMetadataUpload } = useUploadGrantProposalMetadata()
   const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
     onSuccess: () => {
-      //TODO: Redirect to the proposal page
-      console.log("Proposal created")
+      router.push(`/proposals/grants`)
     },
   })
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

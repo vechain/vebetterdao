@@ -3,7 +3,7 @@ import { useCallback, useState } from "react"
 import { uploadBlobToIPFS } from "@/utils"
 import { GrantFormData } from "./proposals/grants/types"
 
-type GrantProposalMetadata = Omit<GrantFormData, "termsOfService"> & {
+export type GrantProposalMetadata = Omit<GrantFormData, "termsOfService"> & {
   title: string
   shortDescription: string
 }

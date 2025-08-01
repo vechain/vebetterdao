@@ -1,7 +1,8 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { getIpfsMetadata } from "@/api/ipfs"
-import { Proposal, ProposalEnriched } from "./types"
+import { Proposal } from "./types"
 import { ProposalState } from "@/api"
+import { GrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 
 /**
  * Returns the query key for fetching multiple grant proposal details.
@@ -21,10 +22,13 @@ export const getGrantProposalDetailsQueryKey = (proposalEvents: Proposal[]) => [
  * @param proposalEvents Array of proposal event data containing IPFS hashes and proposer addresses
  * @returns Object with detailed proposal information mapped by proposal ID
  */
-export const useGrantProposalDetails = (proposalEvents: Proposal[]) => {
+export const useGrantProposalDetails = (
+  proposalEvents: Proposal[],
+): UseQueryResult<Record<string, GrantProposalMetadata & Proposal>> => {
   return useQuery({
     queryKey: getGrantProposalDetailsQueryKey(proposalEvents),
     queryFn: async () => {
+      console.log("proposalEvents", proposalEvents)
       if (proposalEvents.length === 0) {
         return {}
       }
@@ -32,14 +36,11 @@ export const useGrantProposalDetails = (proposalEvents: Proposal[]) => {
       // Batch fetch IPFS metadata for all proposals
       const ipfsMetadataPromises = proposalEvents.map(event =>
         event.ipfsDescription
-          ? getIpfsMetadata<{
-              title?: string
-              description?: string
-              shortDescription?: string
-              image?: string
-            }>(event.ipfsDescription, false)
+          ? getIpfsMetadata<GrantProposalMetadata>(`ipfs://${event.ipfsDescription}`, false)
           : Promise.resolve(undefined),
       )
+
+      console.log("ipfsMetadataPromises", ipfsMetadataPromises)
 
       // TODO: Batch resolve VNS domain
       // This would require additional implementation based on your domain resolution strategy
@@ -53,34 +54,44 @@ export const useGrantProposalDetails = (proposalEvents: Proposal[]) => {
       ])
 
       // Create detailed proposal objects mapped by ID
-      const detailsMap: Record<string, ProposalEnriched> = {}
+      const detailsMap: Record<string, GrantProposalMetadata & Proposal> = {}
 
       proposalEvents.forEach((event, index) => {
         const ipfsMetadata = ipfsMetadatas[index]
         const proposerDomain = proposerDomains[index]
+        console.log("proposerDomain", proposerDomain)
 
         detailsMap[event.id] = {
           ...event,
-          b3tr: "", //TODO: FIX THIS
-          dAppGrant: "", //TODO: FIX THIS
-          state: ProposalState.Pending,
-          phases: {
-            //TODO: FIX THIS
-            [ProposalState.Pending]: {
-              startAt: "0",
-              endAt: "0",
-            },
-            [ProposalState.Active]: {
-              startAt: "0",
-              endAt: "0",
-            },
-          },
-          title: ipfsMetadata?.title || ipfsMetadata?.shortDescription || "Grant Proposal",
-          description: ipfsMetadata?.description || ipfsMetadata?.shortDescription || "",
-          proposer: {
-            profilePicture: "", //TODO: FIX THIS
-            addressOrDomain: proposerDomain ?? event.proposerAddress,
-          },
+          title: ipfsMetadata?.projectName || ipfsMetadata?.shortDescription || "Grant Proposal",
+          description: ipfsMetadata?.projectName || ipfsMetadata?.shortDescription || "",
+          shortDescription: ipfsMetadata?.shortDescription || "",
+          state: event.state ?? ProposalState.Pending,
+          projectName: ipfsMetadata?.projectName ?? "",
+          companyName: ipfsMetadata?.companyName ?? "",
+          appTestnetUrl: ipfsMetadata?.appTestnetUrl ?? "",
+          projectWebsite: ipfsMetadata?.projectWebsite ?? "",
+          githubUsername: ipfsMetadata?.githubUsername ?? "",
+          twitterUsername: ipfsMetadata?.twitterUsername ?? "",
+          discordUsername: ipfsMetadata?.discordUsername ?? "",
+          grantType: ipfsMetadata?.grantType ?? "",
+          problemDescription: ipfsMetadata?.problemDescription ?? "",
+          solutionDescription: ipfsMetadata?.solutionDescription ?? "",
+          targetUsers: ipfsMetadata?.targetUsers ?? "",
+          competitiveEdge: ipfsMetadata?.competitiveEdge ?? "",
+          benefitsToUsers: ipfsMetadata?.benefitsToUsers ?? "",
+          benefitsToDApps: ipfsMetadata?.benefitsToDApps ?? "",
+          x2EModel: ipfsMetadata?.x2EModel ?? "",
+          revenueModel: ipfsMetadata?.revenueModel ?? "",
+          highLevelRoadmap: ipfsMetadata?.highLevelRoadmap ?? "",
+          milestones: ipfsMetadata?.milestones ?? [],
+          benefitsToVeChainEcosystem: ipfsMetadata?.benefitsToVeChainEcosystem ?? "",
+          applicantName: ipfsMetadata?.applicantName ?? "",
+          applicantSurname: ipfsMetadata?.applicantSurname ?? "",
+          applicantRole: ipfsMetadata?.applicantRole ?? "",
+          applicantProfileUrl: ipfsMetadata?.applicantProfileUrl ?? "",
+          applicantCountry: ipfsMetadata?.applicantCountry ?? "",
+          applicantCity: ipfsMetadata?.applicantCity ?? "",
         }
       })
 

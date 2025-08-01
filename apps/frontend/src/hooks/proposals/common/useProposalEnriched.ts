@@ -34,12 +34,11 @@ export const useProposalEnriched = () => {
         ...details,
         title: details?.title || "Grant Proposal",
         b3tr: `${event.grantAmount} B3TR`,
-        proposer: details?.proposer ?? {
-          //TODO: FIX THIS
-          profilePicture: "",
+        proposer: {
+          profilePicture: details?.applicantProfileUrl ?? "",
           addressOrDomain: event.proposerAddress,
         },
-        dAppGrant: "dApp Grant",
+        dAppGrant: `${details?.grantType} Grant`,
         state,
         //TODO: Figure out how to get the phases
         phases: {

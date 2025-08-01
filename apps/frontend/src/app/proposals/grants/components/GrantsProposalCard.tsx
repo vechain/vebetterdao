@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import { PiTelegramLogo } from "react-icons/pi"
 import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { ProposalState } from "@/api"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 type GrantsProposalCardProps = {
   proposal: ProposalEnriched
@@ -37,7 +38,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
           </Text>
         </HStack>
         <HStack w="full" align="stretch">
-          <Text fontSize={{ base: "14px", md: "16px" }}>{proposal.proposer.addressOrDomain}</Text>
+          <Text fontSize={{ base: "14px", md: "16px" }}>{humanAddress(proposal.proposer.addressOrDomain, 4, 4)}</Text>
           <Center height="20px">
             <Divider orientation="vertical" />
           </Center>

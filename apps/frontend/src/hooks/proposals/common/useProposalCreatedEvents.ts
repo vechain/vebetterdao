@@ -5,6 +5,7 @@ import { B3TRGovernor__factory, Treasury__factory } from "@repo/contracts"
 import { formatEther } from "ethers"
 import BigNumber from "bignumber.js"
 import { Proposal, ProposalType } from "../grants/types"
+import { ProposalState } from "@/api"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi
@@ -54,11 +55,14 @@ export const useProposalCreatedEvents = () => {
 
     proposalEvents.data?.forEach(proposal => {
       const type = typeMap.get(proposal.id) ?? ProposalType.Standard
+      const allCalldatas = proposal.calldatas.map(calldata => getAndDecodeGrantAmount(calldata))
+      const grantAmount = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
       const enhancedProposal: Proposal = {
         ...proposal,
         type,
+        state: ProposalState.Pending,
         ...(type === ProposalType.Grant && {
-          grantAmount: getAndDecodeGrantAmount(proposal.calldatas[0]),
+          grantAmount,
         }),
       }
 

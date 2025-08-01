@@ -100,8 +100,14 @@ export const GrantsPageContent = () => {
       />
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
-          {proposals &&
-            proposals.map((proposal: ProposalEnriched) => <GrantsProposalCard key={proposal.id} proposal={proposal} />)}
+          <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
+            {proposals &&
+              proposals.map((proposal: ProposalEnriched) => (
+                <GridItem colSpan={{ base: 1 }} key={proposal.id}>
+                  <GrantsProposalCard key={proposal.id} proposal={proposal} />
+                </GridItem>
+              ))}
+          </Grid>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
           <Card w="full" variant="ghost" p={8}></Card>

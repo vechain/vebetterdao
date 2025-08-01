@@ -42,6 +42,8 @@ export type ProposalEnriched = Proposal & {
 
 export type Proposal = {
   id: string
+  description?: string
+  state: ProposalState
   type: ProposalType
   ipfsDescription: string
   grantAmount?: BigNumber | undefined
