@@ -109,4 +109,9 @@ export const CONTRACT_LIST = [
     contractAddress: config.nodeManagementContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
   },
+  {
+    name: "Grants Manager",
+    contractAddress: config.grantsManagerContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
+  },
 ]
