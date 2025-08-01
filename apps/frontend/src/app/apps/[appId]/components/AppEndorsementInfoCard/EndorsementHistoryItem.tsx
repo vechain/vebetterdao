@@ -70,7 +70,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
           })}
         </Text>
       </VStack>
-      <VStack align="end" gap={0} flex={1} w="full">
+      <VStack align="end" gap={0}>
         <HStack gap={1} align="flex-start">
           <Text fontWeight={600} color={isEndorsingColor}>
             {`${isEndorsing ? "+" : "-"}`}

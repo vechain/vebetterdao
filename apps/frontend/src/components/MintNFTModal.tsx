@@ -12,6 +12,7 @@ type Props = {
   tokenID?: string
 }
 
+// TODO: check modal here
 export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
   const { imageData } = useNFTImage()
   const { t } = useTranslation()

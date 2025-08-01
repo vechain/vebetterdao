@@ -1,4 +1,4 @@
-import { useMediaQuery, Dialog, Portal } from "@chakra-ui/react"
+import { useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
 import { BaseBottomSheet } from "./BaseBottomSheet"
 
 type Props = {
@@ -45,7 +45,11 @@ export const BaseModal = ({
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content rounded={"2xl"} {...modalContentProps}>
-              {isCloseable && showCloseButton ? <Dialog.CloseTrigger /> : null}
+              {isCloseable && showCloseButton ? (
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size="md" />
+                </Dialog.CloseTrigger>
+              ) : null}
               <Dialog.Body p={10} rounded={"2xl"} {...modalBodyProps}>
                 {children}
               </Dialog.Body>

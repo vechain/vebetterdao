@@ -73,7 +73,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         onClose()
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading size="lg">{t("Endorse {{appName}} dApp", { appName: xApp?.name })}</Heading>
+        <Heading size="xl" fontWeight={700}>
+          {t("Endorse {{appName}} dApp", { appName: xApp?.name })}
+        </Heading>
 
         <Text
           as="span"
@@ -94,7 +96,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   key={node.nodeId}
                   variant="outline"
                   alignItems="flex-start"
-                  direction="row"
+                  flexDirection="row"
                   gap="8px"
                   p="16px"
                   rounded="8px">
@@ -106,20 +108,25 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                     value={node.nodeId}
                     flex={1}
                     justifyContent="space-between"
-                    flexDirection="row-reverse">
-                    <Card.Body p="0" gap="8px">
+                    alignItems="center"
+                    flexDirection="row">
+                    <Card.Body p="0" gap="0">
                       <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                         {t("Node")}
                       </Text>
                       <Text fontWeight={700} lineHeight={1.6} lineClamp={1}>
                         {`${node.name} #${node.nodeId}`}
                       </Text>
-                      <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
+                      <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
                         <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
                           {t("{{value}} points", { value: node.xNodePoints })}
                         </Text>
                       </Box>
                     </Card.Body>
+                    <Card.Footer p="0">
+                      <RadioGroup.ItemHiddenInput />
+                      <RadioGroup.ItemIndicator />
+                    </Card.Footer>
                   </RadioGroup.Item>
                 </Card.Root>
               ))}

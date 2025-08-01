@@ -1,5 +1,5 @@
 import { AppDetails } from "./AppDetails"
-import { Heading, Dialog, VStack } from "@chakra-ui/react"
+import { Heading, Dialog, VStack, Portal } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export type AppAdministrationRole = {
@@ -25,30 +25,33 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
       placement="center"
       closeOnInteractOutside>
       <Dialog.Backdrop />
-
-      <Dialog.Content>
-        <Dialog.Header>
-          <Heading size="lg">{t("Managed apps")}</Heading>
-        </Dialog.Header>
-        <Dialog.CloseTrigger />
-        <Dialog.Body>
-          <VStack gap={12}>
-            {userAppRoles.map(role => {
-              if (role.isAdmin || role.isModerator) {
-                return (
-                  <AppDetails
-                    appId={role.appId}
-                    isAdmin={role.isAdmin}
-                    isModerator={role.isModerator}
-                    key={`managed-app-${role.appId}`}
-                    showSeparator={true}
-                  />
-                )
-              }
-            })}
-          </VStack>
-        </Dialog.Body>
-      </Dialog.Content>
+      <Portal>
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.Header>
+              <Heading size="lg">{t("Managed apps")}</Heading>
+            </Dialog.Header>
+            <Dialog.CloseTrigger />
+            <Dialog.Body>
+              <VStack gap={12}>
+                {userAppRoles.map(role => {
+                  if (role.isAdmin || role.isModerator) {
+                    return (
+                      <AppDetails
+                        appId={role.appId}
+                        isAdmin={role.isAdmin}
+                        isModerator={role.isModerator}
+                        key={`managed-app-${role.appId}`}
+                        showSeparator={true}
+                      />
+                    )
+                  }
+                })}
+              </VStack>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
     </Dialog.Root>
   )
 }

@@ -83,7 +83,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                       key={node.nodeId}
                       variant="outline"
                       alignItems="center"
-                      direction="row"
+                      flexDirection="row"
                       gap="8px"
                       p="16px"
                       rounded="8px">
@@ -108,7 +108,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                           lineClamp={isAbove800 ? 1 : undefined}>
                           {`${node.name} #${node.nodeId}`}
                         </Text>
-                        <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
+                        <Box display="inline-block" w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
                           <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
                             {t("{{value}} points", { value: node.xNodePoints })}
                           </Text>

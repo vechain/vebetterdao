@@ -1,4 +1,4 @@
-import { Card, Dialog, HStack, Text, VStack, NativeSelect, Box, Center, Image, Icon } from "@chakra-ui/react"
+import { Card, Dialog, HStack, Text, VStack, NativeSelect, Box, Center, Image, Icon, Portal } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
 import { DatePicker } from "@/components"
@@ -96,65 +96,69 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
       <Dialog.Backdrop />
-      <Dialog.Content borderRadius="20px">
-        <Dialog.CloseTrigger />
-        <Dialog.Header>
-          <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-            {t("Transaction history")}
-          </Text>
-        </Dialog.Header>
+      <Portal>
+        <Dialog.Positioner>
+          <Dialog.Content borderRadius="20px">
+            <Dialog.CloseTrigger />
+            <Dialog.Header>
+              <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+                {t("Transaction history")}
+              </Text>
+            </Dialog.Header>
 
-        <Dialog.Body pb={6}>
-          <Card.Root w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={2} h={"full"} pb={4}>
-            <Card.Body overflowY="hidden">
-              <HStack justifyContent="flex-end" alignItems="baseline">
-                <Icon
-                  as={FaSync}
-                  onClick={() => {
-                    refetch()
-                    setTransactionTypeFilter("ALL")
-                    setIsRotating(!isRotating)
-                  }}
-                  cursor="pointer"
-                  transform={isRotating ? "rotate(360deg)" : "rotate(0deg)"}
-                  transition="transform 0.4s ease-in-out"
-                />
-              </HStack>
+            <Dialog.Body pb={6}>
+              <Card.Root w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={2} h={"full"} pb={4}>
+                <Card.Body overflowY="hidden">
+                  <HStack justifyContent="flex-end" alignItems="baseline">
+                    <Icon
+                      as={FaSync}
+                      onClick={() => {
+                        refetch()
+                        setTransactionTypeFilter("ALL")
+                        setIsRotating(!isRotating)
+                      }}
+                      cursor="pointer"
+                      transform={isRotating ? "rotate(360deg)" : "rotate(0deg)"}
+                      transition="transform 0.4s ease-in-out"
+                    />
+                  </HStack>
 
-              <HStack gap={4} mb={4} justifyContent="space-between" w="full">
-                <VStack alignItems="start" gap={0} flex="0.75">
-                  <Text fontSize="sm" mb={1}>
-                    {t("Type")}
-                  </Text>
-                  <NativeSelect.Root size="sm">
-                    <NativeSelect.Indicator />
-                    <NativeSelect.Field
-                      rounded={"md"}
-                      value={transactionTypeFilter}
-                      onChange={e => setTransactionTypeFilter(e.target.value)}
-                      w="full">
-                      <option value="ALL">{t("All")}</option>
-                      <option value="DEPOSIT">{t("Deposits")}</option>
-                      <option value="WITHDRAW">{t("Withdrawals")}</option>
-                      <option value="DISTRIBUTE_REWARDS">{t("Rewards Distribution")}</option>
-                      <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
-                    </NativeSelect.Field>
-                  </NativeSelect.Root>
-                </VStack>
+                  <HStack gap={4} mb={4} justifyContent="space-between" w="full">
+                    <VStack alignItems="start" gap={0} flex="0.75">
+                      <Text fontSize="sm" mb={1}>
+                        {t("Type")}
+                      </Text>
+                      <NativeSelect.Root size="sm">
+                        <NativeSelect.Indicator />
+                        <NativeSelect.Field
+                          rounded={"md"}
+                          value={transactionTypeFilter}
+                          onChange={e => setTransactionTypeFilter(e.target.value)}
+                          w="full">
+                          <option value="ALL">{t("All")}</option>
+                          <option value="DEPOSIT">{t("Deposits")}</option>
+                          <option value="WITHDRAW">{t("Withdrawals")}</option>
+                          <option value="DISTRIBUTE_REWARDS">{t("Rewards Distribution")}</option>
+                          <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
+                        </NativeSelect.Field>
+                      </NativeSelect.Root>
+                    </VStack>
 
-                <VStack alignItems="start" gap={0} flex="1">
-                  <Text fontSize="sm" mb={1}>
-                    {t("Date Range")}
-                  </Text>
-                  <DatePicker startDate={startDate} endDate={endDate} onChange={handleDateRangeChange} size="sm" />
-                </VStack>
-              </HStack>
+                    <VStack alignItems="start" gap={0} flex="1">
+                      <Text fontSize="sm" mb={1}>
+                        {t("Date Range")}
+                      </Text>
+                      <DatePicker startDate={startDate} endDate={endDate} onChange={handleDateRangeChange} size="sm" />
+                    </VStack>
+                  </HStack>
 
-              {renderTx()}
-            </Card.Body>
-          </Card.Root>
-        </Dialog.Body>
-      </Dialog.Content>
+                  {renderTx()}
+                </Card.Body>
+              </Card.Root>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
     </Dialog.Root>
   )
 }

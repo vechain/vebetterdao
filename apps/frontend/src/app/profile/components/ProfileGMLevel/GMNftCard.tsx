@@ -39,7 +39,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
           <Image src={gm?.metadata?.image} alt={gm?.metadata?.name} boxSize="62px" rounded="8px" />
         </Card.Header>
 
-        <Card.Body p="0" gap="8px">
+        <Card.Body p="0" gap="0">
           {gm ? (
             <>
               <ConditionalWrapper

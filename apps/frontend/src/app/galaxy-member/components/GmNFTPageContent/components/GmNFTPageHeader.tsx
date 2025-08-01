@@ -14,6 +14,7 @@ import {
   VStack,
   useDisclosure,
   Dialog,
+  Portal,
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -180,22 +181,26 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
         }}
         placement="center"
         size="xl">
-        <Dialog.Backdrop />
-        <Dialog.Content boxShadow="none" background="transparent" maxW="500px" w="full" p={0} m={0}>
-          <Dialog.Body p={0}>
-            <Box
-              position="relative"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              overflow="hidden"
-              bgGradient={getLevelGradient(Number(tokenLevel))}
-              p={1}
-              rounded="16px">
-              <Image src={metadata?.image} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
-            </Box>
-          </Dialog.Body>
-        </Dialog.Content>
+        <Portal>
+          <Dialog.Positioner>
+            <Dialog.Backdrop />
+            <Dialog.Content boxShadow="none" background="transparent" maxW="500px" w="full" p={0} m={0}>
+              <Dialog.Body p={0}>
+                <Box
+                  position="relative"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  overflow="hidden"
+                  bgGradient={getLevelGradient(Number(tokenLevel))}
+                  p={1}
+                  rounded="16px">
+                  <Image src={metadata?.image} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
+                </Box>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
       </Dialog.Root>
     </Card.Root>
   )

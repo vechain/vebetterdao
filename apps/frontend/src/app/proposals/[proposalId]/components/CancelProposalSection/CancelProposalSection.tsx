@@ -1,6 +1,6 @@
 import { ProposalState } from "@/api"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
-import { Button, Card, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, Dialog, Text, VStack, useDisclosure, Portal } from "@chakra-ui/react"
 import { UilBan } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -63,35 +63,39 @@ export const CancelProposalSection = () => {
       <Dialog.Root
         open={confirmationModal.open}
         onOpenChange={details => !details.open && handleCloseConfirmationModal()}>
-        <Dialog.Backdrop />
-        <Dialog.Content>
-          <Dialog.Body py="16px">
-            <VStack alignItems="stretch" gap={6}>
-              <Heading fontSize={"24px"} fontWeight={700}>
-                {t("Cancel proposal")}
-              </Heading>
-              <VStack alignItems="stretch" gap={0}>
-                <Text fontSize={"14px"}>
-                  {t(
-                    "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
-                  )}
-                </Text>
-                <Text fontWeight={600} fontSize={"14px"}>
-                  {t("This action cannot be undone.")}
-                </Text>
-              </VStack>
-              <HStack justifyContent={"flex-end"}>
-                <Button variant={"primaryGhost"} onClick={handleCloseConfirmationModal}>
-                  {t("Go back")}
-                </Button>
-                <Button variant={"dangerFilled"} onClick={handleCancelProposal}>
-                  <UilBan size="18px" />
-                  {t("Cancel this proposal")}
-                </Button>
-              </HStack>
-            </VStack>
-          </Dialog.Body>
-        </Dialog.Content>
+        <Portal>
+          <Dialog.Positioner>
+            <Dialog.Backdrop />
+            <Dialog.Content>
+              <Dialog.Body py="16px">
+                <VStack alignItems="stretch" gap={6}>
+                  <Heading fontSize={"24px"} fontWeight={700}>
+                    {t("Cancel proposal")}
+                  </Heading>
+                  <VStack alignItems="stretch" gap={0}>
+                    <Text fontSize={"14px"}>
+                      {t(
+                        "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
+                      )}
+                    </Text>
+                    <Text fontWeight={600} fontSize={"14px"}>
+                      {t("This action cannot be undone.")}
+                    </Text>
+                  </VStack>
+                  <HStack justifyContent={"flex-end"}>
+                    <Button variant={"primaryGhost"} onClick={handleCloseConfirmationModal}>
+                      {t("Go back")}
+                    </Button>
+                    <Button variant={"dangerFilled"} onClick={handleCancelProposal}>
+                      <UilBan size="18px" />
+                      {t("Cancel this proposal")}
+                    </Button>
+                  </HStack>
+                </VStack>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
       </Dialog.Root>
     </Card.Root>
   )
