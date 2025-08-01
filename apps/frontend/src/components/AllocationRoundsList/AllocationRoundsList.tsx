@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, HStack, Heading, HeadingProps, Link, VStack } from "@chakra-ui/react"
+import { Alert, Box, Button, Card, HStack, Heading, Link, VStack } from "@chakra-ui/react"
 import { useAllocationsRoundsEvents } from "@/api"
 import { AllocationRoundCard } from "./components/AllocationRoundCard"
 import { useCallback, useMemo, useState } from "react"
@@ -9,14 +9,12 @@ import NextLink from "next/link"
 type Props = {
   maxRoundsToShow?: number
   showLoadMore?: boolean
-  headingSize?: HeadingProps["size"]
   showViewAll?: boolean
   renderInsideCard?: boolean
 }
 export const AllocationRoundsList: React.FC<Props> = ({
   maxRoundsToShow = 3,
   showLoadMore = false,
-  headingSize = "4xl",
   showViewAll = true,
   renderInsideCard = false,
 }) => {
@@ -42,7 +40,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
       <VStack gap={8} w="full" align={"flex-start"}>
         {!renderInsideCard && (
           <HStack w="full" justify="space-between" alignItems={"baseline"}>
-            <Heading size={headingSize} fontWeight="bold" lineHeight={1.2}>
+            <Heading size={["3xl", "4xl"]} fontWeight="bold" lineHeight={1.2}>
               {t("Allocations")}
             </Heading>
             {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
@@ -80,7 +78,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
     totalRoundsToShow,
     invertedCreatedRounds,
     renderInsideCard,
-    headingSize,
+    loadMore,
     showViewAll,
     showLoadMore,
     renderRounds,
@@ -93,7 +91,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
         <Card.Root w="full" variant="baseWithBorder">
           <Card.Header>
             <HStack w="full" justify="space-between" alignItems={"baseline"}>
-              <Heading size={headingSize}>{t("Allocations")}</Heading>
+              <Heading size={["3xl", "4xl"]}>{t("Allocations")}</Heading>
               {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
                 <Link asChild variant="plain" colorPalette="primary">
                   <NextLink href="/rounds">

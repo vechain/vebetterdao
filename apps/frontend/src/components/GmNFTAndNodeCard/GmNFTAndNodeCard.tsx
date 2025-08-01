@@ -104,7 +104,7 @@ export const GmNFTAndNodeCard = () => {
                     title={selectedGM?.metadata?.name || "name"}
                     footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
                     images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
-                    onCardClick={() => router.push(`/profile?tab=gm`)}
+                    onCardClick={() => router.push(`/galaxy-member/${selectedGM?.tokenId}`)}
                   />
                 ) : (
                   <GmEmptyStateCard
