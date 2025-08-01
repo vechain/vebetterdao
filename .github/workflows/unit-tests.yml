@@ -10,7 +10,6 @@ on:
     branches:
       - main
       - testnet
-      - feat/update-slither-workflow
 
 jobs:
   check-changes:
@@ -207,7 +206,7 @@ jobs:
 
   run-slither:
     name: Slither Analysis
-    uses: vechain/github-actions/.github/workflows/slither.yaml@feature/slither-action
+    uses: vechain/github-actions/.github/workflows/slither.yaml@62cc6d6dc08c6a49518766e877942685f080b443 # v.1.9.0
     needs: check-changes
     if: needs.check-changes.outputs.contracts-changed == 'true'
     with:
