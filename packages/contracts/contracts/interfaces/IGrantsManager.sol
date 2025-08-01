@@ -30,19 +30,6 @@ pragma solidity 0.8.20;
  */
 interface IGrantsManager {
   // ------------------ Events ------------------ //
-  /**
-   * @notice Emitted when a milestone is registered
-   * @param proposalId The ID of the proposal
-   * @param milestones The milestones of the proposal
-   * @param projectDetailsMetadataURI The metadata URI of the project
-   * @param proposer The address of the proposer
-   */
-  event MilestonesRegistered(
-    uint256 indexed proposalId,
-    Milestones milestones,
-    string projectDetailsMetadataURI,
-    address indexed proposer
-  );
 
   /**
    * @notice Emitted when a milestone is validated ( ready to be claimed by the receiver )

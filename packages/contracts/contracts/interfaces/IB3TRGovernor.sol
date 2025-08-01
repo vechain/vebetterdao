@@ -175,11 +175,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   );
 
   /**
-   * @dev Emitted when a proposal is created with milestones
-   */
-  event MilestonesCreated(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType, string description);
-
-  /**
    * @dev Emitted when a proposal is queued.
    */
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);

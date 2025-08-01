@@ -221,7 +221,6 @@ contract GrantsManager is
     m.claimedAmount = 0; // 0 because the milestone is not claimed yet
 
     _validateMilestones(m);
-    emit MilestonesRegistered(_milestoneId, m, projectDetailsMetadataURI, proposer);
   }
 
   /**
@@ -253,7 +252,7 @@ contract GrantsManager is
    */
   function approveMilestones(
     uint256 proposalId,
-    uint256 milestoneIndex
+    uint256 milestoneIndex 
   ) external onlyRoleOrGovernance(GRANTS_APPROVER_ROLE) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     MilestoneState currentState = $.proposalMilestones[proposalId].milestone[milestoneIndex].status;

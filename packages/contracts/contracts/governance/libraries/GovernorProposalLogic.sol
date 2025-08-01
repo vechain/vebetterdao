@@ -77,11 +77,6 @@ library GovernorProposalLogic {
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
 
   /**
-   * @dev Emitted when a proposal is created with type information.
-   */
-  event MilestonesCreated(uint256 indexed proposalId, GovernorTypes.ProposalType proposalTypeValue, string description);
-
-  /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
    */
   error GovernorUnexpectedProposalState(
@@ -640,10 +635,6 @@ library GovernorProposalLogic {
 
     // Emit event just for the proposal type
     emit ProposalCreatedWithType(proposalId, proposalTypeValue);
-
-    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
-      emit MilestonesCreated(proposalId, proposalTypeValue, description);
-    }
   }
 
   /**

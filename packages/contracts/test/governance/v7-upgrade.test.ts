@@ -1083,4 +1083,7 @@ describe("Governance - Upgrades", function () {
     const v7VotingThresholdStandard = await governorV7.votingThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
     expect(v7VotingThresholdStandard).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_VOTING_THRESHOLD))
   })
+
+  // it("Should loop the length of the quorum numerator history when initializing the new quorum numerator", async function () {
+  // })
 })
