@@ -61,19 +61,7 @@ interface IGrantsManager {
   event MilestoneDescriptionMetadataURIUpdated(uint256 indexed proposalId, string newDescriptionMetadataURI);
 
   // ------------------ Errors ------------------ //
-  /**
-   * @notice Error thrown when a milestone is already in a specific state
-   * @param proposalId The ID of the proposal
-   * @param milestoneIndex The index of the milestone
-   * @param newStatus The new state to set
-   * @param currentState The current state of the milestone
-   */
-  error MilestoneAlreadyInState(
-    uint256 proposalId,
-    uint256 milestoneIndex,
-    MilestoneState newStatus,
-    MilestoneState currentState
-  );
+
 
   /**
    * @notice Error thrown when a target is invalid
@@ -97,13 +85,7 @@ interface IGrantsManager {
    * @param proposalId The ID of the proposal
    * @param milestoneIndex The index of the milestone
    */
-  error MilestoneAlreadyValidated(uint256 proposalId, uint256 milestoneIndex);
-
-  /**
-   * @notice Error thrown when milestone status is not pending
-   * @param status The current status of the milestone
-   */
-  error MilestoneNotPending(MilestoneState status);
+  error MilestoneAlreadyApproved(uint256 proposalId, uint256 milestoneIndex);
 
   /**
    * @notice Error thrown when milestone recipient is zero address
@@ -151,7 +133,7 @@ interface IGrantsManager {
    * @param proposalId The ID of the proposal
    * @param milestoneIndex The index of the milestone
    */
-  error PreviousMilestoneNotValidated(uint256 proposalId, uint256 milestoneIndex);
+  error PreviousMilestoneNotApproved(uint256 proposalId, uint256 milestoneIndex);
 
   /**
    * @notice Error thrown when milestone is already claimed
@@ -233,11 +215,17 @@ interface IGrantsManager {
    */
   enum MilestoneState {
     Pending, // 0 - default
-    Validated, // 1 - milestone is active and claimable
+    Approved, // 1 - approved by admin and claimable
     Claimed, // 2 - funds claimed by recipient
-    Rejected, // 3 - admin rejects
-    Expired, // 4 - deadline passed without action
-    Refunded // 5 - funds returned to treasury
+    Rejected // 3 - admin rejects
+  }
+
+  /**
+   * @notice GrantProposalStatus enum to store the status of the grant proposal
+   */
+  enum GrantProposalStatus {
+    InDevelopment,
+    Completed
   }
 
   /**
@@ -245,35 +233,22 @@ interface IGrantsManager {
    */
   struct Milestone {
     uint256 amount;
-    MilestoneState status;
+    bool isClaimed;
+    bool isApproved;
   }
 
   /**
-   * @notice Milestones struct
+   * @notice GrantProposal struct
    */
-  struct Milestones {
+  struct GrantProposal { 
     uint256 id;
     uint256 totalAmount;
     uint256 claimedAmount;  
     address proposer;
-    Milestone[] milestone;
+    Milestone[] milestones;
     string milestonesDetailsMetadataURI; 
     string projectDetailsMetadataURI; 
   }
-
-  // /**
-  //  * @notice Sets the status of a proposal
-  //  * @param proposalId The ID of the proposal
-  //  * @param status The status to set
-  //  */
-  // function setProposalStatus(uint256 proposalId, ProposalStatus status) external;
-
-  // /**
-  //  * @notice Returns the status of a proposal
-  //  * @param proposalId The ID of the proposal
-  //  * @return ProposalStatus The status of the proposal
-  //  */
-  // function getProposalStatus(uint256 proposalId) external view returns (ProposalStatus);
 
   // ------------------ Grants Manager Milestone Functions ------------------ //
 
@@ -304,9 +279,23 @@ interface IGrantsManager {
   /**
    * @notice Returns the milestones for a proposal
    * @param proposalId The ID of the proposal
-   * @return Milestones The milestones for the proposal
+   * @return GrantProposal The milestones for the proposal
    */
-  function getMilestones(uint256 proposalId) external view returns (Milestones memory);
+  function getGrantProposal(uint256 proposalId) external view returns (GrantProposal memory);
+
+  /**
+   * @notice Returns the status of a grant proposal
+   * @param proposalId The ID of the proposal
+   * @return GrantProposalStatus The status of the grant proposal
+   */
+  function getGrantProposalStatus(uint256 proposalId) external view returns (GrantProposalStatus);
+
+  /**
+   * @notice Returns the milestones for a proposal
+   * @param proposalId The ID of the proposal
+   * @return GrantProposal The milestones for the proposal
+   */
+  function getMilestones(uint256 proposalId) external view returns (Milestone[] memory);
 
   /**
    * @notice Approves a milestone

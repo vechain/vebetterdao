@@ -39,7 +39,6 @@ import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.so
 import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
-import { console } from "hardhat/console.sol";
 
 /**
  * @title GrantsManager
@@ -63,7 +62,7 @@ contract GrantsManager is
   /// @notice Storage structure for GrantsManager
   /// @custom:storage-location erc7201:b3tr.storage.GrantsManager
   struct GrantsManagerStorage {
-    mapping(uint256 => Milestones) proposalMilestones; // proposalId => milestones
+    mapping(uint256 proposalId => GrantProposal grantProposal) grant;
     IB3TRGovernor governor;
     ITreasury treasury;
     IB3TR b3tr;
@@ -140,27 +139,6 @@ contract GrantsManager is
     _;
   }
 
-  // ------------------ Milestone State Functions ------------------ //
-  // /**
-  //  * @notice Sets the status of a proposal
-  //  * @param proposalId The ID of the proposal
-  //  * @param status The status to set
-  //  */
-  // function setProposalStatus(uint256 proposalId, ProposalStatus status) external onlyAdminOrGovernanceRole {
-  //   GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-  //   $.proposalMilestones[proposalId].status = status;
-  // }
-
-  // /**
-  //  * @notice Returns the status of a proposal
-  //  * @param proposalId The ID of the proposal
-  //  * @return ProposalStatus The status of the proposal
-  //  */
-  // function getProposalStatus(uint256 proposalId) external view returns (ProposalStatus) {
-  //   GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-  //   return $.proposalMilestones[proposalId].status;
-  // }
-
   // ------------------ Grants Manager Milestone Functions ------------------ //
   /**
    * @dev Internal function to create milestones for a proposal.
@@ -180,8 +158,10 @@ contract GrantsManager is
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     uint256 _milestoneId = proposalId;
-    Milestones storage m = $.proposalMilestones[_milestoneId];
+    GrantProposal storage m = $.grant[_milestoneId];
     uint256 totalAmount = 0;
+    bool isApproved = false;
+    bool isClaimed = false;
 
     for (uint256 i = 0; i < calldatas.length; i++) {
       bytes memory data = calldatas[i];
@@ -210,7 +190,9 @@ contract GrantsManager is
       }
 
       totalAmount += amount;
-      $.proposalMilestones[_milestoneId].milestone.push(Milestone({ amount: amount, status: MilestoneState.Pending }));
+      $.grant[_milestoneId].milestones.push(
+        Milestone({ amount: amount, isClaimed: isClaimed, isApproved: isApproved })
+      );
     }
 
     m.id = _milestoneId;
@@ -232,17 +214,76 @@ contract GrantsManager is
   function getMilestone(uint256 proposalId, uint256 milestoneIndex) external view returns (Milestone memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-    return $.proposalMilestones[proposalId].milestone[milestoneIndex];
+    return $.grant[proposalId].milestones[milestoneIndex];
+  }
+
+  // ------------------ Milestone State Functions ------------------ //
+
+  /**
+   * @notice Returns the status of a grant proposal
+   * @param proposalId The id of the proposal
+   * @return GrantProposalStatus The status of the grant proposal { see IGrantsManager:GrantProposalStatus }
+   */
+  function getGrantProposalStatus(uint256 proposalId) external view returns (GrantProposalStatus) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    GrantProposal memory grantProposal = $.grant[proposalId];
+    Milestone[] memory milestones = grantProposal.milestones;
+
+    MilestoneState lastState = _getMilestoneState(proposalId, milestones.length - 1);
+
+    if (lastState == MilestoneState.Approved) {
+      return GrantProposalStatus.Completed;
+    }
+    return GrantProposalStatus.InDevelopment;
+  }
+
+  /**
+   * @notice Returns the state of a milestone
+   * @param proposalId The id of the proposal
+   * @param milestoneIndex The index of the milestone
+   * @return status The state of the milestone {see IGrantsManager:MilestoneState }
+   */
+  function _getMilestoneState(
+    uint256 proposalId,
+    uint256 milestoneIndex
+  ) internal view returns (MilestoneState status) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    GrantProposal memory grant = $.grant[proposalId];
+    Milestone memory milestone = grant.milestones[milestoneIndex];
+
+    if ($.governor.state(proposalId) == GovernorTypes.ProposalState.Canceled) {
+      return MilestoneState.Rejected;
+    }
+
+    if (milestone.isClaimed) {
+      return MilestoneState.Claimed;
+    }
+
+    if (milestone.isApproved) {
+      return MilestoneState.Approved;
+    }
+
+    return MilestoneState.Pending;
   }
 
   /**
    * @notice Returns the milestones for a proposal.
    * @param proposalId The id of the proposal
-   * @return Milestones The milestones for the proposal
+   * @return GrantProposal The milestones for the proposal
    */
-  function getMilestones(uint256 proposalId) external view returns (Milestones memory) {
+  function getMilestones(uint256 proposalId) external view returns (Milestone[] memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.proposalMilestones[proposalId];
+    return $.grant[proposalId].milestones;
+  }
+
+  /**
+   * @notice Returns the grant proposal for a proposal.
+   * @param proposalId The id of the proposal
+   * @return GrantProposal The grant proposal for the proposal
+   */
+  function getGrantProposal(uint256 proposalId) external view returns (GrantProposal memory) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    return $.grant[proposalId];
   }
 
   /**
@@ -252,10 +293,10 @@ contract GrantsManager is
    */
   function approveMilestones(
     uint256 proposalId,
-    uint256 milestoneIndex 
+    uint256 milestoneIndex
   ) external onlyRoleOrGovernance(GRANTS_APPROVER_ROLE) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    MilestoneState currentState = $.proposalMilestones[proposalId].milestone[milestoneIndex].status;
+    MilestoneState currentState = _getMilestoneState(proposalId, milestoneIndex);
 
     // get the state of the proposal, should be queud or executed
     GovernorTypes.ProposalState proposalState = $.governor.state(proposalId);
@@ -266,24 +307,23 @@ contract GrantsManager is
       revert MilestoneStateNotPending(currentState);
     }
 
-    // check that the previous milestone is validated
+    // check that the previous milestone is validated : chronologically approving
     if (milestoneIndex > 0) {
-      MilestoneState previousState = $.proposalMilestones[proposalId].milestone[milestoneIndex - 1].status;
-      if (previousState != MilestoneState.Validated && previousState != MilestoneState.Claimed) {
-        revert PreviousMilestoneNotValidated(proposalId, milestoneIndex - 1);
+      MilestoneState previousState = _getMilestoneState(proposalId, milestoneIndex - 1);
+      if (previousState != MilestoneState.Approved && previousState != MilestoneState.Claimed) {
+        revert PreviousMilestoneNotApproved(proposalId, milestoneIndex - 1);
       }
     }
 
-    // if (milestoneIndex == $.proposalMilestones[proposalId].milestone.length - 1) {
-    //   $.proposalMilestones[proposalId].status = ProposalStatus.Completed;
-    // }
-
-    _setMilestoneStatus(proposalId, milestoneIndex, MilestoneState.Validated);
+    $.grant[proposalId].milestones[milestoneIndex].isApproved = true;
     emit MilestoneValidated(proposalId, milestoneIndex);
   }
 
+  // approve with a reason
+  // only the admin can approve with a reason
+
   /**
-   * @notice Sets the minimum milestone count
+   * @notice Sets the minimum number of milestones for a grant proposal
    * @param minimumMilestoneCount The minimum milestone count
    */
   function setMinimumMilestoneCount(uint256 minimumMilestoneCount) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -307,8 +347,7 @@ contract GrantsManager is
    * @return MilestoneState The state of the milestone
    */
   function getMilestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState) {
-    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.proposalMilestones[proposalId].milestone[milestoneIndex].status;
+    return _getMilestoneState(proposalId, milestoneIndex);
   }
 
   /**
@@ -317,18 +356,34 @@ contract GrantsManager is
    */
   function rejectMilestone(uint256 proposalId) external onlyAdminOrGovernanceRole {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    Milestone[] memory milestones = $.proposalMilestones[proposalId].milestone;
+    Milestone[] memory milestones = $.grant[proposalId].milestones;
 
+    // check if all of the milestones are approved
     for (uint256 i = 0; i < milestones.length; i++) {
-      if (milestones[i].status == MilestoneState.Validated) {
-        revert MilestoneAlreadyValidated(proposalId, i);
+      if (_getMilestoneState(proposalId, i) == MilestoneState.Approved) {
+        revert MilestoneAlreadyApproved(proposalId, i);
       }
     }
 
+    // Reconstruct the arguments(targets, values, calldatas, descriptionHash) from milestones
+    address[] memory target = new address[](milestones.length);
+    string memory description = $.grant[proposalId].projectDetailsMetadataURI;
+
     for (uint256 i = 0; i < milestones.length; i++) {
-      _setMilestoneStatus(proposalId, i, MilestoneState.Rejected);
+      target[i] = address(this);
+    }
+    uint256[] memory values = new uint256[](milestones.length);
+    for (uint256 i = 0; i < milestones.length; i++) {
+      values[i] = 0;
+    }
+    bytes32 descriptionHash = keccak256(bytes(description));
+    bytes[] memory calldatas = new bytes[](milestones.length);
+    for (uint256 i = 0; i < milestones.length; i++) {
+      calldatas[i] = abi.encodeWithSelector($.treasury.transferB3TR.selector, address(this), milestones[i].amount);
     }
 
+    // Turn the proposal into a cancel proposal from the
+    $.governor.cancel(target, values, calldatas, descriptionHash);
     _transferRemainingAmountToTreasury(proposalId);
   }
 
@@ -339,7 +394,7 @@ contract GrantsManager is
    */
   function getTotalAmountForMilestones(uint256 milestoneId) external view returns (uint256) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.proposalMilestones[milestoneId].totalAmount;
+    return $.grant[milestoneId].totalAmount;
   }
 
   // ------------------ Grants Manager Funds Functions ------------------ //
@@ -351,14 +406,16 @@ contract GrantsManager is
   function claimMilestone(uint256 proposalId, uint256 milestoneIndex) external nonReentrant {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-    Milestones storage m = $.proposalMilestones[proposalId];
-    if (milestoneIndex >= m.milestone.length) {
+    GrantProposal storage m = $.grant[proposalId];
+    if (milestoneIndex >= m.milestones.length) {
       revert InvalidMilestoneIndex(proposalId, milestoneIndex);
     }
 
     // check that the milestone is validated or not already claimed
-    Milestone memory milestone = m.milestone[milestoneIndex];
-    if (milestone.status != MilestoneState.Validated && milestone.status != MilestoneState.Claimed) {
+    Milestone memory milestone = m.milestones[milestoneIndex];
+    // get the state of the milestone
+    MilestoneState milestoneState = _getMilestoneState(proposalId, milestoneIndex);
+    if (milestoneState != MilestoneState.Approved && milestoneState != MilestoneState.Claimed) {
       revert MilestoneNotApprovedByAdmin(proposalId, milestoneIndex);
     }
 
@@ -367,8 +424,8 @@ contract GrantsManager is
       revert CallerIsNotTheGrantProposer(msg.sender, proposer);
     }
 
-    // check that the milestone is not already claimed
-    if (milestone.status == MilestoneState.Claimed) {
+    // check that the milestone is not already  if (GovernorStateLogic.state($.governor, proposalId) == GovernorTypes.ProposalState.Canceled) {
+    if (milestoneState == MilestoneState.Claimed) {
       revert MilestoneAlreadyClaimed(proposalId, milestoneIndex);
     }
 
@@ -383,26 +440,9 @@ contract GrantsManager is
       revert TransferFailed();
     }
 
-    // Update milestone status to Claimed using this contract's context
-    this.setMilestoneStatus(proposalId, milestoneIndex, MilestoneState.Claimed);
-
     // Update the claimed amount of the proposal
-    m.claimedAmount += milestone.amount;
-
+    m.milestones[milestoneIndex].isClaimed = true;
     emit MilestoneClaimed(proposalId, milestoneIndex, milestone.amount);
-  }
-
-  /**
-   * @notice Public function to set milestone status, only callable by this contract
-   * @param proposalId The ID of the proposal
-   * @param milestoneIndex The index of the milestone
-   * @param newStatus The new status to set
-   */
-  function setMilestoneStatus(uint256 proposalId, uint256 milestoneIndex, MilestoneState newStatus) external {
-    if (msg.sender != address(this)) {
-      revert NotAuthorized();
-    }
-    _setMilestoneStatus(proposalId, milestoneIndex, newStatus);
   }
 
   /**
@@ -412,8 +452,7 @@ contract GrantsManager is
    * @return bool True if the milestone is claimable, false otherwise
    */
   function isClaimable(uint256 proposalId, uint256 milestoneIndex) external view returns (bool) {
-    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.proposalMilestones[proposalId].milestone[milestoneIndex].status == MilestoneState.Validated;
+    return _getMilestoneState(proposalId, milestoneIndex) == MilestoneState.Approved;
   }
 
   // ------------------ Grants Manager Contract Functions ------------------ //
@@ -481,10 +520,10 @@ contract GrantsManager is
    */
   function updateMilestoneDescriptionMetadataURI(uint256 proposalId, string memory newDescriptionMetadataURI) external {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    if (msg.sender != $.proposalMilestones[proposalId].proposer) {
+    if (msg.sender != $.grant[proposalId].proposer) {
       revert NotAuthorized();
     }
-    $.proposalMilestones[proposalId].milestonesDetailsMetadataURI = newDescriptionMetadataURI;
+    $.grant[proposalId].milestonesDetailsMetadataURI = newDescriptionMetadataURI;
 
     emit MilestoneDescriptionMetadataURIUpdated(proposalId, newDescriptionMetadataURI);
   }
@@ -496,7 +535,7 @@ contract GrantsManager is
    */
   function getMilestoneDescriptionMetadataURI(uint256 proposalId) external view returns (string memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.proposalMilestones[proposalId].milestonesDetailsMetadataURI;
+    return $.grant[proposalId].milestonesDetailsMetadataURI;
   }
 
   /**
@@ -506,15 +545,15 @@ contract GrantsManager is
    */
   function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.proposalMilestones[proposalId].projectDetailsMetadataURI;
+    return $.grant[proposalId].projectDetailsMetadataURI;
   }
 
   // ------------------  Internal Functions ------------------ //
   /**
    * @notice Validates the milestones
-   * @param milestones The milestones to validate
+   * @param grant The milestones to validate
    */
-  function _validateMilestones(Milestones memory milestones) internal view {
+  function _validateMilestones(GrantProposal memory grant) internal view {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     if (msg.sender != address($.governor)) {
@@ -522,58 +561,39 @@ contract GrantsManager is
     }
 
     // Check the proposer
-    if (milestones.proposer == address(0)) {
+    if (grant.proposer == address(0)) {
       revert MilestoneProposerZeroAddress();
     }
 
     // Check the milestones details metadata URI
-    if (bytes(milestones.milestonesDetailsMetadataURI).length == 0) {
+    if (bytes(grant.milestonesDetailsMetadataURI).length == 0) {
       revert MilestoneDetailsMetadataURIEmpty();
     }
 
     // Check the project details metadata URI
-    if (bytes(milestones.projectDetailsMetadataURI).length == 0) {
+    if (bytes(grant.projectDetailsMetadataURI).length == 0) {
       revert ProjectDetailsMetadataURIEmpty();
     }
 
     // Check the milestones amounts
-    for (uint256 i = 0; i < milestones.milestone.length; i++) {
-      if (milestones.milestone[i].amount == 0) {
+    for (uint256 i = 0; i < grant.milestones.length; i++) {
+      if (grant.milestones[i].amount == 0) {
         revert MilestoneAmountZero(i);
       }
     }
 
-    if (milestones.totalAmount == 0) {
+    if (grant.totalAmount == 0) {
       revert MilestoneTotalAmountZero();
     }
 
-    if (milestones.claimedAmount > milestones.totalAmount) {
-      revert MilestoneClaimedAmountExceedsTotalAmount(milestones.claimedAmount, milestones.totalAmount);
+    if (grant.claimedAmount > grant.totalAmount) {
+      revert MilestoneClaimedAmountExceedsTotalAmount(grant.claimedAmount, grant.totalAmount);
     }
 
     // Check the minimum milestone count
-    if (milestones.milestone.length < $.minimumMilestoneCount) {
-      revert InvalidNumberOfMilestones(milestones.milestone.length, $.minimumMilestoneCount);
+    if (grant.milestones.length < $.minimumMilestoneCount) {
+      revert InvalidNumberOfMilestones(grant.milestones.length, $.minimumMilestoneCount);
     }
-  }
-
-  /**
-   * @dev Sets the status of a milestone.
-   * @param proposalId The ID of the proposal.
-   * @param milestoneIndex The index of the milestone.
-   * @param newStatus The new status of the milestone.
-   */
-  function _setMilestoneStatus(uint256 proposalId, uint256 milestoneIndex, MilestoneState newStatus) internal {
-    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    // only the contract itself can set the milestone status
-    if (msg.sender != address(this) && !hasRole(DEFAULT_ADMIN_ROLE, _msgSender())) {
-      revert NotAuthorized();
-    }
-    MilestoneState currentState = $.proposalMilestones[proposalId].milestone[milestoneIndex].status;
-    if (currentState == newStatus) {
-      revert MilestoneAlreadyInState(proposalId, milestoneIndex, newStatus, currentState);
-    }
-    $.proposalMilestones[proposalId].milestone[milestoneIndex].status = newStatus;
   }
 
   /**
@@ -582,8 +602,7 @@ contract GrantsManager is
    */
   function _transferRemainingAmountToTreasury(uint256 proposalId) internal {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    uint256 remainingAmount = $.proposalMilestones[proposalId].totalAmount -
-      $.proposalMilestones[proposalId].claimedAmount;
+    uint256 remainingAmount = $.grant[proposalId].totalAmount - $.grant[proposalId].claimedAmount;
     if (remainingAmount > 0) {
       $.b3tr.transfer(address($.treasury), remainingAmount);
     }
