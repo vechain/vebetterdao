@@ -6,11 +6,11 @@ import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { useRouter } from "next/navigation"
 import { PiTelegramLogo } from "react-icons/pi"
-import { Proposal } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { ProposalState } from "@/api"
 
 type GrantsProposalCardProps = {
-  proposal: Proposal
+  proposal: ProposalEnriched
 }
 
 export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {

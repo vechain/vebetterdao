@@ -89,7 +89,6 @@ export type GrantFormData = {
   // Milestones
   milestones: Array<{
     description: string
-    deliverables: string
     fundingAmount: number
     durationFrom: number //Unix timestamp in seconds
     durationTo: number //Unix timestamp in seconds

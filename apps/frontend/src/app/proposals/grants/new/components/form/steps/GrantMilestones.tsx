@@ -137,9 +137,9 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
                   </UnorderedList>
                 </GridItem>
                 {!isFirst && ( //TODO: This information should come from the Smart Contract, to know the minimal amount of milestones
-                  <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
                     <Button
-                      variant="primarySubtle"
+                      borderRadius="full"
                       leftIcon={<Icon as={UilTrash} />}
                       onClick={() => removeMilestone(index)}>
                       {t("Remove")}
@@ -165,7 +165,6 @@ export const GrantMilestones = ({ register, setValue, getValues, setData, errors
     //Append to internal array and update the form store
     milestones.push({
       description: "",
-      deliverables: "",
       fundingAmount: 0,
       durationFrom: dayjs(lastMilestone.durationTo * 1000)
         .add(1, "month")

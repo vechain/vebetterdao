@@ -7,6 +7,7 @@ import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } 
 import { useBuildTransaction } from "@/hooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
+import { type GrantFormData } from "./types"
 
 const governorContractAddress = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
@@ -15,6 +16,13 @@ const treasuryAddress = getConfig().treasuryContractAddress
 const treasuryInterface = Treasury__factory.createInterface()
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 
+type BuildClausesProps = {
+  metadataIpfsCID: string
+  milestonesIpfsCID: string
+  milestones: GrantFormData["milestones"]
+  votingRoundId: number
+  depositAmount: string
+}
 /**
  * Data required to create a proposal. Multiple actions could be provided in case we want multiple function to be executed
  */
@@ -33,35 +41,39 @@ export type useCreateGrantProposalProps = {
 export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: useCreateGrantProposalProps) => {
   const { account } = useWallet()
 
-  const buildClauses = useCallback(() => {
-    const clauses: EnhancedClause[] = []
+  const buildClauses = useCallback(
+    ({ metadataIpfsCID, milestones, depositAmount, votingRoundId, milestonesIpfsCID }: BuildClausesProps) => {
+      const clauses: EnhancedClause[] = []
 
-    const calldatas = [
-      treasuryInterface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("150000")]),
-    ]
+      const calldatas = milestones.map((milestone: GrantFormData["milestones"][0]) =>
+        treasuryInterface.encodeFunctionData("transferB3TR", [
+          grantsManagerAddress,
+          ethers.parseEther(milestone.fundingAmount.toString()),
+        ]),
+      )
+      const args = [
+        Array(milestones.length).fill(treasuryAddress),
+        Array(milestones.length).fill(0),
+        calldatas,
+        metadataIpfsCID,
+        votingRoundId,
+        ethers.parseEther(depositAmount).toString(),
+        milestonesIpfsCID,
+      ]
+      const createProposalClause = buildClause({
+        contractInterface: b3trGovernorInterface,
+        to: governorContractAddress,
+        method: "proposeGrant",
+        args,
+        comment: `Create new proposal for round ${votingRoundId} with metadata: ${metadataIpfsCID} and milestones: ${milestonesIpfsCID}`,
+      })
 
-    const argszada = [
-      [treasuryAddress],
-      [0], //TODO: REMOVE MOCK VALUE
-      calldatas,
-      "bafkreigegkllgrware3br2y64frqre4zlmz7es7s7rogs6lrs22x7jo55y",
-      4,
-      0,
-      "bafkreigegkllgrware3br2y64frqre4zlmz7es7s7rogs6lrs22x7jo55y",
-    ]
-    console.log("argszada", argszada)
-    const createProposalClause = buildClause({
-      contractInterface: b3trGovernorInterface,
-      to: governorContractAddress,
-      method: "proposeGrant",
-      args: argszada,
-    })
-    console.log("createProposalClause", createProposalClause)
+      clauses.push(createProposalClause)
 
-    clauses.push(createProposalClause)
-
-    return clauses
-  }, [])
+      return clauses
+    },
+    [],
+  )
 
   const refetchQueryKeys = useMemo(() => {
     return [getProposalsEventsQueryKey(), getProposalClaimableUserDepositsQueryKey(account?.address ?? "")]
@@ -71,5 +83,6 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
     onSuccess,
     refetchQueryKeys,
     transactionModalCustomUI,
+    gasPadding: 0.15,
   })
 }

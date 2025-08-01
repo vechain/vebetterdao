@@ -7,6 +7,9 @@ import { useForm } from "react-hook-form"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { useGrantProposalFormStore } from "@/store/useGrantProposalFormStore"
 import { GrantMilestones } from "./steps/GrantMilestones"
+import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
+import { useCurrentAllocationsRoundId } from "@/api"
+import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
   ABOUT_APPLICANT = "ABOUT_APPLICANT",
@@ -67,6 +70,14 @@ export const GrantsNewFormStepCard = () => {
     index: 0,
     count: steps.length,
   })
+  const { onMetadataUpload } = useUploadGrantProposalMetadata()
+  const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
+    onSuccess: () => {
+      //TODO: Redirect to the proposal page
+      console.log("Proposal created")
+    },
+  })
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const firstStep = 0
   const lastStep = steps.length - 1
 
@@ -74,9 +85,27 @@ export const GrantsNewFormStepCard = () => {
     //Keep new and old data in the store
     setData({ ...data })
     if (activeStep !== lastStep) {
-      goToNext()
+      return goToNext()
     }
-    console.log("Form submitted:", data)
+
+    if (!currentRoundId || isNaN(Number(currentRoundId))) return //TODO: THROW ERROR
+
+    const title = data.projectName
+    const shortDescription = data.problemDescription
+    const proposalMetadataURI = await onMetadataUpload({ ...data, title, shortDescription })
+    if (!proposalMetadataURI) return console.error("Error uploading proposal metadata") //TODO: THROW ERROR
+
+    //Upload the description and milestones to IPFS
+    const milestonesIpfsCID = await onMetadataUpload(data.milestones)
+    if (!milestonesIpfsCID) return console.error("Error uploading milestones") //TODO: THROW ERROR
+
+    await createGrantProposal({
+      metadataIpfsCID: proposalMetadataURI,
+      milestonesIpfsCID,
+      milestones: data.milestones,
+      votingRoundId: Number(currentRoundId) + 2, //TODO: Make sure this is next round or possible round depending on min voting delay
+      depositAmount: "0", //TODO: Add info from the form
+    })
   }
 
   const handleSaveDraft = () => {

@@ -44,7 +44,6 @@ const initialState: GrantFormData = {
   milestones: [
     {
       description: "",
-      deliverables: "",
       fundingAmount: 0,
       durationFrom: dayjs().unix(), //TODO: This should be the current date
       durationTo: dayjs().add(1, "month").unix(), //TODO: This should be the current date + 1 month
