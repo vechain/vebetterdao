@@ -42,7 +42,7 @@ export const CreateProposalStepperCard = () => {
   const [steps, setSteps] = useState<CreateProposalStep[]>([])
 
   const { value: activeStep, setStep: setActiveStep } = useSteps({
-    defaultStep: 1,
+    defaultStep: 0,
     count: steps.length,
   })
 
@@ -70,26 +70,27 @@ export const CreateProposalStepperCard = () => {
   return (
     <Card.Root variant="baseWithBorder">
       <Card.Header>
-        <Heading size="md">{t("Progress")}</Heading>
+        <Heading size="xl" fontWeight="bold">
+          {t("Progress")}
+        </Heading>
       </Card.Header>
-      <Card.Body>
+      <Card.Body pt={4}>
         <Steps.Root
           variant={"primaryVertical"}
-          size="sm"
+          size="xs"
           step={activeStep}
           orientation="vertical"
           colorPalette="primary"
           gap="0"
-          height={height}
-          mt={4}>
+          height={height}>
           <Steps.List>
             {steps.map((step, index) => (
               <Steps.Item key={step.key} index={index}>
                 <Steps.Indicator>
                   <Steps.Status
-                    incomplete={<Circle bg="#004CFC" size={"30%"} />}
+                    incomplete={<Circle bg="#004CFC" size={"0%"} />}
                     complete={<Circle bg="#004CFC" size={"30%"} />}
-                    current={<Circle bg="#004CFC" size={"60%"} />}
+                    current={<Circle bg="#004CFC" size={"50%"} />}
                   />
                 </Steps.Indicator>
                 <Box flexShrink="0">

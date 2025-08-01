@@ -45,7 +45,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
             {inputType === "checkbox" ? (
               <Checkbox.Root
                 pointerEvents={"none"}
-                size="lg"
+                size="md"
                 data-testid={`checkable-card__${title}__checkbox`}
                 checked={checked}
                 onCheckedChange={details => onChange(!!details.checked)}
@@ -55,7 +55,8 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
               </Checkbox.Root>
             ) : (
               <RadioGroup.Root
-                size="lg"
+                colorPalette="blue"
+                size="md"
                 data-testid={`checkable-card__${title}__radio`}
                 value={checked ? "1" : undefined}
                 onValueChange={details => onChange(details.value === "1")}

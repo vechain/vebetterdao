@@ -78,7 +78,7 @@ export const GmNFTAndNodeCard = () => {
           align="stretch"
           justify={userHasNoNodeOrGm ? "center" : "stretch"}
           direction={isAbove1200 ? "row" : "column-reverse"}>
-          <VStack flex="3" align={"stretch"} gap="24px">
+          <VStack flex="3" align={"stretch"} gap="24px" px="2px">
             <HStack gap="40px" align={"baseline"} justify={"space-between"}>
               <Heading fontSize="xl" fontWeight={600} lineHeight={"30px"}>
                 {t("Your NFTs")}

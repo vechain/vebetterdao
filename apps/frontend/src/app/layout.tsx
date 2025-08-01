@@ -116,7 +116,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <Providers>
           {isProduction && <FreshDeskWidget widgetId={103000007852} />}
-          <VStack minH="100vh" gap={0} align="stretch" _dark={{ bg: "bg.layout._dark" }} _light={{ bg: "bg.layout" }}>
+          <VStack minH="100vh" gap={0} align="stretch" bg="layout-bg">
             <Navbar />
             <Flex flex={1}>
               <Container

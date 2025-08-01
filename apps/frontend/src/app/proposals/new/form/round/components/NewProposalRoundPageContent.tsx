@@ -108,7 +108,9 @@ export const NewProposalRoundPageContent = () => {
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start">
           <VStack gap={[4, 6]} align="flex-start">
-            <Heading size={["md", "lg"]}>{t("Select a voting session date")}</Heading>
+            <Heading size={["xl", "2xl"]} fontWeight="bold">
+              {t("Select a voting session date")}
+            </Heading>
             <Text fontSize={["sm", "md"]}>
               {t("Choose the")}{" "}
               <Text as="span" fontWeight={600}>

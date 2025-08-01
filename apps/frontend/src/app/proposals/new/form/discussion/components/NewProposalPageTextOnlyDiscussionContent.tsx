@@ -52,7 +52,9 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       <Card.Body py={8}>
         <VStack gap={[6, 8]} alignItems="flex-start">
           <VStack gap={[4, 6]} alignItems="flex-start">
-            <Heading size={["md", "lg"]}>{t("General proposal")}</Heading>
+            <Heading size={["xl", "2xl"]} fontWeight="bold">
+              {t("General proposal")}
+            </Heading>
             <Text fontSize={["sm", "md"]} color="gray.500">
               {t(
                 "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",

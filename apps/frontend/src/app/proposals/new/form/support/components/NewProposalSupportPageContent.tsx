@@ -58,7 +58,9 @@ export const NewProposalSupportPageContent = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[6, 8]} alignItems="flex-start">
             <VStack gap={[4, 6]} alignItems="flex-start">
-              <Heading size={["md", "lg"]}>{t("Community support")}</Heading>
+              <Heading size={["xl", "2xl"]} fontWeight="bold">
+                {t("Community support")}
+              </Heading>
               <Text fontSize={["sm", "md"]} color="gray.500">
                 {t(
                   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",

@@ -111,7 +111,9 @@ export const PublishAndPreviewPageContent = () => {
     <Card.Root w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start" separator={<Separator />}>
-          <Heading size={["md", "lg"]}>{t("Check your proposal before publishing")}</Heading>
+          <Heading size={["xl", "2xl"]} fontWeight="bold">
+            {t("Check your proposal before publishing")}
+          </Heading>
           <MDEditor.Markdown
             source={markdownDescription}
             style={{

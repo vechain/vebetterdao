@@ -10,7 +10,7 @@ import { nativeSelectSlotRecipe } from "./native-select"
 // import { headingRecipe } from "./heading"
 
 const config = defineConfig({
-  preflight: true,
+  //preflight: true,
   cssVarsPrefix: "vbd",
 
   theme: {
@@ -74,20 +74,129 @@ const config = defineConfig({
       },
 
       colors: {
-        // Chakra Colors
         "chakra-body-text": {
-          base: { value: "#1E1E1E" },
-          _dark: { value: "#E4E4E4" },
+          value: {
+            base: "#1E1E1E",
+            _dark: "#E4E4E4",
+          },
         },
         "chakra-body-bg": {
-          base: { value: "#F7F7F7" },
-          _dark: { value: "#131313" },
+          value: {
+            base: "#F7F7F7",
+            _dark: "#131313",
+          },
         },
+        "info-bg": {
+          value: {
+            base: "#F8F8F8",
+            _dark: "#1E1E1E",
+          },
+        },
+        "dark-contrast-on-card-bg": {
+          value: {
+            base: "#F8F8F8",
+            _dark: "#131313",
+          },
+        },
+        "profile-bg": {
+          value: {
+            base: "#FFFFFF",
+            _dark: "#2D2D2F",
+          },
+        },
+        "contrast-on-dark-bg": {
+          value: {
+            base: "#FFFFFF",
+            _dark: "#1A1A1A",
+          },
+        },
+        "light-contrast-on-card-bg": {
+          value: {
+            base: "#FAFAFA",
+            _dark: "#2D2D2F",
+          },
+        },
+        "your-ranking-hover": {
+          value: {
+            base: "#005EFF",
+            _dark: "#005EFF",
+          },
+        },
+        "b3tr-balance-bg": {
+          value: {
+            base: "#E5EEFF",
+            _dark: "#1A2547",
+          },
+        },
+        "vot3-balance-bg": {
+          value: {
+            base: "#E3FFC4",
+            _dark: "#1A2E0F",
+          },
+        },
+        "contrast-bg-strong": {
+          value: {
+            base: "#000000",
+            _dark: "#E2E8F0",
+          },
+        },
+        "contrast-bg-muted": {
+          value: {
+            base: "#FFFFFF",
+            _dark: "#2D3748",
+          },
+        },
+        "contrast-bg-muted-hover": {
+          value: {
+            base: "#EFEFEF",
+            _dark: "#A0AEC0",
+          },
+        },
+        "contrast-bg-strong-hover": {
+          value: {
+            base: "#1A1A1A",
+            _dark: "#CBD5E0",
+          },
+        },
+        "contrast-fg-on-strong": {
+          value: {
+            base: "#FFFFFF",
+            _dark: "#000000",
+          },
+        },
+        "contrast-fg-on-muted": {
+          value: {
+            base: "#000000",
+            _dark: "#FFFFFF",
+          },
+        },
+        "hover-contrast-bg": {
+          value: {
+            base: "#F8F8F8",
+            _dark: "#2D2F31",
+          },
+        },
+        "contrast-border": {
+          value: {
+            base: "#EFEFEF",
+            _dark: "#4A5568",
+          },
+        },
+        "layout-bg": {
+          value: {
+            base: "#F7F7F7",
+            _dark: "#131313",
+          },
+        },
+
+        // --- new colors ---
 
         // Logo
         logo: {
-          _dark: { value: "#277CDF" },
-          base: { value: "#004CFC" },
+          value: {
+            _dark: "#277CDF",
+            base: "#004CFC",
+          },
         },
 
         // // Brand Colors
@@ -104,74 +213,106 @@ const config = defineConfig({
         //   base: { value: "#000000" },
         // },
         "secondary-strong": {
-          _dark: { value: "#4F5945" },
-          base: { value: "#6DCB09" },
+          value: {
+            _dark: "#4F5945",
+            base: "#6DCB09",
+          },
         },
         "secondary-stronger": {
-          _dark: { value: "#383F31" },
-          base: { value: "#448300" },
+          value: {
+            _dark: "#383F31",
+            base: "#448300",
+          },
         },
         "secondary-subtle": {
-          _dark: { value: "#CDFF9F" },
-          base: { value: "#CDFF9F" },
+          value: {
+            _dark: "#CDFF9F",
+            base: "#CDFF9F",
+          },
         },
 
         // Actions
         actions: {
           primary: {
             default: {
-              _dark: { value: "#277CDF" },
-              base: { value: "#004CFC" },
+              value: {
+                _dark: "#277CDF",
+                base: "#004CFC",
+              },
             },
             hover: {
-              _dark: { value: "#2E67EA" },
-              base: { value: "#0F58FF" },
+              value: {
+                _dark: "#2E67EA",
+                base: "#0F58FF",
+              },
             },
             pressed: {
-              _dark: { value: "#0945D0" },
-              base: { value: "#0045E5" },
+              value: {
+                _dark: "#0945D0",
+                base: "#0045E5",
+              },
             },
             disabled: {
-              _dark: { value: "#272E37" },
-              base: { value: "#E1E1E1" },
+              value: {
+                _dark: "#272E37",
+                base: "#E1E1E1",
+              },
             },
             text: {
-              _dark: { value: "#FFFFFF" },
-              base: { value: "#FFFFFF" },
+              value: {
+                _dark: "#FFFFFF",
+                base: "#FFFFFF",
+              },
             },
             "text-disabled": {
-              _dark: { value: "#828282" },
-              base: { value: "#757575" },
+              value: {
+                _dark: "#828282",
+                base: "#757575",
+              },
             },
           },
           secondary: {
             default: {
-              _dark: { value: "rgba(255, 255, 255, 0.2)" },
-              base: { value: "#E0E9FE" },
+              value: {
+                _dark: "rgba(255, 255, 255, 0.2)",
+                base: "#E0E9FE",
+              },
             },
             hover: {
-              _dark: { value: "#404B5E" },
-              base: { value: "#EBF1FE" },
+              value: {
+                _dark: "#404B5E",
+                base: "#EBF1FE",
+              },
             },
             pressed: {
-              _dark: { value: "#303746" },
-              base: { value: "#CEDCFD" },
+              value: {
+                _dark: "#303746",
+                base: "#CEDCFD",
+              },
             },
             disabled: {
-              _dark: { value: "#272E37" },
-              base: { value: "#E1E1E1" },
+              value: {
+                _dark: "#272E37",
+                base: "#E1E1E1",
+              },
             },
             text: {
-              _dark: { value: "#FFFFFF" },
-              base: { value: "#004CFC" },
+              value: {
+                _dark: "#FFFFFF",
+                base: "#004CFC",
+              },
             },
             "text-lighter": {
-              _dark: { value: "#7CB7FC" },
-              base: { value: "#004CFC" },
+              value: {
+                _dark: "#7CB7FC",
+                base: "#004CFC",
+              },
             },
             "text-disabled": {
-              _dark: { value: "#828282" },
-              base: { value: "#757575" },
+              value: {
+                _dark: "#828282",
+                base: "#757575",
+              },
             },
           },
         },
@@ -179,186 +320,253 @@ const config = defineConfig({
         // Text Colors
         text: {
           default: {
-            _dark: { value: "#E4E4E4" },
-            base: { value: "#252525" },
+            value: {
+              _dark: "#E4E4E4",
+              base: "#252525",
+            },
           },
           subtle: {
-            _dark: { value: "#979797" },
-            base: { value: "#6A6A6A" },
+            value: {
+              _dark: "#979797",
+              base: "#6A6A6A",
+            },
           },
           lighter: {
-            _dark: { value: "#979797" },
-            base: { value: "#6A6A6A" },
+            value: {
+              _dark: "#979797",
+              base: "#6A6A6A",
+            },
           },
           strong: {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#000000" },
+            value: {
+              _dark: "#FFFFFF",
+              base: "#000000",
+            },
           },
           darker: {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#000000" },
+            value: {
+              _dark: "#FFFFFF",
+              base: "#000000",
+            },
           },
           alt: {
-            _dark: { value: "#000000" },
-            base: { value: "#FFFFFF" },
+            value: {
+              _dark: "#000000",
+              base: "#FFFFFF",
+            },
           },
           "alt-subtle": {
-            _dark: { value: "rgba(0, 0, 0, 0.7)" },
-            base: { value: "rgba(255, 255, 255, 0.7)" },
+            value: {
+              _dark: "rgba(0, 0, 0, 0.7)",
+              base: "rgba(255, 255, 255, 0.7)",
+            },
           },
         },
 
         // Background Colors
         bg: {
-          layout: {
-            _dark: { value: "#131313" },
-            base: { value: "#F7F7F7" },
-          },
-
           primary: {
-            _dark: { value: "#1D1D1D" },
-            base: { value: "#FFFFFF" },
+            value: {
+              _dark: "#1D1D1D",
+              base: "#FFFFFF",
+            },
           },
           secondary: {
-            _dark: { value: "#131313" },
-            base: { value: "#FAFAFA" },
+            value: {
+              _dark: "#131313",
+              base: "#FAFAFA",
+            },
           },
           tertiary: {
-            _dark: { value: "#2F2F2F" },
-            base: { value: "#F8F8F8" },
+            value: {
+              _dark: "#2F2F2F",
+              base: "#F8F8F8",
+            },
           },
         },
 
         // Border Colors
         border: {
           primary: {
-            _dark: { value: "#2D2D2F" },
-            base: { value: "#D5D5D5" },
+            value: {
+              _dark: "#2D2D2F",
+              base: "#D5D5D5",
+            },
           },
           secondary: {
-            _dark: { value: "#2E2E32" },
-            base: { value: "#EFEFEF" },
+            value: {
+              _dark: "#2E2E32",
+              base: "#EFEFEF",
+            },
           },
           tertiary: {
-            _dark: { value: "#4B4B4B" },
-            base: { value: "rgba(255, 255, 255, 0.5)" },
+            value: {
+              _dark: "#4B4B4B",
+              base: "rgba(255, 255, 255, 0.5)",
+            },
           },
         },
 
         // Icon Colors
         icon: {
           default: {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#2D3748" },
+            value: {
+              _dark: "#FFFFFF",
+              base: "#2D3748",
+            },
           },
           darker: {
-            _dark: { value: "#767676" },
-            base: { value: "#171923" },
+            value: {
+              _dark: "#767676",
+              base: "#171923",
+            },
           },
           lighter: {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#6A6A6A" },
+            value: {
+              _dark: "#FFFFFF",
+              base: "#6A6A6A",
+            },
           },
         },
 
         // Status Colors - Info
         info: {
           strong: {
-            _dark: { value: "#CBDDFF" },
-            base: { value: "#0046CB" },
+            value: {
+              _dark: "#CBDDFF",
+              base: "#0046CB",
+            },
           },
           primary: {
-            _dark: { value: "#A2C2FF" },
-            base: { value: "#6194F5" },
+            value: {
+              _dark: "#A2C2FF",
+              base: "#6194F5",
+            },
           },
           secondary: {
-            _dark: { value: "#A2C2FF" },
-            base: { value: "#CBDDFF" },
+            value: {
+              _dark: "#A2C2FF",
+              base: "#CBDDFF",
+            },
           },
           subtle: {
-            _dark: { value: "#2A303A" },
-            base: { value: "#E5EEFF" },
+            value: {
+              _dark: "#2A303A",
+              base: "#E5EEFF",
+            },
           },
         },
 
         // Status Colors - Warning
         warning: {
           strong: {
-            _dark: { value: "#FFC885" },
-            base: { value: "#AF5F00" },
+            value: {
+              _dark: "#FFC885",
+              base: "#AF5F00",
+            },
           },
           primary: {
-            _dark: { value: "#F29B32" },
-            base: { value: "#F29B32" },
+            value: {
+              _dark: "#F29B32",
+              base: "#F29B32",
+            },
           },
           secondary: {
-            _dark: { value: "#B2752C" },
-            base: { value: "#FFE4C3" },
+            value: {
+              _dark: "#B2752C",
+              base: "#FFE4C3",
+            },
           },
           subtle: {
-            _dark: { value: "#36322D" },
-            base: { value: "#FFF3E5" },
+            value: {
+              _dark: "#36322D",
+              base: "#FFF3E5",
+            },
           },
         },
 
         // Status Colors - Error/Negative
         error: {
           primary: {
-            _dark: { value: "#D23F63" },
-            base: { value: "#C84968" },
+            value: {
+              _dark: "#D23F63",
+              base: "#C84968",
+            },
           },
           secondary: {
-            _dark: { value: "#9C354E" },
-            base: { value: "#EC9BAF" },
+            value: {
+              _dark: "#9C354E",
+              base: "#EC9BAF",
+            },
           },
           subtle: {
-            _dark: { value: "#2C1D21" },
-            base: { value: "#FCEEF1" },
+            value: {
+              _dark: "#2C1D21",
+              base: "#FCEEF1",
+            },
           },
           "subtle-2": {
-            _dark: { value: "#2C1D21" },
-            base: { value: "#FCEEF1" },
+            value: {
+              _dark: "#2C1D21",
+              base: "#FCEEF1",
+            },
           },
         },
 
         // Status Colors - Success/Positive
         success: {
           strong: {
-            _dark: { value: "#A3E7D6" },
-            base: { value: "#047229" },
+            value: {
+              _dark: "#A3E7D6",
+              base: "#047229",
+            },
           },
           primary: {
-            _dark: { value: "#26C9A1" },
-            base: { value: "#3DBA67" },
+            value: {
+              _dark: "#26C9A1",
+              base: "#3DBA67",
+            },
           },
           secondary: {
-            _dark: { value: "#1EA181" },
-            base: { value: "#99E0B1" },
+            value: {
+              _dark: "#1EA181",
+              base: "#99E0B1",
+            },
           },
           subtle: {
-            _dark: { value: "#212A23" },
-            base: { value: "#E9FDF1" },
+            value: {
+              _dark: "#212A23",
+              base: "#E9FDF1",
+            },
           },
         },
 
         // System Feedback
         feedback: {
           info: {
-            _dark: { value: "#CBDDFF" },
-            base: { value: "#CBDDFF" },
+            value: {
+              _dark: "#CBDDFF",
+              base: "#CBDDFF",
+            },
           },
           error: {
-            _dark: { value: "#2C1D21" },
-            base: { value: "#FCEEF1" },
+            value: {
+              _dark: "#2C1D21",
+              base: "#FCEEF1",
+            },
           },
           success: {
             primary: {
-              _dark: { value: "#26C9A1" },
-              base: { value: "#26B491" },
+              value: {
+                _dark: "#26C9A1",
+                base: "#26B491",
+              },
             },
             tertiary: {
-              _dark: { value: "#212A23" },
-              base: { value: "#E2FDF6" },
+              value: {
+                _dark: "#212A23",
+                base: "#E2FDF6",
+              },
             },
           },
         },
@@ -366,40 +574,56 @@ const config = defineConfig({
         // Graphs
         graphs: {
           "1": {
-            _dark: { value: "#F0F4F7" },
-            base: { value: "#203A87" },
+            value: {
+              _dark: "#F0F4F7",
+              base: "#203A87",
+            },
           },
           "2": {
-            _dark: { value: "#4BA0FD" },
-            base: { value: "#225EED" },
+            value: {
+              _dark: "#4BA0FD",
+              base: "#225EED",
+            },
           },
           "3": {
-            _dark: { value: "#2C87F3" },
-            base: { value: "#307AE6" },
+            value: {
+              _dark: "#2C87F3",
+              base: "#307AE6",
+            },
           },
           "4": {
-            _dark: { value: "#337BEA" },
-            base: { value: "#5FA5F9" },
+            value: {
+              _dark: "#337BEA",
+              base: "#5FA5F9",
+            },
           },
           "5": {
-            _dark: { value: "#1145CD" },
-            base: { value: "#BEDBFE" },
+            value: {
+              _dark: "#1145CD",
+              base: "#BEDBFE",
+            },
           },
           "6": {
-            _dark: { value: "#06308A" },
-            base: { value: "#DBE9FD" },
+            value: {
+              _dark: "#06308A",
+              base: "#DBE9FD",
+            },
           },
         },
 
         // Votes
         votes: {
           "abstain-default": {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#B59525" },
+            value: {
+              _dark: "#FFFFFF",
+              base: "#B59525",
+            },
           },
           "abstain-strong": {
-            _dark: { value: "#FFFFFF" },
-            base: { value: "#A27112" },
+            value: {
+              _dark: "#FFFFFF",
+              base: "#A27112",
+            },
           },
         },
       },
