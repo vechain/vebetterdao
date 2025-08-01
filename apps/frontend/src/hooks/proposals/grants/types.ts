@@ -12,7 +12,6 @@ export type PhaseInfo = {
 
 export type CommunityInteraction = {
   percentage: number
-  icon: JSX.Element
 }
 
 export type ProposalPhases = {
@@ -37,7 +36,7 @@ export type ProposalEnriched = Proposal & {
     [ProposalState.Pending]: PhaseInfo
     [ProposalState.Active]: PhaseInfo
   }
-  // communityInteractions: ProposalInteractions
+  communityInteractions?: ProposalInteractions
 }
 
 export type Proposal = {

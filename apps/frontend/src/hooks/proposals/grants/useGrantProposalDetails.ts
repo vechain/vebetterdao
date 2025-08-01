@@ -28,7 +28,6 @@ export const useGrantProposalDetails = (
   return useQuery({
     queryKey: getGrantProposalDetailsQueryKey(proposalEvents),
     queryFn: async () => {
-      console.log("proposalEvents", proposalEvents)
       if (proposalEvents.length === 0) {
         return {}
       }
@@ -40,26 +39,13 @@ export const useGrantProposalDetails = (
           : Promise.resolve(undefined),
       )
 
-      console.log("ipfsMetadataPromises", ipfsMetadataPromises)
-
-      // TODO: Batch resolve VNS domain
-      // This would require additional implementation based on your domain resolution strategy
-      const proposerDomainsPromises = proposalEvents.map(
-        _ => Promise.resolve(undefined), // Placeholder for domain resolution
-      )
-
-      const [ipfsMetadatas, proposerDomains] = await Promise.all([
-        Promise.all(ipfsMetadataPromises),
-        Promise.all(proposerDomainsPromises),
-      ])
+      const ipfsMetadatas = await Promise.all(ipfsMetadataPromises)
 
       // Create detailed proposal objects mapped by ID
       const detailsMap: Record<string, GrantProposalMetadata & Proposal> = {}
 
       proposalEvents.forEach((event, index) => {
         const ipfsMetadata = ipfsMetadatas[index]
-        const proposerDomain = proposerDomains[index]
-        console.log("proposerDomain", proposerDomain)
 
         detailsMap[event.id] = {
           ...event,

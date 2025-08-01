@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js"
 import { isFinite } from "lodash"
+import dayjs from "dayjs"
 
 export const ROUND_DECIMAL_ZERO = 0
 export const ROUND_DECIMAL_DEFAULT = 2
@@ -210,4 +211,18 @@ export function formatToHumanNumber(
   }
 
   return amountString
+}
+
+export const formatTimeLeft = (endAtMiliseconds: number) => {
+  const endAt = dayjs(endAtMiliseconds)
+  const days = endAt.diff(dayjs(), "day")
+  const hours = endAt.diff(dayjs(), "hour") % 24
+  const minutes = endAt.diff(dayjs(), "minute") % 60
+
+  //if any is negative, return 0
+  if (days < 0 || hours < 0 || minutes < 0) {
+    return "0d | 0h | 0m"
+  }
+
+  return `${days}d | ${hours}h | ${minutes}m`
 }

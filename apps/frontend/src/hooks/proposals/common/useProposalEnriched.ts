@@ -40,15 +40,15 @@ export const useProposalEnriched = () => {
         },
         dAppGrant: `${details?.grantType} Grant`,
         state,
-        //TODO: Figure out how to get the phases
+        //TODO: Resolve the endAt and startAt or delegate to the component to fetch it
         phases: {
           [ProposalState.Pending]: {
             startAt: event.createdAt.toString(),
-            endAt: event.votingRoundId.toString(),
+            endAt: event.createdAt.toString(),
           },
           [ProposalState.Active]: {
-            startAt: event.votingRoundId.toString(),
-            endAt: event.votingRoundId.toString(),
+            startAt: event.createdAt.toString(),
+            endAt: event.createdAt.toString(),
           },
         },
         description: details?.description || "",
