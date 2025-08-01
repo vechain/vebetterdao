@@ -216,7 +216,7 @@ export const RoundInfoBottomSheet = () => {
               <NoActiveProposalCard />
             )}
           </VStack>
-          <Button onClick={() => router.push("/proposals")} variant="plain" colorPalette="primary">
+          <Button onClick={() => router.push("/proposals")} variant="primaryGhost" fontWeight="semibold">
             {t("View all proposals")}
           </Button>
         </VStack>
