@@ -46,7 +46,7 @@
     "@vechain/connex-driver": "^2.1.0",
     "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
-    "@vechain/vechain-kit": "2.0.0-rc.8",
+    "@vechain/vechain-kit": "2.0.0-rc.10",
     "@vercel/analytics": "^1.5.0",
     "axios": "^1.7.4",
     "browser-image-compression": "^2.0.2",
