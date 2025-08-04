@@ -67,7 +67,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorNonexistentProposal(uint256 proposalId);
 
   /**
-   * @dev The `votingThreshold_DEPRECATED` is not met.
+   * @dev The `votingThreshold` is not met.
    */
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 
@@ -619,7 +619,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function getRequiredGMLevelByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256);
 
   /**
    * @notice Set the GM weight for a proposal type

@@ -103,17 +103,6 @@ library GovernorConfigurator {
   }
 
   /**
-   * @notice Sets the voting threshold.
-   * @dev Sets a new voting threshold and emits a {VotingThresholdSet} event.
-   * @param self The storage reference for the GovernorStorage.
-   * @param newVotingThreshold The new voting threshold.
-   */
-  function setVotingThreshold(GovernorStorageTypes.GovernorStorage storage self, uint256 newVotingThreshold) external {
-    emit VotingThresholdSet(self.votingThreshold_DEPRECATED, newVotingThreshold);
-    self.votingThreshold_DEPRECATED = newVotingThreshold;
-  }
-
-  /**
    * @notice Sets the minimum delay before vote starts.
    * @dev Sets a new minimum voting delay and emits a {MinVotingDelaySet} event.
    * @param self The storage reference for the GovernorStorage.
@@ -152,26 +141,6 @@ library GovernorConfigurator {
     );
     emit XAllocationVotingSet(address(self.xAllocationVoting), address(newXAllocationVoting));
     self.xAllocationVoting = newXAllocationVoting;
-  }
-
-  /**
-   * @notice Sets the deposit threshold percentage.
-   * @dev Sets a new deposit threshold percentage and emits a {DepositThresholdSet} and {DepositThresholdSetV2} events. Reverts if the threshold is not in range.
-   * @dev This function is deprecated and will be removed in a future version. Use {setProposalTypeDepositThresholdPercentage} instead.
-   * @param self The storage reference for the GovernorStorage.
-   * @param newDepositThreshold The new deposit threshold percentage.
-   */
-  function setDepositThresholdPercentage(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 newDepositThreshold
-  ) external {
-    if (newDepositThreshold > 100) {
-      revert GovernorDepositThresholdNotInRange(newDepositThreshold);
-    }
-
-    emit DepositThresholdSet(self.depositThresholdPercentage_DEPRECATED, newDepositThreshold);
-    self.depositThresholdPercentage_DEPRECATED = newDepositThreshold;
-    _setProposalTypeDepositThresholdPercentage(self, GovernorTypes.ProposalType.Standard, newDepositThreshold);
   }
 
   /**

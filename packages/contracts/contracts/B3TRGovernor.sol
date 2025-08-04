@@ -301,16 +301,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice See {Governor-depositThreshold}.
-   * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
-   * @return uint256 The deposit threshold percentage
-   */
-  function depositThresholdPercentage() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThresholdPercentage_DEPRECATED;
-  }
-
-  /**
    * @notice See {Governor-depositThresholdPercentage}.
    * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
    * @return uint256 The deposit threshold percentage
@@ -320,17 +310,6 @@ contract B3TRGovernor is
   ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.proposalTypeDepositThresholdPercentage[proposalTypeValue];
-  }
-  
-
-  /**
-   * @notice See {Governor-votingThreshold_DEPRECATED}.
-   * @dev This function is deprecated since we are using proposalTypeVotingThreshold for the voting threshold
-   * @return uint256 The voting threshold
-   */
-  function votingThreshold() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.votingThreshold_DEPRECATED;
   }
 
   /**
@@ -700,7 +679,6 @@ contract B3TRGovernor is
     return GovernorProposalLogic.proposalType($, proposalId);
   }
 
-
   /** GovernorStorageTypes.GovernorStorage storage self = $.governor.getGovernorStorage();
    * @notice Returns the deposit threshold for a proposal type.
    * @param proposalTypeValue The type of proposal.
@@ -794,7 +772,9 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function getRequiredGMLevelByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.requiredGMLevelByProposalType[proposalTypeValue];
   }
