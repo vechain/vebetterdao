@@ -24,6 +24,7 @@ interface XAppMetadata {
   app_urls: AppUrl[]
   ve_world: {
     banner: string
+    featured_image: string
   }
 }
 
@@ -68,6 +69,7 @@ const generateMetadata = async (file: string): Promise<XAppMetadata> => {
   metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", "media")
   metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", "media")
   metadata.ve_world.banner = toIPFSURL(imagesIpfsUrl, "banner.png", "media")
+  metadata.ve_world.featured_image = toIPFSURL(imagesIpfsUrl, "featured_image.png", "media")
 
   return metadata
 }
