@@ -74,8 +74,8 @@
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
     "complete-translations": "dotenv -e .env -- turbo complete-translations",
     "prepare": "husky install",
-    "contracts:verify:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run verify:testnet --filter=@repo/contracts -- ",
-    "contracts:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run verify:mainnet --filter=@repo/contracts -- ",
+    "contracts:verify:testnet": "dotenv -v VITE_APP_ENV=testnet -- yarn workspace @repo/contracts ts-node scripts/verify/verify-entrypoint.ts",
+    "contracts:verify:mainnet": "dotenv -v VITE_APP_ENV=mainnet -- yarn workspace @repo/contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@repo/contracts"
   },
   "devDependencies": {
