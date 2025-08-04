@@ -41,6 +41,20 @@ export const EditAppAddresses = ({
     setEditTeamWalletAddress(true)
   }, [modalEditTeamWalletAddress, setEditTeamWalletAddress])
 
+  const handleTeamWalletAddressResolved = useCallback(
+    (address?: string) => {
+      form.setValue("teamWalletAddress", address ?? "")
+    },
+    [form],
+  )
+
+  const handleAdminAddressResolved = useCallback(
+    (address?: string) => {
+      form.setValue("adminAddress", address ?? "")
+    },
+    [form],
+  )
+
   return (
     <VStack align="stretch" gap="32px">
       <Text color="#D23F63" fontSize={"24px"} fontWeight={700}>
@@ -54,7 +68,7 @@ export const EditAppAddresses = ({
         <FormControl>
           <InputGroup>
             <WalletAddressInput
-              onAddressResolved={address => form.setValue("teamWalletAddress", address ?? "")}
+              onAddressResolved={handleTeamWalletAddressResolved}
               isDisabled={!editTeamWalletAddress}
               isRequired={true}
               defaultValue={app?.teamWalletAddress}
@@ -90,7 +104,7 @@ export const EditAppAddresses = ({
         <FormControl>
           <InputGroup>
             <WalletAddressInput
-              onAddressResolved={address => form.setValue("adminAddress", address ?? "")}
+              onAddressResolved={handleAdminAddressResolved}
               isDisabled={!editAdminAddress}
               isRequired={true}
               defaultValue={admin}

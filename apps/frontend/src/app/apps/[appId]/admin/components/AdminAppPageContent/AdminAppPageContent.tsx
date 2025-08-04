@@ -90,11 +90,15 @@ export const AdminAppPageContent = () => {
     form.reset(newOnchainAddresses)
   }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators, signalers])
 
+  const haveToSyncForm = useMemo(() => {
+    return !isAddressesLoading && admin && app?.teamWalletAddress
+  }, [admin, app?.teamWalletAddress, isAddressesLoading])
+
   useEffect(() => {
-    if (!isAddressesLoading && admin && app?.teamWalletAddress) {
+    if (haveToSyncForm) {
       syncForm()
     }
-  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, signalers, isAddressesLoading])
+  }, [haveToSyncForm, syncForm])
 
   const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators, newSignalers] = form.watch([
     "adminAddress",
