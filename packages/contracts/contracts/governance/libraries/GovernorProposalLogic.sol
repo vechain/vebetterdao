@@ -318,7 +318,6 @@ library GovernorProposalLogic {
    * @param calldatas The function signatures and arguments.
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
-   * @param depositAmount The amount of tokens the proposer intends to deposit.
    * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
    * @return The proposal id.
    */
@@ -329,7 +328,6 @@ library GovernorProposalLogic {
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     address proposer = msg.sender;
@@ -360,7 +358,7 @@ library GovernorProposalLogic {
         calldatas,
         description,
         startRoundId,
-        depositAmount,
+        0,
         GovernorTypes.ProposalType.Grant
       );
   }

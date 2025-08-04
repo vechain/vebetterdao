@@ -989,26 +989,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice Update the deposit threshold. This operation can only be performed through a governance proposal.
-   * Emits a {DepositThresholdSet} event.
-   * @param newDepositThreshold The new deposit threshold
-   */
-  function setDepositThresholdPercentage(uint256 newDepositThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setDepositThresholdPercentage($, newDepositThreshold);
-  }
-
-  /**
-   * @notice Update the voting threshold. This operation can only be performed through a governance proposal.
-   * Emits a {VotingThresholdSet} event.
-   * @param newVotingThreshold The new voting threshold
-   */
-  function setVotingThreshold(uint256 newVotingThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setVotingThreshold($, newVotingThreshold);
-  }
-
-  /**
    * @notice Update the min voting delay before vote can start.
    * This operation can only be performed through a governance proposal.
    * Emits a {MinVotingDelaySet} event.
@@ -1072,7 +1052,6 @@ contract B3TRGovernor is
    * @param calldatas The list of call data
    * @param description The proposal description
    * @param startRoundId The round in which the proposal should start
-   * @param depositAmount The amount of deposit for the proposal
    * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
    * @return The proposal id
    */
@@ -1082,7 +1061,6 @@ contract B3TRGovernor is
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
-    uint256 depositAmount,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
@@ -1094,7 +1072,6 @@ contract B3TRGovernor is
         calldatas,
         description,
         startRoundId,
-        depositAmount,
         milestonesDetailsMetadataURI
       );
   }

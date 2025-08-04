@@ -50,6 +50,9 @@ library GovernorDepositLogic {
   /// @dev Thrown when the proposal ID does not exist.
   error GovernorNonexistentProposal(uint256 proposalId);
 
+  /// @dev Thrown when the grantee tries to deposit for their own grant.
+  error GranteeCannotDepositOwnGrant(uint256 proposalId);
+
   // --------------- SETTERS ---------------
   /**
    * @notice Deposits tokens for a proposal.
@@ -67,6 +70,10 @@ library GovernorDepositLogic {
 
     if (proposal.roundIdVoteStart == 0) {
       revert GovernorNonexistentProposal(proposalId);
+    }
+
+    if (proposal.proposer == msg.sender && self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
+      revert GranteeCannotDepositOwnGrant(proposalId);
     }
 
     GovernorStateLogic.validateStateBitmap(

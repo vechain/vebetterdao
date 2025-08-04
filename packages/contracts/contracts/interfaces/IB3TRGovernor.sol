@@ -160,6 +160,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error UnauthorizedAccess(address user);
 
   /**
+   * @dev The grantee cannot deposit for their own grant.
+   */
+  error GranteeCannotDepositOwnGrant(uint256 proposalId);
+
+  /**
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(
@@ -363,13 +368,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function getProposalTypeDepositThresholdPercentage(
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256);
-
-  /**
-   * @notice module:core
-   * @dev The minimum number of vote tokens needed to cast a vote
-   */
-  function votingThreshold() external view returns (uint256);
-
+  
   /**
    * @notice module:core
    * @dev The voting threshold for a proposal type
@@ -470,6 +469,18 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 startRoundId,
     uint256 depositAmount
   ) external returns (uint256 proposalId);
+
+  /**
+   * @dev Create a grant proposal. Grantee cannot deposit for it's own grant. 
+   */
+  function proposeGrant(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    string memory milestonesDetailsMetadataURI
+  ) external returns (uint256);
 
   /**
    * @dev Queue a proposal. Some governors require this step to be performed before execution can happen. If queuing
