@@ -31,7 +31,7 @@ import {
   waitForCurrentRoundToEnd,
 } from "../helpers/common"
 
-describe.only("Governance - Milestone Creation", function () {
+describe("Governance - Milestone Creation", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -128,6 +128,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -153,6 +154,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -181,6 +183,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.emit(grantsManager, "MilestonesCreated")
@@ -203,6 +206,7 @@ describe.only("Governance - Milestone Creation", function () {
         calldatas,
         [0n, 0n],
         description,
+        0,
         milestonesDetailsMetadataURI,
         contractToPassToMethods,
       )
@@ -258,6 +262,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -283,6 +288,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -312,6 +318,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -347,6 +354,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           voteStartsInRoundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -374,6 +382,7 @@ describe.only("Governance - Milestone Creation", function () {
         calldatas,
         description,
         voteStartsInRoundId,
+        0,
         milestonesDetailsMetadataURI,
       )
     })
@@ -412,6 +421,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
+        "0", // deposit amount
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -438,6 +448,7 @@ describe.only("Governance - Milestone Creation", function () {
         calldatas,
         description,
         roundId,
+        0, // depositAmount
         milestonesDetailsMetadataURI,
       )
 
@@ -468,6 +479,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, ethers.parseEther("1")],
           [grantsManagerAddress, ethers.parseEther("1")],
         ], // args of transferb3tr
+        "0", // deposit amount
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -505,6 +517,7 @@ describe.only("Governance - Milestone Creation", function () {
         [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
         description,
         roundId,
+        0,
         milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
@@ -544,6 +557,7 @@ describe.only("Governance - Milestone Creation", function () {
         [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
         description,
         roundId,
+        0,
         milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
@@ -582,6 +596,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr( should have a revert if the amount is not equal)
+        "0", // deposit amount
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -666,6 +681,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr( should have a revert if the amount is not equal)
+        "0", // deposit amount
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -699,6 +715,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
+        "0", // deposit amount
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -729,6 +746,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -755,6 +773,7 @@ describe.only("Governance - Milestone Creation", function () {
           calldatas,
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -784,6 +803,7 @@ describe.only("Governance - Milestone Creation", function () {
         calldatas,
         description,
         roundId,
+        0,
         milestonesDetailsMetadataURI,
       )
 
@@ -812,7 +832,6 @@ describe.only("Governance - Milestone Creation", function () {
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later s
 
       const roundId = await getRoundId(contractToPassToMethods)
-      console.log("roundId", roundId)
       const tx = await governor.connect(proposer).proposeGrant(
         [treasuryAddress, treasuryAddress], // Only Treasury for now
         [0, 0], // transferb3tr is not payable
@@ -822,6 +841,7 @@ describe.only("Governance - Milestone Creation", function () {
         ],
         description,
         roundId,
+        0,
         milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
@@ -841,6 +861,7 @@ describe.only("Governance - Milestone Creation", function () {
         ],
         description2,
         roundId,
+        0,
         milestonesDetailsMetadataURI,
       )
       const receipt2 = await tx2.wait()
@@ -894,6 +915,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
+        0,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -949,6 +971,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
+        0,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -990,6 +1013,7 @@ describe.only("Governance - Milestone Creation", function () {
           [grantsManagerAddress, values[0]],
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
+        0,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -1024,6 +1048,7 @@ describe.only("Governance - Milestone Creation", function () {
         [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
         description,
         roundId,
+        0,
         milestonesDetailsMetadataURI,
       )
 
@@ -1075,6 +1100,7 @@ describe.only("Governance - Milestone Creation", function () {
           [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
           description,
           roundId,
+          0,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.reverted
@@ -1089,6 +1115,7 @@ describe.only("Governance - Milestone Creation", function () {
             [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
             description,
             roundId,
+            0,
             milestonesDetailsMetadataURI,
           ),
       ).to.emit(governor, "ProposalCreated")

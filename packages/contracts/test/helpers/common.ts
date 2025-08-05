@@ -164,6 +164,7 @@ export const createGrantProposal = async (
   calldatas: any[],
   values: bigint[] = [],
   description: string,
+  depositAmount: number,
   milestonesDetailsMetadataURI: string,
   contractToPassToMethods?: any[],
   roundId?: string,
@@ -174,11 +175,22 @@ export const createGrantProposal = async (
     roundId = await getRoundId(contractToPassToMethods)
   }
 
+  const noDepositAmountFromGrantee = 0
+
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(targets, values, calldatas, description, roundId, milestonesDetailsMetadataURI, {
-      gasLimit: 10_000_000,
-    })
+    .proposeGrant(
+      targets,
+      values,
+      calldatas,
+      description,
+      roundId,
+      noDepositAmountFromGrantee,
+      milestonesDetailsMetadataURI,
+      {
+        gasLimit: 10_000_000,
+      },
+    )
 
   return tx
 }
@@ -189,6 +201,7 @@ export const createMultiContractProposalGrant = async (
   values: bigint[],
   targets: string[],
   description: string,
+  depositAmount: any,
   milestonesDetailsMetadataURI: string,
   roundId?: string,
   contractToPassToMethods?: any[],
@@ -201,9 +214,18 @@ export const createMultiContractProposalGrant = async (
 
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(targets, values, calldatas, description, roundId.toString(), milestonesDetailsMetadataURI, {
-      gasLimit: 10_000_000,
-    })
+    .proposeGrant(
+      targets,
+      values,
+      calldatas,
+      description,
+      roundId.toString(),
+      depositAmount,
+      milestonesDetailsMetadataURI,
+      {
+        gasLimit: 10_000_000,
+      },
+    )
   return tx
 }
 
@@ -215,6 +237,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
   description: string,
   functionsToCall: string[],
   args: any[][],
+  depositAmount: any,
   milestonesDetailsMetadataURI: string,
   contractToPassToMethods?: any[],
   roundId?: string,
@@ -246,6 +269,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
     values.push(0n)
   }
 
+  const noDepositAmountFromGrantee = 0
   // create a new proposal
   // console.log("Creating proposal")
   const tx = await createMultiContractProposalGrant(
@@ -254,6 +278,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
     values,
     targets,
     description,
+    noDepositAmountFromGrantee,
     milestonesDetailsMetadataURI,
     roundId,
     contractToPassToMethods,
@@ -335,8 +360,9 @@ export const createProposalWithMultipleFunctions = async (
       return Contract.interface.encodeFunctionData(func, args[index])
     }),
     description,
+    functionsToCall[0],
+    args[0],
     roundId,
-    0, // depositAmount
   )
 
   return tx

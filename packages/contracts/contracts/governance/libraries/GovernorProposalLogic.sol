@@ -328,6 +328,7 @@ library GovernorProposalLogic {
     bytes[] memory calldatas,
     string memory description,
     uint256 startRoundId,
+    uint256 depositAmount,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     address proposer = msg.sender;
@@ -358,7 +359,7 @@ library GovernorProposalLogic {
         calldatas,
         description,
         startRoundId,
-        0,
+        depositAmount,
         GovernorTypes.ProposalType.Grant
       );
   }
