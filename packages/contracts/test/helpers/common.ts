@@ -164,7 +164,6 @@ export const createGrantProposal = async (
   calldatas: any[],
   values: bigint[] = [],
   description: string,
-  depositAmount: number,
   milestonesDetailsMetadataURI: string,
   contractToPassToMethods?: any[],
   roundId?: string,
@@ -177,7 +176,7 @@ export const createGrantProposal = async (
 
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(targets, values, calldatas, description, roundId, depositAmount, milestonesDetailsMetadataURI, {
+    .proposeGrant(targets, values, calldatas, description, roundId, milestonesDetailsMetadataURI, {
       gasLimit: 10_000_000,
     })
 
@@ -190,7 +189,6 @@ export const createMultiContractProposalGrant = async (
   values: bigint[],
   targets: string[],
   description: string,
-  depositAmount: any,
   milestonesDetailsMetadataURI: string,
   roundId?: string,
   contractToPassToMethods?: any[],
@@ -203,18 +201,9 @@ export const createMultiContractProposalGrant = async (
 
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(
-      targets,
-      values,
-      calldatas,
-      description,
-      roundId.toString(),
-      depositAmount,
-      milestonesDetailsMetadataURI,
-      {
-        gasLimit: 10_000_000,
-      },
-    )
+    .proposeGrant(targets, values, calldatas, description, roundId.toString(), milestonesDetailsMetadataURI, {
+      gasLimit: 10_000_000,
+    })
   return tx
 }
 
@@ -226,7 +215,6 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
   description: string,
   functionsToCall: string[],
   args: any[][],
-  depositAmount: any,
   milestonesDetailsMetadataURI: string,
   contractToPassToMethods?: any[],
   roundId?: string,
@@ -266,7 +254,6 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
     values,
     targets,
     description,
-    depositAmount,
     milestonesDetailsMetadataURI,
     roundId,
     contractToPassToMethods,
@@ -274,7 +261,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
 
   // change the all function to be compatible with grants proposal
   const proposalId = await getProposalIdFromGrantsProposalTx(tx, contractToPassToMethods)
-  await payDeposit(proposalId, proposer, contractToPassToMethods)
+  await payDeposit(proposalId, owner, contractToPassToMethods)
 
   // wait
   // console.log("Waiting for voting period to start")

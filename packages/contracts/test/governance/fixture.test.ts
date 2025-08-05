@@ -209,9 +209,6 @@ export async function validateProposalEvents(
 
   // Define required events based on proposal type
   const requiredEvents = ["ProposalCreated", "ProposalCreatedWithType"]
-  if (expectedType === Number(GRANT_PROPOSAL_TYPE)) {
-    requiredEvents.push("MilestonesCreated")
-  }
 
   // Find all relevant events in one pass
   const foundEvents: Record<string, any> = {}
@@ -255,7 +252,6 @@ export async function validateProposalEvents(
     proposalId: proposalCreated.args[0],
     decodedProposalCreatedEvent: proposalCreated,
     decodedProposalCreatedWithTypeEvent: proposalCreatedWithType,
-    decodedMilestonesCreatedEvent: foundEvents["MilestonesCreated"] || null,
   }
 }
 

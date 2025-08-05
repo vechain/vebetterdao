@@ -88,11 +88,6 @@ interface IGrantsManager {
   error MilestoneAlreadyApproved(uint256 proposalId, uint256 milestoneIndex);
 
   /**
-   * @notice Error thrown when milestone recipient is zero address
-   */
-  error MilestoneRecipientZeroAddress();
-
-  /**
    * @notice Error thrown when milestone amount is zero
    * @param milestoneIndex The index of the milestone with zero amount
    */
@@ -116,11 +111,6 @@ interface IGrantsManager {
    * @param required The minimum number of milestones required
    */
   error InvalidNumberOfMilestones(uint256 provided, uint256 required);
-
-  /**
-   * @notice Error thrown when proposal is not queued or executed
-   */
-  error ProposalNotQueuedOrExecuted();
 
   /**
    * @notice Error thrown when milestone state is not pending
@@ -148,11 +138,6 @@ interface IGrantsManager {
   error NotAuthorized();
 
   /**
-   * @notice Error thrown when milestone ID already exists
-   */
-  error EmptyMilestoneId();
-
-  /**
    * @notice Error thrown when milestone is not validated
    * @param proposalId The ID of the proposal
    * @param milestoneIndex The index of the milestone
@@ -165,13 +150,6 @@ interface IGrantsManager {
    * @param milestoneIndex The index of the milestone
    */
   error InvalidMilestoneIndex(uint256 proposalId, uint256 milestoneIndex);
-
-  /**
-   * @notice Error thrown when caller is not the governor
-   * @param caller The address of the caller
-   * @param governor The address of the governor
-   */
-  error CallerIsNotTheGovernor(address caller, address governor);
 
   /**
    * @notice Error thrown when milestone proposer is zero address
@@ -209,6 +187,12 @@ interface IGrantsManager {
    */
   error ProjectDetailsMetadataURIEmpty();
 
+  /**
+   * @notice Error thrown when proposal is not executed
+   * @param proposalId The ID of the proposal
+   */
+  error ProposalNotExecuted(uint256 proposalId);
+
   // ------------------ Structs and Enums ------------------ //
   /**
    * @notice MilestoneState enum to store the status of the milestone
@@ -221,20 +205,14 @@ interface IGrantsManager {
   }
 
   /**
-   * @notice GrantProposalStatus enum to store the status of the grant proposal
-   */
-  enum GrantProposalStatus {
-    InDevelopment,
-    Completed
-  }
-
-  /**
    * @notice Milestone struct
    */
   struct Milestone {
     uint256 amount;
     bool isClaimed;
     bool isApproved;
+    bool isRejected;
+    string reason;
   }
 
   /**
@@ -279,21 +257,14 @@ interface IGrantsManager {
   /**
    * @notice Returns the milestones for a proposal
    * @param proposalId The ID of the proposal
-   * @return GrantProposal The milestones for the proposal
+   * @return GrantProposal struct created on proposeGrant
    */
   function getGrantProposal(uint256 proposalId) external view returns (GrantProposal memory);
 
   /**
-   * @notice Returns the status of a grant proposal
-   * @param proposalId The ID of the proposal
-   * @return GrantProposalStatus The status of the grant proposal
-   */
-  function getGrantProposalStatus(uint256 proposalId) external view returns (GrantProposalStatus);
-
-  /**
    * @notice Returns the milestones for a proposal
    * @param proposalId The ID of the proposal
-   * @return GrantProposal The milestones for the proposal
+   * @return Milestone[] The milestones for the grant proposal
    */
   function getMilestones(uint256 proposalId) external view returns (Milestone[] memory);
 
@@ -304,6 +275,14 @@ interface IGrantsManager {
    */
   function approveMilestones(uint256 proposalId, uint256 milestoneIndex) external;
 
+  /**
+   * @notice Approves a milestone with a reason
+   * @param proposalId The ID of the proposal
+   * @param milestoneIndex The index of the milestone
+   * @param reason The reason for approving the milestone
+   * @notice This is used to approve a mi
+   */
+  function approveMilestoneWithReason(uint256 proposalId, uint256 milestoneIndex, string memory reason) external;
   /**
    * @notice Sets the minimum milestone count
    * @param minimumMilestoneCount The minimum milestone count
@@ -325,10 +304,24 @@ interface IGrantsManager {
   function getMilestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState);
 
   /**
+   * @notice Returns if a proposal is in development
+   * @param proposalId The ID of the proposal
+   * @return bool True if the proposal is in development, false otherwise
+   */
+  function isGrantCompleted(uint256 proposalId) external view returns (bool);
+
+  /**
+   * @notice Returns if a proposal is in development
+   * @param proposalId The ID of the proposal
+   * @return bool True if the proposal is in development, false otherwise
+   */
+  function isGrantInDevelopment(uint256 proposalId) external view returns (bool);
+
+  /**
    * @notice Rejects a milestone
    * @param proposalId The ID of the proposal
    */
-  function rejectMilestone(uint256 proposalId) external;
+  function rejectMilestones(uint256 proposalId) external;
 
   /**
    * @notice Returns the total amount for milestones
@@ -390,13 +383,6 @@ interface IGrantsManager {
   function setB3trContract(address _b3tr) external;
 
   // ------------------ Metadata Functions ------------------ //
-
-  // /**
-  //  * @notice Returns the project details metadata URI for a proposal
-  //  * @param proposalId The ID of the proposal
-  //  * @return The project details metadata URI for the proposal
-  //  */
-  // function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory);
 
   /**
    * @notice Updates the milestone description metadata URI for a proposal
