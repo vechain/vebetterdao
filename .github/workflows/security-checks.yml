@@ -1,4 +1,4 @@
-name: 'Security Checks'
+name: "Security Checks"
 on:
   pull_request:
   push:
@@ -7,13 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  scorecard:
-    uses: vechain/github-actions/.github/workflows/scorecard.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
-    secrets:
-      app-id: ${{ secrets.SCORECARD_APPID }}
-      private-key: ${{ secrets.SCORECARD_PRIVATEKEY }}
   checkov:
-      uses: vechain/github-actions/.github/workflows/checkov.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+    uses: vechain/github-actions/.github/workflows/checkov.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
   infracost:
     uses: vechain/github-actions/.github/workflows/infracost.yaml@7afcb88e42aa6ab0636dd5d899f9bb5cf2806cf1 # v.1.5.0
     secrets:
