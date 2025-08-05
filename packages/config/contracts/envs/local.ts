@@ -36,8 +36,8 @@ export function createLocalConfig() {
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
-        "setDepositThresholdPercentage",
-        "setVotingThreshold",
+        "setProposalTypeDepositThresholdPercentage",
+        "setProposalTypeVotingThreshold",
       ],
       Treasury: ["transferVET", "transferB3TR"],
       XAllocationVoting: [

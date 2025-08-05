@@ -335,9 +335,8 @@ export const createProposalWithMultipleFunctions = async (
       return Contract.interface.encodeFunctionData(func, args[index])
     }),
     description,
-    functionsToCall[0],
-    args[0],
     roundId,
+    0, // depositAmount
   )
 
   return tx
