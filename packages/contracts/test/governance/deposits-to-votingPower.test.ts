@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
-import { setupGovernanceFixtureWithEmissions, setupProposer, setupVoter } from "./fixture.test"
+import { setupGovernanceFixtureWithEmissions, setupProposer, setupVoter, STANDARD_PROPOSAL_TYPE } from "./fixture.test"
 import {
   VOT3,
   B3TR,
@@ -10,7 +10,7 @@ import {
   B3TRGovernor,
 } from "../../typechain-types"
 import { ethers } from "hardhat"
-import { getRoundId, moveBlocks, startNewAllocationRound, getProposalIdFromTx } from "../helpers/common"
+import { getRoundId, moveBlocks, startNewAllocationRound, getProposalIdFromTx, getVot3Tokens } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
@@ -102,6 +102,13 @@ describe.only("Voting power with proposal deposit", function () {
 
       // next round i got the deposit voting power
       const proposalId = await getProposalIdFromTx(tx)
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+
+      //Make the proposal reach the deposit threshold
+      //TODO: WIP ALLOWANCE HERE, JUST NEEDS TO CALCULATE TO HANDLE THE VOTING POWER PROPERLY
+      // await getVot3Tokens(owner, ethers.formatEther(depositThreshold))
+      // await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther(depositThreshold.toString()))
+      // await governor.connect(proposer).deposit(depositThreshold, proposalId)
 
       // check the voting power
       const roundSnapshot = await xAllocationVoting.roundSnapshot(roundid)
