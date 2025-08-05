@@ -23,8 +23,8 @@ import {
 } from "../../typechain-types"
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
-import { ethers } from "hardhat"
-import { bootstrapAndStartEmissions, waitForCurrentRoundToEnd } from "../helpers/common"
+import { ethers, expect } from "hardhat"
+import { bootstrapAndStartEmissions, getVot3Tokens, waitForCurrentRoundToEnd } from "../helpers/common"
 
 //Constants for proposal types
 export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
@@ -177,6 +177,29 @@ export async function setupProposer(
   await b3tr.connect(minterAccount).mint(account, ethers.parseEther(amount))
   await b3tr.connect(account).approve(await vot3.getAddress(), ethers.parseEther("9"))
   await vot3.connect(account).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })
+}
+
+export async function setupVoter(
+  voter: SignerWithAddress,
+  b3tr: B3TR,
+  vot3: VOT3,
+  minterAccount: SignerWithAddress,
+  owner: SignerWithAddress,
+  veBetterPassport: VeBetterPassport,
+) {
+  await waitForCurrentRoundToEnd()
+  await getVot3Tokens(voter, "10000", {
+    b3tr,
+    vot3,
+    minterAccount,
+  })
+
+  // whitelist voter
+  await veBetterPassport.connect(owner).whitelist(voter.address)
+  await veBetterPassport.connect(owner).toggleCheck(1)
+  expect(await veBetterPassport.isCheckEnabled(1)).to.be.true
+  // expect voter to be person
+  expect(await veBetterPassport.isPerson(voter.address)).to.deep.equal([true, "User is whitelisted"])
 }
 
 export async function startNewRoundAndGetRoundId(

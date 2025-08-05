@@ -47,7 +47,7 @@ describe("Governance - Milestone Creation", function () {
   let treasuryAddress: string
   let emissions: Emissions
   let xAllocationVoting: XAllocationVoting
-  let contractToPassToMethods: any[]
+  let contractToPassToMethods: any
   let treasuryContract: ContractFactory
   let grantsManagerInterface: Interface
   let governorProposalLogicInterface: Interface
@@ -75,19 +75,19 @@ describe("Governance - Milestone Creation", function () {
     grantsManagerAddress = await grantsManager.getAddress()
     treasuryAddress = await treasury.getAddress()
     treasuryContract = await ethers.getContractFactory("Treasury")
-    contractToPassToMethods = [
-      b3tr, //[0]
-      vot3, //[1]
-      minterAccount, //[2]
-      governor, //[3]
-      treasury, //[4]
-      emissions, //[5]
-      xAllocationVoting, //[6]
-      veBetterPassport, //[7]
-      owner, //[8]
-      timeLock, //[9]
-      grantsManager, //[10]
-    ]
+    contractToPassToMethods = {
+      b3tr,
+      vot3,
+      minterAccount,
+      governor,
+      treasury,
+      emissions,
+      xAllocationVoting,
+      veBetterPassport,
+      owner,
+      timeLock,
+      grantsManager,
+    }
 
     grantsManagerInterface = GrantsManager__factory.createInterface()
     governorProposalLogicInterface = GovernorProposalLogic__factory.createInterface()
