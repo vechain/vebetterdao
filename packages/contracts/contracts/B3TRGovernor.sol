@@ -295,27 +295,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice Returns the deposit threshold
-   * @return uint256 The deposit threshold
-   */
-  function depositThreshold() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorDepositLogic.depositThreshold($);
-  }
-
-  /**
-   * @notice See {Governor-depositThresholdPercentage}.
-   * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
-   * @return uint256 The deposit threshold percentage
-   */
-  function getProposalTypeDepositThresholdPercentage(
-    GovernorTypes.ProposalType proposalTypeValue
-  ) external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.proposalTypeDepositThresholdPercentage[proposalTypeValue];
-  }
-
-  /**
    * @notice Returns the voting threshold for a proposal type
    * @param proposalTypeValue The type of the proposal
    * @return uint256 The voting threshold
@@ -712,12 +691,12 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal
    * @return uint256 The quorum
    */
-  function quorumByType(
+  function quorumByProposalType(
     uint256 blockNumber,
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumByType($, blockNumber, proposalTypeValue);
+    return GovernorQuorumLogic.quorumByProposalType($, blockNumber, proposalTypeValue);
   }
 
   /**
@@ -725,21 +704,21 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal
    * @return uint256 The quorum numerator
    */
-  function quorumNumeratorByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function quorumNumeratorByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumNumeratorByType($, proposalTypeValue);
+    return GovernorQuorumLogic.quorumNumeratorByProposalType($, proposalTypeValue);
   }
   /**
    * @notice Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
    * @param timepoint The timepoint to get the quorum numerator for
    * @return uint256 The quorum numerator at the given timepoint
    */
-  function quorumNumeratorByType(
+  function quorumNumeratorByProposalType(
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumNumeratorByType($, timepoint, proposalTypeValue);
+    return GovernorQuorumLogic.quorumNumeratorByProposalType($, timepoint, proposalTypeValue);
   }
 
   /**
@@ -747,7 +726,9 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
    */
-  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function depositThresholdCapByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorConfigurator.getDepositThresholdCap($, proposalTypeValue);
   }

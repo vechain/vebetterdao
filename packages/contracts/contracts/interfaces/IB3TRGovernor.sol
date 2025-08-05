@@ -359,16 +359,16 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
-  function depositThreshold() external view returns (uint256);
+  function depositThresholdByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice module:core
    * @dev The proposal Threshold Percentage for all type of proposal
    */
-  function getProposalTypeDepositThresholdPercentage(
+  function depositThresholdPercentageByProposalType(
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256);
-  
+
   /**
    * @notice module:core
    * @dev The voting threshold for a proposal type
@@ -471,7 +471,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   ) external returns (uint256 proposalId);
 
   /**
-   * @dev Create a grant proposal. Grantee cannot deposit for it's own grant. 
+   * @dev Create a grant proposal. Grantee cannot deposit for it's own grant.
    */
   function proposeGrant(
     address[] memory targets,
@@ -648,7 +648,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
    */
-  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function depositThresholdCapByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256);
 
   /**
    * @notice Get the deposit voting power for a given account at a given timepoint
