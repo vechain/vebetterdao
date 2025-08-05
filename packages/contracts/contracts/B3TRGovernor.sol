@@ -81,6 +81,9 @@ import { IGalaxyMember } from "./interfaces/IGalaxyMember.sol";
  * - Difference from V4: Updated all libraries to use new version of IVoterRewards that supports GM Upgrades.
  * ------------------ VERSION 6 ------------------
  * - Updated all libraries to use new version of IVoterRewards that supports GM Rewards Pool.
+ ------------------ VERSION 7 ------------------
+ * - Added proposal type concept, STANDARD (0n) for existing proposals and GRANT (1n) for new grants proposals.
+ * - Added deposit threshold cap based on proposal type.
  */
 contract B3TRGovernor is
   IB3TRGovernor,
