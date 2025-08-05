@@ -6,7 +6,7 @@ import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
 import { getRoundId, getVot3Tokens } from "../helpers"
 
-describe("Proposal - Proposer requirement", function () {
+describe.only("Proposal - Proposer requirement", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR

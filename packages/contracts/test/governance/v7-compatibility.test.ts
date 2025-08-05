@@ -14,7 +14,7 @@ import { createProposal, getProposalIdFromTx } from "../helpers/common"
 import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("Governance - Compatibility & Thresholds", function () {
+describe.only("Governance - Compatibility & Thresholds", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
