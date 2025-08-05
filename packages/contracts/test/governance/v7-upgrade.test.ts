@@ -604,11 +604,11 @@ describe.only("Governance - Upgrades", function () {
     await governorV7.connect(owner).updateQuorumNumeratorByType(newQuorumNumerator, proposalStandardType)
 
     const v7QuorumNumeratorLatest = await governorV7["quorumNumerator()"]()
-    const v7QuorumNumeratorByTypeAtBlock = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+    const v7QuorumNumeratorByTypeAtBlock = await governorV7["quorumNumeratorByProposalType(uint256,uint8)"](
       v6QuorumNumeratorBlockNumber,
       proposalStandardType,
     )
-    const v7QuorumNumeratorByTypeLatest = await governorV7["quorumNumeratorByType(uint8)"](proposalStandardType)
+    const v7QuorumNumeratorByTypeLatest = await governorV7["quorumNumeratorByProposalType(uint8)"](proposalStandardType)
 
     //Querying without a timepoint should return the latest quorum numerator
     expect(v7QuorumNumeratorLatest).to.be.equal(newQuorumNumerator)
@@ -842,21 +842,21 @@ describe.only("Governance - Upgrades", function () {
     expect(v7QuorumNumerator).to.be.equal(v6QuorumNumerator3)
 
     //Check if the quorum at the timepoint where it was set to config - 1 is the same as the quorum set in the last timepoint
-    const v7QuorumNumeratorAtBlock1 = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+    const v7QuorumNumeratorAtBlock1 = await governorV7["quorumNumeratorByProposalType(uint256,uint8)"](
       v6QuorumNumeratorBlockNumber1, //Timepoint
       STANDARD_PROPOSAL_TYPE, //Proposal type
     )
     expect(v7QuorumNumeratorAtBlock1).to.be.equal(v6QuorumNumerator1)
 
     //Check if the quorum at the timepoint where it was set to config + 10 is the same as the quorum set in the last timepoint
-    const v7QuorumNumeratorAtBlock2 = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+    const v7QuorumNumeratorAtBlock2 = await governorV7["quorumNumeratorByProposalType(uint256,uint8)"](
       v6QuorumNumeratorBlockNumber2, //Timepoint
       STANDARD_PROPOSAL_TYPE, //Proposal type
     )
     expect(v7QuorumNumeratorAtBlock2).to.be.equal(v6QuorumNumerator2)
 
     //Check if the quorum at the timepoint where it was set to config + 20 is the same as the quorum set in the last timepoint
-    const v7QuorumNumeratorAtBlock3 = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+    const v7QuorumNumeratorAtBlock3 = await governorV7["quorumNumeratorByProposalType(uint256,uint8)"](
       v6QuorumNumeratorBlockNumber3, //Timepoint
       STANDARD_PROPOSAL_TYPE, //Proposal type
     )
@@ -1060,7 +1060,7 @@ describe.only("Governance - Upgrades", function () {
     const v7QuorumNumerator = await governorV7["quorumNumerator()"]()
     expect(v7QuorumNumerator).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE))
 
-    const v7QuorumNumeratorByType = await governorV7["quorumNumeratorByType(uint8)"](
+    const v7QuorumNumeratorByType = await governorV7["quorumNumeratorByProposalType(uint8)"](
       STANDARD_PROPOSAL_TYPE, //Proposal type
     )
     expect(v7QuorumNumeratorByType).to.be.equal(ethers.toBigInt(config.B3TR_GOVERNOR_QUORUM_PERCENTAGE))
@@ -1790,8 +1790,8 @@ describe.only("Governance - Upgrades", function () {
       const expectedValue = newQuorumNumeratorArr[i]
       const blockNumber = quorumNumeratorHistoryBlocks[i]
 
-      // Use quorumNumeratorByType method to get quorum at specific timepoint
-      const v7QuorumAtBlock = await governorV7["quorumNumeratorByType(uint256,uint8)"](
+      // Use quorumNumeratorByProposalType method to get quorum at specific timepoint
+      const v7QuorumAtBlock = await governorV7["quorumNumeratorByProposalType(uint256,uint8)"](
         blockNumber,
         STANDARD_PROPOSAL_TYPE,
       )

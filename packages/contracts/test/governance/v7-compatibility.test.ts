@@ -102,7 +102,7 @@ describe.only("Governance - Compatibility & Thresholds", function () {
           ? standardDepositThresholdCap
           : (ethers.toBigInt(config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD) * totalSupply) / ethers.toBigInt(100)
 
-      const depositThreshold = await governor.depositThreshold()
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
       expect(depositThreshold).to.eql(expectedDepositThreshold)
     })
 
@@ -115,7 +115,7 @@ describe.only("Governance - Compatibility & Thresholds", function () {
       await governor.connect(owner).setProposalTypeDepositThresholdPercentage(100, proposalStandardType)
 
       // Get the deposit threshold
-      const depositThreshold = await governor.depositThreshold()
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
       expect(depositThreshold).to.eql(expectedThreshold)
     })
   })
