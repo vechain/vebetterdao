@@ -683,6 +683,33 @@ describe.only("Governance - Milestone Creation", function () {
       )
     })
 
+    it("Should not be able to claim a milestone if the grant manager is paused", async () => {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+
+      await grantsManager.connect(owner).approveMilestones(proposalId, 0)
+      await grantsManager.connect(owner).pause()
+      await expect(grantsManager.connect(proposer).claimMilestone(proposalId, 0)).to.be.reverted
+      await grantsManager.connect(owner).unpause()
+      await grantsManager.connect(proposer).claimMilestone(proposalId, 0)
+    })
+
     // it("Should correctly approve / claim the milestones if more than 1 grants proposal are created")
   })
 
@@ -1017,6 +1044,54 @@ describe.only("Governance - Milestone Creation", function () {
       expect(isGrantCompleted).to.equal(false)
       const isGrantInDevelopment = await grantsManager.isGrantInDevelopment(proposalId)
       expect(isGrantInDevelopment).to.equal(false)
+    })
+  })
+
+  describe("Pause and unpause", function () {
+    it("Only pauser role or governance should be able to pause and unpause the grants manager", async function () {
+      await expect(grantsManager.connect(proposer).pause()).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+      await grantsManager.grantRole(await grantsManager.PAUSER_ROLE(), proposer.address)
+
+      await expect(grantsManager.connect(proposer).pause()).to.emit(grantsManager, "Paused")
+      await expect(grantsManager.connect(proposer).unpause()).to.emit(grantsManager, "Unpaused")
+    })
+    it("Should not be able to create a proposal if the grant manager is paused", async function () {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+
+      const roundId = await getRoundId(contractToPassToMethods)
+      await grantsManager.setMinimumMilestoneCount(1)
+
+      await grantsManager.connect(owner).pause()
+      await expect(
+        governor.connect(proposer).proposeGrant(
+          [treasuryAddress], // Only Treasury for now
+          [0], // transferb3tr is not payable
+          [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
+          description,
+          roundId,
+          milestonesDetailsMetadataURI,
+        ),
+      ).to.be.reverted
+
+      await grantsManager.connect(owner).unpause()
+      expect(
+        await governor
+          .connect(proposer)
+          .proposeGrant(
+            [treasuryAddress],
+            [0],
+            [treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")])],
+            description,
+            roundId,
+            milestonesDetailsMetadataURI,
+          ),
+      ).to.emit(governor, "ProposalCreated")
     })
   })
 })

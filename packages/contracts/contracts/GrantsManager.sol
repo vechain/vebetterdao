@@ -39,7 +39,6 @@ import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.so
 import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
-
 /**
  * @title GrantsManager
  * @notice Contract that manages grant funds milestone validation and claiming
@@ -58,6 +57,7 @@ contract GrantsManager is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE"); 
   bytes32 public constant GRANTS_APPROVER_ROLE = keccak256("GRANTS_APPROVER_ROLE");
   bytes32 public constant GRANTS_REJECTOR_ROLE = keccak256("GRANTS_REJECTOR_ROLE");
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
   // ------------------ STORAGE MANAGEMENT ------------------ //
   /// @notice Storage structure for GrantsManager
@@ -154,7 +154,7 @@ contract GrantsManager is
     uint256 proposalId,
     address proposer,
     bytes[] memory calldatas
-  ) external onlyGovernor {
+  ) external onlyGovernor whenNotPaused {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     uint256 _milestoneId = proposalId;
@@ -441,7 +441,7 @@ contract GrantsManager is
    * @param proposalId The ID of the grant proposal
    * @param milestoneIndex The index of the milestone to claim
    */
-  function claimMilestone(uint256 proposalId, uint256 milestoneIndex) external nonReentrant {
+  function claimMilestone(uint256 proposalId, uint256 milestoneIndex) external nonReentrant whenNotPaused {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
     GrantProposal storage m = $.grant[proposalId];
@@ -547,6 +547,23 @@ contract GrantsManager is
   function setB3trContract(address _b3tr) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     $.b3tr = IB3TR(_b3tr);
+  }
+
+
+  /**
+   * @notice Pauses all token transfers and minting functions
+   * @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+   */
+  function pause() public onlyRoleOrGovernance(PAUSER_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @notice Unpauses the contract to resume token transfers and minting
+   * @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+   */
+  function unpause() public onlyRoleOrGovernance(PAUSER_ROLE) {
+    _unpause();
   }
 
   // ------------------ Metadata Functions ------------------ //
