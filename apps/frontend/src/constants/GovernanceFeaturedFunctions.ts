@@ -143,12 +143,12 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
       {
         name: "Update voting threshold",
         description: "Change the amount of VOT3 required for the quorum of a proposal",
-        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "setVotingThreshold"),
+        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "setProposalTypeVotingThreshold"),
       },
       {
         name: "Update deposit threshold percentage",
         description: "Change the amount of VOT3 required to be deposited to create a proposal",
-        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "setDepositThresholdPercentage"),
+        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "setProposalTypeDepositThresholdPercentage"),
       },
       {
         name: "Update minimum voting delay",
@@ -158,7 +158,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
       {
         name: "Update quorum numerator",
         description: "Change the amount of votes required for a proposal to pass",
-        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "updateQuorumNumerator"),
+        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "updateQuorumNumeratorByType"),
       },
       {
         name: "Update execution delay",

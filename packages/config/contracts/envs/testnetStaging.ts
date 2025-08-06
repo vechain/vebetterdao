@@ -33,7 +33,7 @@ export function createTestnetStagingConfig() {
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
-        "updateQuorumNumerator",
+        "updateQuorumNumeratorByType",
         "updateDelay",
         "setProposalTypeDepositThresholdPercentage",
         "setProposalTypeVotingThreshold",
