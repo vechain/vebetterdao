@@ -1,10 +1,9 @@
-import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
+import { ProposalState, useGetUserGMs, useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
+import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
+import { RequirementModal, ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
@@ -14,9 +13,12 @@ import { AnalyticsUtils } from "@/utils"
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
-  const router = useRouter()
   const { t } = useTranslation()
-
+  const {
+    isOpen: isRequirementModalOpen,
+    onOpen: openRequirementModal,
+    onClose: closeRequirementModal,
+  } = useDisclosure()
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
@@ -24,14 +26,22 @@ export const ProposalsPageContent = () => {
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
+  //TODO: Move to a common hook
+  const { data: userGMs } = useGetUserGMs(account?.address)
+  const hasMoonNft = useMemo(() => {
+    //TODO: Level should come from another hook or multiclause
+    return userGMs?.some(gm => Number(gm.tokenLevel) >= 2)
+  }, [userGMs])
+
   const onNewClick = useCallback(() => {
     if (!account?.address) {
       open()
       return
     }
+
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
-    router.push("/proposals/new")
-  }, [account, open, router])
+    openRequirementModal()
+  }, [account?.address, open, openRequirementModal])
 
   //First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
   const sortedProposals = useMemo(() => {
@@ -127,6 +137,7 @@ export const ProposalsPageContent = () => {
           <JoinCommunity />
         </Box>
       </Show>
+      <RequirementModal isOpen={isRequirementModalOpen} onClose={closeRequirementModal} hasNft={hasMoonNft ?? false} />
     </VStack>
   )
 }
