@@ -426,7 +426,7 @@ export const waitForCurrentRoundToEnd = async (contractToPassToMethods?: any) =>
   const { xAllocationVoting } = await getContractInstances(contractToPassToMethods)
 
   const currentRoundId = await xAllocationVoting.currentRoundId()
-  await waitForRoundToEnd(Number(currentRoundId))
+  await waitForRoundToEnd(Number(currentRoundId), xAllocationVoting)
   await waitForNextBlock()
 }
 

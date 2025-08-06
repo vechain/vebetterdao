@@ -24,7 +24,12 @@ import {
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
 import { ethers, expect } from "hardhat"
-import { bootstrapAndStartEmissions, getVot3Tokens, waitForCurrentRoundToEnd } from "../helpers/common"
+import {
+  bootstrapAndStartEmissions,
+  bootstrapEmissions,
+  getVot3Tokens,
+  waitForCurrentRoundToEnd,
+} from "../helpers/common"
 
 //Constants for proposal types
 export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
@@ -187,7 +192,6 @@ export async function setupVoter(
   owner: SignerWithAddress,
   veBetterPassport: VeBetterPassport,
 ) {
-  await waitForCurrentRoundToEnd()
   await getVot3Tokens(voter, "10000", {
     b3tr,
     vot3,
@@ -210,10 +214,10 @@ export async function startNewRoundAndGetRoundId(
   // and start a new one
   if ((await emissions.nextCycle()) === 0n) {
     // if emissions are not started yet, we need to bootstrap and start them
-    await bootstrapAndStartEmissions()
+    await bootstrapAndStartEmissions({ emissions, xAllocationVoting })
   } else {
     // otherwise we need to wait for the current round to end and start the next one
-    await waitForCurrentRoundToEnd()
+    await waitForCurrentRoundToEnd({ emissions, xAllocationVoting })
     await emissions.distribute()
   }
   return ((await xAllocationVoting.currentRoundId()) + 1n).toString()
@@ -280,6 +284,6 @@ export async function validateProposalEvents(
 
 export async function setupGovernanceFixtureWithEmissions(): Promise<GovernanceFixture> {
   const fixture = await setupGovernanceFixture()
-  await bootstrapAndStartEmissions()
+  await bootstrapEmissions({ emissions: fixture.emissions })
   return fixture
 }

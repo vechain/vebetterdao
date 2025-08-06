@@ -1,5 +1,11 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
-import { setupGovernanceFixtureWithEmissions, setupProposer, setupVoter, STANDARD_PROPOSAL_TYPE } from "./fixture.test"
+import {
+  setupGovernanceFixtureWithEmissions,
+  setupProposer,
+  setupVoter,
+  STANDARD_PROPOSAL_TYPE,
+  startNewRoundAndGetRoundId,
+} from "./fixture.test"
 import {
   VOT3,
   B3TR,
@@ -10,7 +16,16 @@ import {
   B3TRGovernor,
 } from "../../typechain-types"
 import { ethers } from "hardhat"
-import { getRoundId, moveBlocks, startNewAllocationRound, getProposalIdFromTx, getVot3Tokens } from "../helpers/common"
+import {
+  getRoundId,
+  moveBlocks,
+  startNewAllocationRound,
+  getProposalIdFromTx,
+  getVot3Tokens,
+  waitForCurrentRoundToEnd,
+  waitForNextBlock,
+  payDeposit,
+} from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
@@ -75,48 +90,98 @@ describe.only("Voting power with proposal deposit", function () {
       expect(votingPower).to.equal(ethers.parseEther("10000")) // 10000 because we had 10000 vot3 tokens at snapshot
     })
 
-    it.only("Should be able to vote on proposal with the proposal VP", async function () {
-      // submit app
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
-
+    it.only("Should be able to vote on allocation with the proposal deposit", async function () {
+      //Submit the app
       await x2EarnApps
         .connect(owner)
         .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
 
-      const roundid = await getRoundId({ emissions, xAllocationVoting })
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
 
-      // Now we can create a new proposal
-      const address = await b3tr.getAddress()
-      const B3trContract = await ethers.getContractFactory("B3TR")
-      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("tokenDetails", [])
-      const voteStartsInRoundId = (await xAllocationVoting.currentRoundId()) + 1n // starts in next round
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
 
-      console.log("voteStartsInRoundId", voteStartsInRoundId)
-      // Create a proposal with a deposit of 1000 VOT3
-      // WIP HERE IS BLOCKING WITH ALLOWANCE
-      const tx = await governor
-        .connect(owner)
-        .propose([address], [0], [encodedFunctionCall], "", voteStartsInRoundId.toString(), ethers.parseEther("1000"), {
-          gasLimit: 10_000_000,
-        })
-
-      // next round i got the deposit voting power
-      const proposalId = await getProposalIdFromTx(tx)
+      //Get the deposit threshold for the proposal type
       const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
 
-      //Make the proposal reach the deposit threshold
-      //TODO: WIP ALLOWANCE HERE, JUST NEEDS TO CALCULATE TO HANDLE THE VOTING POWER PROPERLY
-      // await getVot3Tokens(owner, ethers.formatEther(depositThreshold))
-      // await vot3.connect(owner).approve(await governor.getAddress(), ethers.parseEther(depositThreshold.toString()))
-      // await governor.connect(proposer).deposit(depositThreshold, proposalId)
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
 
-      // check the voting power
-      const roundSnapshot = await xAllocationVoting.roundSnapshot(roundid)
-      const votingPowerForAllocation = await xAllocationVoting.getVotes(voter.address, roundSnapshot)
-      expect(votingPowerForAllocation).to.equal(ethers.parseEther("10100"))
+      const expectedVot3BalanceBeforeDeposit = expectedVot3Balance + depositThreshold
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceBeforeDeposit)
 
-      const votingPowerForProposal = await governor.getVotes(voter.address, roundid)
-      expect(votingPowerForProposal).to.equal(ethers.parseEther("100")) // only the deposit voting power is counted for the proposal
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 2
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal depositing the exact threshold
+      const tx = await governor
+        .connect(voter)
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+          `${this?.test?.title}`,
+          (Number(roundIdBeforeVotesDeposit) + 2).toString(),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      const proposalId = await getProposalIdFromTx(tx)
+      console.log("proposalId", proposalId)
+      await payDeposit(proposalId, voter, { governor, vot3 })
+
+      //Wait for round to end
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      //Start new round
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const roundIdAfterVotesDeposit = await xAllocationVoting.currentRoundId()
+      const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
+      const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
+
+      console.log("pastRound Id", roundIdBeforeVotesDeposit)
+      console.log("currentRoundId", roundIdAfterVotesDeposit)
+
+      const votingPowerForAllocationBeforeVotes = await xAllocationVoting.getVotes(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+      const votingPowerForAllocationAfterVotes = await xAllocationVoting.getVotes(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      console.log(
+        "votingPowerForAllocationBeforeVotes",
+        Number(votingPowerForAllocationBeforeVotes) / 10 ** Number(await vot3.decimals()),
+      )
+      console.log(
+        "votingPowerForAllocationAfterVotes",
+        Number(votingPowerForAllocationAfterVotes) / 10 ** Number(await vot3.decimals()),
+      )
+
+      const depositvotingpower = await xAllocationVoting.getDepositVotingPower(voter.address, roundSnapshotBeforeVotes)
+      console.log("depositvotingpower", depositvotingpower)
+      expect(depositvotingpower).to.equal(depositThreshold)
+      expect(votingPowerForAllocationBeforeVotes).to.equal(votingPowerForAllocationAfterVotes)
     })
   })
 
@@ -136,3 +201,32 @@ describe.only("Voting power with proposal deposit", function () {
     )
   })
 })
+// const expectedVot3BalanceAfterDeposit = expectedVot3Balance //Balance should be the same as the beginning since we spent the deposit amount
+// expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceAfterDeposit)
+
+// const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
+// //Wait the round to ends
+// const deadline = await xAllocationVoting.roundDeadline(roundIdBeforeVotesDeposit)
+
+// const currentBlock = await xAllocationVoting.clock()
+
+// await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
+// await waitForNextBlock()
+// await waitForNextBlock()
+// console.log("working still")
+// await xAllocationVoting.startNewRound()
+// await emissions.distribute()
+
+// const roundIdAfterVotesDeposit = await xAllocationVoting.currentRoundId()
+// const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
+
+// console.log("roundSnapshotBeforeVotes", roundSnapshotBeforeVotes)
+// console.log("roundSnapshotAfterVotes", roundSnapshotAfterVotes)
+
+// // check the voting power
+// const roundSnapshot = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
+// const votingPowerForAllocation = await xAllocationVoting.getVotes(voter.address, roundSnapshot)
+// expect(votingPowerForAllocation).to.equal(ethers.parseEther("10100"))
+
+// const votingPowerForProposal = await governor.getVotes(voter.address, roundIdAfterVotesDeposit)
+// expect(votingPowerForProposal).to.equal(ethers.parseEther("100")) // only the deposit voting power is counted for the proposal

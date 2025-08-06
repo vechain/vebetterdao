@@ -7,14 +7,14 @@ import {
   STANDARD_PROPOSAL_TYPE,
   GRANT_PROPOSAL_TYPE,
 } from "./fixture.test"
-import { B3TRGovernor, VOT3, B3TR } from "../../typechain-types"
+import { B3TRGovernor, VOT3, B3TR, Emissions } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory } from "ethers"
 import { createProposal, getProposalIdFromTx } from "../helpers/common"
 import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe.only("Governance - Compatibility & Thresholds", function () {
+describe("Governance - Compatibility & Thresholds", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -22,6 +22,7 @@ describe.only("Governance - Compatibility & Thresholds", function () {
   let minterAccount: SignerWithAddress
   let proposer: SignerWithAddress
   let owner: SignerWithAddress
+  let emissions: Emissions
 
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
@@ -32,8 +33,10 @@ describe.only("Governance - Compatibility & Thresholds", function () {
     minterAccount = fixture.minterAccount
     proposer = fixture.proposer
     owner = fixture.owner
+    emissions = fixture.emissions
 
     // Setup proposer for all tests
+    await emissions.connect(minterAccount).start()
     await setupProposer(proposer, b3tr, vot3, minterAccount)
   })
 

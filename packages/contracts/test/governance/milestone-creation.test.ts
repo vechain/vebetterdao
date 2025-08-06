@@ -69,6 +69,7 @@ describe("Governance - Milestone Creation", function () {
     xAllocationVoting = fixture.xAllocationVoting
 
     // Setup proposer for all tests
+    await emissions.connect(minterAccount).start()
     await setupProposer(proposer, b3tr, vot3, minterAccount)
     await vot3.connect(proposer).approve(await governor.getAddress(), ethers.parseEther("1000"))
 
