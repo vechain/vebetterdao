@@ -39,7 +39,10 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
-    except: ["mocks", "deprecated", "interfaces", "test", "templates", "openzeppelin"],
+    except:
+      process.env.NEXT_PUBLIC_APP_ENV === "production"
+        ? ["mocks", "deprecated", "interfaces", "test", "templates", "openzeppelin"] // Production excludes
+        : [],
   },
   mocha: {
     timeout: 1800000,
@@ -47,7 +50,10 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: false,
-    excludeContracts: ["mocks", "deprecated", "interfaces", "test", "templates"],
+    excludeContracts:
+      process.env.NEXT_PUBLIC_APP_ENV === "production"
+        ? ["mocks", "deprecated", "interfaces", "test", "templates"]
+        : [],
   },
   defaultNetwork: process.env.IS_TEST_COVERAGE ? "hardhat" : "vechain_solo",
   networks: {
