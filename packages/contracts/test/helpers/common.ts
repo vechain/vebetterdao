@@ -328,8 +328,12 @@ export const createProposalWithMultipleFunctions = async (
   return tx
 }
 
-export const getProposalIdFromTx = async (tx: ContractTransactionResponse, depositPayed: boolean = false) => {
-  const { governor } = await getOrDeployContractInstances({})
+export const getProposalIdFromTx = async (
+  tx: ContractTransactionResponse,
+  depositPayed: boolean = false,
+  contractToPassToMethods?: any,
+) => {
+  const { governor } = await getContractInstances(contractToPassToMethods)
   const proposeReceipt = await tx.wait()
   const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[0]
 

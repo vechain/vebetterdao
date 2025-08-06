@@ -120,7 +120,7 @@ describe.only("Voting power with proposal deposit", function () {
       //Allowance for the deposit
       await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
 
-      // Create the proposal depositing the exact threshold
+      // Create the proposal
       const tx = await governor
         .connect(voter)
         .propose(
@@ -135,9 +135,12 @@ describe.only("Voting power with proposal deposit", function () {
           },
         )
 
-      const proposalId = await getProposalIdFromTx(tx)
-      console.log("proposalId", proposalId)
-      await payDeposit(proposalId, voter, { governor, vot3 })
+      //Deposit into the proposal the exact threshold
+      await tx.wait()
+      const proposalId = await getProposalIdFromTx(tx, false, { governor })
+
+      const txForDeposit = await governor.connect(voter).deposit(depositThreshold, proposalId)
+      await txForDeposit.wait()
 
       //Wait for round to end
       await waitForCurrentRoundToEnd({ xAllocationVoting })
@@ -157,31 +160,44 @@ describe.only("Voting power with proposal deposit", function () {
       const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
       const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
 
-      console.log("pastRound Id", roundIdBeforeVotesDeposit)
-      console.log("currentRoundId", roundIdAfterVotesDeposit)
-
-      const votingPowerForAllocationBeforeVotes = await xAllocationVoting.getVotes(
-        voter.address,
-        roundSnapshotBeforeVotes,
-      )
       const votingPowerForAllocationAfterVotes = await xAllocationVoting.getVotes(
         voter.address,
         roundSnapshotAfterVotes,
       )
 
-      console.log(
-        "votingPowerForAllocationBeforeVotes",
-        Number(votingPowerForAllocationBeforeVotes) / 10 ** Number(await vot3.decimals()),
+      const depositvotingpowerInAllocationBeforeVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
       )
-      console.log(
-        "votingPowerForAllocationAfterVotes",
-        Number(votingPowerForAllocationAfterVotes) / 10 ** Number(await vot3.decimals()),
+      const depositvotingpowerInGovernorBeforeVotes = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
       )
 
-      const depositvotingpower = await xAllocationVoting.getDepositVotingPower(voter.address, roundSnapshotBeforeVotes)
-      console.log("depositvotingpower", depositvotingpower)
-      expect(depositvotingpower).to.equal(depositThreshold)
-      expect(votingPowerForAllocationBeforeVotes).to.equal(votingPowerForAllocationAfterVotes)
+      const depositvotingpowerInAllocationAfterVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+      const depositvotingpowerInGovernorAfter = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      console.log(
+        "User total voting power (voting power + deposit voting power)",
+        Number(votingPowerForAllocationAfterVotes) +
+          Number(depositvotingpowerInAllocationAfterVotes) / 10 ** Number(await vot3.decimals()),
+      )
+
+      //Both deposit voting power should be 0 because no deposit was done
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInGovernorBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(depositvotingpowerInGovernorBeforeVotes)
+
+      //Both deposit voting power should be equal the threshold and same for the governor
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositThreshold)
+      expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
     })
   })
 
