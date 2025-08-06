@@ -965,6 +965,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodesManagement: nodeManagementAddress,
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
+    StargateNFT: await stargateNftMock.getAddress(),
   }
 
   const libraries: {
