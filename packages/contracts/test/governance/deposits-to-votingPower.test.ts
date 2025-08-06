@@ -1,11 +1,5 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
-import {
-  setupGovernanceFixtureWithEmissions,
-  setupProposer,
-  setupVoter,
-  STANDARD_PROPOSAL_TYPE,
-  startNewRoundAndGetRoundId,
-} from "./fixture.test"
+import { setupGovernanceFixtureWithEmissions, setupProposer, setupVoter, STANDARD_PROPOSAL_TYPE } from "./fixture.test"
 import {
   VOT3,
   B3TR,
@@ -17,18 +11,17 @@ import {
 } from "../../typechain-types"
 import { ethers } from "hardhat"
 import {
-  getRoundId,
   moveBlocks,
   startNewAllocationRound,
   getProposalIdFromTx,
   getVot3Tokens,
   waitForCurrentRoundToEnd,
   waitForNextBlock,
-  payDeposit,
 } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
+import { catchRevert } from "../helpers"
 
 describe.only("Voting power with proposal deposit", function () {
   let vot3: VOT3
@@ -43,6 +36,7 @@ describe.only("Voting power with proposal deposit", function () {
   let owner: SignerWithAddress
   let emissions: Emissions
   let governor: B3TRGovernor
+  let endorser1: SignerWithAddress
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
     vot3 = fixture.vot3
@@ -57,6 +51,7 @@ describe.only("Voting power with proposal deposit", function () {
     owner = fixture.owner
     emissions = fixture.emissions
     governor = fixture.governor
+    endorser1 = fixture.otherAccounts[5]
 
     // Setup proposer for all tests
     await setupProposer(proposer, b3tr, vot3, minterAccount)
@@ -90,12 +85,15 @@ describe.only("Voting power with proposal deposit", function () {
       expect(votingPower).to.equal(ethers.parseEther("10000")) // 10000 because we had 10000 vot3 tokens at snapshot
     })
 
-    it.only("Should be able to vote on allocation with the proposal deposit", async function () {
+    it("Should be able to vote on allocation with the proposal deposit", async function () {
       //Submit the app
       await x2EarnApps
         .connect(owner)
         .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
 
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
       //Setup voter + start new round
       await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
 
@@ -183,10 +181,130 @@ describe.only("Voting power with proposal deposit", function () {
         roundSnapshotAfterVotes,
       )
 
-      console.log(
-        "User total voting power (voting power + deposit voting power)",
-        Number(votingPowerForAllocationAfterVotes) +
-          Number(depositvotingpowerInAllocationAfterVotes) / 10 ** Number(await vot3.decimals()),
+      //Both deposit voting power should be 0 because no deposit was done
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInGovernorBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(depositvotingpowerInGovernorBeforeVotes)
+
+      //Both deposit voting power should be equal the threshold and same for the governor
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositThreshold)
+      expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
+
+      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
+      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
+
+      const txForVote = await xAllocationVoting
+        .connect(voter)
+        .castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit])
+
+      await txForVote.wait()
+
+      const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
+
+      //The app should have the total vote with the deposit as voting power as well
+      expect(totalVoteWithDeposit).to.equal(appVotes)
+    })
+    it("Should be able to vote on allocation with the proposal deposit if deposit twice", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
+
+      const expectedVot3BalanceBeforeDeposit = expectedVot3Balance + depositThreshold
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceBeforeDeposit)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 2
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal
+      const tx = await governor
+        .connect(voter)
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+          `${this?.test?.title}`,
+          (Number(roundIdBeforeVotesDeposit) + 2).toString(),
+          0,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      //Deposit into the proposal the exact threshold in 2 operations
+      await tx.wait()
+      const proposalId = await getProposalIdFromTx(tx, false, { governor })
+
+      const txForDeposit = await governor.connect(voter).deposit(depositThreshold / 2n, proposalId)
+      await txForDeposit.wait()
+
+      //Wait few blocks to simulate the time between the 2 deposits
+      await moveBlocks(10)
+
+      const txForDeposit2 = await governor.connect(voter).deposit(depositThreshold / 2n, proposalId)
+      await txForDeposit2.wait()
+
+      //Wait for round to end
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      //Start new round
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const roundIdAfterVotesDeposit = await xAllocationVoting.currentRoundId()
+      const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
+      const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
+
+      const votingPowerForAllocationAfterVotes = await xAllocationVoting.getVotes(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      const depositvotingpowerInAllocationBeforeVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+      const depositvotingpowerInGovernorBeforeVotes = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+
+      const depositvotingpowerInAllocationAfterVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+      const depositvotingpowerInGovernorAfter = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
       )
 
       //Both deposit voting power should be 0 because no deposit was done
@@ -198,6 +316,249 @@ describe.only("Voting power with proposal deposit", function () {
       expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositThreshold)
       expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
       expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
+
+      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
+      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
+
+      const txForVote = await xAllocationVoting
+        .connect(voter)
+        .castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit])
+
+      await txForVote.wait()
+
+      const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
+
+      //The app should have the total vote with the deposit as voting power as well
+      expect(totalVoteWithDeposit).to.equal(appVotes)
+    })
+    it("Should be able to vote on allocation with the proposal deposit if the proposal is created already with a deposit", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
+
+      const expectedVot3BalanceBeforeDeposit = expectedVot3Balance + depositThreshold
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceBeforeDeposit)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 2
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal already supporting the deposit threshold
+      const tx = await governor
+        .connect(voter)
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+          `${this?.test?.title}`,
+          (Number(roundIdBeforeVotesDeposit) + 2).toString(),
+          depositThreshold,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      await tx.wait()
+
+      //Wait for round to end
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      //Start new round
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const roundIdAfterVotesDeposit = await xAllocationVoting.currentRoundId()
+      const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
+      const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
+
+      const votingPowerForAllocationAfterVotes = await xAllocationVoting.getVotes(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      const depositvotingpowerInAllocationBeforeVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+      const depositvotingpowerInGovernorBeforeVotes = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+
+      const depositvotingpowerInAllocationAfterVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+      const depositvotingpowerInGovernorAfter = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      //Both deposit voting power should be 0 because no deposit was done
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInGovernorBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(depositvotingpowerInGovernorBeforeVotes)
+
+      //Both deposit voting power should be equal the threshold and same for the governor
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositThreshold)
+      expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
+
+      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
+      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
+
+      const txForVote = await xAllocationVoting
+        .connect(voter)
+        .castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit])
+
+      await txForVote.wait()
+
+      const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
+
+      //The app should have the total vote with the deposit as voting power as well
+      expect(totalVoteWithDeposit).to.equal(appVotes)
+    })
+
+    it("Should NOT be able to vote on allocation with the proposal deposit if the value is higher than the total voting power", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
+
+      const expectedVot3BalanceBeforeDeposit = expectedVot3Balance + depositThreshold
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceBeforeDeposit)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 2
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal already supporting the deposit threshold
+      const tx = await governor
+        .connect(voter)
+        .propose(
+          [await b3tr.getAddress()],
+          [0],
+          [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+          `${this?.test?.title}`,
+          (Number(roundIdBeforeVotesDeposit) + 2).toString(),
+          depositThreshold,
+          {
+            gasLimit: 10_000_000,
+          },
+        )
+
+      await tx.wait()
+
+      //Wait for round to end
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      //Start new round
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const roundIdAfterVotesDeposit = await xAllocationVoting.currentRoundId()
+      const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
+      const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
+
+      const votingPowerForAllocationAfterVotes = await xAllocationVoting.getVotes(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      const depositvotingpowerInAllocationBeforeVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+      const depositvotingpowerInGovernorBeforeVotes = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotBeforeVotes,
+      )
+
+      const depositvotingpowerInAllocationAfterVotes = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+      const depositvotingpowerInGovernorAfter = await governor.getDepositVotingPower(
+        voter.address,
+        roundSnapshotAfterVotes,
+      )
+
+      //Both deposit voting power should be 0 because no deposit was done
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInGovernorBeforeVotes).to.equal(0)
+      expect(depositvotingpowerInAllocationBeforeVotes).to.equal(depositvotingpowerInGovernorBeforeVotes)
+
+      //Both deposit voting power should be equal the threshold and same for the governor
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositThreshold)
+      expect(depositvotingpowerInGovernorAfter).to.equal(depositThreshold)
+      expect(depositvotingpowerInAllocationAfterVotes).to.equal(depositvotingpowerInGovernorAfter)
+
+      //Sum of the voting power and the deposit voting power to get the total vote available for the voter to vote on the allocation
+      const totalVoteWithDeposit = votingPowerForAllocationAfterVotes + depositvotingpowerInAllocationAfterVotes
+
+      await catchRevert(
+        xAllocationVoting.connect(voter).castVote(roundIdAfterVotesDeposit, [app1Id], [totalVoteWithDeposit + 1n]),
+      )
+
+      const appVotes = await xAllocationVoting.getAppVotes(roundIdAfterVotesDeposit, app1Id)
+
+      //App should not have any votes because the total vote with the deposit is higher than the total voting power and tx reverted
+      expect(appVotes).to.equal(0)
     })
   })
 
@@ -217,32 +578,3 @@ describe.only("Voting power with proposal deposit", function () {
     )
   })
 })
-// const expectedVot3BalanceAfterDeposit = expectedVot3Balance //Balance should be the same as the beginning since we spent the deposit amount
-// expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceAfterDeposit)
-
-// const roundSnapshotBeforeVotes = await xAllocationVoting.roundSnapshot(roundIdBeforeVotesDeposit)
-// //Wait the round to ends
-// const deadline = await xAllocationVoting.roundDeadline(roundIdBeforeVotesDeposit)
-
-// const currentBlock = await xAllocationVoting.clock()
-
-// await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
-// await waitForNextBlock()
-// await waitForNextBlock()
-// console.log("working still")
-// await xAllocationVoting.startNewRound()
-// await emissions.distribute()
-
-// const roundIdAfterVotesDeposit = await xAllocationVoting.currentRoundId()
-// const roundSnapshotAfterVotes = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
-
-// console.log("roundSnapshotBeforeVotes", roundSnapshotBeforeVotes)
-// console.log("roundSnapshotAfterVotes", roundSnapshotAfterVotes)
-
-// // check the voting power
-// const roundSnapshot = await xAllocationVoting.roundSnapshot(roundIdAfterVotesDeposit)
-// const votingPowerForAllocation = await xAllocationVoting.getVotes(voter.address, roundSnapshot)
-// expect(votingPowerForAllocation).to.equal(ethers.parseEther("10100"))
-
-// const votingPowerForProposal = await governor.getVotes(voter.address, roundIdAfterVotesDeposit)
-// expect(votingPowerForProposal).to.equal(ethers.parseEther("100")) // only the deposit voting power is counted for the proposal
