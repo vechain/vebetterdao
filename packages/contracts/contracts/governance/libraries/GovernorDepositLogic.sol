@@ -29,6 +29,7 @@ import { GovernorTypes } from "./GovernorTypes.sol";
 import { GovernorConfigurator } from "./GovernorConfigurator.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 
 /// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
@@ -137,10 +138,11 @@ library GovernorDepositLogic {
 
     self.deposits[proposalId][depositor] += amount;
 
-    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(SafeCast.toUint48(block.timestamp));
+    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(
+      SafeCast.toUint48(GovernorClockLogic.clock(self))
+    );
     uint208 newVotes = currentVotes + SafeCast.toUint208(amount);
-
-    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), newVotes);
+    self.depositsVotingPower[depositor].push(GovernorClockLogic.clock(self), newVotes);
 
     emit ProposalDeposit(depositor, proposalId, amount);
   }
