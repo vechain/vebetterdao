@@ -18,7 +18,7 @@ async function main() {
     "XAllocationVotingV6",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
-    [config.b3trContractAddress],
+    [config.b3trGovernorAddress],
     {
       version: 7,
     },
