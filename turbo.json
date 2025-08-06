@@ -18,7 +18,17 @@
     "CONTRACT_VERSION",
     "FUNCTION_TO_CALL",
     "NEXT_DEPLOY_LATEST_ONLY",
-    "OPENAI_API_KEY"
+    "OPENAI_API_KEY",
+    "RESET_USER_SIGNAL_COUNT_API_KEY",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "FRESHDESK_API_TOKEN",
+    "FRESHDESK_DOMAIN",
+    "FRESHDESK_GROUP_ID",
+    "NEXTAUTH_SECRET",
+    "TWITTER_CLIENT_ID",
+    "TWITTER_CLIENT_SECRET",
+    "RESET_USER_SIGNAL_COUNT_DOMAIN"
   ],
   "tasks": {
     "install": {
@@ -28,6 +38,7 @@
       "cache": false
     },
     "build": {
+      "cache": true,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
@@ -149,7 +160,7 @@
       "cache": false
     },
     "compile": {
-      "cache": false,
+      "cache": true,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "deploy": {
@@ -179,16 +190,24 @@
       "cache": false
     },
     "upgrade:contract:local": {
-      "dependsOn": ["upgrade:contract"]
-    },
-    "upgrade:contract:testnet-staging": {
-      "dependsOn": ["upgrade:contract"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
     },
     "upgrade:contract:testnet": {
-      "dependsOn": ["upgrade:contract"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
+    },
+    "upgrade:contract:testnet-staging": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
     },
     "upgrade:contract:mainnet": {
-      "dependsOn": ["upgrade:contract"]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
     },
     "deploy:contract": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],

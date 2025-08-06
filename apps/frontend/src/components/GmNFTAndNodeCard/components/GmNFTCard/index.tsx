@@ -1,13 +1,10 @@
 import { Box, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { UilPolygon } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
-import { useDomainOrAddress } from "@/hooks"
 
 interface GmNFTCardProps {
-  isGMOwned: boolean
   isGMLoading: boolean
   gmImage?: string
   gmName?: string
@@ -21,7 +18,6 @@ interface GmNFTCardProps {
 }
 
 export const GmNFTCard = ({
-  isGMOwned,
   isGMLoading,
   gmImage,
   gmName,
@@ -30,33 +26,8 @@ export const GmNFTCard = ({
   nodeAttachedColor,
   viewMode,
   onCardClick,
-  domain,
-  profile,
 }: GmNFTCardProps) => {
   const { t } = useTranslation()
-  const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
-
-  if (!isGMOwned) {
-    return (
-      <HStack
-        rounded="12px"
-        p="24px 12px"
-        position="relative"
-        flex={1}
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23FFFFFF80' stroke-width='1' stroke-dasharray='12%2c 20' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
-        }}>
-        <UilPolygon size={"36px"} color={"#FFFFFF80"} style={{ transform: "rotate(90deg)" }} />
-        <Text color={"#FFFFFF80"}>
-          {viewMode
-            ? t("{{value}} needs to mint an NFT to get reward multipliers", {
-                value: domainOrAddress,
-              })
-            : t("You need to mint an NFT to get reward multipliers")}
-        </Text>
-      </HStack>
-    )
-  }
 
   return (
     <HStack

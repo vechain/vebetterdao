@@ -446,7 +446,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
       <CardFooter display={"flex"} flexDir={"column"} w="full" alignItems="center" justify="center">
         <Button
           variant="primaryAction"
-          disabled={!!errors}
+          disabled={Object.keys(errors).length > 0}
           type="submit"
           w="full"
           px={10}

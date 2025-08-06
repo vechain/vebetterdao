@@ -20,17 +20,20 @@ export enum XAppStatus {
 }
 
 export const APP_CATEGORIES = [
-  { id: "carbon-footprint", name: "Carbon Footprint", color: "#feeab6" },
-  { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
-  { id: "fitness-wellness", name: "Fitness & Wellness", color: "#D1E2FF" },
-  { id: "green-finance-defi", name: "Green Finance, DeFi", color: "##ffe0cd" },
-  { id: "green-mobility-travel", name: "Green Travel", color: "#FAD1FC" },
-  { id: "nutrition", name: "Nutrition", color: "#CEF5D1" },
-  { id: "plastic-waste-recycling", name: "Plastic Waste & Recycling", color: "#FFD4E0" },
-  { id: "renewable-energy-efficiency", name: "Renewable Energy", color: "#E0DAFD" },
-  { id: "social-community-activism", name: "Social, Community, Activism", color: "#c2f4f0" },
-  { id: "sustainable-shopping", name: "Sustainable Shopping", color: "#C4ECFF" },
+  { id: "nutrition", name: "Food & Drinks", color: "#CEF5D1" },
+  { id: "plastic-waste-recycling", name: "Recycling", color: "#FFD4E0" },
+  { id: "fitness-wellness", name: "Lifestyle", color: "#D1E2FF" },
+  { id: "renewable-energy-efficiency", name: "Energy", color: "#E0DAFD" },
+  { id: "sustainable-shopping", name: "Shopping", color: "#C4ECFF" },
+  { id: "green-mobility-travel", name: "Transportation", color: "#FAD1FC" },
+  { id: "pets", name: "Pets", color: "#f0c2ff" },
+  { id: "education-learning", name: "Learning", color: "#E5E9F0" },
+  { id: "green-finance-defi", name: "Web3", color: "#ffe0cd" },
+  { id: "others", name: "Others", color: "#feeab6" },
 ]
+
+// Track deprecated categories that should not count towards the category limit if present in metadata
+export const DEPRECATED_IDS = ["social-community-activism", "carbon-footprint"]
 
 // SORTING
 export type SortOption = "newest" | "rewards" | "alphabetical" | "default"

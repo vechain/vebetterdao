@@ -16,7 +16,7 @@ export const useCurrentAppSignalers = () => {
   } = useSignalerAssignedToApp(appId ?? "")
 
   // Memoize the event fetching to avoid unnecessary re-renders
-  const memoizedSignalers = useMemo(() => activeSignalers || [], [JSON.stringify(activeSignalers)])
+  const memoizedSignalers = useMemo(() => activeSignalers || [], [activeSignalers])
 
   return {
     activeSignalers: memoizedSignalers,

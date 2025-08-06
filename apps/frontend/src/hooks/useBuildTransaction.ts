@@ -68,7 +68,7 @@ export const useBuildTransaction = <ClausesParams = void>({
       })
       onFailure?.()
     },
-    [onFailure],
+    [onFailure, updateModal],
   )
 
   const result = useSendTransaction({
@@ -94,7 +94,7 @@ export const useBuildTransaction = <ClausesParams = void>({
 
     lastReportedStatusRef.current = transactionStatus
     updateModal(transactionStatus, txID, error)
-  }, [transactionStatus, txID, error])
+  }, [transactionStatus, txID, error, updateModal])
 
   /**
    * Function to send a transaction based on the provided parameters.
