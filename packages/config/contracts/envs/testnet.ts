@@ -138,6 +138,6 @@ export function createTestnetConfig() {
     NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
 
     // Milestones
-    MINIMUM_MILESTONE_COUNT: 2,
+    MINIMUM_MILESTONE_COUNT: 2, // test-compatibility
   })
 }
