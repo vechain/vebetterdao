@@ -8,7 +8,7 @@ import {
   VE_WOLRD_SCALING_FACTOR,
   IMAGE_REQUIREMENTS,
 } from "@/constants"
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
@@ -26,8 +26,12 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
   const { t } = useTranslation()
   const [invalidFormat, setInvalidFormat] = useState(false)
   const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
-
-  const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
+  const [computedWidth, setComputedWidth] = useState(0)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setComputedWidth(Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR)
+    }
+  }, [])
   const accept = IMAGE_REQUIREMENTS.ve_world_featured_image.mimeType
 
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])

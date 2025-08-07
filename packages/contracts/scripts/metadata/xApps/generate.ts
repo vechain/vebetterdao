@@ -84,13 +84,14 @@ const validateMediaFiles = async (filename: string) => {
   }
 
   // media must contain 2 files: a logo and a banner
-  if (media.length !== 2) {
+  if (media.length !== 3) {
     throw new Error(`Invalid media files for ${filename}`)
   }
 
   const logo = await fs.readFile(`${MEDIA_PATH}/${filename}/logo.png`)
   const banner = await fs.readFile(`${MEDIA_PATH}/${filename}/banner.png`)
-  if (!logo || !banner) {
+  const ve_world_banner = await fs.readFile(`${MEDIA_PATH}/${filename}/ve_world_banner.png`)
+  if (!logo || !banner || !ve_world_banner) {
     throw new Error(`Invalid media files for ${filename}`)
   }
 }
