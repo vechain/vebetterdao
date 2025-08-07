@@ -93,7 +93,6 @@ export const setupEnvironment = async (
   b3tr: B3TR,
   vot3: VOT3,
   vechainNodesMock: TokenAuction,
-  stargateNftAddress: StargateNFT,
 ) => {
   switch (config) {
     case "local":
@@ -108,7 +107,6 @@ export const setupEnvironment = async (
         b3tr,
         vot3,
         vechainNodesMock,
-        stargateNftAddress,
         shouldEndorseXApps(),
       )
       break
@@ -142,7 +140,6 @@ export const setupLocalEnvironment = async (
   b3tr: B3TR,
   vot3: VOT3,
   vechainNodesMock: TokenAuction,
-  stargateNftAddress: StargateNFT,
   endorseApps: boolean,
 ) => {
   const start = performance.now()
@@ -192,7 +189,7 @@ export const setupLocalEnvironment = async (
    * Fifth seed account will have a Strength Economic Node
    * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
    */
-  await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
+  // await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
 
   await startEmissions(emissionsContract, admin)
 
@@ -201,7 +198,7 @@ export const setupLocalEnvironment = async (
     // 8 apps
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
     // const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
-    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, stargateNftAddress)
+    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
   }
   await proposeUpgradeGovernance(governor, xAllocationVoting)
 

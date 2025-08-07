@@ -58,22 +58,6 @@ export async function deployLatest(config: ContractsConfig) {
   const creators = allCreators.slice(0, APPS.length)
   console.log(`================  Address used to deploy: ${deployer.address}`)
 
-  // testing endorse xApp
-  const snft = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
-  const nodeIds = await snft.idsOwnedBy(deployer.address.toString())
-
-  console.log("nodeIds", nodeIds)
-  console.log("nodeIds[0]", nodeIds[0])
-
-  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
-  console.log(
-    "allAccounts",
-    allAccounts.map(acct => acct.key.address.toString()),
-  )
-
-  const vNodesMocks = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
-  await mintVechainNodes(vNodesMocks, allAccounts, [Number(nodeIds[0])])
-
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
   // Also we have many roles in our contracts but we currently use one wallet for all roles
   const TEMP_ADMIN = network.name === "vechain_solo" ? config.CONTRACTS_ADMIN_ADDRESS : deployer.address
@@ -744,7 +728,6 @@ export async function deployLatest(config: ContractsConfig) {
           b3tr,
           vot3,
           vechainNodesMock,
-          stargateNftMock,
           shouldEndorseXApps(),
         )
       } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
@@ -759,7 +742,6 @@ export async function deployLatest(config: ContractsConfig) {
         b3tr,
         vot3,
         vechainNodesMock,
-        stargateNftMock,
         shouldEndorseXApps(),
       )
       break

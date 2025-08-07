@@ -51,7 +51,7 @@ export const endorseXApps = async (
   endorsers: SeedAccount[],
   x2EarnApps: X2EarnApps,
   apps: string[],
-  stargateNftAddress: StargateNFT, //vechainNodesMocks
+  vechainNodesMock: TokenAuction,
 ): Promise<void> => {
   const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
@@ -63,8 +63,7 @@ export const endorseXApps = async (
   // 8 apps
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
-    const nodeIds = await stargateNftAddress.idsOwnedBy(owner.toString())
-    const nodeId = nodeIds[0] // out of range
+    const nodeId = await vechainNodesMock.ownerToId(owner.toString())
     const clause = Clause.callFunction(
       Address.of(await x2EarnApps.getAddress()),
       ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
