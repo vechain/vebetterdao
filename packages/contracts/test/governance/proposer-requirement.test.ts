@@ -74,6 +74,14 @@ describe("Proposal - Proposer requirement", function () {
         governor.connect(owner).setRequiredGMLevelByProposalType(0, Number(maxGMWeight) + 1),
       ).to.be.revertedWithCustomError(governor, "GMLevelAboveMaxLevel")
     })
+
+    it("Should not set the required GM level if the proposal type is invalid", async function () {
+      await expect(governor.connect(owner).setRequiredGMLevelByProposalType(2, 1)).to.be.reverted
+    })
+
+    it("Should not get the required GM level if the proposal type is invalid", async function () {
+      await expect(governor.getRequiredGMLevelByProposalType(2)).to.be.reverted
+    })
   })
 
   describe("Permissions", function () {
