@@ -86,6 +86,13 @@ library GovernorConfigurator {
     uint256 newDepositThresholdCap
   );
 
+  /// @dev Emitted when the required GM level for a proposal type is set.
+  event RequiredGMLevelSet(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldRequiredGMLevel,
+    uint256 newRequiredGMLevel
+  );
+
   /**------------------ SETTERS ------------------**/
 
   /**
@@ -421,6 +428,7 @@ library GovernorConfigurator {
     uint256 newGMWeight
   ) internal {
     uint256 maxGMWeight = self.galaxyMember.MAX_LEVEL();
+    uint256 oldRequiredGMLevel = self.requiredGMLevelByProposalType[proposalTypeValue];
     require(
       GovernorProposalLogic.isValidProposalType(proposalTypeValue),
       "GovernorConfigurator: invalid proposal type"
@@ -429,6 +437,7 @@ library GovernorConfigurator {
     if (newGMWeight > maxGMWeight) {
       revert GMLevelAboveMaxLevel(newGMWeight);
     }
+    emit RequiredGMLevelSet(proposalTypeValue, oldRequiredGMLevel, newGMWeight);
     self.requiredGMLevelByProposalType[proposalTypeValue] = newGMWeight;
   }
 }

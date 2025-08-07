@@ -82,6 +82,11 @@ describe("Proposal - Proposer requirement", function () {
     it("Should not get the required GM level if the proposal type is invalid", async function () {
       await expect(governor.getRequiredGMLevelByProposalType(2)).to.be.reverted
     })
+
+    it("Should emit the RequiredGMLevelSet event when the required GM level is set", async function () {
+      const tx = await governor.connect(owner).setRequiredGMLevelByProposalType(0, 1)
+      await expect(tx).to.emit(governor, "RequiredGMLevelSet").withArgs(0, 0, 1)
+    })
   })
 
   describe("Permissions", function () {
