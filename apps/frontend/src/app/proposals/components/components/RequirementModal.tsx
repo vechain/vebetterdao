@@ -12,6 +12,9 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
+import { useGMRequiredByProposalType } from "@/api"
+import { gmNfts } from "@/constants/gmNfts"
+import { useRouter } from "next/navigation"
 
 type Props = {
   isOpen: UseDisclosureProps["isOpen"]
@@ -22,6 +25,15 @@ type Props = {
 export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
   const { t } = useTranslation()
   const modalIcon = useColorModeValue("/assets/icons/nft-earth-light.png", "/assets/icons/nft-earth-dark.png")
+  const { data: gmRequired } = useGMRequiredByProposalType()
+  const router = useRouter()
+  const handleGetNftOrApply = () => {
+    if (!hasNft) {
+      router.push("/profile?tab=gm")
+    } else {
+      router.push("/proposals/new")
+    }
+  }
 
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
@@ -36,7 +48,8 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
             <OrderedList spacing={2}>
               <ListItem>
                 <Trans
-                  i18nKey="Get a <b>Galaxy Member - Moon NFT</b>. You can upgrade your NFT to GM Moon NFT or buy it."
+                  i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
+                  values={{ gmName: gmNfts[Number(gmRequired)]?.name ?? "Moon" }}
                   components={{ b: <Text as="span" fontWeight="bold" /> }}
                 />
               </ListItem>
@@ -59,7 +72,7 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
             {t("Create Discourse")}
           </Button>
 
-          <Button variant="primaryAction" w="full" py={6}>
+          <Button variant="primaryAction" w="full" py={6} onClick={handleGetNftOrApply}>
             {!hasNft ? t("Get NFT") : t("Apply")}
           </Button>
         </HStack>
