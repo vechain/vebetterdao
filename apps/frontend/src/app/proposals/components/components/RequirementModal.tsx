@@ -68,7 +68,11 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
           )}
         </VStack>
         <HStack w="full" h="full" justifyContent="center" pt={4}>
-          <Button variant="secondary" w="full" py={6}>
+          <Button
+            variant="secondary"
+            w="full"
+            py={6}
+            onClick={() => window.open("https://vechain.discourse.group", "_blank")}>
             {t("Create Discourse")}
           </Button>
 

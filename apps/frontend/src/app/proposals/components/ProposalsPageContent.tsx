@@ -1,4 +1,4 @@
-import { ProposalState, useGetUserGMs, useProposalClaimableUserDeposits } from "@/api"
+import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
@@ -9,6 +9,7 @@ import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -26,12 +27,7 @@ export const ProposalsPageContent = () => {
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
-  //TODO: Move to a common hook
-  const { data: userGMs } = useGetUserGMs(account?.address)
-  const hasMoonNft = useMemo(() => {
-    //TODO: Level should come from another hook or multiclause
-    return userGMs?.some(gm => Number(gm.tokenLevel) >= 2)
-  }, [userGMs])
+  const hasMetProposalCriteria = useMetProposalCriteria()
 
   const onNewClick = useCallback(() => {
     if (!account?.address) {
@@ -137,7 +133,11 @@ export const ProposalsPageContent = () => {
           <JoinCommunity />
         </Box>
       </Show>
-      <RequirementModal isOpen={isRequirementModalOpen} onClose={closeRequirementModal} hasNft={hasMoonNft ?? false} />
+      <RequirementModal
+        isOpen={isRequirementModalOpen}
+        onClose={closeRequirementModal}
+        hasNft={hasMetProposalCriteria}
+      />
     </VStack>
   )
 }

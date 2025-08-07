@@ -3,9 +3,9 @@ import { RequirementModal } from "./RequirementModal"
 import { AnalyticsUtils } from "@/utils"
 import { Box, Image, Text, Button, useDisclosure } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { useGetUserGMs } from "@/api"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
 
 export const CreateProposalCard = () => {
   const { account } = useWallet()
@@ -18,12 +18,7 @@ export const CreateProposalCard = () => {
 
   const { t } = useTranslation()
 
-  //TODO: Move to a common hook
-  const { data: userGMs } = useGetUserGMs(account?.address)
-  const hasMoonNft = useMemo(() => {
-    //TODO: Level should come from another hook or multiclause
-    return userGMs?.some(gm => Number(gm.tokenLevel) >= 2)
-  }, [userGMs])
+  const hasMetProposalCriteria = useMetProposalCriteria()
 
   const onNewClick = useCallback(() => {
     if (!account?.address) {
@@ -57,7 +52,11 @@ export const CreateProposalCard = () => {
           {t("Create proposal")}
         </Button>
       </Box>
-      <RequirementModal isOpen={isRequirementModalOpen} onClose={closeRequirementModal} hasNft={hasMoonNft ?? false} />
+      <RequirementModal
+        isOpen={isRequirementModalOpen}
+        onClose={closeRequirementModal}
+        hasNft={hasMetProposalCriteria}
+      />
     </>
   )
 }
