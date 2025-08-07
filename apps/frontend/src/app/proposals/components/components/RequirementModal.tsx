@@ -49,7 +49,7 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
               <ListItem>
                 <Trans
                   i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
-                  values={{ gmName: gmNfts[Number(gmRequired)]?.name ?? "Moon" }}
+                  values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
                   components={{ b: <Text as="span" fontWeight="bold" /> }}
                 />
               </ListItem>

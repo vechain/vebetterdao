@@ -15,7 +15,7 @@ export const useMetProposalCriteria = (proposalType: ProposalType = ProposalType
 
   const { data: userGMs } = useGetUserGMs(account?.address)
   const hasMoonNft = useMemo(() => {
-    return userGMs?.some(gm => Number(gm.tokenLevel) >= (gmRequired ?? 2))
+    return userGMs?.some(gm => Number(gm.tokenLevel) >= (gmRequired ?? 1))
   }, [userGMs, gmRequired])
 
   return hasMoonNft ?? false
