@@ -7,7 +7,9 @@ import {
   VOT3,
   VoterRewards,
   X2EarnApps,
+  B3TRGovernor,
   XAllocationVoting,
+  StargateNFT,
 } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
@@ -15,7 +17,7 @@ import { App, endorseXApps, registerXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
-import { EnvConfig, getContractsConfig, shouldEndorseXApps } from "@repo/config/contracts"
+import { EnvConfig, shouldEndorseXApps } from "@repo/config/contracts"
 
 const accounts = getTestKeys(17)
 const xDappCreatorAccounts = accounts.slice(0, 8)
@@ -86,11 +88,12 @@ export const setupEnvironment = async (
   emissions: Emissions,
   treasury: Treasury,
   x2EarnApps: X2EarnApps,
-  governor: B3TRGovernorV1,
+  governor: B3TRGovernor,
   xAllocationVoting: XAllocationVoting,
   b3tr: B3TR,
   vot3: VOT3,
   vechainNodesMock: TokenAuction,
+  stargateNftAddress: StargateNFT,
 ) => {
   switch (config) {
     case "local":
@@ -105,6 +108,7 @@ export const setupEnvironment = async (
         b3tr,
         vot3,
         vechainNodesMock,
+        stargateNftAddress,
         shouldEndorseXApps(),
       )
       break
@@ -133,11 +137,12 @@ export const setupLocalEnvironment = async (
   emissions: Emissions,
   treasury: Treasury,
   x2EarnApps: X2EarnApps,
-  governor: B3TRGovernorV1,
+  governor: B3TRGovernor,
   xAllocationVoting: XAllocationVoting,
   b3tr: B3TR,
   vot3: VOT3,
   vechainNodesMock: TokenAuction,
+  stargateNftAddress: StargateNFT,
   endorseApps: boolean,
 ) => {
   const start = performance.now()
@@ -163,6 +168,7 @@ export const setupLocalEnvironment = async (
 
   // Seed the first 5 accounts with some tokens
   const treasuryAddress = await treasury.getAddress()
+  // 5+ 8 accounts: 13 accounts
   const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
   const seedAccounts = allAccounts.slice(0, 5)
   const endorserAccounts = allAccounts
@@ -177,6 +183,7 @@ export const setupLocalEnvironment = async (
 
   await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
+  // Deprecated with stargateNFTAddress
   /**
    * First seed account will have a Mjolnir X Node
    * Second seed account will have a Thunder X Node
@@ -191,9 +198,10 @@ export const setupLocalEnvironment = async (
 
   if (endorseApps) {
     // Get unendorsed XAPPs
+    // 8 apps
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
     // const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
-    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
+    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, stargateNftAddress)
   }
   await proposeUpgradeGovernance(governor, xAllocationVoting)
 

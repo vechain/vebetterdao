@@ -5,6 +5,7 @@ import {
   XAllocationVoting__factory,
   X2EarnApps,
   TokenAuction,
+  StargateNFT,
 } from "../../typechain-types"
 import { type TransactionClause, Clause, Address, ABIContract } from "@vechain/sdk-core"
 import { TransactionUtils } from "@repo/utils"
@@ -50,7 +51,7 @@ export const endorseXApps = async (
   endorsers: SeedAccount[],
   x2EarnApps: X2EarnApps,
   apps: string[],
-  vechainNodesMock: TokenAuction,
+  stargateNftAddress: StargateNFT, //vechainNodesMocks
 ): Promise<void> => {
   const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
@@ -59,16 +60,18 @@ export const endorseXApps = async (
   }
   console.log("Endorsing x-apps...")
 
+  // 8 apps
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
-    const nodeId = await vechainNodesMock.ownerToId(owner.toString())
+    const nodeIds = await stargateNftAddress.idsOwnedBy(owner.toString())
+    const nodeId = nodeIds[0] // out of range
     const clause = Clause.callFunction(
       Address.of(await x2EarnApps.getAddress()),
       ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
       [apps[i], nodeId],
     )
 
-    await TransactionUtils.sendTx(thorClient, [clause], endorsers[i].key.pk)
+    await TransactionUtils.sendTx(thorClient, [clause], endorsers[i].key.pk) // failing
   }
 
   console.log("x-apps endorsed.")

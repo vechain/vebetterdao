@@ -12,11 +12,10 @@ import {
   Treasury,
   X2EarnRewardsPool,
   X2EarnApps,
+  NodeManagementV3,
   VeBetterPassport,
   X2EarnCreator,
   StargateNFT,
-  StargateDelegation,
-  NodeManagementV3,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -27,9 +26,8 @@ import {
   deployAndInitializeLatest,
   deployAndUpgrade,
   deployProxy,
-  deployStargateProxyWithoutInitialization,
+  mintVechainNodes,
   saveContractsToFile,
-  initializeProxy,
 } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
@@ -44,8 +42,7 @@ import {
   validateContractRole,
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
-import { deployStargateNFTLibraries } from "./deploys/deployStargateNftLibraries"
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { getSeedAccounts, SeedStrategy } from "../helpers/seedAccounts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -60,6 +57,22 @@ export async function deployLatest(config: ContractsConfig) {
   const [deployer, ...allCreators] = await ethers.getSigners()
   const creators = allCreators.slice(0, APPS.length)
   console.log(`================  Address used to deploy: ${deployer.address}`)
+
+  // testing endorse xApp
+  const snft = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
+  const nodeIds = await snft.idsOwnedBy(deployer.address.toString())
+
+  console.log("nodeIds", nodeIds)
+  console.log("nodeIds[0]", nodeIds[0])
+
+  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
+  console.log(
+    "allAccounts",
+    allAccounts.map(acct => acct.key.address.toString()),
+  )
+
+  const vNodesMocks = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
+  await mintVechainNodes(vNodesMocks, allAccounts, [Number(nodeIds[0])])
 
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
   // Also we have many roles in our contracts but we currently use one wallet for all roles
@@ -112,143 +125,25 @@ export async function deployLatest(config: ContractsConfig) {
     VoteEligibilityUtilsV4,
   } = await x2EarnLibraries()
 
-  let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
-  let stargateNftAddress = "0x0000000000000000000000000000000000000000"
-  let stargateDelegateAddress = "0x0000000000000000000000000000000000000000"
-  let nodeManagementAddress = "0x0000000000000000000000000000000000000000"
-
-  // If we are on hardhat, we need to deploy the VTHO token
-  let vthoAddress
-  if (network.name === "hardhat") {
-    const VTHOFactory = await ethers.getContractFactory("MyERC20")
-    const vtho = await VTHOFactory.deploy(deployer.address, deployer.address)
-    await vtho.waitForDeployment()
-
-    vthoAddress = await vtho.getAddress()
-  } else {
-    vthoAddress = "0x0000000000000000000000000000456E65726779"
-  }
-  console.log("VTHO token address: ", vthoAddress)
-
+  // ----------------------  Stargate Contracts and NodeManagement ----------------------
   let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
+  const vechainNodesAddress = await vechainNodesMock.getAddress()
+  console.log("Using Vechain Nodes Mock deployed at: ", vechainNodesAddress)
+
   let stargateNftMock = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
-  let stargateDelegateMock = (await ethers.getContractAt(
-    "StargateDelegation",
-    config.STARGATE_DELEGATE_CONTRACT_ADDRESS,
-  )) as StargateDelegation
-  let nodeManagementMock = (await ethers.getContractAt(
+  const stargateNftAddress = await stargateNftMock.getAddress()
+  console.log("Using Stargate NFT Mock deployed at: ", stargateNftAddress)
+
+  let stargateDelegateMock = await ethers.getContractAt("StargateDelegation", config.STARGATE_DELEGATE_CONTRACT_ADDRESS)
+  const stargateDelegateAddress = await stargateDelegateMock.getAddress()
+  console.log("Using Stargate Delegate Mock deployed at: ", stargateDelegateAddress)
+
+  let nodeManagement = (await ethers.getContractAt(
     "NodeManagementV3",
     config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
   )) as NodeManagementV3
-
-  if (network.name !== "vechain_mainnet") {
-    console.log("Deploying Vechain Nodes mock contracts")
-
-    const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
-    vechainNodesMock = await TokenAuctionLock.deploy()
-    await vechainNodesMock.waitForDeployment()
-
-    const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-    const clockAuctionContract = await ClockAuctionLock.deploy(await vechainNodesMock.getAddress(), TEMP_ADMIN)
-
-    await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
-
-    await vechainNodesMock.addOperator(TEMP_ADMIN)
-    vechainNodesAddress = await vechainNodesMock.getAddress()
-
-    console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
-    console.log("Deploying Stargate mock contracts")
-
-    console.log("Deploying the StargateNFT libraries...")
-    const {
-      StargateNFTClockLib,
-      StargateNFTSettingsLib,
-      StargateNFTTokenLib,
-      StargateNFTMintingLib,
-      StargateNFTVetGeneratedVthoLib,
-      StargateNFTLevelsLib,
-    } = await deployStargateNFTLibraries({ logOutput: true })
-
-    console.log("Deploying StargateNFT...")
-    stargateNftAddress = await deployStargateProxyWithoutInitialization(
-      "StargateNFT",
-      {
-        Clock: await StargateNFTClockLib.getAddress(),
-        MintingLogic: await StargateNFTMintingLib.getAddress(),
-        Settings: await StargateNFTSettingsLib.getAddress(),
-        Token: await StargateNFTTokenLib.getAddress(),
-        VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
-        Levels: await StargateNFTLevelsLib.getAddress(),
-      },
-      true,
-    )
-
-    console.log(`Deploying StargateDelegation...`)
-    stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, true)
-
-    stargateNftMock = (await initializeProxy(
-      stargateNftAddress,
-      "StargateNFT",
-      [
-        {
-          tokenCollectionName: "VeChain Node Token",
-          tokenCollectionSymbol: "VNT",
-          baseTokenURI: "ipfs://mock/",
-          admin: deployer.address,
-          upgrader: deployer.address,
-          pauser: deployer.address,
-          levelOperator: deployer.address,
-          legacyNodes: vechainNodesAddress, // from TokenAuction mock
-          stargateDelegation: stargateDelegateAddress,
-          legacyLastTokenId: 13, // see setup.ts, seeding for 5 + APPS.length accounts
-          levelsAndSupplies: initialTokenLevels, // TODO: review implementation
-          vthoToken: vthoAddress,
-        },
-      ],
-      {
-        Clock: await StargateNFTClockLib.getAddress(),
-        MintingLogic: await StargateNFTMintingLib.getAddress(),
-        Settings: await StargateNFTSettingsLib.getAddress(),
-        Token: await StargateNFTTokenLib.getAddress(),
-        VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
-        Levels: await StargateNFTLevelsLib.getAddress(),
-      },
-    )) as StargateNFT
-    console.log("StargateNFT initialized")
-
-    stargateDelegateMock = (await initializeProxy(
-      stargateDelegateAddress,
-      "StargateDelegation",
-      [
-        {
-          upgrader: deployer.address,
-          admin: deployer.address,
-          stargateNFT: stargateNftAddress,
-          vthoToken: vthoAddress,
-          vthoRewardPerBlock, // CHECK - as per stargate local config
-          delegationPeriod: 10, // CHECK - as per stargate local config
-          operator: deployer.address,
-        },
-      ],
-      {},
-    )) as StargateDelegation
-    console.log("StargateDelegation initialized")
-
-    // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
-    await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
-    await vechainNodesMock.setLeadTime(0)
-
-    nodeManagementMock = (await deployAndUpgrade(
-      ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
-      [[vechainNodesAddress, deployer.address, deployer.address], [], [stargateNftAddress]],
-      {
-        versions: [undefined, 2, 3],
-        logOutput: true,
-      },
-    )) as NodeManagementV3
-
-    nodeManagementAddress = await nodeManagementMock.getAddress()
-  }
+  const nodeManagementAddress = await nodeManagement.getAddress()
+  console.log("Using Node Management Mock deployed at: ", nodeManagementAddress)
 
   // ---------------------- Deploy Contracts ----------------------
   console.log("Deploying VeBetter DAO contracts")
@@ -305,19 +200,6 @@ export async function deployLatest(config: ContractsConfig) {
     undefined,
     true,
   )) as Treasury
-
-  // Deploy NodeManagement - DEPRECATED
-  // const nodeManagement = (await deployAndInitializeLatest(
-  //   "NodeManagement",
-  //   [
-  //     {
-  //       name: "initialize",
-  //       args: [vechainNodesAddress, TEMP_ADMIN, deployer.address],
-  //     },
-  //   ],
-  //   {},
-  //   true, // logOutput
-  // )) as NodeManagement
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddressTemp = TEMP_ADMIN
@@ -862,6 +744,7 @@ export async function deployLatest(config: ContractsConfig) {
           b3tr,
           vot3,
           vechainNodesMock,
+          stargateNftMock,
           shouldEndorseXApps(),
         )
       } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
@@ -876,6 +759,7 @@ export async function deployLatest(config: ContractsConfig) {
         b3tr,
         vot3,
         vechainNodesMock,
+        stargateNftMock,
         shouldEndorseXApps(),
       )
       break

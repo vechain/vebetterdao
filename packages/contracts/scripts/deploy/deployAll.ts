@@ -269,147 +269,22 @@ export async function deployAll(config: ContractsConfig) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
 
-  let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
-  let stargateNftAddress = "0x0000000000000000000000000000000000000000"
-  let stargateDelegateAddress = "0x0000000000000000000000000000000000000000"
-  let nodeManagementAddress = "0x0000000000000000000000000000000000000000"
+  // Stargate contracts - contracts will be deployed as mocks on testnet staging
+  let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
+  const vechainNodesAddress = await vechainNodesMock.getAddress()
+  console.log("Using Vechain Nodes Mock deployed at: ", vechainNodesAddress)
 
-  // If we are on hardhat, we need to deploy the VTHO token
-  let vthoAddress
-  if (network.name === "hardhat") {
-    const VTHOFactory = await ethers.getContractFactory("MyERC20")
-    const vtho = await VTHOFactory.deploy(deployer.address, deployer.address)
-    await vtho.waitForDeployment()
+  let stargateNftMock = await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)
+  const stargateNftAddress = await stargateNftMock.getAddress()
+  console.log("Using Stargate NFT Mock deployed at: ", stargateNftAddress)
 
-    vthoAddress = await vtho.getAddress()
-  } else {
-    vthoAddress = "0x0000000000000000000000000000456E65726779"
-  }
-  console.log("VTHO token address: ", vthoAddress)
+  let stargateDelegateMock = await ethers.getContractAt("StargateDelegation", config.STARGATE_DELEGATE_CONTRACT_ADDRESS)
+  const stargateDelegateAddress = await stargateDelegateMock.getAddress()
+  console.log("Using Stargate Delegate Mock deployed at: ", stargateDelegateAddress)
 
-  let vechainNodesMock = (await ethers.getContractAt(
-    "TokenAuction",
-    config.VECHAIN_NODES_CONTRACT_ADDRESS,
-  )) as TokenAuction
-  let stargateNftMock = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
-  let stargateDelegateMock = (await ethers.getContractAt(
-    "StargateDelegation",
-    config.STARGATE_DELEGATE_CONTRACT_ADDRESS,
-  )) as StargateDelegation
-  let nodeManagementMock = (await ethers.getContractAt(
-    "NodeManagementV3",
-    config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
-  )) as NodeManagementV3
-
-  if (network.name !== "vechain_mainnet") {
-    console.log("Deploying Vechain Nodes mock contracts")
-
-    const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
-    vechainNodesMock = await TokenAuctionLock.deploy()
-    await vechainNodesMock.waitForDeployment()
-    vechainNodesAddress = await vechainNodesMock.getAddress()
-
-    const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-    const clockAuctionContract = await ClockAuctionLock.deploy(vechainNodesAddress, TEMP_ADMIN)
-
-    await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
-
-    await vechainNodesMock.addOperator(TEMP_ADMIN)
-
-    console.log("Vechain Nodes Mock deployed at: ", vechainNodesAddress)
-
-    console.log("Deploying Stargate mock contracts")
-
-    console.log("Deploying the StargateNFT libraries...")
-    const {
-      StargateNFTClockLib,
-      StargateNFTSettingsLib,
-      StargateNFTTokenLib,
-      StargateNFTMintingLib,
-      StargateNFTVetGeneratedVthoLib,
-      StargateNFTLevelsLib,
-    } = await deployStargateNFTLibraries({ logOutput: true })
-
-    console.log("Deploying StargateNFT...")
-    stargateNftAddress = await deployStargateProxyWithoutInitialization(
-      "StargateNFT",
-      {
-        Clock: await StargateNFTClockLib.getAddress(),
-        MintingLogic: await StargateNFTMintingLib.getAddress(),
-        Settings: await StargateNFTSettingsLib.getAddress(),
-        Token: await StargateNFTTokenLib.getAddress(),
-        VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
-        Levels: await StargateNFTLevelsLib.getAddress(),
-      },
-      true,
-    )
-
-    console.log(`Deploying StargateDelegation...`)
-    stargateDelegateAddress = await deployStargateProxyWithoutInitialization("StargateDelegation", {}, true)
-
-    stargateNftMock = (await initializeProxy(
-      stargateNftAddress,
-      "StargateNFT",
-      [
-        {
-          tokenCollectionName: "VeChain Node Token",
-          tokenCollectionSymbol: "VNT",
-          baseTokenURI: "ipfs://mock/",
-          admin: deployer.address,
-          upgrader: deployer.address,
-          pauser: deployer.address,
-          levelOperator: deployer.address,
-          legacyNodes: vechainNodesAddress, // from TokenAuction mock
-          stargateDelegation: stargateDelegateAddress,
-          legacyLastTokenId: 13, // see setup.ts, seeding for 5 + APPS.length accounts
-          levelsAndSupplies: initialTokenLevels, // TODO: review implementation
-          vthoToken: vthoAddress,
-        },
-      ],
-      {
-        Clock: await StargateNFTClockLib.getAddress(),
-        MintingLogic: await StargateNFTMintingLib.getAddress(),
-        Settings: await StargateNFTSettingsLib.getAddress(),
-        Token: await StargateNFTTokenLib.getAddress(),
-        VetGeneratedVtho: await StargateNFTVetGeneratedVthoLib.getAddress(),
-        Levels: await StargateNFTLevelsLib.getAddress(),
-      },
-    )) as StargateNFT
-    console.log("StargateNFT initialized")
-
-    stargateDelegateMock = (await initializeProxy(
-      stargateDelegateAddress,
-      "StargateDelegation",
-      [
-        {
-          upgrader: deployer.address,
-          admin: deployer.address,
-          stargateNFT: stargateNftAddress,
-          vthoToken: vthoAddress,
-          vthoRewardPerBlock, // CHECK - as per stargate local config
-          delegationPeriod: 10, // CHECK - as per stargate local config
-          operator: deployer.address,
-        },
-      ],
-      {},
-    )) as StargateDelegation
-    console.log("StargateDelegation initialized")
-
-    // Add stargateNftMock as operator to vechainNodesMock, so that it can destroy legacy nodes
-    await vechainNodesMock.addOperator(await stargateNftMock.getAddress())
-    await vechainNodesMock.setLeadTime(0)
-
-    nodeManagementMock = (await deployAndUpgrade(
-      ["NodeManagementV1", "NodeManagementV2", "NodeManagementV3"],
-      [[vechainNodesAddress, deployer.address, deployer.address], [], [stargateNftAddress]],
-      {
-        versions: [undefined, 2, 3],
-        logOutput: true,
-      },
-    )) as NodeManagementV3
-
-    nodeManagementAddress = await nodeManagementMock.getAddress()
-  }
+  let nodeManagementMock = await ethers.getContractAt("NodeManagementV3", config.NODE_MANAGEMENT_CONTRACT_ADDRESS)
+  const nodeManagementAddress = await nodeManagementMock.getAddress()
+  console.log("Using Node Management Mock deployed at: ", nodeManagementAddress)
 
   // ---------------------- Deploy Contracts ----------------------
   console.log("Deploying VeBetter DAO contracts")
