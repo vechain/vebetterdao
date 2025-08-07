@@ -56,6 +56,7 @@ async function main() {
   const GovernorVotesLogic = await ethers.getContractFactory("GovernorVotesLogic", {
     libraries: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
     },
   })
   const GovernorVotesLogicLib = await GovernorVotesLogic.deploy()

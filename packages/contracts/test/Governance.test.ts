@@ -31,7 +31,7 @@ import { B3TRGovernor, B3TRGovernorV1, B3TRGovernorV3, B3TRGovernor__factory } f
 import { deployAndUpgrade, deployProxy } from "../scripts/helpers"
 import { GRANT_PROPOSAL_TYPE, STANDARD_PROPOSAL_TYPE } from "./governance/fixture.test"
 
-describe.only("Governor and TimeLock - @shard4", function () {
+describe("Governor and TimeLock - @shard4", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()

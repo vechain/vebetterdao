@@ -58,7 +58,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *  - Align IVoterRewards and IEmissions interfaces with the new contracts
  *
  * ----- Version 7 -----
- * - Added B3TRGovernor contract to the contract
+ * - Proposal Execution: Count proposal deposits to x-allocation voting power
  *
  */
 contract XAllocationVoting is

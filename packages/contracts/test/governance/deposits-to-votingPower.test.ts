@@ -23,7 +23,7 @@ import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
 import { catchRevert } from "../helpers"
 
-describe.only("Voting power with proposal deposit", function () {
+describe("Voting power with proposal deposit", function () {
   let vot3: VOT3
   let b3tr: B3TR
   let minterAccount: SignerWithAddress
@@ -57,8 +57,8 @@ describe.only("Voting power with proposal deposit", function () {
     await setupProposer(proposer, b3tr, vot3, minterAccount)
   })
 
-  describe.only("Backward compatibility", function () {
-    it.only("Should be able to vote in xApps allocation without proposal deposit if no deposit is done", async function () {
+  describe("Backward compatibility", function () {
+    it("Should be able to vote in xApps allocation without proposal deposit if no deposit is done", async function () {
       await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
       // submit app
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))

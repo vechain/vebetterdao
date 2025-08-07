@@ -26,27 +26,20 @@ pragma solidity 0.8.20;
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { ITreasury } from "./interfaces/ITreasury.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { IGrantsManager } from "./interfaces/IGrantsManager.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { GovernorStateLogic } from "./governance/libraries/GovernorStateLogic.sol";
 import { GovernorProposalLogic } from "./governance/libraries/GovernorProposalLogic.sol";
 import { GovernorTypes } from "./governance/libraries/GovernorTypes.sol";
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 /**
  * @title GrantsManager
  * @notice Contract that manages grant funds milestone validation and claiming
  */
 contract GrantsManager is
   IGrantsManager,
-  IERC721Receiver,
-  IERC1155Receiver,
   AccessControlUpgradeable,
   PausableUpgradeable,
   ReentrancyGuardUpgradeable,
@@ -63,7 +56,7 @@ contract GrantsManager is
   /// @notice Storage structure for GrantsManager
   /// @custom:storage-location erc7201:b3tr.storage.GrantsManager
   struct GrantsManagerStorage {
-    mapping(uint256 proposalId => GrantProposal grantProposal) grant;
+    mapping(uint256 proposalgId => GrantProposal grantProposal) grant;
     IB3TRGovernor governor;
     ITreasury treasury;
     IB3TR b3tr;
@@ -703,52 +696,7 @@ contract GrantsManager is
     return 1;
   }
 
-  // ------------------ OVERRIDES ------------------ //
-  /**
-   * @notice Implements IERC721Receiver interface
-   */
-  function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
-    return this.onERC721Received.selector;
-  }
-
-  /**
-   * @notice Implements IERC1155Receiver interface
-   */
-  function onERC1155Received(
-    address,
-    address,
-    uint256,
-    uint256,
-    bytes calldata
-  ) external pure override returns (bytes4) {
-    return this.onERC1155Received.selector;
-  }
-
-  /**
-   * @notice Implements IERC1155Receiver interface
-   */
-  function onERC1155BatchReceived(
-    address,
-    address,
-    uint256[] calldata,
-    uint256[] calldata,
-    bytes calldata
-  ) external pure override returns (bytes4) {
-    return this.onERC1155BatchReceived.selector;
-  }
-
-  /**
-   * @notice Implements supportsInterface for IERC165
-   */
-  function supportsInterface(
-    bytes4 interfaceId
-  ) public view virtual override(AccessControlUpgradeable, IERC165) returns (bool) {
-    return
-      interfaceId == type(IERC1155Receiver).interfaceId ||
-      interfaceId == type(IERC721Receiver).interfaceId ||
-      super.supportsInterface(interfaceId);
-  }
-
+  // ------------------ Overrides ------------------ //
   /**
    * @notice Authorize upgrade for UUPS
    * @dev Only addresses with the UPGRADER_ROLE can upgrade the contract
