@@ -402,6 +402,10 @@ library GovernorConfigurator {
     GovernorStorageTypes.GovernorStorage storage self,
     GovernorTypes.ProposalType proposalTypeValue
   ) internal view returns (uint256) {
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalTypeValue),
+      "GovernorConfigurator: invalid proposal type"
+    );
     return self.requiredGMLevelByProposalType[proposalTypeValue];
   }
 
@@ -417,6 +421,11 @@ library GovernorConfigurator {
     uint256 newGMWeight
   ) internal {
     uint256 maxGMWeight = self.galaxyMember.MAX_LEVEL();
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalTypeValue),
+      "GovernorConfigurator: invalid proposal type"
+    );
+
     if (newGMWeight > maxGMWeight) {
       revert GMLevelAboveMaxLevel(newGMWeight);
     }
