@@ -35,7 +35,6 @@ export function createGalacticaTestConfig() {
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
-        "setDepositThresholdPercentage",
         "setVotingThreshold",
       ],
       Treasury: ["transferVET", "transferB3TR"],

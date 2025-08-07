@@ -16,11 +16,12 @@ const config: AppConfig = {
   treasuryContractAddress: "0x0594fb9c3a4a10c54b9ebc536dcbc8cdbd24870e",
   x2EarnAppsContractAddress: "0x76a8c10c5530c2240991662fd7f66831d487bafa",
   x2EarnRewardsPoolContractAddress: "0x944221453e535f6e62588be87adc467f322deb31",
-  nodeManagementContractAddress: "0x8bcbfc20ee39c94f4e60afc5d78c402f70b4f3b2", // ok
+  nodeManagementContractAddress: "0x8bcbfc20ee39c94f4e60afc5d78c402f70b4f3b2",
   veBetterPassportContractAddress: "0xebdeafaf485ecb6c524c7ffbc06a16dccfd38284",
   x2EarnCreatorContractAddress: "0xedb20fc1f27d494d5346a776bf895bf24a52b2e6",
-  tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c", // aka vechainNodesContractAddress
-  stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770", // ok
+  tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c",
+  stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
+  grantsManagerContractAddress: "0x35d46ef6ba0f2d09e50f11378b0757383ab1fa42",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
