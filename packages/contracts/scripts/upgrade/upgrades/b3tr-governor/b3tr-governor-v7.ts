@@ -116,7 +116,7 @@ async function main() {
         standardGMWeight: contractsConfig.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
         grantGMWeight: contractsConfig.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
         galaxyMember: config.galaxyMemberContractAddress, //GalaxyMember contract
-        grantsManager: config.grantsManagerContractAddress, //GrantsManager contract //TODO: Figure out , since 0x0 gonna revert the initialization
+        grantsManager: config.grantsManagerContractAddress, // GrantsManager contract
       },
     ],
     {
