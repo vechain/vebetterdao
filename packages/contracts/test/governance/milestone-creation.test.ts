@@ -37,6 +37,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
   let b3tr: B3TR
   let minterAccount: SignerWithAddress
   let proposer: SignerWithAddress
+  let secondaryAccount: SignerWithAddress
   let treasury: Treasury
   let grantsManager: GrantsManager
   let owner: SignerWithAddress
@@ -59,6 +60,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
     b3tr = fixture.b3tr
     minterAccount = fixture.minterAccount
     proposer = fixture.proposer
+    secondaryAccount = fixture.otherAccount
     treasury = fixture.treasury
     grantsManager = fixture.grantsManager
     owner = fixture.owner
@@ -130,6 +132,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -156,6 +159,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -185,6 +189,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.emit(grantsManager, "MilestonesCreated")
@@ -208,6 +213,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         [0n, 0n],
         description,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
         contractToPassToMethods,
       )
@@ -235,8 +241,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(storedGrant.milestones[1].isApproved).to.equal(false)
       expect(storedGrant.milestones[0].isRejected).to.equal(false)
       expect(storedGrant.milestones[1].isRejected).to.equal(false)
-      expect(storedGrant.milestonesDetailsMetadataURI).to.equal(milestonesDetailsMetadataURI)
-      expect(storedGrant.projectDetailsMetadataURI).to.equal(description)
+      expect(storedGrant.metadataURI).to.equal(milestonesDetailsMetadataURI)
       // get the state of the milestone
       const firstMilestoneState = await grantsManager.getMilestoneState(proposalId, 0)
       const secondMilestoneState = await grantsManager.getMilestoneState(proposalId, 1)
@@ -264,6 +269,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -290,6 +296,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -320,6 +327,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -356,6 +364,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           voteStartsInRoundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -384,18 +393,18 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         voteStartsInRoundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
     })
 
     it("Should not be able to call createMilestone if it's not the governor", async () => {
-      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
 
       await expect(
         grantsManager
           .connect(owner)
-          .createMilestones(description, milestonesDetailsMetadataURI, 0, owner.address, [], {}),
+          .createMilestones(milestonesDetailsMetadataURI, 0, proposer.address, owner.address, [], {}),
       ).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
@@ -423,6 +432,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         "0", // deposit amount
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -450,6 +460,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         roundId,
         0, // depositAmount
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
 
@@ -481,6 +492,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, ethers.parseEther("1")],
         ], // args of transferb3tr
         "0", // deposit amount
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -519,6 +531,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         roundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
@@ -559,6 +572,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         roundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
@@ -581,7 +595,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       )
     })
 
-    it("Milestone should be claimed by the proposal owner once the proposal is executed and the milestone is validated", async () => {
+    it("Milestone should be claimed by the PROPOSER once the proposal is executed and the milestone is validated", async () => {
       const description = "My new project"
       const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
@@ -598,6 +612,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr( should have a revert if the amount is not equal)
         "0", // deposit amount
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -614,7 +629,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         "NotAuthorized",
       )
       // try to claim will it have not been approve by any governor role
-      await expect(grantsManager.connect(voter).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
+      await expect(grantsManager.connect(proposer).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
         },
@@ -638,11 +653,11 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         {
           interface: grantsManagerInterface,
         },
-        "CallerIsNotTheGrantProposer",
+        "CallerIsNotTheGrantReceiver",
       )
 
       // try to claim the 2nd milestone before approving the first one
-      await expect(grantsManager.connect(voter).claimMilestone(proposalId, 1)).to.be.revertedWithCustomError(
+      await expect(grantsManager.connect(proposer).claimMilestone(proposalId, 1)).to.be.revertedWithCustomError(
         {
           interface: grantsManagerInterface,
         },
@@ -666,6 +681,92 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(balanceAfterClaiming).to.equal(balanceBeforeClaiming + ethers.parseEther("20000"))
     })
 
+    it("Milestone should be claimed by the GRANTS RECEIVER once the proposal is executed and the milestone is validated", async () => {
+      const description = "My new project"
+      const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr( should have a revert if the amount is not equal)
+        "0", // deposit amount
+        secondaryAccount.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+
+      const balanceBeforeClaiming = await b3tr.balanceOf(secondaryAccount.address)
+
+      // try to approve with someone else than the governor roles
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
+      await expect(grantsManager.connect(proposer).approveMilestones(proposalId, 0)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+      // try to claim will it have not been approve by any governor role
+      await expect(grantsManager.connect(secondaryAccount).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "MilestoneNotApprovedByAdmin",
+      )
+
+      // grant owner the approver role
+      await grantsManager.grantRole(await grantsManager.GRANTS_APPROVER_ROLE(), owner.address)
+      // try to approve the 2nd milestone before approving the first one
+      await expect(grantsManager.connect(owner).approveMilestones(proposalId, 1)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "PreviousMilestoneNotApproved",
+      )
+
+      // approve with the correct role
+      await grantsManager.connect(owner).approveMilestones(proposalId, 0)
+      // try to claim with someone else than the grants receiver
+      await expect(grantsManager.connect(voter).claimMilestone(proposalId, 0)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "CallerIsNotTheGrantReceiver",
+      )
+
+      // try to claim the 2nd milestone before approving the first one
+      await expect(grantsManager.connect(secondaryAccount).claimMilestone(proposalId, 1)).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "MilestoneNotApprovedByAdmin",
+      )
+
+      // approve the milestone
+      // claim the milestone with the correct role
+      await grantsManager.connect(secondaryAccount).claimMilestone(proposalId, 0)
+
+      // check the state of the milestone 0
+      const milestone0 = await grantsManager.getMilestone(proposalId, 0)
+      expect(milestone0.isClaimed).to.equal(true) // Claimed
+
+      // approve the second milestone
+      await grantsManager.connect(owner).approveMilestones(proposalId, 1)
+      // claim the second milestone
+      await grantsManager.connect(secondaryAccount).claimMilestone(proposalId, 1)
+
+      const balanceAfterClaiming = await b3tr.balanceOf(secondaryAccount.address)
+      expect(balanceAfterClaiming).to.equal(balanceBeforeClaiming + ethers.parseEther("20000"))
+    })
+
     it("Cannot claim twice the same milestone", async () => {
       const description = "My new project"
       const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
@@ -683,6 +784,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr( should have a revert if the amount is not equal)
         "0", // deposit amount
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -717,6 +819,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         "0", // deposit amount
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -748,6 +851,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.revertedWithCustomError(
@@ -755,33 +859,6 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           interface: grantsManagerInterface,
         },
         "MilestoneDetailsMetadataURIEmpty",
-      )
-    })
-
-    it("Cannot create milestone if the project details metadata URI is empty", async () => {
-      const description = "" // project details metadata URI cannot be changed later
-      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
-
-      const roundId = await getRoundId(contractToPassToMethods)
-      const calldatas = [
-        treasury.interface.encodeFunctionData("transferB3TR", [grantsManagerAddress, ethers.parseEther("1")]),
-      ]
-
-      expect(
-        governor.connect(proposer).proposeGrant(
-          [treasuryAddress], // Only Treasury for now
-          [0], // transferb3tr is not payable
-          calldatas,
-          description,
-          roundId,
-          0,
-          milestonesDetailsMetadataURI,
-        ),
-      ).to.be.revertedWithCustomError(
-        {
-          interface: grantsManagerInterface,
-        },
-        "ProjectDetailsMetadataURIEmpty",
       )
     })
 
@@ -805,6 +882,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         roundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
 
@@ -817,12 +895,72 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
       )
 
-      await grantsManager
-        .connect(proposer)
-        .updateMilestoneDescriptionMetadataURI(proposalId, newMilestonesDetailsMetadataURI)
+      await grantsManager.connect(proposer).updateMilestoneMetadataURI(proposalId, newMilestonesDetailsMetadataURI)
 
       const grants = await grantsManager.getGrantProposal(proposalId)
-      expect(grants.milestonesDetailsMetadataURI).to.equal(newMilestonesDetailsMetadataURI)
+      expect(grants.metadataURI).to.equal(newMilestonesDetailsMetadataURI)
+    })
+
+    it("Proposer should be able to update the grants receiver", async () => {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr
+        "0", // deposit amount
+        proposer.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+      const originalGrantsReceiver = await grantsManager.getGrantsReceiverAddress(proposalId)
+      expect(originalGrantsReceiver).to.equal(proposer.address)
+
+      await grantsManager.connect(proposer).updateGrantsReceiver(proposalId, owner.address)
+      const grants = await grantsManager.getGrantProposal(proposalId)
+      const newGrantsReceiver = owner.address
+      expect(grants.grantsReceiver).to.equal(newGrantsReceiver) // Should be updated
+      expect(newGrantsReceiver).to.not.equal(originalGrantsReceiver) // Should be different
+    })
+
+    it("Governance should be able to update the grants receiver", async () => {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr
+        "0", // deposit amount
+        proposer.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+      const originalGrantsReceiver = await grantsManager.getGrantsReceiverAddress(proposalId)
+      expect(originalGrantsReceiver).to.equal(proposer.address)
+
+      await grantsManager.connect(owner).updateGrantsReceiver(proposalId, owner.address)
+      const grants = await grantsManager.getGrantProposal(proposalId)
+      const newGrantsReceiver = owner.address
+      expect(grants.grantsReceiver).to.equal(newGrantsReceiver) // Should be updated
+      expect(newGrantsReceiver).to.not.equal(originalGrantsReceiver) // Should be different
     })
   })
 
@@ -843,6 +981,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         roundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
       const receipt = await tx.wait()
@@ -863,6 +1002,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description2,
         roundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
       const receipt2 = await tx2.wait()
@@ -917,6 +1057,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         0,
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -973,6 +1114,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         0,
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -1015,6 +1157,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         0,
+        proposer.address,
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
@@ -1050,6 +1193,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
         roundId,
         0,
+        proposer.address,
         milestonesDetailsMetadataURI,
       )
 
@@ -1102,6 +1246,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           description,
           roundId,
           0,
+          proposer.address,
           milestonesDetailsMetadataURI,
         ),
       ).to.be.reverted
@@ -1117,6 +1262,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
             description,
             roundId,
             0,
+            proposer.address,
             milestonesDetailsMetadataURI,
           ),
       ).to.emit(governor, "ProposalCreated")
