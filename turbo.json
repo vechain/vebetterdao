@@ -160,7 +160,7 @@
       "cache": false
     },
     "compile": {
-      "cache": true,
+      "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "deploy": {
