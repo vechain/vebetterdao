@@ -560,6 +560,59 @@ describe("Voting power with proposal deposit", function () {
       //App should not have any votes because the total vote with the deposit is higher than the total voting power and tx reverted
       expect(appVotes).to.equal(0)
     })
+
+    it("Should be able to vote on allocation even if no deposit was done", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Wait for round to end
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      //Start new round
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+      const currentRoundSnapshot = await xAllocationVoting.roundSnapshot(currentRoundId)
+
+      const votingPowerForAllocationAfterVotes = await xAllocationVoting.getVotes(voter.address, currentRoundSnapshot)
+      const depositVotingPower = await xAllocationVoting.getDepositVotingPower(voter.address, currentRoundSnapshot)
+
+      expect(votingPowerForAllocationAfterVotes).to.equal(expectedVot3Balance)
+      expect(depositVotingPower).to.equal(0)
+
+      const txForVote = await xAllocationVoting
+        .connect(voter)
+        .castVote(currentRoundId, [app1Id], [votingPowerForAllocationAfterVotes])
+
+      await txForVote.wait()
+
+      const appVotes = await xAllocationVoting.getAppVotes(currentRoundId, app1Id)
+
+      //The app should have the total vote with the deposit as voting power as well
+      expect(votingPowerForAllocationAfterVotes).to.equal(appVotes)
+    })
   })
 
   describe("Proposal deposit", function () {
