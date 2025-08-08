@@ -47,11 +47,13 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
           {!hasNft ? (
             <OrderedList spacing={2}>
               <ListItem>
-                <Trans
-                  i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
-                  values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
-                  components={{ b: <Text as="span" fontWeight="bold" /> }}
-                />
+                <Text fontSize="16px" fontWeight={400}>
+                  <Trans
+                    i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
+                    values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
+                    components={{ b: <Text as="span" fontWeight="bold" /> }}
+                  />
+                </Text>
               </ListItem>
               <ListItem>
                 <Trans
@@ -61,10 +63,12 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
               </ListItem>
             </OrderedList>
           ) : (
-            <Trans
-              i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
-              components={{ b: <Text as="span" fontWeight="bold" /> }}
-            />
+            <Text fontSize="16px" fontWeight={400}>
+              <Trans
+                i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
+                components={{ b: <Text as="span" fontWeight="bold" /> }}
+              />
+            </Text>
           )}
         </VStack>
         <HStack w="full" h="full" justifyContent="center" pt={4}>
