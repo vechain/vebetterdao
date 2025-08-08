@@ -47,7 +47,7 @@ contract GrantsManager is
 {
   // ------------------ ROLES ------------------ //
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE"); 
+  bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant GRANTS_APPROVER_ROLE = keccak256("GRANTS_APPROVER_ROLE");
   bytes32 public constant GRANTS_REJECTOR_ROLE = keccak256("GRANTS_REJECTOR_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -56,7 +56,7 @@ contract GrantsManager is
   /// @notice Storage structure for GrantsManager
   /// @custom:storage-location erc7201:b3tr.storage.GrantsManager
   struct GrantsManagerStorage {
-    mapping(uint256 proposalgId => GrantProposal grantProposal) grant;
+    mapping(uint256 proposalId => GrantProposal grantProposal) grant;
     IB3TRGovernor governor;
     ITreasury treasury;
     IB3TR b3tr;
@@ -328,7 +328,7 @@ contract GrantsManager is
     _checkProposalState(proposalId);
     _checkMilestoneState(proposalId, milestoneIndex);
 
-    // The previous milestone should be approved or claimed 
+    // The previous milestone should be approved or claimed
     if (milestoneIndex > 0) {
       MilestoneState previousState = _getMilestoneState(proposalId, milestoneIndex - 1);
       if (previousState != MilestoneState.Approved && previousState != MilestoneState.Claimed) {
@@ -356,7 +356,7 @@ contract GrantsManager is
     _checkProposalState(proposalId);
     _checkMilestoneState(proposalId, milestoneIndex);
 
-    // The previous milestone should be approved or claimed 
+    // The previous milestone should be approved or claimed
     if (milestoneIndex > 0) {
       MilestoneState previousState = _getMilestoneState(proposalId, milestoneIndex - 1);
       if (previousState != MilestoneState.Approved && previousState != MilestoneState.Claimed) {
@@ -542,7 +542,6 @@ contract GrantsManager is
     $.b3tr = IB3TR(_b3tr);
   }
 
-
   /**
    * @notice Pauses all token transfers and minting functions
    * @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
@@ -653,11 +652,11 @@ contract GrantsManager is
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     uint256 remainingAmount = $.grant[proposalId].totalAmount - $.grant[proposalId].claimedAmount;
     if (remainingAmount > 0) {
-        // Make sure we have the balance before trying to transfer
-        uint256 currentBalance = $.b3tr.balanceOf(address(this));
-        if (currentBalance < remainingAmount) {
-          revert InsufficientFunds(currentBalance, remainingAmount);
-        }
+      // Make sure we have the balance before trying to transfer
+      uint256 currentBalance = $.b3tr.balanceOf(address(this));
+      if (currentBalance < remainingAmount) {
+        revert InsufficientFunds(currentBalance, remainingAmount);
+      }
 
       $.b3tr.transfer(address($.treasury), remainingAmount);
     }
