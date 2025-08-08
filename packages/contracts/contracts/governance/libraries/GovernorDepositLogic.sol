@@ -111,9 +111,9 @@ library GovernorDepositLogic {
 
     self.deposits[proposalId][depositer] = 0;
 
-    uint208 currentVotes = self.depositsVotingPower[depositer].upperLookupRecent(SafeCast.toUint48(block.timestamp));
+    uint208 currentVotes = self.depositsVotingPower[depositer].upperLookupRecent(GovernorClockLogic.clock(self));
     uint208 newVotes = SafeCast.toUint208(currentVotes - amount);
-    self.depositsVotingPower[depositer].push(SafeCast.toUint48(block.timestamp), newVotes);
+    self.depositsVotingPower[depositer].push(GovernorClockLogic.clock(self), newVotes);
 
     require(self.vot3.transfer(depositer, amount), "B3TRGovernor: transfer failed");
 
@@ -138,9 +138,7 @@ library GovernorDepositLogic {
 
     self.deposits[proposalId][depositor] += amount;
 
-    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(
-      SafeCast.toUint48(GovernorClockLogic.clock(self))
-    );
+    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(GovernorClockLogic.clock(self));
     uint208 newVotes = currentVotes + SafeCast.toUint208(amount);
     self.depositsVotingPower[depositor].push(GovernorClockLogic.clock(self), newVotes);
 

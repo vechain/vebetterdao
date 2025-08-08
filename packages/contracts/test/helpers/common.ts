@@ -760,15 +760,11 @@ export const startNewAllocationRound = async (contractToPassToMethods?: any): Pr
 
   if (nextCycle === 0n) {
     await bootstrapAndStartEmissions()
-    console.log("Emissions bootstrapped")
   } else if (nextCycle === 1n) {
     await emissions.connect(minterAccount).start()
-    console.log("Emissions started")
   } else if (await emissions.isCycleEnded(await emissions.getCurrentCycle())) {
     await emissions.distribute()
-    console.log("Emissions distributed")
   }
-  console.log("current round id", await xAllocationVoting.currentRoundId())
   return Number(await xAllocationVoting.currentRoundId())
 }
 
