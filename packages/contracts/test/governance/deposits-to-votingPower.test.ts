@@ -23,7 +23,7 @@ import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
 import { catchRevert } from "../helpers"
 
-describe("Voting power with proposal deposit", function () {
+describe("Voting power with proposal deposit - @shard4a", function () {
   let vot3: VOT3
   let b3tr: B3TR
   let minterAccount: SignerWithAddress
