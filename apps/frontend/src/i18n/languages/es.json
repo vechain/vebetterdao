@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "Obtén NFT y comienza a recibir recompensas.",
   "You have no nodes yet.": "Aún no tienes nodos.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Tamaño recomendado: 512x512 px. Mantenga una relación de aspecto de 1:1. El logotipo debe ser una imagen cuadrada completa y debe tener un fondo.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Tamaño recomendado: 686×515. Mantenga una relación de aspecto de 4:3. Los recursos no deben contener logotipos, marcas, texto ni ningún objeto/elemento ajeno al propósito de la aplicación."
+  "VeWorld Featured Image": "Imagen Destacada de VeWorld",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Mantener una relación de aspecto de 4:3. Los recursos no deben contener logotipos, marcas, texto ni objetos/elementos no relacionados con el propósito de la aplicación.",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Tamaño recomendado: 720x720 (mínimo). Mantener una relación de aspecto de 1:1. Los recursos no deben contener logotipos, marcas, texto ni objetos/elementos no relacionados con el propósito de la aplicación.",
+  "Maintain a 9:16 aspect ratio.": "Mantener una relación de aspecto de 9:16.",
+  "VeWorld assets": "Recursos de VeWorld",
+  "Featured Image": "Imagen Destacada",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "Los recursos de VeWorld se utilizan para mostrar la aplicación en la billetera móvil de VeWorld. Inclúyelos para hacer tu aplicación más atractiva. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Tamaño recomendado: 800×400. Mantener una relación de aspecto de 2:1."
 }

@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "NFTを入手して報酬を受け取り始めましょう。",
   "You have no nodes yet.": "まだノードがありません。",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "推奨サイズ: 512x512 px。1:1 のアスペクト比を維持してください。ロゴは完全な正方形の画像で、背景が必要です。",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "推奨サイズ: 686×515。4:3 のアスペクト比を維持してください。アセットには、アプリの目的に関係ないロゴ、ブランド、テキスト、またはオブジェクト/要素を含めないでください。"
+  "VeWorld Featured Image": "VeWorld特集画像",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "4:3のアスペクト比を維持します。資産には、アプリの目的と無関係なロゴ、ブランド、テキスト、またはオブジェクト/要素を含めてはいけません。",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "推奨サイズ: 720x720 (最小)。1:1のアスペクト比を維持します。資産には、アプリの目的と無関係なロゴ、ブランド、テキスト、またはオブジェクト/要素を含めてはいけません。",
+  "Maintain a 9:16 aspect ratio.": "9:16のアスペクト比を維持します。",
+  "VeWorld assets": "VeWorld資産",
+  "Featured Image": "特集画像",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld資産は、VeWorldモバイルウォレットにアプリを表示するために使用されます。アプリをより魅力的にするために含めてください。✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "推奨サイズ: 800×400。2:1のアスペクト比を維持します。"
 }

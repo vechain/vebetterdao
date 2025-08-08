@@ -53,6 +53,15 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
           mediaFolder.file(path, blob)
         }
 
+        if (metadata.ve_world.featured_image) {
+          const { blob, path } = processImage(
+            metadata.ve_world.featured_image,
+            "ve_world_featured_image",
+            "ve_world_featured_image",
+          )
+          mediaFolder.file(path, blob)
+        }
+
         for (let i = 0; i < metadata.screenshots.length; i++) {
           const screenshot = metadata.screenshots[i]
           if (screenshot) {
@@ -81,6 +90,9 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
             banner: metadata.ve_world.banner
               ? `ipfs://${imagesCid}/media/ve_world_banner.${IMAGE_REQUIREMENTS.ve_world_banner.extension}`
               : metadata.ve_world.banner,
+            featured_image: metadata.ve_world.featured_image
+              ? `ipfs://${imagesCid}/media/ve_world_featured_image.${IMAGE_REQUIREMENTS.ve_world_featured_image.extension}`
+              : metadata.ve_world.featured_image,
           },
         }
 

@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "获取NFT并开始获得奖励。",
   "You have no nodes yet.": "您还没有节点。",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "推荐尺寸: 512x512 像素。保持 1:1 的比例。标志必须是完整的正方形图像，并且必须有背景。",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "推荐尺寸: 686×515。保持 4:3 的比例。素材不应包含标志、品牌、文字或与应用目的无关的对象/元素。"
+  "VeWorld Featured Image": "VeWorld精选图片",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "保持4:3的纵横比。资产不应包含标志、品牌、文本或与应用程序目的无关的对象/元素",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "推荐尺寸：720x720（最小）。保持1:1的纵横比。资产不应包含标志、品牌、文本或与应用程序目的无关的对象/元素。",
+  "Maintain a 9:16 aspect ratio.": "保持9:16的纵横比。",
+  "VeWorld assets": "VeWorld 资产",
+  "Featured Image": "精选图片",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld 资产用于在 VeWorld 移动钱包中显示应用程序。包括它们以使您的应用程序更具吸引力。✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "推荐尺寸：800×400。保持2:1的纵横比。"
 }

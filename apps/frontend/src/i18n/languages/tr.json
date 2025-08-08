@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "NFT alın ve ödüller kazanmaya başlayın.",
   "You have no nodes yet.": "Henüz düğümünüz yok.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Önerilen boyut: 512x512 piksel. 1:1 en-boy oranını koruyun. Logo, tam kare bir görüntü olmalı ve bir arka plana sahip olmalıdır.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Önerilen boyut: 686×515. 4:3 en-boy oranını koruyun. Varlıklar, uygulamanın amacına ve uygun olmayan logolar, markalar, metin veya diğer nesneler/unsurlar içermemelidir."
+  "VeWorld Featured Image": "VeWorld Öne Çıkan Görsel",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "4:3 oranını koruyun. Varlıklar logo, marka, metin veya uygulamanın amacıyla ilgili olmayan nesne/öğeler içermemelidir",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Önerilen boyut: 720x720 (minimum). 1:1 oranını koruyun. Varlıklar logo, marka, metin veya uygulama amacına aykırı nesne/öğeler içermemelidir",
+  "Maintain a 9:16 aspect ratio.": "9:16 oranını koruyun.",
+  "VeWorld assets": "VeWorld varlıkları",
+  "Featured Image": "Öne Çıkan Görsel",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld varlıkları, uygulamanın VeWorld mobil cüzdanında görüntülenmesi için kullanılır. Uygulamanızı daha ilgi çekici hale getirmek için bunları ekleyin. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Önerilen boyut: 800×400. 2:1 oranını koruyun."
 }
