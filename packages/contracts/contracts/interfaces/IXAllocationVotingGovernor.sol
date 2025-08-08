@@ -262,6 +262,18 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function castVote(uint256 roundId, bytes32[] memory appsIds, uint256[] memory voteWeights) external;
 
   /**
+   * @dev Toggle autovoting for the caller
+   */
+  function toggleAutoVoting() external;
+
+  /**
+   * @dev Toggle autovoting for a user
+   * @param user The address to toggle autovoting for
+   * @notice This function is only callable by the VOT3 contract
+   */
+  function toggleAutoVotingForUser(address user) external;
+
+  /**
    * @dev Returns the current allocation round round.
    */
   function currentRoundId() external view returns (uint256);

@@ -33,6 +33,7 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /**
@@ -115,6 +116,8 @@ abstract contract XAllocationVotingGovernor is
    * @notice Only addresses with a valid passport can vote.
    */
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
+    // TODO: User should NOT be able to cast a vote if the the voter has auto-voting enabled
+
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
@@ -193,6 +196,8 @@ abstract contract XAllocationVotingGovernor is
     }
 
     _countVote(roundId, voter, finalAppIds, voteWeights);
+
+    relayerRewardsPool().registerRelayerAction(msg.sender, roundId, RelayerAction.VOTE);
 
     emit AllocationAutoVoteCast(voter, roundId, finalAppIds, voteWeights);
   }
@@ -402,6 +407,11 @@ abstract contract XAllocationVotingGovernor is
   function voterRewards() public view virtual returns (IVoterRewards);
 
   /**
+   * @dev Returns the RelayerRewardsPool contract.
+   */
+  function relayerRewardsPool() public view virtual returns (IRelayerRewardsPool);
+
+  /**
    * @dev Checks if autovoting is enabled for an account
    */
   function _isAutoVotingEnabled(address account) internal view virtual returns (bool);
@@ -415,4 +425,9 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the voting preferences for an account
    */
   function _getUserVotingPreferences(address account) internal view virtual returns (bytes32[] memory);
+
+  /**
+   * @dev Gets the total number of users who enabled autovoting at a specific timepoint
+   */
+  function _getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) internal view virtual returns (uint208);
 }

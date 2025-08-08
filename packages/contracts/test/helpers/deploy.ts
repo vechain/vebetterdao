@@ -109,6 +109,7 @@ import {
   PassportPoPScoreLogicV3,
   PassportWhitelistAndBlacklistLogicV3,
   StargateNFT,
+  RelayerRewardsPool,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -263,6 +264,9 @@ interface DeployInstance {
   // StarGate
   stargateNftMock: StargateNFT
   vthoTokenMock: MyERC20
+
+  // Rewards Pool related to XAllocationVoting
+  relayerRewardsPool: RelayerRewardsPool
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -1043,6 +1047,22 @@ export const getOrDeployContractInstances = async ({
     },
   )) as B3TRGovernor
 
+  const relayerRewardsPool = (await deployAndUpgrade(
+    ["RelayerRewardsPool"],
+    [
+      [
+        owner.address, // admin
+        owner.address, // upgrader
+        await b3tr.getAddress(), // b3trAddress
+        await emissions.getAddress(), // emissionsAddress
+      ],
+    ],
+    {
+      versions: [undefined],
+      logOutput: false,
+    },
+  )) as RelayerRewardsPool
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -1136,6 +1156,21 @@ export const getOrDeployContractInstances = async ({
   // Set up the X2EarnCreator contract
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
   await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
+
+  // Setup the RelayerRewardsPool contract
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.RELAYER_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await relayerRewardsPool
+    .connect(owner)
+    .grantRole(await relayerRewardsPool.DEPOSITOR_ROLE(), await voterRewards.getAddress())
+    .then(async tx => await tx.wait())
+  await xAllocationVoting
+    .connect(owner)
+    .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
+    .then(async tx => await tx.wait())
+  await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
 
   // Since x2EarnApps v5, new apps => new creator != owner
   // Token id 2, 3, 4, 5 are reserved for the creator NFTs
@@ -1268,6 +1303,7 @@ export const getOrDeployContractInstances = async ({
     vthoTokenMock,
     vechainNodesMock,
     stargateNftMock,
+    relayerRewardsPool,
   }
   return cachedDeployInstance
 }

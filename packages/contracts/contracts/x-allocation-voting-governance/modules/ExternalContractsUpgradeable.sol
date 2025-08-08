@@ -29,6 +29,7 @@ import { IEmissions } from "../../interfaces/IEmissions.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
 
 /**
  * @title ExternalContractsUpgradeable
@@ -41,6 +42,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     IEmissions _emissions;
     IVoterRewards _voterRewards;
     IVeBetterPassport _veBetterPassport;
+    IRelayerRewardsPool _relayerRewardsPool;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.ExternalContracts")) - 1)) & ~bytes32(uint256(0xff))
@@ -61,6 +63,8 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   event VoterRewardsSet(address oldContractAddress, address newContractAddress);
   // @dev Emit when the VeBetterPassport contract is set
   event VeBetterPassportSet(address oldContractAddress, address newContractAddress);
+  // @dev Emit when the RelayerRewardsPool contract is set
+  event RelayerRewardsPoolSet(address oldContractAddress, address newContractAddress);
 
   /**
    * @dev Initializes the contract
@@ -122,6 +126,14 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     return $._veBetterPassport;
   }
 
+  /**
+   * @dev Get the RelayerRewardsPool contract
+   */
+  function relayerRewardsPool() public view override returns (IRelayerRewardsPool) {
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    return $._relayerRewardsPool;
+  }
+
   // ------- Internal Functions ------- //
 
   /**
@@ -177,5 +189,21 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
 
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._veBetterPassport = newVeBetterPassport;
+  }
+
+  /**
+   * @dev Sets the RelayerRewardsPool contract
+   * @param newRelayerRewardsPool The new RelayerRewardsPool contract address
+   */
+  function _setRelayerRewardsPool(IRelayerRewardsPool newRelayerRewardsPool) internal virtual {
+    require(
+      address(newRelayerRewardsPool) != address(0),
+      "XAllocationVotingGovernor: new RelayerRewardsPool is the zero address"
+    );
+
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+
+    emit RelayerRewardsPoolSet(address($._relayerRewardsPool), address(newRelayerRewardsPool));
+    $._relayerRewardsPool = newRelayerRewardsPool;
   }
 }

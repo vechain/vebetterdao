@@ -173,6 +173,16 @@ contract XAllocationVoting is
   }
 
   /**
+   * @dev Toggle autovoting for a user
+   * @param user The address to toggle autovoting for
+   * @notice This function is only callable by the VOT3 contract, please refer to toggleAutoVoting() instead
+   */
+  function toggleAutoVotingForUser(address user) external {
+    require(msg.sender == address(token()), "XAllocationVoting: only VOT3 contract can call this");
+    _toggleAutovoting(user);
+  }
+
+  /**
    * @dev Set the voting preferences for the caller
    */
   function setUserVotingPreferences(bytes32[] memory appIds) public {
@@ -198,6 +208,15 @@ contract XAllocationVoting is
    */
   function setVoterRewardsAddress(IVoterRewards newVoterRewards) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVoterRewards(newVoterRewards);
+  }
+
+  /**
+   * @dev Set the address of the RelayerRewardsPool contract
+   */
+  function setRelayerRewardsPoolAddress(
+    IRelayerRewardsPool newRelayerRewardsPool
+  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    _setRelayerRewardsPool(newRelayerRewardsPool);
   }
 
   /**
@@ -276,6 +295,21 @@ contract XAllocationVoting is
    */
   function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {
     return _getUserVotingPreferences(account);
+  }
+
+  /**
+   * @dev Get the total number of users who enabled autovoting at the last emission block
+   */
+  function getTotalAutoVotingUsers() public view returns (uint208) {
+    uint256 lastEmissionBlock = emissions().lastEmissionBlock();
+    return _getTotalAutoVotingUsersAtTimepoint(uint48(lastEmissionBlock));
+  }
+
+  /**
+   * @dev Get the total number of users who enabled autovoting at a specific timepoint
+   */
+  function getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) public view returns (uint208) {
+    return _getTotalAutoVotingUsersAtTimepoint(timepoint);
   }
 
   /**
