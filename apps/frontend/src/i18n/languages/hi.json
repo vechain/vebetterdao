@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "एनएफटी प्राप्त करें और पुरस्कार प्राप्त करना शुरू करें।",
   "You have no nodes yet.": "आपके पास अभी तक कोई नोड नहीं है।",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "अनुशंसित आकार: 512x512 पिक्सल। एक 1:1 पहलू अनुपात बनाए रखें। लोगो एक पूर्ण वर्ग चित्र होना चाहिए और उसकी पृष्ठभूमि होनी चाहिए।",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "अनुशंसित आकार: 686×515। एक 4:3 पहलू अनुपात बनाए रखें। संपत्तियों में लोगो, ब्रांड, पाठ, या ऐप के उद्देश्य से असंबंधित कोई वस्तु/तत्व नहीं होना चाहिए।"
+  "VeWorld Featured Image": "VeWorld विशेष छवि",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "4:3 अनुपात बनाए रखें। संपत्तियों में लोगो, ब्रांड, पाठ, या ऐप के उद्देश्य से संबंधित कोई भी वस्तुएं/तत्व नहीं होने चाहिए।",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "अनुशंसित आकार: 720x720 (न्यूनतम)। 1:1 अनुपात बनाए रखें। संपत्तियों में लोगो, ब्रांड, पाठ, या ऐप के उद्देश्य से संबंधित कोई भी वस्तुएं/तत्व नहीं होने चाहिए।",
+  "Maintain a 9:16 aspect ratio.": "9:16 अनुपात बनाए रखें।",
+  "VeWorld assets": "VeWorld संपत्तियाँ",
+  "Featured Image": "विशेष चित्र",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld संपत्तियों का उपयोग VeWorld मोबाइल वॉलेट में ऐप को प्रदर्शित करने के लिए किया जाता है। इन्हें शामिल करें ताकि आपकी ऐप अधिक आकर्षक बने। ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "अनुशंसित आकार: 800×400। 2:1 अनुपात बनाए रखें।"
 }
