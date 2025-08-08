@@ -215,14 +215,14 @@ contract VOT3 is
     address to,
     uint256 amount
   ) internal override(ERC20Upgradeable, ERC20VotesUpgradeable, ERC20PausableUpgradeable) {
-    // Revert if the transfer would leave the sender with less than 1 VOT3 while autovoting is enabled
+    // Toggle off if the transfer would leave the sender with less than 1 VOT3 while autovoting is enabled
     if (from != address(0)) {
       uint256 balanceAfterTransfer = balanceOf(from) - amount;
 
       if (balanceAfterTransfer < 1 ether) {
         VOT3Storage storage $ = _getVOT3Storage();
         if (address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabled(from)) {
-          revert("VOT3: cannot transfer below 1 VOT3 while autovoting is enabled");
+          $.xAllocationVoting.toggleAutoVotingForUser(from);
         }
       }
     }
