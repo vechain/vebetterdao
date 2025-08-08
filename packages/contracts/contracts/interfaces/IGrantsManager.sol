@@ -54,14 +54,36 @@ interface IGrantsManager {
   event MilestoneRejectedAndFundsReturnedToTreasury(uint256 indexed proposalId, uint256 amount);
 
   /**
-   * @notice Emitted when a milestone description metadata URI is updated
+   * @notice Emitted when a milestone metadata URI is updated
    * @param proposalId The ID of the proposal
-   * @param newDescriptionMetadataURI The new description metadata URI
+   * @param newMilestoneMetadataURI The new metadata URI
    */
-  event MilestoneDescriptionMetadataURIUpdated(uint256 indexed proposalId, string newDescriptionMetadataURI);
+  event MilestoneMetadataURIUpdated(uint256 indexed proposalId, string newMilestoneMetadataURI);
+
+  /**
+   * @notice Emitted when the grants receiver address is updated
+   * @param proposalId The ID of the proposal
+   * @param newGrantsReceiver The new grants receiver address
+   */
+  event GrantsReceiverUpdated(uint256 indexed proposalId, address newGrantsReceiver);
+
+  /**
+   * @notice Emitted when milestones are created for a proposal
+   * @param proposalId The ID of the proposal
+   * @param proposer The address of the proposer
+   * @param grantsReceiver The address of the grants receiver
+   * @param totalAmount The total amount of all milestones
+   * @param metadataURI The IPFS hash containing milestone details
+   */
+  event MilestonesCreated(
+    uint256 indexed proposalId,
+    address indexed proposer,
+    address indexed grantsReceiver,
+    uint256 totalAmount,
+    string metadataURI
+  );
 
   // ------------------ Errors ------------------ //
-
 
   /**
    * @notice Error thrown when a target is invalid
@@ -157,18 +179,16 @@ interface IGrantsManager {
   error MilestoneProposerZeroAddress();
 
   /**
-   * @notice Error thrown when caller is not the grant proposer
+   * @notice Error thrown when caller is not the grant receiver
    * @param caller The address of the caller
    * @param recipient The address of the recipient
    */
-  error CallerIsNotTheGrantProposer(address caller, address recipient);
-
+  error CallerIsNotTheGrantReceiver(address caller, address recipient);
 
   /**
    * @notice Error thrown when transfer fails
    */
   error TransferFailed();
-
 
   /**
    * @notice Error thrown when funds are insufficient
@@ -181,11 +201,6 @@ interface IGrantsManager {
    * @notice Error thrown when milestone details metadata URI is empty
    */
   error MilestoneDetailsMetadataURIEmpty();
-
-  /**
-   * @notice Error thrown when project details metadata URI is empty  
-   */
-  error ProjectDetailsMetadataURIEmpty();
 
   /**
    * @notice Error thrown when proposal is not executed
@@ -218,31 +233,31 @@ interface IGrantsManager {
   /**
    * @notice GrantProposal struct
    */
-  struct GrantProposal { 
+  struct GrantProposal {
     uint256 id;
     uint256 totalAmount;
-    uint256 claimedAmount;  
+    uint256 claimedAmount;
     address proposer;
+    address grantsReceiver;
     Milestone[] milestones;
-    string milestonesDetailsMetadataURI; 
-    string projectDetailsMetadataURI; 
+    string metadataURI;
   }
 
   // ------------------ Grants Manager Milestone Functions ------------------ //
 
   /**
    * @notice Creates milestones for a proposal
-   * @param projectDetailsMetadataURI The IPFS hash containing milestones descriptions and metadata
-   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
+   * @param metadataURI The IPFS hash containing the milestones metadata
    * @param proposalId The ID of the proposal
    * @param proposer The address of the proposer
+   * @param grantsReceiver The address of the grants receiver
    * @param calldatas The calldatas of the milestones
    */
   function createMilestones(
-    string memory projectDetailsMetadataURI,
-    string memory milestonesDetailsMetadataURI,
+    string memory metadataURI,
     uint256 proposalId,
     address proposer,
+    address grantsReceiver,
     bytes[] memory calldatas
   ) external;
 
@@ -382,26 +397,33 @@ interface IGrantsManager {
    */
   function setB3trContract(address _b3tr) external;
 
+  /**
+   * @notice Updates the grants receiver address
+   * @param proposalId The ID of the proposal
+   * @param newGrantsReceiver The new grants receiver address
+   */
+  function updateGrantsReceiver(uint256 proposalId, address newGrantsReceiver) external;
+
+  /**
+   * @notice Returns the grants receiver address
+   * @param proposalId The ID of the proposal
+   * @return The address of the grants receiver
+   */
+  function getGrantsReceiverAddress(uint256 proposalId) external view returns (address);
+
   // ------------------ Metadata Functions ------------------ //
 
   /**
    * @notice Updates the milestone description metadata URI for a proposal
    * @param proposalId The ID of the proposal
-   * @param newDescriptionMetadataURI The milestone description metadata URI to set
+   * @param newMilestoneMetadataURI The milestone description metadata URI to set
    */
-  function updateMilestoneDescriptionMetadataURI(uint256 proposalId, string memory newDescriptionMetadataURI) external;
+  function updateMilestoneMetadataURI(uint256 proposalId, string memory newMilestoneMetadataURI) external;
 
   /**
-   * @notice Returns the project details metadata URI for a proposal
+   * @notice Returns the milestone  metadata URI for a proposal
    * @param proposalId The ID of the proposal
-   * @return The project details metadata URI for the proposal
+   * @return The milestone  metadata URI for the proposal
    */
-  function getMilestoneDescriptionMetadataURI(uint256 proposalId) external view returns (string memory);
-
-  /**
-   * @notice Returns the project details metadata URI for a proposal
-   * @param proposalId The ID of the proposal
-   * @return The project details metadata URI for the proposal
-   */
-  function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory);
+  function getMilestoneMetadataURI(uint256 proposalId) external view returns (string memory);
 }

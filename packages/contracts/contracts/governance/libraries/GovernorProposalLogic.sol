@@ -318,7 +318,9 @@ library GovernorProposalLogic {
    * @param calldatas The function signatures and arguments.
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
-   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
+   * @param depositAmount The amount of tokens the proposer intends to deposit.
+   * @param grantsReceiver The address of the grants receiver
+   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones ipfs hash
    * @return The proposal id.
    */
   function proposeGrant(
@@ -329,15 +331,14 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
+    address grantsReceiver,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
-    address proposer = msg.sender;
     uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
-    IGrantsManager grantsManager = self.grantsManager;
 
     validateProposeParams(
       self,
-      proposer,
+      msg.sender, //Proposer
       startRoundId,
       description,
       targets,
@@ -347,12 +348,19 @@ library GovernorProposalLogic {
       GovernorTypes.ProposalType.Grant
     );
 
-    grantsManager.createMilestones(description, milestonesDetailsMetadataURI, proposalId, proposer, calldatas);
+    //Instantiate the grants manager contract inline to avoid stack too deep errors
+    IGrantsManager(self.grantsManager).createMilestones(
+      milestonesDetailsMetadataURI,
+      proposalId,
+      msg.sender, //Proposer
+      grantsReceiver,
+      calldatas
+    );
 
     return
       _propose(
         self,
-        proposer,
+        msg.sender, //Proposer
         proposalId,
         targets,
         values,
@@ -690,7 +698,6 @@ library GovernorProposalLogic {
       revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogic._state(self, proposalId), bytes32(0));
     }
 
-  
     GovernorFunctionRestrictionsLogic.checkFunctionsRestriction(self, targets, calldatas);
   }
 

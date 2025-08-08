@@ -131,31 +131,33 @@ contract GrantsManager is
     }
     _;
   }
+  modifier onlyGrantsProposerOrGovernance(uint256 proposalId) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    if (!(hasRole(GOVERNANCE_ROLE, _msgSender()) || _msgSender() == $.grant[proposalId].proposer)) {
+      revert NotAuthorized();
+    }
+    _;
+  }
 
   // ------------------ Grants Manager Milestone Functions ------------------ //
   /**
    * @dev Internal function to create milestones for a proposal.
-   * @param projectDetailsMetadataURI The IPFS hash containing milestones descriptions and metadata
-   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
+   * @param metadataURI The IPFS hash containing the milestones descriptions
    * @param proposalId The ID of the proposal
    * @param proposer The address of the proposer
    * @param calldatas The calldatas of the milestones
    */
   function createMilestones(
-    string memory projectDetailsMetadataURI,
-    string memory milestonesDetailsMetadataURI,
+    string memory metadataURI,
     uint256 proposalId,
     address proposer,
+    address grantsReceiver,
     bytes[] memory calldatas
   ) external onlyGovernor whenNotPaused {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
 
-    uint256 _milestoneId = proposalId;
-    GrantProposal storage m = $.grant[_milestoneId];
+    GrantProposal storage m = $.grant[proposalId];
     uint256 totalAmount = 0;
-    bool isApproved = false;
-    bool isClaimed = false;
-    bool isRejected = false;
 
     for (uint256 i = 0; i < calldatas.length; i++) {
       bytes memory data = calldatas[i];
@@ -184,19 +186,20 @@ contract GrantsManager is
       }
 
       totalAmount += amount;
-      $.grant[_milestoneId].milestones.push(
-        Milestone({ amount: amount, isClaimed: isClaimed, isApproved: isApproved, isRejected: isRejected, reason: "" })
+      $.grant[proposalId].milestones.push(
+        Milestone({ amount: amount, isClaimed: false, isApproved: false, isRejected: false, reason: "" })
       );
     }
 
-    m.id = _milestoneId;
+    m.id = proposalId;
     m.proposer = proposer;
-    m.milestonesDetailsMetadataURI = milestonesDetailsMetadataURI;
-    m.projectDetailsMetadataURI = projectDetailsMetadataURI;
+    m.metadataURI = metadataURI;
     m.totalAmount = totalAmount;
     m.claimedAmount = 0; // 0 because the milestone is not claimed yet
+    m.grantsReceiver = grantsReceiver;
 
     _validateMilestones(m);
+    emit MilestonesCreated(proposalId, proposer, grantsReceiver, totalAmount, metadataURI);
   }
 
   /**
@@ -442,17 +445,17 @@ contract GrantsManager is
       revert InvalidMilestoneIndex(proposalId, milestoneIndex);
     }
 
+    address grantsReceiver = m.grantsReceiver;
+    if (msg.sender != grantsReceiver) {
+      revert CallerIsNotTheGrantReceiver(msg.sender, grantsReceiver);
+    }
+
     // check that the milestone is validated or not already claimed
     Milestone memory milestone = m.milestones[milestoneIndex];
     // get the state of the milestone
     MilestoneState milestoneState = _getMilestoneState(proposalId, milestoneIndex);
     if (milestoneState != MilestoneState.Approved && milestoneState != MilestoneState.Claimed) {
       revert MilestoneNotApprovedByAdmin(proposalId, milestoneIndex);
-    }
-
-    address proposer = m.proposer;
-    if (msg.sender != proposer) {
-      revert CallerIsNotTheGrantProposer(msg.sender, proposer);
     }
 
     // check that the milestone is not already  if (GovernorStateLogic.state($.governor, proposalId) == GovernorTypes.ProposalState.Canceled) {
@@ -465,8 +468,8 @@ contract GrantsManager is
       revert InsufficientFunds($.b3tr.balanceOf(address(this)), milestone.amount);
     }
 
-    // Transfer B3TR tokens to proposer first
-    bool success = $.b3tr.transfer(proposer, milestone.amount);
+    // Transfer B3TR tokens to grants receiver
+    bool success = $.b3tr.transfer(grantsReceiver, milestone.amount);
     if (!success) {
       revert TransferFailed();
     }
@@ -504,6 +507,31 @@ contract GrantsManager is
   function getGovernorContract() external view returns (address) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     return address($.governor);
+  }
+
+  /**
+   * @notice Updates the grants receiver address
+   * @param proposalId The ID of the proposal
+   * @param newGrantsReceiver The address of the grants receiver contract
+   * @dev Only the proposer or governance can update the grants receiver address
+   */
+  function updateGrantsReceiver(
+    uint256 proposalId,
+    address newGrantsReceiver
+  ) external onlyGrantsProposerOrGovernance(proposalId) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    $.grant[proposalId].grantsReceiver = newGrantsReceiver;
+    emit GrantsReceiverUpdated(proposalId, newGrantsReceiver);
+  }
+
+  /**
+   * @notice Returns the grants receiver address
+   * @param proposalId The ID of the proposal
+   * @return The address of the grants receiver
+   */
+  function getGrantsReceiverAddress(uint256 proposalId) external view returns (address) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    return $.grant[proposalId].grantsReceiver;
   }
 
   /**
@@ -561,42 +589,31 @@ contract GrantsManager is
   // ------------------ Metadata Functions ------------------ //
 
   /**
-   * @notice Updates the description metadata URI for a milestone
+   * @notice Updates the metadata URI for a milestone
    * @param proposalId The ID of the proposal
-   * @param newDescriptionMetadataURI The new IPFS hash containing the updated milestone descriptions
+   * @param newMilestoneMetadataURI The new IPFS hash containing the updated milestone descriptions
    * @notice The JSON is {milestone1: {details: ..., duration: timestamp}, milestone2: {details: ..., duration: timestamp}}
    */
-  function updateMilestoneDescriptionMetadataURI(uint256 proposalId, string memory newDescriptionMetadataURI) external {
+  function updateMilestoneMetadataURI(uint256 proposalId, string memory newMilestoneMetadataURI) external {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     if (msg.sender != $.grant[proposalId].proposer) {
       revert NotAuthorized();
     }
-    $.grant[proposalId].milestonesDetailsMetadataURI = newDescriptionMetadataURI;
+    $.grant[proposalId].metadataURI = newMilestoneMetadataURI;
 
-    emit MilestoneDescriptionMetadataURIUpdated(proposalId, newDescriptionMetadataURI);
+    emit MilestoneMetadataURIUpdated(proposalId, newMilestoneMetadataURI);
   }
 
   /**
-   * @notice Returns the description metadata URI for a milestone
+   * @notice Returns the metadata URI for a milestone
    * @param proposalId The ID of the proposal
-   * @return The description metadata URI for the milestone
+   * @return The metadata URI for the milestone
    */
-  function getMilestoneDescriptionMetadataURI(uint256 proposalId) external view returns (string memory) {
+  function getMilestoneMetadataURI(uint256 proposalId) external view returns (string memory) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.grant[proposalId].milestonesDetailsMetadataURI;
+    return $.grant[proposalId].metadataURI;
   }
 
-  /**
-   * @notice Returns the project details metadata URI for a proposal
-   * @param proposalId The ID of the proposal
-   * @return The project details metadata URI for the proposal
-   */
-  function getProjectDetailsMetadataURI(uint256 proposalId) external view returns (string memory) {
-    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    return $.grant[proposalId].projectDetailsMetadataURI;
-  }
-
-  // ------------------  Internal Functions ------------------ //
   /**
    * @notice Validates the milestones
    * @param grant The milestones to validate
@@ -614,13 +631,8 @@ contract GrantsManager is
     }
 
     // Check the milestones details metadata URI
-    if (bytes(grant.milestonesDetailsMetadataURI).length == 0) {
+    if (bytes(grant.metadataURI).length == 0) {
       revert MilestoneDetailsMetadataURIEmpty();
-    }
-
-    // Check the project details metadata URI
-    if (bytes(grant.projectDetailsMetadataURI).length == 0) {
-      revert ProjectDetailsMetadataURIEmpty();
     }
 
     // Check the milestones amounts

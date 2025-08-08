@@ -480,6 +480,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
+    address grantsReceiver,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256);
 
