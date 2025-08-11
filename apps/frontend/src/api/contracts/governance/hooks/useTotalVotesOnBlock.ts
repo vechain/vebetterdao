@@ -33,7 +33,10 @@ export const useTotalVotesOnBlock = (block?: number, address?: string, enabled =
       select: data => {
         const depositsVotes = ethers.formatEther(data[0])
         const totalVotesWithDeposits = parseFloat(votes || "0") + parseFloat(depositsVotes)
-        return totalVotesWithDeposits.toString()
+        return {
+          totalVotesWithDeposits: totalVotesWithDeposits.toString(),
+          depositsVotes: depositsVotes.toString(),
+        }
       },
     },
   })
