@@ -1,11 +1,12 @@
 "use client"
-import { useAllocationsRound, useGetVotesOnBlock, useIsQuadraticFundingDisabled } from "@/api"
+import { useAllocationsRound, useIsQuadraticFundingDisabled, useTotalVotesOnBlock } from "@/api"
 import { ResponsiveCard, VOT3Icon } from "@/components"
 import { useBreakpoints } from "@/hooks"
 import { VStack, Heading, Box, HStack, Skeleton, Text } from "@chakra-ui/react"
+import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -17,10 +18,15 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const { data: roundInfo } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const depositsVotes = totalVotesAtSnapshotQuery.data?.depositsVotes
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
+
   const { data: isQuadraticFundingDisabled } = useIsQuadraticFundingDisabled()
 
   return (
@@ -43,6 +49,15 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
           <Text fontSize="14px" fontWeight={400} color="#6A6A6A">
             {t("VOT3 balance at snapshot")}
           </Text>
+          {depositsVotes && (
+            <Text fontSize={14}>
+              <Trans
+                i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
+                values={{ depositsVotes: FormattingUtils.humanNumber(Number(depositsVotes ?? 0)) }}
+                components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+              />
+            </Text>
+          )}
         </VStack>
         {isDesktop && !isQuadraticFundingDisabled && (
           <Box fontSize={"14px"} color={"#6A6A6A"} fontWeight={400}>

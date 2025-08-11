@@ -1770,5 +1770,6 @@
   "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.",
   "Create Discourse": "Create Discourse",
   "Apply": "Apply",
-  "Get NFT": "Get NFT"
+  "Get NFT": "Get NFT",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
 }
