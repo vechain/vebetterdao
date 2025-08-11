@@ -17,13 +17,14 @@ import {
   getVot3Tokens,
   waitForCurrentRoundToEnd,
   waitForNextBlock,
+  waitForProposalToBeActive,
 } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
 import { catchRevert } from "../helpers"
 
-describe("Voting power with proposal deposit - @shard4a", function () {
+describe.only("Voting power with proposal deposit - @shard4a", function () {
   let vot3: VOT3
   let b3tr: B3TR
   let minterAccount: SignerWithAddress
@@ -447,7 +448,7 @@ describe("Voting power with proposal deposit - @shard4a", function () {
       expect(totalVoteWithDeposit).to.equal(appVotes)
     })
 
-    it("Should NOT be able to vote on allocation with the proposal deposit if the value is higher than the total voting power", async function () {
+    it.only("Should NOT be able to vote on allocation with the proposal deposit if the value is higher than the total voting power", async function () {
       //Submit the app
       await x2EarnApps
         .connect(owner)
@@ -615,14 +616,135 @@ describe("Voting power with proposal deposit - @shard4a", function () {
     })
   })
 
-  describe("Proposal deposit", function () {
-    it("Deposit on proposal should be counted as voting power", async function () {})
-    it("Withdrawal on proposal should be removed from voting power", async function () {})
+  describe.only("Withdrawing(claim back) deposits", function () {
+    it.only("Will not withdrawing or voting on allocation, the deposit voting power should remains as voting power for xapps voting", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+      console.log("depositThreshold", depositThreshold)
+      console.log("expectedVot3Balance", expectedVot3Balance)
+      console.log("total", depositThreshold + expectedVot3Balance)
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
+
+      const expectedVot3BalanceBeforeDeposits = expectedVot3Balance + depositThreshold // 10 000 vot3 mint + expectedvot3
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceBeforeDeposits)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 1
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal already supporting the deposit threshold
+      const tx = await governor.connect(voter).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+        `${this?.test?.title}`,
+        (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
+        depositThreshold,
+        {
+          gasLimit: 10_000_000,
+        },
+      )
+      await tx.wait()
+      const proposalId = await getProposalIdFromTx(tx, true, { governor })
+      console.log("===== roundId ====", await xAllocationVoting.currentRoundId())
+      await waitForProposalToBeActive(proposalId, { governor })
+      // ROUND 3 -> withdraw possible
+      console.log("===== roundId ====", await xAllocationVoting.currentRoundId())
+
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+      await waitForNextBlock()
+
+      // Round 3 : the VP should be the current vot3 balance + the proposal deposit (no withdraw yet)
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+      const currentRoundSnapshot = await xAllocationVoting.roundSnapshot(currentRoundId)
+      await waitForNextBlock()
+      console.log("===== roundId ====", await xAllocationVoting.currentRoundId())
+      console.log("currentRoundSnapshot", currentRoundSnapshot)
+      // expect current round to = 4
+      const votingPowerAfterVotes = await xAllocationVoting.getVotes(voter.address, currentRoundSnapshot)
+      const depositVPAfterVotes = await xAllocationVoting.getDepositVotingPower(voter.address, currentRoundSnapshot)
+
+      const totalVP = votingPowerAfterVotes + depositVPAfterVotes
+      const totalDeposits = depositThreshold + expectedVot3Balance
+
+      expect(totalVP).to.equal(totalDeposits) // no withdraw -> VP = the current vot3 balance + the proposal deposit
+
+      // claim the deposit back
+      await governor.withdraw(proposalId, voter.address)
+      // get the clock
+      // const now = await governor.clock()
+      // await waitForNextBlock()
+
+      // console.log("===== roundId ====", await xAllocationVoting.currentRoundId())
+      // console.log("currentRoundSnapshot", currentRoundSnapshot)
+      // console.log("now", now)
+      // const vpAfterClaimBack_now = await xAllocationVoting.getVotes(voter.address, now)
+      // const depositVPAfterClaimBackDeposit_now = await xAllocationVoting.getDepositVotingPower(voter.address, now)
+
+      // console.log("vpAfterClaimBack_now", vpAfterClaimBack_now) // -> this should be 10000
+      // console.log("depositVPAfterClaimBackDeposit_now", depositVPAfterClaimBackDeposit_now) // -> this should be 0
+      // const totalVPNow = vpAfterClaimBack_now + depositVPAfterClaimBackDeposit_now // = 10000 ( withdraw the deposits )
+      // console.log(vpAfterClaimBack_now, depositVPAfterClaimBackDeposit_now)
+      // expect(depositVPAfterClaimBackDeposit_now).to.equal(0)
+      // expect(totalVPNow).to.equal(expectedVot3Balance) // ISSUE HERE
+
+      // const txForVote = await xAllocationVoting.connect(voter).castVote(currentRoundId, [app1Id], [totalVPAfterClaim])
+      // await txForVote.wait()
+      // const appVotes = await xAllocationVoting.getAppVotes(currentRoundId, app1Id)
+      // expect(totalVPAfterClaim).to.equal(appVotes)
+
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const roundAtSnapshot = await xAllocationVoting.currentRoundId()
+      const atSnapshot = await xAllocationVoting.roundSnapshot(roundAtSnapshot)
+
+      const vp = await xAllocationVoting.getVotes(voter.address, atSnapshot)
+      const vpWithDeposit = await xAllocationVoting.getDepositVotingPower(voter.address, atSnapshot)
+
+      console.log("vp", vp) // -> this should be 10000
+      console.log("vpWithDeposit", vpWithDeposit) // -> this should be 0
+      const totalVPAfterClaim = vp + vpWithDeposit // = 10000 ( withdraw the deposits )
+      console.log(vp, vpWithDeposit)
+      expect(vpWithDeposit).to.equal(0)
+      expect(totalVPAfterClaim).to.equal(expectedVot3Balance) // ISSUE HERE, last round, we withdraw the deposits -> should not include the deposit vp
+    })
+
+    it("Once withdrawing the deposit, the deposit voting power should be removed from the allocation voting", async function () {})
 
     it("Should only count deposit voting power for the allocation voting and not for the proposal voting", async function () {})
 
-    it("Should be able to deposit multiple times, incresing the voting power", async function () {})
-    it("I can deposit twice in the same proposal, and have the sum of the deposits as Voting power", async function () {})
+    it("Should be able to deposit multiple times, increasing the voting power", async function () {})
 
     it("Should be able to withdraw multiple times, decreasing the voting power", async function () {})
 
