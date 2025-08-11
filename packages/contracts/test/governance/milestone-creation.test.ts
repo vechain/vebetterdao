@@ -962,6 +962,36 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(grants.grantsReceiver).to.equal(newGrantsReceiver) // Should be updated
       expect(newGrantsReceiver).to.not.equal(originalGrantsReceiver) // Should be different
     })
+    it("Current grants receiver should be able to update the grants receiver", async () => {
+      const description = "My new project"
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr
+        "0", // deposit amount
+        secondaryAccount.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+      const originalGrantsReceiver = await grantsManager.getGrantsReceiverAddress(proposalId)
+      expect(originalGrantsReceiver).to.equal(secondaryAccount.address)
+
+      const newGrantsReceiver = owner.address
+      await grantsManager.connect(secondaryAccount).updateGrantsReceiver(proposalId, newGrantsReceiver)
+      const grants = await grantsManager.getGrantProposal(proposalId)
+      expect(grants.grantsReceiver).to.equal(newGrantsReceiver) // Should be updated
+      expect(newGrantsReceiver).to.not.equal(originalGrantsReceiver) // Should be different
+    })
   })
 
   describe("Milestone deposit", function () {

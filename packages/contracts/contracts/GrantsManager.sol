@@ -131,9 +131,13 @@ contract GrantsManager is
     }
     _;
   }
-  modifier onlyGrantsProposerOrGovernance(uint256 proposalId) {
+  modifier onlyGrantsStakeholdersOrGovernance(uint256 proposalId) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    if (!(hasRole(GOVERNANCE_ROLE, _msgSender()) || _msgSender() == $.grant[proposalId].proposer)) {
+    if (
+      !(hasRole(GOVERNANCE_ROLE, _msgSender()) ||
+        _msgSender() == $.grant[proposalId].proposer ||
+        _msgSender() == $.grant[proposalId].grantsReceiver)
+    ) {
       revert NotAuthorized();
     }
     _;
@@ -518,7 +522,7 @@ contract GrantsManager is
   function updateGrantsReceiver(
     uint256 proposalId,
     address newGrantsReceiver
-  ) external onlyGrantsProposerOrGovernance(proposalId) {
+  ) external onlyGrantsStakeholdersOrGovernance(proposalId) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     $.grant[proposalId].grantsReceiver = newGrantsReceiver;
     emit GrantsReceiverUpdated(proposalId, newGrantsReceiver);
