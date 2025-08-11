@@ -224,7 +224,7 @@ contract GrantsManager is
    * 1. The proposal has been executed AND
    * 2. At least one milestone is still pending
    */
-  function isGrantInDevelopment(uint256 proposalId) external view returns (bool) {
+  function isGrantInDevelopment(uint256 proposalId) public view returns (bool) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     GrantProposal memory grant = $.grant[proposalId];
     GovernorTypes.ProposalState proposalState = $.governor.state(proposalId);
@@ -235,8 +235,8 @@ contract GrantsManager is
     }
 
     for (uint256 i = 0; i < grant.milestones.length; i++) {
-      MilestoneState state = _getMilestoneState(proposalId, i);
-      if (state == MilestoneState.Pending) {
+      MilestoneState _milestoneState = _getMilestoneState(proposalId, i);
+      if (_milestoneState == MilestoneState.Pending) {
         return true;
       }
     }
@@ -249,7 +249,7 @@ contract GrantsManager is
    * @return bool True if the proposal is completed, false otherwise
    * @dev Ascending order status of the milestones, so last one is the one that determines the status of the grant
    */
-  function isGrantCompleted(uint256 proposalId) external view returns (bool) {
+  function isGrantCompleted(uint256 proposalId) public view returns (bool) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     GrantProposal memory grant = $.grant[proposalId];
     GovernorTypes.ProposalState proposalState = $.governor.state(proposalId);
@@ -488,6 +488,26 @@ contract GrantsManager is
    */
   function isClaimable(uint256 proposalId, uint256 milestoneIndex) external view returns (bool) {
     return _getMilestoneState(proposalId, milestoneIndex) == MilestoneState.Approved;
+  }
+
+  /**
+   * @notice Returns the state of a grant {see IGrantsManager:GrantState }
+   * @param proposalId The id of the proposal
+   * @return GrantState The state of the grant
+   */
+  function state(uint256 proposalId) external view returns (GrantState) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    GovernorTypes.ProposalState proposalState = $.governor.state(proposalId);
+
+    if (isGrantInDevelopment(proposalId)) {
+      return GrantState.InDevelopment;
+    }
+
+    if (isGrantCompleted(proposalId)) {
+      return GrantState.Completed;
+    }
+
+    return GrantState(uint256(proposalState));
   }
 
   // ------------------ Grants Manager Contract Functions ------------------ //

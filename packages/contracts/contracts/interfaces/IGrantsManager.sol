@@ -209,6 +209,24 @@ interface IGrantsManager {
   error ProposalNotExecuted(uint256 proposalId);
 
   // ------------------ Structs and Enums ------------------ //
+
+  /**
+   * @notice GrantState enum to store the status of the grant
+   * @dev This is the same as the ProposalState enum however with InDevelopment and Completed extra states
+   */
+  enum GrantState {
+    Pending,
+    Active,
+    Canceled,
+    Defeated,
+    Succeeded,
+    Queued,
+    Executed,
+    DepositNotMet,
+    InDevelopment,
+    Completed
+  }
+
   /**
    * @notice MilestoneState enum to store the status of the milestone
    */
