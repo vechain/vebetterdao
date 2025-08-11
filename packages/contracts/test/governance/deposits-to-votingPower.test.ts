@@ -24,7 +24,7 @@ import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
 import { catchRevert } from "../helpers"
 
-describe.only("Voting power with proposal deposit - @shard4a", function () {
+describe("Voting power with proposal deposit - @shard4a", function () {
   let vot3: VOT3
   let b3tr: B3TR
   let minterAccount: SignerWithAddress
@@ -617,7 +617,7 @@ describe.only("Voting power with proposal deposit - @shard4a", function () {
   })
 
   describe("Voting with deposits VP", function () {
-    it.only("Should NOT count the deposit VP in the proposal VP", async function () {
+    it("Should NOT count the deposit VP in the proposal VP", async function () {
       //Submit the app
       await x2EarnApps
         .connect(owner)
