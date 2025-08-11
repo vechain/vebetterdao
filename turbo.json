@@ -330,14 +330,6 @@
     "complete-translations": {
       "cache": false
     },
-    "verify:testnet": {
-      "cache": false,
-      "dependsOn": ["^compile"]
-    },
-    "verify:mainnet": {
-      "cache": false,
-      "dependsOn": ["^compile"]
-    },
     "estimate-voting-gas:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
