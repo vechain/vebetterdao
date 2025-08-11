@@ -1037,6 +1037,7 @@ contract B3TRGovernor is
    * @param description The proposal description
    * @param startRoundId The round in which the proposal should start
    * @param depositAmount The amount of deposit for the proposal
+   * @param grantsReceiver The address of the grants receiver
    * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
    * @return The proposal id
    */
@@ -1047,6 +1048,7 @@ contract B3TRGovernor is
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
+    address grantsReceiver,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
@@ -1059,6 +1061,7 @@ contract B3TRGovernor is
         description,
         startRoundId,
         depositAmount,
+        grantsReceiver,
         milestonesDetailsMetadataURI
       );
   }

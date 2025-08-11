@@ -17,6 +17,7 @@ import {
   getVot3Tokens,
   waitForCurrentRoundToEnd,
   waitForNextBlock,
+  waitForProposalToBeActive,
 } from "../helpers/common"
 import { endorseApp } from "../helpers/xnodes"
 import { describe, it, beforeEach } from "mocha"
@@ -615,19 +616,295 @@ describe("Voting power with proposal deposit - @shard4a", function () {
     })
   })
 
-  describe("Proposal deposit", function () {
-    it("Deposit on proposal should be counted as voting power", async function () {})
-    it("Withdrawal on proposal should be removed from voting power", async function () {})
+  describe("Voting with deposits VP", function () {
+    it("Should NOT count the deposit VP in the proposal VP", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
 
-    it("Should only count deposit voting power for the allocation voting and not for the proposal voting", async function () {})
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
 
-    it("Should be able to deposit multiple times, incresing the voting power", async function () {})
-    it("I can deposit twice in the same proposal, and have the sum of the deposits as Voting power", async function () {})
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
 
-    it("Should be able to withdraw multiple times, decreasing the voting power", async function () {})
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
 
-    it(
-      "I can withdraw from a proposal, and the deposits voting power is either reduced or removeds to vote on allocation",
-    )
+      const totalVot3 = expectedVot3Balance + depositThreshold // 10 000 vot3 mint + expectedvot3
+      expect(await vot3.balanceOf(voter.address)).to.equal(totalVot3)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 1
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal already supporting the deposit threshold
+      const tx = await governor.connect(voter).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+        `${this?.test?.title}`,
+        (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
+        depositThreshold,
+        {
+          gasLimit: 10_000_000,
+        },
+      )
+      await tx.wait()
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      const proposalVP = await xAllocationVoting.getVotes(
+        voter.address,
+        await xAllocationVoting.roundSnapshot(await xAllocationVoting.currentRoundId()),
+      )
+      const proposalDepositVP = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        await xAllocationVoting.roundSnapshot(await xAllocationVoting.currentRoundId()),
+      )
+
+      expect(proposalVP).to.equal(expectedVot3Balance)
+      expect(proposalDepositVP).to.equal(depositThreshold)
+    })
+  })
+
+  describe("Withdrawing(claim back) deposits", function () {
+    it("Deposits VP should be transferred to the VOT3 balance VP when withdrawing", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
+
+      const totalVot3 = expectedVot3Balance + depositThreshold // 10 000 vot3 mint + expectedvot3
+      expect(await vot3.balanceOf(voter.address)).to.equal(totalVot3)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 1
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+
+      // Create the proposal already supporting the deposit threshold
+      const tx = await governor.connect(voter).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+        `${this?.test?.title}`,
+        (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
+        depositThreshold,
+        {
+          gasLimit: 10_000_000,
+        },
+      )
+      await tx.wait()
+      const proposalId = await getProposalIdFromTx(tx, true, { governor })
+      await waitForProposalToBeActive(proposalId, { governor })
+      // ROUND 3 -> withdraw possible
+
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+      await waitForNextBlock()
+
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+      const currentRoundSnapshot = await xAllocationVoting.roundSnapshot(currentRoundId)
+      await waitForNextBlock()
+
+      const votingPowerAfterVotes = await xAllocationVoting.getVotes(voter.address, currentRoundSnapshot)
+      const depositVPAfterVotes = await xAllocationVoting.getDepositVotingPower(voter.address, currentRoundSnapshot)
+
+      const totalVP = votingPowerAfterVotes + depositVPAfterVotes
+      expect(totalVP).to.equal(totalVot3)
+
+      // claim the deposit back
+      await governor.withdraw(proposalId, voter.address) // it goes back to the balance (getvotes is increased) of the voter
+      // get the clock
+      const now = await governor.clock()
+      await waitForNextBlock()
+
+      const vpAfterClaimBack_now = await xAllocationVoting.getVotes(voter.address, now)
+      const depositVPAfterClaimBackDeposit_now = await xAllocationVoting.getDepositVotingPower(voter.address, now)
+
+      const totalVPNow = vpAfterClaimBack_now + depositVPAfterClaimBackDeposit_now
+      expect(depositVPAfterClaimBackDeposit_now).to.equal(0) // withdraw the deposits
+      expect(totalVPNow).to.equal(totalVot3) // deposits goes back in the principal balance of the voter
+
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const currentRoundIdAfterWithdraw = await xAllocationVoting.currentRoundId()
+
+      const txForVote = await xAllocationVoting
+        .connect(voter)
+        .castVote(currentRoundIdAfterWithdraw, [app1Id], [totalVPNow])
+      await txForVote.wait()
+      const appVotes = await xAllocationVoting.getAppVotes(currentRoundIdAfterWithdraw, app1Id)
+      expect(totalVPNow).to.equal(appVotes)
+
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+
+      await waitForNextBlock()
+
+      const roundAtSnapshot = await xAllocationVoting.currentRoundId()
+      const atSnapshot = await xAllocationVoting.roundSnapshot(roundAtSnapshot)
+
+      const vpAfterSpendingVOT3 = await xAllocationVoting.getVotes(voter.address, atSnapshot)
+      const depositsVPAfterSpendingVOT3 = await xAllocationVoting.getDepositVotingPower(voter.address, atSnapshot)
+
+      expect(vpAfterSpendingVOT3).to.equal(totalVot3)
+      expect(depositsVPAfterSpendingVOT3).to.equal(0)
+    })
+
+    it("Should be able to deposit multiple times, increasing the deposit VP", async function () {
+      //Submit the app
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(creator[0].address, creator[0].address, creator[0].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator[0].address))
+      //Endorse App
+      await endorseApp(app1Id, endorser1)
+      //Setup voter + start new round
+      await setupVoter(voter, b3tr, vot3, minterAccount, owner, veBetterPassport)
+
+      const expectedVot3Balance = ethers.parseEther("10000")
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3Balance)
+
+      //Get the deposit threshold for the proposal type
+      const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+
+      //Get user the balance of deposit
+      await getVot3Tokens(voter, ethers.formatEther(depositThreshold))
+      await getVot3Tokens(owner, ethers.formatEther(depositThreshold))
+
+      const expectedVot3BalanceBeforeDeposits = expectedVot3Balance + depositThreshold // 10 000 vot3 mint + expectedvot3
+      expect(await vot3.balanceOf(voter.address)).to.equal(expectedVot3BalanceBeforeDeposits)
+      expect(await vot3.balanceOf(owner.address)).to.equal(depositThreshold)
+
+      //Start emissions
+      await emissions.connect(minterAccount).start()
+
+      //Round 1
+      const roundIdBeforeVotesDeposit = await xAllocationVoting.currentRoundId()
+
+      //Allowance for the deposit
+      await vot3.connect(voter).approve(await governor.getAddress(), depositThreshold)
+      const depositThresholdReduced = depositThreshold / BigInt(2) // 2 times less
+      const remainingDivided = (depositThreshold - depositThresholdReduced) / BigInt(2)
+
+      const voterDepositSecondTime = remainingDivided
+      const depositor2Deposit = remainingDivided
+      await vot3.connect(owner).approve(await governor.getAddress(), depositor2Deposit)
+
+      // Create the proposal already supporting the deposit threshold
+      const tx = await governor.connect(voter).propose(
+        [await b3tr.getAddress()],
+        [0],
+        [(await ethers.getContractFactory("B3TR")).interface.encodeFunctionData("tokenDetails", [])],
+        `${this?.test?.title}`,
+        (Number(roundIdBeforeVotesDeposit) + 2).toString(), // In 2 round possible to withdraw, meanwhile VP is either consumed by castVote, or stored
+        depositThresholdReduced,
+        {
+          gasLimit: 10_000_000,
+        },
+      )
+      await tx.wait()
+      const proposalId = await getProposalIdFromTx(tx, true, { governor })
+      // remaing vot3 deposited by the voter and the depositor2
+      await governor.connect(voter).deposit(voterDepositSecondTime, proposalId, { gasLimit: 10_000_000 })
+      await governor.connect(owner).deposit(depositor2Deposit, proposalId, { gasLimit: 10_000_000 })
+
+      const voterBalance = await vot3.balanceOf(voter.address)
+      const depositor2Balance = await vot3.balanceOf(owner.address)
+
+      await waitForProposalToBeActive(proposalId, { governor })
+      await waitForCurrentRoundToEnd({ xAllocationVoting })
+      await startNewAllocationRound({
+        emissions,
+        xAllocationVoting,
+        minterAccount,
+      })
+      await waitForNextBlock()
+      await waitForNextBlock()
+
+      const nowSnapshot = await xAllocationVoting.roundSnapshot(await xAllocationVoting.currentRoundId())
+
+      const vpVoter = await xAllocationVoting.getVotes(voter.address, nowSnapshot)
+      const depositVPVoter = await xAllocationVoting.getDepositVotingPower(voter.address, nowSnapshot)
+      expect(vpVoter).to.equal(voterBalance)
+      expect(depositVPVoter).to.equal(voterDepositSecondTime + depositThresholdReduced)
+
+      const vpDepositor2 = await xAllocationVoting.getVotes(owner.address, nowSnapshot)
+      const depositVPDepositor2 = await xAllocationVoting.getDepositVotingPower(owner.address, nowSnapshot)
+      expect(vpDepositor2).to.equal(depositor2Balance)
+      expect(depositVPDepositor2).to.equal(depositor2Deposit)
+
+      await governor.withdraw(proposalId, voter.address)
+      await governor.withdraw(proposalId, owner.address)
+
+      const afterWithrawSnapshot = await xAllocationVoting.roundSnapshot(await governor.clock())
+      const depositVPAfterWithdrawVoter = await xAllocationVoting.getDepositVotingPower(
+        voter.address,
+        afterWithrawSnapshot,
+      )
+      const depositVPAfterWithdrawDepositor2 = await xAllocationVoting.getDepositVotingPower(
+        owner.address,
+        afterWithrawSnapshot,
+      )
+
+      expect(depositVPAfterWithdrawVoter).to.equal(0) // after withdraw the voter has no deposit
+      expect(depositVPAfterWithdrawDepositor2).to.equal(0) // after withdraw the depositor2 has no deposit
+    })
   })
 })
