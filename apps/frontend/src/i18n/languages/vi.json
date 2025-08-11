@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "Nhận NFT và bắt đầu nhận phần thưởng.",
   "You have no nodes yet.": "Bạn chưa có nút nào.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Kích thước đề xuất: 512x512 px. Giữ tỷ lệ khung hình 1:1. Logo phải là một hình vuông đầy đủ và phải có nền.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Kích thước đề xuất: 686×515. Giữ tỷ lệ khung hình 4:3. Tài sản không nên chứa các logo, thương hiệu, văn bản, hoặc bất kỳ đối tượng/phần tử nào không liên quan đến mục đích của ứng dụng."
+  "VeWorld Featured Image": "Hình ảnh nổi bật của VeWorld",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Duy trì tỷ lệ khung hình 4:3. Tài nguyên không nên chứa logo, nhãn hiệu, văn bản hoặc bất kỳ đối tượng/phần tử nào không liên quan đến mục đích của ứng dụng.",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Kích thước khuyến nghị: 720x720 (tối thiểu). Duy trì tỷ lệ khung hình 1:1. Tài nguyên không nên chứa logo, nhãn hiệu, văn bản hoặc bất kỳ đối tượng/phần tử nào không liên quan đến mục đích của ứng dụng.",
+  "Maintain a 9:16 aspect ratio.": "Duy trì tỷ lệ khung hình 9:16.",
+  "VeWorld assets": "Tài nguyên VeWorld",
+  "Featured Image": "Hình ảnh nổi bật",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "Tài nguyên VeWorld được sử dụng để hiển thị ứng dụng trong ví di động VeWorld. Bao gồm chúng để làm cho ứng dụng của bạn thêm phần hấp dẫn. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Kích thước khuyến nghị: 800×400. Duy trì tỷ lệ khung hình 2:1."
 }
