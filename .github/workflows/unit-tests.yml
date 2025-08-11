@@ -56,16 +56,25 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Cache Solidity compilers
+      - name: Cache node_modules
         uses: actions/cache@v3
         with:
-          path: ~/.cache/hardhat-nodejs
-          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-solc-
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      # Restore when enabling steps that involve smart contract compilation
+      # - name: Cache Solidity compilers
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.cache/hardhat-nodejs
+      #     key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-solc-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
       # Disabled Global and Frontend unit tests for now as they are not working
       # Contract tests should be run separately for each shard on the next step
@@ -135,8 +144,13 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache Solidity compilers
         uses: actions/cache@v3
@@ -145,6 +159,9 @@ jobs:
           key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-solc-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
       - name: Set Shard Environment Variable
         run: echo "SHARD=${{ matrix.shard }}" >> $GITHUB_ENV
@@ -172,18 +189,22 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install Dependencies at Root
         run: yarn install --frozen-lockfile
 
-      - name: Download All Coverage Artifacts
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p packages/contracts/coverage-shards
-          for shard in shard0 shard2 shard3 shard4 shard5 shard6 shard7 shard8 shard8a shard8b shard8c shard9 shard10 shard11 shard12 shard13 shard14 shard15 shard16 shard17a shard17b; do
-            echo "Downloading artifact coverage-$shard"
-            gh run download --name "coverage-$shard" --dir packages/contracts/coverage-shards/$shard
-          done
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: packages/contracts/coverage-shards
 
       - name: Debug Downloaded Artifacts
         run: ls -la packages/contracts/coverage-shards
