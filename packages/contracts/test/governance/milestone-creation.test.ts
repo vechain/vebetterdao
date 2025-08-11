@@ -901,7 +901,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(grants.metadataURI).to.equal(newMilestonesDetailsMetadataURI)
     })
 
-    it("Proposer should be able to update the grants receiver", async () => {
+    it("Proposer should  NOT be able to update the grants receiver", async () => {
       const description = "My new project"
       const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
       const values = [ethers.parseEther("10000"), ethers.parseEther("10000")]
@@ -918,18 +918,24 @@ describe("Governance - Milestone Creation - @shard4b", function () {
           [grantsManagerAddress, values[1]],
         ], // args of transferb3tr
         "0", // deposit amount
-        proposer.address,
+        secondaryAccount.address, // grants receiver
         milestonesDetailsMetadataURI, // milestones
         contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
       )
       const originalGrantsReceiver = await grantsManager.getGrantsReceiverAddress(proposalId)
-      expect(originalGrantsReceiver).to.equal(proposer.address)
+      expect(originalGrantsReceiver).to.equal(secondaryAccount.address)
 
-      await grantsManager.connect(proposer).updateGrantsReceiver(proposalId, owner.address)
+      await expect(
+        grantsManager.connect(proposer).updateGrantsReceiver(proposalId, owner.address),
+      ).to.be.revertedWithCustomError(
+        {
+          interface: grantsManagerInterface,
+        },
+        "NotAuthorized",
+      )
+
       const grants = await grantsManager.getGrantProposal(proposalId)
-      const newGrantsReceiver = owner.address
-      expect(grants.grantsReceiver).to.equal(newGrantsReceiver) // Should be updated
-      expect(newGrantsReceiver).to.not.equal(originalGrantsReceiver) // Should be different
+      expect(grants.grantsReceiver).to.equal(originalGrantsReceiver) // Should not be updated
     })
 
     it("Governance should be able to update the grants receiver", async () => {

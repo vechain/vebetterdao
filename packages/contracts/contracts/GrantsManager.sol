@@ -131,13 +131,9 @@ contract GrantsManager is
     }
     _;
   }
-  modifier onlyGrantsStakeholdersOrGovernance(uint256 proposalId) {
+  modifier onlyGrantsReceiverOrGovernance(uint256 proposalId) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    if (
-      !(hasRole(GOVERNANCE_ROLE, _msgSender()) ||
-        _msgSender() == $.grant[proposalId].proposer ||
-        _msgSender() == $.grant[proposalId].grantsReceiver)
-    ) {
+    if (!(hasRole(GOVERNANCE_ROLE, _msgSender()) || _msgSender() == $.grant[proposalId].grantsReceiver)) {
       revert NotAuthorized();
     }
     _;
@@ -517,12 +513,12 @@ contract GrantsManager is
    * @notice Updates the grants receiver address
    * @param proposalId The ID of the proposal
    * @param newGrantsReceiver The address of the grants receiver contract
-   * @dev Only the proposer or governance can update the grants receiver address
+   * @dev Only the grants receiver or governance can update the grants receiver address
    */
   function updateGrantsReceiver(
     uint256 proposalId,
     address newGrantsReceiver
-  ) external onlyGrantsStakeholdersOrGovernance(proposalId) {
+  ) external onlyGrantsReceiverOrGovernance(proposalId) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     $.grant[proposalId].grantsReceiver = newGrantsReceiver;
     emit GrantsReceiverUpdated(proposalId, newGrantsReceiver);
