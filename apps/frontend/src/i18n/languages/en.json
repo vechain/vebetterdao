@@ -1771,5 +1771,6 @@
   "Create Discourse": "Create Discourse",
   "Apply": "Apply",
   "Get NFT": "Get NFT",
-  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals",
+  "More info about your votes at snapshot": "More info about your votes at snapshot"
 }
