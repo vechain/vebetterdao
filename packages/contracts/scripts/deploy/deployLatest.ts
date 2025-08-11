@@ -22,13 +22,7 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { shouldEndorseXApps } from "@repo/config/contracts"
-import {
-  deployAndInitializeLatest,
-  deployAndUpgrade,
-  deployProxy,
-  mintVechainNodes,
-  saveContractsToFile,
-} from "../helpers"
+import { deployAndInitializeLatest, deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
 import { governanceLibraries, passportLibraries } from "../libraries"
 import {
   transferAdminRole,
@@ -42,7 +36,6 @@ import {
   validateContractRole,
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
-import { getSeedAccounts, SeedStrategy } from "../helpers/seedAccounts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -621,6 +614,19 @@ export async function deployLatest(config: ContractsConfig) {
     .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   console.log("Vote registrar role granted to XAllocationVoting")
+
+  await xAllocationVoting
+    .connect(deployer)
+    .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
+    .then(async tx => await tx.wait())
+  console.log("Governance role granted to deployer")
+
+  await x2EarnRewardsPool
+    .connect(deployer)
+    .grantRole(await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), deployer.address)
+    .then(async tx => await tx.wait())
+  console.log("Governance role granted to deployer")
+
   // Grant Vote Registrar role to B3TRGovernor
   await voterRewards
     .connect(deployer)
@@ -657,10 +663,23 @@ export async function deployLatest(config: ContractsConfig) {
     .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
     .then(async tx => await tx.wait())
 
+  // Setup VeBetterPassport addresses to replace TEMP Initialisation
   await x2EarnApps
     .connect(deployer)
     .setVeBetterPassportContract(await veBetterPassport.getAddress())
     .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in X2EarnApps contract")
+  await xAllocationVoting
+    .connect(deployer)
+    .setVeBetterPassport(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in XAllocationVoting contract")
+
+  await x2EarnRewardsPool
+    .connect(deployer)
+    .setVeBetterPassport(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in X2EarnRewardsPool contract")
 
   // Setup XAllocationPool addresses
   await xAllocationPool
