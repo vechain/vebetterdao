@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "Skaffa NFT och börja ta emot belöningar.",
   "You have no nodes yet.": "Du har inga noder än.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Rekommenderad storlek: 512x512 px. Bibehåll ett 1:1 bildförhållande. Logotypen måste vara en full kvadratisk bild och den måste ha en bakgrund.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Rekommenderad storlek: 686×515. Bibehåll ett 4:3 bildförhållande. Tillgångar ska inte innehålla logotyper, varumärken, text eller några orelaterade objekt/element till appens syfte."
+  "VeWorld Featured Image": "VeWorld Utvald Bild",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Bibehåll ett bildförhållande på 4:3. Tillgångar bör inte innehålla logotyper, varumärken, text eller andra orelaterade objekt/element för appens syfte",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Rekommenderad storlek: 720x720 (minimum). Bibehåll ett bildförhållande på 1:1. Tillgångar bör inte innehålla logotyper, varumärken, text eller andra orelaterade objekt/element för appens syfte",
+  "Maintain a 9:16 aspect ratio.": "Bibehåll ett bildförhållande på 9:16.",
+  "VeWorld assets": "VeWorld-tillgångar",
+  "Featured Image": "Utvald Bild",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld-tillgångar används för att visa appen i VeWorlds mobila plånbok. Inkludera dem för att göra din app mer engagerande. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Rekommenderad storlek: 800×400. Bibehåll ett bildförhållande på 2:1."
 }

@@ -78,6 +78,7 @@ export const NewAppPageFormContent = () => {
         categories: [],
         ve_world: {
           banner: data.ve_world_banner,
+          featured_image: data.ve_world_featured_image,
         },
       })
       if (!metadataUri) return

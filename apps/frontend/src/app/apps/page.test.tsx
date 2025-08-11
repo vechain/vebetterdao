@@ -48,6 +48,7 @@ describe("Apps", () => {
       tweets: [],
       ve_world: {
         banner: "",
+        featured_image: "",
       },
     },
     isLoading: false,

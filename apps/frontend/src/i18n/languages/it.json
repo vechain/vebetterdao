@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "Ottieni NFT e inizia a ricevere ricompense.",
   "You have no nodes yet.": "Non hai ancora nodi.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Dimensioni consigliate: 512x512 px. Mantenere un rapporto d'aspetto di 1:1. Il logo deve essere un'immagine a quadrato pieno e deve avere uno sfondo.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Dimensioni consigliate: 686×515. Mantenere un rapporto d'aspetto di 4:3. Gli asset non devono contenere loghi, marchi, testo o alcun oggetto/elemento non correlato allo scopo dell'app."
+  "VeWorld Featured Image": "Immagine in evidenza di VeWorld",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Mantieni un rapporto d'aspetto di 4:3. Le risorse non dovrebbero contenere loghi, marchi, testo o oggetti/elementi non correlati all'obiettivo dell'app.",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Dimensione consigliata: 720x720 (minimo). Mantieni un rapporto d'aspetto di 1:1. Le risorse non dovrebbero contenere loghi, marchi, testo o oggetti/elementi non correlati all'obiettivo dell'app.",
+  "Maintain a 9:16 aspect ratio.": "Mantieni un rapporto d'aspetto di 9:16.",
+  "VeWorld assets": "Risorse di VeWorld",
+  "Featured Image": "Immagine in evidenza",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "Le risorse di VeWorld sono utilizzate per visualizzare l'app nel wallet mobile VeWorld. Includile per rendere la tua app più coinvolgente. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Dimensione consigliata: 800×400. Mantieni un rapporto d'aspetto di 2:1."
 }

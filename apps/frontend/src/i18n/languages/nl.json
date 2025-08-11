@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "Verkrijg NFT en begin beloningen te ontvangen.",
   "You have no nodes yet.": "Je hebt nog geen nodes.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Aanbevolen grootte: 512x512 px. Handhaaf een 1:1 beeldverhouding. Het logo moet een volledig vierkante afbeelding zijn en moet een achtergrond hebben.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Aanbevolen grootte: 686×515. Handhaaf een 4:3 beeldverhouding. Middelen mogen geen logo's, merken, tekst of andere niet-gerelateerde objecten/elementen met het doel van de app bevatten."
+  "VeWorld Featured Image": "VeWorld Uitgelichte Afbeelding",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Behoud een beeldverhouding van 4:3. Middelen mogen geen logo's, merken, tekst of andere niet-gerelateerde objecten/elementen bevatten voor het doel van de app.",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Aanbevolen grootte: 720x720 (minimaal). Behoud een beeldverhouding van 1:1. Middelen mogen geen logo's, merken, tekst of andere niet-gerelateerde objecten/elementen bevatten voor het doel van de app.",
+  "Maintain a 9:16 aspect ratio.": "Behoud een beeldverhouding van 9:16.",
+  "VeWorld assets": "VeWorld middelen",
+  "Featured Image": "Uitgelichte Afbeelding",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld-middelen worden gebruikt om de app weer te geven in de VeWorld mobiele portemonnee. Voeg ze toe om uw app aantrekkelijker te maken. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Aanbevolen grootte: 800×400. Behoud een beeldverhouding van 2:1."
 }
