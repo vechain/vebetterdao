@@ -69,7 +69,7 @@ export async function deployGrantsManager() {
   )
 
   console.log("================================================================================")
-  console.log(`Updating the config file with the new X2EarnCreator contract address`)
+  console.log(`Updating the config file with the new Grants Manager contract address`)
   try {
     Object.assign(envConfig, { grantsManagerContractAddress: await grantsManager.getAddress() })
     await updateConfig(envConfig, "GrantsManager")
@@ -77,8 +77,6 @@ export async function deployGrantsManager() {
   } catch (e) {
     console.error("Failed to update config file, update it manually")
   }
-
-  console.log(`TODO: Update .../deploy_output/contracts.txt file with new Grants Manager contract address`)
 
   console.log("================================================================================")
   console.log("Grants Manager address: ", await grantsManager.getAddress())

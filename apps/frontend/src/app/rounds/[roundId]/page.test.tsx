@@ -191,6 +191,7 @@ test("Allocations", async () => {
       tweets: [],
       ve_world: {
         banner: "",
+        featured_image: "",
       },
       categories: [],
     },

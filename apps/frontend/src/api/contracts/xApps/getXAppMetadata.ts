@@ -33,6 +33,7 @@ export type XAppMetadata = {
   tweets: string[]
   ve_world: {
     banner: string
+    featured_image: string
   }
   categories: string[]
 }

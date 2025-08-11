@@ -1758,5 +1758,12 @@
   "Get NFT and start receiving rewards.": "Obtenha NFT e comece a receber recompensas.",
   "You have no nodes yet.": "Você ainda não tem nós.",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "Tamanho recomendado: 512x512 px. Mantenha uma proporção de 1:1. O logotipo deve ser uma imagem quadrada completa e deve ter um fundo.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Tamanho recomendado: 686×515. Mantenha uma proporção de 4:3. Os ativos não devem conter logotipos, marcas, texto ou qualquer objeto/elemento não relacionado ao propósito do aplicativo."
+  "VeWorld Featured Image": "Imagem em Destaque do VeWorld",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Mantenha uma proporção de 4:3. Os ativos não devem conter logotipos, marcas, texto ou quaisquer objetos/elementos não relacionados ao propósito do aplicativo.",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "Tamanho recomendado: 720x720 (mínimo). Mantenha uma proporção de 1:1. Os ativos não devem conter logotipos, marcas, texto ou quaisquer objetos/elementos não relacionados ao propósito do aplicativo.",
+  "Maintain a 9:16 aspect ratio.": "Mantenha uma proporção de 9:16.",
+  "VeWorld assets": "Ativos VeWorld",
+  "Featured Image": "Imagem em Destaque",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "Os ativos do VeWorld são usados para exibir o aplicativo na carteira móvel VeWorld. Inclua-os para tornar seu aplicativo mais envolvente. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Tamanho recomendado: 800×400. Mantenha uma proporção de 2:1."
 }

@@ -1759,5 +1759,12 @@
   ".": "앱",
   "App preview": "앱 미리보기",
   "Recommended size: 512x512 px. Maintain a 1:1 aspect ratio. The logo must be a full square image and they must have a background.": "권장 크기: 512x512 픽셀. 1:1 비율을 유지하세요. 로고는 완전한 정사각형 이미지이며 배경이 있어야 합니다.",
-  "Recommended size: 686×515. Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "권장 크기: 686x515. 4:3 비율을 유지하세요. 에셋에는 앱의 목적과 관련 없는 로고, 브랜드, 텍스트 또는 기타 객체/요소가 포함되어서는 안 됩니다."
+  "VeWorld Featured Image": "VeWorld 추천 이미지",
+  "Maintain a 4:3 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "4:3 비율을 유지하세요. 자산에 로고, 브랜드, 텍스트 또는 앱의 목적과 관련 없는 개체/요소를 포함하지 않아야 합니다.",
+  "Recommended size: 720x720 (minimum). Maintain a 1:1 aspect ratio. Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose": "권장 크기: 최소 720x720. 1:1 비율을 유지하세요. 자산에 로고, 브랜드, 텍스트 또는 앱의 목적과 관련 없는 개체/요소를 포함하지 않아야 합니다.",
+  "Maintain a 9:16 aspect ratio.": "9:16 비율을 유지하세요.",
+  "VeWorld assets": "VeWorld 자산",
+  "Featured Image": "추천 이미지",
+  "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld 자산은 VeWorld 모바일 지갑에서 앱을 표시하는 데 사용됩니다. 앱을 더 매력적으로 만들기 위해 이를 포함하세요. ✨",
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "권장 크기: 800×400. 2:1 비율을 유지하세요."
 }

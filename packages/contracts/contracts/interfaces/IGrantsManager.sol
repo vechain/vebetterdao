@@ -215,16 +215,16 @@ interface IGrantsManager {
    * @dev This is the same as the ProposalState enum however with InDevelopment and Completed extra states
    */
   enum GrantState {
-    Pending,
-    Active,
-    Canceled,
-    Defeated,
-    Succeeded,
-    Queued,
-    Executed,
-    DepositNotMet,
-    InDevelopment,
-    Completed
+    Pending, // 0 
+    Active, // 1 
+    Canceled, // 2 
+    Defeated, // 3 
+    Succeeded, // 4 
+    Queued, // 5 
+    Executed, // 6 
+    DepositNotMet, // 7 
+    InDevelopment, // 8 
+    Completed // 9 
   }
 
   /**
