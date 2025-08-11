@@ -251,7 +251,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(secondMilestoneState).to.equal(0) // Pending
       // get the grant state
       const grantState = await grantsManager.state(proposalId)
-      expect(grantState).to.equal(8) // InDevelopment
+      expect(grantState).to.equal(0) // Pending state <=> the proposal state
     })
 
     it("Cannot create the milestone if the function executable is not transferB3TR", async () => {
@@ -1125,7 +1125,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
 
       // Check the states ( Proposal should be Executed, Milestone should be Rejected )
       const grantState = await grantsManager.state(proposalId)
-      expect(grantState).to.equal(8) // InDevelopment
+      expect(grantState).to.equal(6) // Executed
       const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
       expect(milestoneState).to.equal(3n) // Rejected
 
@@ -1169,7 +1169,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
 
       // Check the states ( Proposal should be Executed, Milestone should be Rejected )
       const grantState = await grantsManager.state(proposalId)
-      expect(grantState).to.equal(8) // InDevelopment
+      expect(grantState).to.equal(9) // Completed ( all funds have been sent )
       const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
       expect(milestoneState).to.equal(2n) // Claimed
       const milestoneState2 = await grantsManager.getMilestoneState(proposalId, 1)
