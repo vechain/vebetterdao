@@ -217,6 +217,23 @@ contract GrantsManager is
   // ------------------ Milestone State Functions ------------------ //
 
   /**
+   * @notice Returns if a proposal is rejected
+   * @param proposalId The id of the proposal
+   * @return bool True if the proposal is rejected, false otherwise
+   * @dev A grant is rejected when at least one milestone is rejected
+   */
+  function isGrantRejected(uint256 proposalId) public view returns (bool) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    GrantProposal memory grant = $.grant[proposalId];
+    for (uint256 i = 0; i < grant.milestones.length; i++) {
+      if (grant.milestones[i].isRejected) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * @notice Returns if a proposal is in development
    * @param proposalId The id of the proposal
    * @return bool True if the proposal is in development, false otherwise
@@ -259,9 +276,9 @@ contract GrantsManager is
       return false;
     }
 
-    // Check if the last milestone is approved or claimed
+    // If last milestone is pending or rejected, the grant is not completed
     MilestoneState lastState = _getMilestoneState(proposalId, grant.milestones.length - 1);
-    if (lastState != MilestoneState.Approved && lastState != MilestoneState.Claimed) {
+    if (lastState == MilestoneState.Pending || lastState == MilestoneState.Rejected) {
       return false;
     }
 
@@ -408,17 +425,24 @@ contract GrantsManager is
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     Milestone[] memory milestones = $.grant[proposalId].milestones;
 
-    // check if all of the milestones are approved
+    if (isGrantCompleted(proposalId)) {
+      revert GrantAlreadyCompleted(proposalId);
+    }
+    if (isGrantRejected(proposalId)) {
+      revert GrantAlreadyRejected(proposalId);
+    }
+
+    // Reject all pending milestones
     for (uint256 i = 0; i < milestones.length; i++) {
-      if (_getMilestoneState(proposalId, i) == MilestoneState.Approved) {
-        revert MilestoneAlreadyApproved(proposalId, i);
+      if (_getMilestoneState(proposalId, i) == MilestoneState.Pending) {
+        // reject the milestone
+        $.grant[proposalId].milestones[i].isRejected = true;
       }
-      // reject the milestone
-      $.grant[proposalId].milestones[i].isRejected = true;
     }
 
     // Transfer the remaining amount to the treasury
     _transferRemainingAmountToTreasury(proposalId);
+    emit GrantCanceled(proposalId);
   }
 
   /**
@@ -498,6 +522,10 @@ contract GrantsManager is
   function grantState(uint256 proposalId) external view returns (GrantState) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     GovernorTypes.ProposalState proposalState = $.governor.state(proposalId);
+
+    if (isGrantRejected(proposalId)) {
+      return GrantState.Canceled;
+    }
 
     if (isGrantInDevelopment(proposalId)) {
       return GrantState.InDevelopment;

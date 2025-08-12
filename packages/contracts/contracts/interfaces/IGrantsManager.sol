@@ -83,6 +83,12 @@ interface IGrantsManager {
     string metadataURI
   );
 
+  /**
+   * @notice Emitted when a grant is canceled
+   * @param proposalId The ID of the proposal
+   */
+  event GrantCanceled(uint256 indexed proposalId);
+
   // ------------------ Errors ------------------ //
 
   /**
@@ -207,6 +213,18 @@ interface IGrantsManager {
    * @param proposalId The ID of the proposal
    */
   error ProposalNotExecuted(uint256 proposalId);
+
+  /**
+   * @notice Error thrown when grant is already completed
+   * @param proposalId The ID of the proposal
+   */
+  error GrantAlreadyCompleted(uint256 proposalId);
+
+  /**
+   * @notice Error thrown when grant is already rejected
+   * @param proposalId The ID of the proposal
+   */
+  error GrantAlreadyRejected(uint256 proposalId);
 
   // ------------------ Structs and Enums ------------------ //
 
@@ -356,6 +374,13 @@ interface IGrantsManager {
    * @return bool True if the proposal is in development, false otherwise
    */
   function isGrantInDevelopment(uint256 proposalId) external view returns (bool);
+
+  /**
+   * @notice Returns if a proposal is rejected
+   * @param proposalId The ID of the proposal
+   * @return bool True if one of the milestones is rejected, false otherwise
+   */
+  function isGrantRejected(uint256 proposalId) external view returns (bool);
 
   /**
    * @notice Rejects a milestone
