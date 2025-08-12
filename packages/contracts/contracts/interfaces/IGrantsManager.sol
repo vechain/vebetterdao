@@ -215,16 +215,16 @@ interface IGrantsManager {
    * @dev This is the same as the ProposalState enum however with InDevelopment and Completed extra states
    */
   enum GrantState {
-    Pending, // 0 
-    Active, // 1 
-    Canceled, // 2 
-    Defeated, // 3 
-    Succeeded, // 4 
-    Queued, // 5 
-    Executed, // 6 
-    DepositNotMet, // 7 
-    InDevelopment, // 8 
-    Completed // 9 
+    Pending, // 0
+    Active, // 1
+    Canceled, // 2
+    Defeated, // 3
+    Succeeded, // 4
+    Queued, // 5
+    Executed, // 6
+    DepositNotMet, // 7
+    InDevelopment, // 8
+    Completed // 9
   }
 
   /**
@@ -334,7 +334,14 @@ interface IGrantsManager {
    * @param milestoneIndex The index of the milestone
    * @return MilestoneState The state of the milestone
    */
-  function getMilestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState);
+  function milestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState);
+
+  /**
+   * @notice Returns the state of a proposal
+   * @param proposalId The ID of the proposal
+   * @return GrantState The state of the proposal
+   */
+  function grantState(uint256 proposalId) external view returns (GrantState);
 
   /**
    * @notice Returns if a proposal is in development

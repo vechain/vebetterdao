@@ -396,7 +396,7 @@ contract GrantsManager is
    * @param milestoneIndex The index of the milestone
    * @return MilestoneState The state of the milestone
    */
-  function getMilestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState) {
+  function milestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState) {
     return _getMilestoneState(proposalId, milestoneIndex);
   }
 
@@ -453,13 +453,13 @@ contract GrantsManager is
     // check that the milestone is validated or not already claimed
     Milestone memory milestone = m.milestones[milestoneIndex];
     // get the state of the milestone
-    MilestoneState milestoneState = _getMilestoneState(proposalId, milestoneIndex);
-    if (milestoneState != MilestoneState.Approved && milestoneState != MilestoneState.Claimed) {
+    MilestoneState _milestoneState = _getMilestoneState(proposalId, milestoneIndex);
+    if (_milestoneState != MilestoneState.Approved && _milestoneState != MilestoneState.Claimed) {
       revert MilestoneNotApprovedByAdmin(proposalId, milestoneIndex);
     }
 
     // check that the milestone is not already  if (GovernorStateLogic.state($.governor, proposalId) == GovernorTypes.ProposalState.Canceled) {
-    if (milestoneState == MilestoneState.Claimed) {
+    if (_milestoneState == MilestoneState.Claimed) {
       revert MilestoneAlreadyClaimed(proposalId, milestoneIndex);
     }
 
@@ -495,7 +495,7 @@ contract GrantsManager is
    * @param proposalId The id of the proposal
    * @return GrantState The state of the grant
    */
-  function state(uint256 proposalId) external view returns (GrantState) {
+  function grantState(uint256 proposalId) external view returns (GrantState) {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
     GovernorTypes.ProposalState proposalState = $.governor.state(proposalId);
 
@@ -713,9 +713,9 @@ contract GrantsManager is
    * @param milestoneIndex The index of the milestone
    */
   function _checkMilestoneState(uint256 proposalId, uint256 milestoneIndex) internal view {
-    MilestoneState milestoneState = _getMilestoneState(proposalId, milestoneIndex);
-    if (milestoneState != MilestoneState.Pending) {
-      revert MilestoneStateNotPending(milestoneState);
+    MilestoneState _milestoneState = _getMilestoneState(proposalId, milestoneIndex);
+    if (_milestoneState != MilestoneState.Pending) {
+      revert MilestoneStateNotPending(_milestoneState);
     }
   }
 
