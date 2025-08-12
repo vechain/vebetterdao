@@ -1,6 +1,5 @@
 import {
   B3TR,
-  B3TRGovernorV1,
   Emissions,
   TokenAuction,
   Treasury,
@@ -9,7 +8,6 @@ import {
   X2EarnApps,
   B3TRGovernor,
   XAllocationVoting,
-  StargateNFT,
 } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
@@ -188,17 +186,18 @@ export const setupLocalEnvironment = async (
    * Forth seed account will have a Mjölnir Economic Node
    * Fifth seed account will have a Strength Economic Node
    * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
+   * BEWARE : The first 8 accounts have to hold those nodes : Check if it is the case before running the script
    */
-  // await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
 
+  // If the first 8 accounts does not have the correct nodes, run the following line
+  // await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
   await startEmissions(emissionsContract, admin)
 
   if (endorseApps) {
     // Get unendorsed XAPPs
-    // 8 apps
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
-    // const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
     await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
+    // If this fails, check if the first 8 accounts have the correct nodes [7, 6, 5, 3, 1, 7, 7, 7]
   }
   await proposeUpgradeGovernance(governor, xAllocationVoting)
 

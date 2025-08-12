@@ -836,20 +836,6 @@ export async function deployLatest(config: ContractsConfig) {
       await veBetterPassport.SETTINGS_MANAGER_ROLE(),
     )
 
-    // NodeManagement - deprecating ...
-    // await validateContractRole(
-    //   nodeManagement,
-    //   config.CONTRACTS_ADMIN_ADDRESS,
-    //   TEMP_ADMIN,
-    //   await nodeManagement.UPGRADER_ROLE(),
-    // )
-    // await validateContractRole(
-    //   nodeManagement,
-    //   config.CONTRACTS_ADMIN_ADDRESS,
-    //   TEMP_ADMIN,
-    //   await nodeManagement.DEFAULT_ADMIN_ROLE(),
-    // )
-
     // X2EarnApps
     await validateContractRole(x2EarnApps, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await x2EarnApps.UPGRADER_ROLE())
 

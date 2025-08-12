@@ -70,7 +70,7 @@ export const endorseXApps = async (
       [apps[i], nodeId],
     )
 
-    await TransactionUtils.sendTx(thorClient, [clause], endorsers[i].key.pk) // failing
+    await TransactionUtils.sendTx(thorClient, [clause], endorsers[i].key.pk)
   }
 
   console.log("x-apps endorsed.")

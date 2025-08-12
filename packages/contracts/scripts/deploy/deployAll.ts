@@ -269,7 +269,8 @@ export async function deployAll(config: ContractsConfig) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
 
-  // Stargate contracts - contracts will be deployed as mocks on testnet staging
+  // Stargate and NFTs related contracts : they are already deployed from stargate project
+  // See from more details: {https://github.com/vechain/stargate-contracts/blob/main/README.md }
   let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
   const vechainNodesAddress = await vechainNodesMock.getAddress()
   console.log("Using Vechain Nodes Mock deployed at: ", vechainNodesAddress)
