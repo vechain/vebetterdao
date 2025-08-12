@@ -1,4 +1,4 @@
-import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useUserVotesInRound } from "@/api"
+import { useAllocationsRound, useHasVotedInRound, useUserVotesInRound, useTotalVotesOnBlock } from "@/api"
 import { Button, Card, CardBody, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
@@ -31,10 +31,12 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
   const seeAllModal = useDisclosure()
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: castVotesEvent, isLoading: castVotesEventLoading } = useUserVotesInRound(
     roundId,

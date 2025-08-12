@@ -2,7 +2,7 @@
 import {
   useAllocationsRound,
   useAllocationsRoundState,
-  useGetVotesOnBlock,
+  useTotalVotesOnBlock,
   useHasVotedInRound,
   useVotingThreshold,
   useRoundXApps,
@@ -50,10 +50,12 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
 
   const { data: roundInfo } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: threshold } = useVotingThreshold()
 
