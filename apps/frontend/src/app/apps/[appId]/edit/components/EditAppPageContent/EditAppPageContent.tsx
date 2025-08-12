@@ -1,4 +1,16 @@
-import { Button, Separator, Field, HStack, Input, Stack, Text, Textarea, VStack, useDisclosure } from "@chakra-ui/react"
+import {
+  Button,
+  Separator,
+  Field,
+  HStack,
+  Input,
+  Stack,
+  Text,
+  Textarea,
+  VStack,
+  useDisclosure,
+  Heading,
+} from "@chakra-ui/react"
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
@@ -14,6 +26,7 @@ import {
   useCurrentAppMetadata,
   useCurrentAppRole,
   useCurrentAppVeWorldBanner,
+  useCurrentAppVeWorldFeaturedImage,
 } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
@@ -23,6 +36,7 @@ import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
+import { EditVeWorldFeatureImage } from "./components/EditVeWorldFeatureImage"
 import { EditAppCategories } from "./components/EditAppCategories"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal } from "@/components/StepModal/StepModal"
@@ -45,6 +59,7 @@ export type EditAppForm = {
   logoImage: string
   bannerImage: string
   ve_world_bannerImage: string
+  ve_world_featured_image: string
   categories: string[]
 }
 
@@ -63,6 +78,7 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
+  const { veWorldFeaturedImage } = useCurrentAppVeWorldFeaturedImage()
   const router = useRouter()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { isTxModalOpen, onClose: onTxModalClose } = useTransactionModal()
@@ -86,6 +102,7 @@ export const EditAppPageContent = () => {
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
       ve_world_bannerImage: veWorldBanner,
+      ve_world_featured_image: veWorldFeaturedImage,
       categories: (appMetadata?.categories ?? []).filter(id => !DEPRECATED_IDS.includes(id)), // remove the deprecated categories
     },
   })
@@ -139,6 +156,7 @@ export const EditAppPageContent = () => {
         categories: data.categories ?? [],
         ve_world: {
           banner: data.ve_world_bannerImage,
+          featured_image: data.ve_world_featured_image,
         },
       })
       return metadataUri
@@ -166,7 +184,10 @@ export const EditAppPageContent = () => {
     if (veWorldBanner) {
       form.setValue("ve_world_bannerImage", veWorldBanner)
     }
-  }, [veWorldBanner, form])
+    if (veWorldFeaturedImage) {
+      form.setValue("ve_world_featured_image", veWorldFeaturedImage)
+    }
+  }, [veWorldBanner, veWorldFeaturedImage, form])
 
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null
@@ -306,7 +327,22 @@ export const EditAppPageContent = () => {
         </Stack>
         <Separator />
         <EditScreenshots form={form} />
-        <EditVeWorldBanner form={form} />
+        <Separator />
+
+        <VStack align={"flex-start"} gap={4}>
+          <Heading fontSize="24px" fontWeight="700">
+            {t("VeWorld assets")}
+          </Heading>
+          <Text fontSize={14} color={"gray"} pt={0}>
+            {t(
+              "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨",
+            )}
+          </Text>
+          <HStack gap={4} w="full" align={"stretch"}>
+            <EditVeWorldBanner form={form} />
+            <EditVeWorldFeatureImage form={form} />
+          </HStack>
+        </VStack>
       </VStack>
     </>
   )

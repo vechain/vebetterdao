@@ -60,7 +60,7 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         </CustomModalContent>
       </Dialog.Root>
       <HStack gap={6} justify={"space-between"}>
-        <HStack hideFrom="md">
+        <HStack hideBelow="md">
           <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
             <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
@@ -71,12 +71,12 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
             </Text>
           </VStack>
         </HStack>
-        <Button variant="dangerGhost" onClick={onOpen}>
+        <Button hideBelow="md" variant="dangerGhost" onClick={onOpen}>
           <UilTrash size={"14px"} color="#D23F63" />
           {t("Remove")}
         </Button>
 
-        <HStack hideBelow="md">
+        <HStack hideFrom="md">
           <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
             <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
@@ -87,7 +87,7 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
             </Text>
           </VStack>
         </HStack>
-        <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+        <IconButton hideFrom="md" variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
           <UilTrash size={"14px"} color="#D23F63" />
         </IconButton>
       </HStack>

@@ -1,25 +1,29 @@
+import { useBreakpoints } from "@/hooks"
 import { Dialog, Portal } from "@chakra-ui/react"
 
 export const CustomModalContent = ({ children, ...others }: Dialog.ContentProps) => {
+  const { isMobile } = useBreakpoints()
   return (
     <Portal>
+      <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content
-          hideFrom="md"
-          position="fixed"
-          bottom="0px"
-          mb="0"
-          roundedTop={"20px"}
-          roundedBottom="0"
-          maxHeight="90vh"
-          overflow="auto"
-          {...others}>
-          {children}
-        </Dialog.Content>
-
-        <Dialog.Content hideBelow="md" rounded={"20px"} {...others}>
-          {children}
-        </Dialog.Content>
+        {isMobile ? (
+          <Dialog.Content
+            position="fixed"
+            bottom="0px"
+            mb="0"
+            roundedTop={"20px"}
+            roundedBottom="0"
+            maxHeight="90vh"
+            overflow="auto"
+            {...others}>
+            {children}
+          </Dialog.Content>
+        ) : (
+          <Dialog.Content rounded={"20px"} {...others}>
+            {children}
+          </Dialog.Content>
+        )}
       </Dialog.Positioner>
     </Portal>
   )

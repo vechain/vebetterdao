@@ -17,6 +17,7 @@ import {
   BANNER_UPLOAD_GUIDELINES,
   LOGO_UPLOAD_GUIDELINES,
   VEWORLD_BANNER_UPLOAD_GUIDELINES,
+  VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES,
   AVG_PHONE_WIDTH,
   notFoundImage,
   VE_WOLRD_SCALING_FACTOR,
@@ -63,6 +64,7 @@ export type CreateEditAppFormData = {
   treasuryWalletAddress: string
   adminWalletAddress: string
   ve_world_banner: string
+  ve_world_featured_image: string
 }
 
 type Props = {
@@ -94,35 +96,44 @@ export const CreateEditAppForm = ({
   const uploadLogoRef = useRef<HTMLButtonElement>(null)
   const uploadBannerRef = useRef<HTMLButtonElement>(null)
   const uploadVeWorldBannerRef = useRef<HTMLButtonElement>(null)
+  const uploadVeWorldFeaturedImageRef = useRef<HTMLButtonElement>(null)
   const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner" | "ve_world_banner") => async (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0]
-      if (!file) return
+    (image: "logo" | "banner" | "ve_world_banner" | "ve_world_featured_image") =>
+      async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
 
-      if (image === "logo") {
-        clearErrors("logo")
-        const base64Logo = await validateImageUpload(file, setError, "logo")
-        if (!base64Logo) return
-        setValue("logo", base64Logo)
-      }
+        if (image === "logo") {
+          clearErrors("logo")
+          const base64Logo = await validateImageUpload(file, setError, "logo")
+          if (!base64Logo) return
+          setValue("logo", base64Logo)
+        }
 
-      if (image === "banner") {
-        clearErrors("banner")
-        const base64Banner = await validateImageUpload(file, setError, "banner")
-        if (!base64Banner) return
-        setValue("banner", base64Banner)
-      }
+        if (image === "banner") {
+          clearErrors("banner")
+          const base64Banner = await validateImageUpload(file, setError, "banner")
+          if (!base64Banner) return
+          setValue("banner", base64Banner)
+        }
 
-      if (image === "ve_world_banner") {
-        clearErrors("ve_world_banner")
-        const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world_banner")
-        if (!base64VeWorldBanner) return
-        setValue("ve_world_banner", base64VeWorldBanner)
-      }
-    },
+        if (image === "ve_world_banner") {
+          clearErrors("ve_world_banner")
+          const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world_banner")
+          if (!base64VeWorldBanner) return
+          setValue("ve_world_banner", base64VeWorldBanner)
+        }
+
+        if (image === "ve_world_featured_image") {
+          clearErrors("ve_world_featured_image")
+          const base64VeWorldFeaturedImage = await validateImageUpload(file, setError, "ve_world_featured_image")
+          if (!base64VeWorldFeaturedImage) return
+          setValue("ve_world_featured_image", base64VeWorldFeaturedImage)
+        }
+      },
     [setError, setValue, clearErrors],
   )
 
@@ -236,20 +247,22 @@ export const CreateEditAppForm = ({
           <Field.Root invalid={!treasuryWalletAddress}>
             <Field.Label>{t("Treasury address")}</Field.Label>
             <Text fontSize="xs" color="gray.500" mb={2}>
-              {t("The wallet address where you will receive your app's B3TR")}
+              {t(`The wallet address where you will receive your app's B3TR`)}
             </Text>
             <InputGroup>
               <WalletAddressInput
-                startElement={
-                  <AddressIcon
-                    pointerEvents="none"
-                    borderRadius={"full"}
-                    boxSize={6}
-                    minW={6}
-                    minH={6}
-                    address={treasuryWalletAddress}
-                  />
-                }
+                inputGroupProps={{
+                  startElement: (
+                    <AddressIcon
+                      pointerEvents="none"
+                      borderRadius={"full"}
+                      boxSize={6}
+                      minW={6}
+                      minH={6}
+                      address={treasuryWalletAddress}
+                    />
+                  ),
+                }}
                 disabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("treasuryWalletAddress", address ?? "")}
@@ -264,9 +277,17 @@ export const CreateEditAppForm = ({
             </Text>
             <InputGroup>
               <WalletAddressInput
-                startElement={
-                  <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={adminWalletAddress ?? ""} />
-                }
+                inputGroupProps={{
+                  startElement: (
+                    <AddressIcon
+                      borderRadius={"full"}
+                      boxSize={6}
+                      minW={6}
+                      minH={6}
+                      address={adminWalletAddress ?? ""}
+                    />
+                  ),
+                }}
                 disabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("adminWalletAddress", address ?? "")}
@@ -385,6 +406,39 @@ export const CreateEditAppForm = ({
                     alignSelf={"flex-end"}
                     onChange={onDrop("ve_world_banner")}
                     ref={uploadVeWorldBannerRef}
+                  />
+                </VStack>
+              </Field.Root>
+            )}
+          />
+          <Controller
+            name="ve_world_featured_image"
+            control={control}
+            rules={{
+              required: "VeWorld featured image is required",
+            }}
+            render={({ field: { value } }) => (
+              <Field.Root invalid={!!errors.ve_world_featured_image}>
+                <Field.Label>{t("VeWorld Featured Image")}</Field.Label>
+                <VStack w="full" align="center">
+                  <Image
+                    onClick={() => uploadVeWorldFeaturedImageRef.current?.click()}
+                    _hover={{ cursor: "pointer" }}
+                    src={value ?? notFoundImage}
+                    alt="ve_world_featured_image"
+                    style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
+                    objectFit="cover"
+                  />
+                  {errors.ve_world_featured_image ? (
+                    <Field.ErrorText>{errors.ve_world_featured_image.message}</Field.ErrorText>
+                  ) : (
+                    <Field.HelperText>{t(VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES)}</Field.HelperText>
+                  )}
+                  <UploadFileButton
+                    mt={4}
+                    alignSelf={"flex-end"}
+                    onChange={onDrop("ve_world_featured_image")}
+                    ref={uploadVeWorldFeaturedImageRef}
                   />
                 </VStack>
               </Field.Root>

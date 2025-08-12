@@ -1,5 +1,5 @@
 import { useId, useState, useEffect, useRef, useCallback } from "react"
-import { Input, InputGroup, InputProps, Field } from "@chakra-ui/react"
+import { Input, InputGroup, InputProps, Field, InputGroupProps } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { isValid as isWalletAddressValid } from "@repo/utils/AddressUtils"
@@ -8,14 +8,14 @@ type Props = InputProps & {
   onDomainResolved?: (domain?: string) => void
   onAddressResolved?: (address?: string) => void
   customValidation?: ({ address }: { address?: string }) => string
-  startElement?: React.ReactNode
+  inputGroupProps?: Omit<InputGroupProps, "children">
 }
 
 export const WalletAddressInput = ({
   onDomainResolved,
   onAddressResolved,
   customValidation,
-  startElement,
+  inputGroupProps,
   ...props
 }: Props) => {
   const id = useId()
@@ -122,9 +122,15 @@ export const WalletAddressInput = ({
     validateInput()
   }, [inputValue, domain, address, t, notifyParentResolved, notifyInvalidInput, customValidation])
 
+  useEffect(() => {
+    if (props.defaultValue) {
+      setInputValue(props.defaultValue as string)
+    }
+  }, [props.defaultValue])
+
   return (
     <Field.Root invalid={!!errorMessage}>
-      <InputGroup startElement={startElement}>
+      <InputGroup {...inputGroupProps}>
         <Input
           {...props}
           id={id}

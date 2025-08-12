@@ -38,6 +38,7 @@
       "cache": false
     },
     "build": {
+      "cache": true,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
       "outputs": [".next/**", "!.next/cache/**"]
     },

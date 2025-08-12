@@ -41,7 +41,7 @@ export const EditAppRewardDistributors = ({ form }: Props) => {
           />
         ))}
       </VStack>
-      <AddRewardDistributorButton editAdminForm={form} />
+      <AddRewardDistributorButton getValues={form.getValues} setValue={form.setValue} />
     </VStack>
   )
 }

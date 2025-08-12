@@ -42,10 +42,6 @@ export const AppsPageContent = () => {
   const newApps = xApps?.newLookingForEndorsement ?? []
   const hasNewApps = newApps.length > 0
 
-  // New apps list for the AllApps component
-  // Note: unendorsed app are always considered new until they are endorsed : timestamp = 0 untill then
-  const newAppsEndorsedandUnendorsed = [...(xApps?.newApps ?? []), ...newApps]
-
   // Apps tabs
   const currentActiveApps =
     xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id as unknown as `0x${string}`)) ?? []
@@ -86,7 +82,7 @@ export const AppsPageContent = () => {
         <VStack alignItems={"flex-start"} gap={4} w="full">
           <Heading size="lg">{t("Sustainability apps")}</Heading>
           <AllApps
-            newApps={newAppsEndorsedandUnendorsed}
+            newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}
             endorsementLostApps={endorsementLostApps}
@@ -97,7 +93,7 @@ export const AppsPageContent = () => {
         <HStack w="full" alignItems={"flex-start"} gap={0}>
           <AllApps
             headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
-            newApps={newAppsEndorsedandUnendorsed}
+            newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}
             endorsementLostApps={endorsementLostApps}

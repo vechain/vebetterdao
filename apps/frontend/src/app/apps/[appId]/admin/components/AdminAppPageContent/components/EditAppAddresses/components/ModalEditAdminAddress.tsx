@@ -11,8 +11,7 @@ type Props = {
 export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }: Props) => {
   const { t } = useTranslation()
   return (
-    <Dialog.Root open={open} onOpenChange={details => !details.open && onClose()} size={"xl"}>
-      <Dialog.Backdrop />
+    <Dialog.Root open={open} onOpenChange={details => !details.open && onClose()} size={"md"}>
       <CustomModalContent>
         <Dialog.Body p={"40px"}>
           <VStack align="center" gap="20px">
