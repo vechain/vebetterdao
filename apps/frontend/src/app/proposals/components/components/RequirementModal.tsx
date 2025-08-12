@@ -12,9 +12,10 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
-import { useGMRequiredByProposalType } from "@/api"
+import { useGetUserGMs, useGMRequiredByProposalType } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
 import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
 
 type Props = {
   isOpen: UseDisclosureProps["isOpen"]
@@ -26,14 +27,35 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
   const { t } = useTranslation()
   const modalIcon = useColorModeValue("/assets/icons/nft-earth-light.png", "/assets/icons/nft-earth-dark.png")
   const { data: gmRequired } = useGMRequiredByProposalType()
+  const { data: userGMs } = useGetUserGMs()
   const router = useRouter()
-  const handleGetNftOrApply = () => {
+
+  const userHasAnyGm = useMemo(() => {
+    return !!userGMs?.length
+  }, [userGMs])
+
+  const userHighestGm = useMemo(() => {
+    if (!userHasAnyGm) return null
+    if (userGMs?.length === 1) return userGMs[0]
+    return userGMs?.sort((a, b) => Number(a.tokenLevel) - Number(b.tokenLevel))[0]
+  }, [userGMs, userHasAnyGm])
+
+  const getNftOrApplyButtonText = useMemo(() => {
+    if (userHasAnyGm) {
+      return t("Upgrade NFT")
+    }
+    return t("Get NFT")
+  }, [userHasAnyGm, t])
+
+  const handleGetNftOrApply = useCallback(() => {
     if (!hasNft) {
       router.push("/profile?tab=gm")
+    } else if (userHasAnyGm) {
+      router.push(`/galaxy-member/${userHighestGm?.tokenId}`)
     } else {
       router.push("/proposals/new")
     }
-  }
+  }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId])
 
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
@@ -81,7 +103,7 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
           </Button>
 
           <Button variant="primaryAction" w="full" py={6} onClick={handleGetNftOrApply}>
-            {!hasNft ? t("Get NFT") : t("Apply")}
+            {getNftOrApplyButtonText}
           </Button>
         </HStack>
       </VStack>
