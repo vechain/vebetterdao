@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
-import { useGetUserGMs, useGMRequiredByProposalType } from "@/api"
+import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -29,6 +29,7 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
   const { data: gmRequired } = useGMRequiredByProposalType()
   const { data: userGMs } = useGetUserGMs()
   const router = useRouter()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const userHasAnyGm = useMemo(() => {
     return !!userGMs?.length
@@ -40,32 +41,30 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
     return userGMs?.sort((a, b) => Number(a.tokenLevel) - Number(b.tokenLevel))[0]
   }, [userGMs, userHasAnyGm])
 
-  const userMeetsRequirement = useMemo(() => {
-    if (!userHighestGm || !gmRequired) return false
-    return Number(userHighestGm.tokenLevel) >= Number(gmRequired)
-  }, [userHighestGm, gmRequired])
-
   const getNftOrApplyButtonText = useMemo(() => {
-    if (!userHasAnyGm) {
-      return t("Get NFT")
-    }
-    if (userMeetsRequirement) {
+    if (hasNft) {
       return t("Apply")
     }
+    if (!userHasAnyGm) {
+      return t("Vote")
+    }
     return t("Upgrade NFT")
-  }, [userHasAnyGm, userMeetsRequirement, t])
+  }, [userHasAnyGm, hasNft, t])
 
   const handleGetNftOrApply = useCallback(() => {
-    if (!hasNft) {
-      router.push("/profile?tab=gm")
-    } else if (userMeetsRequirement) {
-      router.push("/proposals/new")
-    } else if (userHasAnyGm) {
+    if (!userHasAnyGm) {
+      router.push(`/rounds/${currentRoundId}`)
+    } else if (!hasNft) {
       router.push(`/galaxy-member/${userHighestGm?.tokenId}`)
     } else {
       router.push("/proposals/new")
     }
-  }, [hasNft, router, userMeetsRequirement, userHasAnyGm, userHighestGm?.tokenId])
+  }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId, currentRoundId])
+
+  console.log("hasNft", hasNft)
+  console.log("userHasAnyGm", userHasAnyGm)
+  console.log("userHighestGm", userHighestGm)
+  console.log("currentRoundId", currentRoundId)
 
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
