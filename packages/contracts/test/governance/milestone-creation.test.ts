@@ -245,12 +245,12 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(storedGrant.milestones[1].isRejected).to.equal(false)
       expect(storedGrant.metadataURI).to.equal(milestonesDetailsMetadataURI)
       // get the state of the milestone
-      const firstMilestoneState = await grantsManager.getMilestoneState(proposalId, 0)
-      const secondMilestoneState = await grantsManager.getMilestoneState(proposalId, 1)
+      const firstMilestoneState = await grantsManager.milestoneState(proposalId, 0)
+      const secondMilestoneState = await grantsManager.milestoneState(proposalId, 1)
       expect(firstMilestoneState).to.equal(0) // Pending
       expect(secondMilestoneState).to.equal(0) // Pending
       // get the grant state
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(0) // Pending state <=> the proposal state
     })
 
@@ -474,7 +474,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         proposer.address,
         description,
       )
-      const milestoneStatus = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneStatus = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneStatus).to.equal(0)
     })
 
@@ -1124,9 +1124,9 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       )
 
       // Check the states ( Proposal should be Executed, Milestone should be Rejected )
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(6) // Executed
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(3n) // Rejected
 
       const grantsManagerBalanceAfterRejection = await b3tr.balanceOf(grantsManagerAddress)
@@ -1168,11 +1168,11 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       await grantsManager.connect(proposer).claimMilestone(proposalId, 1)
 
       // Check the states ( Proposal should be Executed, Milestone should be Rejected )
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(9) // Completed ( all funds have been sent )
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(2n) // Claimed
-      const milestoneState2 = await grantsManager.getMilestoneState(proposalId, 1)
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
       expect(milestoneState2).to.equal(2n) // Claimed
       const isGrantCompleted = await grantsManager.isGrantCompleted(proposalId)
       expect(isGrantCompleted).to.equal(true)
@@ -1205,11 +1205,11 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       // Claim the first milestone
       await grantsManager.connect(proposer).claimMilestone(proposalId, 0)
 
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(8) // InDevelopment
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(2n) // Claimed
-      const milestoneState2 = await grantsManager.getMilestoneState(proposalId, 1)
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
       expect(milestoneState2).to.equal(0n) // Pending
       const isGrantCompleted = await grantsManager.isGrantCompleted(proposalId)
       expect(isGrantCompleted).to.equal(false)
@@ -1244,9 +1244,9 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
       )
 
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(0) // Pending
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(0n) // Pending
       const isGrantCompleted = await grantsManager.isGrantCompleted(proposalId)
       expect(isGrantCompleted).to.equal(false)
@@ -1286,19 +1286,19 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
       )
       // Check the states ( Proposal should be Pending and Grant should be Pending )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
       //Pay the deposit
       await payDeposit(proposalId, owner)
 
       //Check the states ( Proposal should be Des and Grant should be Pending )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       // simulate start of new round with enough voting delay
       await waitForCurrentRoundToEnd()
       await emissions.distribute()
 
       //Check the states ( Proposal should be active and Grant should be active )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       await governor.connect(voter).castVote(proposalId, 1, { gasLimit: 10_000_000 }) // vote for
 
@@ -1307,21 +1307,21 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       await emissions.distribute()
 
       //Check the states ( Proposal should be Succeeded and Grant should be Succeeded )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       // Queue the proposal
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
       await governor.connect(proposer).queue(targets, values, calldatas, descriptionHash)
 
       //Check the states ( Proposal should be Queued and Grant should be Queued )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       // Execute the proposal
       await governor.connect(owner).execute(targets, values, calldatas, descriptionHash)
 
       //Check the states ( Proposal should be Executed and Grant should be InDevelopment )
       expect(await governor.state(proposalId)).to.equal("6")
-      expect(await grantsManager.state(proposalId)).to.equal("8")
+      expect(await grantsManager.grantState(proposalId)).to.equal("8")
 
       //Approve first milestone
       await grantsManager.connect(owner).approveMilestones(proposalId, 0)
@@ -1330,7 +1330,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
 
       //Governor state should remain executed and grant state should remain in development
       expect(await governor.state(proposalId)).to.equal("6")
-      expect(await grantsManager.state(proposalId)).to.equal("8")
+      expect(await grantsManager.grantState(proposalId)).to.equal("8")
 
       //Approve second milestone (this is the last one)
       await grantsManager.connect(owner).approveMilestones(proposalId, 1)
@@ -1339,7 +1339,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
 
       //Governor state should remain executed and grant state should be completed
       expect(await governor.state(proposalId)).to.equal("6")
-      expect(await grantsManager.state(proposalId)).to.equal("9")
+      expect(await grantsManager.grantState(proposalId)).to.equal("9")
     })
   })
 
