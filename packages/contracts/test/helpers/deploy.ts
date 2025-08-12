@@ -1124,6 +1124,7 @@ export const getOrDeployContractInstances = async ({
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
+    StargateNFT: await stargateNftMock.getAddress(),
   }
 
   const libraries = {

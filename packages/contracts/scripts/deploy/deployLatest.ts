@@ -12,7 +12,7 @@ import {
   Treasury,
   X2EarnRewardsPool,
   X2EarnApps,
-  NodeManagement,
+  NodeManagementV3,
   VeBetterPassport,
   X2EarnCreator,
   GrantsManager,
@@ -102,26 +102,25 @@ export async function deployLatest(config: ContractsConfig) {
     VoteEligibilityUtilsV4,
   } = await x2EarnLibraries()
 
-  let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
-
+  // ----------------------  Stargate Contracts and NodeManagement ----------------------
   let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
-  if (network.name !== "vechain_mainnet") {
-    console.log("Deploying Vechain Nodes mock contracts")
+  const vechainNodesAddress = await vechainNodesMock.getAddress()
+  console.log("Using Vechain Nodes Mock deployed at: ", vechainNodesAddress)
 
-    const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
-    vechainNodesMock = await TokenAuctionLock.deploy()
-    await vechainNodesMock.waitForDeployment()
+  let stargateNftMock = (await ethers.getContractAt("StargateNFT", config.STARGATE_NFT_CONTRACT_ADDRESS)) as StargateNFT
+  const stargateNftAddress = await stargateNftMock.getAddress()
+  console.log("Using Stargate NFT Mock deployed at: ", stargateNftAddress)
 
-    const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-    const clockAuctionContract = await ClockAuctionLock.deploy(await vechainNodesMock.getAddress(), TEMP_ADMIN)
+  let stargateDelegateMock = await ethers.getContractAt("StargateDelegation", config.STARGATE_DELEGATE_CONTRACT_ADDRESS)
+  const stargateDelegateAddress = await stargateDelegateMock.getAddress()
+  console.log("Using Stargate Delegate Mock deployed at: ", stargateDelegateAddress)
 
-    await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
-
-    await vechainNodesMock.addOperator(TEMP_ADMIN)
-    vechainNodesAddress = await vechainNodesMock.getAddress()
-
-    console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
-  }
+  let nodeManagement = (await ethers.getContractAt(
+    "NodeManagementV3",
+    config.NODE_MANAGEMENT_CONTRACT_ADDRESS,
+  )) as NodeManagementV3
+  const nodeManagementAddress = await nodeManagement.getAddress()
+  console.log("Using Node Management Mock deployed at: ", nodeManagementAddress)
 
   // ---------------------- Deploy Contracts ----------------------
   console.log("Deploying VeBetter DAO contracts")
@@ -179,19 +178,6 @@ export async function deployLatest(config: ContractsConfig) {
     true,
   )) as Treasury
 
-  // Deploy NodeManagement
-  const nodeManagement = (await deployAndInitializeLatest(
-    "NodeManagementV3",
-    [
-      {
-        name: "initialize",
-        args: [vechainNodesAddress, TEMP_ADMIN, deployer.address],
-      },
-    ],
-    {},
-    true, // logOutput
-  )) as NodeManagement
-
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddressTemp = TEMP_ADMIN
 
@@ -209,7 +195,7 @@ export async function deployLatest(config: ContractsConfig) {
       ],
       [
         config.XAPP_GRACE_PERIOD,
-        await nodeManagement.getAddress(),
+        nodeManagementAddress,
         veBetterPassportContractAddressTemp,
         await x2EarnCreator.getAddress(),
       ],
@@ -317,7 +303,7 @@ export async function deployLatest(config: ContractsConfig) {
         name: "initializeV2",
         args: [
           await vechainNodesMock.getAddress(),
-          await nodeManagement.getAddress(),
+          nodeManagementAddress,
           TEMP_ADMIN,
           config.GM_NFT_NODE_TO_FREE_LEVEL,
         ],
@@ -580,9 +566,10 @@ export async function deployLatest(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
-    vechainNodesManagement: await nodeManagement.getAddress(),
+    vechainNodesManagement: nodeManagementAddress,
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
+    StargateNFT: await stargateNftMock.getAddress(),
   }
 
   const libraries: {
@@ -666,6 +653,19 @@ export async function deployLatest(config: ContractsConfig) {
     .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   console.log("Vote registrar role granted to XAllocationVoting")
+
+  await xAllocationVoting
+    .connect(deployer)
+    .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
+    .then(async tx => await tx.wait())
+  console.log("Governance role granted to deployer")
+
+  await x2EarnRewardsPool
+    .connect(deployer)
+    .grantRole(await x2EarnRewardsPool.CONTRACTS_ADDRESS_MANAGER_ROLE(), deployer.address)
+    .then(async tx => await tx.wait())
+  console.log("Governance role granted to deployer")
+
   // Grant Vote Registrar role to B3TRGovernor
   await voterRewards
     .connect(deployer)
@@ -702,10 +702,23 @@ export async function deployLatest(config: ContractsConfig) {
     .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
     .then(async tx => await tx.wait())
 
+  // Setup VeBetterPassport addresses to replace TEMP Initialisation
   await x2EarnApps
     .connect(deployer)
     .setVeBetterPassportContract(await veBetterPassport.getAddress())
     .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in X2EarnApps contract")
+  await xAllocationVoting
+    .connect(deployer)
+    .setVeBetterPassport(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in XAllocationVoting contract")
+
+  await x2EarnRewardsPool
+    .connect(deployer)
+    .setVeBetterPassport(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in X2EarnRewardsPool contract")
 
   // Setup XAllocationPool addresses
   await xAllocationPool
@@ -858,7 +871,7 @@ export async function deployLatest(config: ContractsConfig) {
 
     await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
-    await transferUpgraderRole(nodeManagement, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    // await transferUpgraderRole(nodeManagementMock, deployer, config.CONTRACTS_ADMIN_ADDRESS) - deprecating...
     await transferUpgraderRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(galaxyMember, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -874,20 +887,6 @@ export async function deployLatest(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await veBetterPassport.SETTINGS_MANAGER_ROLE(),
-    )
-
-    // NodeManagement
-    await validateContractRole(
-      nodeManagement,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await nodeManagement.UPGRADER_ROLE(),
-    )
-    await validateContractRole(
-      nodeManagement,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await nodeManagement.DEFAULT_ADMIN_ROLE(),
     )
 
     // X2EarnApps
@@ -1184,7 +1183,7 @@ export async function deployLatest(config: ContractsConfig) {
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
     vechainNodesMock: vechainNodesAddress,
-    vechainNodeManagement: nodeManagement,
+    vechainNodeManagement: nodeManagementAddress,
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
     libraries: {
