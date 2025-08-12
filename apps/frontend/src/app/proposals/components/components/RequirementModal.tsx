@@ -40,22 +40,32 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
     return userGMs?.sort((a, b) => Number(a.tokenLevel) - Number(b.tokenLevel))[0]
   }, [userGMs, userHasAnyGm])
 
+  const userMeetsRequirement = useMemo(() => {
+    if (!userHighestGm || !gmRequired) return false
+    return Number(userHighestGm.tokenLevel) >= Number(gmRequired)
+  }, [userHighestGm, gmRequired])
+
   const getNftOrApplyButtonText = useMemo(() => {
-    if (userHasAnyGm) {
-      return t("Upgrade NFT")
+    if (!userHasAnyGm) {
+      return t("Get NFT")
     }
-    return t("Get NFT")
-  }, [userHasAnyGm, t])
+    if (userMeetsRequirement) {
+      return t("Apply")
+    }
+    return t("Upgrade NFT")
+  }, [userHasAnyGm, userMeetsRequirement, t])
 
   const handleGetNftOrApply = useCallback(() => {
     if (!hasNft) {
       router.push("/profile?tab=gm")
+    } else if (userMeetsRequirement) {
+      router.push("/proposals/new")
     } else if (userHasAnyGm) {
       router.push(`/galaxy-member/${userHighestGm?.tokenId}`)
     } else {
       router.push("/proposals/new")
     }
-  }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId])
+  }, [hasNft, router, userMeetsRequirement, userHasAnyGm, userHighestGm?.tokenId])
 
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
