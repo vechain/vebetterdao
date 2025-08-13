@@ -23,8 +23,13 @@ import {
 } from "../../typechain-types"
 import { getOrDeployContractInstances } from "../helpers"
 import { ContractFactory, ContractTransactionReceipt } from "ethers"
-import { ethers } from "hardhat"
-import { bootstrapAndStartEmissions, waitForCurrentRoundToEnd } from "../helpers/common"
+import { ethers, expect } from "hardhat"
+import {
+  bootstrapAndStartEmissions,
+  bootstrapEmissions,
+  getVot3Tokens,
+  waitForCurrentRoundToEnd,
+} from "../helpers/common"
 
 //Constants for proposal types
 export const STANDARD_PROPOSAL_TYPE = ethers.toBigInt(0)
@@ -179,6 +184,28 @@ export async function setupProposer(
   await vot3.connect(account).convertToVOT3(ethers.parseEther("9"), { gasLimit: 10_000_000 })
 }
 
+export async function setupVoter(
+  voter: SignerWithAddress,
+  b3tr: B3TR,
+  vot3: VOT3,
+  minterAccount: SignerWithAddress,
+  owner: SignerWithAddress,
+  veBetterPassport: VeBetterPassport,
+) {
+  await getVot3Tokens(voter, "10000", {
+    b3tr,
+    vot3,
+    minterAccount,
+  })
+
+  // whitelist voter
+  await veBetterPassport.connect(owner).whitelist(voter.address)
+  await veBetterPassport.connect(owner).toggleCheck(1)
+  expect(await veBetterPassport.isCheckEnabled(1)).to.be.true
+  // expect voter to be person
+  expect(await veBetterPassport.isPerson(voter.address)).to.deep.equal([true, "User is whitelisted"])
+}
+
 export async function startNewRoundAndGetRoundId(
   emissions: Emissions,
   xAllocationVoting: XAllocationVoting,
@@ -187,10 +214,10 @@ export async function startNewRoundAndGetRoundId(
   // and start a new one
   if ((await emissions.nextCycle()) === 0n) {
     // if emissions are not started yet, we need to bootstrap and start them
-    await bootstrapAndStartEmissions()
+    await bootstrapAndStartEmissions({ emissions, xAllocationVoting })
   } else {
     // otherwise we need to wait for the current round to end and start the next one
-    await waitForCurrentRoundToEnd()
+    await waitForCurrentRoundToEnd({ emissions, xAllocationVoting })
     await emissions.distribute()
   }
   return ((await xAllocationVoting.currentRoundId()) + 1n).toString()
@@ -209,9 +236,6 @@ export async function validateProposalEvents(
 
   // Define required events based on proposal type
   const requiredEvents = ["ProposalCreated", "ProposalCreatedWithType"]
-  if (expectedType === Number(GRANT_PROPOSAL_TYPE)) {
-    requiredEvents.push("MilestonesCreated")
-  }
 
   // Find all relevant events in one pass
   const foundEvents: Record<string, any> = {}
@@ -255,12 +279,11 @@ export async function validateProposalEvents(
     proposalId: proposalCreated.args[0],
     decodedProposalCreatedEvent: proposalCreated,
     decodedProposalCreatedWithTypeEvent: proposalCreatedWithType,
-    decodedMilestonesCreatedEvent: foundEvents["MilestonesCreated"] || null,
   }
 }
 
 export async function setupGovernanceFixtureWithEmissions(): Promise<GovernanceFixture> {
   const fixture = await setupGovernanceFixture()
-  await bootstrapAndStartEmissions()
+  await bootstrapEmissions({ emissions: fixture.emissions })
   return fixture
 }

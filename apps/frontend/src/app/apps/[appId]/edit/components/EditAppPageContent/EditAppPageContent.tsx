@@ -5,6 +5,7 @@ import {
   FormErrorMessage,
   HStack,
   Input,
+  Heading,
   Stack,
   Text,
   Textarea,
@@ -26,6 +27,7 @@ import {
   useCurrentAppMetadata,
   useCurrentAppRole,
   useCurrentAppVeWorldBanner,
+  useCurrentAppVeWorldFeaturedImage,
 } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
@@ -35,12 +37,14 @@ import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
+import { EditVeWorldFeatureImage } from "./components/EditVeWorldFeatureImage"
 import { EditAppCategories } from "./components/EditAppCategories"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal } from "@/components/StepModal/StepModal"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import Lottie from "react-lottie"
+import { DEPRECATED_IDS } from "@/types/appDetails"
 
 export type EditAppForm = {
   name: string
@@ -56,6 +60,7 @@ export type EditAppForm = {
   logoImage: string
   bannerImage: string
   ve_world_bannerImage: string
+  ve_world_featured_image: string
   categories: string[]
 }
 
@@ -74,6 +79,7 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
+  const { veWorldFeaturedImage } = useCurrentAppVeWorldFeaturedImage()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { isTxModalOpen, onClose: onTxModalClose } = useTransactionModal()
@@ -97,7 +103,8 @@ export const EditAppPageContent = () => {
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
       ve_world_bannerImage: veWorldBanner,
-      categories: appMetadata?.categories ?? [],
+      ve_world_featured_image: veWorldFeaturedImage,
+      categories: (appMetadata?.categories ?? []).filter(id => !DEPRECATED_IDS.includes(id)), // remove the deprecated categories
     },
   })
   const {
@@ -150,6 +157,7 @@ export const EditAppPageContent = () => {
         categories: data.categories ?? [],
         ve_world: {
           banner: data.ve_world_bannerImage,
+          featured_image: data.ve_world_featured_image,
         },
       })
       return metadataUri
@@ -177,7 +185,10 @@ export const EditAppPageContent = () => {
     if (veWorldBanner) {
       form.setValue("ve_world_bannerImage", veWorldBanner)
     }
-  }, [veWorldBanner, form])
+    if (veWorldFeaturedImage) {
+      form.setValue("ve_world_featured_image", veWorldFeaturedImage)
+    }
+  }, [veWorldBanner, veWorldFeaturedImage, form])
 
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null
@@ -320,7 +331,22 @@ export const EditAppPageContent = () => {
         </Stack>
         <Divider />
         <EditScreenshots form={form} />
-        <EditVeWorldBanner form={form} />
+        <Divider />
+
+        <VStack align={"flex-start"} gap={4}>
+          <Heading fontSize="24px" fontWeight="700">
+            {t("VeWorld assets")}
+          </Heading>
+          <Text fontSize={14} color={"gray"} pt={0}>
+            {t(
+              "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨",
+            )}
+          </Text>
+          <HStack gap={4} w="full" align={"stretch"}>
+            <EditVeWorldBanner form={form} />
+            <EditVeWorldFeatureImage form={form} />
+          </HStack>
+        </VStack>
       </VStack>
     </>
   )

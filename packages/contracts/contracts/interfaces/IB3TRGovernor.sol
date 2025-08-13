@@ -67,7 +67,7 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error GovernorNonexistentProposal(uint256 proposalId);
 
   /**
-   * @dev The `votingThreshold_DEPRECATED` is not met.
+   * @dev The `votingThreshold` is not met.
    */
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 
@@ -160,6 +160,11 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   error UnauthorizedAccess(address user);
 
   /**
+   * @dev The grantee cannot deposit for their own grant.
+   */
+  error GranteeCannotDepositOwnGrant(uint256 proposalId);
+
+  /**
    * @dev Emitted when a proposal is created
    */
   event ProposalCreated(
@@ -173,11 +178,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 indexed roundIdVoteStart,
     uint256 depositThreshold
   );
-
-  /**
-   * @dev Emitted when a proposal is created with milestones
-   */
-  event MilestonesCreated(uint256 indexed proposalId, GovernorTypes.ProposalType proposalType, string description);
 
   /**
    * @dev Emitted when a proposal is queued.
@@ -359,21 +359,15 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @notice module:core
    * @dev The number of votes in support of a proposal required in order for a proposal to become active.
    */
-  function depositThreshold() external view returns (uint256);
+  function depositThresholdByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
 
   /**
    * @notice module:core
    * @dev The proposal Threshold Percentage for all type of proposal
    */
-  function getProposalTypeDepositThresholdPercentage(
+  function depositThresholdPercentageByProposalType(
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256);
-
-  /**
-   * @notice module:core
-   * @dev The minimum number of vote tokens needed to cast a vote
-   */
-  function votingThreshold() external view returns (uint256);
 
   /**
    * @notice module:core
@@ -475,6 +469,20 @@ interface IB3TRGovernor is IERC165, IERC6372 {
     uint256 startRoundId,
     uint256 depositAmount
   ) external returns (uint256 proposalId);
+
+  /**
+   * @dev Create a grant proposal. Grantee cannot deposit for it's own grant.
+   */
+  function proposeGrant(
+    address[] memory targets,
+    uint256[] memory values,
+    bytes[] memory calldatas,
+    string memory description,
+    uint256 startRoundId,
+    uint256 depositAmount,
+    address grantsReceiver,
+    string memory milestonesDetailsMetadataURI
+  ) external returns (uint256);
 
   /**
    * @dev Queue a proposal. Some governors require this step to be performed before execution can happen. If queuing
@@ -624,7 +632,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function getRequiredGMLevelByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256);
 
   /**
    * @notice Set the GM weight for a proposal type
@@ -639,7 +649,9 @@ interface IB3TRGovernor is IERC165, IERC6372 {
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
    */
-  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256);
+  function depositThresholdCapByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256);
 
   /**
    * @notice Get the deposit voting power for a given account at a given timepoint

@@ -1,12 +1,12 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { setupGovernanceFixtureWithEmissions, setupProposer } from "./fixture.test"
-import { B3TRGovernor, VOT3, B3TR, GalaxyMember } from "../../typechain-types"
+import { B3TRGovernor, VOT3, B3TR, GalaxyMember, Emissions } from "../../typechain-types"
 import { ethers } from "ethers"
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
 import { getRoundId, getVot3Tokens } from "../helpers"
 
-describe("Proposal - Proposer requirement", function () {
+describe("Proposal - Proposer requirement - @shard4c", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -14,7 +14,7 @@ describe("Proposal - Proposer requirement", function () {
   let proposer: SignerWithAddress
   let owner: SignerWithAddress
   let galaxyMember: GalaxyMember
-
+  let emissions: Emissions
   beforeEach(async function () {
     const fixture = await setupGovernanceFixtureWithEmissions()
     governor = fixture.governor
@@ -24,7 +24,9 @@ describe("Proposal - Proposer requirement", function () {
     proposer = fixture.proposer
     owner = fixture.owner
     galaxyMember = fixture.galaxyMember
+    emissions = fixture.emissions
     // Setup proposer for all tests
+    await emissions.connect(minterAccount).start()
     await setupProposer(proposer, b3tr, vot3, minterAccount)
   })
 
@@ -71,6 +73,19 @@ describe("Proposal - Proposer requirement", function () {
       await expect(
         governor.connect(owner).setRequiredGMLevelByProposalType(0, Number(maxGMWeight) + 1),
       ).to.be.revertedWithCustomError(governor, "GMLevelAboveMaxLevel")
+    })
+
+    it("Should not set the required GM level if the proposal type is invalid", async function () {
+      await expect(governor.connect(owner).setRequiredGMLevelByProposalType(2, 1)).to.be.reverted
+    })
+
+    it("Should not get the required GM level if the proposal type is invalid", async function () {
+      await expect(governor.getRequiredGMLevelByProposalType(2)).to.be.reverted
+    })
+
+    it("Should emit the RequiredGMLevelSet event when the required GM level is set", async function () {
+      const tx = await governor.connect(owner).setRequiredGMLevelByProposalType(0, 1)
+      await expect(tx).to.emit(governor, "RequiredGMLevelSet").withArgs(0, 0, 1)
     })
   })
 

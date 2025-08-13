@@ -81,6 +81,9 @@ import { IGalaxyMember } from "./interfaces/IGalaxyMember.sol";
  * - Difference from V4: Updated all libraries to use new version of IVoterRewards that supports GM Upgrades.
  * ------------------ VERSION 6 ------------------
  * - Updated all libraries to use new version of IVoterRewards that supports GM Rewards Pool.
+ ------------------ VERSION 7 ------------------
+ * - Added proposal type concept, STANDARD (0n) for existing proposals and GRANT (1n) for new grants proposals.
+ * - Added deposit threshold cap based on proposal type.
  */
 contract B3TRGovernor is
   IB3TRGovernor,
@@ -289,48 +292,6 @@ contract B3TRGovernor is
   function proposalDeadline(uint256 proposalId) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorProposalLogic.proposalDeadline($, proposalId);
-  }
-
-  /**
-   * @notice Returns the deposit threshold
-   * @return uint256 The deposit threshold
-   */
-  function depositThreshold() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorDepositLogic.depositThreshold($);
-  }
-
-  /**
-   * @notice See {Governor-depositThreshold}.
-   * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
-   * @return uint256 The deposit threshold percentage
-   */
-  function depositThresholdPercentage() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.depositThresholdPercentage_DEPRECATED;
-  }
-
-  /**
-   * @notice See {Governor-depositThresholdPercentage}.
-   * @dev This function is deprecated since we are using proposalTypeDepositThresholdPercentage for the deposit threshold percentage
-   * @return uint256 The deposit threshold percentage
-   */
-  function getProposalTypeDepositThresholdPercentage(
-    GovernorTypes.ProposalType proposalTypeValue
-  ) external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.proposalTypeDepositThresholdPercentage[proposalTypeValue];
-  }
-  
-
-  /**
-   * @notice See {Governor-votingThreshold_DEPRECATED}.
-   * @dev This function is deprecated since we are using proposalTypeVotingThreshold for the voting threshold
-   * @return uint256 The voting threshold
-   */
-  function votingThreshold() external view returns (uint256) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return $.votingThreshold_DEPRECATED;
   }
 
   /**
@@ -700,7 +661,6 @@ contract B3TRGovernor is
     return GovernorProposalLogic.proposalType($, proposalId);
   }
 
-
   /** GovernorStorageTypes.GovernorStorage storage self = $.governor.getGovernorStorage();
    * @notice Returns the deposit threshold for a proposal type.
    * @param proposalTypeValue The type of proposal.
@@ -731,12 +691,12 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal
    * @return uint256 The quorum
    */
-  function quorumByType(
+  function quorumByProposalType(
     uint256 blockNumber,
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumByType($, blockNumber, proposalTypeValue);
+    return GovernorQuorumLogic.quorumByProposalType($, blockNumber, proposalTypeValue);
   }
 
   /**
@@ -744,21 +704,21 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal
    * @return uint256 The quorum numerator
    */
-  function quorumNumeratorByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function quorumNumeratorByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumNumeratorByType($, proposalTypeValue);
+    return GovernorQuorumLogic.quorumNumeratorByProposalType($, proposalTypeValue);
   }
   /**
    * @notice Returns the quorum numerator at a specific timepoint using the GovernorQuorumFraction library.
    * @param timepoint The timepoint to get the quorum numerator for
    * @return uint256 The quorum numerator at the given timepoint
    */
-  function quorumNumeratorByType(
+  function quorumNumeratorByProposalType(
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
   ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorQuorumLogic.quorumNumeratorByType($, timepoint, proposalTypeValue);
+    return GovernorQuorumLogic.quorumNumeratorByProposalType($, timepoint, proposalTypeValue);
   }
 
   /**
@@ -766,7 +726,9 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
    */
-  function getDepositThresholdCapByType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function depositThresholdCapByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return GovernorConfigurator.getDepositThresholdCap($, proposalTypeValue);
   }
@@ -794,7 +756,9 @@ contract B3TRGovernor is
    * @param proposalTypeValue The type of the proposal
    * @return The GM weight for the proposal type
    */
-  function getRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue) external view returns (uint256) {
+  function getRequiredGMLevelByProposalType(
+    GovernorTypes.ProposalType proposalTypeValue
+  ) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return $.requiredGMLevelByProposalType[proposalTypeValue];
   }
@@ -1009,26 +973,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice Update the deposit threshold. This operation can only be performed through a governance proposal.
-   * Emits a {DepositThresholdSet} event.
-   * @param newDepositThreshold The new deposit threshold
-   */
-  function setDepositThresholdPercentage(uint256 newDepositThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setDepositThresholdPercentage($, newDepositThreshold);
-  }
-
-  /**
-   * @notice Update the voting threshold. This operation can only be performed through a governance proposal.
-   * Emits a {VotingThresholdSet} event.
-   * @param newVotingThreshold The new voting threshold
-   */
-  function setVotingThreshold(uint256 newVotingThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorConfigurator.setVotingThreshold($, newVotingThreshold);
-  }
-
-  /**
    * @notice Update the min voting delay before vote can start.
    * This operation can only be performed through a governance proposal.
    * Emits a {MinVotingDelaySet} event.
@@ -1093,6 +1037,7 @@ contract B3TRGovernor is
    * @param description The proposal description
    * @param startRoundId The round in which the proposal should start
    * @param depositAmount The amount of deposit for the proposal
+   * @param grantsReceiver The address of the grants receiver
    * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
    * @return The proposal id
    */
@@ -1103,6 +1048,7 @@ contract B3TRGovernor is
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
+    address grantsReceiver,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
@@ -1115,6 +1061,7 @@ contract B3TRGovernor is
         description,
         startRoundId,
         depositAmount,
+        grantsReceiver,
         milestonesDetailsMetadataURI
       );
   }

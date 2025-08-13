@@ -89,12 +89,12 @@ library GovernorQuorumLogic {
   /// @param self The storage structure containing the quorum numerator history.
   /// @param timepoint The specific timepoint for which to fetch the numerator.
   /// @return The quorum numerator at the given timepoint.
-  function quorumNumeratorByType(
+  function quorumNumeratorByProposalType(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
   ) public view returns (uint256) {
-    return _quorumNumeratorByType(self, timepoint, proposalTypeValue);
+    return _quorumNumeratorByProposalType(self, timepoint, proposalTypeValue);
   }
 
   /// @notice Retrieves the latest quorum numerator using the GovernorClockLogic library.
@@ -111,7 +111,7 @@ library GovernorQuorumLogic {
    * @param proposalTypeValue The type of proposal.
    * @return The latest quorum numerator for the proposal type.
    */
-  function quorumNumeratorByType(
+  function quorumNumeratorByProposalType(
     GovernorStorageTypes.GovernorStorage storage self,
     GovernorTypes.ProposalType proposalTypeValue
   ) public view returns (uint256) {
@@ -147,13 +147,13 @@ library GovernorQuorumLogic {
    * @param proposalTypeValue The type of proposal.
    * @return The quorum at the given timepoint and proposal type.
    */
-  function quorumByType(
+  function quorumByProposalType(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
   ) public view returns (uint256) {
     return
-      (self.vot3.getPastTotalSupply(timepoint) * quorumNumeratorByType(self, timepoint, proposalTypeValue)) /
+      (self.vot3.getPastTotalSupply(timepoint) * quorumNumeratorByProposalType(self, timepoint, proposalTypeValue)) /
       quorumDenominator();
   }
 
@@ -203,7 +203,7 @@ library GovernorQuorumLogic {
     GovernorTypes.ProposalType proposalType = self.proposalType[proposalId];
 
     return
-      quorumByType(self, GovernorProposalLogic._proposalSnapshot(self, proposalId), proposalType) <=
+      quorumByProposalType(self, GovernorProposalLogic._proposalSnapshot(self, proposalId), proposalType) <=
       self.proposalTotalVotes[proposalId];
   }
   /**
@@ -213,7 +213,7 @@ library GovernorQuorumLogic {
    * @param proposalTypeValue The type of proposal.
    * @return The quorum numerator at the given timepoint for the specified proposal type.
    */
-  function _quorumNumeratorByType(
+  function _quorumNumeratorByProposalType(
     GovernorStorageTypes.GovernorStorage storage self,
     uint256 timepoint,
     GovernorTypes.ProposalType proposalTypeValue
@@ -245,7 +245,7 @@ library GovernorQuorumLogic {
     GovernorTypes.ProposalType proposalTypeValue
   ) internal {
     uint256 denominator = quorumDenominator();
-    uint256 oldQuorumNumerator = quorumNumeratorByType(self, proposalTypeValue);
+    uint256 oldQuorumNumerator = quorumNumeratorByProposalType(self, proposalTypeValue);
 
     if (newQuorumNumerator > denominator) {
       revert GovernorInvalidQuorumFraction(newQuorumNumerator, denominator);

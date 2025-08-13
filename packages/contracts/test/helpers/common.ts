@@ -54,61 +54,20 @@ export const moveBlocks = async (blocks: number) => {
   }
 }
 
-export const getContractInstances = async (contractToPassToMethods?: any[]) => {
-  let b3tr: B3TR
-  let vot3: VOT3
-  let minterAccount: HardhatEthersSigner
-  let governor: B3TRGovernor
-  let treasury: Treasury
-  let emissions: Emissions
-  let xAllocationVoting: XAllocationVoting
-  let veBetterPassport: VeBetterPassport
-  let owner: HardhatEthersSigner
-  let timeLock: TimeLock
-  let grantsManager: GrantsManager
+// Extract the Contracts type from the deployment function
+type Contracts = Awaited<ReturnType<typeof getOrDeployContractInstances>>
 
-  if (contractToPassToMethods) {
-    b3tr = contractToPassToMethods[0] as B3TR
-    vot3 = contractToPassToMethods[1] as VOT3
-    minterAccount = contractToPassToMethods[2] as HardhatEthersSigner
-    governor = contractToPassToMethods[3] as B3TRGovernor
-    treasury = contractToPassToMethods[4] as Treasury
-    emissions = contractToPassToMethods[5] as Emissions
-    xAllocationVoting = contractToPassToMethods[6] as XAllocationVoting
-    veBetterPassport = contractToPassToMethods[7] as VeBetterPassport
-    owner = contractToPassToMethods[8] as HardhatEthersSigner
-    timeLock = contractToPassToMethods[9] as TimeLock
-    grantsManager = contractToPassToMethods[10] as GrantsManager
-  } else {
-    const instances = await getOrDeployContractInstances({})
-    b3tr = instances?.b3tr as B3TR
-    vot3 = instances?.vot3 as VOT3
-    minterAccount = instances?.minterAccount as HardhatEthersSigner
-    governor = instances?.governor as B3TRGovernor
-    treasury = instances?.treasury as Treasury
-    emissions = instances?.emissions as Emissions
-    xAllocationVoting = instances?.xAllocationVoting as XAllocationVoting
-    veBetterPassport = instances?.veBetterPassport as VeBetterPassport
-    owner = instances?.owner as HardhatEthersSigner
-    timeLock = instances?.timeLock as TimeLock
-    grantsManager = instances?.grantsManager as GrantsManager
-  }
+// Allow overriding fixture contracts instead of redeploying each time
+export const getContractInstances = async (overrides?: Partial<Contracts>): Promise<NonNullable<Contracts>> => {
+  const instances = await getOrDeployContractInstances({})
+  if (!instances) throw new Error("Failed to get contract instances")
   return {
-    b3tr,
-    vot3,
-    minterAccount,
-    governor,
-    treasury,
-    emissions,
-    xAllocationVoting,
-    veBetterPassport,
-    owner,
-    timeLock,
-    grantsManager,
+    ...instances,
+    ...overrides,
   }
 }
 
-export const getRoundId = async (contractToPassToMethods?: any[]) => {
+export const getRoundId = async (contractToPassToMethods?: any) => {
   const { emissions, xAllocationVoting } = await getContractInstances(contractToPassToMethods)
   if ((await emissions.nextCycle()) === 0n) {
     await bootstrapAndStartEmissions(contractToPassToMethods)
@@ -116,6 +75,7 @@ export const getRoundId = async (contractToPassToMethods?: any[]) => {
   const roundId = ((await xAllocationVoting.currentRoundId()) + 1n).toString()
   return roundId
 }
+
 export const createProposal = async (
   contractToCall: BaseContract,
   ContractFactory: ContractFactory,
@@ -165,8 +125,9 @@ export const createGrantProposal = async (
   values: bigint[] = [],
   description: string,
   depositAmount: number,
+  grantsReceiver: string,
   milestonesDetailsMetadataURI: string,
-  contractToPassToMethods?: any[],
+  contractToPassToMethods?: any,
   roundId?: string,
 ) => {
   const { governor } = await getContractInstances(contractToPassToMethods)
@@ -175,11 +136,23 @@ export const createGrantProposal = async (
     roundId = await getRoundId(contractToPassToMethods)
   }
 
+  const noDepositAmountFromGrantee = 0
+
   const tx = await governor
     .connect(proposer)
-    .proposeGrant(targets, values, calldatas, description, roundId, depositAmount, milestonesDetailsMetadataURI, {
-      gasLimit: 10_000_000,
-    })
+    .proposeGrant(
+      targets,
+      values,
+      calldatas,
+      description,
+      roundId,
+      noDepositAmountFromGrantee,
+      grantsReceiver,
+      milestonesDetailsMetadataURI,
+      {
+        gasLimit: 10_000_000,
+      },
+    )
 
   return tx
 }
@@ -191,9 +164,10 @@ export const createMultiContractProposalGrant = async (
   targets: string[],
   description: string,
   depositAmount: any,
+  grantsReceiver: string,
   milestonesDetailsMetadataURI: string,
   roundId?: string,
-  contractToPassToMethods?: any[],
+  contractToPassToMethods?: any,
 ) => {
   const { governor } = await getContractInstances(contractToPassToMethods)
 
@@ -210,6 +184,7 @@ export const createMultiContractProposalGrant = async (
       description,
       roundId.toString(),
       depositAmount,
+      grantsReceiver,
       milestonesDetailsMetadataURI,
       {
         gasLimit: 10_000_000,
@@ -227,8 +202,9 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
   functionsToCall: string[],
   args: any[][],
   depositAmount: any,
+  grantsReceiver: string,
   milestonesDetailsMetadataURI: string,
-  contractToPassToMethods?: any[],
+  contractToPassToMethods?: any,
   roundId?: string,
 ) => {
   const { governor, veBetterPassport, owner, treasury } = await getContractInstances(contractToPassToMethods)
@@ -258,6 +234,8 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
     values.push(0n)
   }
 
+  const noDepositAmountFromGrantee = 0
+  depositAmount = noDepositAmountFromGrantee
   // create a new proposal
   // console.log("Creating proposal")
   const tx = await createMultiContractProposalGrant(
@@ -267,6 +245,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
     targets,
     description,
     depositAmount,
+    grantsReceiver,
     milestonesDetailsMetadataURI,
     roundId,
     contractToPassToMethods,
@@ -274,7 +253,7 @@ export const createProposalWithMultipleFunctionsAndExecuteItGrant = async (
 
   // change the all function to be compatible with grants proposal
   const proposalId = await getProposalIdFromGrantsProposalTx(tx, contractToPassToMethods)
-  await payDeposit(proposalId, proposer, contractToPassToMethods)
+  await payDeposit(proposalId, owner, contractToPassToMethods)
 
   // wait
   // console.log("Waiting for voting period to start")
@@ -348,16 +327,19 @@ export const createProposalWithMultipleFunctions = async (
       return Contract.interface.encodeFunctionData(func, args[index])
     }),
     description,
-    functionsToCall[0],
-    args[0],
     roundId,
+    0, //No deposit amount
   )
 
   return tx
 }
 
-export const getProposalIdFromTx = async (tx: ContractTransactionResponse, depositPayed: boolean = false) => {
-  const { governor } = await getOrDeployContractInstances({})
+export const getProposalIdFromTx = async (
+  tx: ContractTransactionResponse,
+  depositPayed: boolean = false,
+  contractToPassToMethods?: any,
+) => {
+  const { governor } = await getContractInstances(contractToPassToMethods)
   const proposeReceipt = await tx.wait()
   const event = depositPayed ? proposeReceipt?.logs[3] : proposeReceipt?.logs[0]
 
@@ -371,7 +353,7 @@ export const getProposalIdFromTx = async (tx: ContractTransactionResponse, depos
 
 export const getProposalIdFromGrantsProposalTx = async (
   tx: ContractTransactionResponse,
-  contractToPassToMethods?: any[],
+  contractToPassToMethods?: any,
 ) => {
   const { governor } = await getContractInstances(contractToPassToMethods)
   const proposeReceipt = await tx.wait()
@@ -405,11 +387,7 @@ export const getProposalIdFromGrantsProposalTx = async (
   return proposalId
 }
 
-export const payDeposit = async (
-  proposalId: string,
-  depositer: HardhatEthersSigner,
-  contractToPassToMethods?: any[],
-) => {
+export const payDeposit = async (proposalId: string, depositer: HardhatEthersSigner, contractToPassToMethods?: any) => {
   const { governor, vot3 } = await getContractInstances(contractToPassToMethods)
 
   // get the proposal deposit amount
@@ -427,7 +405,7 @@ export const payDeposit = async (
   await governor.connect(depositer).deposit(proposalThreshold, proposalId)
 }
 
-export const waitForVotingPeriodToEnd = async (proposalId: number, contractToPassToMethods?: any[]) => {
+export const waitForVotingPeriodToEnd = async (proposalId: number, contractToPassToMethods?: any) => {
   const { governor } = await getContractInstances(contractToPassToMethods)
 
   const deadline = await governor.proposalDeadline(proposalId)
@@ -454,18 +432,15 @@ export const waitForRoundToEnd = async (roundId: number | BigInt, xAllocationVot
   await moveBlocks(parseInt((deadline - currentBlock + BigInt(1)).toString()))
 }
 
-export const waitForCurrentRoundToEnd = async (contractToPassToMethods?: any[]) => {
+export const waitForCurrentRoundToEnd = async (contractToPassToMethods?: any) => {
   const { xAllocationVoting } = await getContractInstances(contractToPassToMethods)
 
   const currentRoundId = await xAllocationVoting.currentRoundId()
-  await waitForRoundToEnd(Number(currentRoundId))
+  await waitForRoundToEnd(Number(currentRoundId), xAllocationVoting)
   await waitForNextBlock()
 }
 
-export const waitForProposalToBeActive = async (
-  proposalId: number,
-  contractToPassToMethods?: any[],
-): Promise<bigint> => {
+export const waitForProposalToBeActive = async (proposalId: number, contractToPassToMethods?: any): Promise<bigint> => {
   const { governor } = await getContractInstances(contractToPassToMethods)
   let proposalState = await governor.state(proposalId) // proposal id of the proposal in the beforeAll step
 
@@ -498,7 +473,7 @@ export const waitForQueuedProposalToBeReady = async (proposalId: number) => {
 }
 
 // Mint some B3TR and Convert B3TR for VOT3
-export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string, contractToPassToMethods?: any[]) => {
+export const getVot3Tokens = async (receiver: HardhatEthersSigner, amount: string, contractToPassToMethods?: any) => {
   const { b3tr, vot3, minterAccount } = await getContractInstances(contractToPassToMethods)
 
   // Mint some B3TR
@@ -535,7 +510,6 @@ export const createProposalAndExecuteIt = async (
   roundId?: string | bigint | number,
 ) => {
   const { governor, veBetterPassport } = await getOrDeployContractInstances({})
-  console.log("====== start of createProposalAND EXECUTE IT=======")
 
   // console.log("Loading votes");
   await getVot3Tokens(voter, "30000")
@@ -721,7 +695,7 @@ export const waitForNextCycle = async (emission?: Emissions) => {
  * E.g: we are in cycle 1 (distributed) and want to move to cycle 3 (not distributed) then we call this funciton with cycle 3
  * and it will distribute the cycle 2 and stop before distributing the cycle 3
  */
-export const moveToCycle = async (cycle: number, contractToPassToMethods?: any[]) => {
+export const moveToCycle = async (cycle: number, contractToPassToMethods?: any) => {
   const { emissions, minterAccount } = await getContractInstances(contractToPassToMethods)
 
   const cycleToBeDistributed = await emissions.nextCycle()
@@ -786,8 +760,8 @@ export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEt
   return appIds
 }
 
-export const startNewAllocationRound = async (): Promise<number> => {
-  const { emissions, xAllocationVoting, minterAccount } = await getOrDeployContractInstances({})
+export const startNewAllocationRound = async (contractToPassToMethods?: any): Promise<number> => {
+  const { emissions, xAllocationVoting, minterAccount } = await getContractInstances(contractToPassToMethods)
   const nextCycle = await emissions.nextCycle()
 
   if (nextCycle === 0n) {
@@ -797,7 +771,6 @@ export const startNewAllocationRound = async (): Promise<number> => {
   } else if (await emissions.isCycleEnded(await emissions.getCurrentCycle())) {
     await emissions.distribute()
   }
-
   return Number(await xAllocationVoting.currentRoundId())
 }
 
@@ -942,7 +915,7 @@ export const participateInGovernanceVoting = async (
   }
 }
 
-export const bootstrapEmissions = async (contractToPassToMethods?: any[]) => {
+export const bootstrapEmissions = async (contractToPassToMethods?: any) => {
   const { b3tr, owner, emissions, minterAccount } = await getContractInstances(contractToPassToMethods)
   // Grant minter role to emissions contract
   await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
@@ -951,9 +924,8 @@ export const bootstrapEmissions = async (contractToPassToMethods?: any[]) => {
   await emissions.connect(minterAccount).bootstrap()
 }
 
-export const bootstrapAndStartEmissions = async (contractToPassToMethods?: any[]) => {
+export const bootstrapAndStartEmissions = async (contractToPassToMethods?: any) => {
   const { emissions, minterAccount } = await getContractInstances(contractToPassToMethods)
-
   await bootstrapEmissions(contractToPassToMethods)
 
   // Start emissions

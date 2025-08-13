@@ -35,7 +35,6 @@ export function createGalacticaTestConfig() {
         "setMinVotingDelay",
         "setWhitelistFunction",
         "setIsFunctionRestrictionEnabled",
-        "setDepositThresholdPercentage",
         "setVotingThreshold",
       ],
       Treasury: ["transferVET", "transferB3TR"],
@@ -215,6 +214,6 @@ export function createGalacticaTestConfig() {
     NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x0000000000000000000000000000000000000000",
 
     // Milestones
-    MINIMUM_MILESTONE_COUNT: 2,
+    MINIMUM_MILESTONE_COUNT: 2, // test-compatibility
   })
 }

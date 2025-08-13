@@ -29,6 +29,7 @@ import { GovernorTypes } from "./GovernorTypes.sol";
 import { GovernorConfigurator } from "./GovernorConfigurator.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { GovernorClockLogic } from "./GovernorClockLogic.sol";
 
 /// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
@@ -50,6 +51,9 @@ library GovernorDepositLogic {
   /// @dev Thrown when the proposal ID does not exist.
   error GovernorNonexistentProposal(uint256 proposalId);
 
+  /// @dev Thrown when the grantee tries to deposit for their own grant.
+  error GranteeCannotDepositOwnGrant(uint256 proposalId);
+
   // --------------- SETTERS ---------------
   /**
    * @notice Deposits tokens for a proposal.
@@ -67,6 +71,10 @@ library GovernorDepositLogic {
 
     if (proposal.roundIdVoteStart == 0) {
       revert GovernorNonexistentProposal(proposalId);
+    }
+
+    if (proposal.proposer == msg.sender && self.proposalType[proposalId] == GovernorTypes.ProposalType.Grant) {
+      revert GranteeCannotDepositOwnGrant(proposalId);
     }
 
     GovernorStateLogic.validateStateBitmap(
@@ -103,9 +111,9 @@ library GovernorDepositLogic {
 
     self.deposits[proposalId][depositer] = 0;
 
-    uint208 currentVotes = self.depositsVotingPower[depositer].upperLookupRecent(SafeCast.toUint48(block.timestamp));
-    uint208 newVotes = SafeCast.toUint208(currentVotes - amount); 
-    self.depositsVotingPower[depositer].push(SafeCast.toUint48(block.timestamp), newVotes);
+    uint208 currentVotes = self.depositsVotingPower[depositer].upperLookupRecent(GovernorClockLogic.clock(self));
+    uint208 newVotes = SafeCast.toUint208(currentVotes - amount);
+    self.depositsVotingPower[depositer].push(GovernorClockLogic.clock(self), newVotes);
 
     require(self.vot3.transfer(depositer, amount), "B3TRGovernor: transfer failed");
 
@@ -130,10 +138,9 @@ library GovernorDepositLogic {
 
     self.deposits[proposalId][depositor] += amount;
 
-    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(SafeCast.toUint48(block.timestamp));
+    uint208 currentVotes = self.depositsVotingPower[depositor].upperLookupRecent(GovernorClockLogic.clock(self));
     uint208 newVotes = currentVotes + SafeCast.toUint208(amount);
-
-    self.depositsVotingPower[depositor].push(SafeCast.toUint48(block.timestamp), newVotes);
+    self.depositsVotingPower[depositor].push(GovernorClockLogic.clock(self), newVotes);
 
     emit ProposalDeposit(depositor, proposalId, amount);
   }
@@ -195,14 +202,6 @@ library GovernorDepositLogic {
   }
 
   /**
-   * @notice Returns the deposit threshold.
-   * @param self The storage reference for the GovernorStorage.
-   * @return uint256 The deposit threshold.
-   */
-  function depositThreshold(GovernorStorageTypes.GovernorStorage storage self) external view returns (uint256) {
-    return _depositThreshold(self);
-  }
-  /**
    * @notice Internal function to calculate the deposit threshold for a proposal type as a percentage of the total supply of B3TR tokens.
    * @dev In case the percentage based threshold is greater than the max threshold, the max threshold is returned.
    * @param self The storage reference for the GovernorStorage.
@@ -234,18 +233,6 @@ library GovernorDepositLogic {
     GovernorTypes.ProposalType proposalType
   ) external view returns (uint256) {
     return _depositThresholdByProposalType(self, proposalType);
-  }
-
-  /**
-   * @notice Internal function to calculate the deposit threshold as a percentage of the total supply of B3TR tokens.
-   * @param self The storage reference for the GovernorStorage.
-   * @dev This was the original function that was used to calculate the deposit threshold. It is kept for backwards compatibility.
-   * @dev Since this was originally designed for the Standard proposal type, it is reusing the `_depositThresholdByProposalType` function with the Standard proposal type.
-   * @return uint256 The deposit threshold.
-   */
-  function _depositThreshold(GovernorStorageTypes.GovernorStorage storage self) internal view returns (uint256) {
-    // deposit threshold is a percentage of the total supply of B3TR tokens
-    return _depositThresholdByProposalType(self, GovernorTypes.ProposalType.Standard);
   }
 
   /**

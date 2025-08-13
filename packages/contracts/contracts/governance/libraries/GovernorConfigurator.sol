@@ -85,6 +85,14 @@ library GovernorConfigurator {
     uint256 oldDepositThresholdCap,
     uint256 newDepositThresholdCap
   );
+
+  /// @dev Emitted when the required GM level for a proposal type is set.
+  event RequiredGMLevelSet(
+    GovernorTypes.ProposalType proposalType,
+    uint256 oldRequiredGMLevel,
+    uint256 newRequiredGMLevel
+  );
+
   /**------------------ SETTERS ------------------**/
 
   /**
@@ -99,17 +107,6 @@ library GovernorConfigurator {
   ) external {
     emit VeBetterPassportSet(address(self.veBetterPassport), address(newVeBetterPassport));
     self.veBetterPassport = newVeBetterPassport;
-  }
-
-  /**
-   * @notice Sets the voting threshold.
-   * @dev Sets a new voting threshold and emits a {VotingThresholdSet} event.
-   * @param self The storage reference for the GovernorStorage.
-   * @param newVotingThreshold The new voting threshold.
-   */
-  function setVotingThreshold(GovernorStorageTypes.GovernorStorage storage self, uint256 newVotingThreshold) external {
-    emit VotingThresholdSet(self.votingThreshold_DEPRECATED, newVotingThreshold);
-    self.votingThreshold_DEPRECATED = newVotingThreshold;
   }
 
   /**
@@ -154,26 +151,6 @@ library GovernorConfigurator {
   }
 
   /**
-   * @notice Sets the deposit threshold percentage.
-   * @dev Sets a new deposit threshold percentage and emits a {DepositThresholdSet} and {DepositThresholdSetV2} events. Reverts if the threshold is not in range.
-   * @dev This function is deprecated and will be removed in a future version. Use {setProposalTypeDepositThresholdPercentage} instead.
-   * @param self The storage reference for the GovernorStorage.
-   * @param newDepositThreshold The new deposit threshold percentage.
-   */
-  function setDepositThresholdPercentage(
-    GovernorStorageTypes.GovernorStorage storage self,
-    uint256 newDepositThreshold
-  ) external {
-    if (newDepositThreshold > 100) {
-      revert GovernorDepositThresholdNotInRange(newDepositThreshold);
-    }
-
-    emit DepositThresholdSet(self.depositThresholdPercentage_DEPRECATED, newDepositThreshold);
-    self.depositThresholdPercentage_DEPRECATED = newDepositThreshold;
-    _setProposalTypeDepositThresholdPercentage(self, GovernorTypes.ProposalType.Standard, newDepositThreshold);
-  }
-
-  /**
    * @notice Updates the timelock controller.
    * @dev Sets a new timelock controller and emits a {TimelockChange} event.
    * @param self The storage reference for the GovernorStorage.
@@ -187,6 +164,7 @@ library GovernorConfigurator {
     emit TimelockChange(address(self.timelock), address(newTimelock));
     self.timelock = newTimelock;
   }
+
   /**
    * @notice Sets the deposit threshold percentage for a proposal type.
    * @dev Sets a new deposit threshold percentage for a proposal type and emits a {DepositThresholdSet} event.
@@ -203,7 +181,7 @@ library GovernorConfigurator {
     if (newDepositThreshold > 100) {
       revert GovernorDepositThresholdNotInRange(newDepositThreshold);
     }
-    _setProposalTypeDepositThresholdPercentage(self, proposalType, newDepositThreshold);
+    _setProposalTypeDepositThresholdPercentage(self, proposalType, newDepositThreshold); //
   }
 
   /**
@@ -294,14 +272,33 @@ library GovernorConfigurator {
     self.proposalTypeDepositThresholdCap[proposalType] = newDepositThresholdCap;
   }
 
+  function setGalaxyMemberContract(
+    GovernorStorageTypes.GovernorStorage storage self,
+    IGalaxyMember newGalaxyMember
+  ) external {
+    require(address(newGalaxyMember) != address(0), "GovernorConfigurator: GalaxyMember address cannot be zero");
+    _setGalaxyMemberContract(self, newGalaxyMember);
+  }
+
   /**
    * @notice Sets the GalaxyMember contract.
    * @param self The storage reference for the GovernorStorage.
    * @param newGalaxyMember The new GalaxyMember contract.
    */
-  function setGalaxyMemberContract(GovernorStorageTypes.GovernorStorage storage self, IGalaxyMember newGalaxyMember) internal {
+  function _setGalaxyMemberContract(
+    GovernorStorageTypes.GovernorStorage storage self,
+    IGalaxyMember newGalaxyMember
+  ) internal {
     require(address(newGalaxyMember) != address(0), "GovernorConfigurator: GalaxyMember address cannot be zero");
     self.galaxyMember = newGalaxyMember;
+  }
+
+  function setGrantsManagerContract(
+    GovernorStorageTypes.GovernorStorage storage self,
+    IGrantsManager newGrantsManager
+  ) external {
+    require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
+    _setGrantsManagerContract(self, newGrantsManager);
   }
 
   /**
@@ -309,10 +306,10 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @param newGrantsManager The new GrantsManager contract.
    */
-  function setGrantsManagerContract(
+  function _setGrantsManagerContract(
     GovernorStorageTypes.GovernorStorage storage self,
     IGrantsManager newGrantsManager
-  ) internal {  
+  ) internal {
     require(address(newGrantsManager) != address(0), "GovernorConfigurator: GrantsManager address cannot be zero");
     self.grantsManager = newGrantsManager;
   }
@@ -365,6 +362,7 @@ library GovernorConfigurator {
   ) internal view returns (IVeBetterPassport) {
     return self.veBetterPassport;
   }
+
   /**
    * @notice Returns the deposit threshold cap for a proposal type.
    * @param self The storage reference for the GovernorStorage.
@@ -384,7 +382,9 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @return The current GalaxyMember contract.
    */
-  function getGalaxyMemberContract(GovernorStorageTypes.GovernorStorage storage self) internal view returns (IGalaxyMember) {
+  function getGalaxyMemberContract(
+    GovernorStorageTypes.GovernorStorage storage self
+  ) internal view returns (IGalaxyMember) {
     return self.galaxyMember;
   }
 
@@ -393,7 +393,9 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @return The current GrantsManager contract.
    */
-  function getGrantsManagerContract(GovernorStorageTypes.GovernorStorage storage self) internal view returns (IGrantsManager) {
+  function getGrantsManagerContract(
+    GovernorStorageTypes.GovernorStorage storage self
+  ) internal view returns (IGrantsManager) {
     return self.grantsManager;
   }
 
@@ -403,7 +405,14 @@ library GovernorConfigurator {
    * @param proposalTypeValue The proposal type.
    * @return The current GM weight for the proposal type.
    */
-  function getRequiredGMLevelByProposalType(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue) internal view returns (uint256) {
+  function getRequiredGMLevelByProposalType(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalTypeValue
+  ) internal view returns (uint256) {
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalTypeValue),
+      "GovernorConfigurator: invalid proposal type"
+    );
     return self.requiredGMLevelByProposalType[proposalTypeValue];
   }
 
@@ -412,12 +421,23 @@ library GovernorConfigurator {
    * @param self The storage reference for the GovernorStorage.
    * @param proposalTypeValue The proposal type.
    * @param newGMWeight The new GM weight for the proposal type.
-   */ 
-  function setRequiredGMLevelByProposalType(GovernorStorageTypes.GovernorStorage storage self, GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) internal {
+   */
+  function setRequiredGMLevelByProposalType(
+    GovernorStorageTypes.GovernorStorage storage self,
+    GovernorTypes.ProposalType proposalTypeValue,
+    uint256 newGMWeight
+  ) internal {
     uint256 maxGMWeight = self.galaxyMember.MAX_LEVEL();
+    uint256 oldRequiredGMLevel = self.requiredGMLevelByProposalType[proposalTypeValue];
+    require(
+      GovernorProposalLogic.isValidProposalType(proposalTypeValue),
+      "GovernorConfigurator: invalid proposal type"
+    );
+
     if (newGMWeight > maxGMWeight) {
       revert GMLevelAboveMaxLevel(newGMWeight);
     }
+    emit RequiredGMLevelSet(proposalTypeValue, oldRequiredGMLevel, newGMWeight);
     self.requiredGMLevelByProposalType[proposalTypeValue] = newGMWeight;
   }
 }

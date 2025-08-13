@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
 import { GalaxyMember } from "../../../../typechain-types"
+import { network } from "hardhat"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -9,6 +10,8 @@ async function main() {
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+
+  console.log("Hardhat network name:", network.name, network)
 
   console.log(
     `Upgrading GalaxyMember contract at address: ${config.galaxyMemberContractAddress} on network: ${config.network.name}`,

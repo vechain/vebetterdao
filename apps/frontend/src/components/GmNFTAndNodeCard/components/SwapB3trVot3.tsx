@@ -106,6 +106,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
           <Button
             isDisabled={isSwapDisabled}
             onClick={onOpen}
+            mt="auto"
             leftIcon={
               <UilExchangeAlt
                 size={"16px"}

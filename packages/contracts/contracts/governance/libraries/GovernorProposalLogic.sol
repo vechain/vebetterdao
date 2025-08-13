@@ -77,11 +77,6 @@ library GovernorProposalLogic {
   event ProposalQueued(uint256 proposalId, uint256 etaSeconds);
 
   /**
-   * @dev Emitted when a proposal is created with type information.
-   */
-  event MilestonesCreated(uint256 indexed proposalId, GovernorTypes.ProposalType proposalTypeValue, string description);
-
-  /**
    * @dev Thrown when the current state of a proposal is not the expected state for an operation.
    */
   error GovernorUnexpectedProposalState(
@@ -324,7 +319,8 @@ library GovernorProposalLogic {
    * @param description The description of the proposal.
    * @param startRoundId The round in which the proposal should be active.
    * @param depositAmount The amount of tokens the proposer intends to deposit.
-   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones descriptions
+   * @param grantsReceiver The address of the grants receiver
+   * @param milestonesDetailsMetadataURI The IPFS hash containing the milestones ipfs hash
    * @return The proposal id.
    */
   function proposeGrant(
@@ -335,15 +331,14 @@ library GovernorProposalLogic {
     string memory description,
     uint256 startRoundId,
     uint256 depositAmount,
+    address grantsReceiver,
     string memory milestonesDetailsMetadataURI
   ) external returns (uint256) {
-    address proposer = msg.sender;
     uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
-    IGrantsManager grantsManager = self.grantsManager;
 
     validateProposeParams(
       self,
-      proposer,
+      msg.sender, //Proposer
       startRoundId,
       description,
       targets,
@@ -353,12 +348,19 @@ library GovernorProposalLogic {
       GovernorTypes.ProposalType.Grant
     );
 
-    grantsManager.createMilestones(description, milestonesDetailsMetadataURI, proposalId, proposer, calldatas);
+    //Instantiate the grants manager contract inline to avoid stack too deep errors
+    IGrantsManager(self.grantsManager).createMilestones(
+      milestonesDetailsMetadataURI,
+      proposalId,
+      msg.sender, //Proposer
+      grantsReceiver,
+      calldatas
+    );
 
     return
       _propose(
         self,
-        proposer,
+        msg.sender, //Proposer
         proposalId,
         targets,
         values,
@@ -640,10 +642,6 @@ library GovernorProposalLogic {
 
     // Emit event just for the proposal type
     emit ProposalCreatedWithType(proposalId, proposalTypeValue);
-
-    if (proposalTypeValue == GovernorTypes.ProposalType.Grant) {
-      emit MilestonesCreated(proposalId, proposalTypeValue, description);
-    }
   }
 
   /**
@@ -700,7 +698,6 @@ library GovernorProposalLogic {
       revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogic._state(self, proposalId), bytes32(0));
     }
 
-  
     GovernorFunctionRestrictionsLogic.checkFunctionsRestriction(self, targets, calldatas);
   }
 

@@ -8,5 +8,6 @@ export * from "./date"
 export * from "./filterAmountInput"
 export * from "./getNodeJsThorClient"
 export * from "./dayjsConfig"
+export * from "./ImageValidation"
 
 export { AddressUtils, AnalyticsUtils, HexUtils }
