@@ -1,7 +1,7 @@
 "use client"
 import { useCanUserVote, useRoundXApps } from "@/api"
 import { Heading, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useMemo, useState } from "react"
+import { useCallback, useLayoutEffect, useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
@@ -21,7 +21,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   const xAppsQuery = useRoundXApps(roundId)
 
-  const { data: selectedApps, setData: onSelectedAppsChange } = useCastAllocationFormStore()
+  const { data: selectedApps, setData: onSelectedAppsChange, filterValidApps } = useCastAllocationFormStore()
 
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
@@ -53,6 +53,14 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   }, [router, roundId, selectedApps, t])
 
   const shouldSeeThePage = useCanUserVote()
+
+  // Clean up invalid app selections when xApps data is loaded
+  useEffect(() => {
+    if (xAppsQuery.data && selectedApps.length > 0) {
+      const validAppIds = xAppsQuery.data.map(app => app.id)
+      filterValidApps(validAppIds)
+    }
+  }, [xAppsQuery.data, selectedApps.length, filterValidApps])
 
   //   redirect to round page if user already voted or voting is concluded
   useLayoutEffect(() => {
