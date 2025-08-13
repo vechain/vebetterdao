@@ -121,5 +121,46 @@ describe("Governance - Compatibility & Thresholds - @shard4d", function () {
       const depositThreshold = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
       expect(depositThreshold).to.eql(expectedThreshold)
     })
+
+    it("Proposals should remain unaffected by the deposit threshold cap, if was created before the cap was set", async function () {
+      const description = "coolDescription"
+      // Create a proposal using the old method (propose)
+      const tx = await createProposal(b3tr, b3trContract, proposer, description)
+      const receipt = await tx.wait()
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // Verify the proposal works exactly as before
+      expect(await governor.state(proposalId)).to.eql(ethers.toBigInt(0)) // pending
+      expect(await governor.proposalProposer(proposalId)).to.eql(proposer.address)
+      expect(await governor.proposalType(proposalId)).to.eql(STANDARD_PROPOSAL_TYPE) // Should default to Standard
+
+      // Verify both events are emitted even for old method
+      await validateProposalEvents(governor, receipt, Number(STANDARD_PROPOSAL_TYPE), proposer.address, description)
+
+      //Expect the proposal deposit threshold to be the same as in the config
+      const contractDepositThresholdBeforeCapSet = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+      const proposalDepositThresholdBeforeCapSet = await governor.proposalDepositThreshold(proposalId)
+      expect(proposalDepositThresholdBeforeCapSet).to.eql(contractDepositThresholdBeforeCapSet)
+
+      // Set the deposit threshold percentage to 100%
+      await governor.connect(owner).setProposalTypeDepositThresholdPercentage(100, STANDARD_PROPOSAL_TYPE)
+
+      // Expect the deposit threshold to be the same as before the cap was set
+      const proposalDepositThresholdAfterCapSet = await governor.proposalDepositThreshold(proposalId)
+      const contractDepositThresholdAfterCapSet = await governor.depositThresholdByProposalType(STANDARD_PROPOSAL_TYPE)
+
+      //The contract deposit threshold should be updated but the proposal deposit threshold should not, so proposals created before the cap was set should remain unaffected by the cap
+      expect(proposalDepositThresholdAfterCapSet).to.eql(proposalDepositThresholdBeforeCapSet)
+      expect(proposalDepositThresholdAfterCapSet).to.not.eql(contractDepositThresholdAfterCapSet)
+
+      //Create a new proposal using the old method
+      const tx2 = await createProposal(b3tr, b3trContract, proposer, `${description} - 2`)
+      await tx2.wait()
+      const proposalId2 = await getProposalIdFromTx(tx2)
+
+      //Expect the proposal deposit threshold to be for the new proposal to be the same as the contract deposit threshold , which is updated after the cap was set
+      const proposalDepositThresholdAfterCapSet2 = await governor.proposalDepositThreshold(proposalId2)
+      expect(proposalDepositThresholdAfterCapSet2).to.eql(contractDepositThresholdAfterCapSet)
+    })
   })
 })
