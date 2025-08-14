@@ -1,4 +1,4 @@
-import { ProposalState, useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
+import { useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import {
@@ -25,6 +25,7 @@ import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
 import Link from "next/link"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 const QUADRATIC_DOCS_URL = "https://vechain-foundation-san-marino.gitbook.io/vebetter-dao/governance#quadratic-voting"
 

@@ -11,17 +11,17 @@ import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
-import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import { Proposal, ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  proposal: ProposalEnriched & { isDepositReached: boolean }
+  proposal: Proposal
   proposalState?: ProposalState
 }
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
   const { id, description } = proposal
-  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
+  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description ?? ""))
 
   const router = useRouter()
 
@@ -81,7 +81,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
           <VStack w="full" justifyContent={"space-between"} spacing={3} align={"flex-start"}>
             <ProposalStatusBadge
               proposalState={proposalState}
-              isDepositReached={proposal.isDepositReached}
+              isDepositReached={false} //TODO: Implement this, fix the type expected
               containerProps={{
                 py: 1,
                 px: 2,

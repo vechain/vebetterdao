@@ -6,7 +6,7 @@ import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { useProposalEnriched } from "@/hooks/proposals/common"
-import { GrantProposalMetadata } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -102,9 +102,9 @@ export const GrantsPageContent = () => {
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
             {enrichedGrantProposals &&
-              enrichedGrantProposals.map((proposal: GrantProposalMetadata) => (
+              enrichedGrantProposals.map(proposal => (
                 <GridItem colSpan={{ base: 1 }} key={proposal.id}>
-                  <GrantsProposalCard key={proposal.id} proposal={proposal} />
+                  <GrantsProposalCard key={proposal.id} proposal={proposal as ProposalEnriched} />
                 </GridItem>
               ))}
           </Grid>

@@ -55,7 +55,10 @@ export const ProposalOverview = () => {
                 <Heading size={["lg", "xl"]}>{proposal.title}</Heading>
               </Skeleton>
               <Skeleton isLoaded={!proposal.isStateLoading} alignSelf={"flex-start"}>
-                <ProposalStatusBadge proposalState={proposal.state} />
+                <ProposalStatusBadge
+                  proposalState={proposal.state}
+                  isDepositReached={proposal?.isDepositReached ?? false}
+                />
               </Skeleton>
               <Spacer h={"24px"} />
               <SkeletonText isLoaded={!proposal.isDescriptionLoading}>

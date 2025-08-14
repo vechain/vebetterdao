@@ -82,7 +82,7 @@ export const ActionBanner = () => {
     ProposalFilter.InThisRound,
   ])
   const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
-    activeProposals?.map(proposal => proposal?.proposalId),
+    activeProposals?.map(proposal => proposal?.id),
     account?.address ?? undefined,
   )
 
@@ -196,12 +196,12 @@ export const ActionBanner = () => {
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
-    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
+    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.id])
     .map(proposal => (
       <CastProposalVoteBanners
-        key={`cast-vote-in-proposal-${proposal?.proposalId}`}
-        id={proposal?.proposalId}
-        description={proposal?.description}
+        key={`cast-vote-in-proposal-${proposal?.id}`}
+        id={proposal?.id}
+        description={proposal?.description ?? ""}
       />
     ))
 

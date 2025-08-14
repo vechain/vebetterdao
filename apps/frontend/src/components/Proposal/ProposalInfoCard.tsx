@@ -19,16 +19,17 @@ import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
 import { ProposalStatusBadge } from "./ProposalStatusBadge"
-import { StandardProposalMetadata } from "@/hooks/proposals/grants/types"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
-export const ProposalInfoCard: React.FC<StandardProposalMetadata & { isDepositReached: boolean }> = ({
-  id,
-  description,
-  votingRoundId,
-  title,
-  state,
-  isDepositReached,
-}) => {
+//TODO: This is a temporary type, we need to fix the type expected
+export const ProposalInfoCard: React.FC<{
+  id: string
+  description: string
+  votingRoundId: string
+  title: string
+  state: ProposalState
+  isDepositReached: boolean
+}> = ({ id, description, votingRoundId, title, state, isDepositReached }) => {
   const router = useRouter()
 
   const { votingStartDate, votingEndDate } = useProposalVoteDates(id)

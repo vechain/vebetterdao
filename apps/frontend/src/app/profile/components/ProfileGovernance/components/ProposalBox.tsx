@@ -43,6 +43,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
       <VStack w={"full"} alignItems={"start"} spacing={2}>
         <ProposalStatusBadge
           proposalState={proposalState}
+          isDepositReached={false} //TODO: Implement this, fix the type expected
           textProps={{
             fontSize: 12,
           }}

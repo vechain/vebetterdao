@@ -96,7 +96,15 @@ export const ProposalsPageContent = () => {
           gap={4}
           w={{ base: "full", md: undefined }}>
           {sortedProposals.map(proposal => (
-            <ProposalInfoCard key={proposal.id} {...proposal} />
+            <ProposalInfoCard
+              key={proposal.id}
+              id={proposal.id}
+              description={proposal.description ?? ""}
+              votingRoundId={proposal.votingRoundId}
+              title={proposal.title ?? ""}
+              state={proposal.state}
+              isDepositReached={proposal.isDepositReached ?? false}
+            />
           ))}
           {sortedProposals.length === 0 && !isLoading && (
             <NoProposalsCard

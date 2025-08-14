@@ -6,14 +6,14 @@ import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { useRouter } from "next/navigation"
 import { PiTelegramLogo } from "react-icons/pi"
-import { GrantProposalMetadata, ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { formatTimeLeft, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
 
 type GrantsProposalCardProps = {
-  proposal: GrantProposalMetadata
+  proposal: ProposalEnriched
 }
 
 //TODO: Move to a separate common component

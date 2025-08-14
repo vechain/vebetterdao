@@ -1,7 +1,8 @@
-import { ProposalState, useIsProposalQuorumReached } from "@/api"
+import { useIsProposalQuorumReached } from "@/api"
 import { HStack, Skeleton, Text } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string

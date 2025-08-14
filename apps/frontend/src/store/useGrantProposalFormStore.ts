@@ -20,6 +20,7 @@ const initialState: GrantFormData = {
   applicantStreet: "",
   applicantPostalCode: "",
   applicantBackground: "",
+  proposerAddress: "",
   // About project
   projectName: "",
   companyName: "",
