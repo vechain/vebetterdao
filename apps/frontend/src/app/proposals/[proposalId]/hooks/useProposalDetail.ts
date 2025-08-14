@@ -5,7 +5,6 @@ import { toIPFSURL } from "@/utils"
 import { useIpfsMetadata } from "@/api/ipfs"
 import {
   useProposalCreatedEvent,
-  ProposalState,
   useProposalState,
   useProposalVoteDates,
   useProposalUserDeposit,
@@ -24,6 +23,7 @@ import {
 } from "@/api"
 import { ethers } from "ethers"
 import dayjs from "dayjs"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()

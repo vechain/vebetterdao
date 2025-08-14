@@ -1,7 +1,7 @@
 import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions"
-import { ProposalState, useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
+import { useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
@@ -12,6 +12,7 @@ import { ProposalTimeline } from "@/components/ProposalSessionSection/components
 import { useMemo } from "react"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string

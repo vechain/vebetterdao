@@ -1,4 +1,3 @@
-import { ProposalState } from "@/api"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
   Button,
@@ -20,6 +19,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../hooks"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useAccountPermissions } from "@/api/contracts/account"
 
 export const CancelProposalSection = () => {

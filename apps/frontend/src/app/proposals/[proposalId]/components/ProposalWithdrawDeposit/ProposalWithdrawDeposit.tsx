@@ -1,10 +1,10 @@
-import { ProposalState } from "@/api"
 import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { FaRegHeart } from "react-icons/fa6"
 
 const compactFormatter = getCompactFormatter(1)

@@ -1,9 +1,9 @@
-import { ProposalState } from "@/api"
 import { Box, HStack, Text } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
 import { FaRegHeart } from "react-icons/fa6"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 const compactFormatter = getCompactFormatter(1)

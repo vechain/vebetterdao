@@ -4,8 +4,7 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, Treasury__factory } from "@repo/contracts"
 import { formatEther } from "ethers"
 import BigNumber from "bignumber.js"
-import { Proposal, ProposalType } from "../grants/types"
-import { ProposalState } from "@/api"
+import { ProposalState, Proposal, ProposalType } from "../grants/types"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi

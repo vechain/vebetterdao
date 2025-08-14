@@ -3,13 +3,13 @@ import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
 import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
-import { ProposalState } from "@/api"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()

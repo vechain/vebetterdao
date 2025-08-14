@@ -1,8 +1,8 @@
-import { ProposalState } from "@/api"
 import { timestampToTimeLeftCompact } from "@/utils"
 import { Box, HStack, Text } from "@chakra-ui/react"
 import { UilClockEight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useProposalDetail } from "../../../hooks"
 
 export const ProposalOverviewTime = () => {

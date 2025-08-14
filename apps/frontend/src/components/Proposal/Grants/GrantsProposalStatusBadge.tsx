@@ -1,9 +1,9 @@
 import { Icon, Badge, HStack, Text } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconscout/react-unicons"
-import { ProposalState } from "@/api"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  state: ProposalState // Remove undefined since we have a default value
+  state: ProposalState
 }
 
 type BadgeConfig = {
@@ -19,40 +19,54 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
     icon: UilHeart,
     variant: "support-phase",
   },
-  [ProposalState.Succeeded]: {
-    text: "Approved",
-    icon: UilCheck,
-    variant: "approved",
-  },
   [ProposalState.Active]: {
     text: "Approval phase",
     icon: UilThumbsUp,
     variant: "approval-phase",
-  },
-  [ProposalState.Defeated]: {
-    text: "Declined",
-    icon: UilBan,
-    variant: "declined",
-  },
-  [ProposalState.Executed]: {
-    text: "Completed",
-    icon: UilCheck,
-    variant: "completed",
   },
   [ProposalState.Canceled]: {
     text: "Declined",
     icon: UilBan,
     variant: "declined",
   },
-  [ProposalState.DepositNotMet]: {
+  [ProposalState.Defeated]: {
     text: "Declined",
     icon: UilBan,
     variant: "declined",
+  },
+  [ProposalState.Succeeded]: {
+    text: "Approved",
+    icon: UilCheck,
+    variant: "approved",
   },
   [ProposalState.Queued]: {
     text: "In development",
     icon: UilCodeBranch,
     variant: "support-phase",
+  },
+
+  [ProposalState.Executed]: {
+    text: "Executed",
+    icon: UilCheck,
+    variant: "completed",
+  },
+
+  [ProposalState.DepositNotMet]: {
+    text: "Declined",
+    icon: UilBan,
+    variant: "declined",
+  },
+
+  [ProposalState.InDevelopment]: {
+    text: "In development",
+    icon: UilCodeBranch,
+    variant: "support-phase",
+  },
+
+  [ProposalState.Completed]: {
+    text: "Completed",
+    icon: UilCheck,
+    variant: "completed",
   },
 }
 

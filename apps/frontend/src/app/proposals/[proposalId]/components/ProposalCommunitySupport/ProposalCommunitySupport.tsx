@@ -2,12 +2,12 @@ import { Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportButton } from "./components/CommunitySupportButton"
-import { ProposalState } from "@/api"
 import { useMemo } from "react"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { BaseTooltip } from "@/components"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const ProposalCommunitySupport = () => {
   const { proposal } = useProposalDetail()

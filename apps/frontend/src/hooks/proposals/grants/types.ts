@@ -1,5 +1,3 @@
-import { ProposalState } from "@/api"
-
 export enum ProposalType {
   Standard,
   Grant,
@@ -27,10 +25,7 @@ export type ProposalEnriched = Proposal & {
   description: string
   b3tr: string
   dAppGrant: string
-  proposer: {
-    profilePicture: string
-    addressOrDomain: string
-  }
+  proposerAddress: string
   state: ProposalState
   phases: {
     [ProposalState.Pending]: PhaseInfo
@@ -67,6 +62,7 @@ export type GrantFormData = {
   applicantStreet?: string
   applicantPostalCode?: string
   applicantBackground?: string
+  proposerAddress: string
   // About project
   projectName: string
   companyName: string
@@ -96,4 +92,34 @@ export type GrantFormData = {
   }>
   // Terms of service
   termsOfService: boolean
+}
+export type GrantProposalMetadata = Omit<GrantFormData, "termsOfService"> & {
+  title: string
+  shortDescription: string
+}
+
+export type StandardProposalMetadata = Proposal & {
+  title: string
+  shortDescription: string
+  markdownDescription: string
+}
+
+type GrantProposalMilestones = GrantFormData["milestones"]
+
+export type GrantProposalMetadataOptions = GrantProposalMetadata | GrantProposalMilestones
+export type ProposalDetails = Record<string, GrantProposalMetadata & Proposal>
+
+export enum ProposalState {
+  // Extend Standard states
+  Pending, // 0
+  Active, // 1
+  Canceled, // 2
+  Defeated,
+  Succeeded, // 4
+  Queued, // 5
+  Executed, // 6
+  DepositNotMet, // 7
+  // Grant-specific states
+  InDevelopment, // 8
+  Completed, // 9
 }

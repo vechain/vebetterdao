@@ -1,4 +1,3 @@
-import { ProposalState } from "@/api"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import {
   Accordion,
@@ -12,6 +11,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useTranslation } from "react-i18next"
 
 export const ProposalCreatedTimelineItem = () => {

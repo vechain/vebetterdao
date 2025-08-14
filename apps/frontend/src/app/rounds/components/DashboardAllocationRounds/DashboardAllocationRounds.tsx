@@ -1,4 +1,4 @@
-import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
@@ -10,6 +10,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import { NoActiveProposalCard } from "../NoActiveProposalCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()

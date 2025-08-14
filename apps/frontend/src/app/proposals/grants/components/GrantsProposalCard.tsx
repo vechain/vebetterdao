@@ -6,15 +6,14 @@ import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { useRouter } from "next/navigation"
 import { PiTelegramLogo } from "react-icons/pi"
-import { ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { ProposalState } from "@/api"
+import { GrantProposalMetadata, ProposalState } from "@/hooks/proposals/grants/types"
 import { formatTimeLeft, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
 
 type GrantsProposalCardProps = {
-  proposal: ProposalEnriched
+  proposal: GrantProposalMetadata
 }
 
 //TODO: Move to a separate common component
@@ -84,7 +83,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             <Center height="20px">
               <Divider orientation="vertical" />
             </Center>
-            <AddressWithProfilePicture address={proposal.proposer.addressOrDomain} />
+            <AddressWithProfilePicture address={proposal.proposerAddress} />
             <Center height="20px">
               <Divider orientation="vertical" />
             </Center>

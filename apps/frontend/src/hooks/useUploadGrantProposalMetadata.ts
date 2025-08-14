@@ -1,16 +1,7 @@
 "use client"
 import { useCallback, useState } from "react"
 import { uploadBlobToIPFS } from "@/utils"
-import { GrantFormData } from "./proposals/grants/types"
-
-export type GrantProposalMetadata = Omit<GrantFormData, "termsOfService"> & {
-  title: string
-  shortDescription: string
-}
-
-type GrantProposalMilestones = GrantFormData["milestones"]
-
-type GrantProposalMetadataOptions = GrantProposalMetadata | GrantProposalMilestones
+import { GrantProposalMetadataOptions } from "./proposals/grants/types"
 
 /**
  * Uploads proposal metadata to IPFS.

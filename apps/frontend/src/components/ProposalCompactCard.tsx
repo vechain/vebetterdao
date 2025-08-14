@@ -1,6 +1,6 @@
 import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
@@ -11,6 +11,7 @@ import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposal: ProposalCreatedEvent

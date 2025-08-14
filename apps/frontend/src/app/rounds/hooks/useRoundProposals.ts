@@ -1,7 +1,8 @@
-import { ProposalState, useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
+import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter } from "@/store"
 import { useMemo } from "react"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const useRoundProposals = (roundId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -11,7 +12,7 @@ export const useRoundProposals = (roundId: string) => {
   const otherProposals = useMemo(() => {
     if (roundId === currentRoundId) return []
     return currentRoundIdProposals.allProposals.filter(
-      proposal => proposal.roundIdVoteStart === roundId && proposal.state !== ProposalState.Canceled,
+      proposal => proposal.votingRoundId === roundId && proposal.state !== ProposalState.Canceled,
     )
   }, [currentRoundIdProposals, roundId, currentRoundId])
 

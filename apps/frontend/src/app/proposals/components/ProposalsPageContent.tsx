@@ -1,4 +1,4 @@
-import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
+import { useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
@@ -10,6 +10,7 @@ import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -22,7 +23,6 @@ export const ProposalsPageContent = () => {
   } = useDisclosure()
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
-
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
@@ -96,13 +96,7 @@ export const ProposalsPageContent = () => {
           gap={4}
           w={{ base: "full", md: undefined }}>
           {sortedProposals.map(proposal => (
-            <ProposalInfoCard
-              key={proposal.proposalId}
-              proposalId={proposal.proposalId}
-              description={proposal.description}
-              roundIdVoteStart={proposal.roundIdVoteStart}
-              proposalState={proposal.state}
-            />
+            <ProposalInfoCard key={proposal.id} {...proposal} />
           ))}
           {sortedProposals.length === 0 && !isLoading && (
             <NoProposalsCard

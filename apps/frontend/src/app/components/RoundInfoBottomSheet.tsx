@@ -4,7 +4,6 @@ import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } f
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
-  ProposalState,
   useAllocationAmount,
   useAllocationsRoundState,
   useCanUserVote,
@@ -20,6 +19,7 @@ import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
