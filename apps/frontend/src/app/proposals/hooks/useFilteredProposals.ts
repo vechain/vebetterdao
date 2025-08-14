@@ -1,33 +1,33 @@
-import { ProposalState, useAllProposalsState, useProposalsEvents, useAllProposalsDepositReached } from "@/api"
+import { useAllProposalsDepositReached } from "@/api"
 import { useMemo } from "react"
 import { ProposalFilter, StateFilter } from "@/store"
+import { useProposalEnriched } from "@/hooks/proposals/common"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
  */
 export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFilter)[]) => {
-  const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
+  // Step 1: Get the standard proposals
+  const { enrichedStandardProposals } = useProposalEnriched()
 
   const proposalsIds = useMemo(() => {
-    if (!proposalsEvents?.created) return []
-    return proposalsEvents?.created.map(proposal => proposal.proposalId)
-  }, [proposalsEvents])
+    return enrichedStandardProposals.map(proposal => proposal.id)
+  }, [enrichedStandardProposals])
 
-  const { data: allProposalsState, isLoading: allProposalsStateLoading } = useAllProposalsState(proposalsIds)
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
     useAllProposalsDepositReached(proposalsIds)
 
   const proposalsWithStateAndDeposit = useMemo(() => {
-    if (!proposalsEvents) return []
+    if (!enrichedStandardProposals) return []
 
-    return proposalsEvents.created.map(proposal => ({
+    return enrichedStandardProposals.map(proposal => ({
       ...proposal,
-      state: allProposalsState?.find(proposalState => proposalState.proposalId === proposal.proposalId)?.state,
       isDepositReached: allProposalsDepositReached?.find(
-        proposalDepositReached => proposalDepositReached.proposalId === proposal.proposalId,
+        proposalDepositReached => proposalDepositReached.proposalId === proposal.id,
       )?.depositReached,
     }))
-  }, [proposalsEvents, allProposalsState, allProposalsDepositReached])
+  }, [enrichedStandardProposals, allProposalsDepositReached])
 
   const filteredProposals = useMemo(() => {
     if (!proposalsWithStateAndDeposit) return []
@@ -72,18 +72,18 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
 
     const sortedProposals = [...filteredProposals].sort((a, b) => {
       // sort first by roundId, then by timestamp
-      const aRoundID = Number(a.roundIdVoteStart)
-      const bRoundID = Number(b.roundIdVoteStart)
+      const aRoundID = Number(a.votingRoundId)
+      const bRoundID = Number(b.votingRoundId)
       if (aRoundID !== bRoundID) return bRoundID - aRoundID
-      return b.blockMeta.blockTimestamp - a.blockMeta.blockTimestamp
+      return b.createdAt - a.createdAt
     })
 
     return sortedProposals
   }, [filteredProposals])
 
   const isLoading = useMemo(() => {
-    return proposalsEventsLoading || allProposalsStateLoading || allProposalsDepositReachedLoading
-  }, [proposalsEventsLoading, allProposalsStateLoading, allProposalsDepositReachedLoading])
+    return allProposalsDepositReachedLoading
+  }, [allProposalsDepositReachedLoading])
 
   return {
     filteredProposals: sortedFilteredProposals,

@@ -48,7 +48,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
               abi,
               address: GOVERNOR_CONTRACT,
               functionName: "getUserDeposit",
-              args: [BigInt(proposal.proposalId || 0), userAddress],
+              args: [BigInt(proposal.id || 0), userAddress],
             }) as const,
         ),
       })
@@ -56,7 +56,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
       const claimableDeposits = res
         .map((deposit, index) => {
           return {
-            proposalId: filteredProposals[index]?.proposalId as string,
+            proposalId: filteredProposals[index]?.id as string,
             deposit: deposit.toString(),
           }
         })

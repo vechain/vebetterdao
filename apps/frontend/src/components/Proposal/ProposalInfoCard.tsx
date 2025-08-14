@@ -12,41 +12,39 @@ import {
   Stack,
 } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
-import { useIpfsMetadata } from "@/api/ipfs"
-import { parseDate, toIPFSURL } from "@/utils"
+import { parseDate } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
 import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
 import { ProposalStatusBadge } from "./ProposalStatusBadge"
+import { StandardProposalMetadata } from "@/hooks/proposals/grants/types"
 
-type Props = Pick<ProposalCreatedEvent, "proposalId" | "description" | "roundIdVoteStart"> & {
-  proposalState?: ProposalState
-}
-
-export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, roundIdVoteStart, proposalState }) => {
-  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
-
+export const ProposalInfoCard: React.FC<StandardProposalMetadata & { isDepositReached: boolean }> = ({
+  id,
+  description,
+  votingRoundId,
+  title,
+  state,
+  isDepositReached,
+}) => {
   const router = useRouter()
 
-  const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
+  const { votingStartDate, votingEndDate } = useProposalVoteDates(id)
 
   const { t } = useTranslation()
 
   const goToProposal = useCallback(() => {
-    router.push(`/proposals/${proposalId}`)
-  }, [router, proposalId])
+    router.push(`/proposals/${id}`)
+  }, [router, id])
 
   const descriptionText = useMemo(() => {
-    if (proposalMetadata.data) {
-      return proposalMetadata.data.shortDescription.length > 200
-        ? `${proposalMetadata.data.shortDescription.slice(0, 200)}...`
-        : proposalMetadata.data.shortDescription
+    if (description) {
+      return description.length > 200 ? `${description.slice(0, 200)}...` : description
     }
     return ""
-  }, [proposalMetadata.data])
+  }, [description])
 
   return (
     <Card
@@ -61,7 +59,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           <HStack w={"full"} justifyContent={"space-between"} mb={2}>
             <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
               {t("Round #{{round}}", {
-                round: roundIdVoteStart,
+                round: votingRoundId,
               })}
             </Text>
             <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
@@ -73,20 +71,16 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           </HStack>
         </Show>
         <HStack justifyContent="space-between" alignItems="center" w={"full"}>
-          <Skeleton
-            isLoaded={proposalMetadata.data !== undefined}
-            minH={"20px"}
-            flex={2.5}
-            maxW={{ base: "300px", md: "full" }}>
+          <Skeleton isLoaded={description !== undefined} minH={"20px"} flex={2.5} maxW={{ base: "300px", md: "full" }}>
             <Text fontSize={20} fontWeight={700} noOfLines={2}>
-              {proposalMetadata.data?.title}
+              {title ?? "---"}
             </Text>
           </Skeleton>
           <Show above="sm">
             <VStack alignItems="flex-end" spacing={0} flex={1}>
               <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
                 {t("Round #{{round}}", {
-                  round: roundIdVoteStart,
+                  round: votingRoundId,
                 })}
               </Text>
               <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
@@ -102,7 +96,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
       <CardBody py={2} mb={4}>
         <Stack direction={["column", "row"]} w="full" justifyContent={"space-between"} spacing={4}>
           <SkeletonText
-            isLoaded={proposalMetadata.data !== undefined}
+            isLoaded={description !== undefined}
             minW={"300px"}
             noOfLines={3}
             flex={2}
@@ -113,13 +107,14 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           </SkeletonText>
 
           <Box flex={1}>
-            <VotingProposalProgress proposalId={proposalId} proposalState={proposalState ?? ProposalState.Pending} />
+            <VotingProposalProgress proposalId={id} proposalState={state} isDepositReached={isDepositReached} />
           </Box>
         </Stack>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
           <ProposalStatusBadge
-            proposalId={proposalId}
-            proposalState={proposalState}
+            proposalId={id}
+            proposalState={state}
+            isDepositReached={isDepositReached}
             containerProps={{
               py: 1,
               px: 2,
