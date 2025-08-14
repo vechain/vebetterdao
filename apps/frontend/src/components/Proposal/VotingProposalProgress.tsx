@@ -1,7 +1,6 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
-import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { ProposalState, useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
+import { useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
 import { Box, Card, CardBody, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
@@ -9,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ProposalYourVote } from "./ProposalYourVote"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
@@ -19,9 +19,14 @@ const compactFormatter = getCompactFormatter(1)
 interface VotingProposalProgressProps {
   proposalId: string
   proposalState: ProposalState
+  isDepositReached: boolean
 }
 
-const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
+const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({
+  proposalId,
+  proposalState,
+  isDepositReached,
+}) => {
   const { t } = useTranslation()
   const { data: proposalVotes } = useProposalVotesIndexer({ proposalId })
 
@@ -56,7 +61,13 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
       )
 
     if ([ProposalState.Pending, ProposalState.DepositNotMet].includes(proposalState))
-      return <VotingSupportProgress proposalId={proposalId} proposalState={proposalState} />
+      return (
+        <VotingSupportProgress
+          proposalId={proposalId}
+          proposalState={proposalState}
+          isDepositReached={isDepositReached}
+        />
+      )
 
     return (
       <VStack w={"full"} spacing={3}>
@@ -127,6 +138,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
 type VotingSupportProgress = {
   proposalId: string
   state: ProposalState
+  isDepositReached: boolean
 }
 
 enum DepositStateColor {
@@ -135,10 +147,13 @@ enum DepositStateColor {
   DEFAULT = "#F29B32", // Orange
 }
 
-const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
+const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({
+  proposalId,
+  proposalState,
+  isDepositReached,
+}) => {
   const { t } = useTranslation()
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
-  const { data: isDepositReached } = useIsDepositReached(proposalId)
 
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
 

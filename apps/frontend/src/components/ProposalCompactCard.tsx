@@ -1,6 +1,6 @@
 import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
+import { ProposalMetadata } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
@@ -11,27 +11,27 @@ import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  proposal: ProposalCreatedEvent
+  proposal: ProposalEnriched & { isDepositReached: boolean }
   proposalState?: ProposalState
 }
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { proposalId, description } = proposal
+  const { id, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
 
   const router = useRouter()
 
-  const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(proposalId)
+  const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(id)
 
   const { t } = useTranslation()
 
   const goToProposal = useCallback(() => {
-    router.push(`/proposals/${proposalId}`)
-  }, [router, proposalId])
+    router.push(`/proposals/${id}`)
+  }, [router, id])
 
   const hasVotedText = useMemo(() => {
     switch (proposalState) {
@@ -57,7 +57,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       case ProposalState.Queued:
         return (
           <ProposalYourVote
-            proposalId={proposalId}
+            proposalId={id}
             proposalState={proposalState}
             renderTitle={false}
             textProps={{ color: "gray.500", fontSize: "14px" }}
@@ -66,7 +66,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       default:
         return ""
     }
-  }, [votingStartDate, proposalState, t, isVotingStartDateLoading, proposalId])
+  }, [votingStartDate, proposalState, t, isVotingStartDateLoading, id])
 
   return (
     <Card
@@ -80,8 +80,8 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
         <HStack justifyContent={"space-between"} w="full">
           <VStack w="full" justifyContent={"space-between"} spacing={3} align={"flex-start"}>
             <ProposalStatusBadge
-              proposalId={proposal.proposalId}
               proposalState={proposalState}
+              isDepositReached={proposal.isDepositReached}
               containerProps={{
                 py: 1,
                 px: 2,

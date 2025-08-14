@@ -112,7 +112,6 @@ export const ProposalInfoCard: React.FC<StandardProposalMetadata & { isDepositRe
         </Stack>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
           <ProposalStatusBadge
-            proposalId={id}
             proposalState={state}
             isDepositReached={isDepositReached}
             containerProps={{
