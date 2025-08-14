@@ -116,17 +116,17 @@ jobs:
             label: Available for Assignment
           - shard: shard3b
             label: Galaxy Member
-          - shard: shard4
-            label: Governor & TimeLock
           - shard: shard4a
-            label: Governance - Voting Power
+            label: Governor & TimeLock
           - shard: shard4b
-            label: Governance - Milestone Creation
+            label: Governance - Voting Power
           - shard: shard4c
-            label: Governance - Proposer Requirement
+            label: Governance - Milestone Creation
           - shard: shard4d
-            label: Governance - Compatibility & Thresholds
+            label: Governance - Proposer Requirement
           - shard: shard4e
+            label: Governance - Compatibility & Thresholds
+          - shard: shard4f
             label: Governance - Upgrades
           - shard: shard5
             label: Node Management

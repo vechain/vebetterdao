@@ -33,7 +33,7 @@ import {
   waitForCurrentRoundToEnd,
 } from "../helpers/common"
 
-describe("Governance - Milestone Creation - @shard4b", function () {
+describe("Governance - Milestone Creation - @shard4c", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
@@ -245,12 +245,12 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       expect(storedGrant.milestones[1].isRejected).to.equal(false)
       expect(storedGrant.metadataURI).to.equal(milestonesDetailsMetadataURI)
       // get the state of the milestone
-      const firstMilestoneState = await grantsManager.getMilestoneState(proposalId, 0)
-      const secondMilestoneState = await grantsManager.getMilestoneState(proposalId, 1)
+      const firstMilestoneState = await grantsManager.milestoneState(proposalId, 0)
+      const secondMilestoneState = await grantsManager.milestoneState(proposalId, 1)
       expect(firstMilestoneState).to.equal(0) // Pending
       expect(secondMilestoneState).to.equal(0) // Pending
       // get the grant state
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(0) // Pending state <=> the proposal state
     })
 
@@ -474,7 +474,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         proposer.address,
         description,
       )
-      const milestoneStatus = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneStatus = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneStatus).to.equal(0)
     })
 
@@ -1123,14 +1123,90 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         "MilestoneRejectedAndFundsReturnedToTreasury",
       )
 
-      // Check the states ( Proposal should be Executed, Milestone should be Rejected )
-      const grantState = await grantsManager.state(proposalId)
-      expect(grantState).to.equal(6) // Executed
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
-      expect(milestoneState).to.equal(3n) // Rejected
+      // Check the states ( Grant should be Canceled, Milestone1 should be Claimed, Milestone2 should be Rejected )
+      const grantState = await grantsManager.grantState(proposalId)
+      expect(grantState).to.equal(2) // Canceled
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
+      expect(milestoneState).to.equal(2n) // Claimed
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
+      expect(milestoneState2).to.equal(3n) // Rejected
+
+      const isGrantRejected = await grantsManager.isGrantRejected(proposalId)
+      expect(isGrantRejected).to.equal(true)
 
       const grantsManagerBalanceAfterRejection = await b3tr.balanceOf(grantsManagerAddress)
       expect(grantsManagerBalanceAfterRejection).to.equal(0)
+    })
+
+    it("Funds should be returned from the grants treasury to the DAO treasury if a grant is rejected, the already claimed funds should not be returned", async function () {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000"), ethers.parseEther("30000")]
+
+      const granteeBalanceBeforeProposal = await b3tr.balanceOf(proposer.address)
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+          [grantsManagerAddress, values[2]],
+        ], // args of transferb3tr
+        0,
+        proposer.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+
+      // Balances after the proposal
+      const grantsManagerBalanceAfterProposalExecuted = await b3tr.balanceOf(grantsManagerAddress) // + 30000
+
+      // Balances before the rejection
+      const treasuryBalanceBeforeRejection = await b3tr.balanceOf(treasuryAddress)
+
+      // approve + claim, the grantee should have 10000
+      const granteeClaimingAmount = ethers.parseEther("10000")
+      await grantsManager.connect(owner).approveMilestones(proposalId, 0)
+      await grantsManager.connect(proposer).claimMilestone(proposalId, 0)
+      const granteeBalanceBeforeRejection = await b3tr.balanceOf(proposer.address)
+      expect(granteeBalanceBeforeRejection).to.equal(granteeBalanceBeforeProposal + granteeClaimingAmount)
+
+      const grantsManagerBalanceAfterGranteeClaiming = await b3tr.balanceOf(grantsManagerAddress)
+      expect(grantsManagerBalanceAfterGranteeClaiming).to.equal(
+        grantsManagerBalanceAfterProposalExecuted - granteeClaimingAmount,
+      )
+
+      // Should transfer back to the DAO's treasury the remaingin funds ( 10 000 )
+      await grantsManager.grantRole(await grantsManager.GRANTS_REJECTOR_ROLE(), owner.address)
+      await expect(grantsManager.connect(owner).rejectMilestones(proposalId)).to.emit(
+        grantsManager,
+        "MilestoneRejectedAndFundsReturnedToTreasury",
+      )
+
+      // Check the states ( Grant should be Canceled, Milestone1 should be Claimed, Milestone2 should be Rejected )
+      const grantState = await grantsManager.grantState(proposalId)
+      expect(grantState).to.equal(2) // Canceled
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
+      expect(milestoneState).to.equal(2n) // Claimed
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
+      expect(milestoneState2).to.equal(3n) // Rejected
+      const milestoneState3 = await grantsManager.milestoneState(proposalId, 2)
+      expect(milestoneState3).to.equal(3n) // Rejected
+
+      const isGrantRejected = await grantsManager.isGrantRejected(proposalId)
+      expect(isGrantRejected).to.equal(true)
+
+      const grantsManagerBalanceAfterRejection = await b3tr.balanceOf(grantsManagerAddress)
+      expect(grantsManagerBalanceAfterRejection).to.equal(0)
+
+      //Current treasury balance should be the sum of the milestones 2 and 3 and past balance
+      const currentTreasuryBalance = await b3tr.balanceOf(treasuryAddress)
+      expect(currentTreasuryBalance).to.be.eq(treasuryBalanceBeforeRejection + values[1] + values[2])
     })
   })
 
@@ -1167,15 +1243,93 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       // Claim the second milestone
       await grantsManager.connect(proposer).claimMilestone(proposalId, 1)
 
-      // Check the states ( Proposal should be Executed, Milestone should be Rejected )
-      const grantState = await grantsManager.state(proposalId)
+      // Check the states ( Proposal should be Executed, Milestone should be Claimed )
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(9) // Completed ( all funds have been sent )
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(2n) // Claimed
-      const milestoneState2 = await grantsManager.getMilestoneState(proposalId, 1)
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
       expect(milestoneState2).to.equal(2n) // Claimed
       const isGrantCompleted = await grantsManager.isGrantCompleted(proposalId)
       expect(isGrantCompleted).to.equal(true)
+    })
+    it("If a milestone is rejected, the grant should be canceled", async function () {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr
+        0,
+        proposer.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+
+      // Approve the first milestone
+      await grantsManager.connect(owner).approveMilestones(proposalId, 0)
+      // Claim the first milestone
+      await grantsManager.connect(proposer).claimMilestone(proposalId, 0)
+
+      // Reject the second milestone
+      await grantsManager.connect(owner).rejectMilestones(proposalId)
+
+      // Check the states ( Proposal should be Canceled, Milestone1 should be Claimed, Milestone2 should be Rejected )
+      const grantState = await grantsManager.grantState(proposalId)
+      expect(grantState).to.equal(2) // Canceled
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
+      expect(milestoneState).to.equal(2n) // Claimed
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
+      expect(milestoneState2).to.equal(3n) // Rejected
+      const isGrantRejected = await grantsManager.isGrantRejected(proposalId)
+      expect(isGrantRejected).to.equal(true)
+    })
+
+    it("If any milestone is still pending, the grant should be in development", async function () {
+      const description = "https://ipfs.io/ipfs/Qm..." // project details metadata URI cannot be changed later
+      const milestonesDetailsMetadataURI = "https://ipfs.io/ipfs/Qm..." // milestones details can be changed later
+      const values = [ethers.parseEther("10000"), ethers.parseEther("20000")]
+
+      const { proposalId } = await createProposalWithMultipleFunctionsAndExecuteItGrant(
+        proposer, // proposer
+        owner, // voter
+        [treasury, treasury], // targets ( 2 transfers )
+        treasuryContract, // contract to pass to avoid re-deploying the contracts
+        description, // description ( will be empty in the proposal, because if modified, the proposalId and milestoneId will be modified => lost in the see)
+        ["transferB3TR", "transferB3TR"], // functionToCall
+        [
+          [grantsManagerAddress, values[0]],
+          [grantsManagerAddress, values[1]],
+        ], // args of transferb3tr
+        0,
+        proposer.address,
+        milestonesDetailsMetadataURI, // milestones
+        contractToPassToMethods, // contracts to pass to avoid re-deploying the contracts
+      )
+
+      // Approve the first milestone
+      await grantsManager.connect(owner).approveMilestones(proposalId, 0)
+      // Claim the first milestone
+      await grantsManager.connect(proposer).claimMilestone(proposalId, 0) // Claim the first milestone
+
+      // Check the states ( Proposal should be InDevelopment, Milestone1 should be Claimed, Milestone2 should be Pending )
+      const grantState = await grantsManager.grantState(proposalId)
+      expect(grantState).to.equal(8) // InDevelopment
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
+      expect(milestoneState).to.equal(2n) // Claimed
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
+      expect(milestoneState2).to.equal(0n) // Pending
+      const isGrantInDevelopment = await grantsManager.isGrantInDevelopment(proposalId)
+      expect(isGrantInDevelopment).to.equal(true)
     })
 
     it("Grant should be in developement if the proposal is executed and at least one milestone is pending", async function () {
@@ -1205,11 +1359,11 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       // Claim the first milestone
       await grantsManager.connect(proposer).claimMilestone(proposalId, 0)
 
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(8) // InDevelopment
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(2n) // Claimed
-      const milestoneState2 = await grantsManager.getMilestoneState(proposalId, 1)
+      const milestoneState2 = await grantsManager.milestoneState(proposalId, 1)
       expect(milestoneState2).to.equal(0n) // Pending
       const isGrantCompleted = await grantsManager.isGrantCompleted(proposalId)
       expect(isGrantCompleted).to.equal(false)
@@ -1244,9 +1398,9 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
       )
 
-      const grantState = await grantsManager.state(proposalId)
+      const grantState = await grantsManager.grantState(proposalId)
       expect(grantState).to.equal(0) // Pending
-      const milestoneState = await grantsManager.getMilestoneState(proposalId, 0)
+      const milestoneState = await grantsManager.milestoneState(proposalId, 0)
       expect(milestoneState).to.equal(0n) // Pending
       const isGrantCompleted = await grantsManager.isGrantCompleted(proposalId)
       expect(isGrantCompleted).to.equal(false)
@@ -1286,19 +1440,19 @@ describe("Governance - Milestone Creation - @shard4b", function () {
         description,
       )
       // Check the states ( Proposal should be Pending and Grant should be Pending )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
       //Pay the deposit
       await payDeposit(proposalId, owner)
 
       //Check the states ( Proposal should be Des and Grant should be Pending )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       // simulate start of new round with enough voting delay
       await waitForCurrentRoundToEnd()
       await emissions.distribute()
 
       //Check the states ( Proposal should be active and Grant should be active )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       await governor.connect(voter).castVote(proposalId, 1, { gasLimit: 10_000_000 }) // vote for
 
@@ -1307,21 +1461,21 @@ describe("Governance - Milestone Creation - @shard4b", function () {
       await emissions.distribute()
 
       //Check the states ( Proposal should be Succeeded and Grant should be Succeeded )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       // Queue the proposal
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
       await governor.connect(proposer).queue(targets, values, calldatas, descriptionHash)
 
       //Check the states ( Proposal should be Queued and Grant should be Queued )
-      expect(await governor.state(proposalId)).to.equal(await grantsManager.state(proposalId))
+      expect(await governor.state(proposalId)).to.equal(await grantsManager.grantState(proposalId))
 
       // Execute the proposal
       await governor.connect(owner).execute(targets, values, calldatas, descriptionHash)
 
       //Check the states ( Proposal should be Executed and Grant should be InDevelopment )
       expect(await governor.state(proposalId)).to.equal("6")
-      expect(await grantsManager.state(proposalId)).to.equal("8")
+      expect(await grantsManager.grantState(proposalId)).to.equal("8")
 
       //Approve first milestone
       await grantsManager.connect(owner).approveMilestones(proposalId, 0)
@@ -1330,7 +1484,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
 
       //Governor state should remain executed and grant state should remain in development
       expect(await governor.state(proposalId)).to.equal("6")
-      expect(await grantsManager.state(proposalId)).to.equal("8")
+      expect(await grantsManager.grantState(proposalId)).to.equal("8")
 
       //Approve second milestone (this is the last one)
       await grantsManager.connect(owner).approveMilestones(proposalId, 1)
@@ -1339,7 +1493,7 @@ describe("Governance - Milestone Creation - @shard4b", function () {
 
       //Governor state should remain executed and grant state should be completed
       expect(await governor.state(proposalId)).to.equal("6")
-      expect(await grantsManager.state(proposalId)).to.equal("9")
+      expect(await grantsManager.grantState(proposalId)).to.equal("9")
     })
   })
 

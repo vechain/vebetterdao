@@ -83,6 +83,12 @@ interface IGrantsManager {
     string metadataURI
   );
 
+  /**
+   * @notice Emitted when a grant is canceled
+   * @param proposalId The ID of the proposal
+   */
+  event GrantCanceled(uint256 indexed proposalId);
+
   // ------------------ Errors ------------------ //
 
   /**
@@ -208,6 +214,18 @@ interface IGrantsManager {
    */
   error ProposalNotExecuted(uint256 proposalId);
 
+  /**
+   * @notice Error thrown when grant is already completed
+   * @param proposalId The ID of the proposal
+   */
+  error GrantAlreadyCompleted(uint256 proposalId);
+
+  /**
+   * @notice Error thrown when grant is already rejected
+   * @param proposalId The ID of the proposal
+   */
+  error GrantAlreadyRejected(uint256 proposalId);
+
   // ------------------ Structs and Enums ------------------ //
 
   /**
@@ -215,16 +233,16 @@ interface IGrantsManager {
    * @dev This is the same as the ProposalState enum however with InDevelopment and Completed extra states
    */
   enum GrantState {
-    Pending, // 0 
-    Active, // 1 
-    Canceled, // 2 
-    Defeated, // 3 
-    Succeeded, // 4 
-    Queued, // 5 
-    Executed, // 6 
-    DepositNotMet, // 7 
-    InDevelopment, // 8 
-    Completed // 9 
+    Pending, // 0
+    Active, // 1
+    Canceled, // 2
+    Defeated, // 3
+    Succeeded, // 4
+    Queued, // 5
+    Executed, // 6
+    DepositNotMet, // 7
+    InDevelopment, // 8
+    Completed // 9
   }
 
   /**
@@ -334,7 +352,14 @@ interface IGrantsManager {
    * @param milestoneIndex The index of the milestone
    * @return MilestoneState The state of the milestone
    */
-  function getMilestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState);
+  function milestoneState(uint256 proposalId, uint256 milestoneIndex) external view returns (MilestoneState);
+
+  /**
+   * @notice Returns the state of a proposal
+   * @param proposalId The ID of the proposal
+   * @return GrantState The state of the proposal
+   */
+  function grantState(uint256 proposalId) external view returns (GrantState);
 
   /**
    * @notice Returns if a proposal is in development
@@ -349,6 +374,13 @@ interface IGrantsManager {
    * @return bool True if the proposal is in development, false otherwise
    */
   function isGrantInDevelopment(uint256 proposalId) external view returns (bool);
+
+  /**
+   * @notice Returns if a proposal is rejected
+   * @param proposalId The ID of the proposal
+   * @return bool True if one of the milestones is rejected, false otherwise
+   */
+  function isGrantRejected(uint256 proposalId) external view returns (bool);
 
   /**
    * @notice Rejects a milestone
