@@ -1,5 +1,4 @@
 import {
-  ProposalState,
   useGetVotesOnBlock,
   useIsUserPerson,
   useProposalSnapshot,
@@ -14,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { MdHowToVote } from "react-icons/md"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string

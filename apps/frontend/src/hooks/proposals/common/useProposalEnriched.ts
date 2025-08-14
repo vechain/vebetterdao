@@ -1,60 +1,68 @@
 import { useMemo } from "react"
 import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
-import { ProposalState, useAllProposalsState } from "@/api"
-import { ProposalEnriched } from "../grants/types"
+import { useAllProposalsState } from "@/api"
 import BigNumber from "bignumber.js"
 import { useGrantProposalDetails } from "../grants/useGrantProposalDetails"
+import { ProposalState } from "../grants/types"
 
 export const useProposalEnriched = () => {
   // Step 1: Fetch events
-  const { allProposals } = useProposalCreatedEvents()
+  const { allProposals, grantProposals, standardProposals } = useProposalCreatedEvents()
 
   // Step 2: Get proposal IDs
-  const proposalIds = useMemo(() => {
-    return allProposals?.map(event => event.id) || []
-  }, [allProposals])
+  const grantProposalsProposalIds = useMemo(() => {
+    return grantProposals?.map(event => event.id) || []
+  }, [grantProposals])
+
+  const standardProposalsProposalIds = useMemo(() => {
+    return standardProposals?.map(event => event.id) || []
+  }, [standardProposals])
 
   // Step 3: Get proposal states, details, and voting data
-  const { data: proposalStates, isLoading: isLoadingStates } = useAllProposalsState(proposalIds)
-  const { data: proposalDetails, isLoading: isLoadingDetails } = useGrantProposalDetails(allProposals || [])
+  const {
+    data: { grantProposalsDetailsMap, standardProposalsDetailsMap } = {
+      grantProposalsDetailsMap: {},
+      standardProposalsDetailsMap: {},
+    },
+    isLoading: isLoadingDetails,
+  } = useGrantProposalDetails(standardProposals, grantProposals)
+  const {
+    data: { grantsProposalStates, standardProposalStates } = {
+      grantsProposalStates: [],
+      standardProposalStates: [],
+    },
+    isLoading: isLoadingStates,
+  } = useAllProposalsState(standardProposalsProposalIds, grantProposalsProposalIds)
 
   // Step 4: Merge all the data
-  const proposals = useMemo(() => {
-    if (!allProposals || isLoadingStates || isLoadingDetails) {
-      return []
-    }
 
-    return allProposals.map((event): ProposalEnriched => {
-      //TODO: IMPROVE THIS, NOT OPTIMIZED
-      const state = proposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
-      const details = proposalDetails?.[event.id]
-      //TODO: Figure out the grants type and profile picture
+  const enrichedGrantProposals = useMemo(() => {
+    return grantProposals.map(event => {
+      const state = grantsProposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
+      const details = grantProposalsDetailsMap?.[event.id]
       return {
         ...event,
         ...details,
-        title: details?.title || "Grant Proposal",
-        b3tr: `${event.grantAmount} B3TR`,
-        proposer: {
-          profilePicture: details?.applicantProfileUrl ?? "",
-          addressOrDomain: event.proposerAddress,
-        },
-        dAppGrant: `${details?.grantType} Grant`,
         state,
-        //TODO: Resolve the endAt and startAt or delegate to the component to fetch it
-        phases: {
-          [ProposalState.Pending]: {
-            startAt: event.createdAt.toString(),
-            endAt: event.createdAt.toString(),
-          },
-          [ProposalState.Active]: {
-            startAt: event.createdAt.toString(),
-            endAt: event.createdAt.toString(),
-          },
-        },
-        description: details?.description || "",
       }
     })
-  }, [allProposals, proposalStates, proposalDetails, isLoadingStates, isLoadingDetails])
+  }, [grantProposals, grantsProposalStates, grantProposalsDetailsMap])
+
+  const enrichedStandardProposals = useMemo(() => {
+    return standardProposals.map(event => {
+      const state = standardProposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
+      const details = standardProposalsDetailsMap?.[event.id]
+      return {
+        ...event,
+        ...details,
+        state,
+      }
+    })
+  }, [standardProposals, standardProposalStates, standardProposalsDetailsMap])
+
+  const proposals = useMemo(() => {
+    return [...enrichedGrantProposals, ...enrichedStandardProposals]
+  }, [enrichedGrantProposals, enrichedStandardProposals])
 
   // Step 5: Calculate aggregated data
   const totalGrantAmount = useMemo(() => {
@@ -67,6 +75,8 @@ export const useProposalEnriched = () => {
 
   return {
     proposals,
+    enrichedGrantProposals,
+    enrichedStandardProposals,
     totalGrantAmount,
     totalProposals: allProposals?.length || 0,
     isLoading,

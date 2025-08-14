@@ -1,4 +1,4 @@
-import { ProposalState, useProposalVotesIndexer } from "@/api"
+import { useProposalVotesIndexer } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
@@ -9,6 +9,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string
