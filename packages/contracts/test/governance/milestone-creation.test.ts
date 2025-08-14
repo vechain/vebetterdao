@@ -33,7 +33,7 @@ import {
   waitForCurrentRoundToEnd,
 } from "../helpers/common"
 
-describe("Governance - Milestone Creation - @shard4b", function () {
+describe("Governance - Milestone Creation - @shard4c", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR
