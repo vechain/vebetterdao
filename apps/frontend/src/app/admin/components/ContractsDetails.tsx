@@ -93,9 +93,14 @@ export const ContractsDetails = () => {
         roles={getContractByAddress(config.nodeManagementContractAddress)?.roles}
       />
       <ContractDetailsCard
-        title="GrantsManager"
+        title="Grants Manager"
         address={config.grantsManagerContractAddress}
         roles={getContractByAddress(config.grantsManagerContractAddress)?.roles}
+      />
+      <ContractDetailsCard
+        title="Stargate"
+        address={config.stargateNFTContractAddress}
+        roles={getContractByAddress(config.stargateNFTContractAddress)?.roles}
       />
     </Grid>
   )

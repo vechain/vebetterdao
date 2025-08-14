@@ -112,6 +112,25 @@ export const CONTRACT_LIST = [
   {
     name: "Grants Manager",
     contractAddress: config.grantsManagerContractAddress,
-    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
+    roles: [
+      "DEFAULT_ADMIN_ROLE",
+      "UPGRADER_ROLE",
+      "GOVERNANCE_ROLE",
+      "GRANTS_APPROVER_ROLE",
+      "GRANTS_REJECTOR_ROLE",
+      "PAUSER_ROLE",
+    ],
+  },
+  {
+    name: "Stargate",
+    contractAddress: config.stargateNFTContractAddress,
+    roles: [
+      "DEFAULT_ADMIN_ROLE",
+      "UPGRADER_ROLE",
+      "PAUSER_ROLE",
+      "LEVEL_OPERATOR_ROLE",
+      "MANAGER_ROLE",
+      "WHITELISTER_ROLE",
+    ],
   },
 ]

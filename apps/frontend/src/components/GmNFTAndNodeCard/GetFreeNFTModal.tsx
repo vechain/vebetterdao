@@ -45,7 +45,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
         <ModalCloseButton />
         <ModalHeader>
           <VStack gap={4} align="flex-start">
-            <Image src="/assets/icons/nft-earth.svg" alt="NFT Earth Illustration" boxSize="80px" />
+            <Image src="/assets/icons/nft-earth-dark.png" alt="NFT Earth Illustration" boxSize="80px" />
             <Heading fontSize="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
           </VStack>
         </ModalHeader>

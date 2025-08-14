@@ -9,7 +9,14 @@ type Props = {
   quorumQuery: UseQueryResult<string, unknown>
   currentVotesQuery: UseQueryResult<string, unknown>
   votesAtSnapshotQuery: UseQueryResult<string, unknown>
-  userVotesAtSnapshotQuery: UseQueryResult<string, unknown>
+  userVotesAtSnapshotQuery: UseQueryResult<
+    | {
+        totalVotesWithDeposits: string // total votes
+        depositsVotes: string // deposit votes if any
+      }
+    | string,
+    unknown
+  >
   renderQuroum?: "none" | "upcoming" | "active"
   isEnded?: boolean
   renderTimeline?: React.ReactNode

@@ -1904,5 +1904,14 @@
   "Become a node holder": "Become a node holder",
   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.": "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.",
   "Get NFT and start receiving rewards.": "Get NFT and start receiving rewards.",
-  "You have no nodes yet.": "You have no nodes yet."
+  "You have no nodes yet.": "You have no nodes yet.",
+  "To apply for a proposal, you must": "To apply for a proposal, you must",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.",
+  "Create Discourse": "Create Discourse",
+  "Apply": "Apply",
+  "Get NFT": "Get NFT",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals",
+  "More info about your votes at snapshot": "More info about your votes at snapshot"
 }
