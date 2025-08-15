@@ -67,7 +67,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
     <Card.Root w="full" data-testid="new-proposal-form" variant="baseWithBorder">
       <Card.Body py={8}>
         <VStack gap={[4, 8]} align="flex-start">
-          <Heading size="lg">{t("What is your proposal about?")}</Heading>
+          <Heading size="2xl">{t("What is your proposal about?")}</Heading>
           <Heading size="md">{t("Basic information")}</Heading>
           <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>

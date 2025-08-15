@@ -95,7 +95,7 @@ export const UpdateRoleCard = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Update Address Role")}</Heading>
+        <Heading size="2xl">{t("Update Address Role")}</Heading>
         <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
       </Card.Header>
 

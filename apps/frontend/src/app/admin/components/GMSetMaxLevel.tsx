@@ -47,7 +47,7 @@ export const GMSetMaxLevel = () => {
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="lg">{t("Set GM Max Level")}</Heading>
+        <Heading size="2xl">{t("Set GM Max Level")}</Heading>
       </Card.Header>
 
       <Card.Body>

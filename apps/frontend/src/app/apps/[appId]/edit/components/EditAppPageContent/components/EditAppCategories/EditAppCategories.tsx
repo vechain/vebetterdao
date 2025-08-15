@@ -26,7 +26,7 @@ type EditAppCategoriesProps = {
 
 export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const { t } = useTranslation()
-  const { open: isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose, setOpen } = useDisclosure()
   const [searchQuery, setSearchQuery] = useState<string>("")
 
   const { setValue, watch, register } = form
@@ -96,8 +96,8 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
               color="black"
               mb={2}>
               <Tag.Label>{category.name}</Tag.Label>
-              <Tag.CloseTrigger>
-                <CloseButton onClick={() => handleRemoveCategory(categoryId)} />
+              <Tag.CloseTrigger asChild>
+                <CloseButton size="sm" color="gray" onClick={() => handleRemoveCategory(categoryId)} />
               </Tag.CloseTrigger>
             </Tag.Root>
           )
@@ -107,13 +107,13 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
           <Popover.Root
             open={isOpen}
             onOpenChange={details => {
-              if (details.open) onClose()
+              if (!details.open) onClose()
               else onOpen()
             }}
             positioning={{ placement: "bottom-start" }}
             closeOnInteractOutside={true}>
             <Popover.Trigger asChild>
-              <Button variant="outline" fontSize="14px" borderRadius="full" size="sm">
+              <Button onClick={() => setOpen(true)} variant="outline" fontSize="14px" borderRadius="full" size="sm">
                 <FaPlus />
                 {t("Add Category")}
               </Button>

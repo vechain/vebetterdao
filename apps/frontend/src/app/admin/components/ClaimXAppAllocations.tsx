@@ -59,7 +59,7 @@ export const ClaimXAppAllocations = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Allocation claiming")}</Heading>
+        <Heading size="2xl">{t("Allocation claiming")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack flex={1} align="flex-start" gap={8}>

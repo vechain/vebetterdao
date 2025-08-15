@@ -225,7 +225,7 @@ export const AllApps = ({
                   <Button
                     key={status}
                     rounded="full"
-                    variant={statusFilter === status ? "solid" : "outline"}
+                    variant={statusFilter === status ? "solid" : "subtle"}
                     size="sm"
                     onClick={() => setStatusFilter(status)}
                     px={3}
@@ -233,7 +233,7 @@ export const AllApps = ({
                     fontWeight="medium">
                     {status}{" "}
                     {statusFilter === status && (
-                      <Badge ml={1} color="black" borderRadius="full">
+                      <Badge ml={1} borderRadius="full">
                         {appWithStatusCounts[status as keyof typeof appWithStatusCounts]}
                       </Badge>
                     )}

@@ -52,7 +52,7 @@ export const NewAppPageContent = () => {
         <Card.Root>
           <Card.Body>
             <VStack gap={8} align="flex-start">
-              <Heading size="lg">{t("Create a new app")}</Heading>
+              <Heading size="2xl">{t("Create a new app")}</Heading>
               <Text>
                 {t(
                   "Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go live, it will undergo a thorough review process by our moderators. Here's how it works:",

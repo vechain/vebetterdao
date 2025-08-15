@@ -35,7 +35,7 @@ export const AppSecurity = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("App Security")}</Heading>
+        <Heading size="2xl">{t("App Security")}</Heading>
         <Text fontSize="sm">{t("Change an app's security level")}</Text>
       </Card.Header>
       <Card.Body>

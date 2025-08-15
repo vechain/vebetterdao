@@ -33,7 +33,7 @@ export const XAppCheckEndorsement = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Check Endorsement")}</Heading>
+        <Heading size="2xl">{t("Check Endorsement")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack flex={1} align="flex-start" gap={8}>

@@ -55,7 +55,7 @@ export const B3trAllowance = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("B3TR Token Allowance")}</Heading>
+        <Heading size="2xl">{t("B3TR Token Allowance")}</Heading>
         <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
       </Card.Header>
       <Card.Body>

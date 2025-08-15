@@ -70,7 +70,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
               />
             </Skeleton>
 
-            <Stack flex="1" align="stretch" justify="center">
+            <Stack flex="1" align="stretch" justify="center" overflow="hidden">
               <Skeleton loading={appMetadataLoading}>
                 <HStack gap={4} align="center">
                   <Heading

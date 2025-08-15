@@ -143,8 +143,8 @@ export const CategorySelector = <T extends FieldValues>({
             <Popover.Root
               open={isOpen}
               onOpenChange={details => {
-                if (details.open) onOpen()
-                else onClose()
+                if (!details.open) onClose()
+                else onOpen()
               }}
               positioning={{
                 placement: "bottom-start",

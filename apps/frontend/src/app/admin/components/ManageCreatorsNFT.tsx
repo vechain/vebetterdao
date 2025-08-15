@@ -100,7 +100,7 @@ export const ManageCreatorsNFT = () => {
   return (
     <Card.Root w="full">
       <Card.Header>
-        <Heading size="lg">{t("Manage Creator NFT")}</Heading>
+        <Heading size="2xl">{t("Manage Creator NFT")}</Heading>
       </Card.Header>
 
       <Card.Body>

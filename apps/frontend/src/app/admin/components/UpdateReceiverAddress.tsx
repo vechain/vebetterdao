@@ -44,7 +44,7 @@ export const UpdateReceiverAddress = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Update Team Wallet Address")}</Heading>
+        <Heading size="2xl">{t("Update Team Wallet Address")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} alignItems={"start"} w="full">

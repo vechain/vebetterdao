@@ -121,7 +121,7 @@ export const AppDetailOverview = ({
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
                       <AppReceiverAddress />
 
-                      <Separator hideBelow="md" />
+                      <Separator hideFrom="md" />
 
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
@@ -164,7 +164,7 @@ export const AppDetailOverview = ({
                           <AdminAppPageButton />
                         </>
                       )}
-                      <Button w={["full", "full", "auto"]} variant={"primaryAction"} onClick={goToWebsite}>
+                      <Button flex={1} variant={"primaryAction"} onClick={goToWebsite}>
                         {t("Go to Website")}
                         <UilArrowUpRight color="#FFFFFF" size={"16px"} />
                       </Button>

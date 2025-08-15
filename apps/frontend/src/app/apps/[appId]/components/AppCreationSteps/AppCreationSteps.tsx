@@ -33,7 +33,7 @@ export const AppCreationSteps = () => {
           <VStack gap={8} align="flex-start">
             <HStack w="full">
               <HStack w="full" justify="start">
-                <Heading size="lg">{t("Your App is almost ready!")}</Heading>
+                <Heading size="2xl">{t("Your App is almost ready!")}</Heading>
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
                 <Icon as={UilInfoCircle} color="rgba(0, 76, 252, 1)" />

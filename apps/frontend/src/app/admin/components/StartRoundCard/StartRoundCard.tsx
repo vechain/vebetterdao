@@ -13,7 +13,7 @@ export const StartRoundCard = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Emissions and Rounds")}</Heading>
+        <Heading size="2xl">{t("Emissions and Rounds")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack w={"full"} gap={4} alignItems={"start"}>

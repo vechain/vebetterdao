@@ -73,7 +73,7 @@ export const BulkClaimXAppsAllocations = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Bulk allocation claiming")}</Heading>
+        <Heading size="2xl">{t("Bulk allocation claiming")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} alignItems={"start"} flex={1} w="full">

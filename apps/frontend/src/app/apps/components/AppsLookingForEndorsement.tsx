@@ -53,7 +53,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
       }}>
       <HStack justifyContent={"space-between"} alignItems={"center"} w={"full"}>
         <VStack alignItems={"flex-start"}>
-          <Heading size="lg" color="gray.900" _dark={{ color: "#E4E4E4" }}>
+          <Heading size="2xl" color="gray.900" _dark={{ color: "#E4E4E4" }}>
             {t("New apps looking for endorsement")}
           </Heading>
           <Text color="gray.600" _dark={{ color: "#A1A1A1" }}>

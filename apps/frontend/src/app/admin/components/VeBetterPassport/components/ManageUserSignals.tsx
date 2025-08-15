@@ -61,7 +61,7 @@ export const ManageUserSignals = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="lg">{t("Manage User Signals")}</Heading>
+        <Heading size="2xl">{t("Manage User Signals")}</Heading>
         <Text fontSize="sm">
           {t(
             "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
