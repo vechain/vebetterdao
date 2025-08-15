@@ -52,7 +52,11 @@ export const AppCardOptionsDesktopMenu = ({
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content bg="#2D3748">
+          <Menu.Content
+            bg={{
+              base: "white",
+              _dark: "#2D3748",
+            }}>
             <Skeleton loading={isLoading}>
               {showViewDetails && (
                 <Menu.Item value="view-details" onClick={navigateToAppDetail}>

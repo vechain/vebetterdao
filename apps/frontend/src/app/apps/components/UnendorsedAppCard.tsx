@@ -1,4 +1,4 @@
-import { Card, Separator, Heading, HStack, Image, Skeleton, Stack, Text, VStack, Icon } from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, Image, Skeleton, Stack, Text, VStack, Icon, Avatar } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
@@ -19,7 +19,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
-  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+  const { data: logo } = useIpfsImage(appMetadata?.logo)
   const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)
 
   const {
@@ -58,17 +58,16 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
           w="full"
           h="full">
           <Stack direction="row" gap={4} align="center" flex="1">
-            <Skeleton loading={isLogoLoading}>
-              <Image
+            <Avatar.Root shape="rounded" h="72px" w="72px">
+              <Avatar.Image
                 src={logo?.image ?? notFoundImage}
                 alt="logo"
-                h="72px"
-                w="72px"
                 minW="72px"
                 borderRadius="9px"
                 objectFit="contain"
               />
-            </Skeleton>
+              <Avatar.Fallback name={appMetadata?.name} />
+            </Avatar.Root>
 
             <Stack flex="1" align="stretch" justify="center" overflow="hidden">
               <Skeleton loading={appMetadataLoading}>

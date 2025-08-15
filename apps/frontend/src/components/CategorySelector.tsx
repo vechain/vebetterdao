@@ -22,6 +22,7 @@ import {
   useDisclosure,
   Field,
   TagCloseTrigger,
+  Portal,
 } from "@chakra-ui/react"
 import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
@@ -155,42 +156,46 @@ export const CategorySelector = <T extends FieldValues>({
                   {t("Add Category")}
                 </Button>
               </Popover.Trigger>
-              <Popover.Content width="300px" maxH="400px" overflowY="auto">
-                <Popover.Body p={3}>
-                  <VStack gap={3} align="stretch">
-                    <InputGroup startElement={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
-                      <Input
-                        size="md"
-                        placeholder={t("Find a category")}
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        borderRadius="md"
-                      />
-                    </InputGroup>
+              <Portal>
+                <Popover.Positioner>
+                  <Popover.Content width="300px" maxH="400px" overflowY="auto">
+                    <Popover.Body p={3}>
+                      <VStack gap={3} align="stretch">
+                        <InputGroup startElement={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
+                          <Input
+                            size="md"
+                            placeholder={t("Find a category")}
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            borderRadius="md"
+                          />
+                        </InputGroup>
 
-                    {filteredCategories.length === 0 ? (
-                      <Text textAlign="center" py={2} color="#6A6A6A">
-                        {t("No categories found")}
-                      </Text>
-                    ) : (
-                      filteredCategories.map(category => (
-                        <Flex
-                          key={category.id}
-                          p={2}
-                          borderRadius="md"
-                          alignItems="center"
-                          cursor="pointer"
-                          bg={selectedCategories?.includes(category.id) ? "blue.50" : "transparent"}
-                          _hover={{ bg: "#F5F5F5" }}
-                          onClick={() => handleSelectCategory(category.id)}>
-                          <Box width="12px" height="12px" borderRadius="full" bg={category.color} mr={3} />
-                          <Text>{category.name}</Text>
-                        </Flex>
-                      ))
-                    )}
-                  </VStack>
-                </Popover.Body>
-              </Popover.Content>
+                        {filteredCategories.length === 0 ? (
+                          <Text textAlign="center" py={2} color="#6A6A6A">
+                            {t("No categories found")}
+                          </Text>
+                        ) : (
+                          filteredCategories.map(category => (
+                            <Flex
+                              key={category.id}
+                              p={2}
+                              borderRadius="md"
+                              alignItems="center"
+                              cursor="pointer"
+                              bg={selectedCategories?.includes(category.id) ? "blue.50" : "transparent"}
+                              _hover={{ bg: "#F5F5F5" }}
+                              onClick={() => handleSelectCategory(category.id)}>
+                              <Box width="12px" height="12px" borderRadius="full" bg={category.color} mr={3} />
+                              <Text>{category.name}</Text>
+                            </Flex>
+                          ))
+                        )}
+                      </VStack>
+                    </Popover.Body>
+                  </Popover.Content>
+                </Popover.Positioner>
+              </Portal>
             </Popover.Root>
           )}
         </HStack>

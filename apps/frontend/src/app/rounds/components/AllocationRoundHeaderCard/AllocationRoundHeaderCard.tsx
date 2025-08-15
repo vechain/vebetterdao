@@ -87,7 +87,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
             <VStack gap={2} align="flex-start">
               <Text
                 color="#6A6A6A"
-                fontSize={["md"]}
+                fontSize="lg"
                 textTransform={"uppercase"}
                 fontWeight={600}
                 data-testid="round-title">

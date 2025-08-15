@@ -52,7 +52,7 @@ export const NewAppPageContent = () => {
         <Card.Root>
           <Card.Body>
             <VStack gap={8} align="flex-start">
-              <Heading size="2xl">{t("Create a new app")}</Heading>
+              <Heading size="3xl">{t("Create a new app")}</Heading>
               <Text>
                 {t(
                   "Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go live, it will undergo a thorough review process by our moderators. Here's how it works:",
@@ -67,7 +67,7 @@ export const NewAppPageContent = () => {
                 <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorPalette="primary" size="lg">
                   {t("More info")}
                 </Button>
-                <Button rounded="full" colorPalette="primary" size="lg" onClick={onContinueClick}>
+                <Button variant="primaryAction" rounded="full" size="lg" onClick={onContinueClick}>
                   {t("Continue")}
                 </Button>
               </HStack>

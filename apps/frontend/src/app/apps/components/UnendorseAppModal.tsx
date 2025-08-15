@@ -57,7 +57,12 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
   //   xNodeLevel,
   // }
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={onClose}
+      modalProps={{
+        size: "lg",
+      }}>
       <VStack gap={6} align="flex-start" w="full">
         <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
 

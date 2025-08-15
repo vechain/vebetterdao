@@ -67,6 +67,9 @@ export const EditAppAddresses = ({ form }: Props) => {
             endElement: editTeamWalletAddress ? null : (
               <Button
                 variant="primaryGhost"
+                bg="#FFFFFF"
+                borderY="1px solid #f4f6f9"
+                borderRight="1px solid #f4f6f9"
                 onClick={modalEditTeamWalletAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
@@ -99,6 +102,9 @@ export const EditAppAddresses = ({ form }: Props) => {
             endElement: editAdminAddress ? null : (
               <Button
                 variant="primaryGhost"
+                bg="#FFFFFF"
+                borderY="1px solid #f4f6f9"
+                borderRight="1px solid #f4f6f9"
                 onClick={modalEditAdminAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}

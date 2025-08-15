@@ -95,7 +95,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
           <Stack direction={["column", "column", "row"]} gap={4} align={"center"}>
             <Skeleton loading={isLoading}>
-              <Heading size="md" color={"#131313"}>
+              <Heading size="lg" color={"#131313"}>
                 {t("Round #{{round}}", {
                   round: data?.roundId,
                 })}
@@ -149,7 +149,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack gap={4}>
           <Skeleton loading={isLoading}>
-            <Heading size="md" color={"#131313"}>
+            <Heading size="xl" color={"#131313"}>
               {t("Round #{{round}}", {
                 round: data?.roundId ?? 0,
               })}

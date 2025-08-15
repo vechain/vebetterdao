@@ -86,7 +86,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           {proposalMetadata.isLoading ? (
             <SkeletonText noOfLines={3} flex={2} />
           ) : (
-            <Text fontSize={16} fontWeight={400} minW={"300px"} flex={2} alignSelf={"flex-start"}>
+            <Text lineClamp="2" fontSize={16} fontWeight={400} minW={"300px"} flex={2} alignSelf={"flex-start"}>
               {descriptionText}
             </Text>
           )}

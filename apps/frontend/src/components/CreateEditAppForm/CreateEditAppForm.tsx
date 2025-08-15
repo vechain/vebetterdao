@@ -154,7 +154,7 @@ export const CreateEditAppForm = ({
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="2xl" fontWeight="bold">
+        <Heading size="3xl" fontWeight="bold">
           {isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}
         </Heading>
       </Card.Header>
