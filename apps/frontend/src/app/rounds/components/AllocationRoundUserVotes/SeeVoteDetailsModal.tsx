@@ -26,7 +26,6 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
   const totalAppsVoted = sortedVotes.length
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
-      <Dialog.Backdrop />
       <CustomModalContent>
         <VStack gap={4} w="full" align="flex-start" p={"24px"}>
           <Heading fontSize={"24px"} fontWeight={700}>

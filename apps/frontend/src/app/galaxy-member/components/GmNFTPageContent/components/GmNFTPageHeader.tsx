@@ -182,8 +182,8 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
         placement="center"
         size="xl">
         <Portal>
+          <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Backdrop />
             <Dialog.Content boxShadow="none" background="transparent" maxW="500px" w="full" p={0} m={0}>
               <Dialog.Body p={0}>
                 <Box

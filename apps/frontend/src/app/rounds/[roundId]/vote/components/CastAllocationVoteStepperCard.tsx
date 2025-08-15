@@ -1,9 +1,9 @@
 "use client"
 import { ResponsiveCard } from "@/components"
 import { useBreakpoints } from "@/hooks"
-import { Box, Circle, Heading, Steps, VStack, useSteps } from "@chakra-ui/react"
+import { Box, Circle, Heading, Steps, VStack } from "@chakra-ui/react"
 import { useParams, usePathname } from "next/navigation"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const CastAllocationVoteStepperCard = () => {
@@ -21,10 +21,7 @@ export const CastAllocationVoteStepperCard = () => {
     [t],
   )
 
-  const { value: activeStep, setStep: setActiveStep } = useSteps({
-    defaultStep: 1,
-    count: steps.length,
-  })
+  const [step, setStep] = useState(1)
 
   //set active step based on the current pathname
   useEffect(() => {
@@ -34,9 +31,9 @@ export const CastAllocationVoteStepperCard = () => {
     )
     const step = steps.find(step => step.pathnames?.includes(pathPattern))
     if (step) {
-      setActiveStep(steps.indexOf(step))
+      setStep(steps.indexOf(step))
     }
-  }, [pathname, params, setActiveStep, steps])
+  }, [pathname, params, setStep, steps])
 
   const height = useMemo(() => {
     return steps.length * 60
@@ -53,7 +50,9 @@ export const CastAllocationVoteStepperCard = () => {
         <Steps.Root
           w="full"
           size="sm"
-          step={activeStep}
+          step={step}
+          onStepChange={e => setStep(e.step)}
+          count={steps.length}
           orientation={isDesktop ? "vertical" : "horizontal"}
           variant="primaryVertical"
           gap={0}
@@ -70,9 +69,9 @@ export const CastAllocationVoteStepperCard = () => {
                 })}>
                 <Steps.Indicator>
                   <Steps.Status
-                    incomplete={<Circle bg="#004CFC" size={"30%"} />}
-                    complete={<Circle bg="#004CFC" size={"30%"} />}
-                    current={<Circle bg="#004CFC" size={"60%"} />}
+                    incomplete={<Circle bg="#004CFC" size="0" />}
+                    complete={<Circle bg="#004CFC" size="2" />}
+                    current={<Circle bg="#004CFC" size="3" />}
                   />
                 </Steps.Indicator>
 

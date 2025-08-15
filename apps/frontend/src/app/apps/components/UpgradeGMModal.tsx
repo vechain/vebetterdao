@@ -68,8 +68,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   }, [handleClose, sendTransaction])
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={handleClose} size={"xl"}>
-      <Dialog.Backdrop />
+    <Dialog.Root open={isOpen} onOpenChange={handleClose} size={"lg"}>
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <Dialog.CloseTrigger />
         <Dialog.Header>
@@ -150,7 +149,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                       {`${nextLevelGM?.name} #${tokenId}`}
                     </Text>
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-                      <HStack rounded="8px" gap={1} color={""}>
+                      <HStack rounded="8px" justifyContent="space-between">
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                           {nextLevelGM?.multiplier}
                         </Text>
@@ -184,7 +183,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
             </Button>
-            <Button color={"#004CFC"} w={"full"} onClick={handleClose}>
+            <Button unstyled fontWeight={700} color={"#004CFC"} w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

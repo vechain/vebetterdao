@@ -30,7 +30,6 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
-        <Dialog.Backdrop />
         <CustomModalContent>
           <Dialog.Body p={"40px"}>
             <VStack align="center" gap="20px">

@@ -24,8 +24,8 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
       trapFocus={true}
       placement="center"
       closeOnInteractOutside>
-      <Dialog.Backdrop />
       <Portal>
+        <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>

@@ -41,7 +41,6 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
-        <Dialog.Backdrop />
         <CustomModalContent>
           <Dialog.CloseTrigger />
 

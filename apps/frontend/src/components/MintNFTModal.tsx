@@ -19,8 +19,6 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose} trapFocus={false} placement="center">
-      <Dialog.Backdrop />
-
       <CustomModalContent w={"auto"} maxW="breakpoint-md">
         <Card.Root rounded={20}>
           <Card.Body>

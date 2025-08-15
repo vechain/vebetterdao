@@ -31,8 +31,8 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={onClose} placement="center">
-        <Dialog.Backdrop />
         <Portal>
+          <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content borderRadius="20px">
               <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />

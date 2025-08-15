@@ -21,7 +21,7 @@ import {
   Flex,
   useDisclosure,
   Field,
-  CloseButton,
+  TagCloseTrigger,
 } from "@chakra-ui/react"
 import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
@@ -107,7 +107,7 @@ export const CategorySelector = <T extends FieldValues>({
 
   return (
     <Field.Root invalid={!!error}>
-      <Field.Label>{t("App Categories")}</Field.Label>
+      <Field.Label fontSize="md">{t("App Categories")}</Field.Label>
 
       <Text fontSize="xs" color="gray.500" mb={2}>
         {t("Select up to 2 categories that best describe your app.")}
@@ -131,10 +131,10 @@ export const CategorySelector = <T extends FieldValues>({
                   backgroundColor={category.color}
                   color="black"
                   mb={2}>
-                  <Tag.Label>{category.name}</Tag.Label>
-                  <Tag.CloseTrigger>
-                    <CloseButton onClick={() => handleRemoveCategory(categoryId)} />
-                  </Tag.CloseTrigger>
+                  <Tag.Label fontWeight="semibold">{category.name}</Tag.Label>
+                  <Tag.EndElement>
+                    <TagCloseTrigger onClick={() => handleRemoveCategory(categoryId)} />
+                  </Tag.EndElement>
                 </Tag.Root>
               )
             })}

@@ -68,7 +68,6 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
       }}
       placement="center"
       trapFocus={true}>
-      <Dialog.Backdrop />
       <CustomModalContent w={"auto"} maxW="breakpoint-md">
         <Card.Root rounded={20}>{renderCardContent()}</Card.Root>
       </CustomModalContent>

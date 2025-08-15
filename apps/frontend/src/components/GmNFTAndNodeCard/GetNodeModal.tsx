@@ -16,8 +16,8 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"2xl"}>
-      <Dialog.Backdrop />
       <Portal>
+        <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>

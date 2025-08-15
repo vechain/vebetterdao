@@ -1,4 +1,4 @@
-import { VStack, HStack, Button, Box } from "@chakra-ui/react"
+import { VStack, HStack, Button, Box, Icon, Text, Link } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { useMemo, useCallback, memo, useState, useEffect } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
@@ -140,18 +140,15 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     [updateURLWithTab],
   )
 
-  // Go back to the home page
-  const onGoBack = useCallback(() => {
-    router.push("/")
-  }, [router])
-
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Button variant="primaryLink" onClick={onGoBack} size="sm" alignSelf={"flex-start"}>
-          <FaAngleLeft />
-          {t("Go back")}
-        </Button>
+        <Link href="/" color="primary.500">
+          <Icon as={FaAngleLeft} boxSize={3} />
+          <Text fontSize="sm" fontWeight="semibold" lineHeight="1.2">
+            {t("Go back")}
+          </Text>
+        </Link>
       )}
       <ProfileHeader address={parsedAddress} />
       <Box

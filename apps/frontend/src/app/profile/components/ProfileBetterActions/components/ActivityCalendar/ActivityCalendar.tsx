@@ -125,7 +125,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
               <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)}>
                 <FaChevronLeft />
               </Button>
-              <Heading size="sm" textAlign="center">
+              <Heading size="md" textAlign="center">
                 {currentDate.format("MMMM YYYY").toUpperCase()}
               </Heading>
               <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isDisabledNextMonth}>
@@ -156,7 +156,6 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                   <Skeleton key={day} h="10" loading={currentMonthOverviewQuery.isLoading}>
                     <Button
                       key={day}
-                      unstyled
                       onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
                       w="full"
                       h="full"

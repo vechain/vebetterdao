@@ -81,7 +81,6 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
 
   return (
     <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} size={"xl"}>
-      <Dialog.Backdrop />
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <Dialog.CloseTrigger />
         <Dialog.Header>

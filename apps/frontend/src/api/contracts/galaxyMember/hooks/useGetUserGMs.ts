@@ -51,13 +51,13 @@ export const useGetUserGMs = (userAddress?: string) => {
         calls: [
           {
             abi: galaxyMemberAbi,
-            address: galaxyMemberContractAddress,
+            address: galaxyMemberContractAddress as `0x${string}`,
             functionName: "getSelectedTokenId",
             args: [address as `0x${string}`],
           },
           {
             abi: galaxyMemberAbi,
-            address: galaxyMemberContractAddress,
+            address: galaxyMemberContractAddress as `0x${string}`,
             functionName: "getTokensInfoByOwner",
             args: [address as `0x${string}`, BigInt(0), BigInt(PAGE_SIZE)],
           },
@@ -71,7 +71,7 @@ export const useGetUserGMs = (userAddress?: string) => {
             gm =>
               ({
                 abi: voterRewardsAbi,
-                address: voterRewardsContractAddress,
+                address: voterRewardsContractAddress as `0x${string}`,
                 functionName: "levelToMultiplier",
                 args: [BigInt(gm.tokenLevel)],
               }) as const,
@@ -83,7 +83,7 @@ export const useGetUserGMs = (userAddress?: string) => {
             gm =>
               ({
                 abi: galaxyMemberAbi,
-                address: galaxyMemberContractAddress,
+                address: galaxyMemberContractAddress as `0x${string}`,
                 functionName: "getNodeIdAttached",
                 args: [gm.tokenId],
               }) as const,

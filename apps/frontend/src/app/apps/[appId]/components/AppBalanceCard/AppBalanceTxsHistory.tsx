@@ -95,8 +95,8 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
-      <Dialog.Backdrop />
       <Portal>
+        <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content borderRadius="20px">
             <Dialog.CloseTrigger />

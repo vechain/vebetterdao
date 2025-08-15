@@ -86,10 +86,10 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
           <IconButton
             onClick={openMenu}
             border={"1px solid #EEEEEE"}
-            bg={"light-contrast-on-card-bg"}
+            variant="subtle"
             rounded="6px"
             aria-label="Open menu">
-            <Icon as={FaBars} />
+            <Icon as={FaBars} boxSize={4} />
           </IconButton>
         )}
       </HStack>

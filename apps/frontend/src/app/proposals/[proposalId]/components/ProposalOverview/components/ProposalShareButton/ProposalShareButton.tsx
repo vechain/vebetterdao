@@ -51,7 +51,6 @@ export const ProposalShareButton = () => {
         }
         placement="center"
         size={"xl"}>
-        <Dialog.Backdrop />
         <CustomModalContent>
           <ModalAnimation>
             <Dialog.CloseTrigger top={4} right={4} />

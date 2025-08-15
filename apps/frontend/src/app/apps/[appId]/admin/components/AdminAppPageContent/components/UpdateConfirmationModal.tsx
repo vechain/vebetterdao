@@ -61,7 +61,6 @@ export const UpdateConfirmationModal = ({
         }
       }}
       size={"xl"}>
-      <Dialog.Backdrop />
       <CustomModalContent>
         <Dialog.Body px="40px" py="20px">
           <VStack align="center" gap="20px">

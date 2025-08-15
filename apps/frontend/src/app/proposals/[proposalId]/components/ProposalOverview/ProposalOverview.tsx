@@ -39,7 +39,7 @@ export const ProposalOverview = () => {
               </HStack>
 
               <Skeleton loading={proposal.isTitleLoading}>
-                <Heading size={["lg", "xl"]}>{proposal.title}</Heading>
+                <Heading size={["2xl", "4xl"]}>{proposal.title}</Heading>
               </Skeleton>
               <Skeleton loading={proposal.isStateLoading} alignSelf={"flex-start"}>
                 <ProposalStatusBadge proposalId={proposal.id} proposalState={proposal.state} />

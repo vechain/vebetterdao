@@ -45,7 +45,7 @@ export const GmCard = ({
       </HStack>
 
       <HStack alignItems="start">
-        <AvatarGroup rounded="8px" shape="square" size="md" stacking="last-on-top" spaceX={"-1.5rem"}>
+        <AvatarGroup rounded="8px" shape="square" size="xl" stacking="last-on-top" spaceX={"-1.5rem"}>
           {images?.slice(0, 2)?.map(image => (
             <Avatar.Root key={image} border="none" rounded="8px">
               <Avatar.Image rounded="8px" src={image} />

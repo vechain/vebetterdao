@@ -276,7 +276,6 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
   return (
     <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} trapFocus={true} placement="center">
-      <Dialog.Backdrop />
       <CustomModalContent w={"auto"} maxW="breakpoint-md">
         <Card.Root rounded={20}>
           <Card.Body>{renderCardContent()}</Card.Body>

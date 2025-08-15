@@ -134,7 +134,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
                 {t("Wallets voted")}
               </Text>
               <Skeleton loading={proposalVotesLoading}>
-                <Heading size="sm">{getCompactFormatter(2).format(proposalVotes?.totalVoters ?? 0)}</Heading>
+                <Heading size="md">{getCompactFormatter(2).format(proposalVotes?.totalVoters ?? 0)}</Heading>
               </Skeleton>
             </VStack>
             <VStack alignItems={"stretch"} gap={6}>

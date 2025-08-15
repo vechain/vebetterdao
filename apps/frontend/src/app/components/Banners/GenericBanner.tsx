@@ -116,7 +116,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
             ))}
           <HStack flex={1}>
             <VStack gap={2} align="stretch" flex={1}>
-              <Text textStyle="xs" color={titleColor} fontWeight="600">
+              <Text color={titleColor} fontWeight="600">
                 {title}
               </Text>
               {descriptionElement}
@@ -130,7 +130,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
             <Text fontSize={12} color={titleColor} fontWeight="600">
               {title}
             </Text>
-            <Heading fontSize="18" fontWeight="700" color={descriptionColor}>
+            <Heading fontSize={18} fontWeight="700" color={descriptionColor}>
               {description}
             </Heading>
             {hasButton && renderButton()}

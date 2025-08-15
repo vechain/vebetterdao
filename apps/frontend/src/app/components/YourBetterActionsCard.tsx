@@ -54,7 +54,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
               <VStack gap={4} align="stretch">
                 {address ? (
                   <>
-                    <Heading size="sm" fontWeight={600}>
+                    <Heading size="md" fontWeight={600}>
                       {t("Last actions")}
                     </Heading>
                     {lastActionsData.length > 0 ? (

@@ -83,21 +83,21 @@ export const SupplyBreakdownCard = () => {
         <VStack gap={4} align="flex-start">
           <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
-              <Text textStyle={["sm", "sm", "md"]} fontWeight="400">
+              <Text textStyle="md" fontWeight="400">
                 {t("B3TR in circulation")}
               </Text>
               <Skeleton loading={!data}>
-                <Heading size={["lg", "xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
+                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack gap={1} align="flex-start">
-              <Text textStyle={["sm", "sm", "md"]} fontWeight="400">
+              <Text textStyle="md" fontWeight="400">
                 {t("VOT3 in circulation")}
               </Text>
               <Skeleton loading={!data}>
-                <Heading size={["lg", "xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
+                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>

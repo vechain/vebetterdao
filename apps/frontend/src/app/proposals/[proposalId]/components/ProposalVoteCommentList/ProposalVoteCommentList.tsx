@@ -61,12 +61,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
         }}
         lazyMount>
         <Menu.Trigger asChild position="relative">
-          <IconButton
-            rounded="full"
-            aria-label={t("Filters")}
-            border="1px solid #D5D5D5"
-            color={"contrast-fg-on-muted"}
-            gap={2}>
+          <IconButton variant="subtle" rounded="full" aria-label={t("Filters")} border="1px solid #D5D5D5" gap={2}>
             <UilFilter />
             {activeFiltersCount > 0 && (
               <Flex
@@ -148,7 +143,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
               </Center>
             }
             endMessage={
-              <Heading size="md" textAlign={"center"} mt={4}>
+              <Heading size="xl" textAlign={"center"} mt={4}>
                 {t("You reached the end!")}
               </Heading>
             }>

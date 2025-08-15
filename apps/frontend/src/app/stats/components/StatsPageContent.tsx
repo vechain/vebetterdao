@@ -381,7 +381,7 @@ export const StatsPageContent = () => {
         </VStack>
         {selectedAppId && topUsersForSelectedApp.length > 0 ? (
           <VStack w="full" gap={4}>
-            <Heading size="sm">
+            <Heading size="md">
               {t("Users by Rewards for")} {appActions[selectedAppId]?.name}
             </Heading>
             <DrillDownBarChart data={topUsersForSelectedApp} />

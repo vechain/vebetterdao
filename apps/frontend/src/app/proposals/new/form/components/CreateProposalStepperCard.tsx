@@ -1,5 +1,5 @@
 import { useProposalFormStore } from "@/store"
-import { Box, Card, Circle, Heading, Steps, useSteps } from "@chakra-ui/react"
+import { Box, Card, Circle, Heading, Steps } from "@chakra-ui/react"
 import { TFunction } from "i18next"
 import { usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -40,19 +40,15 @@ export const CreateProposalStepperCard = () => {
   const pathname = usePathname()
   const { actions } = useProposalFormStore()
   const [steps, setSteps] = useState<CreateProposalStep[]>([])
-
-  const { value: activeStep, setStep: setActiveStep } = useSteps({
-    defaultStep: 0,
-    count: steps.length,
-  })
+  const [step, setStep] = useState(1)
 
   //set active step based on the current pathname
   useEffect(() => {
     const step = steps.find(step => step.pathnames?.includes(pathname))
     if (step) {
-      setActiveStep(steps.indexOf(step))
+      setStep(steps.indexOf(step))
     }
-  }, [pathname, setActiveStep, steps])
+  }, [pathname, setStep, steps])
 
   //set steps based on the current actions + pathname
   useEffect(() => {
@@ -78,7 +74,9 @@ export const CreateProposalStepperCard = () => {
         <Steps.Root
           variant={"primaryVertical"}
           size="xs"
-          step={activeStep}
+          step={step}
+          onStepChange={e => setStep(e.step)}
+          count={steps.length}
           orientation="vertical"
           colorPalette="primary"
           gap="0"
@@ -88,9 +86,9 @@ export const CreateProposalStepperCard = () => {
               <Steps.Item key={step.key} index={index}>
                 <Steps.Indicator>
                   <Steps.Status
-                    incomplete={<Circle bg="#004CFC" size={"0%"} />}
-                    complete={<Circle bg="#004CFC" size={"30%"} />}
-                    current={<Circle bg="#004CFC" size={"50%"} />}
+                    incomplete={<Circle bg="#004CFC" size="0" />}
+                    complete={<Circle bg="#004CFC" size="2" />}
+                    current={<Circle bg="#004CFC" size="3" />}
                   />
                 </Steps.Indicator>
                 <Box flexShrink="0">

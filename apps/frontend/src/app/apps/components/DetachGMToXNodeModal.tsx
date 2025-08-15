@@ -42,7 +42,6 @@ export const DetachGMToXNodeModal = ({ gmId, xNodeId, isOpen, onClose }: Props) 
 
   return (
     <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={details => !details.open && handleClose()}>
-      <Dialog.Backdrop />
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <Dialog.CloseTrigger />
         <Dialog.Header>

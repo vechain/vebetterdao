@@ -9,7 +9,7 @@ import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { Box, Circle, Steps } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { v4 as uuid } from "uuid"
 
 type Props = {
@@ -52,28 +52,28 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
 const AllocationRoundTimeline = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
 
-  const activeStep = useMemo(() => {
+  const [step, setStep] = useState(1)
+
+  useEffect(() => {
     const stateNumber = Number(roundInfo.state)
-    switch (stateNumber) {
-      case 0:
-        return 1
-      case 1:
-        return 3
-      case 2:
-        return 3
-      default:
-        return 0
+
+    if (stateNumber === 0) {
+      setStep(1)
+    } else if (stateNumber === 1 || stateNumber === 2) {
+      setStep(3)
+    } else {
+      setStep(0)
     }
-  }, [roundInfo])
+  }, [roundInfo.state])
 
   const steps = useMemo(
     () => [
       {
-        title: activeStep > 0 ? t("Voting session started") : t("Voting session starts"),
+        title: step > 1 ? t("Voting session started") : t("Voting session starts"),
         description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A"),
       },
       {
-        title: activeStep > 1 ? t("Voting session ended") : t("Voting session ends"),
+        title: step > 2 ? t("Voting session ended") : t("Voting session ends"),
         description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A"),
       },
       {
@@ -81,13 +81,14 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
         description: "",
       },
     ],
-    [roundInfo, activeStep],
+    [roundInfo, step],
   )
 
   return (
     <Steps.Root
-      size="sm"
-      step={activeStep}
+      size="xs"
+      step={step}
+      count={steps.length}
       orientation="vertical"
       colorPalette="primary"
       gap="0"
@@ -99,9 +100,9 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
           <Steps.Item key={`allocation-round-session-step-${uuid()}`} index={index}>
             <Steps.Indicator>
               <Steps.Status
-                incomplete={<Circle bg="#004CFC" size={"30%"} />}
-                complete={<Circle bg="#004CFC" size={"30%"} />}
-                current={<Circle bg="#004CFC" size={"60%"} />}
+                incomplete={<Circle bg="#004CFC" size="0" />}
+                complete={<Circle bg="#004CFC" size="2" />}
+                current={<Circle bg="#004CFC" size="3" />}
               />
             </Steps.Indicator>
 

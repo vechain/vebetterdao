@@ -118,9 +118,9 @@ export const ProposalTimeline = () => {
             <Steps.Item key={`proposal-timeline-step-${step.key}`} index={index} style={{ width: "100%" }}>
               <Steps.Indicator>
                 <Steps.Status
-                  incomplete={<Circle bg="#004CFC" size={"0%"} />}
-                  complete={<Circle bg="#004CFC" size={"30%"} />}
-                  current={<Circle bg="#004CFC" size={"50%"} />}
+                  incomplete={<Circle bg="#004CFC" size="0" />}
+                  complete={<Circle bg="#004CFC" size="30%" />}
+                  current={<Circle bg="#004CFC" size="50%" />}
                 />
               </Steps.Indicator>
               {step}

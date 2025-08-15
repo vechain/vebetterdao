@@ -30,7 +30,7 @@ export const AppPreviewDetailCard = ({
     if (isMobile) {
       return (
         <>
-          <IconButton rounded={"full"} onClick={openMobileOptions} aria-label="Open app options">
+          <IconButton variant="subtle" rounded={"full"} onClick={openMobileOptions} aria-label="Open app options">
             <FaEllipsisVertical />
           </IconButton>
           <AppCardOptionsMobileModal

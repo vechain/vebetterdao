@@ -40,24 +40,19 @@ export const AppCardOptionsDesktopMenu = ({
 
   return (
     <Menu.Root>
-      <Menu.Trigger>
+      <Menu.Trigger asChild>
         <IconButton
+          variant="subtle"
           rounded="full"
           _hover={{
             cursor: "default",
-          }}
-          onClick={e => {
-            e.stopPropagation()
           }}>
           <FaEllipsisVertical />
         </IconButton>
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content
-            onClick={e => {
-              e.stopPropagation()
-            }}>
+          <Menu.Content bg="#2D3748">
             <Skeleton loading={isLoading}>
               {showViewDetails && (
                 <Menu.Item value="view-details" onClick={navigateToAppDetail}>
@@ -65,7 +60,7 @@ export const AppCardOptionsDesktopMenu = ({
                   {t("View details")}
                 </Menu.Item>
               )}
-              <Menu.Item value="go-to-app" asChild disabled={!externalUrl}>
+              <Menu.Item value="go-to-app" disabled={!externalUrl}>
                 <FaExternalLinkAlt />
                 <Link href={externalUrl ?? ""} target="_blank" rel="noreferrer">
                   {externalUrl ? t("Go to the App") : t("No App link available")}

@@ -63,7 +63,6 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
-      <Dialog.Backdrop />
       <CustomModalContent>
         <Dialog.Body p={"40px"}>
           <VStack align="stretch" gap="32px">

@@ -85,7 +85,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             h="full"
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
-            <Heading size="sm">{t("Not enough data for the week")}</Heading>
+            <Heading size="md">{t("Not enough data for the week")}</Heading>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
@@ -169,7 +169,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             <Icon as={FaAngleLeft} boxSize={5} />
           </IconButton>
 
-          <Heading size={["sm", "sm", "xl"]} fontWeight="bold">
+          <Heading size={{ base: "md", lg: "xl" }} fontWeight="bold">
             {t("Round {{id}} leaderboard", {
               id: selectedRoundId ?? "",
             })}

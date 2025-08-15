@@ -17,7 +17,7 @@ export const UploadFileButton = forwardRef<HTMLButtonElement, Props>(({ onChange
       cursor="pointer"
       // htmlFor={id}
       variant="outline"
-      colorScheme="primary"
+      colorPalette="blue"
       rounded="full"
       {...props}>
       <FaFile />

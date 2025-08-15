@@ -7,7 +7,7 @@ import { stepsSlotRecipe } from "./steps"
 import { buttonRecipe } from "./button"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
-// import { headingRecipe } from "./heading"
+import { headingRecipe } from "./heading"
 
 const config = defineConfig({
   //preflight: true,
@@ -15,7 +15,7 @@ const config = defineConfig({
 
   theme: {
     recipes: {
-      // heading: headingRecipe,
+      heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
     },
@@ -62,9 +62,6 @@ const config = defineConfig({
 
     semanticTokens: {
       fonts: {
-        // body: { value: "var(--font-inter)" },
-        // heading: { value: "var(--font-instrument-sans)" },
-
         body: {
           value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
         },
@@ -190,6 +187,17 @@ const config = defineConfig({
         },
 
         // --- new colors ---
+
+        // TODO: add these colors to the theme to use primary as color palette
+        // primary: {
+        //   solid: { value: "{colors.primary.500}" },
+        //   contrast: { value: "{colors.primary.100}" },
+        //   fg: { value: "{colors.primary.700}" },
+        //   muted: { value: "{colors.primary.100}" },
+        //   subtle: { value: "{colors.primary.200}" },
+        //   emphasized: { value: "{colors.primary.300}" },
+        //   focusRing: { value: "{colors.primary.500}" },
+        // },
 
         // Logo
         logo: {

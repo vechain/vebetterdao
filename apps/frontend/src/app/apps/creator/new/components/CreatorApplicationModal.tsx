@@ -33,7 +33,6 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
     if (status === "error" || errorMessage) {
       return (
         <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()} placement="center">
-          <Dialog.Backdrop />
           <CustomModalContent>
             <ErrorModalContent title={t("Error submitting form")} description={errorMessage} />
           </CustomModalContent>
@@ -53,7 +52,6 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
   }, [status, errorMessage, isOpen, handleClose, onButtonClick, t])
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()} placement="center">
-      <Dialog.Backdrop />
       <CustomModalContent>{modalContent}</CustomModalContent>
     </Dialog.Root>
   )

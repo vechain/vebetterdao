@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next"
 import { AnalyticsUtils } from "@/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { queryClient, useUserBotSignals, useUserSignalEvents, useXApps } from "@/api"
-import { VStack, Heading, Spinner, Steps, Box, useSteps, Link, Text, Alert, List } from "@chakra-ui/react"
-import { UilTimesCircle } from "@iconscout/react-unicons"
+import { VStack, Heading, Spinner, Steps, Box, Link, Text, Alert, List } from "@chakra-ui/react"
 
 import { useRouter } from "next/navigation"
 import { getVerifiedVetDomainQueryKey, useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
@@ -86,10 +85,7 @@ export const AppealSteps = () => {
     }
   }
 
-  const { value: activeStep, setStep: setActiveStep } = useSteps({
-    step: getActiveStepIndex(),
-    count: STEPS.length,
-  })
+  const [step, setStep] = useState(getActiveStepIndex())
 
   const handleResetingSignal = useCallback(async () => {
     if (!connectedAccount?.address) {
@@ -119,7 +115,7 @@ export const AppealSteps = () => {
 
         setResetingStatus(RESET_STATUS.SUCCESS)
         setApiResponse(data.message)
-        setActiveStep(3) // After successful reseting signal count
+        setStep(3) // After successful reseting signal count
 
         AnalyticsUtils.trackEvent(signalReset, signalResetActions(SignalResetProperties.SIGNAL_RESET_SUCCESS))
       } else {
@@ -130,17 +126,17 @@ export const AppealSteps = () => {
       setResetingStatus(RESET_STATUS.ERROR)
       setApiResponse(error)
     }
-  }, [connectedAccount?.address, setActiveStep])
+  }, [connectedAccount?.address, setStep])
 
   useEffect(() => {
     if (resetingStatus === RESET_STATUS.SUCCESS) {
-      setActiveStep(3)
+      setStep(3)
     } else if (isVerified) {
-      setActiveStep(2)
+      setStep(2)
     } else {
-      setActiveStep(1)
+      setStep(1)
     }
-  }, [resetingStatus, isVerified, setActiveStep])
+  }, [resetingStatus, isVerified, setStep])
 
   // Refresh verification status when returning from vet.domains
   useEffect(() => {
@@ -228,19 +224,21 @@ export const AppealSteps = () => {
         }
       </Text>
 
-      <Steps.Root step={activeStep} size="lg" orientation="vertical" height="350px" gap="0" overflow="visible">
+      <Steps.Root
+        defaultStep={1}
+        step={step}
+        onStepChange={e => setStep(e.step)}
+        count={STEPS.length}
+        size="lg"
+        orientation="vertical"
+        height="350px"
+        gap="0"
+        overflow="visible"
+        colorPalette="blue">
         <Steps.List>
           {STEPS.map((step, index) => (
             <Steps.Item key={step.id} index={index}>
-              <Steps.Indicator>
-                {index === 2 && resetingStatus === RESET_STATUS.PENDING ? (
-                  <Spinner size="sm" />
-                ) : index === 2 && resetingStatus === RESET_STATUS.ERROR ? (
-                  <UilTimesCircle color="#FF0000" />
-                ) : (
-                  <Steps.Status complete={<Steps.Number />} incomplete={<Steps.Number />} current={<Steps.Number />} />
-                )}
-              </Steps.Indicator>
+              <Steps.Indicator colorPalette="blue.500" />
 
               <Box flexShrink="1" minWidth="0">
                 <Steps.Title>{step.title}</Steps.Title>

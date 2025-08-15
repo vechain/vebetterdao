@@ -221,7 +221,7 @@ export const DatePicker = ({
               <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)} disabled={isPrevMonthDisabled}>
                 <FaChevronLeft />
               </Button>
-              <Heading size="sm" textAlign="center">
+              <Heading size="md" textAlign="center">
                 {monthName.toUpperCase()}
               </Heading>
               <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>

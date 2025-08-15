@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react"
-import { Text, VStack, HStack, Card, useClipboard, IconButton, Stack, Heading } from "@chakra-ui/react"
+import { Text, VStack, HStack, Card, useClipboard, IconButton, Stack, Heading, Icon } from "@chakra-ui/react"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
@@ -45,11 +45,12 @@ export const ProfileHeader = ({ address }: Props) => {
                 </Text>
 
                 <IconButton
+                  boxSize={6}
                   variant="plain"
-                  colorPalette={isCopied ? "green" : "primary"}
+                  color={isCopied ? "green" : "primary"}
                   onClick={handleCopy}
                   aria-label="Copy Address">
-                  {isCopied ? <UilCheck /> : <UilCopy />}
+                  <Icon as={isCopied ? UilCheck : UilCopy} boxSize={6} />
                 </IconButton>
               </HStack>
             </Stack>

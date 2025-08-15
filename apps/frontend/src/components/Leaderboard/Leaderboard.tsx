@@ -3,7 +3,6 @@ import {
   useSustainabilitySingleUserOverview,
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
-import NextLink from "next/link"
 
 import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
@@ -105,7 +104,7 @@ export const Leaderboard = () => {
             h="full"
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
-            <Heading size="sm">{t("Not enough data for the week")}</Heading>
+            <Heading size="md">{t("Not enough data for the week")}</Heading>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
               {t("Leaderboard is available since the integration of sustainability proofs 🥇")}
             </Text>
@@ -139,7 +138,7 @@ export const Leaderboard = () => {
             <HStack justify={"space-between"} w="full">
               <IconButton
                 minW={0}
-                size={"lg"}
+                boxSize={6}
                 aria-label="Next round"
                 variant="ghost"
                 color="primary"
@@ -148,7 +147,7 @@ export const Leaderboard = () => {
                 <Icon as={FaAngleLeft} boxSize={5} />
               </IconButton>
               <Skeleton loading={roundIdLoading}>
-                <Heading size={["sm", "sm", "md"]}>
+                <Heading size={{ base: "md", lg: "xl" }}>
                   {t("Round {{id}} leaderboard", {
                     id: selectedRoundId ?? "",
                   })}
@@ -156,7 +155,7 @@ export const Leaderboard = () => {
               </Skeleton>
               <IconButton
                 minW={0}
-                size={"lg"}
+                boxSize={6}
                 aria-label="Next round"
                 variant="ghost"
                 color="primary"
@@ -181,8 +180,13 @@ export const Leaderboard = () => {
             )}
           </VStack>
           <Separator w="full" h={1} />
-          <Link asChild variant={"plain"} color="primary" mx="auto">
-            <NextLink href={`/leaderboard/${selectedRoundId}`}>{t("See full leaderboard")}</NextLink>
+          <Link
+            href={`/leaderboard/${selectedRoundId}`}
+            variant={"plain"}
+            color="primary"
+            fontWeight="semibold"
+            mx="auto">
+            {t("See full leaderboard")}
           </Link>
         </VStack>
       </Card.Body>

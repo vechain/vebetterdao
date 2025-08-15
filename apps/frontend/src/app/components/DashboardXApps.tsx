@@ -97,7 +97,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
 
             <VStack gap={1} align="flex-start" w={"fit-content"}>
               <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-                <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
+                <Heading size={"md"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
               </Skeleton>
             </VStack>
           </HStack>

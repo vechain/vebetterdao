@@ -47,7 +47,7 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
           </Skeleton>
 
           <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-            <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
+            <Heading size={"md"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
             <Text fontSize={"sm"} fontWeight={"300"} color={"#6A6A6A"}>
               {role}
             </Text>

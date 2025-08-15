@@ -15,8 +15,8 @@ export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
 
   return (
     <Dialog.Root size={"full"} open={isOpen} onOpenChange={details => !details.open && onClose()}>
-      <Dialog.Backdrop />
       <Portal>
+        <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content m={0} h={"100vh"} borderRadius={0} overflow={"auto"}>
             <Dialog.Header pos="sticky" top={0} left={0} bg={headerBg}>

@@ -122,6 +122,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Container
                 mt={{ base: 2, md: 10 }}
                 mb={[20, 20, 20]}
+                px={[4, 4, 4]}
                 maxW="breakpoint-xl"
                 display={"flex"}
                 flex={1}

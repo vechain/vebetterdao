@@ -64,6 +64,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
           return (
             <Button
+              border="none"
               colorPalette={selected ? "primary" : "gray"}
               rounded={"full"}
               w={["full", "full", "auto"]}
@@ -74,7 +75,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
               fontWeight="semibold"
               fontSize="md"
               data-testid={selected ? "current-section" : ""}>
-              <Icon as={route.icon} />
+              <Icon as={route.icon} boxSize={4} />
               {route.name}
             </Button>
           )
