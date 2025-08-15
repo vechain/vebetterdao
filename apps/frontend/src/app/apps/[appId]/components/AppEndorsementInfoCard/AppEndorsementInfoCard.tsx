@@ -134,6 +134,8 @@ export const AppEndorsementInfoCard = ({
         <Link
           key="lookForEndorsersButton"
           href={DISCORD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           w="full"
           onClick={() =>
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))

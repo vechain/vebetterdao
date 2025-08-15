@@ -38,7 +38,7 @@ export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
           </Text>
           <HStack>
             {image}
-            <Text fontSize={28} fontWeight={700} fontFamily="var(--font-instrument-sans)" data-testid={dataTestId}>
+            <Text fontSize={28} fontWeight={700} data-testid={dataTestId}>
               {compactFormatter.format(Number(balanceScaled))}
             </Text>
           </HStack>

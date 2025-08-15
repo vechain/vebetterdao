@@ -143,7 +143,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
       <VStack alignItems={"flex-start"}>
         <Image src="/assets/icons/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
-        <Text fontSize={24} fontWeight={700} fontFamily="var(--font-instrument-sans)">
+        <Text fontSize={24} fontWeight={700}>
           {t("Voting rewards")}
         </Text>
         <Box mt={3} mb={1}>

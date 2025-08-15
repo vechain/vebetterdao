@@ -17,7 +17,7 @@ type Props = {
 }
 export const AppPreviewDetailCard = ({
   app,
-  appMetadataLoading,
+  appMetadataLoading = false,
   appMetadataError,
   isLogoLoading,
   isBannerLoading,

@@ -95,6 +95,7 @@ export const ProposalsFilters = (props: Props) => {
       {!isStateFilter ? (
         <HStack
           justifyContent={"space-between"}
+          p={1}
           gap={2}
           overflowY={"visible"}
           overflowX={"auto"}
@@ -127,7 +128,8 @@ export const ProposalsFilters = (props: Props) => {
                 lineHeight="inherit"
                 h="auto"
                 minW={"auto"}
-                variant="outline"
+                variant="surface"
+                colorPalette="gray"
                 px={4}
                 py={3}
                 key={filterKey}

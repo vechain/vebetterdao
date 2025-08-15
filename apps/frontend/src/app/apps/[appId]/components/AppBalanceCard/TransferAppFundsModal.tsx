@@ -6,6 +6,7 @@ import { DepositModal } from "./DepositModal"
 import { FundsManagementModal } from "./FundsManagementModal"
 
 import { XApp, UnendorsedApp } from "@/api/contracts/xApps"
+import { useBreakpoints } from "@/hooks"
 
 type Props = {
   app: XApp | UnendorsedApp
@@ -19,6 +20,7 @@ type Props = {
 
 export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused, isAppAdmin }: Props) => {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoints()
 
   const { open: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
   const { open: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
@@ -30,7 +32,11 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
 
   return (
     <>
-      <Dialog.Root open={isOpen} onOpenChange={onClose} placement="center">
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={onClose}
+        placement={isMobile ? "bottom" : "center"}
+        motionPreset="slide-in-bottom">
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>

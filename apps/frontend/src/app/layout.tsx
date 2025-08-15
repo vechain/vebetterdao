@@ -3,18 +3,17 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { Inter, Instrument_Sans } from "next/font/google"
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-})
-const instrumentSans = Instrument_Sans({
-  variable: "--font-instrument-sans",
-  subsets: ["latin"],
-  display: "swap",
-})
+// import { Inter, Instrument_Sans } from "next/font/google"
+// const inter = Inter({
+//   variable: "--font-inter",
+//   subsets: ["latin"],
+//   display: "swap",
+// })
+// const instrumentSans = Instrument_Sans({
+//   variable: "--font-instrument-sans",
+//   subsets: ["latin"],
+//   display: "swap",
+// })
 
 import { Footer, TransactionModal } from "@/components"
 import dynamic from "next/dynamic"
@@ -79,7 +78,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       style={{
         scrollBehavior: "smooth",
       }}
-      className={`${inter.variable} ${instrumentSans.variable}`}>
+      // className={`${inter.variable} ${instrumentSans.variable}`}
+    >
       <head>
         <title>{t("VeBetterDAO")}</title>
         <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO's governance." />

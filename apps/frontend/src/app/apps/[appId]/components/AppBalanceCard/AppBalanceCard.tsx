@@ -96,7 +96,7 @@ export const AppBalanceCard = () => {
                 </Tooltip>
               </HStack>
               <Skeleton loading={isBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+                <Heading size={{ base: "2xl", md: "4xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
               </Skeleton>
             </VStack>
 
@@ -128,7 +128,7 @@ export const AppBalanceCard = () => {
                 </Tooltip>
               </HStack>
               <Skeleton loading={isRewardsBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "xl" }} color={rewardsPoolColor}>
+                <Heading size={{ base: "2xl", md: "4xl" }} color={rewardsPoolColor}>
                   {compactFormatter.format(Number(rewardsBalance?.scaled || 0))}
                 </Heading>
               </Skeleton>

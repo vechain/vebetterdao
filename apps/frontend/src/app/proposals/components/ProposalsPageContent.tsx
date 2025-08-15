@@ -60,7 +60,7 @@ export const ProposalsPageContent = () => {
         <HStack gap={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
           <Box>
             <HStack gap={3} alignItems={"center"}>
-              <Heading as="h1" size="xl">
+              <Heading as="h1" size="4xl">
                 {t("Proposals")}
               </Heading>
             </HStack>
