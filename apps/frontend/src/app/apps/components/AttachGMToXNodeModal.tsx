@@ -27,7 +27,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
