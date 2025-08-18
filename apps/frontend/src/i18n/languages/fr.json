@@ -1765,5 +1765,14 @@
   "VeWorld assets": "Actifs de VeWorld",
   "Featured Image": "Image en vedette",
   "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "Les actifs de VeWorld sont utilisés pour afficher l'application dans le portefeuille mobile VeWorld. Incluez-les pour rendre votre application plus engageante. ✨",
-  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Taille recommandée : 800×400. Maintenez un rapport d'aspect de 2:1."
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Taille recommandée : 800×400. Maintenez un rapport d'aspect de 2:1.",
+  "To apply for a proposal, you must": "Pour postuler à une proposition, vous devez",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "Obtenez un <b>Galaxy Member - {{gmName}} NFT</b>. Vous pouvez améliorer votre NFT en GM {{gmName}} NFT ou l'acheter.",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Créez un fil de discussion sur votre proposition sur le forum <b>VeChain Discourse</b> au moins 3 jours avant de le soumettre sur VeBetterDAO.",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Ayez une discussion sur votre proposition sur le forum <b>VeChain Discourse</b> au moins 3 jours avant de la soumettre sur VeBetterDAO.",
+  "Create Discourse": "Créer un forum",
+  "Apply": "Postuler",
+  "Get NFT": "Obtenez un NFT",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Inclut <bold>{{depositsVotes}} VOT3</bold> des propositions de soutien",
+  "More info about your votes at snapshot": "Plus d'informations sur vos votes lors du snapshot"
 }
