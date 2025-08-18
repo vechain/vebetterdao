@@ -159,7 +159,7 @@ contract XAllocationVoting is
    * @dev Initializes the contract with the B3TRGovernor contract.
    * @param _b3trGovernor The address of the B3TRGovernor contract.
    */
-  function initializeV7(IB3TRGovernor _b3trGovernor) public reinitializer(7) {
+  function initializeV7(IB3TRGovernor _b3trGovernor) public onlyRole(UPGRADER_ROLE) reinitializer(7) {
     __ExternalContracts_init_v3(_b3trGovernor);
   }
 
