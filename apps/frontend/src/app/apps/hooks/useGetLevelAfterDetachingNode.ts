@@ -12,5 +12,8 @@ export const useGetLevelAfterDetachingNode = (tokenId: string) => {
     address,
     method,
     args: [BigInt(tokenId)],
+    queryOptions: {
+      select: data => data[0].toString(),
+    },
   })
 }

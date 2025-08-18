@@ -172,6 +172,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
       </Stack>
       <DetachGMToXNodeModal
         gmId={gm.tokenId}
+        gmLevel={gm.tokenLevel}
         xNodeId={gm.nodeIdAttached ?? ""}
         isOpen={isDetachGMToXNodeModalOpen}
         onClose={() => {

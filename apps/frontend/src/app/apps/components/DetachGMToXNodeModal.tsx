@@ -23,12 +23,13 @@ import { useGetLevelAfterDetachingNode } from "../hooks/useGetLevelAfterDetachin
 
 type Props = {
   gmId: string
+  gmLevel: string
   xNodeId: string
   isOpen: boolean
   onClose: () => void
 }
 
-export const DetachGMToXNodeModal = ({ gmId, xNodeId, isOpen, onClose }: Props) => {
+export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
 
@@ -57,16 +58,18 @@ export const DetachGMToXNodeModal = ({ gmId, xNodeId, isOpen, onClose }: Props) 
           <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
         </ModalHeader>
         <ModalBody>
-          <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
-            <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
-            <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
-              <Trans
-                i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
-                values={{ level: levelAfterDetach }}
-                components={{ bold: <Text as="span" fontWeight={"600"} /> }}
-              />
-            </Text>
-          </HStack>
+          {levelAfterDetach && gmLevel !== levelAfterDetach && (
+            <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
+              <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
+              <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
+                <Trans
+                  i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
+                  values={{ level: levelAfterDetach }}
+                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                />
+              </Text>
+            </HStack>
+          )}
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
