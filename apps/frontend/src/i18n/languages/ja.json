@@ -1765,5 +1765,14 @@
   "VeWorld assets": "VeWorld資産",
   "Featured Image": "特集画像",
   "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld資産は、VeWorldモバイルウォレットにアプリを表示するために使用されます。アプリをより魅力的にするために含めてください。✨",
-  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "推奨サイズ: 800×400。2:1のアスペクト比を維持します。"
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "推奨サイズ: 800×400。2:1のアスペクト比を維持します。",
+  "To apply for a proposal, you must": "提案に応募するには、次のことを行う必要があります。",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "<b>Galaxy Member - {{gmName}} NFT</b> を入手してください。NFTをGM {{gmName}} NFTにアップグレードするか、購入することができます。",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "<b>VeChain Discourse</b>フォーラムに提案についてのディスカッションスレッドを作成し、VeBetterDAOで提出する3日前までに行ってください。",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "<b>VeChain Discourse</b>フォーラムで提案についてのディスカッションを行い、VeBetterDAOで提出する3日前までに行ってください。",
+  "Create Discourse": "ディスコースを作成",
+  "Apply": "申し込み",
+  "Get NFT": "NFTを入手",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "サポートしている提案からの<bold>{{depositsVotes}} VOT3</bold>を含む",
+  "More info about your votes at snapshot": "スナップショットでの投票に関する詳細情報"
 }
