@@ -32,7 +32,7 @@ export const useProposalEnriched = () => {
       standardProposalStates: [],
     },
     isLoading: isLoadingStates,
-  } = useAllProposalsState(standardProposalsProposalIds, grantProposalsProposalIds)
+  } = useAllProposalsState(grantProposalsProposalIds, standardProposalsProposalIds)
 
   // Step 4: Merge all the data
 
