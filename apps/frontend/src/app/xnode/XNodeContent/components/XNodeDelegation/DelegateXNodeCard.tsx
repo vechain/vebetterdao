@@ -26,7 +26,7 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const ownerDomain = vnsOwnerData?.domain
 
   const isOwner = compareAddresses(account?.address ?? "", xNodeOwner ?? "")
-  const displayAddress = isOwner ? (delegateeDomain ?? delegatee) : (ownerDomain ?? xNodeOwner)
+  const displayAddress = isOwner ? delegateeDomain ?? delegatee : ownerDomain ?? xNodeOwner
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (

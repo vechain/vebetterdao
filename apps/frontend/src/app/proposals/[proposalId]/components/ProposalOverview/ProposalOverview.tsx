@@ -38,8 +38,8 @@ export const ProposalOverview = () => {
     <Card variant="baseWithBorder" w="full" borderRadius={"3xl"}>
       <CardBody>
         <Stack direction={["column", "row"]} justify="space-between" spacing={12} w="full" alignItems={"stretch"}>
-          <VStack spacing={4} align="flex-start" flex={2} justify={"space-between"}>
-            <VStack spacing={2} align="flex-start">
+          <VStack spacing={4} align="flex-start" flex={2} justify={"space-between"} minW={0}>
+            <VStack spacing={2} align="flex-start" w="full">
               <HStack justify={"space-between"} align={"center"} w="full">
                 <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading}>
                   <Text color="#6A6A6A" fontSize={["md"]} textTransform={"uppercase"} fontWeight={600}>
@@ -59,13 +59,19 @@ export const ProposalOverview = () => {
               </Skeleton>
               <Spacer h={"24px"} />
               <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
-                <Text color="gray.500" fontSize={["sm", "md"]}>
+                <Text
+                  color="gray.500"
+                  fontSize={["sm", "md"]}
+                  wordBreak="break-word"
+                  overflowWrap="break-word"
+                  whiteSpace="pre-wrap"
+                  maxW="100%">
                   {proposal.description}
                 </Text>
               </SkeletonText>
             </VStack>
 
-            <Divider color={"#D5D5D5"} />
+            <Divider color={"#D5D5D5"} w="100%" />
             <Stack
               direction={["column", "column", "row"]}
               w="full"

@@ -60,6 +60,7 @@ export type AppConfig = {
   passportLibraries: PassportLibraries
   b3trMultiSigAddress?: string
   stargateNFTContractAddress: string
+  grantsManagerContractAddress: string
   nodeUrl: string
   indexerUrl?: string
   network: Network

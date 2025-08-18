@@ -137,5 +137,8 @@ export function createTestnetConfig() {
     STARGATE_NFT_CONTRACT_ADDRESS: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
     STARGATE_DELEGATE_CONTRACT_ADDRESS: "0x7240e3bc0d26431512d5b67dbd26d199205bffe8",
     NODE_MANAGEMENT_CONTRACT_ADDRESS: "0x8bcbfc20ee39c94f4e60afc5d78c402f70b4f3b2",
+
+    // Milestones
+    MINIMUM_MILESTONE_COUNT: 2, // test-compatibility
   })
 }

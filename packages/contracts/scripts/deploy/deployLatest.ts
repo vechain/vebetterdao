@@ -15,7 +15,7 @@ import {
   NodeManagementV3,
   VeBetterPassport,
   X2EarnCreator,
-  StargateNFT,
+  GrantsManager,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -411,6 +411,10 @@ export async function deployLatest(config: ContractsConfig) {
         name: "initializeV2",
         args: [veBetterPassportContractAddressTemp],
       },
+      {
+        name: "initializeV7",
+        args: [TEMP_ADMIN],
+      },
     ],
     {},
     true,
@@ -497,6 +501,22 @@ export async function deployLatest(config: ContractsConfig) {
         name: "initializeV4",
         args: [await veBetterPassport.getAddress()],
       },
+      {
+        name: "initializeV7",
+        args: [
+          {
+            grantDepositThreshold: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD, //Grant deposit threshold
+            grantVotingThreshold: config.B3TR_GOVERNOR_GRANT_VOTING_THRESHOLD, //Grant voting threshold
+            grantQuorum: config.B3TR_GOVERNOR_GRANT_QUORUM_PERCENTAGE, //Grant quorum percentage
+            grantDepositThresholdCap: config.B3TR_GOVERNOR_GRANT_DEPOSIT_THRESHOLD_CAP, //Grant deposit threshold cap
+            standardDepositThresholdCap: config.B3TR_GOVERNOR_STANDARD_DEPOSIT_THRESHOLD_CAP, //Standard deposit threshold cap
+            standardGMWeight: config.B3TR_GOVERNOR_STANDARD_GM_WEIGHT, //Standard GM weight
+            grantGMWeight: config.B3TR_GOVERNOR_GRANT_GM_WEIGHT, //Grant GM weight
+            galaxyMember: await galaxyMember.getAddress(),
+            grantsManager: TEMP_ADMIN,
+          },
+        ],
+      },
     ],
     {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -511,6 +531,24 @@ export async function deployLatest(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
+  const grantsManager = (await deployAndInitializeLatest(
+    "GrantsManager",
+    [
+      {
+        name: "initialize",
+        args: [
+          await governor.getAddress(),
+          await treasury.getAddress(),
+          TEMP_ADMIN,
+          await b3tr.getAddress(),
+          config.MINIMUM_MILESTONE_COUNT, // minimum milestone count
+        ],
+      },
+    ],
+    {},
+    true,
+  )) as GrantsManager
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -519,6 +557,7 @@ export async function deployLatest(config: ContractsConfig) {
     B3TRGovernor: await governor.getAddress(),
     Emissions: await emissions.getAddress(),
     GalaxyMember: await galaxyMember.getAddress(),
+    GrantsManager: await grantsManager.getAddress(),
     TimeLock: await timelock.getAddress(),
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),
@@ -717,6 +756,13 @@ export async function deployLatest(config: ContractsConfig) {
     .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnApps.getAddress())
     .then(async tx => await tx.wait())
 
+  //Setup Governor
+  await governor
+    .connect(deployer)
+    .setGrantsManager(await grantsManager.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("GrantsManager address set in Governor contract")
+
   // Set up X2EarnApps contract
   await x2EarnCreator.grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
   await x2EarnCreator.grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
@@ -797,6 +843,13 @@ export async function deployLatest(config: ContractsConfig) {
     await transferContractsAddressManagerRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
+    // Grant GOVERNANCE_ROLE to admin and set B3TRGovernor in XAllocationVoting
+    await xAllocationVoting
+      .connect(deployer)
+      .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
+      .then(async tx => await tx.wait())
+    console.log("Governance role granted to admin in ", await xAllocationVoting.getAddress())
+    await xAllocationVoting.connect(deployer).setB3TRGovernor(await governor.getAddress())
     await xAllocationVoting
       .connect(deployer)
       .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), config.CONTRACTS_ADMIN_ADDRESS)

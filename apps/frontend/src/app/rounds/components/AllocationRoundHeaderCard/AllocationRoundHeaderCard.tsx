@@ -2,7 +2,7 @@ import {
   useAllocationsRound,
   useAllocationsRoundState,
   useCanUserVote,
-  useGetVotesOnBlock,
+  useTotalVotesOnBlock,
   useHasVotedInRound,
   useUserVotesInRound,
   useVotingThreshold,
@@ -50,10 +50,12 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account?.address ?? undefined)
 
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     data?.voteStart ? Number(data.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: threshold } = useVotingThreshold()
 
