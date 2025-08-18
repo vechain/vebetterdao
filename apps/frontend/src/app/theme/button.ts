@@ -80,8 +80,12 @@ export const ButtonStyle: ComponentStyleConfig = {
       rounded: "full",
       color: "rgba(0, 76, 252, 1)",
       bgColor: "rgba(224, 233, 254, 1)",
+
       _hover: {
-        bg: "#7b818e",
+        bg: "#EBF1FE",
+        _dark: {
+          bg: "#404B5E",
+        },
         _disabled: {
           bg: "rgba(224, 233, 254, 0.7)",
         },

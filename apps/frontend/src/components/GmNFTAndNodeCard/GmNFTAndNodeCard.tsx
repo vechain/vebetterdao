@@ -86,7 +86,7 @@ export const GmNFTAndNodeCard = () => {
 
           {userHasNoNodeOrGm ? (
             <GmEmptyStateCard
-              icon={<Image src="/assets/icons/nft-earth.svg" alt="NFT Earth Illustration" />}
+              icon={<Image src="/assets/icons/nft-earth-dark.png" alt="NFT Earth Illustration" boxSize="60px" />}
               text={t(
                 "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.",
               )}
@@ -107,7 +107,7 @@ export const GmNFTAndNodeCard = () => {
                 />
               ) : (
                 <GmEmptyStateCard
-                  icon={<Image src="/assets/icons/nft-earth.svg" alt="NFT Earth Illustration" />}
+                  icon={<Image src="/assets/icons/nft-earth-dark.png" alt="NFT Earth Illustration" boxSize="60px" />}
                   text={t("Get NFT and start receiving rewards.")}
                 />
               )}
