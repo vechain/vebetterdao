@@ -9,7 +9,6 @@ if (typeof self === "undefined") {
 }
 
 const nextConfig = {
-  transpilePackages: ["@repo/contracts"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
