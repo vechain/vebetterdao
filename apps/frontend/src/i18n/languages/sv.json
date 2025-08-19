@@ -1765,5 +1765,14 @@
   "VeWorld assets": "VeWorld-tillgångar",
   "Featured Image": "Utvald Bild",
   "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld-tillgångar används för att visa appen i VeWorlds mobila plånbok. Inkludera dem för att göra din app mer engagerande. ✨",
-  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Rekommenderad storlek: 800×400. Bibehåll ett bildförhållande på 2:1."
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Rekommenderad storlek: 800×400. Bibehåll ett bildförhållande på 2:1.",
+  "To apply for a proposal, you must": "För att ansöka om ett förslag måste du",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "Skaffa en <b>Galaxy Member - {{gmName}} NFT</b>. Du kan uppgradera din NFT till GM {{gmName}} NFT eller köpa den.",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Skapa en diskussionstråd om ditt förslag på <b>VeChain Discourse</b> forumet minst 3 dagar innan du skickar in det på VeBetterDAO.",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Ha en diskussion om ditt förslag på <b>VeChain Discourse</b> forumet minst 3 dagar innan du skickar in det på VeBetterDAO.",
+  "Create Discourse": "Skapa Discourse",
+  "Apply": "Ansök",
+  "Get NFT": "Skaffa NFT",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Inkluderar <bold>{{depositsVotes}} VOT3</bold> från stödjande förslag",
+  "More info about your votes at snapshot": "Mer information om dina röster vid snapshot"
 }

@@ -1765,5 +1765,14 @@
   "VeWorld assets": "VeWorld 资产",
   "Featured Image": "精选图片",
   "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld 资产用于在 VeWorld 移动钱包中显示应用程序。包括它们以使您的应用程序更具吸引力。✨",
-  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "推荐尺寸：800×400。保持2:1的纵横比。"
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "推荐尺寸：800×400。保持2:1的纵横比。",
+  "To apply for a proposal, you must": "要申请提案，您必须",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "获取<b>银河会员 - {{gmName}} NFT</b>。您可以升级您的NFT为GM {{gmName}} NFT或购买它。",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "在将提案提交到VeBetterDAO之前，至少3天前在<b>VeChain Discourse</b>论坛上创建关于您的提案的讨论线程。",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "在将提案提交到VeBetterDAO之前，至少3天前在<b>VeChain Discourse</b>论坛上讨论您的提案。",
+  "Create Discourse": "创建讨论",
+  "Apply": "申请",
+  "Get NFT": "获取NFT",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "包含来自支持提案的<bold>{{depositsVotes}} VOT3</bold>",
+  "More info about your votes at snapshot": "查看快照上关于您投票的更多信息"
 }

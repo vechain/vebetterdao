@@ -1765,5 +1765,14 @@
   "VeWorld assets": "Tài nguyên VeWorld",
   "Featured Image": "Hình ảnh nổi bật",
   "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "Tài nguyên VeWorld được sử dụng để hiển thị ứng dụng trong ví di động VeWorld. Bao gồm chúng để làm cho ứng dụng của bạn thêm phần hấp dẫn. ✨",
-  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Kích thước khuyến nghị: 800×400. Duy trì tỷ lệ khung hình 2:1."
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Kích thước khuyến nghị: 800×400. Duy trì tỷ lệ khung hình 2:1.",
+  "To apply for a proposal, you must": "Để nộp đề xuất, bạn phải",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "Nhận <b>Thành viên Galaxy - NFT {{gmName}}</b>. Bạn có thể nâng cấp NFT của mình lên GM {{gmName}} NFT hoặc mua nó.",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Tạo một chuỗi thảo luận về đề xuất của bạn trên diễn đàn <b>VeChain Discourse</b> ít nhất 3 ngày trước khi nộp lên VeBetterDAO.",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Có một cuộc thảo luận về đề xuất của bạn trên diễn đàn <b>VeChain Discourse</b> ít nhất 3 ngày trước khi nộp lên VeBetterDAO.",
+  "Create Discourse": "Tạo thảo luận",
+  "Apply": "Áp dụng",
+  "Get NFT": "Nhận NFT",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Bao gồm <bold>{{depositsVotes}} VOT3</bold> từ các đề xuất hỗ trợ",
+  "More info about your votes at snapshot": "Thêm thông tin về phiếu bầu của bạn tại snapshot"
 }

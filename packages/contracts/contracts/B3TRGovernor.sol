@@ -176,7 +176,9 @@ contract B3TRGovernor is
     __GovernorStorage_init_v4(_veBetterPassport);
   }
 
-  function initializeV7(GovernorTypes.InitializationDataV7 memory initializationDataV7) public reinitializer(7) {
+  function initializeV7(
+    GovernorTypes.InitializationDataV7 memory initializationDataV7
+  ) public onlyRole(DEFAULT_ADMIN_ROLE) reinitializer(7) {
     __GovernorStorage_init_v7(initializationDataV7);
   }
 
