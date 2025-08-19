@@ -13,8 +13,7 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
-    "./artifacts/*": "./artifacts/*",
-    "./typechain-types/*": "./typechain-types/*"
+    "./typechain-types": "./typechain-types/index.ts"
   },
   "scripts": {
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
