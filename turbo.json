@@ -32,14 +32,14 @@
   ],
   "tasks": {
     "install": {
-      "dependsOn": ["@repo/contracts#install", "^compile"]
+      "dependsOn": ["@repo/contracts#install"]
     },
     "@repo/contracts#install": {
       "cache": false
     },
     "build": {
       "cache": true,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
+      "dependsOn": ["@repo/contracts#compile", "@repo/config#check-or-generate-local-config"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
