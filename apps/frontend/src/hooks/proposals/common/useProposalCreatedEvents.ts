@@ -61,7 +61,7 @@ export const useProposalCreatedEvents = () => {
         type,
         state: ProposalState.Pending,
         ...(type === ProposalType.Grant && {
-          grantAmount,
+          grantAmount: grantAmount.toNumber() ?? 0,
         }),
       }
 
