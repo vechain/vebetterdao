@@ -31,6 +31,6 @@ jobs:
           PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }} # create this secret in the private repo
         run: |
           # Replace org/repo with your public repo
-          git remote add public https://x-access-token:${PUSH_TOKEN}@github.com/your-org/public-contracts.git
+          git remote add public https://x-access-token:${PUSH_TOKEN}@github.com:vechain/vebetterdao-contracts.git
           # Force-push keeps the public repo perfectly mirrored to the subdir
           git push public contracts-split:refs/heads/main --force
