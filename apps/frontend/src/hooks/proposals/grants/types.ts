@@ -3,43 +3,29 @@ export enum ProposalType {
   Grant,
 }
 
-export type PhaseInfo = {
-  startAt: string
-  endAt: string
-}
-
 export type CommunityInteraction = {
   percentage: number
 }
 
-export type ProposalPhases = {
-  [key in ProposalState]?: PhaseInfo
-}
-
-export type ProposalInteractions = {
-  [key in ProposalState]?: CommunityInteraction[]
-}
-
-export type ProposalEnriched = Proposal & {
+export type ProposalEnriched = ProposalCreatedEvent & {
   title: string
+  shortDescription: string
+  markdownDescription: string
   description: string
   proposerAddress: string
-  grantType?: string
   state: ProposalState
-  phases: {
-    [ProposalState.Pending]: PhaseInfo
-    [ProposalState.Active]: PhaseInfo
-  }
-  communityInteractions?: ProposalInteractions
 }
 
-export type Proposal = {
+export type GrantProposalEnriched = ProposalEnriched &
+  Omit<GrantFormData, "termsOfService"> & {
+    grantType: string
+    grantAmount: number
+  }
+
+export type ProposalCreatedEvent = {
   id: string
-  description?: string
-  state: ProposalState
   type: ProposalType
   ipfsDescription: string
-  grantAmount?: number
   votingRoundId: string
   depositThreshold: string
   proposerAddress: string
@@ -92,21 +78,6 @@ export type GrantFormData = {
   // Terms of service
   termsOfService: boolean
 }
-export type GrantProposalMetadata = Omit<GrantFormData, "termsOfService"> & {
-  title: string
-  shortDescription: string
-}
-
-export type StandardProposalMetadata = Proposal & {
-  title: string
-  shortDescription: string
-  markdownDescription: string
-}
-
-type GrantProposalMilestones = GrantFormData["milestones"]
-
-export type GrantProposalMetadataOptions = GrantProposalMetadata | GrantProposalMilestones
-export type ProposalDetails = Record<string, GrantProposalMetadata & Proposal>
 
 export enum ProposalState {
   // Extend Standard states

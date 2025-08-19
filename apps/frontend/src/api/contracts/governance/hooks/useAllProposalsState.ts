@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, GrantsManager__factory } from "@repo/contracts"
@@ -11,7 +11,16 @@ export const getAllProposalsStateQueryKey = (grantProposalsIds?: string[], stand
     ? ["PROPOSALS", "ALL", "STATE", grantProposalsIds, standardProposalsIds]
     : ["PROPOSALS", "ALL", "STATE"]
 
-export const useAllProposalsState = (grantProposalsIds: string[], standardProposalsIds: string[]) => {
+export const useAllProposalsState = ({
+  grantProposalsIds,
+  standardProposalsIds,
+}: {
+  grantProposalsIds: string[]
+  standardProposalsIds: string[]
+}): UseQueryResult<{
+  grantsProposalStates: { proposalId: string; state: ProposalState }[]
+  standardProposalStates: { proposalId: string; state: ProposalState }[]
+}> => {
   const thor = useThor()
   const queryClient = useQueryClient()
   const grantsManagerContractAddress = getConfig().grantsManagerContractAddress as `0x${string}`

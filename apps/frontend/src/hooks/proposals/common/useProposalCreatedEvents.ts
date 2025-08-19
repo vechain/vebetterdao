@@ -1,23 +1,17 @@
 import { useMemo } from "react"
 import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory, Treasury__factory } from "@repo/contracts"
-import { formatEther } from "ethers"
-import BigNumber from "bignumber.js"
-import { ProposalState, Proposal, ProposalType } from "../grants/types"
+import { B3TRGovernor__factory } from "@repo/contracts"
+import { ProposalType, ProposalCreatedEvent } from "../grants/types"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi
-const treasuryInterface = Treasury__factory.createInterface()
 
-const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
-  if (!calldata) return BigNumber(0)
-  const decodedData = treasuryInterface.decodeFunctionData("transferB3TR", calldata)
-  const formattedAmount = formatEther(decodedData?.[1]?.toString() ?? "0")
-  return BigNumber(formattedAmount)
-}
-
-export const useProposalCreatedEvents = () => {
+export const useProposalCreatedEvents = (): {
+  standardProposals: ProposalCreatedEvent[]
+  grantProposals: ProposalCreatedEvent[]
+  allProposals: ProposalCreatedEvent[]
+} => {
   const proposalEvents = useEvents({
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreated",
@@ -48,21 +42,16 @@ export const useProposalCreatedEvents = () => {
   const { standardProposals, grantProposals, allProposals } = useMemo(() => {
     const typeMap = new Map(proposalTypeEvents.data?.map(proposal => [proposal.id, proposal.type]) ?? [])
 
-    const standard: Proposal[] = []
-    const grant: Proposal[] = []
-    const all: Proposal[] = []
+    const standard: ProposalCreatedEvent[] = []
+    const grant: ProposalCreatedEvent[] = []
+    const all: ProposalCreatedEvent[] = []
 
     proposalEvents.data?.forEach(proposal => {
       const type = typeMap.get(proposal.id) ?? ProposalType.Standard
-      const allCalldatas = proposal.calldatas.map(calldata => getAndDecodeGrantAmount(calldata))
-      const grantAmount = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
-      const enhancedProposal: Proposal = {
+
+      const enhancedProposal = {
         ...proposal,
         type,
-        state: ProposalState.Pending,
-        ...(type === ProposalType.Grant && {
-          grantAmount: grantAmount.toNumber() ?? 0,
-        }),
       }
 
       all.push(enhancedProposal)

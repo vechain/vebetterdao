@@ -3,18 +3,29 @@ import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 import { useAllProposalsState } from "@/api"
 import BigNumber from "bignumber.js"
 import { useGrantProposalDetails } from "../grants/useGrantProposalDetails"
-import { ProposalState } from "../grants/types"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
 
-export const useProposalEnriched = () => {
+// Utility type to ensure required fields stay required after spreading
+type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
+
+type UseProposalEnrichedReturn = {
+  proposals: (GrantProposalEnriched | ProposalEnriched)[]
+  enrichedGrantProposals: GrantProposalEnriched[]
+  enrichedStandardProposals: ProposalEnriched[]
+  totalGrantAmount: BigNumber
+  totalProposals: number
+  isLoading: boolean
+}
+export const useProposalEnriched = (): UseProposalEnrichedReturn => {
   // Step 1: Fetch events
   const { allProposals, grantProposals, standardProposals } = useProposalCreatedEvents()
 
   // Step 2: Get proposal IDs
-  const grantProposalsProposalIds = useMemo(() => {
+  const grantProposalsIds = useMemo(() => {
     return grantProposals?.map(event => event.id) || []
   }, [grantProposals])
 
-  const standardProposalsProposalIds = useMemo(() => {
+  const standardProposalsIds = useMemo(() => {
     return standardProposals?.map(event => event.id) || []
   }, [standardProposals])
 
@@ -25,18 +36,20 @@ export const useProposalEnriched = () => {
       standardProposalsDetailsMap: {},
     },
     isLoading: isLoadingDetails,
-  } = useGrantProposalDetails(standardProposals, grantProposals)
+  } = useGrantProposalDetails({ standardProposals, grantProposals })
   const {
     data: { grantsProposalStates, standardProposalStates } = {
       grantsProposalStates: [],
       standardProposalStates: [],
     },
     isLoading: isLoadingStates,
-  } = useAllProposalsState(grantProposalsProposalIds, standardProposalsProposalIds)
+  } = useAllProposalsState({
+    grantProposalsIds,
+    standardProposalsIds,
+  })
 
   // Step 4: Merge all the data
-
-  const enrichedGrantProposals = useMemo(() => {
+  const enrichedGrantProposals: GrantProposalEnriched[] = useMemo(() => {
     return grantProposals.map(event => {
       const state = grantsProposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
       const details = grantProposalsDetailsMap?.[event.id]
@@ -44,11 +57,14 @@ export const useProposalEnriched = () => {
         ...event,
         ...details,
         state,
-      }
+      } as EnsureRequired<
+        typeof event & typeof details & { state: ProposalState },
+        "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
+      >
     })
   }, [grantProposals, grantsProposalStates, grantProposalsDetailsMap])
 
-  const enrichedStandardProposals = useMemo(() => {
+  const enrichedStandardProposals: ProposalEnriched[] = useMemo(() => {
     return standardProposals.map(event => {
       const state = standardProposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
       const details = standardProposalsDetailsMap?.[event.id]
@@ -56,7 +72,10 @@ export const useProposalEnriched = () => {
         ...event,
         ...details,
         state,
-      }
+      } as EnsureRequired<
+        typeof event & typeof details & { state: ProposalState },
+        "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
+      >
     })
   }, [standardProposals, standardProposalStates, standardProposalsDetailsMap])
 
@@ -67,9 +86,12 @@ export const useProposalEnriched = () => {
   // Step 5: Calculate aggregated data
   const totalGrantAmount = useMemo(() => {
     return (
-      allProposals?.reduce((acc, event) => acc.plus(event?.grantAmount ?? BigNumber(0)), BigNumber(0)) ?? BigNumber(0)
+      enrichedGrantProposals?.reduce(
+        (acc, event) => acc.plus(BigNumber(event?.grantAmount) ?? BigNumber(0)),
+        BigNumber(0),
+      ) ?? BigNumber(0)
     )
-  }, [allProposals])
+  }, [enrichedGrantProposals])
 
   const isLoading = isLoadingStates || isLoadingDetails
 
