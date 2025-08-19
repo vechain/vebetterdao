@@ -23,9 +23,8 @@ export type ProposalInteractions = {
 export type ProposalEnriched = Proposal & {
   title: string
   description: string
-  b3tr: string
-  dAppGrant: string
   proposerAddress: string
+  grantType?: string
   state: ProposalState
   phases: {
     [ProposalState.Pending]: PhaseInfo
@@ -40,7 +39,7 @@ export type Proposal = {
   state: ProposalState
   type: ProposalType
   ipfsDescription: string
-  grantAmount?: BigNumber | undefined
+  grantAmount?: number
   votingRoundId: string
   depositThreshold: string
   proposerAddress: string
