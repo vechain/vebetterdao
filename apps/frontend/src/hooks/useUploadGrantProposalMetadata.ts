@@ -1,7 +1,9 @@
 "use client"
 import { useCallback, useState } from "react"
 import { uploadBlobToIPFS } from "@/utils"
-import { GrantProposalMetadataOptions } from "./proposals/grants/types"
+import { GrantFormData } from "./proposals/grants/types"
+
+type UploadData = (GrantFormData & { title?: string; shortDescription?: string }) | GrantFormData["milestones"]
 
 /**
  * Uploads proposal metadata to IPFS.
@@ -9,12 +11,12 @@ import { GrantProposalMetadataOptions } from "./proposals/grants/types"
  */
 export const useUploadGrantProposalMetadata = () => {
   const [metadataUploading, setMetadataUploading] = useState(false)
-  const [metadataUploadError, setMetadataUploadError] = useState<Error>()
+  const [metadataUploadError, setMetadataUploadError] = useState<Error | null>(null)
 
-  const onMetadataUpload = useCallback(async (data: GrantProposalMetadataOptions) => {
+  const onMetadataUpload = useCallback(async (data: UploadData): Promise<string | undefined> => {
     try {
       setMetadataUploading(true)
-
+      setMetadataUploadError(null)
       // Create a Blob from the proposal metadata
       const metadataBlob = new Blob([JSON.stringify(data)], { type: "application/json" })
 

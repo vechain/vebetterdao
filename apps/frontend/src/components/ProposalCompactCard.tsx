@@ -11,10 +11,10 @@ import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
-import { Proposal, ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  proposal: Proposal
+  proposal: ProposalEnriched
   proposalState?: ProposalState
 }
 
