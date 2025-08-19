@@ -39,8 +39,8 @@
     },
     "build": {
       "cache": true,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "@repo/contracts#compile"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
       "cache": false

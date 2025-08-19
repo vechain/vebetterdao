@@ -1,0 +1,36 @@
+name: Sync contracts to public repo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/contracts/**" # 🔒 only run when files here change
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # required for subtree split
+
+      - name: Configure git author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create split branch from subdir
+        run: |
+          # Creates a branch that contains only packages/contracts history
+          git subtree split --prefix=packages/contracts -b contracts-split
+
+      - name: Push to public repo
+        env:
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }} # create this secret in the private repo
+        run: |
+          # Replace org/repo with your public repo
+          git remote add public https://x-access-token:${PUSH_TOKEN}@github.com/your-org/public-contracts.git
+          # Force-push keeps the public repo perfectly mirrored to the subdir
+          git push public contracts-split:refs/heads/main --force
