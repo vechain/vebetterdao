@@ -1,16 +1,16 @@
 import { HStack, VStack, Heading, Text, Card, Icon, Divider, Center, Stack, Hide } from "@chakra-ui/react"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
-import { UilClock, UilLink, UilThumbsUp, UilThumbsDown, UilCircle } from "@iconscout/react-unicons"
+import { UilClock, UilThumbsUp, UilThumbsDown, UilCircle } from "@iconscout/react-unicons"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { useRouter } from "next/navigation"
-import { PiTelegramLogo } from "react-icons/pi"
 import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { formatTimeLeft, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { LiaDiscourse } from "react-icons/lia"
 
 type GrantsProposalCardProps = {
   proposal: ProposalEnriched
@@ -62,9 +62,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const goToProposal = () => {
     router.push(`/proposals/${proposal.id}`)
   }
+  console.log(proposal)
   return (
     <Card w="full" p={{ base: 5, md: 7 }} cursor="pointer" onClick={goToProposal}>
-      <VStack w="full" gap={2} alignItems="flex-start">
+      <VStack w="full" gap={4} alignItems="flex-start">
         {/* Title */}
         <Heading size="md" noOfLines={2}>
           {proposal.title}
@@ -74,10 +75,12 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
         <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
           <HStack>
             <B3TRIcon boxSize={{ base: "14px", md: "16px" }} />
-            <Text>{proposal.b3tr}</Text>
+            <Text>
+              {proposal.grantAmount} {"B3TR"}
+            </Text>
             <Hide below="md">
               <Text>
-                {"•"} {proposal.dAppGrant}
+                {"•"} {proposal?.grantType} {/* TODO: Improve this and include "Grant" at the end */}
               </Text>
             </Hide>
             <Center height="20px">
@@ -88,11 +91,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
               <Divider orientation="vertical" />
             </Center>
           </HStack>
-          <HStack fontSize={{ base: "14px", md: "16px" }}>
-            <Icon as={UilLink} />
+          <HStack fontSize={{ base: "14px", md: "20px" }} gap={"16px"}>
+            <Icon as={LiaDiscourse} />
             <Icon as={FaXTwitter} />
             <Icon as={AiOutlineDiscord} />
-            <Icon as={PiTelegramLogo} />
           </HStack>
         </Stack>
         <Divider w="full" h={1} />
@@ -109,9 +111,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             {isSupportOrVotingPhase && (
               <Text fontSize={{ base: "10px", md: "14px" }}>
                 {t("End: {{endDate}}", {
-                  endDate: formatTimeLeft(
-                    Number(proposal?.phases?.[proposal.state as keyof typeof proposal.phases]?.endAt) * 1000,
-                  ),
+                  endDate: formatTimeLeft(1755890602), //TODO: Grab the correct end date
                 })}
               </Text>
             )}

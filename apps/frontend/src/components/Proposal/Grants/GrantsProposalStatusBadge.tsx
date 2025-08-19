@@ -76,8 +76,8 @@ export const GrantsProposalStatusBadge = ({ state = ProposalState.Pending }: Pro
   return (
     <Badge variant={config.variant as any}>
       <HStack textAlign="center" justifyContent="center" alignItems="center">
-        <Icon as={config.icon} boxSize={4} />
-        <Text> {config.text}</Text>
+        <Icon as={config.icon} boxSize={5} />
+        <Text fontWeight="bold"> {config.text}</Text>
       </HStack>
     </Badge>
   )
