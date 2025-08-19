@@ -58,6 +58,7 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
         metadataIpfsCID,
         votingRoundId,
         ethers.parseEther(depositAmount).toString(),
+        account?.address, //TODO: change to grantsReceiver
         milestonesIpfsCID,
       ]
       const createProposalClause = buildClause({
@@ -72,7 +73,7 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
 
       return clauses
     },
-    [],
+    [account?.address],
   )
 
   const refetchQueryKeys = useMemo(() => {
