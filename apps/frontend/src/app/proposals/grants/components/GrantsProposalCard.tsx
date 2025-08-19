@@ -11,7 +11,9 @@ import { AddressIcon } from "@/components/AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { LiaDiscourse } from "react-icons/lia"
 import { useEstimateFutureRoundTimestamp } from "@/hooks"
-import { useCurrentAllocationsRoundId } from "@/api"
+import { useCurrentAllocationsRoundId, useProposalDepositEvent, useProposalVotesIndexer } from "@/api"
+import { UilClock, UilThumbsUp, UilThumbsDown, UilCircle } from "@iconscout/react-unicons"
+import { formatEther } from "ethers"
 
 type GrantsProposalCardProps = {
   proposal: GrantProposalEnriched
@@ -31,10 +33,53 @@ const AddressWithProfilePicture = ({ address }: { address: string }) => {
   )
 }
 
+//TODO: Move to a separate common component
+const CommunityInteractions = ({
+  state,
+  depositPercentage,
+  votesFor,
+  votesAgainst,
+  votesAbstain,
+}: {
+  state: ProposalState
+  depositPercentage: number
+  votesFor: number
+  votesAgainst: number
+  votesAbstain: number
+}) => {
+  if (state === ProposalState.Pending) {
+    return (
+      <HStack key={depositPercentage} fontSize={{ base: "14px", md: "16px" }} gap={1}>
+        <Icon as={UilClock} />
+        <Text>{`${Number(depositPercentage).toFixed(2)}%`}</Text>
+      </HStack>
+    )
+  }
+
+  return (
+    <>
+      <HStack key={votesFor} fontSize={{ base: "14px", md: "16px" }} gap={1}>
+        <Icon as={UilThumbsUp} />
+        <Text>{`${votesFor}%`}</Text>
+      </HStack>
+      <HStack key={votesAgainst} fontSize={{ base: "14px", md: "16px" }} gap={1}>
+        <Icon as={UilThumbsDown} />
+        <Text>{`${votesAgainst}%`}</Text>
+      </HStack>
+      <HStack key={votesAbstain} fontSize={{ base: "14px", md: "16px" }} gap={1}>
+        <Icon as={UilCircle} />
+        <Text>{`${votesAbstain}%`}</Text>
+      </HStack>
+    </>
+  )
+}
+
 export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const router = useRouter()
   const { t } = useTranslation()
-  const isSupportOrVotingPhase = proposal.state === ProposalState.Pending || proposal.state === ProposalState.Active
+  const proposalDepositEvent = useProposalDepositEvent(proposal.id)
+  const { data: proposalVotes } = useProposalVotesIndexer({ proposalId: proposal.id })
+
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const supportPhaseEndsAt = useEstimateFutureRoundTimestamp({
     currentRoundId: currentRoundId ?? "",
@@ -45,7 +90,14 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
     targetRoundId: proposal.votingRoundId,
   })
 
+  //TODO: Organize and cleanup this
+  const isSupportOrVotingPhase = proposal.state === ProposalState.Pending || proposal.state === ProposalState.Active
+  const communityDeposits = proposalDepositEvent.communityDeposits
+  const communityDepositPercentage = (communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
   const endsAt = proposal.state === ProposalState.Pending ? supportPhaseEndsAt : votingPhaseEndsAt
+  const votesFor = proposalVotes?.votes.for.percentage
+  const votesAgainst = proposalVotes?.votes.against.percentage
+  const votesAbstain = proposalVotes?.votes.abstain.percentage
 
   const goToProposal = () => {
     router.push(`/proposals/${proposal.id}`)
@@ -105,12 +157,15 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             ) : null}
           </HStack>
           <HStack gap={{ base: 3, md: 4 }}>
-            {/* {communityInteractions[proposal.state as keyof typeof communityInteractions]?.map(interaction => (
-              <HStack key={interaction.percentage} fontSize={{ base: "14px", md: "16px" }} gap={1}>
-                {interaction.icon}
-                <Text>{`${interaction.percentage}%`}</Text>
-              </HStack>
-            ))} */}
+            {isSupportOrVotingPhase && (
+              <CommunityInteractions
+                state={proposal.state}
+                depositPercentage={communityDepositPercentage}
+                votesFor={votesFor ?? 0}
+                votesAgainst={votesAgainst ?? 0}
+                votesAbstain={votesAbstain ?? 0}
+              />
+            )}
           </HStack>
         </Stack>
       </VStack>
