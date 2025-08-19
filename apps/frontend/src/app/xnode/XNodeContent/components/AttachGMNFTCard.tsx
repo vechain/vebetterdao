@@ -141,6 +141,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
       />
       <DetachGMToXNodeModal
         gmId={xNode.gmTokenIdAttachedToNode || ""}
+        gmLevel={attachedGMNFT?.tokenLevel || ""}
         xNodeId={xNode.nodeId}
         isOpen={detachGmToXNodeModal.isOpen}
         onClose={detachGmToXNodeModal.onClose}

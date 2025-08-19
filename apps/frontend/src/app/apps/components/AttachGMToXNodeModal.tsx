@@ -1,12 +1,10 @@
-import { getGMLevel, useGetUserGMs, UserNode } from "@/api"
-import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { useGetUserGMs, UserNode } from "@/api"
 import { CustomModalContent, BaseTooltip } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
-import { useAttachGMToXNode, useB3trDonated } from "@/hooks"
+import { useAttachGMToXNode } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import {
   Alert,
@@ -29,10 +27,11 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useGetLevelAfterAttachingNode } from "../hooks/useGetLevelAfterAttachingNode"
 
 type Props = {
   gmId: string
@@ -45,22 +44,14 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
 
-  const { data: b3trDonated } = useB3trDonated(gmId)
-  const { data: gmMaxLevel } = useGMMaxLevel()
+  const { data: levelAfterAttaching } = useGetLevelAfterAttachingNode({
+    tokenId: gmId,
+    nodeTokenId: node?.nodeId ?? "",
+  })
+
   const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
-
-  const gmStartingLevel = useMemo(() => {
-    const gmStartingLevel = xNodeToGMstartingLevel[node?.nodeLevel ?? 0]
-
-    return Math.min(gmStartingLevel ?? 1, gmMaxLevel ?? 1)
-  }, [gmMaxLevel, node?.nodeLevel])
-
-  const levelAfterDetach = useMemo(() => {
-    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
-  }, [b3trDonated, gmStartingLevel])
-
-  const isNoAffectAttachment = gm ? gm?.tokenLevel === String(levelAfterDetach) : true
+  const isNoAffectAttachment = gm ? String(gm?.tokenLevel) === levelAfterAttaching : true
 
   const handleClose = useCallback(() => {
     onClose()
@@ -88,7 +79,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
     {
       Icon: CurveArrowIcon,
       title: t("Free upgrade"),
-      description: t("Your GM NFT will be level {{value}} after attaching.", { value: levelAfterDetach }),
+      description: t("Your GM NFT will be level {{value}} after attaching.", { value: levelAfterAttaching }),
     },
     {
       Icon: ThreeSparklesIcon,
