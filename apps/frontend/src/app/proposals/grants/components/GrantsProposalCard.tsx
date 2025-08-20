@@ -79,24 +79,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
         </Stack>
         <Divider w="full" h={1} />
         {/* Footer */}
-        <Stack
-          w="full"
-          h="full"
-          justifyContent="space-between"
-          alignContent="center"
-          direction={{ base: "column", md: "row" }}
-          gap={2}>
-          <HStack w="full">
+        {/* Mobile Layout */}
+        <VStack w="full" gap={2} display={{ base: "flex", md: "none" }}>
+          <HStack w="full" justifyContent="space-between">
             <GrantsProposalStatusBadge state={proposal.state} />
-            {isSupportOrVotingPhase && endsAt ? (
-              <Text fontSize={{ base: "10px", md: "14px" }}>
-                {t("End: {{endDate}}", {
-                  endDate: formatTimeLeft(endsAt),
-                })}
-              </Text>
-            ) : null}
-          </HStack>
-          <HStack gap={{ base: 3, md: 4 }}>
             {isSupportOrVotingPhase && (
               <ProposalCommunityInteractions
                 state={proposal.state}
@@ -107,7 +93,37 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
               />
             )}
           </HStack>
-        </Stack>
+          {isSupportOrVotingPhase && endsAt ? (
+            <Text fontSize="12px" alignSelf="flex-start" color="subtle.active" pl={2}>
+              {t("End: {{endDate}}", {
+                endDate: formatTimeLeft(endsAt),
+              })}
+            </Text>
+          ) : null}
+        </VStack>
+
+        {/* Desktop Layout */}
+        <HStack w="full" justifyContent="space-between" display={{ base: "none", md: "flex" }}>
+          <HStack gap={4}>
+            <GrantsProposalStatusBadge state={proposal.state} />
+            {isSupportOrVotingPhase && endsAt ? (
+              <Text fontSize="14px" color="subtle.active">
+                {t("End: {{endDate}}", {
+                  endDate: formatTimeLeft(endsAt),
+                })}
+              </Text>
+            ) : null}
+          </HStack>
+          {isSupportOrVotingPhase && (
+            <ProposalCommunityInteractions
+              state={proposal.state}
+              depositPercentage={communityDepositPercentage}
+              votesFor={proposalVotes?.votes.for.percentage ?? 0}
+              votesAgainst={proposalVotes?.votes.against.percentage ?? 0}
+              votesAbstain={proposalVotes?.votes.abstain.percentage ?? 0}
+            />
+          )}
+        </HStack>
       </VStack>
     </Card>
   )

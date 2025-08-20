@@ -1,6 +1,6 @@
 import { ProposalState } from "@/hooks/proposals/grants/types"
 import { HStack, Icon, Text } from "@chakra-ui/react"
-import { UilClock, UilThumbsUp, UilThumbsDown, UilCircle } from "@iconscout/react-unicons"
+import { UilHeart, UilThumbsUp, UilThumbsDown, UilCircle } from "@iconscout/react-unicons"
 
 export const ProposalCommunityInteractions = ({
   state,
@@ -16,10 +16,11 @@ export const ProposalCommunityInteractions = ({
   votesAbstain: number
 }) => {
   if (state === ProposalState.Pending) {
+    const formattedDepositPercentage = Number(depositPercentage).toFixed(2)
     return (
       <HStack key={depositPercentage} fontSize={{ base: "14px", md: "16px" }} gap={1}>
-        <Icon as={UilClock} />
-        <Text>{`${Number(depositPercentage).toFixed(2)}%`}</Text>
+        <Icon as={UilHeart} />
+        <Text>{`${formattedDepositPercentage}%`}</Text>
       </HStack>
     )
   }
