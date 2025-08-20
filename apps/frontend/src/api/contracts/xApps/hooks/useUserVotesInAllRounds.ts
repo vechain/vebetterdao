@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { getEventsKey, useEvents } from "@/hooks"
-import { XAllocationVoting__factory } from "@repo/contracts"
+import { XAllocationVoting__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`

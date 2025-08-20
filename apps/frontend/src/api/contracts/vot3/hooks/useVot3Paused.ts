@@ -1,7 +1,7 @@
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
-import { VOT3__factory } from "@repo/contracts"
+import { VOT3__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress

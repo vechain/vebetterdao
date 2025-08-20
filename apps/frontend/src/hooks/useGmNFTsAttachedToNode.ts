@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { GalaxyMember__factory, VoterRewards__factory } from "@repo/contracts"
+import { GalaxyMember__factory, VoterRewards__factory } from "@vechain-kit/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { getIpfsImage, getIpfsMetadata, IpfsImage } from "@/api/ipfs"
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"

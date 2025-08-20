@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { B3TRGovernorJson } from "@repo/contracts"
+import { B3TRGovernorJson } from "@vechain-kit/vebetterdao-contracts"
 const b3trGovernorAbi = B3TRGovernorJson.abi
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress

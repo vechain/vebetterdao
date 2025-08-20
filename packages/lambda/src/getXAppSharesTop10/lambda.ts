@@ -5,7 +5,7 @@ import { Clause, Address, ABIContract } from "@vechain/sdk-core"
 import mainnetConfig from "@repo/config/mainnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@vechain-kit/vebetterdao-contracts"
 
 import { findBlacklistedApps, getCurrentRoundId, getData, getRoundXApps, getRoundXAppShares } from "../helpers"
 import { buildResponse } from "../helpers/api/response"

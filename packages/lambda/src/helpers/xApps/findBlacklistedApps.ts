@@ -1,5 +1,5 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { X2EarnApps__factory as X2EarnApps } from "@vechain-kit/vebetterdao-contracts"
 import { ABIContract, Address, Clause } from "@vechain/sdk-core"
 
 /**

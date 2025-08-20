@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.556.0",
-    "@repo/contracts": "*",
+    "@vechain-kit/vebetterdao-contracts": "*",
     "lambda-local": "^2.1.2"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@repo/contracts"
+import { NodeManagement__factory } from "@vechain-kit/vebetterdao-contracts"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/dapp-kit-react"
 import { ThorClient } from "@vechain/sdk-network"

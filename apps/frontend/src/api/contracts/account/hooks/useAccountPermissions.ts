@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { AccessControl__factory } from "@repo/contracts/typechain-types"
+import { AccessControl__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getBytes32Role } from "./useHasRole"

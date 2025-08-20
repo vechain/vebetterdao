@@ -1,7 +1,7 @@
 import { FormattingUtils } from "@repo/utils"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TR__factory } from "@repo/contracts"
+import { B3TR__factory } from "@vechain-kit/vebetterdao-contracts"
 import { formatEther } from "ethers"
 
 const abi = B3TR__factory.abi

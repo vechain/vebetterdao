@@ -1,5 +1,5 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
+import { XAllocationVoting__factory as XAllocationVoting } from "@vechain-kit/vebetterdao-contracts"
 import { ABIContract } from "@vechain/sdk-core"
 
 /**

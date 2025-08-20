@@ -3,7 +3,7 @@ import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter } from "@/store"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi

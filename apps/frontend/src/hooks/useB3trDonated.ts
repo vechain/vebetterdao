@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory } from "@repo/contracts"
+import { GalaxyMember__factory } from "@vechain-kit/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 

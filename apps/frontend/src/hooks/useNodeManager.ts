@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@repo/contracts"
+import { NodeManagement__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const abi = NodeManagement__factory.abi
 const address = getConfig().nodeManagementContractAddress

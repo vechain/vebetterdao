@@ -1,6 +1,6 @@
 import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const abi = B3TRGovernor__factory.abi
 const method = "canProposalStartInNextRound" as const

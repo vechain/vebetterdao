@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VOT3__factory } from "@repo/contracts"
+import { VOT3__factory } from "@vechain-kit/vebetterdao-contracts"
 import { ethers } from "ethers"
 
 const abi = VOT3__factory.abi

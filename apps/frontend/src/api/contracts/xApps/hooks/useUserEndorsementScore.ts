@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@vechain-kit/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`

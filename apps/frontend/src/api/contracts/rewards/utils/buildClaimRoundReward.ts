@@ -1,6 +1,6 @@
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@repo/contracts"
+import { VoterRewards__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()
 

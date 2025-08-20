@@ -3,6 +3,7 @@ description:
 globs: **/src/api/**/*.ts
 alwaysApply: false
 ---
+
 # Cursor Rules for @hooks Directory
 
 ## useCallClause Hook Pattern
@@ -12,7 +13,7 @@ When creating hooks that use `useCallClause` from `@vechain/vechain-kit`, follow
 ### 1. File Structure Template
 
 ```typescript
-import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+import { ContractFactory__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config" // if using contract addresses from config
 
@@ -56,7 +57,7 @@ export const useHookName = (param1: string, param2?: number) => {
 
 ```typescript
 // 1. Contract factory imports first
-import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+import { ContractFactory__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
 // 2. VeChain kit imports
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 // 3. Config imports if needed

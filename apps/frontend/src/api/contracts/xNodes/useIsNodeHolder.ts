@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs, ThorClient, executeCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@repo/contracts"
+import { NodeManagement__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const address = getConfig().nodeManagementContractAddress as `0x${string}`
 const abi = NodeManagement__factory.abi

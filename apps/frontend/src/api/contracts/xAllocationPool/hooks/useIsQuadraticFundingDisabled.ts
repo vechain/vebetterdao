@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress

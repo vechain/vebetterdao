@@ -2,7 +2,7 @@ import { getProposalUserDepositQueryKey, getProposalClaimableUserDepositsQueryKe
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
 

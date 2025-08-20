@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@vechain-kit/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = VeBetterPassport__factory.abi

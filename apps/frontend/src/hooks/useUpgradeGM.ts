@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@repo/contracts"
+import { GalaxyMember__factory } from "@vechain-kit/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
@@ -7,7 +7,7 @@ import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey 
 import { getB3trDonatedQueryKey } from "./useB3trDonated"
 import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
 
-import { B3TR__factory } from "@repo/contracts/typechain-types"
+import { B3TR__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
 import { ethers } from "ethers"
 import { useWallet } from "@vechain/vechain-kit"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"

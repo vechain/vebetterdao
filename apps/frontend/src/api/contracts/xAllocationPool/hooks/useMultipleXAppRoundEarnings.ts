@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
 import { formatEther } from "viem"
 import { useRoundXApps } from "../../xApps/hooks"
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"

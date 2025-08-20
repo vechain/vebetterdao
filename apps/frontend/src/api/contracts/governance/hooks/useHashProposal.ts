@@ -1,7 +1,7 @@
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts"
 import { ProposalAction, ReducedActions } from "@/hooks"
 
 const abi = B3TRGovernor__factory.abi

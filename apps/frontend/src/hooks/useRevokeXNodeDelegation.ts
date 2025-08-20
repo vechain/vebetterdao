@@ -3,7 +3,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory, GalaxyMember__factory } from "@repo/contracts"
+import { NodeManagement__factory, GalaxyMember__factory } from "@vechain-kit/vebetterdao-contracts"
 import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, UserNode } from "@/api"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 

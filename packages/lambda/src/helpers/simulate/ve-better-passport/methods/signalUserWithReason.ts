@@ -2,7 +2,7 @@ import { FunctionFragment } from "ethers"
 
 import { ThorClient } from "@vechain/sdk-network"
 import { clauseBuilder } from "@vechain/sdk-core"
-import { VeBetterPassport__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@vechain-kit/vebetterdao-contracts"
 import localConfig from "@repo/config/local"
 
 import { getCallerWalletInfo } from "./config"

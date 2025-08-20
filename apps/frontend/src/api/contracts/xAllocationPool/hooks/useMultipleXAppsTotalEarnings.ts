@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
 import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"

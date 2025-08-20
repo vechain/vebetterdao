@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@repo/contracts/typechain-types"
+import { VoterRewards__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
 import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { useQuery } from "@tanstack/react-query"

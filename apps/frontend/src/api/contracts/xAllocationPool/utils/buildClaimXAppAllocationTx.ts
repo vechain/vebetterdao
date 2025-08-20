@@ -1,6 +1,6 @@
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
 
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
 

@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { TimeLock__factory } from "@repo/contracts"
+import { TimeLock__factory } from "@vechain-kit/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { useProposalOperationId } from "./useProposalOperationId"
 import { useMemo } from "react"

@@ -1,6 +1,6 @@
 import { ThorClient } from "@vechain/sdk-network"
 import { Clause, ABIContract, Address } from "@vechain/sdk-core"
-import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
+import { XAllocationPool__factory as XAllocationPool } from "@vechain-kit/vebetterdao-contracts"
 
 /**
  * Retrieves the shares for the xApps in a specific round.
