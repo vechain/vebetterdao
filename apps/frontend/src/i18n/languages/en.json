@@ -1745,7 +1745,6 @@
   "2. Get support from the community": "2. Get support from the community",
   "3. Get final review from the community": "3. Get final review from the community",
   "4. Receive funds and start developing": "4. Receive funds and start developing",
-  "Apply": "Apply",
   "View profile": "View profile",
   "Apply for grant": "Apply for grant",
   "Up to {{amount}}": "Up to {{amount}}",
@@ -1913,5 +1912,10 @@
   "Apply": "Apply",
   "Get NFT": "Get NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals",
-  "More info about your votes at snapshot": "More info about your votes at snapshot"
+  "More info about your votes at snapshot": "More info about your votes at snapshot",
+  "Unsaved Changes": "Unsaved Changes",
+  "You have unsaved changes to '{{projectName}}'. What would you like to do?": "You have unsaved changes to '{{projectName}}'. What would you like to do?",
+  "You have unsaved changes. What would you like to do?": "You have unsaved changes. What would you like to do?",
+  "Leave anyway": "Leave anyway",
+  "Grant application saved successfully.": "Grant application saved successfully."
 }
