@@ -5,9 +5,8 @@ import {
   useCurrentAllocationsRoundId,
   useHasVotedInRound,
 } from "../../xAllocations"
-import { useGetVotesOnBlock } from "./useVotesOnBlock"
 import { useVotingThreshold } from "./useVotingThreshold"
-import { useAllocationRoundSnapshot, useIsPersonAtTimepoint } from "@/api"
+import { useAllocationRoundSnapshot, useIsPersonAtTimepoint, useTotalVotesOnBlock } from "@/api"
 
 /**
  * Hook to check if a user can vote in a round.
@@ -20,10 +19,13 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { data: roundSnapshot, isLoading: roundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const { data: roundInfo } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
-    parsedAccount ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
+
   const { data: threshold } = useVotingThreshold()
   const hasVotesAtSnapshot = Number(votesAtSnapshot) >= (Number(threshold) ?? 0)
 

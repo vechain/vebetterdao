@@ -2,10 +2,10 @@
 import {
   useAllocationsRound,
   useAllocationsRoundState,
-  useGetVotesOnBlock,
   useHasVotedInRound,
   useVotingThreshold,
   useRoundXApps,
+  useTotalVotesOnBlock,
 } from "@/api"
 import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
@@ -55,10 +55,12 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { data: state } = useAllocationsRoundState(roundId)
 
   const { data: roundInfo, isLoading: stateLoading } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: threshold } = useVotingThreshold()
 

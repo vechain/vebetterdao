@@ -1,4 +1,4 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useHasVotedInRound, useTotalVotesOnBlock } from "@/api"
 import { Button, Card, Grid, GridItem, Heading, Image, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -13,10 +13,11 @@ export const CastYourVoteCard: React.FC = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundDetail } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundDetail.voteStart ? Number(roundDetail.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
 
   const lottieSize = useBreakpointValue(
     {

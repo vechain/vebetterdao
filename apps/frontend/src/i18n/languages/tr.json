@@ -1765,5 +1765,14 @@
   "VeWorld assets": "VeWorld varlıkları",
   "Featured Image": "Öne Çıkan Görsel",
   "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨": "VeWorld varlıkları, uygulamanın VeWorld mobil cüzdanında görüntülenmesi için kullanılır. Uygulamanızı daha ilgi çekici hale getirmek için bunları ekleyin. ✨",
-  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Önerilen boyut: 800×400. 2:1 oranını koruyun."
+  "Recommended size: 800×400. Maintain a 2:1 aspect ratio.": "Önerilen boyut: 800×400. 2:1 oranını koruyun.",
+  "To apply for a proposal, you must": "Bir teklif başvurusu yapmak için, aşağıdakilere sahip olmalısınız",
+  "Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it.": "<b>Galaxy Member - {{gmName}} NFT</b> alın. NFT'nizi GM {{gmName}} NFT'ye yükseltebilir veya satın alabilirsiniz.",
+  "Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Teklifinizi <b>VeChain Discourse</b> forumunda en az 3 gün önce paylaşarak bir tartışma başlatın.",
+  "Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO.": "Teklifinizi <b>VeChain Discourse</b> forumunda en az 3 gün önce tartışın.",
+  "Create Discourse": "Discourse Oluştur",
+  "Apply": "Başvur",
+  "Get NFT": "NFT Alın",
+  "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Destekleyen tekliflerden <bold>{{depositsVotes}} VOT3</bold> içerir",
+  "More info about your votes at snapshot": "Snapshot üzerinde oylarınızla ilgili daha fazla bilgi"
 }

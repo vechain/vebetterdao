@@ -19,8 +19,9 @@ const config: AppConfig = {
   nodeManagementContractAddress: "0x8bcbfc20ee39c94f4e60afc5d78c402f70b4f3b2",
   veBetterPassportContractAddress: "0x592c756df7a5d39de1735030e8b9c18b7417e6c4",
   x2EarnCreatorContractAddress: "0xb89f0ecdaf9987f87912d6c77756435fe4085b05",
-  tokenAuctionContractAddress: "0x47049ccfce2f4ee866b37abccea276ebaca570db",
+  tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c",
   stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
+  grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
@@ -76,7 +77,6 @@ const config: AppConfig = {
     passportWhitelistAndBlacklistLogicAddress: "0x45feba7af9219ad26967b2db82d6ef9297219881",
   },
   externalContractIntegrations: {
-    // This is a MOCK VetDomains contract
     vetDomainsContractAddress: "0xE27C72E252D5C3B2daf871aB7628F29370438589",
   },
 }

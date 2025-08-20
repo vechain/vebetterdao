@@ -11,6 +11,7 @@ export type CastAllocationFormStoreState = {
   data: CastAllocationVoteFormData[]
   setData: (_data: CastAllocationVoteFormData[]) => void
   clearData: () => void
+  filterValidApps: (validAppIds: string[]) => void
 }
 
 /**
@@ -29,6 +30,10 @@ export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()
           set({
             data: [],
           }),
+        filterValidApps: (validAppIds: string[]) =>
+          set(state => ({
+            data: state.data.filter(vote => validAppIds.includes(vote.appId)),
+          })),
       }),
       {
         name: "CAST_ALLOCATION_FORM_STORE",

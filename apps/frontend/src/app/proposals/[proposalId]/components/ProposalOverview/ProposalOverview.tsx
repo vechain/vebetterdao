@@ -25,7 +25,7 @@ export const ProposalOverview = () => {
     <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
       <Card.Body>
         <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
-          <VStack gap={4} align="flex-start" flex={2} justify={"space-between"}>
+          <VStack gap={4} align="flex-start" flex={2} justify={"space-between"} minW={0}>
             <VStack gap={2} align="flex-start">
               <HStack justify={"space-between"} align={"center"} w="full">
                 <Skeleton loading={proposal.isRoundIdVoteStartLoading}>
@@ -46,13 +46,18 @@ export const ProposalOverview = () => {
               </Skeleton>
               <Spacer h={"24px"} />
               <Skeleton loading={proposal.isDescriptionLoading}>
-                <Text color="gray.500" fontSize={["sm", "md"]}>
+                <Text
+                  color="gray.500"
+                  fontSize={["sm", "md"]}
+                  wordBreak="break-word"
+                  overflowWrap="break-word"
+                  whiteSpace="pre-wrap"
+                  maxW="100%">
                   {proposal.description}
                 </Text>
               </Skeleton>
             </VStack>
-
-            <Separator color={"#D5D5D5"} />
+            <Separator color={"#D5D5D5"} w="100%" />
             <Stack
               direction={["column", "column", "row"]}
               w="full"

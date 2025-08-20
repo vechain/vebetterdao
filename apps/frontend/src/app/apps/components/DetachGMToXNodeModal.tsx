@@ -1,30 +1,27 @@
-import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
 import { CustomModalContent } from "@/components"
-import { useDetachGMFromXNode, useB3trDonated } from "@/hooks"
+import { useDetachGMFromXNode } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { Dialog, VStack, Heading, Text, Button, HStack } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useGetLevelAfterDetachingNode } from "../hooks/useGetLevelAfterDetachingNode"
 
 type Props = {
   gmId: string
+  gmLevel: string
   xNodeId: string
   isOpen: boolean
   onClose: () => void
 }
 
-export const DetachGMToXNodeModal = ({ gmId, xNodeId, isOpen, onClose }: Props) => {
+export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
 
-  const { data: b3trDonated } = useB3trDonated(gmId)
-
-  const levelAfterDetach = useMemo(() => {
-    return getGMLevel(1, Number(b3trDonated ?? 0))
-  }, [b3trDonated])
+  const { data: levelAfterDetach } = useGetLevelAfterDetachingNode(gmId)
 
   const handleClose = useCallback(() => {
     onClose()
@@ -48,16 +45,18 @@ export const DetachGMToXNodeModal = ({ gmId, xNodeId, isOpen, onClose }: Props) 
           <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
         </Dialog.Header>
         <Dialog.Body>
-          <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
-            <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
-            <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
-              <Trans
-                i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
-                values={{ level: levelAfterDetach }}
-                components={{ bold: <Text as="span" fontWeight={"600"} /> }}
-              />
-            </Text>
-          </HStack>
+          {levelAfterDetach && gmLevel !== levelAfterDetach && (
+            <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
+              <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
+              <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
+                <Trans
+                  i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
+                  values={{ level: levelAfterDetach }}
+                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                />
+              </Text>
+            </HStack>
+          )}
         </Dialog.Body>
         <Dialog.Footer w="full">
           <VStack alignItems="stretch" w="full">

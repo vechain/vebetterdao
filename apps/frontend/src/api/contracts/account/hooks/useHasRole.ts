@@ -39,7 +39,7 @@ export const hasRoleQueryKey = (role: string, contractAddress: string, address?:
     abi,
     address: contractAddress,
     method,
-    args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
+    args: [getBytes32Role(role) as `0x${string}`, address as `0x${string}`],
   })
 
 /**
@@ -54,7 +54,7 @@ export const useHasRole = (role: string, contractAddress: string, address?: stri
     abi,
     address: contractAddress,
     method,
-    args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
+    args: [getBytes32Role(role) as `0x${string}`, address as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: data => data[0],

@@ -2,7 +2,7 @@ import {
   useAllocationRoundQuorum,
   useAllocationVotes,
   useAllocationsRound,
-  useGetVotesOnBlock,
+  useTotalVotesOnBlock,
   useVot3PastSupply,
 } from "@/api"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
@@ -22,7 +22,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const currentVotesQuery = useAllocationVotes(roundId)
   const quorumQuery = useAllocationRoundQuorum(roundId)
   const votesAtSnapshotQuery = useVot3PastSupply(roundInfo.voteStart)
-  const userVotesAtSnapshotQuery = useGetVotesOnBlock(
+  const totalVotesAtSnapshot = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
     account?.address ?? "",
   )
@@ -40,7 +40,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
       quorumQuery={quorumQuery}
       votesAtSnapshotQuery={votesAtSnapshotQuery}
       currentVotesQuery={currentVotesQuery}
-      userVotesAtSnapshotQuery={userVotesAtSnapshotQuery}
+      userVotesAtSnapshotQuery={totalVotesAtSnapshot}
       renderQuroum={isUpcoming ? "upcoming" : "active"}
       isEnded={!isRoundActive}
       showQuorumNeeded={false}

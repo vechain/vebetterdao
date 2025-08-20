@@ -57,12 +57,12 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
         <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
           <IconButton
             rounded={"full"}
-            variant="solid"
+            variant="subtle"
             aria-label="Go to App"
             fontSize="22px"
             disabled={isAppMetadataError}
             onClick={navigateToAppDetail}
-            color={"primary.500"}>
+            colorPalette={"blue"}>
             <FiArrowUpRight />
           </IconButton>
         </Skeleton>
