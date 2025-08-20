@@ -1,77 +1,19 @@
-import { HStack, VStack, Heading, Text, Card, Icon, Divider, Center, Stack, Hide } from "@chakra-ui/react"
+import { HStack, VStack, Heading, Text, Card, Divider, Center, Stack, Hide } from "@chakra-ui/react"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
-import { FaXTwitter } from "react-icons/fa6"
-import { AiOutlineDiscord } from "react-icons/ai"
 import { useRouter } from "next/navigation"
 import { ProposalState, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
-import { formatTimeLeft, humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { formatTimeLeft } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { AddressIcon } from "@/components/AddressIcon"
-import { useVechainDomain } from "@vechain/vechain-kit"
-import { LiaDiscourse } from "react-icons/lia"
 import { useEstimateFutureRoundTimestamp } from "@/hooks"
 import { useCurrentAllocationsRoundId, useProposalDepositEvent, useProposalVotesIndexer } from "@/api"
-import { UilClock, UilThumbsUp, UilThumbsDown, UilCircle } from "@iconscout/react-unicons"
 import { formatEther } from "ethers"
+import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
+import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
+import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 
 type GrantsProposalCardProps = {
   proposal: GrantProposalEnriched
-}
-
-//TODO: Move to a separate common component
-const AddressWithProfilePicture = ({ address }: { address: string }) => {
-  const { data: vechainDomain } = useVechainDomain(address)
-  const displayAddress = vechainDomain?.domain
-    ? humanDomain(vechainDomain.domain, 18, 0)
-    : humanAddress(address ?? "", 6, 3)
-  return (
-    <HStack gap={2} alignItems="center">
-      <AddressIcon boxSize={4} borderRadius="full" address={address} />
-      <Text>{displayAddress}</Text>
-    </HStack>
-  )
-}
-
-//TODO: Move to a separate common component
-const CommunityInteractions = ({
-  state,
-  depositPercentage,
-  votesFor,
-  votesAgainst,
-  votesAbstain,
-}: {
-  state: ProposalState
-  depositPercentage: number
-  votesFor: number
-  votesAgainst: number
-  votesAbstain: number
-}) => {
-  if (state === ProposalState.Pending) {
-    return (
-      <HStack key={depositPercentage} fontSize={{ base: "14px", md: "16px" }} gap={1}>
-        <Icon as={UilClock} />
-        <Text>{`${Number(depositPercentage).toFixed(2)}%`}</Text>
-      </HStack>
-    )
-  }
-
-  return (
-    <>
-      <HStack key={votesFor} fontSize={{ base: "14px", md: "16px" }} gap={1}>
-        <Icon as={UilThumbsUp} />
-        <Text>{`${votesFor}%`}</Text>
-      </HStack>
-      <HStack key={votesAgainst} fontSize={{ base: "14px", md: "16px" }} gap={1}>
-        <Icon as={UilThumbsDown} />
-        <Text>{`${votesAgainst}%`}</Text>
-      </HStack>
-      <HStack key={votesAbstain} fontSize={{ base: "14px", md: "16px" }} gap={1}>
-        <Icon as={UilCircle} />
-        <Text>{`${votesAbstain}%`}</Text>
-      </HStack>
-    </>
-  )
 }
 
 export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
@@ -81,6 +23,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const { data: proposalVotes } = useProposalVotesIndexer({ proposalId: proposal.id })
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
   const supportPhaseEndsAt = useEstimateFutureRoundTimestamp({
     currentRoundId: currentRoundId ?? "",
     targetRoundId: proposal.votingRoundId,
@@ -90,14 +33,12 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
     targetRoundId: proposal.votingRoundId,
   })
 
-  //TODO: Organize and cleanup this
   const isSupportOrVotingPhase = proposal.state === ProposalState.Pending || proposal.state === ProposalState.Active
-  const communityDeposits = proposalDepositEvent.communityDeposits
-  const communityDepositPercentage = (communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
+  const communityDepositPercentage =
+    (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
+
+  //Show countdown for next step depending on the proposal state
   const endsAt = proposal.state === ProposalState.Pending ? supportPhaseEndsAt : votingPhaseEndsAt
-  const votesFor = proposalVotes?.votes.for.percentage
-  const votesAgainst = proposalVotes?.votes.against.percentage
-  const votesAbstain = proposalVotes?.votes.abstain.percentage
 
   const goToProposal = () => {
     router.push(`/proposals/${proposal.id}`)
@@ -114,28 +55,27 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
         {/* B3TR and dApp Grant */}
         <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
           <HStack>
+            {/* Amount and grant type */}
             <B3TRIcon boxSize={{ base: "14px", md: "16px" }} />
             <Text>
               {proposal.grantAmount} {"B3TR"}
             </Text>
             <Hide below="md">
               <Text>
-                {"•"} {proposal?.grantType} {/* TODO: Improve this and include "Grant" at the end */}
+                {"•"} {proposal?.grantType} {"Grant"}
               </Text>
             </Hide>
+            {/* Divider */}
             <Center height="20px">
               <Divider orientation="vertical" />
             </Center>
+            {/* Proposer */}
             <AddressWithProfilePicture address={proposal.proposerAddress} />
             <Center height="20px">
               <Divider orientation="vertical" />
             </Center>
           </HStack>
-          <HStack fontSize={{ base: "14px", md: "20px" }} gap={"16px"}>
-            <Icon as={LiaDiscourse} />
-            <Icon as={FaXTwitter} />
-            <Icon as={AiOutlineDiscord} />
-          </HStack>
+          <ProposalLinksAndSocials proposal={proposal} />
         </Stack>
         <Divider w="full" h={1} />
         {/* Footer */}
@@ -158,12 +98,12 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
           </HStack>
           <HStack gap={{ base: 3, md: 4 }}>
             {isSupportOrVotingPhase && (
-              <CommunityInteractions
+              <ProposalCommunityInteractions
                 state={proposal.state}
                 depositPercentage={communityDepositPercentage}
-                votesFor={votesFor ?? 0}
-                votesAgainst={votesAgainst ?? 0}
-                votesAbstain={votesAbstain ?? 0}
+                votesFor={proposalVotes?.votes.for.percentage ?? 0}
+                votesAgainst={proposalVotes?.votes.against.percentage ?? 0}
+                votesAbstain={proposalVotes?.votes.abstain.percentage ?? 0}
               />
             )}
           </HStack>
