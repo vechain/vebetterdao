@@ -37,7 +37,7 @@
     "contracts:deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run deploy:testnet --filter=@repo/contracts",
     "contracts:deploy:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run deploy:mainnet --filter=@repo/contracts",
     "contracts:deploy:latest": "dotenv -v NEXT_PUBLIC_APP_ENV=local -v NEXT_DEPLOY_LATEST_ONLY=true -e .env turbo run deploy --filter=@repo/contracts",
-    "contracts:deploy:testnet-staging:latest": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -v NEXT_DEPLOY_LATEST_ONLY=true  -e .env turbo run deploy --filter=@repo/contracts",
+    "contracts:deploy:testnet-staging:latest": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -v NEXT_DEPLOY_LATEST_ONLY=true -v ENDORSE_XAPPS=true -e .env turbo run deploy --filter=@repo/contracts",
     "contracts:deploy:galactica-test": "dotenv -v NEXT_PUBLIC_APP_ENV=galactica-test -- turbo run deploy:galactica-test --filter=@repo/contracts",
     "contracts:select-and-deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @repo/contracts ts-node scripts/deploy/select-and-deploy.ts",
     "contracts:select-and-deploy:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @repo/contracts ts-node scripts/deploy/select-and-deploy.ts",
@@ -79,7 +79,8 @@
     "prepare": "husky install",
     "contracts:verify:testnet": "dotenv -v VITE_APP_ENV=testnet -- yarn workspace @repo/contracts ts-node scripts/verify/verify-entrypoint.ts",
     "contracts:verify:mainnet": "dotenv -v VITE_APP_ENV=mainnet -- yarn workspace @repo/contracts ts-node scripts/verify/verify-entrypoint.ts",
-    "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@repo/contracts"
+    "contracts:estimate-voting-gas:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run estimate-voting-gas:mainnet --filter=@repo/contracts",
+    "contracts:decode-reverting-error": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @repo/contracts ts-node scripts/helpers/decodeError.ts"
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",
