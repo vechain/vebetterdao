@@ -1,251 +1,212 @@
-import { ethers } from "hardhat"
+import { ethers, network } from "hardhat"
 import { getConfig } from "@repo/config"
-import { EnvConfig } from "@repo/config/contracts"
+import { B3TRGovernor, B3TRGovernor__factory } from "../../typechain-types"
+import { readFileSync, writeFileSync } from "fs"
+import BigNumber from "bignumber.js"
+const config = getConfig()
+const VERBOSE = true
 
-interface DepositEvent {
-  depositor: string
-  proposalId: string
-  amount: bigint
-  blockNumber: number
-  transactionHash: string
-}
-
-interface WithdrawEvent {
-  withdrawer: string
-  proposalId: string
-  amount: bigint
-  blockNumber: number
-  transactionHash: string
-}
-
-interface ProposalAnalysis {
-  proposalId: string
-  totalDeposited: bigint
-  totalWithdrawn: bigint
-  remainingToWithdraw: bigint
-  depositors: {
-    [address: string]: {
-      deposited: bigint
-      withdrawn: bigint
-      remaining: bigint
-    }
+// Conditional logging function
+const log = (...args: any[]) => {
+  if (VERBOSE) {
+    console.log(...args)
   }
 }
 
-/**
- * Script to analyze ProposalDeposit and ProposalWithdraw events
- * Identifies remaining withdrawable amounts per address per proposal
- */
-async function analyzeProposalDeposits() {
-  console.log("🔍 Starting analysis of proposal deposits and withdrawals...")
+const stuckDeposits: { walletAddress: string; proposalId: string; depositAmount: string }[] = []
 
-  // Get environment config
-  const envName = (process.env.NEXT_PUBLIC_APP_ENV as EnvConfig) || "testnet-staging"
-  const config = getConfig(envName)
-  console.log(`📋 Using config for environment: ${envName}`)
-  console.log(`🏛️  B3TR Governor address: ${config.b3trGovernorAddress}`)
+const getUserDeposit = async (walletAddress: string, proposalId: string) => {
+  const [signer] = await ethers.getSigners()
 
+  const deposit = await B3TRGovernor__factory.connect(config.b3trGovernorAddress!, signer).getUserDeposit(
+    proposalId,
+    walletAddress,
+  )
+  if (deposit.toString() !== "0") {
+    stuckDeposits.push({
+      walletAddress,
+      proposalId,
+      depositAmount: deposit.toString(),
+    })
+    writeFileSync("stuckDeposits.json", JSON.stringify(stuckDeposits, null, 2))
+    log(
+      `💰 User ${walletAddress} has ${BigNumber(deposit.toString()).dividedBy("1e18").toFixed(4)} B3TR stuck in proposal ${proposalId}`,
+    )
+  }
+  return deposit
+}
+
+// Helper function to fetch events in blocks chunks
+async function fetchEventsInChunks(
+  contract: any,
+  filter: any,
+  fromBlock: number,
+  toBlock: number,
+  chunkSize: number = 100000,
+): Promise<any[]> {
+  const allEvents: any[] = []
+  let currentBlock = fromBlock
+  const totalBlocks = toBlock - fromBlock + 1
+  let processedBlocks = 0
+
+  log(`    📊 Processing ${totalBlocks} blocks in chunks of ${chunkSize}...`)
+
+  while (currentBlock <= toBlock) {
+    const endChunk = Math.min(currentBlock + chunkSize - 1, toBlock)
+    const chunkBlocks = endChunk - currentBlock + 1
+    processedBlocks += chunkBlocks
+
+    const progress = ((processedBlocks / totalBlocks) * 100).toFixed(1)
+    log(`    📡 [${progress}%] Fetching events from block ${currentBlock} to ${endChunk}...`)
+
+    const events = await contract.queryFilter(filter, currentBlock, endChunk)
+    allEvents.push(...events)
+
+    if (events.length > 0) {
+      log(`    ✅ Found ${events.length} events in this chunk`)
+    }
+
+    currentBlock = endChunk + 1
+  }
+
+  return allEvents
+}
+
+export async function main() {
+  const startTime = Date.now()
+
+  // Display startup banner
+  log(`\n${"=".repeat(80)}`)
+  log(`🔍 B3TR GOVERNANCE STUCK DEPOSITS ANALYSIS`)
+  log(`${"=".repeat(80)}`)
+  log(`🔗 Network: ${network.name}`)
+  log(`📋 Environment: ${config.environment}`)
+  log(`🏛️ Governor Address: ${config.b3trGovernorAddress}`)
+
+  // Environment variables
+  const startBlock = 18868871 // B3TRGovernor was deployed at 18,868,871, but only on 19,820,936 (V4 Upgrade) the withdraw event was added
+  const currentBlock = await ethers.provider.getBlockNumber()
+  const endBlock = currentBlock
+
+  log(`📊 Block Range: ${startBlock.toLocaleString()} → ${endBlock.toLocaleString()}`)
+  log(`📈 Total Blocks to Analyze: ${(endBlock - startBlock).toLocaleString()}`)
+  log(`${"=".repeat(80)}`)
+
+  // Get contract instances
+  const b3trGovernor = (await ethers.getContractAt("B3TRGovernor", config.b3trGovernorAddress!)) as B3TRGovernor
+
+  const depositEventFilter = b3trGovernor.filters.ProposalDeposit()
+  const proposalCreatedEventFilter = b3trGovernor.filters.ProposalCreated()
+
+  // Step 1: Fetch all relevant events in parallel
+  log(`\n📊 Step 1: Fetching blockchain events...`)
+  const [depositEvents, proposalCreatedEvents] = await Promise.all([
+    fetchEventsInChunks(b3trGovernor, depositEventFilter, startBlock, endBlock, 100000),
+    fetchEventsInChunks(b3trGovernor, proposalCreatedEventFilter, startBlock, endBlock, 100000),
+  ])
+
+  log(`✅ Deposit Events Found: ${depositEvents.length}`)
+  log(`✅ Proposal Created Events Found: ${proposalCreatedEvents.length}`)
+
+  // Step 2: Process and organize events by depositor
+  log(`\n📊 Step 2: Processing and organizing events by depositor...`)
+
+  const uniqueDepositors = new Set<string>()
+  const proposalIds: string[] = []
+
+  // Extract unique depositors
+  for (const event of depositEvents) {
+    const depositorAddress = event.args.depositor.toLowerCase()
+    uniqueDepositors.add(depositorAddress)
+  }
+
+  // Extract all proposal IDs
+  for (const event of proposalCreatedEvents) {
+    proposalIds.push(event.args.proposalId.toString())
+  }
+
+  log(`👥 Found ${uniqueDepositors.size} unique depositors`)
+  log(`📋 Found ${proposalIds.length} total proposals`)
+
+  // Check each depositor against each proposal for stuck deposits
+  log(`\n🔍 Step 3: Analyzing stuck deposits...`)
+  let processedCount = 0
+  const totalChecks = uniqueDepositors.size * proposalIds.length
+
+  for (const depositorAddress of uniqueDepositors) {
+    for (const proposalId of proposalIds) {
+      await getUserDeposit(depositorAddress, proposalId)
+      processedCount++
+
+      if (processedCount % 100 === 0) {
+        const progress = ((processedCount / totalChecks) * 100).toFixed(1)
+        log(`⏳ Progress: ${progress}% (${processedCount}/${totalChecks} checks completed)`)
+      }
+    }
+  }
+
+  // Calculate and display summary
+  const summary = await calculateStuckDepositsSummary()
+
+  const executionTime = (Date.now() - startTime) / 1000
+  log(`\n⏱️  EXECUTION TIME: ${executionTime.toFixed(2)}s (${(executionTime / 60).toFixed(2)} minutes)`)
+
+  return summary
+}
+
+interface StuckDepositSummary {
+  totalStuckAmount: string
+  totalStuckAmountFormatted: string
+  stuckDepositsCount: number
+  affectedWallets: number
+  affectedProposals: number
+}
+
+const calculateStuckDepositsSummary = async (): Promise<StuckDepositSummary> => {
   try {
-    // Get the B3TRGovernor contract instance
-    const b3trGovernor = await ethers.getContractAt("B3TRGovernor", config.b3trGovernorAddress)
-    console.log("✅ Connected to B3TRGovernor contract")
+    const stuckDepositsData = await readFileSync("stuckDeposits.json", "utf8")
+    const stuckDepositsArray = JSON.parse(stuckDepositsData)
 
-    // Get the current block number to determine range
-    const latestBlock = await ethers.provider.getBlockNumber()
-    console.log(`📦 Latest block: ${latestBlock}`)
+    // Calculate total stuck amount in wei
+    const totalStuckAmountWei = stuckDepositsArray.reduce((acc: BigNumber, item: { depositAmount: string }) => {
+      return acc.plus(new BigNumber(item.depositAmount))
+    }, new BigNumber(0))
 
-    console.log("🔄 Querying ProposalDeposit events...")
-    // Query all ProposalDeposit events
-    const depositFilter = b3trGovernor.filters.ProposalDeposit()
-    const depositEvents = await b3trGovernor.queryFilter(depositFilter, 0, latestBlock)
-    console.log(`💰 Found ${depositEvents.length} deposit events`)
+    // Get unique wallets and proposals affected
+    const uniqueWallets = new Set(stuckDepositsArray.map((item: { walletAddress: string }) => item.walletAddress))
+    const uniqueProposals = new Set(stuckDepositsArray.map((item: { proposalId: string }) => item.proposalId))
 
-    console.log("🔄 Querying ProposalWithdraw events...")
-    // ProposalWithdraw event is not exposed in IB3TRGovernor interface, so we query by event signature
-    // event ProposalWithdraw(address indexed withdrawer, uint256 indexed proposalId, uint256 amount)
-    const withdrawEventSignature = "ProposalWithdraw(address,uint256,uint256)"
-    const withdrawEventTopic = ethers.id(withdrawEventSignature)
-
-    const withdrawLogs = await ethers.provider.getLogs({
-      address: config.b3trGovernorAddress,
-      topics: [withdrawEventTopic],
-      fromBlock: 0,
-      toBlock: latestBlock,
-    })
-
-    // Parse the withdraw events manually
-    const withdrawEvents = withdrawLogs.map(log => {
-      const decoded = ethers.AbiCoder.defaultAbiCoder().decode(
-        ["uint256"], // amount (non-indexed)
-        log.data,
-      )
-      return {
-        args: {
-          withdrawer: ethers.getAddress("0x" + log.topics[1].slice(26)), // Remove 0x and leading zeros
-          proposalId: BigInt(log.topics[2]),
-          amount: decoded[0],
-        },
-        blockNumber: log.blockNumber,
-        transactionHash: log.transactionHash,
-      }
-    })
-    console.log(`💸 Found ${withdrawEvents.length} withdraw events`)
-
-    // Process deposit events
-    const deposits: DepositEvent[] = depositEvents.map(event => ({
-      depositor: event.args.depositor,
-      proposalId: event.args.proposalId.toString(),
-      amount: event.args.amount,
-      blockNumber: event.blockNumber,
-      transactionHash: event.transactionHash,
-    }))
-
-    // Process withdraw events
-    const withdrawals: WithdrawEvent[] = withdrawEvents.map(event => ({
-      withdrawer: event.args.withdrawer,
-      proposalId: event.args.proposalId.toString(),
-      amount: event.args.amount,
-      blockNumber: event.blockNumber,
-      transactionHash: event.transactionHash,
-    }))
-
-    console.log("📊 Analyzing deposits and withdrawals by proposal...")
-
-    // Group by proposalId and analyze
-    const proposalAnalyses: { [proposalId: string]: ProposalAnalysis } = {}
-
-    // Process deposits
-    for (const deposit of deposits) {
-      if (!proposalAnalyses[deposit.proposalId]) {
-        proposalAnalyses[deposit.proposalId] = {
-          proposalId: deposit.proposalId,
-          totalDeposited: 0n,
-          totalWithdrawn: 0n,
-          remainingToWithdraw: 0n,
-          depositors: {},
-        }
-      }
-
-      const analysis = proposalAnalyses[deposit.proposalId]
-      analysis.totalDeposited += deposit.amount
-
-      if (!analysis.depositors[deposit.depositor]) {
-        analysis.depositors[deposit.depositor] = {
-          deposited: 0n,
-          withdrawn: 0n,
-          remaining: 0n,
-        }
-      }
-
-      analysis.depositors[deposit.depositor].deposited += deposit.amount
+    const summary: StuckDepositSummary = {
+      totalStuckAmount: totalStuckAmountWei.toString(),
+      totalStuckAmountFormatted: totalStuckAmountWei.dividedBy("1e18").toFixed(4),
+      stuckDepositsCount: stuckDepositsArray.length,
+      affectedWallets: uniqueWallets.size,
+      affectedProposals: uniqueProposals.size,
     }
 
-    // Process withdrawals
-    for (const withdrawal of withdrawals) {
-      if (!proposalAnalyses[withdrawal.proposalId]) {
-        // This shouldn't happen if data is consistent, but handle gracefully
-        console.warn(`⚠️  Found withdrawal for proposal ${withdrawal.proposalId} without corresponding deposits`)
-        continue
-      }
+    // Display comprehensive summary
+    log(`\n${"=".repeat(60)}`)
+    log(`📊 STUCK DEPOSITS ANALYSIS SUMMARY`)
+    log(`${"=".repeat(60)}`)
+    log(`💰 Total Stuck Amount: ${summary.totalStuckAmountFormatted} B3TR`)
+    log(`📈 Total Stuck Deposits: ${summary.stuckDepositsCount}`)
+    log(`👥 Affected Wallets: ${summary.affectedWallets}`)
+    log(`📋 Affected Proposals: ${summary.affectedProposals}`)
+    log(`💾 Data saved to: stuckDeposits.json`)
+    log(`${"=".repeat(60)}`)
 
-      const analysis = proposalAnalyses[withdrawal.proposalId]
-      analysis.totalWithdrawn += withdrawal.amount
-
-      if (!analysis.depositors[withdrawal.withdrawer]) {
-        // This shouldn't happen if data is consistent, but handle gracefully
-        console.warn(
-          `⚠️  Found withdrawal by ${withdrawal.withdrawer} for proposal ${withdrawal.proposalId} without corresponding deposit`,
-        )
-        analysis.depositors[withdrawal.withdrawer] = {
-          deposited: 0n,
-          withdrawn: 0n,
-          remaining: 0n,
-        }
-      }
-
-      analysis.depositors[withdrawal.withdrawer].withdrawn += withdrawal.amount
-    }
-
-    // Calculate remaining amounts
-    for (const proposalId in proposalAnalyses) {
-      const analysis = proposalAnalyses[proposalId]
-
-      for (const address in analysis.depositors) {
-        const depositor = analysis.depositors[address]
-        depositor.remaining = depositor.deposited - depositor.withdrawn
-      }
-
-      analysis.remainingToWithdraw = analysis.totalDeposited - analysis.totalWithdrawn
-    }
-
-    // Display results
-    console.log("\n" + "=".repeat(80))
-    console.log("📋 PROPOSAL DEPOSITS AND WITHDRAWALS ANALYSIS")
-    console.log("=".repeat(80))
-
-    let totalWithdrawableFound = false
-
-    for (const proposalId in proposalAnalyses) {
-      const analysis = proposalAnalyses[proposalId]
-
-      // Only show proposals that have remaining withdrawable amounts
-      const hasRemainingFunds = analysis.remainingToWithdraw > 0n
-      const addressesWithFunds = Object.entries(analysis.depositors).filter(([, data]) => data.remaining > 0n)
-
-      if (hasRemainingFunds && addressesWithFunds.length > 0) {
-        totalWithdrawableFound = true
-
-        console.log(`\n📝 Proposal ID: ${proposalId}`)
-        console.log(`💰 Total Deposited: ${ethers.formatEther(analysis.totalDeposited)} B3TR`)
-        console.log(`💸 Total Withdrawn: ${ethers.formatEther(analysis.totalWithdrawn)} B3TR`)
-        console.log(`🏦 Remaining to Withdraw: ${ethers.formatEther(analysis.remainingToWithdraw)} B3TR`)
-        console.log(`👥 Addresses with withdrawable funds:`)
-
-        for (const [address, data] of addressesWithFunds) {
-          console.log(`   🔹 ${address}`)
-          console.log(`      Deposited: ${ethers.formatEther(data.deposited)} B3TR`)
-          console.log(`      Withdrawn: ${ethers.formatEther(data.withdrawn)} B3TR`)
-          console.log(`      Remaining: ${ethers.formatEther(data.remaining)} B3TR`)
-        }
-        console.log("-".repeat(60))
-      }
-    }
-
-    if (!totalWithdrawableFound) {
-      console.log("\n✅ No remaining withdrawable funds found across all proposals!")
-      console.log("All depositors have successfully withdrawn their deposits.")
-    }
-
-    // Summary statistics
-    const totalProposals = Object.keys(proposalAnalyses).length
-    const proposalsWithFunds = Object.values(proposalAnalyses).filter(p => p.remainingToWithdraw > 0n).length
-    const totalRemainingAcrossAll = Object.values(proposalAnalyses).reduce((sum, p) => sum + p.remainingToWithdraw, 0n)
-
-    console.log("\n" + "=".repeat(80))
-    console.log("📊 SUMMARY STATISTICS")
-    console.log("=".repeat(80))
-    console.log(`📝 Total Proposals Analyzed: ${totalProposals}`)
-    console.log(`🏦 Proposals with Remaining Funds: ${proposalsWithFunds}`)
-    console.log(`💰 Total Remaining Across All Proposals: ${ethers.formatEther(totalRemainingAcrossAll)} B3TR`)
-    console.log(`📈 Total Deposit Events: ${deposits.length}`)
-    console.log(`📉 Total Withdraw Events: ${withdrawals.length}`)
+    return summary
   } catch (error) {
-    console.error("❌ Error analyzing proposal deposits:", error)
-    process.exit(1)
+    log(`❌ Error calculating stuck deposits summary: ${error}`)
+    return {
+      totalStuckAmount: "0",
+      totalStuckAmountFormatted: "0",
+      stuckDepositsCount: 0,
+      affectedWallets: 0,
+      affectedProposals: 0,
+    }
   }
 }
 
-// Run the script
-if (require.main === module) {
-  analyzeProposalDeposits()
-    .then(() => {
-      console.log("\n✅ Analysis completed successfully!")
-      process.exit(0)
-    })
-    .catch(error => {
-      console.error("❌ Script failed:", error)
-      process.exit(1)
-    })
-}
-
-export { analyzeProposalDeposits }
+// Execute the analysis
+main().catch(console.error)
