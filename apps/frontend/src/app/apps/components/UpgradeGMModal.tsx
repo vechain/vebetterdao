@@ -15,6 +15,7 @@ import {
   Card,
   Alert,
   Skeleton,
+  CloseButton,
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -70,7 +71,9 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleClose} size={"lg"}>
       <CustomModalContent p={{ base: 3, md: 5 }}>
-        <Dialog.CloseTrigger />
+        <Dialog.CloseTrigger asChild>
+          <CloseButton />
+        </Dialog.CloseTrigger>
         <Dialog.Header>
           <VStack gap={4} align="flex-start">
             <UilArrowCircleUp cursor="pointer" size="50px" color="#004CFC" />

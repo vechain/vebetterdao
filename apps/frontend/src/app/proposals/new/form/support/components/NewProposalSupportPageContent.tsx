@@ -79,13 +79,14 @@ export const NewProposalSupportPageContent = () => {
                 <InputGroup
                   w="full"
                   mt={4}
-                  startElement={<VOT3Icon colorVariant="dark" />}
-                  startAddonProps={{
+                  startElement={<VOT3Icon boxSize={8} colorVariant="dark" />}
+                  startElementProps={{
+                    p: 1,
                     pointerEvents: "none",
                   }}
                   endElement={
                     <Skeleton loading={thresholdLoading}>
-                      <Heading w="auto" size={["sm", "sm", "lg"]} color="gray.500" fontWeight={400}>
+                      <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500" fontWeight={400}>
                         {`/ ${compactFormatter.format(Number(threshold))}`}
                       </Heading>
                     </Skeleton>
@@ -105,21 +106,18 @@ export const NewProposalSupportPageContent = () => {
                         }
                       },
                     })}
-                    ml={2}
                     w="full"
-                    variant="flushed"
                     placeholder={t("Enter the amount of VOT3")}
                     fontSize={["xl", "xl", "3xl"]}
-                    fontFamily={"Instrument Sans Variable"}
                   />
                 </InputGroup>
                 <Skeleton loading={balanceLoading}>
                   {errors.amount ? (
-                    <Field.ErrorText color="red.500" data-testid="amount-input-error-message">
+                    <Field.ErrorText fontStyle="sm" color="red.500" data-testid="amount-input-error-message">
                       {errors.amount.message}
                     </Field.ErrorText>
                   ) : (
-                    <Field.HelperText>
+                    <Field.HelperText fontStyle="sm">
                       {t("Your current VOT3 balance is")} {balance?.formatted}
                     </Field.HelperText>
                   )}

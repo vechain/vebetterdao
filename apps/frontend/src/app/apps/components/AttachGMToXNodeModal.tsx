@@ -6,7 +6,19 @@ import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { useAttachGMToXNode } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { Alert, Box, Button, Flex, Heading, Dialog, Stack, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
+import {
+  Alert,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Dialog,
+  Stack,
+  Text,
+  useBreakpointValue,
+  VStack,
+  CloseButton,
+} from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -73,7 +85,9 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
   return (
     <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={handleClose} size={"xl"}>
       <CustomModalContent p={{ base: 3, md: 5 }}>
-        <Dialog.CloseTrigger />
+        <Dialog.CloseTrigger asChild>
+          <CloseButton />
+        </Dialog.CloseTrigger>
         <Dialog.Header>
           <Heading fontSize="lg">{t("Attaching Node to GM NFT")}</Heading>
         </Dialog.Header>

@@ -20,7 +20,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
   roundId,
   selected,
   onSelect,
-  renderSkeleton,
+  renderSkeleton = false,
   isSelectable = true,
   cardProps = {},
 }) => {

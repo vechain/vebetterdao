@@ -1,5 +1,5 @@
 import { AppDetails } from "./AppDetails"
-import { Heading, Dialog, VStack, Portal } from "@chakra-ui/react"
+import { Heading, Dialog, VStack, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export type AppAdministrationRole = {
@@ -31,7 +31,9 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
             <Dialog.Header>
               <Heading size="2xl">{t("Managed apps")}</Heading>
             </Dialog.Header>
-            <Dialog.CloseTrigger />
+            <Dialog.CloseTrigger asChild>
+              <CloseButton />
+            </Dialog.CloseTrigger>
             <Dialog.Body>
               <VStack gap={12}>
                 {userAppRoles.map(role => {

@@ -1,4 +1,4 @@
-import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon } from "@chakra-ui/react"
+import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, CloseButton } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useDepositToAppBalance, useGetB3trBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
@@ -126,7 +126,9 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />
+        <Dialog.CloseTrigger asChild top={{ base: 5, md: 6 }} right={4}>
+          <CloseButton />
+        </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>

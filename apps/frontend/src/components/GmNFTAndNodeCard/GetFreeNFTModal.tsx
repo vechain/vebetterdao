@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Dialog, Button, Image, Text, VStack, Stack, Heading, Box, Portal } from "@chakra-ui/react"
+import { Dialog, Button, Image, Text, VStack, Stack, Heading, Box, Portal, CloseButton } from "@chakra-ui/react"
 
 interface GetFreeNFTModalProps {
   isOpen: boolean
@@ -61,7 +61,9 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
               </Stack>
             </Dialog.Footer>
 
-            <Dialog.CloseTrigger />
+            <Dialog.CloseTrigger asChild>
+              <CloseButton />
+            </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>

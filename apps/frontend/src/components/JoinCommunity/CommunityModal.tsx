@@ -1,4 +1,4 @@
-import { Card, Dialog, VStack, Text } from "@chakra-ui/react"
+import { Card, Dialog, VStack, Text, CloseButton } from "@chakra-ui/react"
 import { CustomModalContent } from "../CustomModalContent"
 import { useCallback } from "react"
 import { DiscordButton, FreshDeskButton, TelegramButton } from "../Footer"
@@ -33,7 +33,9 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
   const renderCardContent = useCallback(() => {
     return (
       <Card.Body>
-        <Dialog.CloseTrigger top={6} right={4} />
+        <Dialog.CloseTrigger top={6} right={4} asChild>
+          <CloseButton />
+        </Dialog.CloseTrigger>
         <Text fontSize={20} fontWeight={700}>
           {t("Join Our Community!")}
         </Text>

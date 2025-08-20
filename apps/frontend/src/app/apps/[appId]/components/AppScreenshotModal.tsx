@@ -1,5 +1,5 @@
 import { notFoundImage } from "@/constants"
-import { Container, Heading, Image, Dialog, VStack, Portal } from "@chakra-ui/react"
+import { Container, Heading, Image, Dialog, VStack, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 import { useColorModeValue } from "@/components/ui/color-mode"
@@ -21,7 +21,9 @@ export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
           <Dialog.Content m={0} h={"100vh"} borderRadius={0} overflow={"auto"}>
             <Dialog.Header pos="sticky" top={0} left={0} bg={headerBg}>
               <Heading size={"md"}>{t("Screenshots")}</Heading>
-              <Dialog.CloseTrigger />
+              <Dialog.CloseTrigger asChild>
+                <CloseButton />
+              </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body>
               <Container maxW={["full", "full", "breakpoint-xl"]}>

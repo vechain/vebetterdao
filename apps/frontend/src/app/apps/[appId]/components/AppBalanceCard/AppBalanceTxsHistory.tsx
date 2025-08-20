@@ -1,4 +1,17 @@
-import { Card, Dialog, HStack, Text, VStack, NativeSelect, Box, Center, Image, Icon, Portal } from "@chakra-ui/react"
+import {
+  Card,
+  Dialog,
+  HStack,
+  Text,
+  VStack,
+  NativeSelect,
+  Box,
+  Center,
+  Image,
+  Icon,
+  Portal,
+  CloseButton,
+} from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
 import { DatePicker } from "@/components"
@@ -99,7 +112,9 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content borderRadius="20px">
-            <Dialog.CloseTrigger />
+            <Dialog.CloseTrigger asChild>
+              <CloseButton />
+            </Dialog.CloseTrigger>
             <Dialog.Header>
               <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
                 {t("Transaction history")}

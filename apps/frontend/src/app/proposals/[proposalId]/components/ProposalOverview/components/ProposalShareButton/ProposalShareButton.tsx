@@ -1,4 +1,4 @@
-import { Heading, VStack, Dialog, IconButton, useDisclosure, Box, Text, HStack } from "@chakra-ui/react"
+import { Heading, VStack, Dialog, IconButton, useDisclosure, Box, Text, HStack, CloseButton } from "@chakra-ui/react"
 import loadingAnimation from "./loading.json"
 import { motion } from "framer-motion"
 import { CustomModalContent } from "@/components"
@@ -53,9 +53,10 @@ export const ProposalShareButton = () => {
         size={"xl"}>
         <CustomModalContent>
           <ModalAnimation>
-            <Dialog.CloseTrigger top={4} right={4} />
+            <Dialog.CloseTrigger asChild top={4} right={4}>
+              <CloseButton />
+            </Dialog.CloseTrigger>
             <motion.div initial="initial" animate="animate" variants={containerVariants}>
-              <Dialog.CloseTrigger top={4} right={4} />
               <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
                   {/* @ts-ignore eslint-disable-line */}

@@ -90,7 +90,7 @@ export const TransactionModal = () => {
       showCloseButton={canShowCloseButton}
       isCloseable={canShowCloseButton}
       modalContentProps={{
-        zIndex: 9999,
+        zIndex: 10,
       }}
       modalBodyProps={{
         p: 10,

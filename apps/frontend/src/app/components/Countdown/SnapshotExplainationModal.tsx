@@ -44,7 +44,6 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
             <Dialog.Header pt={0}>
               <Heading size={["2xl", "4xl"]}>{t("What is a snapshot ?")}</Heading>
             </Dialog.Header>
-            <Dialog.CloseTrigger py={10} />
             <Dialog.Body alignItems={"center"}>
               <VStack alignItems={"center"} gap={8}>
                 <Text fontSize={["sm", "lg"]}>

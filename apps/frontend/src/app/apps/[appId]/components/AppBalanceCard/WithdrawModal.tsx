@@ -1,4 +1,16 @@
-import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, NativeSelect } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  HStack,
+  Text,
+  VStack,
+  Dialog,
+  Input,
+  Skeleton,
+  Icon,
+  NativeSelect,
+  CloseButton,
+} from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
@@ -174,7 +186,9 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
-        <Dialog.CloseTrigger />
+        <Dialog.CloseTrigger asChild>
+          <CloseButton />
+        </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>

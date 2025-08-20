@@ -3,7 +3,7 @@ import { CustomModalContent } from "@/components/CustomModalContent"
 import { NFTWithRings } from "@/components/GmNFT/components"
 import { ShareButtons } from "@/components/ShareButtons"
 import { notFoundImage } from "@/constants"
-import { Card, Dialog, Text, VStack } from "@chakra-ui/react"
+import { Card, Dialog, Text, VStack, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
@@ -26,7 +26,9 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
               rounded="2xl"
               data-testid="gmnft-modal"
               bgGradient={"radial-gradient(76.36% 85.35% at 50.12% 27.48%, #304828 0%, #01091B 100%)"}>
-              <Dialog.CloseTrigger color={"white"} />
+              <Dialog.CloseTrigger color={"white"} asChild>
+                <CloseButton />
+              </Dialog.CloseTrigger>
               <Dialog.Body
                 display={"flex"}
                 alignContent={"center"}

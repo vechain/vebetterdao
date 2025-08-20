@@ -1,5 +1,5 @@
 import { CustomModalContent } from "@/components"
-import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, CloseButton } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -42,7 +42,9 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
         <CustomModalContent>
-          <Dialog.CloseTrigger />
+          <Dialog.CloseTrigger asChild>
+            <CloseButton />
+          </Dialog.CloseTrigger>
 
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">

@@ -12,6 +12,7 @@ import {
   Circle,
   Skeleton,
   Portal,
+  CloseButton,
 } from "@chakra-ui/react"
 import { useAppAvailableFunds, useAppRewardsBalance, useRefillRewardsPool } from "@/api/contracts/x2EarnRewardsPool"
 import { useTranslation } from "react-i18next"
@@ -182,7 +183,9 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content borderRadius="20px">
-            <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />
+            <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} asChild>
+              <CloseButton />
+            </Dialog.CloseTrigger>
             <Dialog.Header>
               <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
                 {t("Refill Pools")}

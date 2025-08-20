@@ -1,4 +1,4 @@
-import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box, Portal } from "@chakra-ui/react"
+import { Button, Dialog, VStack, useDisclosure, Text, Alert, Box, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 import { WithdrawModal } from "./WithdrawModal"
@@ -41,7 +41,9 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content borderRadius="20px">
-              <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} />
+              <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} asChild>
+                <CloseButton />
+              </Dialog.CloseTrigger>
               <Dialog.Header>
                 <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
                   {t("Transfer App Balance")}
