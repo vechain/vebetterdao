@@ -1,8 +1,9 @@
 import { ethers, network } from "hardhat"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor, B3TRGovernor__factory } from "../../typechain-types"
+import { B3TRGovernor } from "../../typechain-types"
 import { readFileSync, writeFileSync } from "fs"
 import BigNumber from "bignumber.js"
+
 const config = getConfig()
 const VERBOSE = true
 
@@ -15,25 +16,19 @@ const log = (...args: any[]) => {
 
 const stuckDeposits: { walletAddress: string; proposalId: string; depositAmount: string }[] = []
 
-const getUserDeposit = async (walletAddress: string, proposalId: string) => {
-  const [signer] = await ethers.getSigners()
+// Initialize signer and governor contract once for reuse
+let governorContract: B3TRGovernor
 
-  const deposit = await B3TRGovernor__factory.connect(config.b3trGovernorAddress!, signer).getUserDeposit(
-    proposalId,
-    walletAddress,
-  )
-  if (deposit.toString() !== "0") {
+const getUserDeposit = async (walletAddress: string, proposalId: string): Promise<void> => {
+  const deposit = await governorContract.getUserDeposit(proposalId, walletAddress)
+  if (deposit !== ethers.toBigInt(0)) {
     stuckDeposits.push({
       walletAddress,
       proposalId,
       depositAmount: deposit.toString(),
     })
-    writeFileSync("stuckDeposits.json", JSON.stringify(stuckDeposits, null, 2))
-    log(
-      `💰 User ${walletAddress} has ${BigNumber(deposit.toString()).dividedBy("1e18").toFixed(4)} B3TR stuck in proposal ${proposalId}`,
-    )
+    log(`💰 User ${walletAddress} has ${ethers.formatEther(deposit)} B3TR stuck in proposal ${proposalId}`)
   }
-  return deposit
 }
 
 // Helper function to fetch events in blocks chunks
@@ -72,6 +67,33 @@ async function fetchEventsInChunks(
   return allEvents
 }
 
+async function checkDepositStuckInChunks(
+  depositCheckTasks: Array<{ depositorAddress: string; proposalId: string }>,
+  totalChecks: number,
+  chunkSize: number = 300,
+) {
+  // Process in batches to avoid memory issues
+  let processedCount = 0
+
+  log(`🧠 Memory optimization: Processing in batches of ${chunkSize} to prevent OOM errors`)
+  log(`⏱️  Estimated batches: ${Math.ceil(depositCheckTasks.length / chunkSize)}`)
+
+  for (let i = 0; i < depositCheckTasks.length; i += chunkSize) {
+    const batch = depositCheckTasks.slice(i, i + chunkSize)
+    const batchNumber = Math.floor(i / chunkSize) + 1
+    const totalBatches = Math.ceil(depositCheckTasks.length / chunkSize)
+
+    log(`⚡ Processing batch ${batchNumber}/${totalBatches} (${batch.length} requests)...`)
+
+    // Process batch in parallel
+    await Promise.all(batch.map(({ depositorAddress, proposalId }) => getUserDeposit(depositorAddress, proposalId)))
+
+    processedCount += batch.length
+    const progress = ((processedCount / totalChecks) * 100).toFixed(1)
+    log(`✅ Batch ${batchNumber} completed! Progress: ${progress}% (${processedCount}/${totalChecks})`)
+  }
+}
+
 export async function main() {
   const startTime = Date.now()
 
@@ -94,6 +116,9 @@ export async function main() {
 
   // Get contract instances
   const b3trGovernor = (await ethers.getContractAt("B3TRGovernor", config.b3trGovernorAddress!)) as B3TRGovernor
+
+  // Initialize the global governor contract for reuse in getUserDeposit
+  governorContract = b3trGovernor
 
   const depositEventFilter = b3trGovernor.filters.ProposalDeposit()
   const proposalCreatedEventFilter = b3trGovernor.filters.ProposalCreated()
@@ -129,21 +154,26 @@ export async function main() {
   log(`📋 Found ${proposalIds.length} total proposals`)
 
   // Check each depositor against each proposal for stuck deposits
-  log(`\n🔍 Step 3: Analyzing stuck deposits...`)
-  let processedCount = 0
+  log(`\n🔍 Step 3: Analyzing stuck deposits with batched parallel processing...`)
   const totalChecks = uniqueDepositors.size * proposalIds.length
+  log(`🚀 Processing ${totalChecks} deposit checks in batches...`)
 
+  // Create all tasks
+  const depositCheckTasks: Array<{ depositorAddress: string; proposalId: string }> = []
   for (const depositorAddress of uniqueDepositors) {
     for (const proposalId of proposalIds) {
-      await getUserDeposit(depositorAddress, proposalId)
-      processedCount++
-
-      if (processedCount % 100 === 0) {
-        const progress = ((processedCount / totalChecks) * 100).toFixed(1)
-        log(`⏳ Progress: ${progress}% (${processedCount}/${totalChecks} checks completed)`)
-      }
+      depositCheckTasks.push({ depositorAddress, proposalId })
     }
   }
+  // Check for stuck deposits in chunks of 500
+  await checkDepositStuckInChunks(depositCheckTasks, totalChecks, 500)
+
+  log(`🎉 All ${totalChecks} deposit checks completed successfully!`)
+
+  // Save all stuck deposits to file
+  const fileName = "stuckDeposits.json"
+  writeFileSync(fileName, JSON.stringify(stuckDeposits, null, 2))
+  log(`💾 Saved ${stuckDeposits.length} stuck deposits to ${fileName}`)
 
   // Calculate and display summary
   const summary = await calculateStuckDepositsSummary()
@@ -162,7 +192,7 @@ interface StuckDepositSummary {
   affectedProposals: number
 }
 
-const calculateStuckDepositsSummary = async (): Promise<StuckDepositSummary> => {
+export const calculateStuckDepositsSummary = async (): Promise<StuckDepositSummary> => {
   try {
     const stuckDepositsData = await readFileSync("stuckDeposits.json", "utf8")
     const stuckDepositsArray = JSON.parse(stuckDepositsData)
@@ -192,7 +222,6 @@ const calculateStuckDepositsSummary = async (): Promise<StuckDepositSummary> => 
     log(`📈 Total Stuck Deposits: ${summary.stuckDepositsCount}`)
     log(`👥 Affected Wallets: ${summary.affectedWallets}`)
     log(`📋 Affected Proposals: ${summary.affectedProposals}`)
-    log(`💾 Data saved to: stuckDeposits.json`)
     log(`${"=".repeat(60)}`)
 
     return summary
