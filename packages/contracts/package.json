@@ -1,6 +1,6 @@
 {
   "name": "@vechain/vebetterdao-contracts",
-  "version": "6.1.0",
+  "version": "6.2.0",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
@@ -15,7 +15,7 @@
     },
     "./typechain-types": "./typechain-types/index.ts"
   },
-  "prepare": "yarn compile",
+  "prepublishOnly": "yarn compile",
   "scripts": {
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
     "test:thor-solo": "npx hardhat test",
@@ -78,8 +78,6 @@
     "@openzeppelin/contracts": "5.0.2",
     "@openzeppelin/contracts-upgradeable": "5.0.2",
     "@openzeppelin/upgrades-core": "^1.32.5",
-    "@repo/config": "*",
-    "@repo/utils": "*",
     "@typechain/hardhat": "^8.0.0",
     "@types/chai": "^4.2.0",
     "@types/mocha": ">=9.1.0",
@@ -107,7 +105,9 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.12",
+    "@repo/config": "*",
     "@repo/eslint-config": "*",
+    "@repo/utils": "*",
     "@typechain/ethers-v6": "^0.4.3",
     "@types/archiver": "^6.0.3",
     "@types/inquirer": "^9.0.7",
