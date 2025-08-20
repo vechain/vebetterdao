@@ -1,16 +1,6 @@
 import { BaseModal } from "@/components/BaseModal"
-import {
-  UseDisclosureProps,
-  VStack,
-  Text,
-  Heading,
-  Button,
-  OrderedList,
-  ListItem,
-  Image,
-  HStack,
-  useColorModeValue,
-} from "@chakra-ui/react"
+import { UseDisclosureProps, VStack, Text, Heading, Button, List, Image, HStack } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
@@ -18,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
 type Props = {
-  isOpen: UseDisclosureProps["isOpen"]
+  isOpen: UseDisclosureProps["open"]
   onClose: UseDisclosureProps["onClose"]
   hasNft: boolean
 }
@@ -68,16 +58,16 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
 
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
-      <VStack align="stretch" spacing={4} alignItems="center">
+      <VStack align="stretch" gap={4} alignItems="center">
         <Image src={modalIcon} alt="NFT Requirement icon" boxSize={180} />
-        <VStack align="stretch" spacing={6}>
+        <VStack align="stretch" gap={6}>
           <Heading alignSelf="center" fontSize="28px">
             {t("To apply for a proposal, you must")}
           </Heading>
 
           {!hasNft ? (
-            <OrderedList spacing={2}>
-              <ListItem>
+            <List.Root as="ol" gap={2}>
+              <List.Item>
                 <Text fontSize="16px" fontWeight={400}>
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
@@ -85,14 +75,14 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
                     components={{ b: <Text as="span" fontWeight="bold" /> }}
                   />
                 </Text>
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 <Trans
                   i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
                   components={{ b: <Text as="span" fontWeight="bold" /> }}
                 />
-              </ListItem>
-            </OrderedList>
+              </List.Item>
+            </List.Root>
           ) : (
             <Text fontSize="16px" fontWeight={400}>
               <Trans

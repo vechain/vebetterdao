@@ -1,6 +1,7 @@
 "use client"
 import { useAllocationsRound, useIsQuadraticFundingDisabled, useTotalVotesOnBlock } from "@/api"
-import { BaseTooltip, ResponsiveCard, VOT3Icon } from "@/components"
+import { ResponsiveCard, VOT3Icon } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { useBreakpoints } from "@/hooks"
 import { VStack, Heading, Box, HStack, Skeleton, Text, Icon } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
@@ -52,9 +53,9 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
               {t("VOT3 balance at snapshot")}
             </Text>
             {depositsVotes && (
-              <BaseTooltip
-                showTooltip={depositsVotes !== "0"}
-                text={
+              <Tooltip
+                disabled={depositsVotes === "0"}
+                content={
                   <Text>
                     <Trans
                       i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
@@ -66,7 +67,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
                 <span>
                   <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
                 </span>
-              </BaseTooltip>
+              </Tooltip>
             )}
           </HStack>
         </VStack>
