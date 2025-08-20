@@ -333,6 +333,10 @@
     "estimate-voting-gas:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "analyze-proposal-deposits:mainnet": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     }
   }
 }
