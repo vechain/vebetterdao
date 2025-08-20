@@ -6,20 +6,13 @@ if (typeof self === "undefined") {
 }
 
 const nextConfig = {
-  // Enable Turbopack for development
-  experimental: {
-    turbo: {
-      rules: {
-        // Handle SVG files with @svgr/webpack equivalent in Turbopack
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
-    optimizePackageImports: ["@chakra-ui/react"],
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    })
+    return config
   },
-  transpilePackages: ["@vechain-kit/vebetterdao-contracts", "@vechain/vechain-kit"],
 }
 
 module.exports = nextConfig

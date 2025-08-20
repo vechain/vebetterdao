@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@vechain-kit/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey, getUserNodesQueryKey } from "@/api"

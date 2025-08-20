@@ -1,7 +1,7 @@
 import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
 import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
-import { Emissions__factory } from "@vechain-kit/vebetterdao-contracts"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"

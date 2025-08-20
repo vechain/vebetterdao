@@ -1,11 +1,11 @@
 import { executeMultipleClausesCall, useThor, executeCallClause, useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@vechain-kit/vebetterdao-contracts"
+import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
 import {
   GalaxyMember__factory,
   StargateNFT__factory,
   X2EarnApps__factory,
-} from "@vechain-kit/vebetterdao-contracts/typechain-types"
+} from "@vechain/vebetterdao-contracts/typechain-types"
 import { useQuery } from "@tanstack/react-query"
 
 import { getIpfsMetadata } from "@/api/ipfs"

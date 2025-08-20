@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
-import { X2EarnRewardsPool__factory, B3TR__factory } from "@vechain-kit/vebetterdao-contracts"
+import { X2EarnRewardsPool__factory, B3TR__factory } from "@vechain/vebetterdao-contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getAppAvailableFundsQueryKey } from "@/api/contracts/x2EarnRewardsPool"

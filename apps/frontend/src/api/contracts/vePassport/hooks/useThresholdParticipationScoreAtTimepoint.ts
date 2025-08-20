@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { formatEther } from "viem"
 
 const address = getConfig().veBetterPassportContractAddress as `0x${string}`

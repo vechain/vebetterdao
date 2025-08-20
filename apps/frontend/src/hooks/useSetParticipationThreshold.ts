@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { VeBetterPassport__factory } from "@vechain-kit/vebetterdao-contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { getParticipationScoreThresholdQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"

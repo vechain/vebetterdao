@@ -2,7 +2,7 @@
 
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@vechain-kit/vebetterdao-contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi

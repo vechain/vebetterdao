@@ -4,7 +4,7 @@ import { getXApps, getXAppsQueryKey } from "@/api"
 
 import { getConfig } from "@repo/config"
 
-import { X2EarnApps__factory } from "@vechain-kit/vebetterdao-contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 
 const abi = X2EarnApps__factory.abi
 const contractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`

@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import dayjs from "@/utils/dayjsConfig"
 import { ThorClient, XAppMetadata, executeMultipleClausesCall } from "@vechain/vechain-kit"
-import { X2EarnApps__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`

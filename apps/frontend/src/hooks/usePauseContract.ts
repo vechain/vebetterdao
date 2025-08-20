@@ -6,7 +6,7 @@ import {
   B3TR__factory,
   VOT3__factory,
   B3TRGovernor__factory,
-} from "@vechain-kit/vebetterdao-contracts"
+} from "@vechain/vebetterdao-contracts"
 import {
   getIsGMPausedQueryKey,
   getIsB3trPausedQueryKey,

@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
-import { VOT3__factory } from "@vechain-kit/vebetterdao-contracts"
+import { VOT3__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 

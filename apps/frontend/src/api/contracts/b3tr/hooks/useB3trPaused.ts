@@ -1,7 +1,7 @@
 import { useCallClause } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
-import { B3TR__factory } from "@vechain-kit/vebetterdao-contracts"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts"
 
 const abi = B3TR__factory.abi
 const address = getConfig().b3trContractAddress

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getConfig } from "@repo/config"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`

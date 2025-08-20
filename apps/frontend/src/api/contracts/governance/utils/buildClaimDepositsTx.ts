@@ -1,7 +1,7 @@
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 
 /**
  * Retrieves the contract interface of the B3TRGovernor.

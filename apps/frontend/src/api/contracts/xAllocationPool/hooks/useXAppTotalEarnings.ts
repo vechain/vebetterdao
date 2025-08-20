@@ -1,4 +1,4 @@
-import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"

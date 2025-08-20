@@ -6,7 +6,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory, VOT3__factory } from "@vechain-kit/vebetterdao-contracts"
+import { B3TRGovernor__factory, VOT3__factory } from "@vechain/vebetterdao-contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"

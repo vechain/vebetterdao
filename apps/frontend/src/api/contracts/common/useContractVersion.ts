@@ -1,4 +1,4 @@
-import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi

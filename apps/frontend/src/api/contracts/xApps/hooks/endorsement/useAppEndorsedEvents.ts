@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { decodeEventLog } from "@/api"
 
 const abi = X2EarnApps__factory.abi

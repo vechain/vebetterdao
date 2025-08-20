@@ -11,9 +11,14 @@
   "exports": {
     ".": {
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/esm/index.d.ts"
     },
-    "./typechain-types": "./typechain-types/index.ts"
+    "./typechain-types": {
+      "import": "./dist/esm/typechain-types/index.js",
+      "require": "./dist/cjs/typechain-types/index.js",
+      "types": "./dist/esm/typechain-types/index.d.ts"
+    }
   },
   "prepublishOnly": "yarn compile",
   "scripts": {

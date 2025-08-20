@@ -1,6 +1,6 @@
 import { useWallet, executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory, VoterRewards__factory } from "@vechain-kit/vebetterdao-contracts"
+import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { useQuery } from "@tanstack/react-query"
 import { NFTMetadata, getIpfsMetadata } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"

@@ -1,7 +1,7 @@
 import { FormattingUtils } from "@repo/utils"
 import { getCallClauseQueryKeyWithArgs, TokenBalance, useCallClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VOT3__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { VOT3__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { ethers } from "ethers"
 
 const abi = VOT3__factory.abi

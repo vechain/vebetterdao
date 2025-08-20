@@ -4,7 +4,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
-import { VeBetterPassport__factory } from "@vechain-kit/vebetterdao-contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getPendingDelegationsQueryKeyDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 import { getPendingDelegationsQueryKeyDelegateePOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegateePOV"
 

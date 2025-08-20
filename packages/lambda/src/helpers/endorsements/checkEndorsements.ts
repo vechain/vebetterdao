@@ -1,5 +1,5 @@
 import { AppConfig } from "@repo/config"
-import { Emissions__factory as Emissions } from "@vechain-kit/vebetterdao-contracts"
+import { Emissions__factory as Emissions } from "@vechain/vebetterdao-contracts"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { buildCheckEndorsementClauses, chunk, getAllApps } from "../xApps"
 import { publishMessage } from "../slack"

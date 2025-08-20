@@ -1,5 +1,5 @@
 import { useCallClause } from "@vechain/vechain-kit"
-import { GalaxyMember__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { getConfig } from "@repo/config"
 
 const abi = GalaxyMember__factory.abi

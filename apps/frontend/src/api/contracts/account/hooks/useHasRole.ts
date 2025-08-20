@@ -1,6 +1,6 @@
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { AccessControl__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const abi = AccessControl__factory.abi
 const method = "hasRole" as const

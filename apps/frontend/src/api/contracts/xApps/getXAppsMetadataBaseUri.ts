@@ -1,6 +1,6 @@
 import { executeCallClause, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain-kit/vebetterdao-contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi

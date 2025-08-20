@@ -1,5 +1,5 @@
 import { AppConfig } from "@repo/config"
-import { Emissions__factory } from "@vechain-kit/vebetterdao-contracts"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { ABIContract } from "@vechain/sdk-core"
 import { ThorClient } from "@vechain/sdk-network"
 

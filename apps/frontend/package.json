@@ -34,7 +34,7 @@
     "@iconscout/react-unicons": "^2.0.2",
     "@repo/config": "*",
     "@repo/constants": "*",
-    "@vechain-kit/vebetterdao-contracts": "*",
+    "@vechain/vebetterdao-contracts": "*",
     "@repo/utils": "*",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/query-sync-storage-persister": "^5.28.12",

@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@vechain-kit/vebetterdao-contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 import { formatEther } from "viem"
 
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`

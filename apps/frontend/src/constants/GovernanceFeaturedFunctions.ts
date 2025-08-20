@@ -11,7 +11,7 @@ import {
   TreasuryContractJson,
   X2EarnAppsJson,
   TreasuryJson,
-} from "@vechain-kit/vebetterdao-contracts"
+} from "@vechain/vebetterdao-contracts"
 
 import { getConfig, getContractsConfig } from "@repo/config"
 import { abi } from "thor-devkit"

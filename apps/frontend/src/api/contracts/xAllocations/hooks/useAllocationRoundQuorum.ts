@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@vechain-kit/vebetterdao-contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { formatEther } from "viem"
 
 const address = getConfig().xAllocationVotingContractAddress as `0x${string}`

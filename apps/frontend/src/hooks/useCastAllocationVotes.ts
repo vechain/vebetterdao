@@ -9,7 +9,7 @@ import {
 } from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { XAllocationVoting__factory } from "@vechain-kit/vebetterdao-contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import { useBuildTransaction } from "./useBuildTransaction"

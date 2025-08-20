@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory } from "@vechain-kit/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 
 const address = getConfig().galaxyMemberContractAddress
 const abi = GalaxyMember__factory.abi

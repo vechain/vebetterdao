@@ -1,5 +1,5 @@
 import { DEFAULT_ADMIN_ROLE, hasRoleQueryKey } from "@/api/contracts/account"
-import { AccessControl__factory } from "@vechain-kit/vebetterdao-contracts/typechain-types"
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 import { EnhancedClause } from "@vechain/vechain-kit"

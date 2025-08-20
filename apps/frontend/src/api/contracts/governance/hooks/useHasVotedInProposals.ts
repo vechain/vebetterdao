@@ -2,7 +2,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain-kit/vebetterdao-contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 
 const abi = B3TRGovernor__factory.abi
 const contractAddress = getConfig().b3trGovernorAddress as `0x${string}`
