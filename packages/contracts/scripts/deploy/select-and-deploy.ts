@@ -31,6 +31,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "x-allocation-voting",
     description: "Deploy only this contract",
   },
+  RelayerRewardsPool: {
+    name: "relayer-rewards-pool",
+    description: "Deploy only this contract",
+  },
 } as const
 
 async function upgradeContract() {
@@ -87,6 +91,13 @@ async function upgradeContract() {
         break
       case "x-allocation-voting":
         console.log("Deploying XAllocationVoting")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "relayer-rewards-pool":
+        console.log("Deploying Relayer Rewards Pool")
         // Set environment variables
         process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
         // Run the upgrade script
