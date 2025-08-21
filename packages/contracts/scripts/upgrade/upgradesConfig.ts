@@ -19,7 +19,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7", "v7_fix"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
@@ -28,6 +28,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v5: "Vechain Nodes x GM upgrades feature",
       v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards)",
       v7: "Proposal Execution + Grants Feature: Add extra voting power based on support tokens + deposit threshold cap + proposal type concept",
+      v7_fix: "Fix the voting power for users that have not withdrawn their voting power",
     },
   },
   XAllocationVoting: {
