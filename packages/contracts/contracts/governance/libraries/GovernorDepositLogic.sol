@@ -170,6 +170,10 @@ library GovernorDepositLogic {
     _seedVotingPower(self, walletAddress, deposit);
   }
 
+  function resetVotingPower(GovernorStorageTypes.GovernorStorage storage self, address walletAddress) external {
+    self.depositsVotingPower[walletAddress].push(GovernorClockLogic.clock(self), 0);
+  }
+
   // --------------- GETTERS ---------------
   /**
    * @notice Returns the amount of tokens deposited by a user for a proposal.

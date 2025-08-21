@@ -652,6 +652,12 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function seedVotingPower(address walletAddress, uint256 deposit) external;
 
   /**
+   * @notice Reset the voting power for a wallet address
+   * @param walletAddress The address of the wallet
+   */
+  function resetVotingPower(address walletAddress) external;
+
+  /**
    * @notice Returns the deposit threshold cap for a proposal type.
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.

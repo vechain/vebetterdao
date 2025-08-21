@@ -1161,9 +1161,23 @@ contract B3TRGovernor is
     GovernorConfigurator.setRequiredGMLevelByProposalType($, proposalTypeValue, newGMWeight);
   }
 
+  /**
+   * @notice Seed the voting power for a wallet address
+   * @param walletAddress The address of the wallet
+   * @param deposit The deposit amount
+   */
   function seedVotingPower(address walletAddress, uint256 deposit) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorDepositLogic.seedVotingPower($, walletAddress, deposit);
+  }
+
+  /**
+   * @notice Reset the voting power for a wallet address
+   * @param walletAddress The address of the wallet
+   */
+  function resetVotingPower(address walletAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorDepositLogic.resetVotingPower($, walletAddress);
   }
 
   /**
