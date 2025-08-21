@@ -110,6 +110,7 @@ import {
   PassportWhitelistAndBlacklistLogicV3,
   StargateNFT,
   RelayerRewardsPool,
+  AutoVotingLogic,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import {
@@ -137,6 +138,7 @@ import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 import { APPS } from "../../scripts/deploy/setup"
 import { deployStargateNFTLibraries } from "../../scripts/deploy/deploys/deployStargateNftLibraries"
 import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { autoVotingLibraries } from "../../scripts/libraries"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -267,6 +269,9 @@ interface DeployInstance {
 
   // Rewards Pool related to XAllocationVoting
   relayerRewardsPool: RelayerRewardsPool
+
+  // AutoVoting Libraries
+  autoVotingLogic: AutoVotingLogic
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -400,6 +405,9 @@ export const getOrDeployContractInstances = async ({
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
   } = await x2EarnLibraries()
+
+  // Deploy AutoVoting Libraries
+  const { AutoVotingLogic } = await autoVotingLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -812,6 +820,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV3",
       "XAllocationVotingV4",
       "XAllocationVotingV5",
+      "XAllocationVotingV6",
       "XAllocationVoting",
     ],
     [
@@ -837,9 +846,19 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      libraries: [
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+      ],
       logOutput: false,
     },
   )) as XAllocationVoting
@@ -1055,6 +1074,7 @@ export const getOrDeployContractInstances = async ({
         owner.address, // upgrader
         await b3tr.getAddress(), // b3trAddress
         await emissions.getAddress(), // emissionsAddress
+        await xAllocationVoting.getAddress(), // xAllocationVotingAddress
       ],
     ],
     {
@@ -1093,6 +1113,9 @@ export const getOrDeployContractInstances = async ({
       EndorsementUtils: await EndorsementUtils.getAddress(),
       AdministrationUtils: await AdministrationUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
+    XAllocationVoting: {
+      AutoVotingLogic: await AutoVotingLogic.getAddress(),
     },
   }
 
@@ -1160,17 +1183,19 @@ export const getOrDeployContractInstances = async ({
   // Setup the RelayerRewardsPool contract
   await relayerRewardsPool
     .connect(owner)
-    .grantRole(await relayerRewardsPool.RELAYER_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   await relayerRewardsPool
     .connect(owner)
-    .grantRole(await relayerRewardsPool.DEPOSITOR_ROLE(), await voterRewards.getAddress())
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
     .then(async tx => await tx.wait())
   await xAllocationVoting
     .connect(owner)
     .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
     .then(async tx => await tx.wait())
   await xAllocationVoting.connect(owner).setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
+  await voterRewards.connect(owner).setRelayerRewardsPool(await relayerRewardsPool.getAddress())
+  await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
 
   // Since x2EarnApps v5, new apps => new creator != owner
   // Token id 2, 3, 4, 5 are reserved for the creator NFTs
@@ -1304,6 +1329,7 @@ export const getOrDeployContractInstances = async ({
     vechainNodesMock,
     stargateNftMock,
     relayerRewardsPool,
+    autoVotingLogic: AutoVotingLogic,
   }
   return cachedDeployInstance
 }

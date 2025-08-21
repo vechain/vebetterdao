@@ -46,6 +46,7 @@ export type AppConfig = {
   timelockContractAddress: string
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string
+  relayerRewardsPoolContractAddress: string
   emissionsContractAddress: string
   voterRewardsContractAddress: string
   galaxyMemberContractAddress: string

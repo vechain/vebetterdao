@@ -19,6 +19,7 @@ import {
   StargateNFT,
   StargateDelegation,
   NodeManagementV3,
+  RelayerRewardsPool,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -33,7 +34,7 @@ import {
   upgradeProxy,
   deployStargateProxyWithoutInitialization,
 } from "../helpers"
-import { governanceLibraries, passportLibraries } from "../libraries"
+import { autoVotingLibraries, governanceLibraries, passportLibraries } from "../libraries"
 import {
   transferAdminRole,
   transferContractsAddressManagerRole,
@@ -251,6 +252,9 @@ export async function deployAll(config: ContractsConfig) {
     EndorsementUtilsV5,
     VoteEligibilityUtilsV5,
   } = await x2EarnLibraries()
+
+  console.log("Deploying AutoVoting Libraries")
+  const { AutoVotingLogic } = await autoVotingLibraries()
 
   // Verify all required libraries are deployed
   if (!AdministrationUtilsV3 || !EndorsementUtilsV3 || !VoteEligibilityUtilsV3) {
@@ -678,8 +682,8 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as Emissions
 
-  const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
+  let voterRewards = (await deployAndUpgrade(
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewardsV5"],
     [
       [
         TEMP_ADMIN, // admin
@@ -701,6 +705,23 @@ export async function deployAll(config: ContractsConfig) {
       logOutput: true,
     },
   )) as VoterRewards
+
+  const relayerRewardsPool = (await deployAndUpgrade(
+    ["RelayerRewardsPool"],
+    [
+      [
+        TEMP_ADMIN, // admin
+        TEMP_ADMIN, // upgrader
+        await b3tr.getAddress(), // b3trAddress
+        await emissions.getAddress(), // emissionsAddress
+        TEMP_ADMIN, // xAllocationVotingAddress
+      ],
+    ],
+    {
+      versions: [undefined],
+      logOutput: true,
+    },
+  )) as RelayerRewardsPool
 
   const xAllocationVoting = (await deployAndUpgrade(
     [
@@ -735,12 +756,32 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [await relayerRewardsPool.getAddress()],
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7],
+      libraries: [
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { AutoVotingLogic: await AutoVotingLogic.getAddress() },
+      ],
       logOutput: true,
     },
   )) as XAllocationVoting
+
+  voterRewards = (await upgradeProxy(
+    "VoterRewardsV5",
+    "VoterRewards",
+    await voterRewards.getAddress(),
+    [await xAllocationVoting.getAddress(), await relayerRewardsPool.getAddress()],
+    {
+      version: 6,
+    },
+  )) as VoterRewards
 
   const veBetterPassportV1 = (await initializeProxy(
     veBetterPassportContractAddress,
@@ -972,6 +1013,7 @@ export async function deployAll(config: ContractsConfig) {
     B3TRGovernor: Record<string, string>
     VeBetterPassport: Record<string, string>
     X2EarnApps: Record<string, string>
+    XAllocationVoting: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -997,6 +1039,9 @@ export async function deployAll(config: ContractsConfig) {
       AdministrationUtils: await AdministrationUtils.getAddress(),
       EndorsementUtils: await EndorsementUtils.getAddress(),
       VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
+    XAllocationVoting: {
+      AutoVotingLogic: await AutoVotingLogic.getAddress(),
     },
   }
 
@@ -1132,6 +1177,23 @@ export async function deployAll(config: ContractsConfig) {
       .safeMint(creator.getAddress())
       .then(async tx => await tx.wait())
   }
+
+  // Set up RelayerRewardsPool contract
+  await relayerRewardsPool
+    .connect(deployer)
+    .setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("XAllocationVoting address set in RelayerRewardsPool contract")
+  await relayerRewardsPool
+    .connect(deployer)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("Pool admin role granted to XAllocationVoting")
+  await relayerRewardsPool
+    .connect(deployer)
+    .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("Pool admin role granted to VoterRewards")
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
