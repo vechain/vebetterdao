@@ -235,11 +235,6 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   event ProposalDeposit(address indexed depositor, uint256 indexed proposalId, uint256 amount);
 
   /**
-   * @dev Emitted when a deposit is withdrawn from a proposal.
-   */
-  event ProposalWithdraw(address indexed withdrawer, uint256 indexed proposalId, uint256 amount);
-
-  /**
    * @dev Emitted when the VeBetterPassport contract is set.
    */
   event VeBetterPassportSet(address indexed oldVeBetterPassport, address indexed newVeBetterPassport);
