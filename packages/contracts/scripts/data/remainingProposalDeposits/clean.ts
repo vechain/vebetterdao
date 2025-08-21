@@ -29,7 +29,7 @@ export async function clean(fileName: string = "moneyStuck.json") {
 
   for (const user of moneyStuckArray) {
     const depositer = user.walletAddress
-    const depositAmount = user.deposit
+    const depositAmount = user.depositAmount
     const roundId = await B3TRGovernor__factory.connect(config.b3trGovernorAddress!, signer).proposalStartRound(
       user.proposalId,
     ) // claimable deposit round

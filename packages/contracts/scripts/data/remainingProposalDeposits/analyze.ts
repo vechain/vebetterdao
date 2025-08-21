@@ -9,7 +9,7 @@ import { resolve } from "path"
 // VARIABLES RAW
 const config = getConfig()
 const VERBOSE = true
-const REVALIDATE_AND_CLEAN = false
+const REVALIDATE_AND_CLEAN = true
 // Conditional logging function
 const log = (...args: any[]) => {
   if (VERBOSE) {
