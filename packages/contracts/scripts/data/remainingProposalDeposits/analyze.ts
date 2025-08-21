@@ -4,12 +4,12 @@ import { B3TRGovernor } from "../../../typechain-types"
 import { readFileSync, writeFileSync } from "fs"
 import BigNumber from "bignumber.js"
 import { clean } from "./clean"
+import { resolve } from "path"
 
 // VARIABLES RAW
 const config = getConfig()
 const VERBOSE = true
-const CLEAN = true
-
+const REVALIDATE_AND_CLEAN = false
 // Conditional logging function
 const log = (...args: any[]) => {
   if (VERBOSE) {
@@ -99,6 +99,7 @@ async function checkDepositStuckInChunks(
 
 export async function main() {
   const startTime = Date.now()
+  const fileName = `moneyStuck-${config.environment}.json`
 
   // Display startup banner
   log(`\n${"=".repeat(80)}`)
@@ -168,18 +169,23 @@ export async function main() {
       depositCheckTasks.push({ depositorAddress, proposalId })
     }
   }
-  // Check for stuck deposits in chunks of 500
-  await checkDepositStuckInChunks(depositCheckTasks, totalChecks, 500)
+  // Check for stuck deposits in chunks of 100
+  await checkDepositStuckInChunks(depositCheckTasks, totalChecks, 100)
 
   log(`🎉 All ${totalChecks} deposit checks completed successfully!`)
 
   // Save all stuck deposits to file
-  const fileName = "stuckDeposits.json"
-  writeFileSync(fileName, JSON.stringify(stuckDeposits, null, 2))
-  log(`💾 Saved ${stuckDeposits.length} stuck deposits to ${fileName}`)
+  const path = resolve(__dirname, "raw", fileName)
+  writeFileSync(path, JSON.stringify(stuckDeposits, null, 2))
+  log(`💾 Saved ${stuckDeposits.length} stuck deposits to ${path}`)
 
   // Calculate and display summary
-  const summary = await calculateStuckDepositsSummary()
+  const summary = await calculateStuckDepositsSummary(fileName)
+
+  // If you want to revalidate and clean the data, getting the rounds and total sum
+  if (REVALIDATE_AND_CLEAN) {
+    await clean(fileName)
+  }
 
   const executionTime = (Date.now() - startTime) / 1000
   log(`\n⏱️  EXECUTION TIME: ${executionTime.toFixed(2)}s (${(executionTime / 60).toFixed(2)} minutes)`)
@@ -195,9 +201,10 @@ interface StuckDepositSummary {
   affectedProposals: number
 }
 
-export const calculateStuckDepositsSummary = async (): Promise<StuckDepositSummary> => {
+export const calculateStuckDepositsSummary = async (fileName: string): Promise<StuckDepositSummary> => {
   try {
-    const stuckDepositsData = await readFileSync("stuckDeposits.json", "utf8")
+    const path = resolve(__dirname, "raw", fileName)
+    const stuckDepositsData = await readFileSync(path, "utf8")
     const stuckDepositsArray = JSON.parse(stuckDepositsData)
 
     // Calculate total stuck amount in wei
@@ -240,9 +247,5 @@ export const calculateStuckDepositsSummary = async (): Promise<StuckDepositSumma
   }
 }
 
-if (CLEAN) {
-  clean()
-} else {
-  // Execute the analysis
-  main().catch(console.error)
-}
+// Execute the analysis
+main().catch(console.error)

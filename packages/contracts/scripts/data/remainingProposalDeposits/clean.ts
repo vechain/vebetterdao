@@ -3,14 +3,21 @@ import { ethers } from "hardhat"
 import BigNumber from "bignumber.js"
 import { B3TRGovernor__factory } from "../../../typechain-types"
 import { getConfig } from "@repo/config"
-import { log } from "console"
+import { resolve } from "path"
 
 const config = getConfig()
+const VERBOSE = false
+const customLog = (message: any) => {
+  if (VERBOSE) {
+    console.log(message)
+  }
+}
 
-export async function clean() {
+export async function clean(fileName: string = "moneyStuck.json") {
   const [signer] = await ethers.getSigners()
+  const path = resolve(__dirname, "raw", fileName)
 
-  const moneyStuck = readFileSync("./scripts/data/remainingProposalDeposits/raw/moneyStuck.json", "utf8")
+  const moneyStuck = readFileSync(path, "utf8")
   const moneyStuckArray = JSON.parse(moneyStuck)
 
   const moneyStuckCleared: {
@@ -65,20 +72,20 @@ export async function clean() {
     const formattedAmount = new BigNumber(user.totalDepositAmount).dividedBy("1e18").toFixed(4)
     const validation = validationResults[user.walletAddress]
 
-    log(`${index + 1}. Wallet: ${user.walletAddress}`)
-    log(`   Total Stuck: ${formattedAmount} B3TR (${user.totalDepositAmount} wei)`)
-    log(`   ProposalsNo: ${user.proposalIds.length}`)
-    log(`   Proposals: ${user.proposalIds.join(", ")}`)
-    log(`   RoundsNo: ${user.correspondingRoundIds.length}`)
-    log(`   Rounds: ${user.correspondingRoundIds.join(", ")}`)
+    customLog(`${index + 1}. Wallet: ${user.walletAddress}`)
+    customLog(`   Total Stuck: ${formattedAmount} B3TR (${user.totalDepositAmount} wei)`)
+    customLog(`   ProposalsNo: ${user.proposalIds.length}`)
+    customLog(`   Proposals: ${user.proposalIds.join(", ")}`)
+    customLog(`   RoundsNo: ${user.correspondingRoundIds.length}`)
+    customLog(`   Rounds: ${user.correspondingRoundIds.join(", ")}`)
 
     // Validation status
-    console.log(`   🔍 Validation: ${validation.isValid ? "✅ SAFE" : "❌ RISKY"}`)
+    customLog(`   🔍 Validation: ${validation.isValid ? "✅ SAFE" : "❌ RISKY"}`)
     if (!validation.isValid) {
-      console.log(`   ⚠️  Issues: ${validation.issues.join(", ")}`)
+      customLog(`   ⚠️  Issues: ${validation.issues.join(", ")}`)
     }
-    console.log(`   📊 Risk Score: ${validation.riskScore}/8`)
-    console.log("")
+    customLog(`   📊 Risk Score: ${validation.riskScore}/8`)
+    customLog("")
   })
   // Generate safety report for seeding
   const safeWallets = moneyStuckCleared.filter(wallet => validationResults[wallet.walletAddress].isValid)
@@ -92,21 +99,17 @@ export async function clean() {
     console.log(`\n⚠️  RISKY WALLETS TO REVIEW:`)
     riskyWallets.forEach((wallet, index) => {
       const validation = validationResults[wallet.walletAddress]
-      const amount = new BigNumber(wallet.totalDepositAmount).dividedBy("1e18").toFixed(4)
-      console.log(`   ${index + 1}. ${wallet.walletAddress} (${amount} B3TR)`)
+      console.log(`   ${index + 1}. ${wallet.walletAddress} (${wallet.totalDepositAmount} B3TR)`)
       console.log(`      Issues: ${validation.issues.join(", ")}`)
       console.log(`      Risk Score: ${validation.riskScore}/8`)
     })
   }
 
   // Save both full data and safe-only data
-  writeFileSync(
-    "./scripts/data/remainingProposalDeposits/cleaned/stuckDeposits.json",
-    JSON.stringify(moneyStuckCleared, null, 2),
-  )
+  writeFileSync(resolve(__dirname, "cleaned", fileName), JSON.stringify(moneyStuckCleared, null, 2))
 
   console.log(`\n💾 Files saved:`)
-  console.log(`   - stuckDeposits.json (all wallets)`)
+  console.log(`   - ${fileName} (all wallets)`)
 }
 
 interface WalletValidation {
