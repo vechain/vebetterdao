@@ -28,8 +28,6 @@
   "dependencies": {
     "@chakra-ui/react": "^3.22.0",
     "@emotion/react": "^11.14.0",
-    "@fontsource-variable/instrument-sans": "^5.0.4",
-    "@fontsource-variable/inter": "^5.0.17",
     "@iconscout/react-unicons": "^2.0.2",
     "@repo/config": "*",
     "@repo/constants": "*",
