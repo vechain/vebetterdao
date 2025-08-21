@@ -1,5 +1,5 @@
 import { AppConfig } from "@repo/config"
-import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { X2EarnApps__factory as X2EarnApps } from "@vechain/vebetterdao-contracts"
 import { Clause } from "@vechain/sdk-core"
 import { Address } from "@vechain/sdk-core"
 import { ABIContract } from "@vechain/sdk-core"

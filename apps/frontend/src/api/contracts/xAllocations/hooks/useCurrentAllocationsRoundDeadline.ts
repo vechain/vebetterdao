@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi

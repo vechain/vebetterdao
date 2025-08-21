@@ -32,15 +32,15 @@
   ],
   "tasks": {
     "install": {
-      "dependsOn": ["@repo/contracts#install", "^compile"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#install", "^compile"]
     },
-    "@repo/contracts#install": {
+    "@vechain/vebetterdao-contracts#install": {
       "cache": false
     },
     "build": {
       "cache": true,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#compile", "@repo/config#check-or-generate-local-config"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
       "cache": false
@@ -75,7 +75,7 @@
     "dev:simulation": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["@repo/contracts#simulation"]
+      "dependsOn": ["@vechain/vebetterdao-contracts#simulation"]
     },
     "start": {
       "cache": false,
@@ -104,55 +104,55 @@
     "setup-contracts": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment"]
+      "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment"]
     },
     "setup-contracts:staging": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:staging"]
+      "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:staging"]
     },
     "setup-contracts:testnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
+      "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:testnet"]
     },
     "setup-contracts:mainnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:mainnet"]
+      "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:mainnet"]
     },
     "setup-contracts:galactica-test": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:galactica-test"]
+      "dependsOn": ["^compile", "@vechain/vebetterdao-contracts#check-contracts-deployment:galactica-test"]
     },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
-    "@repo/contracts#check-contracts-deployment": {
+    "@vechain/vebetterdao-contracts#check-contracts-deployment": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "@repo/contracts#check-contracts-deployment:staging": {
+    "@vechain/vebetterdao-contracts#check-contracts-deployment:staging": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "@repo/contracts#check-contracts-deployment:testnet": {
+    "@vechain/vebetterdao-contracts#check-contracts-deployment:testnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "@repo/contracts#check-contracts-deployment:mainnet": {
+    "@vechain/vebetterdao-contracts#check-contracts-deployment:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "@repo/contracts#check-contracts-deployment:galactica-test": {
+    "@vechain/vebetterdao-contracts#check-contracts-deployment:galactica-test": {
       "cache": false
     },
-    "@repo/contracts#simulation": {
+    "@vechain/vebetterdao-contracts#simulation": {
       "cache": false,
       "dependsOn": ["^setup-contracts"]
     },
-    "@repo/contracts#simulation-galactica": {
+    "@vechain/vebetterdao-contracts#simulation-galactica": {
       "cache": false,
       "dependsOn": ["^setup-contracts:galactica-test"]
     },

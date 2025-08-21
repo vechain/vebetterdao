@@ -1,7 +1,12 @@
 import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory, B3TR__factory, VOT3__factory, B3TRGovernor__factory } from "@repo/contracts"
+import {
+  GalaxyMember__factory,
+  B3TR__factory,
+  VOT3__factory,
+  B3TRGovernor__factory,
+} from "@vechain/vebetterdao-contracts"
 import {
   getIsGMPausedQueryKey,
   getIsB3trPausedQueryKey,

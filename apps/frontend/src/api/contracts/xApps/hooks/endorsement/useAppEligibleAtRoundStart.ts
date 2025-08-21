@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { useAllocationRoundSnapshot, useCurrentAllocationsRoundId } from "@/api"
 
 const address = getConfig().x2EarnAppsContractAddress

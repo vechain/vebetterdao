@@ -3,7 +3,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
-import { VeBetterPassport__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getPendingLinkingsQueryKey } from "@/api"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()

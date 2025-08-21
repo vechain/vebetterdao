@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 import { formatEther } from "viem"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 
