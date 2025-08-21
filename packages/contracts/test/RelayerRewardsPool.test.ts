@@ -1,0 +1,726 @@
+import { ethers } from "hardhat"
+import { expect } from "chai"
+import { describe, it, beforeEach } from "mocha"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+
+import { getOrDeployContractInstances, waitForNextCycle } from "./helpers"
+import { RelayerRewardsPool, B3TR, Emissions, XAllocationVoting } from "../typechain-types"
+
+describe("RelayerRewardsPool", function () {
+  let relayerRewardsPool: RelayerRewardsPool
+  let b3tr: B3TR
+  let emissions: Emissions
+  let xAllocationVoting: XAllocationVoting
+  let minterAccount: HardhatEthersSigner
+  let owner: HardhatEthersSigner
+  let upgrader: HardhatEthersSigner
+  let poolAdmin: HardhatEthersSigner
+  let relayer1: HardhatEthersSigner
+  let relayer2: HardhatEthersSigner
+  let user1: HardhatEthersSigner
+  let user2: HardhatEthersSigner
+  let otherAccounts: HardhatEthersSigner[]
+
+  // Main setup - used by most tests
+  const setupContracts = async () => {
+    const config = await getOrDeployContractInstances({
+      forceDeploy: true,
+    })
+    if (!config) throw new Error("Failed to deploy contracts")
+
+    relayerRewardsPool = config.relayerRewardsPool
+    b3tr = config.b3tr
+    emissions = config.emissions
+    xAllocationVoting = config.xAllocationVoting
+    owner = config.owner
+    minterAccount = config.minterAccount
+    otherAccounts = config.otherAccounts
+
+    // Setup test accounts
+    upgrader = otherAccounts[0]
+    poolAdmin = otherAccounts[1]
+    relayer1 = otherAccounts[2]
+    relayer2 = otherAccounts[3]
+    user1 = otherAccounts[4]
+    user2 = otherAccounts[5]
+
+    // Grant roles for testing
+    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), owner.address)
+    await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+    await emissions.connect(minterAccount).bootstrap()
+    await emissions.connect(minterAccount).start()
+
+    await relayerRewardsPool.connect(owner).grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), poolAdmin.address)
+  }
+
+  beforeEach(async function () {
+    await setupContracts()
+  })
+
+  describe("Deployment and Initialization", function () {
+    it("should deploy with correct initial values", async function () {
+      expect(await relayerRewardsPool.version()).to.equal("1")
+      expect(await relayerRewardsPool.getVoteWeight()).to.equal(3)
+      expect(await relayerRewardsPool.getClaimWeight()).to.equal(1)
+      expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(8640)
+    })
+
+    it("should have correct role assignments", async function () {
+      const DEFAULT_ADMIN_ROLE = await relayerRewardsPool.DEFAULT_ADMIN_ROLE()
+      const POOL_ADMIN_ROLE = await relayerRewardsPool.POOL_ADMIN_ROLE()
+
+      expect(await relayerRewardsPool.hasRole(DEFAULT_ADMIN_ROLE, owner.address)).to.be.true
+      expect(await relayerRewardsPool.hasRole(POOL_ADMIN_ROLE, owner.address)).to.be.true
+      expect(await relayerRewardsPool.hasRole(POOL_ADMIN_ROLE, poolAdmin.address)).to.be.true
+    })
+
+    it("should revert initialization with zero addresses", async function () {
+      const RelayerRewardsPoolFactory = await ethers.getContractFactory("RelayerRewardsPool")
+      const pool = await RelayerRewardsPoolFactory.deploy()
+
+      await expect(
+        pool.initialize(
+          ethers.ZeroAddress,
+          upgrader.address,
+          await b3tr.getAddress(),
+          await emissions.getAddress(),
+          await xAllocationVoting.getAddress(),
+        ),
+      ).to.be.revertedWithCustomError(pool, "InvalidInitialization")
+
+      await expect(
+        pool.initialize(
+          owner.address,
+          ethers.ZeroAddress,
+          await b3tr.getAddress(),
+          await emissions.getAddress(),
+          await xAllocationVoting.getAddress(),
+        ),
+      ).to.be.revertedWithCustomError(pool, "InvalidInitialization")
+
+      await expect(
+        pool.initialize(
+          owner.address,
+          upgrader.address,
+          ethers.ZeroAddress,
+          await emissions.getAddress(),
+          await xAllocationVoting.getAddress(),
+        ),
+      ).to.be.revertedWithCustomError(pool, "InvalidInitialization")
+
+      await expect(
+        pool.initialize(
+          owner.address,
+          upgrader.address,
+          await b3tr.getAddress(),
+          await emissions.getAddress(),
+          ethers.ZeroAddress,
+        ),
+      ).to.be.revertedWithCustomError(pool, "InvalidInitialization")
+    })
+  })
+
+  describe("Role Management", function () {
+    it("should allow admin to grant and revoke pool admin role", async function () {
+      const POOL_ADMIN_ROLE = await relayerRewardsPool.POOL_ADMIN_ROLE()
+
+      // Grant role
+      await relayerRewardsPool.connect(owner).grantRole(POOL_ADMIN_ROLE, user1.address)
+      expect(await relayerRewardsPool.hasRole(POOL_ADMIN_ROLE, user1.address)).to.be.true
+
+      // Revoke role
+      await relayerRewardsPool.connect(owner).revokeRole(POOL_ADMIN_ROLE, user1.address)
+      expect(await relayerRewardsPool.hasRole(POOL_ADMIN_ROLE, user1.address)).to.be.false
+    })
+
+    it("should not allow non-admin to grant roles", async function () {
+      const POOL_ADMIN_ROLE = await relayerRewardsPool.POOL_ADMIN_ROLE()
+
+      await expect(relayerRewardsPool.connect(user1).grantRole(POOL_ADMIN_ROLE, user2.address)).to.be.reverted
+    })
+
+    it("should allow pool admin to perform admin functions", async function () {
+      // Pool admin should be able to register relayers
+      await expect(relayerRewardsPool.connect(poolAdmin).registerRelayer(relayer1.address)).to.not.be.reverted
+    })
+  })
+
+  describe("Contract Configuration", function () {
+    it("should allow admin to update B3TR address", async function () {
+      const newB3TRAddress = user1.address // Using a dummy address for testing
+
+      await expect(relayerRewardsPool.connect(owner).setB3TRAddress(newB3TRAddress))
+        .to.emit(relayerRewardsPool, "B3TRAddressUpdated")
+        .withArgs(newB3TRAddress, await b3tr.getAddress())
+    })
+
+    it("should allow admin to update Emissions address", async function () {
+      const newEmissionsAddress = user1.address // Using a dummy address for testing
+
+      await expect(relayerRewardsPool.connect(owner).setEmissionsAddress(newEmissionsAddress))
+        .to.emit(relayerRewardsPool, "EmissionsAddressUpdated")
+        .withArgs(newEmissionsAddress, await emissions.getAddress())
+    })
+
+    it("should revert setting zero address for B3TR", async function () {
+      await expect(relayerRewardsPool.connect(owner).setB3TRAddress(ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("b3trAddress")
+    })
+
+    it("should revert setting zero address for Emissions", async function () {
+      await expect(relayerRewardsPool.connect(owner).setEmissionsAddress(ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("emissionsAddress")
+    })
+
+    it("should not allow non-admin to update addresses", async function () {
+      await expect(relayerRewardsPool.connect(user1).setB3TRAddress(user2.address)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+
+      await expect(relayerRewardsPool.connect(user1).setEmissionsAddress(user2.address)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+    })
+  })
+
+  describe("Weight Management", function () {
+    it("should allow admin to update vote weight", async function () {
+      const newWeight = 5
+
+      await expect(relayerRewardsPool.connect(owner).setVoteWeight(newWeight))
+        .to.emit(relayerRewardsPool, "VoteWeightUpdated")
+        .withArgs(newWeight, 3) // 3 is the initial vote weight
+
+      expect(await relayerRewardsPool.getVoteWeight()).to.equal(newWeight)
+    })
+
+    it("should allow admin to update claim weight", async function () {
+      const newWeight = 2
+
+      await expect(relayerRewardsPool.connect(owner).setClaimWeight(newWeight))
+        .to.emit(relayerRewardsPool, "ClaimWeightUpdated")
+        .withArgs(newWeight, 1) // 1 is the initial claim weight
+
+      expect(await relayerRewardsPool.getClaimWeight()).to.equal(newWeight)
+    })
+
+    it("should revert setting zero weight", async function () {
+      await expect(relayerRewardsPool.connect(owner).setVoteWeight(0))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("voteWeight")
+
+      await expect(relayerRewardsPool.connect(owner).setClaimWeight(0))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("claimWeight")
+    })
+
+    it("should not allow non-admin to update weights", async function () {
+      await expect(relayerRewardsPool.connect(user1).setVoteWeight(5)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+
+      await expect(relayerRewardsPool.connect(user1).setClaimWeight(2)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+    })
+  })
+
+  describe("Relayer Registration", function () {
+    it("should allow admin to register a relayer", async function () {
+      await expect(relayerRewardsPool.connect(owner).registerRelayer(relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerRegistered")
+        .withArgs(relayer1.address)
+
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.true
+
+      const registeredRelayers = await relayerRewardsPool.getRegisteredRelayers()
+      expect(registeredRelayers).to.include(relayer1.address)
+    })
+
+    it("should allow pool admin to register a relayer", async function () {
+      await expect(relayerRewardsPool.connect(poolAdmin).registerRelayer(relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerRegistered")
+        .withArgs(relayer1.address)
+
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.true
+    })
+
+    it("should revert registering zero address", async function () {
+      await expect(relayerRewardsPool.connect(owner).registerRelayer(ethers.ZeroAddress))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("relayer")
+    })
+
+    it("should revert registering already registered relayer", async function () {
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      await expect(relayerRewardsPool.connect(owner).registerRelayer(relayer1.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "RelayerAlreadyRegistered")
+        .withArgs(relayer1.address)
+    })
+
+    it("should allow admin to unregister a relayer", async function () {
+      // First register
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.true
+
+      // Then unregister
+      await expect(relayerRewardsPool.connect(owner).unregisterRelayer(relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerUnregistered")
+        .withArgs(relayer1.address)
+
+      expect(await relayerRewardsPool.isRegisteredRelayer(relayer1.address)).to.be.false
+
+      const registeredRelayers = await relayerRewardsPool.getRegisteredRelayers()
+      expect(registeredRelayers).to.not.include(relayer1.address)
+    })
+
+    it("should revert unregistering non-registered relayer", async function () {
+      await expect(relayerRewardsPool.connect(owner).unregisterRelayer(relayer1.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "RelayerNotRegistered")
+        .withArgs(relayer1.address)
+    })
+
+    it("should handle multiple relayer registrations correctly", async function () {
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer2.address)
+
+      const registeredRelayers = await relayerRewardsPool.getRegisteredRelayers()
+      expect(registeredRelayers).to.have.lengthOf(2)
+      expect(registeredRelayers).to.include(relayer1.address)
+      expect(registeredRelayers).to.include(relayer2.address)
+
+      // Unregister one and check the array is properly updated
+      await relayerRewardsPool.connect(owner).unregisterRelayer(relayer1.address)
+
+      const updatedRelayers = await relayerRewardsPool.getRegisteredRelayers()
+      expect(updatedRelayers).to.have.lengthOf(1)
+      expect(updatedRelayers).to.include(relayer2.address)
+      expect(updatedRelayers).to.not.include(relayer1.address)
+    })
+
+    it("should not allow non-admin to register/unregister relayers", async function () {
+      await expect(relayerRewardsPool.connect(user1).registerRelayer(relayer1.address)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+
+      // Register first
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      await expect(relayerRewardsPool.connect(user1).unregisterRelayer(relayer1.address)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+    })
+  })
+
+  describe("Early Access Configuration", function () {
+    it("should allow admin to update early access blocks", async function () {
+      const newBlocks = 200
+
+      await expect(relayerRewardsPool.connect(owner).setEarlyAccessBlocks(newBlocks))
+        .to.emit(relayerRewardsPool, "EarlyAccessBlocksUpdated")
+        .withArgs(newBlocks, 8640) // 8640 is the initial value
+
+      expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(newBlocks)
+    })
+
+    it("should correctly determine early access status", async function () {
+      const newBlocks = 200
+      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(newBlocks)
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const earlyAccessBlocks = await relayerRewardsPool.getEarlyAccessBlocks()
+
+      // Should be active if current block is within early access period
+      expect(await relayerRewardsPool.isEarlyAccessActive(currentBlock)).to.be.true
+
+      // Should not be active if start block is far in the past
+      const pastBlock = currentBlock - Number(earlyAccessBlocks) - 10
+
+      expect(await relayerRewardsPool.isEarlyAccessActive(pastBlock)).to.be.false
+    })
+
+    it("should not allow non-admin to update early access blocks", async function () {
+      await expect(relayerRewardsPool.connect(user1).setEarlyAccessBlocks(200)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+    })
+  })
+
+  describe("Round Setup and Action Management", function () {
+    beforeEach(async function () {
+      // Register relayers for testing
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer2.address)
+    })
+
+    it("should set total actions for round correctly", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 10
+
+      await expect(relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers))
+        .to.emit(relayerRewardsPool, "EarlyAccessAllocationsSet")
+        .withArgs(roundId, totalAutoVotingUsers, 2) // 2 registered relayers
+
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalAutoVotingUsers * 2) // 2 actions per user
+
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+      const expectedWeightedActions = BigInt(totalAutoVotingUsers) * (voteWeight + claimWeight)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(expectedWeightedActions)
+    })
+
+    it("should register relayer actions correctly", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 10
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+
+      // Register a VOTE action
+      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0)) // 0 = VOTE
+        .to.emit(relayerRewardsPool, "RelayerActionRegistered")
+        .withArgs(relayer1.address, roundId, 1, voteWeight)
+
+      expect(await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)).to.equal(1)
+      expect(await relayerRewardsPool.totalRelayerWeightedActions(relayer1.address, roundId)).to.equal(voteWeight)
+
+      // Register a CLAIM action
+      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1)) // 1 = CLAIM
+        .to.emit(relayerRewardsPool, "RelayerActionRegistered")
+        .withArgs(relayer1.address, roundId, 2, claimWeight)
+
+      expect(await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)).to.equal(2)
+      expect(await relayerRewardsPool.totalRelayerWeightedActions(relayer1.address, roundId)).to.equal(
+        voteWeight + claimWeight,
+      )
+    })
+
+    it("should revert registering action for zero address", async function () {
+      const roundId = 1
+
+      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(ethers.ZeroAddress, roundId, 0))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("relayer")
+    })
+
+    it("should not allow non-admin to register actions or set round totals", async function () {
+      const roundId = 1
+
+      await expect(relayerRewardsPool.connect(user1).setTotalActionsForRound(roundId, 10)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+
+      await expect(
+        relayerRewardsPool.connect(user1).registerRelayerAction(relayer1.address, roundId, 0),
+      ).to.be.revertedWith("RelayerRewardsPool: caller must have admin or pool admin role")
+    })
+  })
+
+  describe("Reward Deposits", function () {
+    it("should allow admin to deposit rewards", async function () {
+      const roundId = 1
+      const amount = ethers.parseEther("100")
+
+      // Give B3TR tokens to owner
+      await b3tr.connect(owner).mint(owner.address, amount)
+      await b3tr.connect(owner).approve(await relayerRewardsPool.getAddress(), amount)
+
+      await expect(relayerRewardsPool.connect(owner).deposit(amount, roundId))
+        .to.emit(relayerRewardsPool, "RewardsDeposited")
+        .withArgs(roundId, amount, amount) // First deposit, so total equals amount
+
+      expect(await relayerRewardsPool.getTotalRewards(roundId)).to.equal(amount)
+    })
+
+    it("should accumulate deposits for the same round", async function () {
+      const roundId = 1
+      const amount1 = ethers.parseEther("100")
+      const amount2 = ethers.parseEther("50")
+
+      // Give B3TR tokens to owner
+      await b3tr.connect(owner).mint(owner.address, amount1 + amount2)
+      await b3tr.connect(owner).approve(await relayerRewardsPool.getAddress(), amount1 + amount2)
+
+      await relayerRewardsPool.connect(owner).deposit(amount1, roundId)
+      await relayerRewardsPool.connect(owner).deposit(amount2, roundId)
+
+      expect(await relayerRewardsPool.getTotalRewards(roundId)).to.equal(amount1 + amount2)
+    })
+
+    it("should revert deposit with zero amount", async function () {
+      await expect(relayerRewardsPool.connect(owner).deposit(0, 1))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("amount")
+    })
+
+    it("should not allow non-admin to deposit", async function () {
+      const amount = ethers.parseEther("100")
+
+      await expect(relayerRewardsPool.connect(user1).deposit(amount, 1)).to.be.revertedWith(
+        "RelayerRewardsPool: caller must have admin or pool admin role",
+      )
+    })
+  })
+
+  describe("Reward Claiming", function () {
+    // Fresh setup for this specific test suite
+    beforeEach(async function () {
+      // Get completely fresh contracts for this test suite
+      await setupContracts()
+
+      // End emissions explicitly
+      await waitForNextCycle(emissions)
+
+      // Setup for reward claiming tests
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer2.address)
+
+      const roundId = 1
+      const totalAutoVotingUsers = 4
+      const rewardAmount = ethers.parseEther("100")
+
+      // Set up round
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      // Deposit rewards
+      await b3tr.connect(owner).mint(owner.address, rewardAmount)
+      await b3tr.connect(owner).approve(await relayerRewardsPool.getAddress(), rewardAmount)
+      await relayerRewardsPool.connect(owner).deposit(rewardAmount, roundId)
+
+      // Each relayer completes exactly half the required actions (2 users worth each)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
+
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM
+    })
+
+    it("should calculate claimable rewards correctly", async function () {
+      const roundId = 1
+      const rewardAmount = ethers.parseEther("100")
+
+      // VERIFY: All required actions are now completed
+      const totalWeightedActions = await relayerRewardsPool.totalWeightedActions(roundId)
+      const completedWeightedActions = await relayerRewardsPool.completedWeightedActions(roundId)
+
+      expect(completedWeightedActions).to.equal(totalWeightedActions, "All actions should be completed")
+
+      // THEN: Both conditions for claimable rewards are met:
+      // 1. All actions completed
+      // 2. Emission cycle ended
+      expect(await relayerRewardsPool.isRewardClaimable(roundId)).to.be.true
+
+      // THEN: Both relayers should get equal rewards (they did equal work)
+      const relayer1Claimable = await relayerRewardsPool.claimableRewards(relayer1.address, roundId)
+      const relayer2Claimable = await relayerRewardsPool.claimableRewards(relayer2.address, roundId)
+
+      expect(relayer1Claimable).to.equal(relayer2Claimable, "Relayers did equal work, should get equal rewards")
+      expect(relayer1Claimable + relayer2Claimable).to.equal(
+        rewardAmount,
+        "Total claimable should equal deposited rewards",
+      )
+      expect(relayer1Claimable).to.be.gt(0, "Rewards should be greater than zero")
+    })
+
+    it("should allow relayer to claim rewards when round is complete", async function () {
+      const roundId = 1
+
+      const claimableAmount = await relayerRewardsPool.claimableRewards(relayer1.address, roundId)
+      expect(claimableAmount).to.be.gt(0)
+
+      const initialBalance = await b3tr.balanceOf(relayer1.address)
+
+      await expect(relayerRewardsPool.connect(relayer1).claimRewards(roundId, relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerRewardsClaimed")
+        .withArgs(relayer1.address, roundId, claimableAmount)
+
+      const finalBalance = await b3tr.balanceOf(relayer1.address)
+      expect(finalBalance - initialBalance).to.equal(claimableAmount)
+
+      // Should not be able to claim again
+      expect(await relayerRewardsPool.claimableRewards(relayer1.address, roundId)).to.equal(0)
+    })
+
+    it("should allow all relayers to claim rewards", async function () {
+      const roundId = 1
+
+      const initialBalance = await b3tr.balanceOf(relayer1.address)
+      const claimableAmount = await relayerRewardsPool.claimableRewards(relayer1.address, roundId)
+
+      const initialBalance2 = await b3tr.balanceOf(relayer2.address)
+      const claimableAmount2 = await relayerRewardsPool.claimableRewards(relayer2.address, roundId)
+
+      // User1 claims for relayer1
+      await expect(relayerRewardsPool.connect(user1).claimRewards(roundId, relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerRewardsClaimed")
+        .withArgs(relayer1.address, roundId, claimableAmount)
+
+      await expect(relayerRewardsPool.connect(user1).claimRewards(roundId, relayer2.address))
+        .to.emit(relayerRewardsPool, "RelayerRewardsClaimed")
+        .withArgs(relayer2.address, roundId, claimableAmount2)
+
+      // Relayer1 and Relayer2 should receive the rewards
+      const finalBalance = await b3tr.balanceOf(relayer1.address)
+      const finalBalance2 = await b3tr.balanceOf(relayer2.address)
+      expect(finalBalance - initialBalance).to.equal(claimableAmount)
+      expect(finalBalance2 - initialBalance2).to.equal(claimableAmount2)
+
+      // Should not be able to claim again
+      await expect(relayerRewardsPool.connect(user1).claimRewards(roundId, relayer1.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "RewardsAlreadyClaimed")
+        .withArgs(relayer1.address, roundId)
+
+      await expect(relayerRewardsPool.connect(user1).claimRewards(roundId, relayer2.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "RewardsAlreadyClaimed")
+        .withArgs(relayer2.address, roundId)
+    })
+
+    it("should revert claiming when round is not complete", async function () {
+      const incompleteRoundId = 2
+      const totalAutoVotingUsers = 4
+
+      // Start a second round
+      await emissions.connect(minterAccount).distribute()
+
+      // Set up a new round that will be incomplete
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(incompleteRoundId, totalAutoVotingUsers)
+
+      // Only register SOME actions (not all required)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+
+      // Verify round is not claimable
+      expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
+      expect(await relayerRewardsPool.claimableRewards(relayer1.address, incompleteRoundId)).to.equal(0)
+
+      // Should revert when trying to claim
+      await expect(relayerRewardsPool.connect(relayer1).claimRewards(incompleteRoundId, relayer1.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "RoundNotEnded")
+        .withArgs(incompleteRoundId)
+    })
+
+    it("should revert when all actions are not completed", async function () {
+      const incompleteRoundId = 2
+      const totalAutoVotingUsers = 4
+
+      // Start a second round
+      await emissions.connect(minterAccount).distribute()
+
+      // Set up a new round that will be incomplete
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(incompleteRoundId, totalAutoVotingUsers)
+
+      // Only register SOME actions (not all required)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+
+      await waitForNextCycle(emissions)
+
+      // Verify round is not claimable
+      expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
+      expect(await relayerRewardsPool.claimableRewards(relayer1.address, incompleteRoundId)).to.equal(0)
+
+      // Should revert when trying to claim
+      await expect(relayerRewardsPool.connect(relayer1).claimRewards(incompleteRoundId, relayer1.address))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "NoRewardsToClaim")
+        .withArgs(relayer1.address, incompleteRoundId)
+    })
+  })
+
+  describe("Reward Claimability", function () {
+    it("should correctly determine if rewards are claimable", async function () {
+      const incompleteRoundId = 1
+      const totalAutoVotingUsers = 2
+
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(incompleteRoundId, totalAutoVotingUsers)
+
+      // Initially not claimable (no actions completed)
+      expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
+
+      // Complete half the actions
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+
+      // Still not claimable (only half completed)
+      expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
+
+      // Complete all actions
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+
+      // Now should be claimable
+      await waitForNextCycle(emissions)
+
+      expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.true
+    })
+  })
+
+  describe("Edge Cases and Error Handling", function () {
+    it("should handle zero relayers in early access allocation", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 10
+
+      // Don't register any relayers
+      await expect(
+        relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers),
+      ).to.not.emit(relayerRewardsPool, "EarlyAccessAllocationsSet")
+
+      // Total actions should still be set correctly
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalAutoVotingUsers * 2)
+    })
+
+    it("should handle proportional rewards correctly with different weighted actions", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 2
+      const rewardAmount = ethers.parseEther("100")
+
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer2.address)
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      // Deposit rewards
+      await b3tr.connect(owner).mint(owner.address, rewardAmount)
+      await b3tr.connect(owner).approve(await relayerRewardsPool.getAddress(), rewardAmount)
+      await relayerRewardsPool.connect(owner).deposit(rewardAmount, roundId)
+
+      // Relayer1 does more VOTE actions (higher weight)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE (weight 3)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE (weight 3)
+
+      // Relayer2 does CLAIM actions (lower weight)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM (weight 1)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM (weight 1)
+
+      await waitForNextCycle(emissions)
+
+      const relayer1Claimable = await relayerRewardsPool.claimableRewards(relayer1.address, roundId)
+      const relayer2Claimable = await relayerRewardsPool.claimableRewards(relayer2.address, roundId)
+
+      // Relayer1 should get more rewards due to higher weighted actions
+      expect(relayer1Claimable).to.be.gt(relayer2Claimable)
+      expect(relayer1Claimable + relayer2Claimable).to.equal(rewardAmount)
+    })
+
+    it("should handle maximum values correctly", async function () {
+      const roundId = 1
+
+      // This should not overflow
+      await expect(relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, 1000)).to.not.be.reverted
+    })
+  })
+
+  describe("Version", function () {
+    it("should return the correct version", async function () {
+      expect(await relayerRewardsPool.version()).to.equal("1")
+    })
+  })
+})
