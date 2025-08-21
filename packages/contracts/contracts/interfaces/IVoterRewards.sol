@@ -144,6 +144,10 @@ interface IVoterRewards {
   /// @return address The B3TR contract address
   function b3tr() external view returns (address);
 
+  /// @notice Gets the RelayerRewardsPool contract address
+  /// @return address The RelayerRewardsPool contract address
+  function relayerRewardsPool() external view returns (address);
+
   /// @notice Gets the galaxy member contract address
   /// @return address The galaxy member contract address
   function galaxyMember() external view returns (address);
