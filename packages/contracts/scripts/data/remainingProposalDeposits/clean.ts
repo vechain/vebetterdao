@@ -49,7 +49,6 @@ export async function clean() {
 
     // for each proposalId, we look the roundId ( getRoundStart ), and add it to the correspondingRoundId array
     moneyStuckCleared[index].correspondingRoundIds.push(roundId.toString())
-    console.log({ roundId, proposalId: user.proposalId, depositer })
 
     // update the proposalIds
     moneyStuckCleared[index].proposalIds.push(user.proposalId)
@@ -96,7 +95,7 @@ export async function clean() {
       const amount = new BigNumber(wallet.totalDepositAmount).dividedBy("1e18").toFixed(4)
       console.log(`   ${index + 1}. ${wallet.walletAddress} (${amount} B3TR)`)
       console.log(`      Issues: ${validation.issues.join(", ")}`)
-      console.log(`      Risk Score: ${validation.riskScore}/10`)
+      console.log(`      Risk Score: ${validation.riskScore}/8`)
     })
   }
 

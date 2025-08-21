@@ -242,7 +242,7 @@ export const calculateStuckDepositsSummary = async (): Promise<StuckDepositSumma
 
 if (CLEAN) {
   clean()
+} else {
+  // Execute the analysis
+  main().catch(console.error)
 }
-
-// Execute the analysis
-main().catch(console.error)
