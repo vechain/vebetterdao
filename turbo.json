@@ -338,7 +338,11 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "seed-voting-power:local": {
+    "analyze-proposal-deposits:testnet-staging": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "seed-voting-power:testnet-staging": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     }
