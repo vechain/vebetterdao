@@ -14,6 +14,7 @@ import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.jso
 import { StepModal } from "@/components/StepModal/StepModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import Lottie from "react-lottie"
+import "./components/tweetStyle.css"
 
 enum AppTweetsStep {
   UPLOADING = "UPLOADING",
