@@ -29,6 +29,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IB3TR.sol";
 import "./interfaces/IRelayerRewardsPool.sol";
 import "./interfaces/IEmissions.sol";
+import "./interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title RelayerRewardsPool
@@ -42,10 +43,9 @@ import "./interfaces/IEmissions.sol";
  * - following the ERC-7201 standard for storage layout
  *
  * Roles:
- * - DEFAULT_ADMIN_ROLE: Can add new admins, set contract addresses, and manage pool settings
+ * - DEFAULT_ADMIN_ROLE: Super admin role for critical operations (contract upgrades, role management)
  * - UPGRADER_ROLE: Can upgrade the contract
- * - RELAYER_REGISTRAR_ROLE: Can register relayer actions (VoterRewards contract)
- * - DEPOSITOR_ROLE: Can deposit rewards into the pool (VoterRewards contract)
+ * - POOL_ADMIN_ROLE: For pool administration functions (manage relayers, weights, settings)
  */
 contract RelayerRewardsPool is
   AccessControlUpgradeable,
@@ -56,16 +56,14 @@ contract RelayerRewardsPool is
   /// @notice The role that can upgrade the contract
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-  /// @notice The role that can register relayer actions
-  bytes32 public constant RELAYER_REGISTRAR_ROLE = keccak256("RELAYER_REGISTRAR_ROLE");
-
-  /// @notice The role that can deposit rewards into the pool
-  bytes32 public constant DEPOSITOR_ROLE = keccak256("DEPOSITOR_ROLE");
+  /// @notice The role for pool administration functions
+  bytes32 public constant POOL_ADMIN_ROLE = keccak256("POOL_ADMIN_ROLE");
 
   /// @custom:storage-location erc7201:b3tr.storage.RelayerRewardsPool
   struct RelayerRewardsPoolStorage {
     IB3TR b3tr;
     IEmissions emissions;
+    IXAllocationVotingGovernor xAllocationVoting;
     // roundId => total rewards available for the round
     mapping(uint256 => uint256) totalRewards;
     // roundId => relayer => number of actions performed
@@ -85,6 +83,16 @@ contract RelayerRewardsPool is
     // configurable weights for different action types
     uint256 voteWeight;
     uint256 claimWeight;
+    // registered relayers set
+    mapping(address => bool) registeredRelayers;
+    // array to track all registered relayers for enumeration
+    address[] relayerAddresses;
+    // number of blocks for exclusive early access
+    uint256 earlyAccessBlocks;
+    // roundId => relayer => allocated vote actions during early access
+    mapping(uint256 => mapping(address => uint256)) relayerEarlyAccessVoteAllocation;
+    // roundId => relayer => used vote actions during early access
+    mapping(uint256 => mapping(address => uint256)) relayerEarlyAccessVoteUsed;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.RelayerRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -108,6 +116,17 @@ contract RelayerRewardsPool is
   /// @param oldAddress The old Emissions contract address
   event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
 
+  /// @notice Emitted when the XAllocationVoting contract address is updated
+  /// @param newAddress The new XAllocationVoting contract address
+  /// @param oldAddress The old XAllocationVoting contract address
+  event XAllocationVotingAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @notice Custom error for when relayer is already registered
+  error RelayerAlreadyRegistered(address relayer);
+
+  /// @notice Custom error for when relayer is not registered
+  error RelayerNotRegistered(address relayer);
+
   /// @notice Custom error for when a round has not ended yet
   error RoundNotEnded(uint256 roundId);
 
@@ -117,27 +136,21 @@ contract RelayerRewardsPool is
   /// @notice Custom error for when there are no rewards to claim
   error NoRewardsToClaim(address relayer, uint256 roundId);
 
+  /// @notice Custom error for when a relayer's early access vote allocation exceeds the allocated amount
+  error EarlyAccessVoteAllocationExceeded(address relayer, uint256 roundId, uint256 used, uint256 allocated);
+
   /// @notice Custom error for when transfer fails
   error TransferFailed();
 
   /// @notice Custom error for invalid parameters
   error InvalidParameter(string parameter);
 
-  /// @notice Modifier to check if the caller has the admin role
-  modifier onlyAdmin() {
-    _checkRole(DEFAULT_ADMIN_ROLE, msg.sender);
-    _;
-  }
-
-  /// @notice Modifier to check if the caller has the relayer registrar role
-  modifier onlyRelayerRegistrar() {
-    _checkRole(RELAYER_REGISTRAR_ROLE, msg.sender);
-    _;
-  }
-
-  /// @notice Modifier to check if the caller has the depositor role
-  modifier onlyDepositor() {
-    _checkRole(DEPOSITOR_ROLE, msg.sender);
+  /// @notice Modifier to check if the caller has either the default admin or pool admin role
+  modifier onlyRoleOrAdmin(bytes32 role) {
+    require(
+      hasRole(role, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
+      "RelayerRewardsPool: caller must have admin or pool admin role"
+    );
     _;
   }
 
@@ -152,17 +165,20 @@ contract RelayerRewardsPool is
    * @param upgrader The upgrader address
    * @param b3trAddress The B3TR contract address
    * @param emissionsAddress The Emissions contract address
+   * @param xAllocationVotingAddress The XAllocationVoting contract address
    */
   function initialize(
     address admin,
     address upgrader,
     address b3trAddress,
-    address emissionsAddress
+    address emissionsAddress,
+    address xAllocationVotingAddress
   ) public initializer {
     require(admin != address(0), "RelayerRewardsPool: admin cannot be zero address");
     require(upgrader != address(0), "RelayerRewardsPool: upgrader cannot be zero address");
     require(b3trAddress != address(0), "RelayerRewardsPool: b3tr cannot be zero address");
     require(emissionsAddress != address(0), "RelayerRewardsPool: emissions cannot be zero address");
+    require(xAllocationVotingAddress != address(0), "RelayerRewardsPool: xAllocationVoting cannot be zero address");
 
     __AccessControl_init();
     __ReentrancyGuard_init();
@@ -170,14 +186,19 @@ contract RelayerRewardsPool is
 
     _grantRole(DEFAULT_ADMIN_ROLE, admin);
     _grantRole(UPGRADER_ROLE, upgrader);
+    _grantRole(POOL_ADMIN_ROLE, admin); // Grant pool admin role to the initial admin
 
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
     $.b3tr = IB3TR(b3trAddress);
     $.emissions = IEmissions(emissionsAddress);
+    $.xAllocationVoting = IXAllocationVotingGovernor(xAllocationVotingAddress);
 
     // Initialize default weights
     $.voteWeight = 3; // Higher weight for vote actions (more gas intensive)
     $.claimWeight = 1; // Base weight for claim actions
+
+    // Initialize default early access period (e.g., 1 block ~= 10 seconds on VeChain)
+    $.earlyAccessBlocks = 8640; // 24 hours
   }
 
   /**
@@ -186,33 +207,7 @@ contract RelayerRewardsPool is
    */
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
-  /**
-   * @notice Set the B3TR contract address
-   * @param b3trAddress The B3TR contract address
-   */
-  function setB3TRAddress(address b3trAddress) external onlyAdmin {
-    if (b3trAddress == address(0)) revert InvalidParameter("b3trAddress");
-
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    address oldAddress = address($.b3tr);
-    $.b3tr = IB3TR(b3trAddress);
-
-    emit B3TRAddressUpdated(b3trAddress, oldAddress);
-  }
-
-  /**
-   * @notice Set the Emissions contract address
-   * @param emissionsAddress The Emissions contract address
-   */
-  function setEmissionsAddress(address emissionsAddress) external onlyAdmin {
-    if (emissionsAddress == address(0)) revert InvalidParameter("emissionsAddress");
-
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    address oldAddress = address($.emissions);
-    $.emissions = IEmissions(emissionsAddress);
-
-    emit EmissionsAddressUpdated(emissionsAddress, oldAddress);
-  }
+  // ----------------------- Getters -----------------------
 
   /**
    * @notice Get the current vote weight
@@ -230,34 +225,6 @@ contract RelayerRewardsPool is
   function getClaimWeight() external view returns (uint256) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
     return $.claimWeight;
-  }
-
-  /**
-   * @notice Set the vote weight
-   * @param newWeight The new vote weight
-   */
-  function setVoteWeight(uint256 newWeight) external onlyAdmin {
-    if (newWeight == 0) revert InvalidParameter("voteWeight");
-
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    uint256 oldWeight = $.voteWeight;
-    $.voteWeight = newWeight;
-
-    emit VoteWeightUpdated(newWeight, oldWeight);
-  }
-
-  /**
-   * @notice Set the claim weight
-   * @param newWeight The new claim weight
-   */
-  function setClaimWeight(uint256 newWeight) external onlyAdmin {
-    if (newWeight == 0) revert InvalidParameter("claimWeight");
-
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    uint256 oldWeight = $.claimWeight;
-    $.claimWeight = newWeight;
-
-    emit ClaimWeightUpdated(newWeight, oldWeight);
   }
 
   /**
@@ -344,58 +311,42 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Registers an action performed by a relayer in a specific round
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @param action The type of action performed (VOTE or CLAIM)
+   * @notice Check if an address is a registered relayer
+   * @param relayer The address to check
+   * @return True if the address is a registered relayer
    */
-  function registerRelayerAction(
-    address relayer,
-    uint256 roundId,
-    RelayerAction action
-  ) external override onlyRelayerRegistrar {
-    if (relayer == address(0)) revert InvalidParameter("relayer");
-
+  function isRegisteredRelayer(address relayer) external view returns (bool) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-
-    // Get weight based on action type
-    uint256 weight = action == RelayerAction.VOTE ? $.voteWeight : $.claimWeight;
-
-    // Update action counts
-    $.relayerActions[roundId][relayer]++;
-    $.relayerWeightedActions[roundId][relayer] += weight;
-    $.completedActions[roundId]++;
-    $.completedWeightedActions[roundId] += weight;
-
-    emit RelayerActionRegistered(relayer, roundId, $.relayerActions[roundId][relayer], weight);
+    return $.registeredRelayers[relayer];
   }
 
   /**
-   * @notice Sets the total number of actions required for a round
-   * @dev This should be called when the round starts based on the number of users with auto-voting enabled
-   * @param roundId The round ID
-   * @param totalActionsRequired The total number of actions required
+   * @notice Get all registered relayers
+   * @return Array of registered relayer addresses
    */
-  function setTotalActionsForRound(
-    uint256 roundId,
-    uint256 totalActionsRequired
-  ) external override onlyRelayerRegistrar {
+  function getRegisteredRelayers() external view returns (address[] memory) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    $.totalActions[roundId] = totalActionsRequired;
+    return $.relayerAddresses;
   }
 
   /**
-   * @notice Sets the total weighted actions required for a round
-   * @dev This should be called when the round starts to set expected weighted actions
-   * @param roundId The round ID
-   * @param totalWeightedActionsRequired The total weighted actions required
+   * @notice Get the number of early access blocks
+   * @return The number of blocks for early access period
    */
-  function setTotalWeightedActionsForRound(
-    uint256 roundId,
-    uint256 totalWeightedActionsRequired
-  ) external onlyRelayerRegistrar {
+  function getEarlyAccessBlocks() external view returns (uint256) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    $.totalWeightedActions[roundId] = totalWeightedActionsRequired;
+    return $.earlyAccessBlocks;
+  }
+
+  /**
+   * @notice Check if early access period is active for a given round
+   * @param roundId The round ID
+   * @return True if early access period is still active
+   */
+  function isEarlyAccessActive(uint256 roundId) public view returns (bool) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 roundStartBlock = $.xAllocationVoting.roundSnapshot(roundId);
+    return block.number < roundStartBlock + $.earlyAccessBlocks;
   }
 
   /**
@@ -427,6 +378,130 @@ contract RelayerRewardsPool is
   function completedWeightedActions(uint256 roundId) external view returns (uint256) {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
     return $.completedWeightedActions[roundId];
+  }
+
+  /**
+   * @notice Get the early access vote allocation for a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @return The allocated vote actions for early access
+   */
+  function getEarlyAccessVoteAllocation(address relayer, uint256 roundId) external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return $.relayerEarlyAccessVoteAllocation[roundId][relayer];
+  }
+
+  /**
+   * @notice Get the early access vote actions used by a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @return The used vote actions during early access
+   */
+  function getEarlyAccessVoteUsed(address relayer, uint256 roundId) external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return $.relayerEarlyAccessVoteUsed[roundId][relayer];
+  }
+
+  /**
+   * @notice Check if a relayer can perform a vote action during early access
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   */
+  function canRelayerVoteInEarlyAccess(address relayer, uint256 roundId) external view {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    // if early access period ended, anyone can vote
+    if (!isEarlyAccessActive(roundId)) {
+      return;
+    }
+
+    // During early access, check if relayer is registered
+    require(
+      $.registeredRelayers[relayer],
+      "RelayerRewardsPool: caller is not a registered relayer during early access period"
+    );
+
+    require(
+      $.relayerEarlyAccessVoteAllocation[roundId][relayer] > 0,
+      "RelayerRewardsPool: relayer has no early access vote allocation"
+    );
+
+    // During early access, check if relayer has active allocation left
+    uint256 allocated = $.relayerEarlyAccessVoteAllocation[roundId][relayer];
+    uint256 used = $.relayerEarlyAccessVoteUsed[roundId][relayer];
+    require(used < allocated, "RelayerRewardsPool: relayer has exceeded their early access vote allocation");
+  }
+
+  // ----------------------- Actions -----------------------
+
+  /**
+   * @notice Set the B3TR contract address
+   * @param b3trAddress The B3TR contract address
+   */
+  function setB3TRAddress(address b3trAddress) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (b3trAddress == address(0)) revert InvalidParameter("b3trAddress");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    address oldAddress = address($.b3tr);
+    $.b3tr = IB3TR(b3trAddress);
+
+    emit B3TRAddressUpdated(b3trAddress, oldAddress);
+  }
+
+  /**
+   * @notice Set the Emissions contract address
+   * @param emissionsAddress The Emissions contract address
+   */
+  function setEmissionsAddress(address emissionsAddress) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (emissionsAddress == address(0)) revert InvalidParameter("emissionsAddress");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    address oldAddress = address($.emissions);
+    $.emissions = IEmissions(emissionsAddress);
+
+    emit EmissionsAddressUpdated(emissionsAddress, oldAddress);
+  }
+
+  /**
+   * @notice Set the XAllocationVoting contract address
+   * @param xAllocationVotingAddress The XAllocationVoting contract address
+   */
+  function setXAllocationVotingAddress(address xAllocationVotingAddress) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (xAllocationVotingAddress == address(0)) revert InvalidParameter("xAllocationVotingAddress");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    address oldAddress = address($.xAllocationVoting);
+    $.xAllocationVoting = IXAllocationVotingGovernor(xAllocationVotingAddress);
+
+    emit XAllocationVotingAddressUpdated(xAllocationVotingAddress, oldAddress);
+  }
+
+  /**
+   * @notice Set the vote weight
+   * @param newWeight The new vote weight
+   */
+  function setVoteWeight(uint256 newWeight) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (newWeight == 0) revert InvalidParameter("voteWeight");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 oldWeight = $.voteWeight;
+    $.voteWeight = newWeight;
+
+    emit VoteWeightUpdated(newWeight, oldWeight);
+  }
+
+  /**
+   * @notice Set the claim weight
+   * @param newWeight The new claim weight
+   */
+  function setClaimWeight(uint256 newWeight) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (newWeight == 0) revert InvalidParameter("claimWeight");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 oldWeight = $.claimWeight;
+    $.claimWeight = newWeight;
+
+    emit ClaimWeightUpdated(newWeight, oldWeight);
   }
 
   /**
@@ -465,11 +540,125 @@ contract RelayerRewardsPool is
   }
 
   /**
+   * @notice Registers an action performed by a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @param action The type of action performed (VOTE or CLAIM)
+   */
+  function registerRelayerAction(
+    address relayer,
+    uint256 roundId,
+    RelayerAction action
+  ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (relayer == address(0)) revert InvalidParameter("relayer");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    // If this is a VOTE action during early access, update the used count
+    if (action == RelayerAction.VOTE) {
+      uint256 used = $.relayerEarlyAccessVoteUsed[roundId][relayer];
+      $.relayerEarlyAccessVoteUsed[roundId][relayer] = used + 1;
+    }
+
+    // Get weight based on action type
+    uint256 weight = action == RelayerAction.VOTE ? $.voteWeight : $.claimWeight;
+
+    // Update action counts
+    $.relayerActions[roundId][relayer]++;
+    $.completedActions[roundId]++;
+
+    // Update weighted actions
+    $.relayerWeightedActions[roundId][relayer] += weight;
+    $.completedWeightedActions[roundId] += weight;
+
+    emit RelayerActionRegistered(relayer, roundId, $.relayerActions[roundId][relayer], weight);
+  }
+
+  /**
+   * @notice Sets the total number of actions required for a round
+   * @dev This should be called when the round starts based on the number of users with auto-voting enabled
+   * @param roundId The round ID
+   * @param totalAutoVotingUsers The total number of auto-voting users
+   */
+  function setTotalActionsForRound(
+    uint256 roundId,
+    uint256 totalAutoVotingUsers
+  ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    // Each auto-voting user requires 2 actions: 1 vote + 1 claim
+    // This means that the total number of actions required for the round is totalAutoVotingUsers * 2
+    $.totalActions[roundId] = totalAutoVotingUsers * 2;
+
+    // Weighted actions are the sum of the vote and claim weights
+    $.totalWeightedActions[roundId] = totalAutoVotingUsers * ($.voteWeight + $.claimWeight);
+
+    // Set up early access vote allocation for registered relayers
+    _setEarlyAccessVoteAllocations(roundId, totalAutoVotingUsers);
+  }
+
+  /**
+   * @notice Register a relayer for early access to auto-voting actions
+   * @param relayer The address of the relayer to register
+   */
+  function registerRelayer(address relayer) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (relayer == address(0)) revert InvalidParameter("relayer");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    if ($.registeredRelayers[relayer]) {
+      revert RelayerAlreadyRegistered(relayer);
+    }
+
+    $.registeredRelayers[relayer] = true;
+    $.relayerAddresses.push(relayer);
+
+    emit RelayerRegistered(relayer);
+  }
+
+  /**
+   * @notice Unregister a relayer from early access
+   * @param relayer The address of the relayer to unregister
+   */
+  function unregisterRelayer(address relayer) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    if (!$.registeredRelayers[relayer]) {
+      revert RelayerNotRegistered(relayer);
+    }
+
+    delete $.registeredRelayers[relayer];
+
+    // Remove from array (swap with last element and pop)
+    for (uint256 i = 0; i < $.relayerAddresses.length; i++) {
+      if ($.relayerAddresses[i] == relayer) {
+        $.relayerAddresses[i] = $.relayerAddresses[$.relayerAddresses.length - 1];
+        $.relayerAddresses.pop();
+        break;
+      }
+    }
+
+    emit RelayerUnregistered(relayer);
+  }
+
+  /**
+   * @notice Set the number of blocks for early access period
+   * @param blocks The number of blocks for early access
+   */
+  function setEarlyAccessBlocks(uint256 blocks) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 oldBlocks = $.earlyAccessBlocks;
+    $.earlyAccessBlocks = blocks;
+
+    emit EarlyAccessBlocksUpdated(blocks, oldBlocks);
+  }
+
+  /**
    * @notice Deposits B3TR tokens into the pool for a specific round
    * @param amount The amount of B3TR tokens to deposit
    * @param roundId The round ID to deposit for
    */
-  function deposit(uint256 amount, uint256 roundId) external override {
+  function deposit(uint256 amount, uint256 roundId) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
     if (amount == 0) revert InvalidParameter("amount");
 
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
@@ -481,6 +670,38 @@ contract RelayerRewardsPool is
     $.totalRewards[roundId] += amount;
 
     emit RewardsDeposited(roundId, amount, $.totalRewards[roundId]);
+  }
+
+  /**
+   * @notice Internal function to allocate vote actions evenly among registered relayers during early access
+   * @param roundId The round ID
+   * @param totalAutoVotingUsers The total number of auto-voting users
+   */
+  function _setEarlyAccessVoteAllocations(uint256 roundId, uint256 totalAutoVotingUsers) internal {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    uint256 numRelayers = $.relayerAddresses.length;
+    if (numRelayers == 0) return; // No registered relayers
+
+    uint256 totalVoteActions = totalAutoVotingUsers; // 1 vote action per user
+    uint256 actionsPerRelayer = totalVoteActions / numRelayers;
+    uint256 remainingActions = totalVoteActions % numRelayers;
+
+    // Allocate actions evenly among relayers
+    for (uint256 i = 0; i < numRelayers; i++) {
+      address relayer = $.relayerAddresses[i];
+      uint256 allocation = actionsPerRelayer;
+
+      // Distribute remaining actions to the first few relayers
+      if (i < remainingActions) {
+        allocation += 1;
+      }
+
+      $.relayerEarlyAccessVoteAllocation[roundId][relayer] = allocation;
+      $.relayerEarlyAccessVoteUsed[roundId][relayer] = 0; // initialize used count to 0
+    }
+
+    emit EarlyAccessAllocationsSet(roundId, totalVoteActions, numRelayers);
   }
 
   /**

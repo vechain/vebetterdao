@@ -72,9 +72,9 @@ interface IRelayerRewardsPool {
   /**
    * @notice Sets the total number of actions required for a round
    * @param roundId The round ID
-   * @param totalActionsRequired The total number of actions required
+   * @param totalAutoVotingUsers The total number of auto-voting users
    */
-  function setTotalActionsForRound(uint256 roundId, uint256 totalActionsRequired) external;
+  function setTotalActionsForRound(uint256 roundId, uint256 totalAutoVotingUsers) external;
 
   /**
    * @notice Returns the claimable reward amount for a relayer in a specific round
@@ -142,6 +142,63 @@ interface IRelayerRewardsPool {
   function completedWeightedActions(uint256 roundId) external view returns (uint256);
 
   /**
+   * @notice Check if an address is a registered relayer
+   * @param relayer The address to check
+   * @return True if the address is a registered relayer
+   */
+  function isRegisteredRelayer(address relayer) external view returns (bool);
+
+  /**
+   * @notice Get all registered relayers
+   * @return Array of registered relayer addresses
+   */
+  function getRegisteredRelayers() external view returns (address[] memory);
+
+  /**
+   * @notice Get the number of early access blocks
+   * @return The number of blocks for early access period
+   */
+  function getEarlyAccessBlocks() external view returns (uint256);
+
+  /**
+   * @notice Check if early access period is active for a given round
+   * @param roundId The round ID
+   * @return True if early access period is still active
+   */
+  function isEarlyAccessActive(uint256 roundId) external view returns (bool);
+
+  /**
+   * @notice Get the early access vote allocation for a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @return The allocated vote actions for early access
+   */
+  function getEarlyAccessVoteAllocation(address relayer, uint256 roundId) external view returns (uint256);
+
+  /**
+   * @notice Get the early access vote actions used by a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @return The used vote actions during early access
+   */
+  function getEarlyAccessVoteUsed(address relayer, uint256 roundId) external view returns (uint256);
+
+  /**
+   * @notice Check if a relayer can perform a vote action during early access
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   */
+  function canRelayerVoteInEarlyAccess(address relayer, uint256 roundId) external view;
+
+  /**
+   * @notice Emitted when early access vote allocations are set for a round
+   * @param roundId The round ID
+   * @param totalVoteActions The total vote actions to be allocated
+   * @param numRelayers The number of registered relayers
+   */
+  event EarlyAccessAllocationsSet(uint256 indexed roundId, uint256 totalVoteActions, uint256 numRelayers);
+
+  /**
    * @notice Emitted when a relayer action is registered
    * @param relayer The relayer address
    * @param roundId The round ID
@@ -179,4 +236,23 @@ interface IRelayerRewardsPool {
    * @param oldWeight The old claim weight
    */
   event ClaimWeightUpdated(uint256 newWeight, uint256 oldWeight);
+
+  /**
+   * @notice Emitted when a relayer is registered
+   * @param relayer The address of the registered relayer
+   */
+  event RelayerRegistered(address indexed relayer);
+
+  /**
+   * @notice Emitted when a relayer is unregistered
+   * @param relayer The address of the unregistered relayer
+   */
+  event RelayerUnregistered(address indexed relayer);
+
+  /**
+   * @notice Emitted when early access blocks are updated
+   * @param newBlocks The new number of early access blocks
+   * @param oldBlocks The old number of early access blocks
+   */
+  event EarlyAccessBlocksUpdated(uint256 newBlocks, uint256 oldBlocks);
 }
