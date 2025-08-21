@@ -337,6 +337,10 @@
     "analyze-proposal-deposits:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "seed-voting-power:mainnet": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     }
   }
 }
