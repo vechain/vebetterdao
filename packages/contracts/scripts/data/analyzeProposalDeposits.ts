@@ -166,7 +166,7 @@ export async function main() {
     }
   }
   // Check for stuck deposits in chunks of 500
-  await checkDepositStuckInChunks(depositCheckTasks, totalChecks, 500)
+  await checkDepositStuckInChunks(depositCheckTasks, totalChecks, 100)
 
   log(`🎉 All ${totalChecks} deposit checks completed successfully!`)
 
