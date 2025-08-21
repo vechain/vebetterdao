@@ -30,7 +30,6 @@ import { GovernorConfigurator } from "./GovernorConfigurator.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { GovernorClockLogic } from "./GovernorClockLogic.sol";
-
 /// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
 /// @dev This library provides functions to deposit and withdraw tokens for proposals, and to get deposit-related information.
@@ -53,6 +52,9 @@ library GovernorDepositLogic {
 
   /// @dev Thrown when the grantee tries to deposit for their own grant.
   error GranteeCannotDepositOwnGrant(uint256 proposalId);
+
+  /// @dev Emitted when the voting power is seeded.
+  event VotingPowerSeeded(address indexed walletAddress, uint256 indexed deposit);
 
   // --------------- SETTERS ---------------
   /**
@@ -143,6 +145,29 @@ library GovernorDepositLogic {
     self.depositsVotingPower[depositor].push(GovernorClockLogic.clock(self), newVotes);
 
     emit ProposalDeposit(depositor, proposalId, amount);
+  }
+
+  function _seedVotingPower(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address walletAddress,
+    uint256 deposit
+  ) internal {
+    self.depositsVotingPower[walletAddress].push(
+      GovernorClockLogic.clock(self),
+      self.depositsVotingPower[walletAddress].upperLookupRecent(GovernorClockLogic.clock(self)) +
+        SafeCast.toUint208(deposit)
+    );
+
+    emit VotingPowerSeeded(walletAddress, deposit);
+  }
+
+  function seedVotingPower(
+    GovernorStorageTypes.GovernorStorage storage self,
+    address walletAddress,
+    uint256 deposit
+  ) external {
+    require(walletAddress != address(0), "B3TRGovernor: wallet address cannot be 0");
+    _seedVotingPower(self, walletAddress, deposit);
   }
 
   // --------------- GETTERS ---------------

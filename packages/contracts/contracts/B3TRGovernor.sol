@@ -1161,6 +1161,11 @@ contract B3TRGovernor is
     GovernorConfigurator.setRequiredGMLevelByProposalType($, proposalTypeValue, newGMWeight);
   }
 
+  function seedVotingPower(address walletAddress, uint256 deposit) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorDepositLogic.seedVotingPower($, walletAddress, deposit);
+  }
+
   /**
    * @notice Get the deposit voting power for a given account at a given timepoint
    * @param account The address of the account

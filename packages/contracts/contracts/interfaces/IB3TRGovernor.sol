@@ -645,6 +645,13 @@ interface IB3TRGovernor is IERC165, IERC6372 {
   function setRequiredGMLevelByProposalType(GovernorTypes.ProposalType proposalTypeValue, uint256 newGMWeight) external;
 
   /**
+   * @notice Seed the voting power for a wallet address
+   * @param walletAddress The address of the wallet
+   * @param deposit The deposit amount
+   */
+  function seedVotingPower(address walletAddress, uint256 deposit) external;
+
+  /**
    * @notice Returns the deposit threshold cap for a proposal type.
    * @param proposalTypeValue The type of proposal.
    * @return uint256 The deposit threshold cap for the proposal type.
