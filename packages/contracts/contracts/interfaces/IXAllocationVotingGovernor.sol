@@ -107,6 +107,16 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   );
 
   /**
+   * @dev Emitted when autovoting is toggled for an account.
+   */
+  event AutoVotingToggled(address indexed account, bool enabled);
+
+  /**
+   * @dev Emitted when the preferred apps are updated for an account.
+   */
+  event PreferredAppsUpdated(address indexed account, bytes32[] apps);
+
+  /**
    * @notice module:core
    * @dev Name of the governor instance (used in building the ERC712 domain separator).
    */
@@ -274,6 +284,13 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function toggleAutoVotingForUser(address user) external;
 
   /**
+   * @dev Check if autovoting is enabled for an account
+   * @param account The address to check
+   * @return Whether autovoting is enabled for the account
+   */
+  function isUserAutoVotingEnabled(address account) external view returns (bool);
+
+  /**
    * @dev Returns the current allocation round round.
    */
   function currentRoundId() external view returns (uint256);
@@ -289,7 +306,8 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function currentRoundDeadline() external view returns (uint256);
 
   /**
-   * @dev Returns if quorum was reached for a specific round.
+   * 
+   @dev Returns if quorum was reached for a specific round.
    */
   function quorumReached(uint256 roundId) external view returns (bool);
 
@@ -330,16 +348,16 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @dev Check if autovoting is enabled for an account at a specific timepoint
-   * @param account The address to check
-   * @param timepoint The timepoint to check
-   * @return Whether autovoting is enabled for the account at the specific timepoint
    */
   function isUserAutoVotingEnabledAtTimepoint(address account, uint48 timepoint) external view returns (bool);
 
   /**
-   * @dev Check if autovoting is enabled for an account
-   * @param account The address to check
-   * @return Whether autovoting is enabled for the account
+   * @dev Validates if an account is a person
    */
-  function isUserAutoVotingEnabled(address account) external view returns (bool);
+  function validatePersonhood(address account) external view;
+
+  /**
+   * @dev Gets voting power and validates it's greater than zero
+   */
+  function getAndValidateVotingPower(address account, uint256 timepoint) external view returns (uint256);
 }

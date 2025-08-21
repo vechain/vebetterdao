@@ -116,28 +116,12 @@ abstract contract XAllocationVotingGovernor is
    * @notice Only addresses with a valid passport can vote.
    */
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
-    // TODO: User should NOT be able to cast a vote if the the voter has auto-voting enabled
-
-    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
+    // TODO autovoting: User should NOT be able to cast a vote if the the voter has auto-voting enabled
 
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
     require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
-    uint256 _currentRoundSnapshot = currentRoundSnapshot();
-
-    (bool isPerson, string memory explanation) = veBetterPassport().isPersonAtTimepoint(
-      _msgSender(),
-      SafeCast.toUint48(_currentRoundSnapshot)
-    );
-
-    // Check if the voter or the delegator of personhood to the voter is a person and returning error with the reason
-    if (!isPerson) {
-      revert GovernorPersonhoodVerificationFailed(_msgSender(), explanation);
-    }
-
-    address voter = _msgSender();
-
-    _countVote(roundId, voter, appIds, voteWeights);
+    _castVoteInternal(_msgSender(), roundId, appIds, voteWeights, false);
   }
 
   // ---------- Internal and Private ---------- //
@@ -146,60 +130,116 @@ abstract contract XAllocationVotingGovernor is
    * @dev Cast a vote for a set of x-2-earn applications on behalf of an account (used for autovoting).
    * @notice Only addresses with a valid passport can vote.
    */
-  function _castVoteOnBehalfOf(address voter, uint256 roundId) internal {
-    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
-
+  function castVoteOnBehalfOf(address voter, uint256 roundId) public {
     require(_isAutoVotingEnabled(voter), "XAllocationVotingGovernor: auto voting is not enabled");
 
-    uint256 _currentRoundSnapshot = currentRoundSnapshot();
+    _checkRelayerEarlyAccessEligibility(roundId);
 
+    bytes32[] memory appIds = _getUserVotingPreferences(voter);
+
+    // Get voter's available votes and create equal distribution
+    (bytes32[] memory finalAppIds, uint256[] memory voteWeights) = _prepareAutoVoteArrays(voter, roundId, appIds);
+
+    _castVoteInternal(voter, roundId, finalAppIds, voteWeights, true);
+  }
+
+  /**  @dev Internal function to handle common voting logic
+   * @param voter The address casting the vote
+   * @param roundId The round ID to vote in
+   * @param appIds Array of app IDs to vote for
+   * @param voteWeights Array of vote weights for each app
+   * @param isAutoVote Whether this is an auto vote (affects events and relayer rewards)
+   */
+  function _castVoteInternal(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory appIds,
+    uint256[] memory voteWeights,
+    bool isAutoVote
+  ) internal {
+    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
+
+    validatePersonhood(voter);
+
+    _countVote(roundId, voter, appIds, voteWeights);
+
+    if (isAutoVote) {
+      relayerRewardsPool().registerRelayerAction(msg.sender, roundId, RelayerAction.VOTE);
+      emit AllocationAutoVoteCast(voter, roundId, appIds, voteWeights);
+    }
+  }
+
+  /**
+   * @dev Prepare arrays for auto voting by filtering eligible apps and calculating equal weights
+   * @param voter The voter address
+   * @param roundId The round ID
+   * @param preferredApps The user's preferred app IDs
+   * @return finalAppIds Array of eligible app IDs
+   * @return voteWeights Array of equal vote weights
+   */
+  function _prepareAutoVoteArrays(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory preferredApps
+  ) internal view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
+    // Get voter's available votes
+    uint256 voterAvailableVotes = getAndValidateVotingPower(voter, roundSnapshot(roundId));
+
+    // Count and collect eligible apps
+    uint256 len = preferredApps.length;
+    bytes32[] memory tempAppIds = new bytes32[](len);
+    uint256 count;
+
+    for (uint256 i; i < len; ++i) {
+      if (isEligibleForVote(preferredApps[i], roundId)) {
+        tempAppIds[count++] = preferredApps[i];
+      }
+    }
+
+    require(count > 0, "XAllocationVotingGovernor: no eligible apps to vote for");
+
+    // Create final arrays with exact size
+    finalAppIds = new bytes32[](count);
+    voteWeights = new uint256[](count);
+    uint256 votePerApp = voterAvailableVotes / count;
+
+    for (uint256 i; i < count; ++i) {
+      finalAppIds[i] = tempAppIds[i];
+      voteWeights[i] = votePerApp;
+    }
+  }
+
+  /**
+   * @dev Validate that the voter is a person at the current round snapshot
+   * @param voter The voter address
+   */
+  function validatePersonhood(address voter) public view {
+    uint256 _currentRoundSnapshot = currentRoundSnapshot();
     (bool isPerson, string memory explanation) = veBetterPassport().isPersonAtTimepoint(
       voter,
       SafeCast.toUint48(_currentRoundSnapshot)
     );
+    require(isPerson, string(abi.encodePacked("GovernorPersonhoodVerificationFailed: ", explanation)));
+  }
 
-    // Check if the voter or the delegator of personhood to the voter is a person and returning error with the reason
-    if (!isPerson) {
-      revert GovernorPersonhoodVerificationFailed(voter, explanation);
-    }
-
-    bytes32[] memory appIds = _getUserVotingPreferences(voter);
-
-    // Get voter's available votes
-    uint256 voterAvailableVotes = getVotes(voter, roundSnapshot(roundId));
+  /**
+   * @dev Gets voting power and validates it's greater than zero
+   * @param account The account to check
+   * @param timepoint The timepoint to check voting power at
+   * @return The voting power (guaranteed to be > 0)
+   */
+  function getAndValidateVotingPower(address account, uint256 timepoint) public view returns (uint256) {
+    uint256 voterAvailableVotes = getVotes(account, timepoint);
     require(voterAvailableVotes > 0, "XAllocationVotingGovernor: no votes available");
+    return voterAvailableVotes;
+  }
 
-    // Filter eligible apps and count them
-    uint256 eligibleAppsCount = 0;
-    bytes32[] memory eligibleAppIds = new bytes32[](appIds.length);
-
-    for (uint256 i = 0; i < appIds.length; i++) {
-      if (isEligibleForVote(appIds[i], roundId)) {
-        eligibleAppIds[eligibleAppsCount] = appIds[i];
-        eligibleAppsCount++;
-      }
-    }
-
-    require(eligibleAppsCount > 0, "XAllocationVotingGovernor: no eligible apps to vote for");
-
-    // Create final arrays with exact size
-    bytes32[] memory finalAppIds = new bytes32[](eligibleAppsCount);
-    uint256[] memory voteWeights = new uint256[](eligibleAppsCount);
-
-    // Calculate equal vote weight per app
-    uint256 votePerApp = voterAvailableVotes / eligibleAppsCount;
-
-    // Distribute votes equally
-    for (uint256 i = 0; i < eligibleAppsCount; i++) {
-      finalAppIds[i] = eligibleAppIds[i];
-      voteWeights[i] = votePerApp;
-    }
-
-    _countVote(roundId, voter, finalAppIds, voteWeights);
-
-    relayerRewardsPool().registerRelayerAction(msg.sender, roundId, RelayerAction.VOTE);
-
-    emit AllocationAutoVoteCast(voter, roundId, finalAppIds, voteWeights);
+  /**
+   * @dev Check if the caller is eligible to perform relayer actions during early access period
+   * @param roundId The current round ID
+   */
+  function _checkRelayerEarlyAccessEligibility(uint256 roundId) internal view {
+    relayerRewardsPool().canRelayerVoteInEarlyAccess(msg.sender, roundId);
   }
 
   /**

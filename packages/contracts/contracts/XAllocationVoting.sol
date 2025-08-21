@@ -156,14 +156,11 @@ contract XAllocationVoting is
     __ExternalContracts_init_v2(_veBetterPassport);
   }
 
-  // ---------- Setters ---------- //
-
-  /**
-   * @dev Cast a vote on behalf of a voter
-   */
-  function castVoteOnBehalfOf(address voter, uint256 roundId) public {
-    _castVoteOnBehalfOf(voter, roundId);
+  function initializeV7(IRelayerRewardsPool _relayerRewardsPool) public reinitializer(7) {
+    __ExternalContracts_init_v7(_relayerRewardsPool);
   }
+
+  // ---------- Setters ---------- //
 
   /**
    * @dev Toggle autovoting for the caller
@@ -319,7 +316,7 @@ contract XAllocationVoting is
   function x2EarnApps()
     public
     view
-    override(ExternalContractsUpgradeable, AutoVotingLogicUpgradeable, XAllocationVotingGovernor)
+    override(ExternalContractsUpgradeable, XAllocationVotingGovernor, AutoVotingLogicUpgradeable)
     returns (IX2EarnApps)
   {
     return ExternalContractsUpgradeable.x2EarnApps();

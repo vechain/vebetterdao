@@ -30,6 +30,7 @@ import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /**
  * @title ExternalContractsUpgradeable
@@ -94,6 +95,11 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   function __ExternalContracts_init_v2(IVeBetterPassport _veBetterPassport) internal onlyInitializing {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._veBetterPassport = _veBetterPassport;
+  }
+
+  function __ExternalContracts_init_v7(IRelayerRewardsPool _relayerRewardsPool) internal onlyInitializing {
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    $._relayerRewardsPool = _relayerRewardsPool;
   }
 
   // ------- Getters ------- //
@@ -202,8 +208,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     );
 
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
-
-    emit RelayerRewardsPoolSet(address($._relayerRewardsPool), address(newRelayerRewardsPool));
     $._relayerRewardsPool = newRelayerRewardsPool;
+    emit RelayerRewardsPoolSet(address($._relayerRewardsPool), address(newRelayerRewardsPool));
   }
 }

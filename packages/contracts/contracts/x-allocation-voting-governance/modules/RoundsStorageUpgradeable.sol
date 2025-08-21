@@ -106,12 +106,12 @@ abstract contract RoundsStorageUpgradeable is Initializable, XAllocationVotingGo
     /**
      * Auto-voting:
      * 1. Get the number of users with auto-voting enabled at round start
-     * 2. Each auto-voting user requires 2 actions: vote + claim rewards
-     * 3. Set the total actions for this round in RelayerRewardsPool
+     * 2. Set the total actions for this round in RelayerRewardsPool
      */
     uint208 totalAutoVotingUsers = _getTotalAutoVotingUsersAtTimepoint(SafeCast.toUint48(snapshot));
-    uint256 totalActionsRequired = uint256(totalAutoVotingUsers) * 2;
-    relayerRewardsPool().setTotalActionsForRound(roundId, totalActionsRequired);
+    if (totalAutoVotingUsers > 0) {
+      relayerRewardsPool().setTotalActionsForRound(roundId, totalAutoVotingUsers);
+    }
 
     emit RoundCreated(roundId, proposer, snapshot, snapshot + duration, apps);
 
