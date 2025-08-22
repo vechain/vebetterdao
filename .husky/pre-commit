@@ -4,3 +4,5 @@
 yarn lint-staged
 
 ./apps/frontend/scripts/check-unused-assets.sh
+chmod +x ./apps/frontend/scripts/check-logs.sh
+./apps/frontend/scripts/check-logs.sh
