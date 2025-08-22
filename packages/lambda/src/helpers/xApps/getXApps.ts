@@ -1,5 +1,8 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { XAllocationVoting__factory as XAllocationVoting, X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import {
+  XAllocationVoting__factory as XAllocationVoting,
+  X2EarnApps__factory as X2EarnApps,
+} from "@vechain/vebetterdao-contracts"
 import { AppConfig } from "@repo/config"
 import { ABIContract } from "@vechain/sdk-core"
 

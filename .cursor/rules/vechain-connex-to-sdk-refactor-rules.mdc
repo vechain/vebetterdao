@@ -1,8 +1,9 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
+
 # VeChain Connex to SDK Refactoring Rules
 
 ## Overview
@@ -23,7 +24,7 @@ import { abi } from "thor-devkit"
 
 ```typescript
 import { useThor, ThorClient, getAllEventLogs } from "@vechain/vechain-kit"
-import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+import { ContractFactory__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 ```
 
 ### Key Changes
@@ -315,7 +316,7 @@ const query = useQuery({
 
 ```typescript
 import { useConnex } from "@vechain/dapp-kit-react"
-import { ContractFactory__factory } from "@repo/contracts"
+import { ContractFactory__factory } from "@vechain/vebetterdao-contracts"
 
 export const useOldPattern = (param: string) => {
   const { thor } = useConnex()
@@ -338,7 +339,7 @@ export const useOldPattern = (param: string) => {
 
 ```typescript
 import { useThor, ThorClient } from "@vechain/vechain-kit"
-import { ContractFactory__factory } from "@repo/contracts/typechain-types"
+import { ContractFactory__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 export const getMethodNameQueryKey = (param: string) => ["new", "methodName", param]
 

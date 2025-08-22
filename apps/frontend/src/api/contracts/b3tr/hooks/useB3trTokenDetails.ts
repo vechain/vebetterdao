@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
-import { B3TR__factory } from "@repo/contracts"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 
 const abi = B3TR__factory.abi

@@ -1,6 +1,6 @@
 import { ProposalType } from "@/types"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 

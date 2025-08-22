@@ -5,7 +5,7 @@ import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 
 import { isValid } from "@repo/utils/AddressUtils"
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 import stagingConfig from "@repo/config/testnet-staging"
 import mainnetConfig from "@repo/config/mainnet"

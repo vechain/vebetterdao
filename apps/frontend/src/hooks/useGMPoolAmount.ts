@@ -1,7 +1,7 @@
 import { ethers } from "ethers"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { Emissions__factory } from "@repo/contracts/typechain-types"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { FormattingUtils } from "@repo/utils"
 
 const address = getConfig().emissionsContractAddress as `0x${string}`

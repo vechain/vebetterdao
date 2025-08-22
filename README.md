@@ -209,6 +209,16 @@ yarn contracts:compile
 
 ```
 
+### Publish
+
+To publish contracts package to the npm `@vechain/vebetterdao-contracts`, run from the root folder:
+
+```bash
+yarn contracts:publish
+```
+
+After publishing make sure to push your commit with latest version of contracts package and sync changes with the public repo `@vechain/vebetterdao-contracts`
+
 ### Test
 
 Since we are using a monorepo structure, we can run the tests only from the root folder.

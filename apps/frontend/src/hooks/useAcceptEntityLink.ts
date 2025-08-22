@@ -4,7 +4,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
-import { VeBetterPassport__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getEntitiesLinkedToPassportQueryKey, getPassportForEntityQueryKey, getPendingLinkingsQueryKey } from "@/api"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()

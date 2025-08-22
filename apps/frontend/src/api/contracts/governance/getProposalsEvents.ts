@@ -1,6 +1,6 @@
 import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
 import { ExtractAbiEvent, ExtractAbiEventNames, AbiParametersToPrimitiveTypes, Abi } from "abitype"
 import { decodeEventLog } from "./getEvents"

@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { useEvents } from "@/hooks"
-import { VeBetterPassport__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 
 const abi = VeBetterPassport__factory.abi
