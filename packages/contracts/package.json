@@ -71,7 +71,11 @@
     "rename-contracts": "ts-node scripts/renameContracts.ts",
     "verify:testnet": "npx hardhat verify --network vechain_testnet",
     "verify:mainnet": "npx hardhat verify --network vechain_mainnet",
-    "estimate-voting-gas:mainnet": "npx hardhat run scripts/helpers/estimateVotingGas.ts --network vechain_mainnet"
+    "estimate-voting-gas:mainnet": "npx hardhat run scripts/helpers/estimateVotingGas.ts --network vechain_mainnet",
+    "analyze-proposal-deposits:mainnet": "npx hardhat run scripts/data/remainingProposalDeposits/analyze.ts --network vechain_mainnet",
+    "analyze-proposal-deposits:testnet-staging": "npx hardhat run scripts/data/remainingProposalDeposits/analyze.ts --network vechain_testnet",
+    "seed-voting-power:testnet-staging": "npx hardhat run scripts/data/remainingProposalDeposits/seed.ts --network vechain_testnet",
+    "seed-voting-power:mainnet": "npx hardhat run scripts/data/remainingProposalDeposits/seed.ts --network vechain_mainnet"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
