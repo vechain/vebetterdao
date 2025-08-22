@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 

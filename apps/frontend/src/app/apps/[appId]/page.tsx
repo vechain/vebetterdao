@@ -8,7 +8,7 @@ import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 
 import { getIpfsMetadata } from "@/api/ipfs"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { XApp } from "@/api"
 
 const abi = X2EarnApps__factory.abi

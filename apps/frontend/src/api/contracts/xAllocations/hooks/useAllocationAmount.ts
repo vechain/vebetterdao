@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { Emissions__factory } from "@repo/contracts"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 
 const abi = Emissions__factory.abi

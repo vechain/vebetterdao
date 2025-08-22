@@ -1,5 +1,5 @@
 import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
+import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { useCallback, useMemo } from "react"

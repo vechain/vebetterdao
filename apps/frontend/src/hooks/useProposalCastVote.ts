@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalsEventsQueryKey, getProposalVotesQuerykey, getUserProposalsVoteEventsQueryKey } from "@/api"

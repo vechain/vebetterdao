@@ -1,4 +1,4 @@
-import { XAllocationVoting__factory } from "@repo/contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
 import { decodeEventLog, useThor } from "@vechain/vechain-kit"
