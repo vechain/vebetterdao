@@ -53,9 +53,6 @@ library GovernorDepositLogic {
   /// @dev Thrown when the grantee tries to deposit for their own grant.
   error GranteeCannotDepositOwnGrant(uint256 proposalId);
 
-  /// @dev Emitted when the voting power is seeded.
-  event VotingPowerSeeded(address indexed walletAddress, uint256 indexed deposit);
-
   // --------------- SETTERS ---------------
   /**
    * @notice Deposits tokens for a proposal.
@@ -145,33 +142,6 @@ library GovernorDepositLogic {
     self.depositsVotingPower[depositor].push(GovernorClockLogic.clock(self), newVotes);
 
     emit ProposalDeposit(depositor, proposalId, amount);
-  }
-
-  function _seedVotingPower(
-    GovernorStorageTypes.GovernorStorage storage self,
-    address walletAddress,
-    uint256 deposit
-  ) internal {
-    self.depositsVotingPower[walletAddress].push(
-      GovernorClockLogic.clock(self),
-      self.depositsVotingPower[walletAddress].upperLookupRecent(GovernorClockLogic.clock(self)) +
-        SafeCast.toUint208(deposit)
-    );
-
-    emit VotingPowerSeeded(walletAddress, deposit);
-  }
-
-  function seedVotingPower(
-    GovernorStorageTypes.GovernorStorage storage self,
-    address walletAddress,
-    uint256 deposit
-  ) external {
-    require(walletAddress != address(0), "B3TRGovernor: wallet address cannot be 0");
-    _seedVotingPower(self, walletAddress, deposit);
-  }
-
-  function resetVotingPower(GovernorStorageTypes.GovernorStorage storage self, address walletAddress) external {
-    self.depositsVotingPower[walletAddress].push(GovernorClockLogic.clock(self), 0);
   }
 
   // --------------- GETTERS ---------------
