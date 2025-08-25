@@ -4,7 +4,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
-import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
+import { GalaxyMember__factory, NodeManagement__factory } from "@vechain/vebetterdao-contracts"
 import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, UserNode } from "@/api"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 

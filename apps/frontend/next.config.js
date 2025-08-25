@@ -1,15 +1,11 @@
 /** @type {import('next').NextConfig} */
 
-const removeImports = require("next-remove-imports")()
-module.exports = removeImports({})
-
-// next.config.js
+// Global self polyfill for environments where it's not defined
 if (typeof self === "undefined") {
   global.self = global
 }
 
 const nextConfig = {
-  transpilePackages: ["@repo/contracts"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

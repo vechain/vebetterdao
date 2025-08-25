@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory, GrantsManager__factory } from "@repo/contracts"
+import { B3TRGovernor__factory, GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 import { getProposalStateQueryKey } from "./useProposalState"
 import { useMemo } from "react"
 import { ProposalState } from "@/hooks/proposals/grants/types"

@@ -1,6 +1,6 @@
 import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { decodeEventLog } from "../governance"
 
