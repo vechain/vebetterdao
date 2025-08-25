@@ -10,13 +10,14 @@ import {
   Stack,
   useDisclosure,
   useToast,
+  Text,
 } from "@chakra-ui/react"
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
-import { AboutApplicant, AboutProject } from "./steps"
+import { AboutGrant } from "./steps"
 import { useForm } from "react-hook-form"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import { GrantMilestones } from "./steps/GrantMilestones"
+import { Milestones } from "./steps/Milestones"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 import { useCurrentAllocationsRoundId } from "@/api"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
@@ -29,9 +30,9 @@ import { SuccessToastModal } from "@/app/components/Toast/SuccessToastModal"
 
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
-  ABOUT_APPLICANT = "ABOUT_APPLICANT",
-  ABOUT_PROJECT = "ABOUT_PROJECT",
-  GRANT_MILESTONES = "GRANT_MILESTONES",
+  ABOUT_GRANT = "ABOUT_GRANT",
+  MILESTONES = "MILESTONES",
+  SCHEDULE = "SCHEDULE",
 }
 
 export type GrantStep = {
@@ -135,22 +136,17 @@ export const GrantsNewFormStepCard = () => {
     {
       key: GrantFormStep.GRANT_TYPE,
       content: <GrantTypeSelection control={control} />,
-      title: t("Type of grant"),
+      title: t("Type"),
     },
     {
-      key: GrantFormStep.ABOUT_APPLICANT,
-      content: <AboutApplicant register={register} errors={errors} />,
-      title: t("About applicant"),
+      key: GrantFormStep.ABOUT_GRANT,
+      content: <AboutGrant register={register} setValue={setValue} watch={watch} errors={errors} />,
+      title: t("About grant"),
     },
     {
-      key: GrantFormStep.ABOUT_PROJECT,
-      content: <AboutProject register={register} setValue={setValue} watch={watch} errors={errors} />,
-      title: t("About project"),
-    },
-    {
-      key: GrantFormStep.GRANT_MILESTONES,
+      key: GrantFormStep.MILESTONES,
       content: (
-        <GrantMilestones
+        <Milestones
           register={register}
           setValue={setValue}
           watch={watch}
@@ -160,7 +156,16 @@ export const GrantsNewFormStepCard = () => {
           formData={formData}
         />
       ),
-      title: t("Grant Milestones"),
+      title: t("Milestones"),
+    },
+    {
+      key: GrantFormStep.SCHEDULE,
+      content: (
+        <>
+          <Text>{t("Schedule")}</Text>
+        </>
+      ),
+      title: t("Schedule"),
     },
   ]
 
