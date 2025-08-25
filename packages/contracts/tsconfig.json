@@ -12,9 +12,9 @@
   "include": [
     "index.ts",
     "artifacts/contracts/**/*.json",
-    "typechain-types/**/*.ts",
-    "scripts/**/*.ts",
-    "test/**/*.ts"
+    "typechain-types/**/*.ts"
+    // "scripts/**/*.ts" //TODO: Add this back after all the issues are fixed
+    // "test/**/*.ts" //TODO: Add this back after all the issues are fixed
   ],
   "exclude": ["node_modules", "dist"]
 }
