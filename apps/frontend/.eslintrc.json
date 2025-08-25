@@ -18,6 +18,11 @@
       }
     ],
     "no-duplicate-imports": "error",
-    "no-console": "error"
+    "no-console": [
+      "error",
+      {
+        "allow": ["error", "warn", "info"]
+      }
+    ]
   }
 }
