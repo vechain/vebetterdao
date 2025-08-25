@@ -31,32 +31,30 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
           const showStepTitle = (isMobile && isActiveStep) || !isMobile
 
           return (
-            <Flex key={step.key} align="center">
-              <Step>
-                <StepIndicator>
-                  <StepStatus
-                    complete={<Icon as={BsCheck} boxSize={7} />}
-                    incomplete={<StepNumber />}
-                    active={<StepNumber />}
-                  />
-                </StepIndicator>
+            <>
+              <Flex key={step.key} align="center">
+                <Step>
+                  <StepIndicator>
+                    <StepStatus
+                      complete={<Icon as={BsCheck} boxSize={7} />}
+                      incomplete={<StepNumber />}
+                      active={<StepNumber />}
+                    />
+                  </StepIndicator>
 
-                {showStepTitle && (
-                  <StepTitle fontSize={{ base: "sm", md: "sm" }} isTruncated noOfLines={1}>
-                    {step.title}
-                  </StepTitle>
-                )}
-              </Step>
-
+                  {showStepTitle && (
+                    <StepTitle fontSize={{ base: "sm", md: "sm" }} isTruncated noOfLines={1}>
+                      {step.title}
+                    </StepTitle>
+                  )}
+                </Step>
+              </Flex>
               {index < steps.length - 1 && (
-                <Icon
-                  as={BsChevronRight}
-                  boxSize={4}
-                  mx={{ base: 2, md: 4 }}
-                  color={index < activeStep ? "blue.500" : "gray.400"}
-                />
+                <Flex w={"full"} align="center" justify="center" minW={{ base: "10px", md: "24px" }}>
+                  <Icon as={BsChevronRight} boxSize={4} color={index < activeStep ? "blue.500" : "gray.400"} />
+                </Flex>
               )}
-            </Flex>
+            </>
           )
         })}
       </Stepper>
