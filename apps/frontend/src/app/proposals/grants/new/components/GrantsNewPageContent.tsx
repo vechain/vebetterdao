@@ -5,7 +5,7 @@ import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 
 const BreadcrumItems = [
   {
-    label: "Governance",
+    label: "Grants",
     href: "/proposals/grants",
   },
 
