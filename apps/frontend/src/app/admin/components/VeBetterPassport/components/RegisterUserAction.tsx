@@ -56,7 +56,7 @@ export const RegisterUserAction = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Register user participation")}</Heading>
+        <Heading size="3xl">{t("Register user participation")}</Heading>
         <Text fontSize="sm">
           {t("Register an action for a user for a specific app. Optionally, for a specific round too")}
         </Text>
@@ -110,8 +110,6 @@ export const RegisterUserAction = () => {
                   <strong>{t("Round")}</strong>
                 </Field.Label>
                 <NumberInput.Root
-                  min={1}
-                  defaultValue="1"
                   value={round}
                   disabled={isLoading}
                   onValueChange={e => {

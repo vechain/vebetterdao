@@ -44,7 +44,7 @@ export const ManageUserStatus = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Manage User Status")}</Heading>
+        <Heading size="3xl">{t("Manage User Status")}</Heading>
         <Text fontSize="sm">
           {t("Manage user participation by adding them to a whitelist, blacklist, or removing their status")}
         </Text>
@@ -56,6 +56,7 @@ export const ManageUserStatus = () => {
               <Field.Root required invalid={!isValidAddress}>
                 <Field.Label>
                   <strong>{t("User address")}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <InputGroup>
                   <WalletAddressInput onAddressResolved={address => setUser(address ?? "")} disabled={isLoading} />

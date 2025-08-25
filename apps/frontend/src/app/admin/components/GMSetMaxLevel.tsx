@@ -44,10 +44,11 @@ export const GMSetMaxLevel = () => {
       newMaxLevel <= GM_MAX_LEVEL_ALLOWED,
     [currentMaxLevel, newMaxLevel],
   )
+
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="2xl">{t("Set GM Max Level")}</Heading>
+        <Heading size="3xl">{t("Set GM Max Level")}</Heading>
       </Card.Header>
 
       <Card.Body>
@@ -57,12 +58,11 @@ export const GMSetMaxLevel = () => {
               <Field.Root required invalid={!!errors.newMaxLevel}>
                 <Field.Label>
                   <strong>{t("GM New Max Level")}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <InputGroup>
                   <NumberInput.Root
                     w="full"
-                    min={GM_MIN_LEVEL_ALLOWED}
-                    max={GM_MAX_LEVEL_ALLOWED}
                     onValueChange={e =>
                       setValue("newMaxLevel", Number(e.value ?? GM_MIN_LEVEL_ALLOWED), { shouldValidate: true })
                     }>

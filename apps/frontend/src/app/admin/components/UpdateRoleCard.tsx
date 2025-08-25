@@ -95,15 +95,18 @@ export const UpdateRoleCard = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Update Address Role")}</Heading>
+        <Heading size="3xl">{t("Update Address Role")}</Heading>
         <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
       </Card.Header>
 
       <Card.Body>
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <VStack gap={4} alignItems={"start"}>
-            <Field.Root invalid={!!errors.contract} required>
-              <Field.Label>{t("Select Contract")}</Field.Label>
+            <Field.Root required invalid={!!errors.contract}>
+              <Field.Label>
+                {t("Select Contract")}
+                <Field.RequiredIndicator />
+              </Field.Label>
               <Controller
                 name="contract"
                 control={control}

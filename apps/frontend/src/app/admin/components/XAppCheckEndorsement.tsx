@@ -33,7 +33,7 @@ export const XAppCheckEndorsement = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Check Endorsement")}</Heading>
+        <Heading size="3xl">{t("Check Endorsement")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack flex={1} align="flex-start" gap={8}>
@@ -56,6 +56,7 @@ export const XAppCheckEndorsement = () => {
                 <Field.Root required>
                   <Field.Label>
                     <strong>{"App"}</strong>
+                    <Field.RequiredIndicator />
                   </Field.Label>
                   <NativeSelect.Root disabled={isLoading}>
                     <NativeSelect.Indicator />

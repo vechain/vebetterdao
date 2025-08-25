@@ -35,7 +35,7 @@ export const AppSecurity = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("App Security")}</Heading>
+        <Heading size="3xl">{t("App Security")}</Heading>
         <Text fontSize="sm">{t("Change an app's security level")}</Text>
       </Card.Header>
       <Card.Body>
@@ -45,6 +45,7 @@ export const AppSecurity = () => {
               <Field.Root required>
                 <Field.Label>
                   <strong>{"App"}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
                   <NativeSelect.Indicator />
@@ -68,6 +69,7 @@ export const AppSecurity = () => {
               <Field.Root required>
                 <Field.Label>
                   <strong>{"Security level"}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading}>
                   <NativeSelect.Indicator />

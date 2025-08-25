@@ -15,7 +15,7 @@ export const PassportToggles = () => {
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="2xl">{"Passport checks enabled"}</Heading>
+        <Heading size="3xl">{"Passport checks enabled"}</Heading>
       </Card.Header>
       <Card.Body>
         <Field.Root as={SimpleGrid} gap={3}>

@@ -61,7 +61,7 @@ export const ManageUserSignals = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Manage User Signals")}</Heading>
+        <Heading size="3xl">{t("Manage User Signals")}</Heading>
         <Text fontSize="sm">
           {t(
             "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
@@ -75,6 +75,7 @@ export const ManageUserSignals = () => {
               <Field.Root required invalid={!isValidAddress}>
                 <Field.Label>
                   <strong>{t("User address")}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <InputGroup>
                   <WalletAddressInput
@@ -89,6 +90,7 @@ export const ManageUserSignals = () => {
             <Field.Root required>
               <Field.Label>
                 <strong>{t("Reason")}</strong>
+                <Field.RequiredIndicator />
               </Field.Label>
               <InputGroup>
                 <Input
