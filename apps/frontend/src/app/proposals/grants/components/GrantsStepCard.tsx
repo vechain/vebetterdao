@@ -110,47 +110,50 @@ export const GrantsStepsCard = ({
           <Box pl={8} pt={8} pb={4}>
             <GrantsStepIndicator activeStep={activeStep} steps={steps} width="35%" />
           </Box>
-          <Box pl={8} pb={5} pt={5}>
-            <VStack spacing={8} alignItems="flex-start" w="full">
-              <VStack alignItems="flex-start" w="full">
-                <Text fontSize="sm" fontWeight="medium">
-                  {currentStep.title}
-                </Text>
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  key={currentStep.key}
-                  style={{ width: "100%" }}>
-                  <VStack alignItems="flex-start" w="full">
-                    <Heading size="md" textStyle="heading">
-                      {currentStep.heading}
-                    </Heading>
-                    {currentStep.listItems.length > 0 ? (
-                      <UnorderedList pl={2} fontSize="sm">
-                        {currentStep?.listItems?.map(item => (
-                          <ListItem key={item}>{item}</ListItem>
-                        ))}
-                      </UnorderedList>
-                    ) : null}
-                  </VStack>
-                </motion.div>
-              </VStack>
-              <HStack w="full" justifyContent="flex-start">
-                {activeStep > 0 && (
-                  <Button variant="primarySubtle" onClick={goToPrevious}>
-                    {t("Previous")}
-                  </Button>
-                )}
-                <Button variant="primaryAction" onClick={isLastStep ? handleApply : goToNext}>
-                  {isLastStep ? t("Apply") : t("Next")}
-                </Button>
-              </HStack>
+          <VStack spacing={8} alignItems="flex-start" w="full" p={10} gap={10}>
+            <VStack alignItems="flex-start" w="full">
+              <Text fontSize="sm" fontWeight="bold" color="subtle.active">
+                {currentStep.title}
+              </Text>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                key={currentStep.key}
+                style={{ width: "100%" }}>
+                <VStack alignItems="flex-start" w="full">
+                  <Heading size="md" textStyle="heading">
+                    {currentStep.heading}
+                  </Heading>
+                  {currentStep.listItems.length > 0 ? (
+                    <UnorderedList pl={2} fontSize="sm">
+                      {currentStep?.listItems?.map(item => (
+                        <ListItem key={item} fontWeight="500" color="subtle.active">
+                          {item}
+                        </ListItem>
+                      ))}
+                    </UnorderedList>
+                  ) : null}
+                </VStack>
+              </motion.div>
             </VStack>
-          </Box>
+            <HStack w="full" justifyContent="flex-start">
+              {activeStep > 0 && (
+                <Button variant="primarySubtle" onClick={goToPrevious}>
+                  {t("Previous")}
+                </Button>
+              )}
+              <Button variant="primaryAction" onClick={isLastStep ? handleApply : goToNext}>
+                {isLastStep ? t("Apply") : t("Next")}
+              </Button>
+            </HStack>
+          </VStack>
         </Box>
 
         <Box bg="b3tr-balance-bg" w="32%" display="flex" alignItems="center" justifyContent="center">
+          <Box position="absolute" top={3} right={5} p={0}>
+            <UilTimes onClick={onClose} cursor="pointer" size={24} />
+          </Box>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
