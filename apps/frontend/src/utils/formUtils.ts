@@ -49,13 +49,6 @@ export const hasGrantFormChanges = (formData: GrantFormData): boolean => {
 }
 
 /**
- * Get a display name for the form (project name or fallback)
- */
-export const getGrantFormDisplayName = (formData: GrantFormData): string => {
-  return formData.projectName || formData.applicantName || "Untitled Grant Proposal"
-}
-
-/**
  * Draft item interface for localStorage
  */
 export interface DraftItem<T = any> {

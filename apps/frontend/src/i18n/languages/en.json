@@ -1913,9 +1913,9 @@
   "Get NFT": "Get NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals",
   "More info about your votes at snapshot": "More info about your votes at snapshot",
+  "Leave without saving?": "Leave without saving?",
   "Unsaved Changes": "Unsaved Changes",
-  "You have unsaved changes to '{{projectName}}'. What would you like to do?": "You have unsaved changes to '{{projectName}}'. What would you like to do?",
-  "You have unsaved changes. What would you like to do?": "You have unsaved changes. What would you like to do?",
+  "You're in the middle of your grant application. If you leave now, your progress won’t be saved. What would you like to do?": "You're in the middle of your grant application. If you leave now, your progress won’t be saved. What would you like to do?",
   "Leave anyway": "Leave anyway",
   "Grant application saved successfully.": "Grant application saved successfully."
 }
