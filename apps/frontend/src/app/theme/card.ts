@@ -78,6 +78,16 @@ const variants = {
         padding: "24px",
       },
     }),
+  ghost: (props: StyleFunctionProps) =>
+    definePartsStyle({
+      container: {
+        bg: "transparent",
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: props.colorMode === "dark" ? "#2D2D2F" : "#D5D5D5",
+      },
+      body: {},
+    }),
 }
 
 // export variants in the component theme
