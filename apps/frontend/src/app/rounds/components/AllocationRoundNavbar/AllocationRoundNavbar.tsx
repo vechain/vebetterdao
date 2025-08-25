@@ -85,7 +85,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             data-testid="prev-round-button"
             color={prevButtonDisabled ? "#757575" : "#004CFC"}
             size="sm"
-            variant={"ghost"}
+            variant={"plain"}
             aria-label="Go to previous round"
             disabled={prevButtonDisabled}
             onClick={goToPreviousRound}>
@@ -115,7 +115,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           </Stack>
           <Button
             data-testid="next-round-button"
-            variant={"ghost"}
+            variant={"plain"}
             size="sm"
             color={nextButtonDisabled ? "#757575" : "#004CFC"}
             aria-label="Go to next round"

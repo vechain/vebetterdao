@@ -56,7 +56,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
           <Text fontWeight={700}>{FormattingUtils.humanNumber(Number(totalVotesWithDeposits ?? 0))}</Text>
         </Skeleton>
 
-        <HStack gap={1} align="center">
+        <HStack gap={1} alignItems="center">
           <Text color="#6A6A6A" fontSize="12px">
             {t("Your votes at snapshot")}
           </Text>
@@ -72,9 +72,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
                   />
                 </Text>
               }>
-              <span>
-                <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
-              </span>
+              <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
             </Tooltip>
           )}
         </HStack>

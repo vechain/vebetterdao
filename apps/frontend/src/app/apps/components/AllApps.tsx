@@ -213,7 +213,6 @@ export const AllApps = ({
               shadow="lg"
               borderRadius={"24px"}
               p={3}
-              bg="info-bg"
               borderColor="#d5d5d5"
               borderWidth="1px">
               {/* Governance Status Section */}

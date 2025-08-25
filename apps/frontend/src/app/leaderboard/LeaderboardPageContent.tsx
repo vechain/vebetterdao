@@ -153,7 +153,15 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button px={0} variant="plain" color="primary" size="sm" onClick={() => router.push("/")}>
+        <Button
+          px={0}
+          variant="plain"
+          color="primary"
+          _hover={{
+            textDecoration: "underline",
+          }}
+          size="sm"
+          onClick={() => router.push("/")}>
           <FaAngleLeft />
           {t("Go back")}
         </Button>

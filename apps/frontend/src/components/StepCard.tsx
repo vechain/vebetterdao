@@ -26,7 +26,7 @@ export const StepCard: React.FC<StepCardProps> = ({
             <Text textTransform={"uppercase"} fontWeight={400} color="gray.500">
               {t("Step {{number}}", { number: stepNumber })}
             </Text>
-            <Heading size={["md", "lg"]}>{t(stepTitle as any)}</Heading>
+            <Heading size={["lg", "xl"]}>{t(stepTitle as any)}</Heading>
             <Text mt={2} fontSize={["sm", "md"]}>
               {t(stepDescription as any)}
             </Text>
