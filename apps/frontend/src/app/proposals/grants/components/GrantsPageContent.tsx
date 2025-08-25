@@ -1,11 +1,12 @@
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, Card, GridItem } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { useProposalEnriched } from "@/hooks/proposals/common"
+import { HowToSupportCard } from "../../components/components"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -109,7 +110,7 @@ export const GrantsPageContent = () => {
           </Grid>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
-          <Card w="full" variant="ghost" p={8}></Card>
+          <HowToSupportCard />
         </GridItem>
       </Grid>
     </VStack>

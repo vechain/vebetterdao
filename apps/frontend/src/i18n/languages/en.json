@@ -1917,5 +1917,8 @@
   "You have unsaved changes to '{{projectName}}'. What would you like to do?": "You have unsaved changes to '{{projectName}}'. What would you like to do?",
   "You have unsaved changes. What would you like to do?": "You have unsaved changes. What would you like to do?",
   "Leave anyway": "Leave anyway",
-  "Grant application saved successfully.": "Grant application saved successfully."
+  "Grant application saved successfully.": "Grant application saved successfully.",
+  "How to support Grant and Proposal?": "How to support Grant and Proposal?",
+  "Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>": "Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>",
+  "You’ll need to buy VOT3 — it’s the token used to support and signal interest in grant proposals.": "You’ll need to buy VOT3 — it’s the token used to support and signal interest in grant proposals."
 }
