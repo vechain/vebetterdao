@@ -1,48 +1,26 @@
 import { useTranslation } from "react-i18next"
-import {
-  VStack,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Text,
-  CardHeader,
-  CardBody,
-  Card,
-  Grid,
-  GridItem,
-} from "@chakra-ui/react"
-import { BsChevronRight } from "react-icons/bs"
+import { VStack, Text, CardHeader, CardBody, Card, Grid, GridItem } from "@chakra-ui/react"
 import { GrantsNewFormStepCard } from "./form"
+import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 
-//TODO: Move to common component
-const BreadcrumbOverview = () => {
-  const { t } = useTranslation()
+const BreadcrumItems = [
+  {
+    label: "Grants",
+    href: "/proposals/grants",
+  },
 
-  return (
-    <Breadcrumb spacing={2} fontSize="lg" separator={<BsChevronRight size={16} />}>
-      <BreadcrumbItem>
-        <BreadcrumbLink href="/proposals/grants">
-          <Text fontWeight="bold" color="#747C89">
-            {t("Governance")}
-          </Text>
-        </BreadcrumbLink>
-      </BreadcrumbItem>
-
-      <BreadcrumbItem isCurrentPage>
-        <BreadcrumbLink href="#">
-          <Text fontWeight="bold">{t("Apply for grant")}</Text>
-        </BreadcrumbLink>
-      </BreadcrumbItem>
-    </Breadcrumb>
-  )
-}
+  {
+    label: "Apply for grant",
+    href: "/proposals/grants/new",
+  },
+]
 
 export const GrantsNewPageContent = () => {
   const { t } = useTranslation()
 
   return (
     <VStack w="full" spacing={8} pb={8} align="flex-start">
-      <BreadcrumbOverview />
+      <PageBreadcrumb items={BreadcrumItems} />
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <GrantsNewFormStepCard />

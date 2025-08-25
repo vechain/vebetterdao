@@ -13,6 +13,7 @@ import { useMemo } from "react"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 
 type Props = {
   proposalId: string
@@ -47,8 +48,19 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   if (shouldNotRenderQuorum) quorumRenderState = "none"
   if (isUpcoming) quorumRenderState = "upcoming"
 
+  const BreadcrumItems = [
+    {
+      label: "Proposals", //TODO: This should be dynamic based on the proposal type like "Grants" or "Proposals"
+      href: "/proposals",
+    },
+    {
+      label: "Overview",
+      href: `/proposals/${proposalId}`,
+    },
+  ]
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
+      <PageBreadcrumb items={BreadcrumItems} />
       {proposal.state === ProposalState.Canceled && <ProposalCanceledAlert />}
       {proposal.state === ProposalState.Active && <CantVoteCard />}
       <ProposalOverview />
