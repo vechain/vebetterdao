@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { B3TRGovernor__factory, Treasury__factory } from "@repo/contracts"
+import { B3TRGovernor__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
 import { useBuildTransaction } from "@/hooks"

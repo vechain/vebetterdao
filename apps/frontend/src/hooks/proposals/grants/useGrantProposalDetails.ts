@@ -3,7 +3,7 @@ import { getIpfsMetadata } from "@/api/ipfs"
 import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
 import { formatEther } from "ethers"
 import BigNumber from "bignumber.js"
-import { Treasury__factory } from "@repo/contracts"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts"
 
 const treasuryInterface = Treasury__factory.createInterface()
 

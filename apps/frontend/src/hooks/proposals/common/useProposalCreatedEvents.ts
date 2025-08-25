@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { ProposalType, ProposalCreatedEvent } from "../grants/types"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
