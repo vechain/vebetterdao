@@ -8,14 +8,14 @@ import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { FormAccordionSection, FormSocialConnectButton } from "@/components/CustomFormFields"
 
-interface AboutProjectProps {
+interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
   errors: FieldErrors<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   watch: UseFormWatch<GrantFormData>
 }
 
-export const AboutProject = ({ register, setValue, watch, errors }: AboutProjectProps) => {
+export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProps) => {
   const { t } = useTranslation()
 
   // Custom validation function to ensure at least one social account is connected

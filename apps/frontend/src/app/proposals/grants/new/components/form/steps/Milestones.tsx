@@ -25,7 +25,7 @@ import { UilPlus, UilTrash, UilArrowRight } from "@iconscout/react-unicons"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import dayjs from "dayjs"
 
-interface GrantMilestonesProps {
+interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   getValues: UseFormGetValues<GrantFormData>
@@ -155,7 +155,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
   )
 }
 
-export const GrantMilestones = ({ register, setValue, getValues, setData, errors, formData }: GrantMilestonesProps) => {
+export const Milestones = ({ register, setValue, getValues, setData, errors, formData }: MilestonesProps) => {
   const { t } = useTranslation()
   const milestones = getValues("milestones")
   const handleAddMilestone = () => {

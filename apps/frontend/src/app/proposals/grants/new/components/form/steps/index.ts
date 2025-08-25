@@ -1,3 +1,2 @@
-export * from "./AboutApplicant"
-export * from "./AboutProject"
+export * from "./AboutGrant"
 // export * from "./GrantMilestones"
