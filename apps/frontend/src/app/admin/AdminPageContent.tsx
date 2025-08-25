@@ -19,6 +19,7 @@ import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
 import { GMSetMaxLevel } from "./components/GMSetMaxLevel"
+import { XAppAssignAppCategory } from "./components/XAppAssignAppCategory"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -90,6 +91,7 @@ export const AdminPageContent = () => {
                 <UpdateReceiverAddress />
                 <UpdateAppsEligibility />
                 <XAppCheckEndorsement />
+                <XAppAssignAppCategory />
               </Grid>
             </TabPanel>
           )}
