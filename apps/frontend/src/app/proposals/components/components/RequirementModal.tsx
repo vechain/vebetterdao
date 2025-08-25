@@ -61,11 +61,6 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
     }
   }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId, currentRoundId])
 
-  console.log("hasNft", hasNft)
-  console.log("userHasAnyGm", userHasAnyGm)
-  console.log("userHighestGm", userHighestGm)
-  console.log("currentRoundId", currentRoundId)
-
   return (
     <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
       <VStack align="stretch" spacing={4} alignItems="center">
