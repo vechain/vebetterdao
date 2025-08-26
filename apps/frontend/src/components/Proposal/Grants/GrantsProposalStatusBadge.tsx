@@ -1,4 +1,4 @@
-import { Icon, Badge, HStack, Text } from "@chakra-ui/react"
+import { Icon, HStack, Text, Badge } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconscout/react-unicons"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
@@ -74,7 +74,8 @@ export const GrantsProposalStatusBadge = ({ state = ProposalState.Pending }: Pro
   const config = BADGE_CONFIG[state]
 
   return (
-    <Badge variant={config.variant}>
+    //TODO: Propel this to the theme
+    <Badge variant={config.variant as any}>
       <HStack textAlign="center" justifyContent="center" alignItems="center">
         <Icon as={config.icon} boxSize={5} />
         <Text fontWeight="bold"> {config.text}</Text>

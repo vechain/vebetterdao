@@ -8,6 +8,7 @@ import { buttonRecipe } from "./button"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
 import { headingRecipe } from "./heading"
+import { badgeRecipe } from "./badge"
 
 const config = defineConfig({
   //preflight: true,
@@ -18,6 +19,7 @@ const config = defineConfig({
       heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
+      badge: badgeRecipe,
     },
 
     slotRecipes: {
@@ -26,9 +28,8 @@ const config = defineConfig({
       steps: stepsSlotRecipe,
       nativeSelect: nativeSelectSlotRecipe,
       numberInput: numberInputSlotRecipe,
-      //TODO: Fix popover and badge recipes
+      //TODO: Fix popover recipe
       // popover: popoverSlotRecipe,
-      // badge: badgeSlotRecipe,
     },
 
     keyframes: {
