@@ -4,20 +4,13 @@ import {
   Heading,
   Text,
   Card,
-  CardHeader,
-  CardBody,
   Alert,
-  AlertIcon,
-  AlertDescription,
   Spinner,
   HStack,
   Badge,
   Box,
   Flex,
-  useColorModeValue,
   Tag,
-  TagLabel,
-  TagCloseButton,
   IconButton,
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
@@ -26,6 +19,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
 import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 export const XAppAssignAppCategory = () => {
   const { t } = useTranslation()
@@ -109,72 +103,72 @@ export const XAppAssignAppCategory = () => {
 
   if (isLoadingApps) {
     return (
-      <Card w={"full"}>
-        <CardHeader>
+      <Card.Root w={"full"}>
+        <Card.Header>
           <Heading size="lg">{t("Assign App Categories")}</Heading>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={4}>
+        </Card.Header>
+        <Card.Body>
+          <VStack gap={4}>
             <Spinner size="lg" />
             <Text>{t("Loading apps without categories...")}</Text>
           </VStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     )
   }
 
   return (
     <>
-      <Card w={"full"}>
-        <CardHeader>
+      <Card.Root w={"full"}>
+        <Card.Header>
           <Heading size="lg">{t("Assign App Categories")}</Heading>
           <Text fontSize="sm" color="#6A6A6A" mt={2}>
             {t("Maximum {{max}} categories per app.", {
               max: MAX_CATEGORIES,
             })}
           </Text>
-        </CardHeader>
-        <CardBody>
-          <VStack spacing={6} align="stretch">
+        </Card.Header>
+        <Card.Body>
+          <VStack gap={6} align="stretch">
             {uploadError && (
-              <Alert status="error">
-                <AlertIcon />
-                <AlertDescription>{uploadError.message}</AlertDescription>
-              </Alert>
+              <Alert.Root status="error">
+                <Alert.Indicator />
+                <Alert.Description>{uploadError.message}</Alert.Description>
+              </Alert.Root>
             )}
 
             {!appsWithoutCategories || appsWithoutCategories.length === 0 ? (
-              <Alert status="success">
-                <AlertIcon />
-                <AlertDescription>{t("All apps have categories assigned! 🎉")}</AlertDescription>
-              </Alert>
+              <Alert.Root status="success">
+                <Alert.Indicator />
+                <Alert.Description>{t("All apps have categories assigned! 🎉")}</Alert.Description>
+              </Alert.Root>
             ) : (
-              <VStack spacing={4} align="stretch">
+              <VStack gap={4} align="stretch">
                 {/* Carousel Header */}
                 <HStack justify="space-between" align="center">
                   <Text fontWeight="semibold">
                     {t("Apps without categories: {{count}}", { count: appsWithoutCategories.length })}
                   </Text>
-                  <HStack spacing={2}>
+                  <HStack gap={2}>
                     <Text fontSize="sm" color="#6A6A6A">
                       {carouselIndex + 1} {"/"} {appsWithoutCategories.length}
                     </Text>
                     <IconButton
                       aria-label={t("Previous app")}
-                      icon={<FaChevronLeft />}
                       size="sm"
                       variant="outline"
                       onClick={handlePrevious}
-                      isDisabled={appsWithoutCategories.length <= 1}
-                    />
+                      disabled={appsWithoutCategories.length <= 1}>
+                      <FaChevronLeft />
+                    </IconButton>
                     <IconButton
                       aria-label={t("Next app")}
-                      icon={<FaChevronRight />}
                       size="sm"
                       variant="outline"
                       onClick={handleNext}
-                      isDisabled={appsWithoutCategories.length <= 1}
-                    />
+                      disabled={appsWithoutCategories.length <= 1}>
+                      <FaChevronRight />
+                    </IconButton>
                   </HStack>
                 </HStack>
 
@@ -193,14 +187,14 @@ export const XAppAssignAppCategory = () => {
                           borderRadius="md"
                           bg={cardBg}
                           mx={1}>
-                          <VStack align="flex-start" spacing={1}>
+                          <VStack align="flex-start" gap={1}>
                             <Text fontWeight="semibold">{app.name}</Text>
                             <Text fontSize="xs" color="black">
                               {app.id}
                             </Text>
                           </VStack>
 
-                          <VStack align="flex-start" spacing={3}>
+                          <VStack align="flex-start" gap={3}>
                             <Text fontSize="sm" fontWeight="medium">
                               {t("Selected Categories ({{count}}/{{max}})", {
                                 count: selectedCategories.length,
@@ -212,16 +206,13 @@ export const XAppAssignAppCategory = () => {
                               {selectedCategories.map(categoryId => {
                                 const category = getCategoryById(categoryId)
                                 return category ? (
-                                  <Tag
+                                  <Tag.Root
                                     key={categoryId}
-                                    size="md"
                                     borderRadius="full"
-                                    variant="solid"
-                                    style={{ backgroundColor: category.color }}
-                                    color="black">
-                                    <TagLabel>{category.name}</TagLabel>
-                                    <TagCloseButton onClick={() => handleToggleCategory(app.id, categoryId)} />
-                                  </Tag>
+                                    style={{ backgroundColor: category.color }}>
+                                    <Tag.Label>{category.name}</Tag.Label>
+                                    <Tag.CloseTrigger onClick={() => handleToggleCategory(app.id, categoryId)} />
+                                  </Tag.Root>
                                 ) : null
                               })}
                             </Flex>
@@ -253,7 +244,7 @@ export const XAppAssignAppCategory = () => {
 
                 {/* Dots Indicator */}
                 {appsWithoutCategories.length > 1 && (
-                  <HStack justify="center" spacing={2}>
+                  <HStack justify="center" gap={2}>
                     {appsWithoutCategories.map((app, index) => (
                       <Box
                         key={app.id}
@@ -270,19 +261,18 @@ export const XAppAssignAppCategory = () => {
                 )}
 
                 <Button
-                  colorScheme="blue"
+                  colorPalette="blue"
                   onClick={handleSubmit}
-                  isDisabled={!canSubmit}
-                  isLoading={isLoading}
-                  loadingText={isUploading ? t("Uploading metadata...") : t("Processing transaction...")}
-                  size="lg">
+                  disabled={!canSubmit}
+                  loading={isLoading}
+                  loadingText={isUploading ? t("Uploading metadata...") : t("Processing transaction...")}>
                   {t("Assign Categories to {{count}} Apps", { count: totalAssignments })}
                 </Button>
               </VStack>
             )}
           </VStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </>
   )
 }
