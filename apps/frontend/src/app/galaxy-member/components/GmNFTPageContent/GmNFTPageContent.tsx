@@ -62,7 +62,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
       <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
-        {userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
+        {!!userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
           <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
             <Card.Header p="1.25rem" pb="0">
               <Heading fontSize="lg" lineHeight={1}>

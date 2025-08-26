@@ -37,7 +37,7 @@ export const BaseModal = ({
             onClose()
           }
         }}
-        size="xl"
+        size="lg"
         placement="center"
         trapFocus={false}
         {...modalProps}>

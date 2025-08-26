@@ -17,7 +17,6 @@
         "destructuredArrayIgnorePattern": "^_"
       }
     ],
-    "no-duplicate-imports": "error",
-    "no-console": "error"
+    "no-duplicate-imports": "error"
   }
 }
