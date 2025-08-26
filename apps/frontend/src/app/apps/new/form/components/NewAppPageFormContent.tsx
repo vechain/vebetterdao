@@ -36,6 +36,7 @@ export const NewAppPageFormContent = () => {
         projectUrl: latestSubmission?.projectUrl ?? "",
         treasuryWalletAddress: "",
         adminWalletAddress: "",
+        categories: [],
       },
     })
 
@@ -75,7 +76,7 @@ export const NewAppPageFormContent = () => {
         app_urls: [],
         social_urls: [],
         tweets: [],
-        categories: [],
+        categories: data.categories,
         ve_world: {
           banner: data.ve_world_banner,
           featured_image: data.ve_world_featured_image,
