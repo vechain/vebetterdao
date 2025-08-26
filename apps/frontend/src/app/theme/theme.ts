@@ -3,6 +3,7 @@ import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 import { cardSlotRecipe } from "./card"
 import { dialogSlotRecipe } from "./dialog"
 import { stepsSlotRecipe } from "./steps"
+import { popoverSlotRecipe } from "./popover"
 
 import { buttonRecipe } from "./button"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
@@ -28,8 +29,7 @@ const config = defineConfig({
       steps: stepsSlotRecipe,
       nativeSelect: nativeSelectSlotRecipe,
       numberInput: numberInputSlotRecipe,
-      //TODO: Fix popover recipe
-      // popover: popoverSlotRecipe,
+      popover: popoverSlotRecipe,
     },
 
     keyframes: {

@@ -1,24 +1,64 @@
-import { ComponentStyleConfig } from "@chakra-ui/react"
+import { defineSlotRecipe } from "@chakra-ui/react"
 
-export const PopoverStyle: ComponentStyleConfig = {
-  parts: ["popper", "content", "header", "body", "footer", "arrow"],
-  baseStyle: {
+export const popoverSlotRecipe = defineSlotRecipe({
+  className: "popover",
+  slots: ["content", "body", "header", "footer", "arrow", "arrowTip"],
+  base: {
     content: {
       rounded: "2xl",
       border: "none",
       boxShadow: "lg",
-      _dark: {
-        bg: "#1D1D1D", //TODO: Change to theme color
+      bg: {
+        base: "white",
+        _dark: "bg.primary", // Using theme color instead of hardcoded value
       },
     },
     body: {
       p: 2,
     },
     arrow: {
-      color: "white",
+      "--arrow-size": "8px",
+    },
+    arrowTip: {
+      borderTopColor: {
+        base: "white",
+        _dark: "bg.primary",
+      },
+      borderInlineStartColor: {
+        base: "white",
+        _dark: "bg.primary",
+      },
     },
   },
-  defaultProps: {
-    placement: "bottom-start",
+  defaultVariants: {
+    size: "md",
   },
-}
+  variants: {
+    size: {
+      sm: {
+        content: {
+          fontSize: "sm",
+        },
+        body: {
+          p: 1.5,
+        },
+      },
+      md: {
+        content: {
+          fontSize: "md",
+        },
+        body: {
+          p: 2,
+        },
+      },
+      lg: {
+        content: {
+          fontSize: "lg",
+        },
+        body: {
+          p: 3,
+        },
+      },
+    },
+  },
+})
