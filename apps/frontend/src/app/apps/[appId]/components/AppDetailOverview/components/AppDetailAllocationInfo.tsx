@@ -1,5 +1,5 @@
 import { useAppAllocations } from "@/api/contracts/governance/hooks/useAppAllocations"
-import { Flex, HStack, Image, Text, VStack } from "@chakra-ui/react"
+import { Card, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useParams } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -12,8 +12,8 @@ export const AppDetailAllocationInfo = () => {
 
   const { t } = useTranslation()
   return (
-    <Flex h={"full"} bg={"light-contrast-on-card-bg"} rounded="8px" flex={1.5} borderWidth={1}>
-      <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"} gap={6}>
+    <Card.Root variant="subtle" h={"full"} rounded="8px" flex={1.5} borderWidth={1}>
+      <Card.Body gap={6}>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
             <Image h="36px" w="36px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
@@ -45,7 +45,7 @@ export const AppDetailAllocationInfo = () => {
             {t("Average allocation distribution")}
           </Text>
         </VStack>
-      </VStack>
-    </Flex>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -7,11 +7,11 @@ export const imageCompressionOptions: CompressOptions = {
 }
 
 export const handleImageCompression = async (file: File): Promise<File> => {
-  console.log(`originalFile size ${file.size / 1024 / 1024} MB`)
+  console.info(`originalFile size ${file.size / 1024 / 1024} MB`)
 
-  console.log("Mime: ", file.type)
+  console.info("Mime: ", file.type)
   const parsedFile = await imageCompression(file, imageCompressionOptions)
-  console.log(`compressFile size ${parsedFile.size / 1024 / 1024} MB`)
+  console.info(`compressFile size ${parsedFile.size / 1024 / 1024} MB`)
   return parsedFile
 }
 

@@ -1,7 +1,7 @@
 import { WalletAddressInput } from "@/app/components/Input"
 import { BaseModal } from "@/components/BaseModal"
 import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
-import { UseDisclosureReturn, VStack, Heading, Box, Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
+import { UseDisclosureReturn, VStack, Heading, Box, Text, Field, Button } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -16,7 +16,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
   const { handleSubmit, setValue, watch } = useForm<FormData>()
   const { isTxModalOpen } = useTransactionModal()
   const accountToConnect = watch("accountToConnect")
-  const { isOpen = false, onClose } = modal
+  const { open: isOpen = false, onClose } = modal
 
   const handleClose = useCallback(() => {
     onClose?.()
@@ -44,12 +44,12 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         </Box>
         <VStack align="stretch">
           <Heading fontSize="lg">{t("Which Primary Account would you like to link to?")}</Heading>
-          <FormControl isInvalid={!accountToConnect}>
-            <FormLabel color="#6A6A6A" fontSize="sm">
+          <Field.Root invalid={!accountToConnect}>
+            <Field.Label color="#6A6A6A" fontSize="sm">
               {t("Wallet address")}
-            </FormLabel>
+            </Field.Label>
             <WalletAddressInput onAddressResolved={address => setValue("accountToConnect", address ?? "")} />
-          </FormControl>
+          </Field.Root>
         </VStack>
         <VStack align="stretch">
           <Button variant="primaryAction" type="submit">

@@ -1,16 +1,6 @@
 import { BaseModal } from "@/components/BaseModal"
-import {
-  UseDisclosureProps,
-  VStack,
-  Text,
-  Heading,
-  Button,
-  OrderedList,
-  ListItem,
-  Image,
-  HStack,
-  useColorModeValue,
-} from "@chakra-ui/react"
+import { UseDisclosureProps, VStack, Text, Heading, Button, List, Image, SimpleGrid } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
@@ -18,12 +8,12 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
 type Props = {
-  isOpen: UseDisclosureProps["isOpen"]
+  isOpen: UseDisclosureProps["open"]
   onClose: UseDisclosureProps["onClose"]
   hasNft: boolean
 }
 
-export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
+export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }: Props) => {
   const { t } = useTranslation()
   const modalIcon = useColorModeValue("/assets/icons/nft-earth-light.png", "/assets/icons/nft-earth-dark.png")
   const { data: gmRequired } = useGMRequiredByProposalType()
@@ -61,23 +51,18 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
     }
   }, [hasNft, router, userHasAnyGm, userHighestGm?.tokenId, currentRoundId])
 
-  console.log("hasNft", hasNft)
-  console.log("userHasAnyGm", userHasAnyGm)
-  console.log("userHighestGm", userHighestGm)
-  console.log("currentRoundId", currentRoundId)
-
   return (
-    <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})} showCloseButton={true}>
-      <VStack align="stretch" spacing={4} alignItems="center">
+    <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={true} modalProps={{ size: "md" }}>
+      <VStack align="stretch" gap={4} alignItems="center">
         <Image src={modalIcon} alt="NFT Requirement icon" boxSize={180} />
-        <VStack align="stretch" spacing={6}>
+        <VStack align="stretch" gap={6}>
           <Heading alignSelf="center" fontSize="28px">
             {t("To apply for a proposal, you must")}
           </Heading>
 
           {!hasNft ? (
-            <OrderedList spacing={2}>
-              <ListItem>
+            <List.Root as="ol" gap={2}>
+              <List.Item>
                 <Text fontSize="16px" fontWeight={400}>
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
@@ -85,14 +70,14 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
                     components={{ b: <Text as="span" fontWeight="bold" /> }}
                   />
                 </Text>
-              </ListItem>
-              <ListItem>
+              </List.Item>
+              <List.Item>
                 <Trans
                   i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
                   components={{ b: <Text as="span" fontWeight="bold" /> }}
                 />
-              </ListItem>
-            </OrderedList>
+              </List.Item>
+            </List.Root>
           ) : (
             <Text fontSize="16px" fontWeight={400}>
               <Trans
@@ -102,19 +87,20 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
             </Text>
           )}
         </VStack>
-        <HStack w="full" h="full" justifyContent="center" pt={4}>
+
+        <SimpleGrid w="full" gap={2} columns={2} pt={4}>
           <Button
+            size="lg"
             variant="secondary"
-            w="full"
             py={6}
             onClick={() => window.open("https://vechain.discourse.group", "_blank")}>
             {t("Create Discourse")}
           </Button>
 
-          <Button variant="primaryAction" w="full" py={6} onClick={handleGetNftOrApply}>
+          <Button size="lg" variant="primaryAction" py={6} onClick={handleGetNftOrApply}>
             {getNftOrApplyButtonText}
           </Button>
-        </HStack>
+        </SimpleGrid>
       </VStack>
     </BaseModal>
   )

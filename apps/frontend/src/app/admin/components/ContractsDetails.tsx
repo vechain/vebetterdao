@@ -1,7 +1,7 @@
 import { useContractVersion } from "@/api"
 import { AddressButton } from "@/components/AddressButton"
 import { B3TRIcon, VETIcon, VOT3Icon, VTHOIcon } from "@/components"
-import { Card, CardBody, CardHeader, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Grid, HStack, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -142,12 +142,12 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   }))
 
   return (
-    <Card w="full" borderRadius={"2xl"} p={2}>
-      <CardHeader>
-        <Heading size={"sm"}>{title}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={4}>
+    <Card.Root w="full" borderRadius={"2xl"} p={2}>
+      <Card.Header>
+        <Heading size={"md"}>{title}</Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={4}>
           <HStack w="full" justify={"space-between"}>
             <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
               {"Address"}
@@ -159,7 +159,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
             <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
               {"Version"}
             </Text>
-            <Skeleton isLoaded={!!version}>
+            <Skeleton loading={!version}>
               <Text fontSize="md">{version}</Text>
             </Skeleton>
           </HStack>
@@ -170,26 +170,26 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
             </Text>
           </HStack>
           <HStack w="full" justify={"space-between"}>
-            <HStack spacing={1}>
-              <Skeleton isLoaded={!b3trBalanceLoading}>
+            <HStack gap={1}>
+              <Skeleton loading={b3trBalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(b3trBalanceScaled))}</Text>
               </Skeleton>
               <B3TRIcon boxSize={5} />
             </HStack>
-            <HStack spacing={1}>
-              <Skeleton isLoaded={!vot3BalanceLoading}>
+            <HStack gap={1}>
+              <Skeleton loading={vot3BalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(vot3BalanceScaled))}</Text>
               </Skeleton>
               <VOT3Icon boxSize={5} />
             </HStack>
-            <HStack spacing={1}>
-              <Skeleton isLoaded={!accountBalanceLoading}>
+            <HStack gap={1}>
+              <Skeleton loading={accountBalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
               </Skeleton>
               <VETIcon boxSize={5} />
             </HStack>
-            <HStack spacing={1}>
-              <Skeleton isLoaded={!accountBalanceLoading}>
+            <HStack gap={1}>
+              <Skeleton loading={accountBalanceLoading}>
                 <Text fontSize="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
               </Skeleton>
               <VTHOIcon boxSize={5} />
@@ -214,7 +214,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
             </VStack>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

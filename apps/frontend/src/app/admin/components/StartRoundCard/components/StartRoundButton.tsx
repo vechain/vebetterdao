@@ -21,8 +21,8 @@ export const StartRoundButton = () => {
   if (parseInt(currentRoundId ?? "0") < 1) return null
 
   return (
-    <VStack w="full" spacing={4}>
-      <VStack w="full" spacing={4} alignItems="start">
+    <VStack w="full" gap={4}>
+      <VStack w="full" gap={4} alignItems="start">
         <VStack>
           <Text>
             {currentRound.voteEndTimestamp?.isBefore()
@@ -38,10 +38,10 @@ export const StartRoundButton = () => {
         </VStack>
         <VStack>
           <Button
-            colorScheme="blue"
-            isDisabled={isCurrentRoundActive}
+            colorPalette="blue"
+            disabled={isCurrentRoundActive}
             onClick={handleSubmit}
-            isLoading={distributionLoading}
+            loading={distributionLoading}
             data-testid={"start-voting-round-button"}>
             {t("Start new round")}
           </Button>

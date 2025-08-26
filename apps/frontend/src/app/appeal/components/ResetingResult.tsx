@@ -1,18 +1,7 @@
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-import {
-  AlertTitle,
-  Box,
-  AlertIcon,
-  Alert,
-  Button,
-  VStack,
-  Code,
-  Collapse,
-  useDisclosure,
-  Text,
-} from "@chakra-ui/react"
+import { Alert, Box, Button, VStack, Code, Collapsible, useDisclosure, Text } from "@chakra-ui/react"
 import { UilArrowUp, UilArrowDown } from "@iconscout/react-unicons"
 import { ResetStatus } from "../types"
 import { RESET_STATUS } from "../constants"
@@ -25,7 +14,7 @@ export const ResetingResult = ({
   apiResponse: string | undefined
 }) => {
   const router = useRouter()
-  const { isOpen, onToggle } = useDisclosure()
+  const { open: isOpen, onToggle } = useDisclosure()
   const { t } = useTranslation()
 
   return (
@@ -40,10 +29,10 @@ export const ResetingResult = ({
 
       {resetingStatus === RESET_STATUS.ERROR && (
         <VStack align="stretch" gap={2}>
-          <Alert status="error" size="md" borderRadius="16px">
-            <AlertIcon w={4} h={4} color="#C84968" />
+          <Alert.Root status="error" size="md" borderRadius="16px">
+            <Alert.Indicator w={4} h={4} color="#C84968" />
             <Box lineHeight={"1.20rem"} fontSize="md" color="#C84968">
-              <AlertTitle>
+              <Alert.Title>
                 {t("Unable to process request. Try refreshing or contact support.")}{" "}
                 <Button
                   p={0}
@@ -51,15 +40,16 @@ export const ResetingResult = ({
                   size="sm"
                   variant="ghost"
                   onClick={onToggle}
-                  rightIcon={isOpen ? <UilArrowUp /> : <UilArrowDown />}
                   color={"black"}
                   _hover={{ color: "black" }}>
                   {t("Show Details")}
-                </Button>
-              </AlertTitle>
 
-              <Collapse in={isOpen} animateOpacity>
-                <Box mt={2} borderRadius="md" bg={"gray.50"} overflowX="auto">
+                  {isOpen ? <UilArrowUp /> : <UilArrowDown />}
+                </Button>
+              </Alert.Title>
+
+              <Collapsible.Root open={isOpen}>
+                <Collapsible.Content mt={2} borderRadius="md" bg={"gray.50"} overflowX="auto">
                   <Text fontSize="xs" p={2} fontWeight="bold" color={"gray.600"}>
                     {t("Error Details")}
                   </Text>
@@ -73,10 +63,10 @@ export const ResetingResult = ({
                     fontSize="xs">
                     {apiResponse}
                   </Code>
-                </Box>
-              </Collapse>
+                </Collapsible.Content>
+              </Collapsible.Root>
             </Box>
-          </Alert>
+          </Alert.Root>
         </VStack>
       )}
     </>

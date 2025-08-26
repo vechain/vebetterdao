@@ -3,25 +3,19 @@ import { ExclamationTriangle } from "@/components"
 import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
+  Field,
   Heading,
   Input,
   Text,
   useBreakpointValue,
   UseDisclosureProps,
   VStack,
-  useSteps,
 } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -36,17 +30,26 @@ enum DelegateXNodeStep {
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
 
+const STEP_COUNT = Object.keys(DelegateXNodeStep).length
+
 export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { account } = useWallet()
-  const { isOpen = false, onClose } = modal
+  const { open: isOpen = false, onClose } = modal
   const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
 
-  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
-    index: 0,
-    count: Object.keys(DelegateXNodeStep).length,
-  })
+  const [step, setStep] = useState(0)
+  const goToNext = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose?.()
+    else setStep(nextStep)
+  }, [step, onClose])
+  const goToPrevious = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose?.()
+    else setStep(prevStep)
+  }, [step, onClose])
 
   const {
     register,
@@ -59,8 +62,8 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
 
   const handleClose = useCallback(() => {
     onClose?.()
-    setActiveStep(0)
-  }, [onClose, setActiveStep])
+    setStep(0)
+  }, [onClose, setStep])
 
   const delegateXNode = useDelegateXNode({
     xNode,
@@ -100,10 +103,10 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
             </Box>
             <VStack align="stretch">
               <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
-              <FormControl isInvalid={!!errors.walletAddress}>
-                <FormLabel color="#6A6A6A" fontSize="sm">
+              <Field.Root invalid={!!errors.walletAddress}>
+                <Field.Label color="#6A6A6A" fontSize="sm">
                   {t("User wallet address")}
-                </FormLabel>
+                </Field.Label>
                 <Input
                   {...register("walletAddress", {
                     required: t("Wallet address is required"),
@@ -116,8 +119,8 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
                     },
                   })}
                 />
-                <FormErrorMessage>{errors?.walletAddress?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors?.walletAddress?.message}</Field.ErrorText>
+              </Field.Root>
             </VStack>
             <VStack align="stretch">
               <Button variant="primaryAction" type="submit">
@@ -145,18 +148,18 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               <Text fontWeight="600">{t("You're adding the following manager to your Node")}</Text>
               <Text fontSize="sm">{finalAddress}</Text>
             </VStack>
-            <Alert status="warning" borderRadius="2xl">
-              <AlertIcon w={5} h={5} />
+            <Alert.Root status="warning" borderRadius="2xl">
+              <Alert.Indicator w={5} h={5} />
               <Box lineHeight={"1.20rem"} fontSize="sm">
-                <AlertTitle as="span">{t("The manager won't be able to transfer or sell your Node.")}</AlertTitle>
-                <AlertDescription as="span">{t("but won't be able to transfer or sell your Node.")}</AlertDescription>
+                <Alert.Title as="span">{t("The manager won't be able to transfer or sell your Node.")}</Alert.Title>
+                <Alert.Description as="span">{t("but won't be able to transfer or sell your Node.")}</Alert.Description>
                 {isXNodeAttachedToGM && (
                   <Text mt={2} fontSize="sm" color="#C84968" fontWeight={600}>
                     {t("Notice: the GM NFT attached to this Node will be detached and will lose the free levels.")}
                   </Text>
                 )}
               </Box>
-            </Alert>
+            </Alert.Root>
             <VStack>
               <Button variant="primaryAction" onClick={handleDelegate}>
                 {t("Yes, I'm sure")}
@@ -192,9 +195,9 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
       onClose={handleClose}
       goToPrevious={goToPrevious}
       goToNext={goToNext}
-      setActiveStep={setActiveStep}
+      setActiveStep={setStep}
       steps={steps}
-      activeStep={activeStep}
+      activeStep={step}
     />
   )
 }

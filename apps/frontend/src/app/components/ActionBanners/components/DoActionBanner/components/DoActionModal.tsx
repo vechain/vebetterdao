@@ -1,7 +1,7 @@
 import { useUserScore } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 import { useMissingActionsLabel } from "@/hooks"
-import { UseDisclosureProps, Card, CardBody, VStack, Flex, Text, Heading, Button, Image, Link } from "@chakra-ui/react"
+import { UseDisclosureProps, Card, VStack, Flex, Text, Heading, Button, Image } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -29,10 +29,10 @@ export const DoActionModal = ({ doActionModal }: Props) => {
   if (isLoading) return null
 
   return (
-    <BaseModal isOpen={doActionModal.isOpen || false} onClose={doActionModal.onClose || (() => {})}>
-      <VStack align="stretch" spacing={4}>
-        <Card bg="#FFD979" borderRadius="xl">
-          <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
+    <BaseModal isOpen={doActionModal.open || false} onClose={doActionModal.onClose || (() => {})}>
+      <VStack align="stretch" gap={4}>
+        <Card.Root bg="#FFD979" borderRadius="xl">
+          <Card.Body pb={2} position="relative" overflow="hidden" borderRadius="xl">
             <Image
               src="/assets/backgrounds/cloud-background-orange.webp"
               alt="cloud-background-orange"
@@ -60,8 +60,8 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                 </Text>
               </Flex>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
         <Heading fontSize={"2xl"} fontWeight={700}>
           {missingActionsLabel.long}
         </Heading>
@@ -70,16 +70,17 @@ export const DoActionModal = ({ doActionModal }: Props) => {
             "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
           )}
         </Text>
-        <Button variant="primaryAction" leftIcon={<IoGridOutline />} onClick={goToApps}>
+        <Button variant="primaryAction" onClick={goToApps}>
+          <IoGridOutline />
           {t("Explore apps")}
         </Button>
         <Button
           variant="primarySubtle"
-          leftIcon={<UilInfoCircle />}
           _hover={{ textDecoration: "none" }}
-          as={Link}
-          href={VEPASSPORT_DOCS_URL}
-          isExternal>
+          onClick={() => {
+            window.open(VEPASSPORT_DOCS_URL, "_blank")
+          }}>
+          <UilInfoCircle />
           {t("Know more")}
         </Button>
       </VStack>

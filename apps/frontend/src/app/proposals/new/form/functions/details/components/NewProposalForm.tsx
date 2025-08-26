@@ -1,4 +1,4 @@
-import { VStack, Heading, FormControl, FormLabel, Input, Textarea, FormErrorMessage } from "@chakra-ui/react"
+import { VStack, Heading, Field, Input, Textarea } from "@chakra-ui/react"
 
 import { useEffect, useCallback } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
@@ -142,48 +142,50 @@ export const NewProposalForm: React.FC<Props> = ({
       style={{
         width: "100%",
       }}>
-      <VStack spacing={8} align="flex-start" w="full">
+      <VStack gap={8} align="flex-start" w="full">
         {renderTitle && (
-          <FormControl isInvalid={!!errors.title}>
-            <FormLabel>{t("Proposal title")}</FormLabel>
+          <Field.Root invalid={!!errors.title}>
+            <Field.Label>{t("Proposal title")}</Field.Label>
             <Input
               data-testid="proposal-title-input"
-              isDisabled={isDisabled}
+              disabled={isDisabled}
               placeholder={t("Enter proposal title")}
+              colorPalette="blue"
               {...register("title", {
                 required: t("This field is required"),
               })}
             />
             {errors.title && (
-              <FormErrorMessage data-testid="newproposal-form-title-error-message">
+              <Field.ErrorText data-testid="newproposal-form-title-error-message">
                 {errors.title.message}
-              </FormErrorMessage>
+              </Field.ErrorText>
             )}
-          </FormControl>
+          </Field.Root>
         )}
         {renderDescription && (
-          <FormControl isInvalid={!!errors.description}>
-            <FormLabel>{t("Proposal description")}</FormLabel>
+          <Field.Root invalid={!!errors.description}>
+            <Field.Label>{t("Proposal description")}</Field.Label>
             <Textarea
               data-testid="proposal-description-input"
-              isDisabled={isDisabled}
+              disabled={isDisabled}
               placeholder={t("Enter proposal description")}
               {...register("description", {
                 required: t("This field is required"),
               })}
+              colorPalette="blue"
             />
             {errors.description && (
-              <FormErrorMessage data-testid="newproposal-form-description-error-message">
+              <Field.ErrorText data-testid="newproposal-form-description-error-message">
                 {errors.description.message}
-              </FormErrorMessage>
+              </Field.ErrorText>
             )}
-          </FormControl>
+          </Field.Root>
         )}
         {renderMarkdownDescription && (
-          <FormControl w="full" mt={4} maxH={400} h={400} isInvalid={!!errors.markdownDescription}>
-            <FormLabel>
+          <Field.Root w="full" mt={4} maxH={400} h={400} invalid={!!errors.markdownDescription}>
+            <Field.Label>
               <Heading size="md">{t("Your proposal")}</Heading>
-            </FormLabel>
+            </Field.Label>
             <Controller
               data-testid="proposal-markdown-description-input"
               name="markdownDescription"
@@ -204,18 +206,18 @@ export const NewProposalForm: React.FC<Props> = ({
               )}
             />
             {errors.markdownDescription && (
-              <FormErrorMessage data-testid="newproposal-form-markdown-error-message">
+              <Field.ErrorText data-testid="newproposal-form-markdown-error-message">
                 {errors.markdownDescription.message}
-              </FormErrorMessage>
+              </Field.ErrorText>
             )}
-          </FormControl>
+          </Field.Root>
         )}
       </VStack>
 
       {renderActions && (
-        <VStack spacing={4} align="flex-start" w="full" mt={12} data-testid="proposal-actions-container">
+        <VStack gap={4} align="flex-start" w="full" mt={12} data-testid="proposal-actions-container">
           <Heading size="md">{t("Executable functions")}</Heading>
-          <VStack spacing={8} align="flex-start" w="full">
+          <VStack gap={8} align="flex-start" w="full">
             {fields?.map((field, index) => {
               const onAddAnotherTransactionClick = () => {
                 insert(index + 1, {

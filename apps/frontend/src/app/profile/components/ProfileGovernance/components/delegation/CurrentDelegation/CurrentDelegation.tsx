@@ -1,5 +1,5 @@
 import { AddressIcon } from "@/components/AddressIcon"
-import { Card, CardBody, VStack, Heading, Text, HStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, HStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
@@ -26,8 +26,8 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   if (isDelegatorLoading || isLoading || !isDelegated) return null
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody borderRadius="xl">
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -63,19 +63,16 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
             </Stack>
             <HStack>
               {isConnectedUser && (
-                <Button
-                  variant={"dangerGhost"}
-                  p={3}
-                  leftIcon={<UilTimes color="#C84968" />}
-                  onClick={delegationModal.onOpen}>
+                <Button variant={"dangerGhost"} p={3} onClick={delegationModal.onOpen}>
+                  <UilTimes color="#C84968" />
                   {t("Remove delegation")}
                 </Button>
               )}
             </HStack>
           </Stack>
         </VStack>
-      </CardBody>
+      </Card.Body>
       <RevokeDelegationDelegateePOVModal modal={delegationModal} delegator={delegatorAddress} />
-    </Card>
+    </Card.Root>
   )
 }

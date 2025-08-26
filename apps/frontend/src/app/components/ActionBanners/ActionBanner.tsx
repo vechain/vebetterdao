@@ -15,7 +15,7 @@ import {
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
-import { Hide, IconButton } from "@chakra-ui/react"
+import { IconButton } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -274,36 +274,36 @@ export const ActionBanner = () => {
       ))}
 
       {/* Custom Navigation Buttons */}
-      <Hide below="md">
-        {!isSliderStart && (
-          <IconButton
-            pos={"absolute"}
-            zIndex={2} // Ensure it's above the slides
-            variant={"primarySubtle"}
-            left={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            icon={<FaChevronLeft />}
-            onClick={() => swiperRef.current?.slidePrev()}
-            aria-label="Prev slide"
-          />
-        )}
-      </Hide>
-      <Hide below="md">
-        {!isSliderEnd && slides.length > 1 && (
-          <IconButton
-            pos={"absolute"}
-            zIndex={2} // Ensure it's above the slides
-            variant={"primarySubtle"}
-            right={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            icon={<FaChevronRight />}
-            onClick={() => swiperRef.current?.slideNext()}
-            aria-label="Next slide"
-          />
-        )}
-      </Hide>
+
+      {!isSliderStart && (
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2} // Ensure it's above the slides
+          variant={"primarySubtle"}
+          left={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slidePrev()}
+          aria-label="Prev slide">
+          <FaChevronLeft />
+        </IconButton>
+      )}
+
+      {!isSliderEnd && slides.length > 1 && (
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2} // Ensure it's above the slides
+          variant={"primarySubtle"}
+          right={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slideNext()}
+          aria-label="Next slide">
+          <FaChevronRight />
+        </IconButton>
+      )}
     </Swiper>
   )
 }

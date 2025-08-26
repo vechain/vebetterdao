@@ -1,20 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { useCallback, useMemo, useState } from "react"
 import { useTransactions } from "@/api"
-import {
-  VStack,
-  Heading,
-  Card,
-  CardBody,
-  Text,
-  HStack,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Spinner,
-  Center,
-} from "@chakra-ui/react"
+import { VStack, Heading, Card, Text, HStack, Menu, Spinner, Center, Portal } from "@chakra-ui/react"
 import { TransactionCard } from "@/components"
 import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
@@ -28,6 +15,7 @@ type Props = {
 
 export const TransactionsContent = ({ address }: Props) => {
   const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
 
   const filters: { id: TransactionType | "all"; label: string }[] = useMemo(
     () => [
@@ -97,35 +85,36 @@ export const TransactionsContent = ({ address }: Props) => {
   }, [router])
 
   return (
-    <Card w={"full"} variant={"baseWithBorder"}>
-      <CardBody>
-        <VStack spacing={6} align="stretch">
+    <Card.Root w={"full"} variant={"baseWithBorder"}>
+      <Card.Body>
+        <VStack gap={6} align="stretch">
           <HStack color="#004CFC" cursor="pointer" onClick={handleGoBack} mb="2">
             <FaChevronLeft />
             <Text>{t("Go back")}</Text>
           </HStack>
-          <Menu>
-            {({ isOpen }) => (
-              <>
-                <MenuButton as={HStack} cursor="pointer">
-                  <HStack>
-                    <Heading size="md">{selectedFilter?.label}</Heading>
-                    {isOpen ? <FaChevronUp color="#004CFC" /> : <FaChevronDown color="#004CFC" />}
-                  </HStack>
-                </MenuButton>
-                <MenuList>
+          <Menu.Root open={open} onOpenChange={details => setOpen(details.open)}>
+            <Menu.Trigger asChild>
+              <HStack>
+                <Heading size="md">{selectedFilter?.label}</Heading>
+                {open ? <FaChevronUp color="#004CFC" /> : <FaChevronDown color="#004CFC" />}
+              </HStack>
+            </Menu.Trigger>
+            <Portal>
+              <Menu.Positioner>
+                <Menu.Content>
                   {filters.map(filter => (
-                    <MenuItem
+                    <Menu.Item
                       key={filter.id}
+                      value={filter.id}
                       onClick={() => setFilterId(filter.id)}
                       fontWeight={filter.id === filterId ? "bold" : "normal"}>
                       {filter.label}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
-                </MenuList>
-              </>
-            )}
-          </Menu>
+                </Menu.Content>
+              </Menu.Positioner>
+            </Portal>
+          </Menu.Root>
           <InfiniteScroll
             dataLength={transactions.length}
             next={fetchNextPage}
@@ -136,10 +125,10 @@ export const TransactionsContent = ({ address }: Props) => {
                 <Spinner size="md" mt={4} alignSelf="center" />
               </Center>
             }>
-            <VStack spacing={6} align="stretch">
+            <VStack gap={6} align="stretch">
               {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (
-                  <VStack key={day} spacing={3} align="stretch">
+                  <VStack key={day} gap={3} align="stretch">
                     <Text fontWeight="600" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
@@ -154,7 +143,7 @@ export const TransactionsContent = ({ address }: Props) => {
             </VStack>
           </InfiniteScroll>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

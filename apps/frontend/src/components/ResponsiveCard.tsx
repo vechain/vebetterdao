@@ -1,8 +1,8 @@
-import { Box, Card, CardBody, CardProps, useBreakpointValue } from "@chakra-ui/react"
+import { Box, Card, CardRootProps, useBreakpointValue } from "@chakra-ui/react"
 
 type Props = {
   children: React.ReactNode
-  cardProps?: CardProps
+  cardProps?: CardRootProps
   mobileStrategy?: "none" | "fullwidth"
 }
 
@@ -19,9 +19,9 @@ export const ResponsiveCard = ({ children, cardProps = {}, mobileStrategy = "non
 
   if (shouldRenderInCard) {
     return (
-      <Card variant={"baseWithBorder"} w="full" {...cardProps}>
-        <CardBody p={6}>{children}</CardBody>
-      </Card>
+      <Card.Root variant={"baseWithBorder"} w="full" {...cardProps}>
+        <Card.Body p={6}>{children}</Card.Body>
+      </Card.Root>
     )
   }
 

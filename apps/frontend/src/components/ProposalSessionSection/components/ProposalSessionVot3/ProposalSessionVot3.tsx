@@ -4,7 +4,7 @@ import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 
 type Props = {
   votesAtSnapshotQuery: UseQueryResult<string, unknown>
@@ -43,7 +43,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
     <HStack p="16px" rounded="12px" bg="light-contrast-on-card-bg" justify="space-between" align="start">
       {/* Left: votes at snapshot */}
       <VStack align="stretch" gap={1} flex={1}>
-        <Skeleton isLoaded={!votesAtSnapshotQuery.isLoading}>
+        <Skeleton loading={votesAtSnapshotQuery.isLoading}>
           <Text fontWeight={700}>{FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}</Text>
         </Skeleton>
         <Text color="#6A6A6A" fontSize="12px">
@@ -52,19 +52,18 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
       </VStack>
 
       <VStack align="stretch" gap={1} flex={1}>
-        <Skeleton isLoaded={!userVotesAtSnapshotQuery.isLoading}>
+        <Skeleton loading={userVotesAtSnapshotQuery.isLoading}>
           <Text fontWeight={700}>{FormattingUtils.humanNumber(Number(totalVotesWithDeposits ?? 0))}</Text>
         </Skeleton>
 
-        <HStack gap={1} align="center">
+        <HStack gap={1} alignItems="center">
           <Text color="#6A6A6A" fontSize="12px">
             {t("Your votes at snapshot")}
           </Text>
 
           {hasDepositVotingPower && (
-            <BaseTooltip
-              showTooltip={hasDepositVotingPower}
-              text={
+            <Tooltip
+              content={
                 <Text>
                   <Trans
                     i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
@@ -73,10 +72,8 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
                   />
                 </Text>
               }>
-              <span>
-                <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
-              </span>
-            </BaseTooltip>
+              <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
+            </Tooltip>
           )}
         </HStack>
       </VStack>

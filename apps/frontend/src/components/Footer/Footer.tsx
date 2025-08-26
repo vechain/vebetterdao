@@ -1,5 +1,5 @@
 "use client"
-import { VStack, Text, Container, HStack, Box, Show, Link, Flex } from "@chakra-ui/react"
+import { VStack, Text, Container, HStack, Box, Link, Flex } from "@chakra-ui/react"
 import { BeBetterVeBetterIcon } from "../Icons"
 import { DiscordButton } from "./components/DiscordButton"
 import { TelegramButton } from "./components/TelegramButton"
@@ -16,8 +16,8 @@ export const Footer: React.FC = () => {
   const currentYear = dayjs().format("YYYY")
 
   const desktopContent = (
-    <VStack>
-      <HStack justifyContent={"space-between"} w="full" spacing={4} my={4}>
+    <VStack hideBelow="md">
+      <HStack justifyContent={"space-between"} w="full" gap={4} my={4}>
         <Box my={14}>
           <BeBetterVeBetterIcon
             beBetterProps={{
@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
             }}
           />
         </Box>
-        <VStack spacing={4} alignItems={"flex-end"}>
+        <VStack gap={4} alignItems={"flex-end"}>
           <DiscordButton />
           <TelegramButton />
           <FreshDeskButton />
@@ -50,13 +50,13 @@ export const Footer: React.FC = () => {
             {t("Version")} {packageJson.version}
           </Text>
         </VStack>
-        <HStack spacing={4}>
-          <Link href={PRIVACY_POLICY_LINK} isExternal>
+        <HStack gap={4}>
+          <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Privacy & Policy")}
             </Text>
           </Link>
-          <Link href={TERMS_AND_CONDITIONS_LINK} isExternal>
+          <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
             <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Terms & Conditions")}
             </Text>
@@ -68,8 +68,8 @@ export const Footer: React.FC = () => {
   )
 
   const mobileContent = (
-    <VStack>
-      <VStack spacing={4} my={4}>
+    <VStack hideFrom="md">
+      <VStack gap={4} my={4}>
         <Box my={8}>
           <BeBetterVeBetterIcon
             beBetterProps={{
@@ -80,7 +80,7 @@ export const Footer: React.FC = () => {
             }}
           />
         </Box>
-        <VStack spacing={4} alignItems={"center"}>
+        <VStack gap={4} alignItems={"center"}>
           <DiscordButton />
           <TelegramButton />
           <FreshDeskButton />
@@ -91,12 +91,12 @@ export const Footer: React.FC = () => {
         </VStack>
       </VStack>
       <VStack borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
-        <Link href={PRIVACY_POLICY_LINK} isExternal>
+        <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
           <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Privacy & Policy")}
           </Text>
         </Link>
-        <Link href={TERMS_AND_CONDITIONS_LINK} isExternal>
+        <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
           <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Terms & Conditions")}
           </Text>
@@ -114,13 +114,13 @@ export const Footer: React.FC = () => {
   return (
     <Flex bgColor={"#191714"}>
       <Container
-        maxW={"container.xl"}
+        maxW="breakpoint-xl"
         display={"flex"}
         alignItems={"stretch"}
         justifyContent={"flex-start"}
         flexDirection={"column"}>
-        <Show above="md">{desktopContent}</Show>
-        <Show below="md">{mobileContent}</Show>
+        {desktopContent}
+        {mobileContent}
       </Container>
     </Flex>
   )

@@ -7,7 +7,8 @@ import {
   useRoundXApps,
 } from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
-import { VStack, Heading, useColorModeValue, Text, Box, Skeleton, Stack, HStack } from "@chakra-ui/react"
+import { VStack, Heading, Text, Box, Skeleton, Stack, HStack } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -89,12 +90,12 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   ])
 
   return (
-    <VStack w="full" flex={1} data-testid="allocation-round-xapps-votes-breakdown-chart" spacing={6}>
-      <Stack w="full" justify="space-between" direction={["column", "column", "row"]} spacing={8}>
-        <VStack spacing={1} align="flex-start">
-          <HStack spacing={3} align="center">
+    <VStack w="full" flex={1} data-testid="allocation-round-xapps-votes-breakdown-chart" gap={6}>
+      <Stack w="full" justify="space-between" direction={["column", "column", "row"]} gap={8}>
+        <VStack gap={1} align="flex-start">
+          <HStack gap={3} align="center">
             <B3TRIcon boxSize="28px" colorVariant="dark" />
-            <Skeleton isLoaded={!roundAmountLoading}>
+            <Skeleton loading={roundAmountLoading}>
               <Heading fontSize="28px" fontWeight={700}>
                 {compactFormatter.format(totalDistributed)}
               </Heading>
@@ -104,9 +105,9 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
             {t("To distribute among apps")}
           </Text>
         </VStack>
-        <HStack spacing={8} align="center" w={["full", "full", "auto"]} justify={"space-between"}>
-          <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
-            <Skeleton isLoaded={!votersLoading}>
+        <HStack gap={8} align="center" w={["full", "full", "auto"]} justify={"space-between"}>
+          <VStack gap={0} align={["flex-start", "flex-start", "flex-end"]}>
+            <Skeleton loading={votersLoading}>
               <Text fontWeight={600} fontSize={"18px"} data-testid={"total-voters"}>
                 {compactFormatter.format(Number(voters ?? 0))}
               </Text>
@@ -115,8 +116,8 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
               {t("Wallets voted")}
             </Text>
           </VStack>
-          <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
-            <Skeleton isLoaded={!xAppsLoading}>
+          <VStack gap={0} align={["flex-start", "flex-start", "flex-end"]}>
+            <Skeleton loading={xAppsLoading}>
               <Text fontWeight={600} fontSize={"18px"}>
                 {compactFormatter.format(Number(xApps?.length ?? 0))}
               </Text>
@@ -125,8 +126,8 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
               {t("Apps")}
             </Text>
           </VStack>
-          <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
-            <Skeleton isLoaded={!maxAmountLoading}>
+          <VStack gap={0} align={["flex-start", "flex-start", "flex-end"]}>
+            <Skeleton loading={maxAmountLoading}>
               <Text fontWeight={600} fontSize={"18px"}>
                 {compactFormatter.format(Number(maxAmount ?? 0))}
               </Text>
@@ -138,8 +139,8 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
         </HStack>
       </Stack>
 
-      <VStack spacing={2} color={"#6194F5"} w="full">
-        <Skeleton isLoaded={!roundAmountLoading} position="relative" w="full">
+      <VStack gap={2} color={"#6194F5"} w="full">
+        <Skeleton loading={roundAmountLoading} position="relative" w="full">
           <Box bg="#D5D5D5" h="8px" rounded="full" />
           {baseAmountsInfo.map((info, index) => {
             const left = baseAmountsInfo.slice(0, index).reduce((acc, curr) => acc + curr.percentage, 0)
@@ -162,10 +163,10 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
           })}
         </Skeleton>
       </VStack>
-      <Stack direction={["column", "column", "row"]} w="full" spacing={[4, 4, 8]}>
+      <Stack direction={["column", "column", "row"]} w="full" gap={[4, 4, 8]}>
         {baseAmountsInfo.map(info => (
-          <Skeleton isLoaded={!info.isLoading} key={`distribution-chart-amount-${info.amount}-${info.color}`}>
-            <HStack w="full" spacing={1}>
+          <Skeleton loading={info.isLoading} key={`distribution-chart-amount-${info.amount}-${info.color}`}>
+            <HStack w="full" gap={1}>
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>
                 {compactFormatter.format(Number(info.amount))}

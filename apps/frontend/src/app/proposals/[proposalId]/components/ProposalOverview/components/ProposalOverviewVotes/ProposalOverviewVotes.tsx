@@ -125,16 +125,16 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
             borderColor: borderColorMap[proposalState],
             borderWidth: 1,
           }}>
-          <VStack alignItems={"stretch"} w="full" justify={"space-between"} spacing={3}>
+          <VStack alignItems={"stretch"} w="full" justify={"space-between"} gap={3}>
             <Heading fontWeight={"700"} fontSize="20px">
               {t("Real time votes")}
             </Heading>
-            <VStack w="full" justify={"space-between"} spacing={0} align={"flex-start"}>
+            <VStack w="full" justify={"space-between"} gap={0} align={"flex-start"}>
               <Text fontWeight={"400"} color="#6A6A6A">
                 {t("Wallets voted")}
               </Text>
-              <Skeleton isLoaded={!proposalVotesLoading}>
-                <Heading size="sm">{getCompactFormatter(2).format(proposalVotes?.totalVoters ?? 0)}</Heading>
+              <Skeleton loading={proposalVotesLoading}>
+                <Heading size="md">{getCompactFormatter(2).format(proposalVotes?.totalVoters ?? 0)}</Heading>
               </Skeleton>
             </VStack>
             <VStack alignItems={"stretch"} gap={6}>

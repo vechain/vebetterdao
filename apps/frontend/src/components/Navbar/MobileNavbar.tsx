@@ -1,14 +1,10 @@
 import {
+  CloseButton,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerProps,
   HStack,
   Icon,
   IconButton,
+  Portal,
   VStack,
   useDisclosure,
   useMediaQuery,
@@ -20,39 +16,53 @@ import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
 import { ProfileButton } from "./ProfileButton"
-import { ThemeSwitcher } from "@/components/ThemeSwitcher"
+import { ColorModeButton } from "../ui/color-mode"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
   { ssr: false },
 )
 
-const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
+const MobileMenuDrawer: React.FC<Omit<Drawer.RootProps & Props, "children">> = ({
   routesToRender,
   isNotMobile,
   ...props
 }) => {
   return (
-    <Drawer size={"sm"} placement="right" {...props}>
-      <DrawerOverlay />
-      <DrawerContent
-        maxWidth={isNotMobile ? undefined : "95%"}
-        borderTopLeftRadius={16}
-        borderBottomLeftRadius={16}
-        background={"contrast-on-dark-bg"}>
-        <DrawerCloseButton position={"absolute"} top={4} right={4} color={"gray.500"} _hover={{ color: "gray.700" }} />
-        <DrawerHeader>
-          <NavbarLogo />
-        </DrawerHeader>
-        <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"} px={5}>
-          <VStack spacing={0} w="full">
-            <ProfileButton onMenuClose={props.onClose} />
-            <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
-          </VStack>
-          <ThemeSwitcher w={"full"} withText={true} />
-        </DrawerBody>
-      </DrawerContent>
-    </Drawer>
+    <Drawer.Root size={"sm"} placement="end" {...props}>
+      <Portal>
+        <Drawer.Backdrop />
+        <Drawer.Positioner>
+          <Drawer.Content
+            maxWidth={isNotMobile ? undefined : "95%"}
+            borderTopLeftRadius={16}
+            borderBottomLeftRadius={16}
+            background={"contrast-on-dark-bg"}>
+            <Drawer.CloseTrigger asChild>
+              <CloseButton
+                position={"absolute"}
+                top={4}
+                right={4}
+                color={"gray.500"}
+                _hover={{ color: "gray.700" }}
+                size="sm"
+              />
+            </Drawer.CloseTrigger>
+
+            <Drawer.Header>
+              <NavbarLogo />
+            </Drawer.Header>
+            <Drawer.Body display={"flex"} flexDirection={"column"} justifyContent={"space-between"} px={5}>
+              <VStack gap={0} w="full">
+                <ProfileButton onMenuClose={() => props.onOpenChange?.({ open: false })} />
+                <NavbarMenu routesToRender={routesToRender} onMenuClick={() => props.onOpenChange?.({ open: true })} />
+              </VStack>
+              <ColorModeButton w={"full"} withText={true} />
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Positioner>
+      </Portal>
+    </Drawer.Root>
   )
 }
 
@@ -61,32 +71,32 @@ type Props = {
   isNotMobile?: boolean
 }
 export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
-  const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
+  const { open: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
 
-  const [isLargerThan500] = useMediaQuery("(min-width: 500px)")
+  const [isLargerThan500] = useMediaQuery(["(min-width: 500px)"])
 
   return (
     <>
       <NavbarLogo />
       <HStack>{isLargerThan500 && <NavbarBalance />}</HStack>
       <HStack gap={2}>
-        <ThemeSwitcher />
+        <ColorModeButton />
         <ConnectWalletButton />
         {!!routesToRender.length && (
           <IconButton
             onClick={openMenu}
             border={"1px solid #EEEEEE"}
-            bg={"light-contrast-on-card-bg"}
+            variant="subtle"
             rounded="6px"
-            icon={<Icon as={FaBars} />}
-            aria-label="Open menu"
-          />
+            aria-label="Open menu">
+            <Icon as={FaBars} boxSize={4} />
+          </IconButton>
         )}
       </HStack>
       {!!routesToRender.length && (
         <MobileMenuDrawer
-          isOpen={isMenuOpen}
-          onClose={closeMenu}
+          open={isMenuOpen}
+          onOpenChange={closeMenu}
           routesToRender={routesToRender}
           isNotMobile={isLargerThan500}
         />

@@ -1,7 +1,6 @@
 import { useProposalComments } from "@/api"
 import {
   Card,
-  CardBody,
   Center,
   Heading,
   Spinner,
@@ -11,11 +10,9 @@ import {
   Button,
   Flex,
   IconButton,
-  MenuButton,
-  Box,
   Menu,
-  MenuList,
   Badge,
+  Portal,
 } from "@chakra-ui/react"
 import { t } from "i18next"
 import InfiniteScroll from "react-infinite-scroll-component"
@@ -56,75 +53,78 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
     const activeFiltersCount = activeFilter !== "All" ? 1 : 0
 
     return (
-      <Menu closeOnSelect={false} placement="bottom" strategy="fixed" autoSelect={false} isLazy flip={false}>
-        <Box position="relative">
-          <MenuButton
-            as={IconButton}
-            isRound={true}
-            aria-label={t("Filters")}
-            border="1px solid #D5D5D5"
-            icon={<UilFilter />}
-            variant=""
-            color={"contrast-fg-on-muted"}
-          />
-
-          {activeFiltersCount > 0 && (
-            <Flex
-              position="absolute"
-              top="-8px"
-              right="-8px"
-              bg="black"
-              color="white"
-              borderRadius="full"
-              w="20px"
-              h="20px"
-              justify="center"
-              align="center"
-              fontSize="xs"
-              fontWeight="bold"
-              boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
-              {activeFiltersCount}
-            </Flex>
-          )}
-        </Box>
-        <MenuList maxW="300px" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
-          <Text fontWeight="bold" mb={2}>
-            {t("Vote Type")}
-          </Text>
-          <Flex flexWrap="wrap" gap={2} mb={4} flexDir="column">
-            {["All", "For", "Against", "Abstain"].map(status => (
-              <Button
-                key={status}
-                size="sm"
-                onClick={() => setActiveFilter(status as VoteType)}
-                bg={activeFilter === status ? "black" : "white"}
-                color={activeFilter === status ? "white" : "black"}
-                borderRadius="16px"
-                border="1px solid"
-                borderColor={activeFilter === status ? "black" : "gray.200"}
-                _hover={{
-                  bg: activeFilter === status ? "blackAlpha.800" : "gray.100",
-                }}
-                px={3}
-                py={1}
-                fontWeight="medium">
-                {status}{" "}
-                {activeFilter === status && (
-                  <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
-                    {visibleComments.length}
-                  </Badge>
-                )}
-              </Button>
-            ))}
-          </Flex>
-        </MenuList>
-      </Menu>
+      <Menu.Root
+        closeOnSelect={false}
+        positioning={{
+          placement: "bottom-end",
+          strategy: "fixed",
+        }}
+        lazyMount>
+        <Menu.Trigger asChild position="relative">
+          <IconButton variant="subtle" rounded="full" aria-label={t("Filters")} border="1px solid #D5D5D5" gap={2}>
+            <UilFilter />
+            {activeFiltersCount > 0 && (
+              <Flex
+                position="absolute"
+                top="-8px"
+                right="-8px"
+                bg="black"
+                color="white"
+                borderRadius="full"
+                w="20px"
+                h="20px"
+                justify="center"
+                align="center"
+                fontSize="xs"
+                fontWeight="bold"
+                boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
+                {activeFiltersCount}
+              </Flex>
+            )}
+          </IconButton>
+        </Menu.Trigger>
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content maxW="300px" bg="gray.800" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
+              <Text fontWeight="bold" mb={2}>
+                {t("Vote Type")}
+              </Text>
+              <Flex flexWrap="wrap" gap={2} mb={4} flexDir="column">
+                {["All", "For", "Against", "Abstain"].map(status => (
+                  <Button
+                    key={status}
+                    size="sm"
+                    onClick={() => setActiveFilter(status as VoteType)}
+                    bg={activeFilter === status ? "black" : "white"}
+                    color={activeFilter === status ? "white" : "black"}
+                    borderRadius="16px"
+                    border="1px solid"
+                    borderColor={activeFilter === status ? "black" : "gray.200"}
+                    _hover={{
+                      bg: activeFilter === status ? "blackAlpha.800" : "gray.100",
+                    }}
+                    px={3}
+                    py={1}
+                    fontWeight="medium">
+                    {status}{" "}
+                    {activeFilter === status && (
+                      <Badge ml={1} colorScheme="white" borderRadius="full" px={2}>
+                        {visibleComments.length}
+                      </Badge>
+                    )}
+                  </Button>
+                ))}
+              </Flex>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      </Menu.Root>
     )
   }
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack alignItems="stretch" gap={4}>
           <HStack justifyContent="space-between" w="full">
             <Heading fontWeight={700} fontSize="24px">
@@ -143,16 +143,18 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
               </Center>
             }
             endMessage={
-              <Heading size="md" textAlign={"center"} mt={4}>
+              <Heading size="xl" textAlign={"center"} mt={4}>
                 {t("You reached the end!")}
               </Heading>
             }>
             <VStack alignItems="stretch">
-              {visibleComments?.map(vote => <ProposalVoteComment key={vote.voter} vote={vote} />)}
+              {visibleComments?.map(vote => (
+                <ProposalVoteComment key={vote.voter} vote={vote} />
+              ))}
             </VStack>
           </InfiniteScroll>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

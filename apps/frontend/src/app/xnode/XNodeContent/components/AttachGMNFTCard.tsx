@@ -9,7 +9,6 @@ import {
   Box,
   Button,
   Card,
-  CardBody,
   Flex,
   Heading,
   HStack,
@@ -56,8 +55,8 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   if (!attachedGMNFT) return null
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -88,7 +87,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
               zIndex={0}
             />
             <HStack p="9px 12px" justify="space-between" gap={6} flex={1} zIndex={1} color="#FFFFFF">
-              <Skeleton isLoaded={!isUserGmsLoading} w={"68px"} h={"68px"} rounded="8px">
+              <Skeleton loading={isUserGmsLoading} w={"68px"} h={"68px"} rounded="8px">
                 <Box
                   w={"68px"}
                   h={"68px"}
@@ -101,7 +100,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                 </Box>
               </Skeleton>
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} noOfLines={1}>
+                <Text fontWeight={700} lineClamp={1}>
                   {attachedGMNFT?.metadata?.name}
                 </Text>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
@@ -110,7 +109,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                       {attachedGMNFT?.multiplier}
                       {"x"}
                     </Text>
-                    <Text fontSize="sm" fontWeight={400} noOfLines={1}>
+                    <Text fontSize="sm" fontWeight={400} lineClamp={1}>
                       {t("GM reward weight")}
                     </Text>
                   </HStack>
@@ -120,32 +119,32 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                 <Button
                   color="#C84968"
                   variant="dangerFilledTonal"
-                  isDisabled={isXNodeDelegator}
+                  disabled={isXNodeDelegator}
                   onClick={handleDetachOnClick}>
                   {t("Detach")}
                 </Button>
               ) : (
-                <Button variant={"primarySubtle"} onClick={() => handleAttachOnClick()} isDisabled={isXNodeDelegator}>
+                <Button variant={"primarySubtle"} onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
                   {t("Attach")}
                 </Button>
               )}
             </HStack>
           </Flex>
         </VStack>
-      </CardBody>
+      </Card.Body>
       <AttachGMToXNodeModal
         gmId={xNode.gmTokenIdAttachedToNode || ""}
         node={xNode}
-        isOpen={attachGmToXNodeModal.isOpen}
+        isOpen={attachGmToXNodeModal.open}
         onClose={attachGmToXNodeModal.onClose}
       />
       <DetachGMToXNodeModal
         gmId={xNode.gmTokenIdAttachedToNode || ""}
         gmLevel={attachedGMNFT?.tokenLevel || ""}
         xNodeId={xNode.nodeId}
-        isOpen={detachGmToXNodeModal.isOpen}
+        isOpen={detachGmToXNodeModal.open}
         onClose={detachGmToXNodeModal.onClose}
       />
-    </Card>
+    </Card.Root>
   )
 }

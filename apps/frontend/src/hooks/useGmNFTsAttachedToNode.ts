@@ -8,10 +8,10 @@ import { notFoundImage } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 
 const galaxyMemberAbi = GalaxyMember__factory.abi
-const galaxyMemberAddress = getConfig().galaxyMemberContractAddress
+const galaxyMemberAddress = getConfig().galaxyMemberContractAddress as `0x${string}`
 const galaxyMemberMethod = "getIdAttachedToNode" as const
 
-const voterRewardsAddress = getConfig().voterRewardsContractAddress
+const voterRewardsAddress = getConfig().voterRewardsContractAddress as `0x${string}`
 const voterRewardsAbi = VoterRewards__factory.abi
 const voterRewardsMethod = "levelToMultiplier" as const
 

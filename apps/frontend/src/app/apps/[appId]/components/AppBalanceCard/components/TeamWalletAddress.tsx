@@ -1,4 +1,4 @@
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -19,10 +19,10 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
   }, [teamWalletAddress])
 
   return (
-    <VStack w={"full"} spacing={4} align={"flex-start"}>
+    <VStack w={"full"} gap={4} align={"flex-start"}>
       <VStack align={"stretch"} w={"full"} justify={"start"}>
-        <BaseTooltip
-          text={
+        <Tooltip
+          content={
             "This is the wallet address where the funds will be sent. You can change this address in the app settings."
           }>
           <Flex w={"fit-content"} justifyContent={"center"} mt={1}>
@@ -33,7 +33,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
               <FiInfo color="rgba(0, 76, 252, 1)" size={14} />
             </HStack>
           </Flex>
-        </BaseTooltip>
+        </Tooltip>
 
         <HStack>
           {showCopiedLink ? (

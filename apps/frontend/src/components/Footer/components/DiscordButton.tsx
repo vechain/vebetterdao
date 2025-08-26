@@ -13,16 +13,15 @@ export const DiscordButton: React.FC<Props> = ({ isFullWidth }) => {
   return (
     <Link
       href={DISCORD_URL}
-      isExternal
       w={isFullWidth ? "full" : undefined}
       onClick={() => AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))}>
       <Button
-        leftIcon={<FaDiscord size={24} />}
-        textColor={"white"}
+        color={"white"}
         bgColor={`#5865f2`}
         _hover={{ bg: "#3f4b9c" }}
         borderRadius={22}
         w={isFullWidth ? "full" : undefined}>
+        <FaDiscord size={24} />
         <Text fontWeight={500} fontSize="16px" lineHeight="19px">
           {t("Join Discord Community")}
         </Text>

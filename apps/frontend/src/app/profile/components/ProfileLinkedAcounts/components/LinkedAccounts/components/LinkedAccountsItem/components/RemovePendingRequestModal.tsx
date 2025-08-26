@@ -1,22 +1,11 @@
 import { BaseModal } from "@/components/BaseModal"
-import {
-  Heading,
-  Text,
-  UseDisclosureProps,
-  VStack,
-  Button,
-  Box,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  useBreakpointValue,
-} from "@chakra-ui/react"
+import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useRemoveLinkingRequestToPassport } from "@/hooks"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDisclosureProps; passport: string }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
@@ -34,27 +23,27 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
   }, [modal, removeLinkingRequest])
 
   return (
-    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
-      <VStack align="stretch" gap={6}>
-        <VStack justify="center" align="center" gap={10}>
+    <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
+      <VStack alignItems="stretch" gap={6}>
+        <VStack justifyContent="center" alignItems="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
           <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to remove the pending request?")}
           </Heading>
         </VStack>
-        <VStack align="stretch">
+        <VStack alignItems="stretch">
           <Text fontWeight="600">{t("You’re removing it from")}</Text>
           <Text fontSize="sm">{passport}</Text>
         </VStack>
-        <Alert status="error" borderRadius="2xl">
-          <AlertIcon w={9} h={9} />
+        <Alert.Root status="error" borderRadius="2xl">
+          <Alert.Indicator w={9} h={9} />
           <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
-            <AlertTitle as="span">
+            <Alert.Title as="span">
               {t("Passport will not able to use the actions performed in this address.")}
-            </AlertTitle>
-            <AlertDescription as="span">{t("once you have removed the pending request.")}</AlertDescription>
+            </Alert.Title>
+            <Alert.Description as="span">{t("once you have removed the pending request.")}</Alert.Description>
           </Box>
-        </Alert>
+        </Alert.Root>
         <VStack>
           <Button variant="primaryAction" onClick={handleRemoveLink}>
             {t("Yes, I'm sure")}

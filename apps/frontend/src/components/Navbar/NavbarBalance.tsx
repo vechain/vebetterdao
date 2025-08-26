@@ -10,7 +10,7 @@ export const NavbarBalance = () => {
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
 
-  const [isDesktop] = useMediaQuery("(min-width: 1060px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
 
   if (!account?.address) {
     return null
@@ -22,7 +22,7 @@ export const NavbarBalance = () => {
   const padding = isDesktop ? "8px 20px" : "4px 10px"
 
   return (
-    <Skeleton isLoaded={!b3trBalanceLoading && !vot3BalanceLoading}>
+    <Skeleton loading={b3trBalanceLoading || vot3BalanceLoading}>
       <HStack flexBasis="250px" gap={0} h={cardHeight} pl={5}>
         <HStack gap={0} align="flex-start">
           <HStack gap={1} bg="#004CFC" borderLeftRadius="full" p={padding} pr="0">

@@ -1,18 +1,6 @@
 import { APP_SECURITY_LEVELS, useAppSecurityLevel, useXApps } from "@/api"
 import { useUpdateAppSecurityLevel } from "@/hooks"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormLabel,
-  Heading,
-  HStack,
-  Select,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, HStack, NativeSelect, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -45,61 +33,67 @@ export const AppSecurity = () => {
   )
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">{t("App Security")}</Heading>
+    <Card.Root w={"full"}>
+      <Card.Header>
+        <Heading size="3xl">{t("App Security")}</Heading>
         <Text fontSize="sm">{t("Change an app's security level")}</Text>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <form onSubmit={handleSubmit}>
-          <VStack spacing={4} alignItems={"start"}>
-            <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
-              <FormControl isRequired>
-                <FormLabel>
+          <VStack gap={4} alignItems={"start"}>
+            <HStack gap={4} w={"full"} justify={"space-between"} align={"start"}>
+              <Field.Root required>
+                <Field.Label>
                   <strong>{"App"}</strong>
-                </FormLabel>
-                <Select
-                  placeholder={t("Select app")}
-                  isDisabled={isLoading}
-                  onChange={e => setAppId(e.target.value)}
-                  value={appId}>
-                  {xApps?.active.map(item => {
-                    return (
-                      <option key={"Select" + item.name} value={item.id}>
-                        {item.name}
-                      </option>
-                    )
-                  })}
-                </Select>
-              </FormControl>
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Indicator />
+                  <NativeSelect.Field
+                    placeholder={t("Select app")}
+                    onChange={e => setAppId(e.target.value)}
+                    value={appId}>
+                    {xApps?.active.map(item => {
+                      return (
+                        <option key={"Select" + item.name} value={item.id}>
+                          {item.name}
+                        </option>
+                      )
+                    })}
+                  </NativeSelect.Field>
+                </NativeSelect.Root>
+              </Field.Root>
             </HStack>
 
-            <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
-              <FormControl isRequired>
-                <FormLabel>
+            <HStack gap={4} w={"full"} justify={"space-between"} align={"start"}>
+              <Field.Root required>
+                <Field.Label>
                   <strong>{"Security level"}</strong>
-                </FormLabel>
-                <Select
-                  placeholder={t("Select app security level")}
-                  isDisabled={isLoading}
-                  onChange={e => setAppSecurityLevel(Number(e.target.value))}
-                  value={appSecurityLevel ?? selectedAppSecurityLevel}>
-                  {APP_SECURITY_LEVELS.map((item, index) => {
-                    return (
-                      <option key={item} value={index}>
-                        {item}
-                      </option>
-                    )
-                  })}
-                </Select>
-              </FormControl>
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <NativeSelect.Root disabled={isLoading}>
+                  <NativeSelect.Indicator />
+                  <NativeSelect.Field
+                    placeholder={t("Select app security level")}
+                    onChange={e => setAppSecurityLevel(Number(e.target.value))}
+                    value={appSecurityLevel ?? selectedAppSecurityLevel}>
+                    {APP_SECURITY_LEVELS.map((item, index) => {
+                      return (
+                        <option key={item} value={index}>
+                          {item}
+                        </option>
+                      )
+                    })}
+                  </NativeSelect.Field>
+                </NativeSelect.Root>
+              </Field.Root>
             </HStack>
-            <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+            <Button disabled={!isFormValid} colorPalette="blue" type="submit" loading={isLoading}>
               {t("Update security level")}
             </Button>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

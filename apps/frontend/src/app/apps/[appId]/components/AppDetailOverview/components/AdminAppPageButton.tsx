@@ -29,10 +29,8 @@ export const AdminAppPageButton = () => {
   }
 
   return (
-    <>
-      <IconButton variant="primaryIconButton" aria-label="Admin App Page" onClick={handleAdmin}>
-        <UilSetting size="20px" />
-      </IconButton>
-    </>
+    <IconButton variant="primaryIconButton" aria-label="Admin App Page" onClick={handleAdmin}>
+      <UilSetting size="20px" />
+    </IconButton>
   )
 }

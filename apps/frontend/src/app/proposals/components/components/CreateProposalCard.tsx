@@ -10,11 +10,7 @@ import { useMetProposalCriteria } from "@/api/contracts/governance"
 export const CreateProposalCard = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
-  const {
-    isOpen: isRequirementModalOpen,
-    onOpen: openRequirementModal,
-    onClose: closeRequirementModal,
-  } = useDisclosure()
+  const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
 
   const { t } = useTranslation()
 

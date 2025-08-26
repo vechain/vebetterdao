@@ -24,7 +24,7 @@ export const ProposalVotesProgressBar = ({ isLoading, text, percentage, voters, 
           <Text color={color}>{text}</Text>
         </HStack>
         <HStack alignItems={"baseline"} gap={1}>
-          <Skeleton isLoaded={!isLoading}>
+          <Skeleton loading={isLoading}>
             <Text color={color} fontSize="14px">
               {t("{{percentage}}%", {
                 percentage: compactFormatter.format(Number(percentage)),
@@ -38,7 +38,7 @@ export const ProposalVotesProgressBar = ({ isLoading, text, percentage, voters, 
           </Skeleton>
         </HStack>
       </HStack>
-      <Skeleton isLoaded={!isLoading} position="relative" h="8px" rounded="full" overflow={"hidden"}>
+      <Skeleton loading={isLoading} position="relative" h="8px" rounded="full" overflow={"hidden"}>
         <Box bg="#D5D5D5" h="full" />
         <Box overflow={"hidden"} bg={color} h="full" w={`${percentage}%`} position="absolute" top={0} left={0} />
       </Skeleton>

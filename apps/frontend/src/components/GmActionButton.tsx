@@ -11,7 +11,7 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/cons
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
-import { BaseTooltip } from "./BaseTooltip"
+import { Tooltip } from "./ui/tooltip"
 
 export const GmActionButton = ({
   b3trBalanceScaled,
@@ -39,10 +39,10 @@ export const GmActionButton = ({
     b3trBalanceScaled && Number(b3trBalanceScaled || 0) >= Number(selectedGM?.b3trToUpgrade)
 
   // Modal controls
-  const { isOpen: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
-  const { isOpen: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
+  const { open: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
+  const { open: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
   const {
-    isOpen: isGetFreeNFTModalOpen,
+    open: isGetFreeNFTModalOpen,
     onOpen: onOpenGetFreeNFTModal,
     onClose: onCloseGetFreeNFTModal,
   } = useDisclosure()
@@ -129,7 +129,7 @@ export const GmActionButton = ({
             }}
             fontSize={"lg"}
             fontWeight={"bold"}
-            noOfLines={1}>
+            lineClamp={1}>
             {t("Max Level Reached!")}
           </Text>
         </HStack>
@@ -138,19 +138,19 @@ export const GmActionButton = ({
 
     // Default case: Upgrade GM
     return (
-      <BaseTooltip
-        placement="top"
-        showTooltip={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-        text={t("Not enough balance to upgrade your GM NFT to the next level.")}>
+      <Tooltip
+        positioning={{ placement: "top" }}
+        disabled={!!isEnoughBalanceToUpgradeGM}
+        content={t("Not enough balance to upgrade your GM NFT to the next level.")}>
         <span>
           <Button
             {...buttonProps}
-            isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+            disabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
             onClick={handleOnUpgrade}>
             {t("Upgrade NFT")}
           </Button>
         </span>
-      </BaseTooltip>
+      </Tooltip>
     )
   }, [
     buttonProps,

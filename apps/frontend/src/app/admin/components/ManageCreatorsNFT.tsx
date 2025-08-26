@@ -1,16 +1,11 @@
 import {
   VStack,
   Button,
-  FormControl,
-  FormLabel,
+  Field,
   InputGroup,
   Input,
   Heading,
-  FormErrorMessage,
   Card,
-  CardHeader,
-  CardBody,
-  Radio,
   RadioGroup,
   Text,
   Badge,
@@ -88,12 +83,12 @@ export const ManageCreatorsNFT = () => {
     <Badge
       textTransform="none"
       fontSize="sm"
-      colorScheme={colorScheme}
+      colorPalette={colorScheme}
       display="flex"
       alignItems="center"
       borderRadius="12px"
       p={2}>
-      <HStack align="start" spacing={2}>
+      <HStack align="start" gap={2}>
         <Icon as={icon} color={colorScheme === "green" ? "green.500" : "red.500"} />
         <Text as="span" wordBreak="break-word" whiteSpace="normal">
           {text}
@@ -103,49 +98,62 @@ export const ManageCreatorsNFT = () => {
   )
 
   return (
-    <Card w="full">
-      <CardHeader>
-        <Heading size="lg">{t("Manage Creator NFT")}</Heading>
-      </CardHeader>
+    <Card.Root w="full">
+      <Card.Header>
+        <Heading size="3xl">{t("Manage Creator NFT")}</Heading>
+      </Card.Header>
 
-      <CardBody>
-        <VStack spacing={8} align="start" w="full">
-          <RadioGroup defaultValue="mint">
+      <Card.Body>
+        <VStack gap={8} align="start" w="full">
+          <RadioGroup.Root
+            defaultValue="mint"
+            onValueChange={details => {
+              if (details.value) setValue("actionType", details.value)
+            }}>
             <VStack align="start">
-              <Radio {...register("actionType", { required: true })} value="mint">
-                {t("Mint NFT")}
-              </Radio>
-              <Radio {...register("actionType", { required: true })} value="burn">
-                {t("Burn NFT")}
-              </Radio>
-              <Radio {...register("actionType", { required: true })} value="check-ownership">
-                {t("Check Ownership")}
-              </Radio>
-              <Radio {...register("actionType", { required: true })} value="check-submitted-apps">
-                {t("Check submitted apps")}
-              </Radio>
+              <RadioGroup.Item {...register("actionType", { required: true })} value="mint">
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Mint NFT")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item {...register("actionType", { required: true })} value="burn">
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Burn NFT")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item {...register("actionType", { required: true })} value="check-ownership">
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Check Ownership")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
+              <RadioGroup.Item {...register("actionType", { required: true })} value="check-submitted-apps">
+                <RadioGroup.ItemHiddenInput />
+                <RadioGroup.ItemIndicator />
+                <RadioGroup.ItemText>{t("Check submitted apps")}</RadioGroup.ItemText>
+              </RadioGroup.Item>
             </VStack>
-          </RadioGroup>
+          </RadioGroup.Root>
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-            <VStack spacing={4} align="start">
+            <VStack gap={4} align="start">
               {actionType === "mint" && (
-                <FormControl>
-                  <FormLabel>
+                <Field.Root>
+                  <Field.Label>
                     <strong>{t("Wallet Address")}</strong>
-                  </FormLabel>
+                  </Field.Label>
                   <InputGroup>
                     <WalletAddressInput
                       onAddressResolved={address => setValue("creatorWalletAddress", address ?? "")}
                     />
                   </InputGroup>
-                </FormControl>
+                </Field.Root>
               )}
               {actionType === "burn" && (
-                <FormControl isRequired isInvalid={Boolean(errors.tokenId)}>
-                  <FormLabel>
+                <Field.Root required invalid={Boolean(errors.tokenId)}>
+                  <Field.Label>
                     <strong>{t("Token ID")}</strong>
-                  </FormLabel>
+                    <Field.RequiredIndicator />
+                  </Field.Label>
                   <InputGroup>
                     <Input
                       placeholder={t("Enter the token ID")}
@@ -154,14 +162,14 @@ export const ManageCreatorsNFT = () => {
                       })}
                     />
                   </InputGroup>
-                  {errors.tokenId && <FormErrorMessage>{errors.tokenId.message}</FormErrorMessage>}
-                </FormControl>
+                  {errors.tokenId && <Field.ErrorText>{errors.tokenId.message}</Field.ErrorText>}
+                </Field.Root>
               )}
               {actionType === "check-ownership" && (
-                <FormControl>
-                  <FormLabel>
+                <Field.Root>
+                  <Field.Label>
                     <strong>{t("Lookup Wallet Address")}</strong>
-                  </FormLabel>
+                  </Field.Label>
                   <InputGroup>
                     <WalletAddressInput onAddressResolved={address => setValue("lookupAddress", address ?? "")} />
                   </InputGroup>
@@ -174,13 +182,13 @@ export const ManageCreatorsNFT = () => {
                       )}
                     </VStack>
                   )}
-                </FormControl>
+                </Field.Root>
               )}
               {actionType === "check-submitted-apps" && (
-                <FormControl>
-                  <FormLabel>
+                <Field.Root>
+                  <Field.Label>
                     <strong>{t("Lookup Wallet Address")}</strong>
-                  </FormLabel>
+                  </Field.Label>
                   <InputGroup>
                     <WalletAddressInput
                       onAddressResolved={address => setValue("lookupCreatorAddress", address ?? "")}
@@ -197,21 +205,21 @@ export const ManageCreatorsNFT = () => {
                       )}
                     </VStack>
                   )}
-                </FormControl>
+                </Field.Root>
               )}
 
               {!check.includes(actionType) && (
                 <Button
-                  colorScheme="blue"
+                  colorPalette="blue"
                   type="submit"
-                  isDisabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
+                  disabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
                   {t(actionType === "mint" ? "Mint" : "Burn")}
                 </Button>
               )}
             </VStack>
           </form>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

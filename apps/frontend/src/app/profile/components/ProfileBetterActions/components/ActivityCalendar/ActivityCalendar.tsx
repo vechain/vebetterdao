@@ -1,18 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react"
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Skeleton,
-  Text,
-  VStack,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { Box, Button, Card, Flex, Grid, Heading, HStack, Skeleton, Text, VStack, useMediaQuery } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -34,7 +21,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   const { t } = useTranslation()
   const today = dayjs()
   const [currentDate, setCurrentDate] = useState(today)
-  const [isMobile] = useMediaQuery("(max-width: 600px)")
+  const [isMobile] = useMediaQuery(["(max-width: 600px)"])
 
   const daysInMonth = currentDate.daysInMonth()
   const firstDayOfMonth = currentDate.startOf("month").day()
@@ -122,11 +109,13 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
         onClose={() => setSelectedDate(undefined)}
         date={selectedDate}
       />
-      <Card w="full" variant="baseWithBorder">
-        <CardBody>
-          <VStack align="stretch" spacing={4}>
+      <Card.Root w="full" variant="baseWithBorder">
+        <Card.Body>
+          <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">
-              <Heading size="md">{t("Actions History")}</Heading>
+              <Heading size="xl" fontWeight="bold">
+                {t("Actions History")}
+              </Heading>
               <Button variant="primaryLink" size="sm" onClick={handleSetListView}>
                 {t("List View")}
               </Button>
@@ -136,10 +125,10 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
               <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)}>
                 <FaChevronLeft />
               </Button>
-              <Heading size="sm" textAlign="center">
+              <Heading size="md" textAlign="center">
                 {currentDate.format("MMMM YYYY").toUpperCase()}
               </Heading>
-              <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} isDisabled={isDisabledNextMonth}>
+              <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isDisabledNextMonth}>
                 <FaChevronRight />
               </Button>
             </Flex>
@@ -164,13 +153,13 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                 const isDisabled = isFutureDay || currentMonthOverviewQuery.isLoading || activityNumber === 0
 
                 return (
-                  <Skeleton key={day} h="10" isLoaded={!currentMonthOverviewQuery.isLoading}>
+                  <Skeleton key={day} h="10" loading={currentMonthOverviewQuery.isLoading}>
                     <Button
                       key={day}
                       onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
                       w="full"
-                      isDisabled={isDisabled}
-                      variant="unstyled"
+                      h="full"
+                      disabled={isDisabled}
                       fontSize="sm"
                       fontWeight="medium"
                       bg={getActivityColor(activityNumber)}
@@ -184,9 +173,9 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                 )
               })}
             </Grid>
-            <HStack justify="center" spacing={2} wrap="wrap">
+            <HStack justify="center" gap={2} wrap="wrap">
               {legendItems.map(item => (
-                <HStack key={item.label} spacing={1}>
+                <HStack key={item.label} gap={1}>
                   <Box w={4} h={4} bg={item.color} borderRadius="md" border="1px solid #ccc" />
 
                   <Text fontSize="xs" color="gray.600">
@@ -201,8 +190,8 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
               )}
             </HStack>
           </VStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </>
   )
 }

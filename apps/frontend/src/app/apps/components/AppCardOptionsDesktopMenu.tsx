@@ -1,18 +1,9 @@
-import {
-  Menu,
-  MenuButton,
-  IconButton,
-  MenuList,
-  MenuItem,
-  useClipboard,
-  useToast,
-  Skeleton,
-  Link,
-} from "@chakra-ui/react"
+import { Menu, IconButton, useClipboard, Skeleton, Link, Portal } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { FaExternalLinkAlt } from "react-icons/fa"
 import { FaEllipsisVertical, FaCheck, FaCopy, FaRegImage } from "react-icons/fa6"
+import { toaster } from "@/components/ui/toaster"
 
 type Props = {
   teamWalletAddress?: string
@@ -29,16 +20,16 @@ export const AppCardOptionsDesktopMenu = ({
   showViewDetails = false,
 }: Props) => {
   const { t } = useTranslation()
-  const { onCopy, hasCopied } = useClipboard(teamWalletAddress ?? "")
+  const { copy: onCopy, copied: hasCopied } = useClipboard({
+    value: teamWalletAddress ?? "",
+  })
 
-  const toast = useToast()
   const handleOnCopy = () => {
     onCopy()
-    toast({
+    toaster.success({
       title: t("Treasury address copied"),
-      status: "success",
       duration: 3000,
-      isClosable: true,
+      closable: true,
     })
   }
 
@@ -48,42 +39,45 @@ export const AppCardOptionsDesktopMenu = ({
   }
 
   return (
-    <Menu>
-      <MenuButton
-        as={IconButton}
-        isRound={true}
-        icon={<FaEllipsisVertical />}
-        _hover={{
-          cursor: "default",
-        }}
-        onClick={e => {
-          e.stopPropagation()
-        }}
-      />
-      <MenuList
-        onClick={e => {
-          e.stopPropagation()
-        }}>
-        <Skeleton isLoaded={!isLoading}>
-          {showViewDetails && (
-            <MenuItem onClick={navigateToAppDetail} icon={<FaRegImage />}>
-              {t("View details")}
-            </MenuItem>
-          )}
-          <MenuItem
-            as={Link}
-            _hover={{ textDecoration: "none" }}
-            href={externalUrl ?? ""}
-            isExternal
-            disabled={!externalUrl}
-            icon={<FaExternalLinkAlt />}>
-            {externalUrl ? t("Go to the App") : t("No App link available")}
-          </MenuItem>
-        </Skeleton>
-        <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
-          {t("Copy team wallet address")}
-        </MenuItem>
-      </MenuList>
-    </Menu>
+    <Menu.Root>
+      <Menu.Trigger asChild>
+        <IconButton
+          variant="subtle"
+          rounded="full"
+          _hover={{
+            cursor: "default",
+          }}>
+          <FaEllipsisVertical />
+        </IconButton>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content
+            bg={{
+              base: "white",
+              _dark: "#2D3748",
+            }}>
+            <Skeleton loading={isLoading}>
+              {showViewDetails && (
+                <Menu.Item value="view-details" onClick={navigateToAppDetail}>
+                  <FaRegImage />
+                  {t("View details")}
+                </Menu.Item>
+              )}
+              <Menu.Item value="go-to-app" disabled={!externalUrl}>
+                <FaExternalLinkAlt />
+                <Link href={externalUrl ?? ""} target="_blank" rel="noreferrer">
+                  {externalUrl ? t("Go to the App") : t("No App link available")}
+                </Link>
+              </Menu.Item>
+            </Skeleton>
+            <Menu.Item value="copy-team-wallet-address" onClick={handleOnCopy}>
+              {hasCopied ? <FaCheck /> : <FaCopy />}
+              {t("Copy team wallet address")}
+            </Menu.Item>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 }

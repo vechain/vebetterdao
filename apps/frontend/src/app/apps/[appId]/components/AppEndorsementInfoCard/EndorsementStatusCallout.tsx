@@ -43,7 +43,7 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
         </Text>
       </HStack>
       {showDescription && (
-        <Skeleton isLoaded={!isAppInfoLoading && !isGracePeriodEventLoading} w="full">
+        <Skeleton loading={isAppInfoLoading || isGracePeriodEventLoading} w="full">
           <Text fontSize="14px" color="#6A6A6A">
             <Trans i18nKey={description as any} values={{ gracePeriodEndDate }} t={t} />
           </Text>

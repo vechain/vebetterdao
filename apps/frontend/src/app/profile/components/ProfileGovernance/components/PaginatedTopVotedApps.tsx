@@ -1,9 +1,10 @@
-import { VStack, HStack, Text, Box, Spinner } from "@chakra-ui/react"
+import { VStack, Box, Spinner, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppVotesGiven } from "@/api"
 import { usePagination, useInfiniteScroll } from "@/hooks"
-import { IoIosArrowBack } from "react-icons/io"
+
 import { AppVotedBox } from "./AppVotedBox"
+import { FaAngleLeft } from "react-icons/fa"
 
 type PaginatedProposalsProps = {
   topVotedApps: AppVotesGiven[]
@@ -26,14 +27,14 @@ export const PaginatedTopVotedApps = ({ topVotedApps, itemsPerPage = 6, goBack }
 
   return (
     <VStack w={"full"}>
-      <HStack w={"full"} mb={{ base: 2, md: 4 }} color="#004CFC" cursor={"pointer"} onClick={goBack}>
-        <IoIosArrowBack onClick={goBack} size={16} />
-        <Text fontSize={{ base: 14, md: 16 }} fontWeight={"500"}>
-          {t("go back")}
-        </Text>
-      </HStack>
-      <VStack w={"full"} spacing={4}>
-        {currentItems?.map(app => <AppVotedBox key={app.appId} appVoted={app} />)}
+      <Button variant={"plain"} color="primary" onClick={goBack} size="sm" alignItems="center" alignSelf={"flex-start"}>
+        <FaAngleLeft />
+        {t("Go back")}
+      </Button>
+      <VStack w={"full"} gap={4}>
+        {currentItems?.map(app => (
+          <AppVotedBox key={app.appId} appVoted={app} />
+        ))}
       </VStack>
       {/* Sentinel Element */}
       {hasMore && (

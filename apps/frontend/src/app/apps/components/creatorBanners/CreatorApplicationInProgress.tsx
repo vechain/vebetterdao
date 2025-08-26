@@ -1,11 +1,11 @@
-import { Box, Card, CardBody, Heading, Image, Stack, Text } from "@chakra-ui/react"
+import { Box, Card, Heading, Image, Stack, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationInProgress = () => {
   const { t } = useTranslation()
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       w="full"
       maxW="100%"
@@ -15,7 +15,7 @@ export const CreatorApplicationInProgress = () => {
         borderRadius: "20px",
         border: "2px solid #E0E9FE",
       }}>
-      <CardBody h={"full"} p={0}>
+      <Card.Body h={"full"} p={0}>
         <Stack direction={{ base: "column", md: "row" }} w="full" h="full">
           {/* Left Section: Image, Title, and Description */}
           <Stack direction="row" h={"full"} align="center">
@@ -49,7 +49,7 @@ export const CreatorApplicationInProgress = () => {
             </Stack>
           </Stack>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

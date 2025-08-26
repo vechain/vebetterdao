@@ -7,7 +7,7 @@ interface Props extends Omit<ButtonProps, "onChange"> {
   onChange: ChangeEventHandler<HTMLInputElement>
 }
 
-export const UploadFileButton = forwardRef<HTMLLabelElement, Props>(({ onChange, ...props }, ref) => {
+export const UploadFileButton = forwardRef<HTMLButtonElement, Props>(({ onChange, ...props }, ref) => {
   const { t } = useTranslation()
   const id = useId()
   return (
@@ -15,12 +15,12 @@ export const UploadFileButton = forwardRef<HTMLLabelElement, Props>(({ onChange,
       ref={ref}
       as="label"
       cursor="pointer"
-      htmlFor={id}
+      // htmlFor={id}
       variant="outline"
-      colorScheme="primary"
+      colorPalette="blue"
       rounded="full"
-      leftIcon={<FaFile />}
       {...props}>
+      <FaFile />
       {t("Upload File")}
       <Input display="none" type="file" id={id} name={id} onChange={onChange} />
     </Button>

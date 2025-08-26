@@ -1,11 +1,11 @@
 import { getB3TrTokenDetailsQueryKey, buildMintB3trTx } from "@/api"
-import { useToast } from "@chakra-ui/react"
 
 import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet, UseSendTransactionReturnValue, useThor } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
+import { toaster } from "@/components/ui/toaster"
 
 type useMintB3trProps = {
   address?: string
@@ -22,7 +22,6 @@ type useMintB3trProps = {
 export const useMintB3tr = ({ address, amount, onSuccess }: useMintB3trProps): UseSendTransactionReturnValue => {
   const thor = useThor()
   const { account } = useWallet()
-  const toast = useToast()
 
   const clauseBuilder = useCallback(() => {
     if (!address) throw new Error("address is required")
@@ -37,16 +36,14 @@ export const useMintB3tr = ({ address, amount, onSuccess }: useMintB3trProps): U
     const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
     const formattedAddress = FormattingUtils.humanAddress(address ?? "")
 
-    toast({
+    toaster.success({
       title: "Tokens minted succesfully",
       description: `You have minted ${formattedAmount} B3TR to ${formattedAddress}`,
-      status: "success",
-      position: "bottom-left",
       duration: 5000,
-      isClosable: true,
+      closable: true,
     })
     onSuccess?.()
-  }, [toast, onSuccess, amount, address])
+  }, [onSuccess, amount, address])
 
   const refetchQueryKeys = useMemo(
     () => [getB3trBalanceQueryKey(account?.address ?? undefined), getB3TrTokenDetailsQueryKey()],

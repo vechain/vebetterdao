@@ -2,8 +2,7 @@ import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
-import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
+import { Button, Heading, HStack, Icon, IconButton, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -13,7 +12,6 @@ import { useRoundProposals } from "../../hooks/useRoundProposals"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { isDesktop } = useBreakpoints()
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -47,35 +45,41 @@ export const DashboardAllocationRounds = () => {
 
   return (
     <ResponsiveCard>
-      <VStack spacing={8} w="full">
-        <HStack spacing={4} justifyContent="space-between" w="full">
+      <VStack gap={8} w="full">
+        <HStack gap={4} justifyContent="space-between" w="full">
           {isDesktop ? (
             <Button
-              variant="link"
-              colorScheme="primary"
-              leftIcon={<FaAngleLeft />}
-              isDisabled={allocationRound.isFirstRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+              px={0}
+              fontSize={"md"}
+              variant="plain"
+              _hover={{
+                textDecoration: "underline",
+              }}
+              color="primary"
+              disabled={allocationRound.isFirstRound}
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
+              fontWeight="semibold">
+              <Icon as={FaAngleLeft} boxSize={4} />
               {t("Previous round")}
             </Button>
           ) : (
             <IconButton
-              size={"lg"}
+              fontSize={"md"}
               aria-label="Previous round"
-              variant="link"
-              colorScheme="primary"
-              icon={<Icon as={FaAngleLeft} boxSize={5} />}
-              isDisabled={allocationRound.isFirstRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-            />
+              variant="ghost"
+              colorPalette="primary"
+              disabled={allocationRound.isFirstRound}
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+              <Icon as={FaAngleLeft} boxSize={4} />
+            </IconButton>
           )}
 
-          <VStack spacing={2}>
+          <VStack gap={2}>
             <Heading fontSize="24px" fontWeight={400}>
               <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: selectedRoundId }} t={t} />
             </Heading>
-            <HStack spacing={2}>
-              <Skeleton isLoaded={!roundInfoLoading}>
+            <HStack gap={2}>
+              <Skeleton loading={roundInfoLoading}>
                 <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
                   {t("{{from}} to {{to}}", {
                     from: roundInfo.voteStartTimestamp?.format("MMM D"),
@@ -84,7 +88,7 @@ export const DashboardAllocationRounds = () => {
                 </Text>
               </Skeleton>
               <DotSymbol color="#6A6A6A" size="2px" />
-              <Skeleton isLoaded={!roundInfoLoading}>
+              <Skeleton loading={roundInfoLoading}>
                 <Text fontSize="14px" color="primary.500" fontWeight={600}>
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
@@ -93,33 +97,39 @@ export const DashboardAllocationRounds = () => {
           </VStack>
           {isDesktop ? (
             <Button
-              variant="link"
-              colorScheme="primary"
-              rightIcon={<FaAngleRight />}
-              isDisabled={allocationRound.isLastRound}
+              px={0}
+              fontWeight="semibold"
+              _hover={{
+                textDecoration: "underline",
+              }}
+              variant="plain"
+              fontSize={"md"}
+              color="primary"
+              disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
               {t("Next round")}
+              <Icon as={FaAngleRight} boxSize={4} />
             </Button>
           ) : (
             <IconButton
-              size={"lg"}
+              fontSize={"md"}
               aria-label="Next round"
-              variant="link"
-              colorScheme="primary"
-              icon={<Icon as={FaAngleRight} boxSize={5} />}
-              isDisabled={allocationRound.isLastRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
-            />
+              variant="ghost"
+              colorPalette="primary"
+              disabled={allocationRound.isLastRound}
+              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+              <Icon as={FaAngleRight} boxSize={5} />
+            </IconButton>
           )}
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
-        <VStack spacing={4} w="full">
+        <VStack gap={4} w="full">
           <Heading fontSize="24px" fontWeight={400}>
             {t("Proposals in this round or looking for support")}
           </Heading>
 
           {!!sortedProposals.length ? (
-            <VStack spacing={4} w="full">
+            <VStack gap={4} w="full">
               {sortedProposals.map(proposal => (
                 <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
               ))}
@@ -128,9 +138,9 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Button onClick={() => router.push("/proposals")} variant="link" colorScheme="primary">
+        <Link href="/proposals" color="primary" fontWeight="semibold">
           {t("View all proposals")}
-        </Button>
+        </Link>
       </VStack>
     </ResponsiveCard>
   )

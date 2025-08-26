@@ -1,4 +1,4 @@
-import { VStack, Heading, Text, HStack, Divider } from "@chakra-ui/react"
+import { VStack, Heading, Text, HStack, Separator } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingDelegationItemDelegatorPOV } from "./components/PendingDelegationItemDelegatorPOV"
 import { useGetPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
@@ -18,7 +18,7 @@ export const PendingDelegationDelegatorPOV = ({ address }: Props) => {
   if (isPendingDelegationsLoading || !delegateeAddress || Number(delegateeAddress) === 0) return null
   return (
     <>
-      <Divider />
+      <Separator />
       <VStack align="stretch" gap={6}>
         <VStack align="stretch">
           <HStack justify="space-between">

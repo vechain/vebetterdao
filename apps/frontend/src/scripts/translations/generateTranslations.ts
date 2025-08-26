@@ -20,11 +20,11 @@ ${JSON.stringify(batch, null, 2)}
 
 const generateTranslations = async () => {
   languagesToGenerate.forEach(async language => {
-    console.log(`Generating translations for ${language.name}`)
+    console.info(`Generating translations for ${language.name}`)
     const batches = splitObjectIntoBatches(en)
     const translations: KeyValueObject = {}
     const promises = batches.map(async (batch, index) => {
-      console.log(`Generating translations for batch ${index + 1} for language "${language.name}"`)
+      console.info(`Generating translations for batch ${index + 1} for language "${language.name}"`)
       return askChatGpt(generatePrompt(language.name, batch))
     })
     const results = await Promise.all(promises)
@@ -33,7 +33,7 @@ const generateTranslations = async () => {
     })
     writeFileSync(`./src/i18n/languages/${language.code}.json`, JSON.stringify(translations, null, 2))
 
-    console.log(`Translations for ${language.name} generated`)
+    console.info(`Translations for ${language.name} generated`)
   })
 }
 

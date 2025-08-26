@@ -62,7 +62,7 @@ export const PreviewCreatedProposals = ({
           </HStack>
         )}
       </HStack>
-      <VStack w={"full"} spacing={4}>
+      <VStack w={"full"} gap={4}>
         {firstProposalsWithMetadata?.map(proposal => (
           <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
         ))}

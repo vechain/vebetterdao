@@ -19,13 +19,8 @@ export const EmptyStateGovernance = ({ title, description, illustration, buttonT
       <VStack w={"full"} borderRadius={12} borderWidth={1} borderColor={"#D5D5D5"} p={10}>
         {illustration}
         <Text>{description}</Text>
-        <Button
-          mt={2}
-          rounded={"full"}
-          variant={"primaryAction"}
-          colorScheme="primary"
-          leftIcon={buttonIcon && <Icon as={buttonIcon} />}
-          onClick={onClick}>
+        <Button mt={2} rounded={"full"} variant={"primaryAction"} colorPalette="primary" onClick={onClick}>
+          {buttonIcon && <Icon as={buttonIcon} />}
           {buttonText}
         </Button>
       </VStack>

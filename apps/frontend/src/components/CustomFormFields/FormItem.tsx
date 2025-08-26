@@ -1,4 +1,4 @@
-import { FormControl, FormErrorMessage, FormLabel, Input, Text, Textarea } from "@chakra-ui/react"
+import { Field, Input, Text, Textarea } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
 
 type FormItemProps = {
@@ -23,15 +23,17 @@ export const FormItem = ({
   const InputComponent = type === "textarea" ? Textarea : Input
 
   return (
-    <FormControl isInvalid={!!error}>
-      <FormLabel mb={description ? 0 : undefined}>{label}</FormLabel>
+    <Field.Root invalid={!!error}>
+      <Field.Label fontSize="md" mb={description ? 0 : undefined} htmlFor={register.name}>
+        {label}
+      </Field.Label>
       {description && (
         <Text fontSize="xs" color="gray.500" mb={2}>
           {description}
         </Text>
       )}
       <InputComponent placeholder={placeholder} {...register} onBlur={onBlur} rounded="xl" />
-      {error && <FormErrorMessage>{error}</FormErrorMessage>}
-    </FormControl>
+      {error && <Field.ErrorText>{error}</Field.ErrorText>}
+    </Field.Root>
   )
 }

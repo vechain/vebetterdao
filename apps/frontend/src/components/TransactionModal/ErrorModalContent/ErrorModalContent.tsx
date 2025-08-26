@@ -55,11 +55,12 @@ export const ErrorModalContent = ({
           />
         </motion.div>
         <VStack gap={4}>
-          {description && <Text size="sm">{description}</Text>}
+          {description && <Text textStyle="sm">{description}</Text>}
           {showExplorerButton && txId && (
             <Link
               href={getExplorerTxLink(txId)}
-              isExternal
+              target="_blank"
+              rel="noopener noreferrer"
               color="gray.500"
               fontSize={"14px"}
               textDecoration={"underline"}>

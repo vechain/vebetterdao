@@ -1,4 +1,4 @@
-import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
@@ -26,12 +26,12 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const ownerDomain = vnsOwnerData?.domain
 
   const isOwner = compareAddresses(account?.address ?? "", xNodeOwner ?? "")
-  const displayAddress = isOwner ? delegateeDomain ?? delegatee : ownerDomain ?? xNodeOwner
+  const displayAddress = isOwner ? (delegateeDomain ?? delegatee) : (ownerDomain ?? xNodeOwner)
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <Heading fontSize="lg">{t("Node Management")}</Heading>
@@ -60,21 +60,19 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
               onRevoke={revokeModal.onOpen}
             />
           ) : (
-            <Button
-              leftIcon={<UilArrowUpRight color="#004CFC" />}
-              variant="primarySubtle"
-              onClick={delegateModal.onOpen}>
+            <Button variant="primarySubtle" onClick={delegateModal.onOpen}>
+              <UilArrowUpRight color="#004CFC" />
               {t("Add node manager")}
             </Button>
           )}
 
           <DelegationAlert isXNodeDelegator={isXNodeDelegator} isXNodeDelegated={isXNodeDelegated} />
         </VStack>
-      </CardBody>
+      </Card.Body>
 
       <DelegateXNodeModal xNode={xNode} modal={delegateModal} />
       <RevokeXNodeDelegationModal xNode={xNode} modal={revokeModal} />
-    </Card>
+    </Card.Root>
   )
 }
 
@@ -124,7 +122,7 @@ const DelegatedNodeDisplay = ({
           </HStack>
         </HStack>
         {isXNodeDelegator && (
-          <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
+          <Button variant="dangerGhost" colorPalette="red" onClick={onRevoke} w={"fit-content"}>
             {t("Cancel delegation")}
           </Button>
         )}

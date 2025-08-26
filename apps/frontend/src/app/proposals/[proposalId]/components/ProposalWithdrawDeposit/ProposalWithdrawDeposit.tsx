@@ -15,7 +15,7 @@ export const ProposalWithdrawDeposit = () => {
   return (
     <>
       {proposal.state !== ProposalState.Pending && proposal.userSupport != 0 && (
-        <Card
+        <Card.Root
           border={`1px solid ${proposal.isUserSupportLeft ? "#004CFC" : "#D5D5D5"}`}
           rounded="16px"
           p="24px"
@@ -92,7 +92,7 @@ export const ProposalWithdrawDeposit = () => {
             </VStack>
             {proposal.isUserSupportLeft && <ProposalWithdrawButton />}
           </VStack>
-        </Card>
+        </Card.Root>
       )}
     </>
   )

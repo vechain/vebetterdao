@@ -1,21 +1,21 @@
 import { BaseModal } from "@/components/BaseModal"
-import { UseDisclosureProps, VStack, Text, Heading, Button, Link } from "@chakra-ui/react"
+import { UseDisclosureProps, VStack, Text, Heading, Link } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { SignalCard } from "./SignalCard"
 import { SignalEvent } from "@/api/contracts/xApps/hooks/useUserSignalEvents"
 
 type Props = {
-  isOpen: UseDisclosureProps["isOpen"]
+  open: UseDisclosureProps["open"]
   onClose: UseDisclosureProps["onClose"]
   signals: (SignalEvent & { appName: string })[]
 }
 
-export const SignalModal = ({ isOpen, onClose, signals }: Props) => {
+export const SignalModal = ({ open, onClose, signals }: Props) => {
   const { t } = useTranslation()
 
   return (
-    <BaseModal isOpen={isOpen || false} onClose={onClose || (() => {})}>
-      <VStack align="stretch" spacing={4}>
+    <BaseModal isOpen={open || false} onClose={onClose || (() => {})}>
+      <VStack align="stretch" gap={4}>
         <Heading size="md">{t("You have been signalled")}</Heading>
         <Text color="#6A6A6A" fontWeight={400}>
           {t(
@@ -29,9 +29,9 @@ export const SignalModal = ({ isOpen, onClose, signals }: Props) => {
           )}
         </Text>
 
-        <Button as={Link} href="/appeal" colorScheme="blue" borderRadius="full" width="">
+        <Link variant="plain" href="/appeal" colorPalette="blue" borderRadius="full">
           {t("File an appeal")}
-        </Button>
+        </Link>
 
         {signals.map(signal => (
           <SignalCard key={signal.appId} appName={signal.appName} reason={signal.reason} />

@@ -2,13 +2,12 @@ import { ConnectWalletButton } from "@/components/ConnectWalletButton"
 import { WalletIcon } from "@/components/Icons/WalletIcon"
 import { Card, Stack, Text, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { FaWallet } from "react-icons/fa6"
 
 export const NotConnectedWallet = () => {
-  const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
+  const [isAbove1200] = useMediaQuery(["(min-width: 1200px)"])
   const { t } = useTranslation()
   return (
-    <Card
+    <Card.Root
       bg="#004CFC"
       rounded="12px"
       p="24px"
@@ -17,16 +16,16 @@ export const NotConnectedWallet = () => {
       overflow={"hidden"}
       bgImage={"/assets/backgrounds/cloud-background.webp"}
       bgSize="cover"
-      bgPosition="center"
+      backgroundPosition="center"
       bgRepeat="no-repeat">
       <Stack justify={"space-between"} direction={isAbove1200 ? "row" : "column"} align="center" gap="24px">
         <Stack direction={isAbove1200 ? "row" : "column"} gap="24px" align="center">
           <WalletIcon />
           <Stack align="stretch">
-            <Text fontSize="2xl" fontWeight={600} align={isAbove1200 ? "left" : "center"}>
+            <Text fontSize="2xl" fontWeight={600} textAlign={isAbove1200 ? "left" : "center"}>
               {t("Wallet not connected")}
             </Text>
-            <Text align={isAbove1200 ? "left" : "center"}>
+            <Text textAlign={isAbove1200 ? "left" : "center"}>
               {t("Connect your wallet to see your balance, earn rewards and mint NFTs.")}
             </Text>
           </Stack>
@@ -35,12 +34,11 @@ export const NotConnectedWallet = () => {
           connectionVariant="modal"
           buttonStyleProps={{
             bg: "#E0E9FE",
-            textColor: "#004CFC",
+            color: "#004CFC",
             px: 10,
-            leftIcon: <FaWallet />,
           }}
         />
       </Stack>
-    </Card>
+    </Card.Root>
   )
 }

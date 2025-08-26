@@ -37,7 +37,7 @@ export const NewCreatorPageFormContent = () => {
 
   const { errors } = formState
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const { clearData } = useCreatorSubmissionFormStore()
   const router = useRouter()
   const [submitStatus, setSubmitStatus] = useState<"success" | "error">("success")
@@ -86,7 +86,7 @@ export const NewCreatorPageFormContent = () => {
 
   return (
     <VStack align="center" w="100%" justify="center">
-      <VStack w={{ base: "100%", sm: "100%", md: "80%" }} spacing={0}>
+      <VStack w={{ base: "100%", sm: "100%", md: "80%" }} gap={0}>
         <HStack
           justify="space-between"
           align="center"
@@ -95,7 +95,7 @@ export const NewCreatorPageFormContent = () => {
           borderTopRadius="12px"
           bgImage={"/assets/backgrounds/cloud-background.webp"}
           bgSize="cover"
-          bgPosition="center"
+          backgroundPosition="center"
           bgRepeat="no-repeat"
           px={4}>
           {/* Text Container */}
@@ -121,7 +121,7 @@ export const NewCreatorPageFormContent = () => {
           </Box>
         </HStack>
 
-        <Card w="full" borderTopRadius="0px" margin={0} py={0}>
+        <Card.Root w="full" borderTopRadius="0px" margin={0} py={0}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <SubmitCreatorForm
               register={register}
@@ -133,7 +133,7 @@ export const NewCreatorPageFormContent = () => {
               clearErrors={clearErrors}
             />
           </form>
-        </Card>
+        </Card.Root>
         <CreatorApplicationModal
           status={submitStatus}
           errorMessage={submitStatus === "error" ? submitErrorMessage : undefined}
