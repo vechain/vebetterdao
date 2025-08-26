@@ -68,7 +68,7 @@ export const RequirementModal = ({ isOpen, onClose, hasNft, isGrants }: Props) =
         <Image src={modalIcon} alt="NFT Requirement icon" boxSize={180} />
         <VStack align="stretch" spacing={6}>
           <Heading alignSelf="center" fontSize="28px">
-            {t("To apply for a proposal, you must")}
+            {isGrants ? t("To apply for a grant, you must") : t("To apply for a proposal, you must")}
           </Heading>
 
           {!hasNft ? (

@@ -1,6 +1,7 @@
 "use client"
 
 import { MotionVStack } from "@/components"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
@@ -22,6 +23,11 @@ export default function GrantsNew() {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Grants New`)
   }, [])
+
+  const metGrantCriteria = useMetProposalCriteria()
+
+  // Show requirement modal if criteria not met
+  if (!metGrantCriteria) return null
 
   return (
     <MotionVStack>
