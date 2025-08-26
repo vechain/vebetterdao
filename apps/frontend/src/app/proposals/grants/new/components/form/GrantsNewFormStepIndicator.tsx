@@ -1,14 +1,4 @@
-import {
-  Stepper,
-  Step,
-  StepIndicator,
-  StepStatus,
-  StepNumber,
-  StepTitle,
-  Icon,
-  useMediaQuery,
-  Flex,
-} from "@chakra-ui/react"
+import { Steps, Icon, useMediaQuery, Flex } from "@chakra-ui/react"
 import { BsCheck, BsChevronRight } from "react-icons/bs"
 import { GrantStep } from "./GrantsNewFormStepCard"
 
@@ -25,39 +15,36 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
         "-ms-overflow-style": "none",
         "scrollbar-width": "none",
       }}>
-      <Stepper index={activeStep} variant="grants" display="flex" overflowX="hidden" w="full" maxW="80vw">
-        {steps.map((step, index) => {
-          const isActiveStep = activeStep === index
-          const showStepTitle = (isMobile && isActiveStep) || !isMobile
+      <Steps.Root step={activeStep} count={steps.length} display="flex" overflowX="hidden" w="full" maxW="80vw">
+        <Steps.List>
+          {steps.map((step, index) => {
+            const isActiveStep = activeStep === index
+            const showStepTitle = (isMobile && isActiveStep) || !isMobile
 
-          return (
-            <>
+            return (
               <Flex key={step.key} align="center">
-                <Step>
-                  <StepIndicator>
-                    <StepStatus
-                      complete={<Icon as={BsCheck} boxSize={7} />}
-                      incomplete={<StepNumber />}
-                      active={<StepNumber />}
-                    />
-                  </StepIndicator>
+                <Steps.Item index={index}>
+                  <Steps.Indicator>
+                    <Steps.Status complete={<Icon as={BsCheck} boxSize={7} />} incomplete={<Steps.Number />} />
+                  </Steps.Indicator>
 
                   {showStepTitle && (
-                    <StepTitle fontSize={{ base: "sm", md: "sm" }} isTruncated noOfLines={1}>
+                    <Steps.Title fontSize={{ base: "sm", md: "sm" }} isTruncated noOfLines={1}>
                       {step.title}
-                    </StepTitle>
+                    </Steps.Title>
                   )}
-                </Step>
+
+                  {index < steps.length - 1 && (
+                    <Flex w={"full"} align="center" justify="center" minW={{ base: "10px", md: "24px" }}>
+                      <Icon as={BsChevronRight} boxSize={4} color={index < activeStep ? "blue.500" : "gray.400"} />
+                    </Flex>
+                  )}
+                </Steps.Item>
               </Flex>
-              {index < steps.length - 1 && (
-                <Flex w={"full"} align="center" justify="center" minW={{ base: "10px", md: "24px" }}>
-                  <Icon as={BsChevronRight} boxSize={4} color={index < activeStep ? "blue.500" : "gray.400"} />
-                </Flex>
-              )}
-            </>
-          )
-        })}
-      </Stepper>
+            )
+          })}
+        </Steps.List>
+      </Steps.Root>
     </Flex>
   )
 }

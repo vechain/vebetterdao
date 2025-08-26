@@ -1,17 +1,5 @@
 import { useTranslation } from "react-i18next"
-import {
-  VStack,
-  CardHeader,
-  CardBody,
-  Card,
-  useSteps,
-  Button,
-  HStack,
-  Stack,
-  useDisclosure,
-  useToast,
-  Text,
-} from "@chakra-ui/react"
+import { VStack, Card, Button, HStack, Stack, useDisclosure, Text, useSteps } from "@chakra-ui/react"
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutGrant } from "./steps"
@@ -25,7 +13,8 @@ import { useRouter, usePathname } from "next/navigation"
 import { UnsavedChangesModal } from "@/components/UnsavedChangesModal"
 import { useGrantDraftStore } from "@/store"
 import { useEffect, useCallback, useMemo, useRef, useState } from "react"
-import { SuccessToastModal } from "@/app/components/Toast/SuccessToastModal"
+// import { SuccessToastModal } from "@/app/components/Toast/SuccessToastModal"
+import { toaster } from "@/components/ui/toaster"
 
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
@@ -42,11 +31,10 @@ export type GrantStep = {
 
 export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
-  const { isOpen: isUnsavedModalOpen, onOpen: openUnsavedModal, onClose: closeUnsavedModal } = useDisclosure()
+  const { open: isUnsavedModalOpen, onOpen: openUnsavedModal, onClose: closeUnsavedModal } = useDisclosure()
 
   const router = useRouter()
   const pathname = usePathname()
-  const toast = useToast()
 
   const [selectedGrantType, setSelectedGrantType] = useState<string>("dapp")
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
@@ -169,8 +157,8 @@ export const GrantsNewFormStepCard = () => {
     },
   ]
 
-  const { activeStep, goToNext, goToPrevious } = useSteps({
-    index: 0,
+  const stepsUI = useSteps({
+    defaultStep: 0,
     count: steps.length,
   })
 
@@ -184,8 +172,8 @@ export const GrantsNewFormStepCard = () => {
 
   const onSubmit = async (data: GrantFormData) => {
     setData({ ...data })
-    if (activeStep !== lastStep) {
-      return goToNext()
+    if (stepsUI.value !== lastStep) {
+      return stepsUI.setStep(stepsUI.value + 1)
     }
 
     if (!currentRoundId || isNaN(Number(currentRoundId))) return
@@ -215,15 +203,12 @@ export const GrantsNewFormStepCard = () => {
       setData(dataToSave)
       saveDraftToStore()
       setLastSavedFormData(JSON.stringify(dataToSave))
-      toast({
+      toaster.success({
+        title: "Draft saved successfully",
         duration: 3000,
-        isClosable: true,
-        position: "top",
-        containerStyle: { marginTop: "72px" },
-        render: ({ onClose }) => <SuccessToastModal onClose={onClose} />,
       })
     }
-  }, [getValues, setData, saveDraftToStore, toast, hasChangedSinceLastSave, selectedGrantType])
+  }, [getValues, setData, saveDraftToStore, hasChangedSinceLastSave, selectedGrantType])
 
   const handleLeaveAnyway = useCallback(() => {
     if (pendingNavigation) {
@@ -242,12 +227,9 @@ export const GrantsNewFormStepCard = () => {
     if (dataToSave.grantType === selectedGrantType) {
       setData(dataToSave)
       saveDraftToStore()
-      toast({
+      toaster.success({
+        title: "Draft saved successfully",
         duration: 1500,
-        isClosable: true,
-        position: "top",
-        containerStyle: { marginTop: "80px" },
-        render: ({ onClose }) => <SuccessToastModal onClose={onClose} />,
       })
     }
     if (pendingNavigation) {
@@ -257,7 +239,7 @@ export const GrantsNewFormStepCard = () => {
         window.location.href = pendingNavigation
       }, 100)
     }
-  }, [getValues, setData, saveDraftToStore, toast, pendingNavigation, closeUnsavedModal, selectedGrantType])
+  }, [getValues, setData, saveDraftToStore, pendingNavigation, closeUnsavedModal, selectedGrantType])
 
   // beforeunload guard
   useEffect(() => {
@@ -329,7 +311,7 @@ export const GrantsNewFormStepCard = () => {
 
   const firstStep = 0
   const lastStep = steps.length - 1
-  const currentStep = steps[activeStep]
+  const currentStep = steps[stepsUI.value]
 
   return (
     <>
@@ -342,19 +324,19 @@ export const GrantsNewFormStepCard = () => {
         onSaveDraft={handleSaveDraftAndLeave}
         onLeaveAnyway={handleLeaveAnyway}
       />
-      <Card>
-        <CardHeader>
-          <GrantsNewFormStepIndicator activeStep={activeStep} steps={steps} />
-        </CardHeader>
-        <CardBody px={{ base: 3, md: 8 }}>
+      <Card.Root>
+        <Card.Header>
+          <GrantsNewFormStepIndicator activeStep={stepsUI.value} steps={steps} />
+        </Card.Header>
+        <Card.Body px={{ base: 3, md: 8 }}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-            <VStack spacing={4} w="full" align="flex-start">
+            <VStack gap={4} w="full" align="flex-start">
               {currentStep?.content}
               <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
-                <HStack spacing={4} w="full">
-                  {activeStep !== firstStep && (
+                <HStack gap={4} w="full">
+                  {stepsUI.value !== firstStep && (
                     <Button
-                      onClick={goToPrevious}
+                      onClick={() => stepsUI.setStep(stepsUI.value - 1)}
                       variant="secondary"
                       px={8}
                       size="lg"
@@ -363,25 +345,27 @@ export const GrantsNewFormStepCard = () => {
                     </Button>
                   )}
                   <Button type="submit" variant="primaryAction" px={8} size="lg" w={{ base: "full", md: "auto" }}>
-                    {activeStep === lastStep ? t("Apply") : t("Continue")}
+                    {stepsUI.value === lastStep ? t("Apply") : t("Continue")}
                   </Button>
                 </HStack>
-                {activeStep !== firstStep && (
+                {stepsUI.value !== firstStep && (
                   <Button
                     variant="primaryLink"
                     onClick={handleSaveDraft}
                     px={8}
-                    isDisabled={isSaveDraftDisabled}
-                    opacity={isSaveDraftDisabled ? 0.5 : 1}
-                    cursor={isSaveDraftDisabled ? "not-allowed" : "pointer"}>
+                    disabled={isSaveDraftDisabled}
+                    _disabled={{
+                      opacity: 0.5,
+                      cursor: "not-allowed",
+                    }}>
                     {t("Save draft")}
                   </Button>
                 )}
               </Stack>
             </VStack>
           </form>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </>
   )
 }

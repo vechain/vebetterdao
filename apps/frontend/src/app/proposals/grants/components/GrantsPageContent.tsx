@@ -17,7 +17,7 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true })
+  const { open, onOpen, onClose } = useDisclosure({ defaultIsOpen: true })
   const { enrichedGrantProposals, totalGrantAmount } = useProposalEnriched()
 
   const stepsArray = useMemo(
@@ -78,7 +78,7 @@ export const GrantsPageContent = () => {
         <Heading as="h1" size="xl">
           {t("Grants")}
         </Heading>
-        {!isOpen && (
+        {!open && (
           <Link
             display="inline-flex"
             alignItems="center"
@@ -92,7 +92,7 @@ export const GrantsPageContent = () => {
           </Link>
         )}
       </HStack>
-      <GrantsStepsCard steps={stepsArray} isOpen={isOpen} onClose={onClose} />
+      <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
       <GrantsStatsCards
         totalApplications={enrichedGrantProposals.length}
         totalApproved={enrichedGrantProposals.length}

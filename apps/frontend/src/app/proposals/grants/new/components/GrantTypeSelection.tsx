@@ -1,8 +1,9 @@
-import { VStack, Text, Grid, Card, CardBody, List, ListItem, ListIcon, useColorModeValue } from "@chakra-ui/react"
+import { VStack, Text, Grid, Card, CardBody, List } from "@chakra-ui/react"
 import { UilCheck } from "@iconscout/react-unicons"
 import { Control, Controller } from "react-hook-form"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { useTranslation } from "react-i18next"
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 interface GrantTypeSelectionProps {
   control: Control<GrantFormData>
@@ -46,10 +47,10 @@ export const GrantTypeSelection = ({ control }: GrantTypeSelectionProps) => {
       name="grantType"
       control={control}
       render={({ field: { onChange, value } }) => (
-        <VStack spacing={8} align="stretch" w="full">
+        <VStack gap={8} align="stretch" w="full">
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
             {Object.entries(grantTypes).map(([type, info]) => (
-              <Card
+              <Card.Root
                 key={type}
                 variant="filledWithBorder"
                 cursor="pointer"
@@ -58,7 +59,7 @@ export const GrantTypeSelection = ({ control }: GrantTypeSelectionProps) => {
                 _hover={{ borderColor: "#004CFC" }}
                 onClick={() => onChange(type)}>
                 <CardBody>
-                  <VStack align="flex-start" spacing={4}>
+                  <VStack align="flex-start" gap={4}>
                     <Text fontSize="xl" fontWeight="bold">
                       {info.title}
                     </Text>
@@ -75,17 +76,19 @@ export const GrantTypeSelection = ({ control }: GrantTypeSelectionProps) => {
                     <Text fontSize="lg" fontWeight="semibold">
                       {t("Apply if you are building")}
                     </Text>
-                    <List spacing={2}>
+                    <List.Root gap={2}>
                       {info.requirements.map((req, index) => (
-                        <ListItem key={index} display="flex" alignItems="center">
-                          <ListIcon as={UilCheck} color="#004CFC" />
+                        <List.Item key={`${req}-${index}`} display="flex" alignItems="center">
+                          <List.Indicator asChild color="#004CFC">
+                            <UilCheck />
+                          </List.Indicator>
                           <Text color="gray.600">{req}</Text>
-                        </ListItem>
+                        </List.Item>
                       ))}
-                    </List>
+                    </List.Root>
                   </VStack>
                 </CardBody>
-              </Card>
+              </Card.Root>
             ))}
           </Grid>
         </VStack>

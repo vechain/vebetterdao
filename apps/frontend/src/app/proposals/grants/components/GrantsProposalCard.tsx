@@ -1,4 +1,4 @@
-import { HStack, VStack, Heading, Text, Card, Divider, Center, Stack, Hide } from "@chakra-ui/react"
+import { HStack, VStack, Heading, Text, Card, Separator, Center, Stack, Box } from "@chakra-ui/react"
 import { B3TRIcon } from "@/components/Icons/B3TRIcon"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { useRouter } from "next/navigation"
@@ -45,12 +45,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   }
 
   return (
-    <Card w="full" p={{ base: 5, md: 7 }} cursor="pointer" onClick={goToProposal}>
+    <Card.Root w="full" p={{ base: 5, md: 7 }} cursor="pointer" onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
         {/* Title */}
-        <Heading size="md" noOfLines={2}>
-          {proposal.title}
-        </Heading>
+        <Heading size="md">{proposal.title}</Heading>
 
         {/* B3TR and dApp Grant */}
         <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
@@ -60,24 +58,24 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             <Text>
               {proposal.grantAmount} {"B3TR"}
             </Text>
-            <Hide below="md">
+            <Box hideBelow="md">
               <Text>
                 {"•"} {proposal?.grantType} {"Grant"}
               </Text>
-            </Hide>
-            {/* Divider */}
+            </Box>
+            {/* Separator */}
             <Center height="20px">
-              <Divider orientation="vertical" />
+              <Separator orientation="vertical" />
             </Center>
             {/* Proposer */}
             <AddressWithProfilePicture address={proposal.proposerAddress} />
             <Center height="20px">
-              <Divider orientation="vertical" />
+              <Separator orientation="vertical" />
             </Center>
           </HStack>
           <ProposalLinksAndSocials proposal={proposal} />
         </Stack>
-        <Divider w="full" h={1} />
+        <Separator w="full" h={1} />
         {/* Footer */}
         {/* Mobile Layout */}
         <VStack w="full" gap={2} display={{ base: "flex", md: "none" }}>
@@ -125,6 +123,6 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
           )}
         </HStack>
       </VStack>
-    </Card>
+    </Card.Root>
   )
 }

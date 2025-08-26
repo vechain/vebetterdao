@@ -4,15 +4,10 @@ import {
   Grid,
   GridItem,
   Heading,
-  UnorderedList,
-  ListItem,
+  List,
   Button,
   Icon,
-  AccordionItem,
   Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
   Badge,
   HStack,
   useMediaQuery,
@@ -54,104 +49,97 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
     return dayjs(durationInMiliseconds).format("MM/DD/YYYY")
   }
 
+  const currentMilestone = getValues(`milestones.${index}`)
+  const hasDurationInfo = currentMilestone.durationFrom && currentMilestone.durationTo
+  const formattedDurationFrom = formatDuration(currentMilestone.durationFrom)
+  const formattedDurationTo = formatDuration(currentMilestone.durationTo)
+
   return (
-    <AccordionItem key={index} {...(isFirst && { borderTop: "none" })}>
-      {({ isExpanded }) => {
-        const currentMilestone = getValues(`milestones.${index}`)
-        const hasDurationInfo = currentMilestone.durationFrom && currentMilestone.durationTo
-        const formattedDurationFrom = formatDuration(currentMilestone.durationFrom)
-        const formattedDurationTo = formatDuration(currentMilestone.durationTo)
-        const showDurationBadge = !isExpanded && hasDurationInfo && !isMobile
-        return (
-          <>
-            <AccordionButton w="full" py={4} textAlign="left" justifyContent="space-between">
-              <HStack w="full" spacing={4}>
-                <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
-                {showDurationBadge && (
-                  <Badge variant="outline" size="sm">
-                    <Text fontSize="sm">{formattedDurationFrom}</Text>
-                    <UilArrowRight />
-                    <Text fontSize="sm">{formattedDurationTo}</Text>
-                  </Badge>
-                )}
-              </HStack>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel>
-              <Text fontSize="sm" color="gray.500" pb={4}>
-                {t("Define the milestones for your project. Funds will be released as milestones are completed.")}
+    <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })}>
+      <Accordion.ItemTrigger w="full" py={4} textAlign="left" justifyContent="space-between">
+        <HStack w="full" spacing={4}>
+          <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
+          {hasDurationInfo && !isMobile && (
+            <Badge variant="outline" size="sm">
+              <Text fontSize="sm">{formattedDurationFrom}</Text>
+              <UilArrowRight />
+              <Text fontSize="sm">{formattedDurationTo}</Text>
+            </Badge>
+          )}
+        </HStack>
+        <Accordion.ItemIndicator />
+      </Accordion.ItemTrigger>
+      <Accordion.ItemContent>
+        <Accordion.ItemBody>
+          <Text fontSize="sm" color="gray.500" pb={4}>
+            {t("Define the milestones for your project. Funds will be released as milestones are completed.")}
+          </Text>
+
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
+            <GridItem colSpan={{ base: 1, md: 2 }}>
+              <FormItem
+                label={t("Amount")}
+                placeholder="0 USD"
+                register={register(`milestones.${index}.fundingAmount`, {
+                  required: t("Please enter the amount for this milestone"),
+                })}
+                error={errors.milestones?.[index]?.fundingAmount?.message}
+              />
+            </GridItem>
+            <GridItem colSpan={{ base: 1, md: 2 }}>
+              <FormItem
+                label={t("Duration")}
+                placeholder={t("From")}
+                register={register(`milestones.${index}.durationFrom`, {
+                  required: t("Please enter the duration for this milestone"),
+                })}
+                error={errors.milestones?.[index]?.durationFrom?.message}
+              />
+            </GridItem>
+
+            <GridItem colSpan={{ base: 1, md: 2 }}>
+              <FormItem
+                placeholder={t("To")}
+                register={register(`milestones.${index}.durationTo`, {
+                  required: t("Please enter the duration for this milestone"),
+                })}
+                error={errors.milestones?.[index]?.durationTo?.message}
+              />
+            </GridItem>
+            <GridItem colSpan={{ base: 1, md: 2 }}>
+              <FormItem
+                label={t("Description")}
+                type="textarea"
+                placeholder={t("Milestone description")}
+                register={register(`milestones.${index}.description`, {
+                  required: t("Please enter the description for this milestone"),
+                })}
+                error={errors.milestones?.[index]?.description?.message}
+              />
+            </GridItem>
+            {/*TODO: Use theme instead of hardcoded color*/}
+            <GridItem bg="#F8F8F8" p={4} borderRadius="xl" mt={{ base: 0, md: 10 }}>
+              <Heading size="sm">{t("Tips")}</Heading>
+              <Text fontSize="sm" color="gray.500">
+                {t("Explain integration and launch on VeBetterDAO, like:")}
               </Text>
-
-              <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
-                <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <FormItem
-                    label={t("Amount")}
-                    placeholder="0 USD"
-                    register={register(`milestones.${index}.fundingAmount`, {
-                      required: t("Please enter the amount for this milestone"),
-                    })}
-                    error={errors.milestones?.[index]?.fundingAmount?.message}
-                  />
-                </GridItem>
-                <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <FormItem
-                    label={t("Duration")}
-                    placeholder={t("From")}
-                    register={register(`milestones.${index}.durationFrom`, {
-                      required: t("Please enter the duration for this milestone"),
-                    })}
-                    error={errors.milestones?.[index]?.durationFrom?.message}
-                  />
-                </GridItem>
-
-                <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <FormItem
-                    placeholder={t("To")}
-                    register={register(`milestones.${index}.durationTo`, {
-                      required: t("Please enter the duration for this milestone"),
-                    })}
-                    error={errors.milestones?.[index]?.durationTo?.message}
-                  />
-                </GridItem>
-                <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <FormItem
-                    label={t("Description")}
-                    type="textarea"
-                    placeholder={t("Milestone description")}
-                    register={register(`milestones.${index}.description`, {
-                      required: t("Please enter the description for this milestone"),
-                    })}
-                    error={errors.milestones?.[index]?.description?.message}
-                  />
-                </GridItem>
-                {/*TODO: Use theme instead of hardcoded color*/}
-                <GridItem bg="#F8F8F8" p={4} borderRadius="xl" mt={{ base: 0, md: 10 }}>
-                  <Heading size="sm">{t("Tips")}</Heading>
-                  <Text fontSize="sm" color="gray.500">
-                    {t("Explain integration and launch on VeBetterDAO, like:")}
-                  </Text>
-                  <UnorderedList>
-                    <ListItem>{t("B3TR integrated as a reward mechanism within the app")}</ListItem>
-                    <ListItem>{t("VeWorld wallet support for seamless B3TR transactions")}</ListItem>
-                    <ListItem>{t("Testing and optimization reporting to ensure smooth UX and functionality")}</ListItem>
-                  </UnorderedList>
-                </GridItem>
-                {!isFirst && ( //TODO: This information should come from the Smart Contract, to know the minimal amount of milestones
-                  <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
-                    <Button
-                      borderRadius="full"
-                      leftIcon={<Icon as={UilTrash} />}
-                      onClick={() => removeMilestone(index)}>
-                      {t("Remove")}
-                    </Button>
-                  </GridItem>
-                )}
-              </Grid>
-            </AccordionPanel>
-          </>
-        )
-      }}
-    </AccordionItem>
+              <List.Root listStyle="disc">
+                <List.Item>{t("B3TR integrated as a reward mechanism within the app")}</List.Item>
+                <List.Item>{t("VeWorld wallet support for seamless B3TR transactions")}</List.Item>
+                <List.Item>{t("Testing and optimization reporting to ensure smooth UX and functionality")}</List.Item>
+              </List.Root>
+            </GridItem>
+            {!isFirst && ( //TODO: This information should come from the Smart Contract, to know the minimal amount of milestones
+              <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
+                <Button borderRadius="full" leftIcon={<Icon as={UilTrash} />} onClick={() => removeMilestone(index)}>
+                  {t("Remove")}
+                </Button>
+              </GridItem>
+            )}
+          </Grid>
+        </Accordion.ItemBody>
+      </Accordion.ItemContent>
+    </Accordion.Item>
   )
 }
 
@@ -192,7 +180,7 @@ export const Milestones = ({ register, setValue, getValues, setData, errors, for
 
   return (
     <VStack spacing={6} align="stretch" w="full">
-      <Accordion allowMultiple>
+      <Accordion.Root multiple>
         {milestones.map((milestone, index) => {
           const uniqueKey = `${milestone.durationFrom}-${milestone.durationTo}`
           return (
@@ -206,7 +194,7 @@ export const Milestones = ({ register, setValue, getValues, setData, errors, for
             />
           )
         })}
-      </Accordion>
+      </Accordion.Root>
       <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
         <GridItem>
           <Button leftIcon={<Icon as={UilPlus} />} variant="primaryLink" onClick={handleAddMilestone}>
