@@ -1921,5 +1921,17 @@
   "How to support Grant and Proposal?": "How to support Grant and Proposal?",
   "Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>": "Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>",
   "You’ll need to buy VOT3 — it’s the token used to support and signal interest in grant proposals.": "You’ll need to buy VOT3 — it’s the token used to support and signal interest in grant proposals.",
-  "Schedule": "Schedule"
+  "Schedule": "Schedule",
+  "How grant application works?": "How grant application works?",
+  "1. Submit your application": "1. Submit your application",
+  "Get early support from the community": "Get early support from the community",
+  "If the minimum deposit threshold is not met within the timeframe, the proposal is automatically cancelled.": "If the minimum deposit threshold is not met within the timeframe, the proposal is automatically cancelled.",
+  "Once it hits the threshold, it moves forward.": "Once it hits the threshold, it moves forward.",
+  "Get final approval from the community": "Get final approval from the community",
+  "The community and VeChain Foundation express support as {icon1: thumbs up}, {icon2: thumbs down} and {icon3: abstain}.": "The community and VeChain Foundation express support as {icon1: thumbs up}, {icon2: thumbs down} and {icon3: abstain}.",
+  "2. Get early support from the community": "2. Get early support from the community",
+  "Your Grant needs early backing from the community and must receive a minimum deposit of over 3.5M VOT3 tokens within 1 week (1 round) of submission to proceed.": "Your Grant needs early backing from the community and must receive a minimum deposit of over 3.5M VOT3 tokens within 1 week (1 round) of submission to proceed.",
+  "3. Get final approval from the community": "3. Get final approval from the community",
+  "If the Grant is approved, you will receive funds.": "If the Grant is approved, you will receive funds.",
+  "The community and VeChain Foundation express support as <thumbsUp/>, <thumbsDown/>, <abstain/>": "The community and VeChain Foundation express support as <thumbsUp/>, <thumbsDown/> <abstain/>"
 }
