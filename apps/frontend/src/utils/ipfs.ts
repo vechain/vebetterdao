@@ -41,7 +41,7 @@ export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<st
 
     // Extract the IPFS hash from the response
     const ipfsHash = response.data.IpfsHash
-    console.log("IPFS Hash:", ipfsHash)
+    console.info("IPFS Hash:", ipfsHash)
 
     return ipfsHash
   } catch (error) {

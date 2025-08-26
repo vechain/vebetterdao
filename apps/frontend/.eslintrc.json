@@ -17,6 +17,12 @@
         "destructuredArrayIgnorePattern": "^_"
       }
     ],
-    "no-duplicate-imports": "error"
+    "no-duplicate-imports": "error",
+    "no-console": [
+      "error",
+      {
+        "allow": ["error", "warn", "info"]
+      }
+    ]
   }
 }

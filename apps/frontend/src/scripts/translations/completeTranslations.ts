@@ -32,15 +32,15 @@ const completeTranslations = async () => {
     }, {} as KeyValueObject)
 
     if (Object.keys(missingTranslations).length === 0) {
-      console.log(`Skipping: All translations for ${language.name} are already completed`)
+      console.info(`Skipping: All translations for ${language.name} are already completed`)
       return
     }
 
-    console.log(`Generating translations for ${language.name}`)
+    console.info(`Generating translations for ${language.name}`)
     const batches = splitObjectIntoBatches(missingTranslations)
     const translatedBatches: KeyValueObject = languageTranslations
     const promises = batches.map(async (batch, index) => {
-      console.log(`Generating translations for batch ${index + 1} for language "${language.name}"`)
+      console.info(`Generating translations for batch ${index + 1} for language "${language.name}"`)
       return askChatGpt(generatePrompt(language.name, batch))
     })
     const results = await Promise.all(promises)
@@ -49,7 +49,7 @@ const completeTranslations = async () => {
     })
     writeFileSync(`./src/i18n/languages/${language.code}.json`, JSON.stringify(translatedBatches, null, 2))
 
-    console.log(`Translations for ${language.name} generated`)
+    console.info(`Translations for ${language.name} generated`)
   })
 }
 
