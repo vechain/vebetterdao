@@ -26,6 +26,9 @@ const config = defineConfig({
       steps: stepsSlotRecipe,
       nativeSelect: nativeSelectSlotRecipe,
       numberInput: numberInputSlotRecipe,
+      //TODO: Fix popover and badge recipes
+      // popover: popoverSlotRecipe,
+      // badge: badgeSlotRecipe,
     },
 
     keyframes: {

@@ -30,6 +30,20 @@ export const stepsSlotRecipe = defineSlotRecipe({
           },
         },
       },
+      grants: {
+        indicator: {
+          bg: "#EFEFEF",
+          color: "#6A6A6A",
+          "&[data-status=complete]": {
+            bg: "#E0E9FE",
+            color: "#004CFC",
+          },
+          "&[data-status=active]": {
+            bg: "#004CFC",
+            color: "#FFFFFF",
+          },
+        },
+      },
     },
   },
 })
