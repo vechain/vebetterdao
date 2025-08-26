@@ -34,9 +34,7 @@ export const StepModal = <T extends string>({
   disableCloseButton,
 }: StepModalProps<T>) => {
   const handleClose = () => {
-    // reset the active step to 0
     setActiveStep(0)
-    // close the modal
     onClose()
   }
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])

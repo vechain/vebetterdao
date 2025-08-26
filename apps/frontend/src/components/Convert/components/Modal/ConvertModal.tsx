@@ -1,5 +1,4 @@
 "use-client"
-import { useSteps } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import {
   useConvertB3tr,
@@ -28,21 +27,26 @@ export enum ConvertStep {
   REVIEW_TX = "REVIEW_TX",
 }
 
+const STEP_COUNT = Object.keys(ConvertStep).length
+
 export const ConvertModal = ({ isOpen, onClose }: Props) => {
+  const { account } = useWallet()
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
   const { isTxModalOpen } = useTransactionModal()
   const { t } = useTranslation()
+  const [step, setStep] = useState(0)
 
-  const { account } = useWallet()
-  const {
-    value: activeStep,
-    goToPrevStep,
-    goToNextStep,
-    setStep,
-  } = useSteps({
-    defaultStep: 0,
-    count: Object.keys(ConvertStep).length,
-  })
+  const goToNextStep = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose()
+    else setStep(nextStep)
+  }, [step, onClose])
+
+  const goToPrevStep = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose()
+    else setStep(prevStep)
+  }, [step, onClose])
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
@@ -221,7 +225,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       goToNext={goToNextStep}
       setActiveStep={setStep}
       steps={steps}
-      activeStep={activeStep}
+      activeStep={step}
     />
   )
 }
