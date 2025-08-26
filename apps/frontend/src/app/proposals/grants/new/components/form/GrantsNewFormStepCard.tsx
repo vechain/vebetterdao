@@ -23,9 +23,8 @@ import { useCurrentAllocationsRoundId } from "@/api"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 import { useRouter, usePathname } from "next/navigation"
 import { UnsavedChangesModal } from "@/components/UnsavedChangesModal"
-import { getGrantFormDisplayName } from "@/utils/formUtils"
 import { useGrantDraftStore } from "@/store"
-import { useEffect, useCallback, useState } from "react"
+import { useEffect, useCallback, useMemo, useRef, useState } from "react"
 import { SuccessToastModal } from "@/app/components/Toast/SuccessToastModal"
 
 export enum GrantFormStep {
@@ -55,41 +54,47 @@ export const GrantsNewFormStepCard = () => {
   const [bypassInterception, setBypassInterception] = useState(false)
 
   const store = useGrantDraftStore(selectedGrantType)
-  const { setData, saveDraft: saveDraftToStore, ...formData } = store
+  const { setData, saveDraft: saveDraftToStore } = store
+
+  const getCleanDraftFromStore = useCallback(() => {
+    const { ...rest } = store as any
+    return rest as Partial<GrantFormData>
+  }, [store])
+
+  const initialDefaults = useMemo(
+    () => (getCleanDraftFromStore() as GrantFormData) ?? ({} as GrantFormData),
+    // only depend on the type to avoid re-initting while typing
+    // we want a fresh snapshot when the page first renders for that type
+    [getCleanDraftFromStore],
+  )
+
   const { handleSubmit, control, register, formState, setValue, getValues, watch, reset } = useForm<GrantFormData>({
-    defaultValues: formData,
+    defaultValues: initialDefaults,
   })
 
   const currentFormData = watch()
   const { errors } = formState
 
-  const projectDisplayName = getGrantFormDisplayName(currentFormData)
-
-  // Update selected grant type when form changes
   useEffect(() => {
     if (currentFormData.grantType && currentFormData.grantType !== selectedGrantType) {
       setSelectedGrantType(currentFormData.grantType)
     }
   }, [currentFormData.grantType, selectedGrantType])
 
-  // Only reset form when grant type changes AND we're switching to a different type with different data
+  // Reset ONLY when the grant type changes
+  const prevTypeRef = useRef<string>(selectedGrantType)
   useEffect(() => {
-    // Get the new store data (excluding store methods)
-    const cleanFormData = { ...formData }
-    delete (cleanFormData as any).setData
-    delete (cleanFormData as any).saveDraft
-    delete (cleanFormData as any).clearData
-    delete (cleanFormData as any).hasDraft
-    delete (cleanFormData as any).getAllDrafts
-
-    // Only reset if the new store data is significantly different or if it has a name
-    if (cleanFormData.applicantName || cleanFormData.projectName) {
-      reset(cleanFormData)
-      setLastSavedFormData(JSON.stringify(cleanFormData))
+    if (prevTypeRef.current !== selectedGrantType) {
+      const freshDraft = getCleanDraftFromStore()
+      // if you want to avoid wiping completely empty drafts, keep as-is:
+      reset({ ...(freshDraft as GrantFormData), grantType: selectedGrantType })
+      setLastSavedFormData(JSON.stringify(getValues()))
+      prevTypeRef.current = selectedGrantType
     }
-  }, [selectedGrantType, reset, formData])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGrantType, reset, getCleanDraftFromStore])
 
-  // Check if form has changed since last draft save
+  // Check if form has changed vs. last saved snapshot
   const hasChangedSinceLastSave = useCallback(() => {
     const currentDataString = JSON.stringify(getValues())
     return currentDataString !== lastSavedFormData
@@ -98,41 +103,35 @@ export const GrantsNewFormStepCard = () => {
   const isSaveDraftDisabled = !hasChangedSinceLastSave()
   const shouldShowUnsavedModal = hasChangedSinceLastSave()
 
-  // Initialize the "last saved" state with current form data on mount
+  // Initialize "last saved" on mount
   useEffect(() => {
-    // Set the initial form data as "saved" to prevent false unsaved changes detection
-    const initialFormData = getValues()
-    setLastSavedFormData(JSON.stringify(initialFormData))
-  }, [getValues])
+    setLastSavedFormData(JSON.stringify(getValues()))
+    // we intentionally run this once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  // Auto-sync form changes to store with debouncing to prevent flickering
+  // Debounced store sync — guarded to avoid spamming store & causing feedback
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout
-
-    const subscription = watch(data => {
-      // Clear previous timeout
+    let timeoutId: ReturnType<typeof setTimeout>
+    const sub = watch(data => {
       clearTimeout(timeoutId)
-
-      // Debounce the sync to prevent excessive updates
       timeoutId = setTimeout(() => {
-        // Only sync if the form's grant type matches the currently selected store
-        if (
-          data &&
-          data.grantType === selectedGrantType &&
-          (data.applicantName || data.projectName || data.problemDescription)
-        ) {
+        if (!data) return
+        if (data.grantType !== selectedGrantType) return
+        // avoid noisy writes: only push if different from lastSavedFormData
+        const serialized = JSON.stringify(data)
+        if (serialized !== lastSavedFormData) {
           setData(data as GrantFormData)
         }
-      }, 300) // 300ms debounce
+      }, 300)
     })
-
     return () => {
-      subscription.unsubscribe()
+      sub.unsubscribe()
       clearTimeout(timeoutId)
     }
-  }, [watch, setData, selectedGrantType])
+  }, [watch, setData, selectedGrantType, lastSavedFormData])
 
-  const steps = [
+  const steps: GrantStep[] = [
     {
       key: GrantFormStep.GRANT_TYPE,
       content: <GrantTypeSelection control={control} />,
@@ -153,7 +152,8 @@ export const GrantsNewFormStepCard = () => {
           getValues={getValues}
           setData={setData}
           errors={errors}
-          formData={formData}
+          // pass current RHF values instead of the unstable spread store object
+          formData={getValues()}
         />
       ),
       title: t("Milestones"),
@@ -173,6 +173,7 @@ export const GrantsNewFormStepCard = () => {
     index: 0,
     count: steps.length,
   })
+
   const { onMetadataUpload } = useUploadGrantProposalMetadata()
   const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
     onSuccess: () => {
@@ -180,176 +181,120 @@ export const GrantsNewFormStepCard = () => {
     },
   })
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const firstStep = 0
-  const lastStep = steps.length - 1
 
   const onSubmit = async (data: GrantFormData) => {
-    //Keep new and old data in the store
     setData({ ...data })
     if (activeStep !== lastStep) {
       return goToNext()
     }
 
-    if (!currentRoundId || isNaN(Number(currentRoundId))) return //TODO: THROW ERROR
+    if (!currentRoundId || isNaN(Number(currentRoundId))) return
 
     const title = data.projectName
     const shortDescription = data.problemDescription
     const proposalMetadataURI = await onMetadataUpload({ ...data, title, shortDescription })
-    if (!proposalMetadataURI) return console.error("Error uploading proposal metadata") //TODO: THROW ERROR
+    if (!proposalMetadataURI) return console.error("Error uploading proposal metadata")
 
-    //Upload the description and milestones to IPFS
     const milestonesIpfsCID = await onMetadataUpload(data.milestones)
-    if (!milestonesIpfsCID) return console.error("Error uploading milestones") //TODO: THROW ERROR
+    if (!milestonesIpfsCID) return console.error("Error uploading milestones")
 
     await createGrantProposal({
       metadataIpfsCID: proposalMetadataURI,
       milestonesIpfsCID,
       milestones: data.milestones,
-      votingRoundId: Number(currentRoundId) + 2, //TODO: Make sure this is next round or possible round depending on min voting delay
-      depositAmount: "0", //TODO: Add info from the form
+      votingRoundId: Number(currentRoundId) + 2,
+      depositAmount: "0",
     })
   }
 
   const handleSaveDraft = useCallback(() => {
     if (!hasChangedSinceLastSave()) return
-
     const currentFormData = getValues()
-    const dataToSave = {
-      ...currentFormData,
-      grantType: selectedGrantType, // Ensure we're saving with the correct grant type
-    }
-
-    // Update store only if grant types match
+    const dataToSave = { ...currentFormData, grantType: selectedGrantType }
     if (dataToSave.grantType === selectedGrantType) {
       setData(dataToSave)
-
       saveDraftToStore()
-
       setLastSavedFormData(JSON.stringify(dataToSave))
-
-      // Show success toast
       toast({
         duration: 3000,
         isClosable: true,
         position: "top",
-        containerStyle: {
-          marginTop: "72px",
-        },
+        containerStyle: { marginTop: "72px" },
         render: ({ onClose }) => <SuccessToastModal onClose={onClose} />,
       })
     }
   }, [getValues, setData, saveDraftToStore, toast, hasChangedSinceLastSave, selectedGrantType])
 
-  // Handle navigation confirmation
   const handleLeaveAnyway = useCallback(() => {
     if (pendingNavigation) {
-      // Set flag to bypass interception
       setBypassInterception(true)
-
-      // Use setTimeout to ensure the flag is set before navigation
       setTimeout(() => {
         window.location.href = pendingNavigation
       }, 0)
-
       setPendingNavigation(null)
       closeUnsavedModal()
     }
   }, [pendingNavigation, closeUnsavedModal])
 
   const handleSaveDraftAndLeave = useCallback(() => {
-    // Get current form values and ensure grant type is correct
     const currentFormData = getValues()
-    const dataToSave = {
-      ...currentFormData,
-      grantType: selectedGrantType, // Ensure we're saving with the correct grant type
-    }
-
-    // Save only if grant types match
+    const dataToSave = { ...currentFormData, grantType: selectedGrantType }
     if (dataToSave.grantType === selectedGrantType) {
       setData(dataToSave)
       saveDraftToStore()
-
       toast({
         duration: 1500,
         isClosable: true,
         position: "top",
-        containerStyle: {
-          marginTop: "80px",
-        },
+        containerStyle: { marginTop: "80px" },
         render: ({ onClose }) => <SuccessToastModal onClose={onClose} />,
       })
     }
-
     if (pendingNavigation) {
-      // Close modal first
       closeUnsavedModal()
       setPendingNavigation(null)
-
-      // Navigate after a short delay to let the draft save time register
       setTimeout(() => {
         window.location.href = pendingNavigation
       }, 100)
     }
   }, [getValues, setData, saveDraftToStore, toast, pendingNavigation, closeUnsavedModal, selectedGrantType])
 
-  // Handle browser refresh/close warning and ensure data is saved
+  // beforeunload guard
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      // Always try to save current form data before leaving
       const currentData = getValues()
-      const dataToSave = {
-        ...currentData,
-        grantType: selectedGrantType, // Ensure correct grant type
-      }
-
+      const dataToSave = { ...currentData, grantType: selectedGrantType }
       if (dataToSave.applicantName && dataToSave.grantType === selectedGrantType) {
         setData(dataToSave)
       }
-
       if (shouldShowUnsavedModal) {
         e.preventDefault()
         return ""
       }
     }
-
     window.addEventListener("beforeunload", handleBeforeUnload)
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload)
-    }
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [shouldShowUnsavedModal, getValues, setData, selectedGrantType])
 
-  // Intercept router navigation
+  // Intercept router navigation (unchanged)
   useEffect(() => {
     if (!shouldShowUnsavedModal || bypassInterception) return
-
-    // Store original push and replace methods
     const originalPush = router.push
     const originalReplace = router.replace
 
-    // Override router methods
     router.push = (url: any, options?: any) => {
-      // Check if we should bypass interception
-      if (bypassInterception) {
-        return originalPush.call(router, url, options)
-      }
-
-      // Check if navigation is to a different page
+      if (bypassInterception) return originalPush.call(router, url, options)
       const targetPath = typeof url === "string" ? url : url.toString()
       if (targetPath !== pathname && !targetPath.startsWith("#")) {
         setPendingNavigation(targetPath)
-        openUnsavedModal() // Are you sure to go out of the page without saving ?
+        openUnsavedModal()
         return Promise.resolve(true)
       }
       return originalPush.call(router, url, options)
     }
 
     router.replace = (url: any, options?: any) => {
-      // Check if we should bypass interception
-      if (bypassInterception) {
-        return originalReplace.call(router, url, options)
-      }
-
+      if (bypassInterception) return originalReplace.call(router, url, options)
       const targetPath = typeof url === "string" ? url : url.toString()
       if (targetPath !== pathname && !targetPath.startsWith("#")) {
         setPendingNavigation(targetPath)
@@ -359,14 +304,10 @@ export const GrantsNewFormStepCard = () => {
       return originalReplace.call(router, url, options)
     }
 
-    // Also handle clicks on links for fallback
     const handleClick = (e: MouseEvent) => {
-      // Check if we should bypass interception
       if (bypassInterception) return
-
       const target = e.target as HTMLElement
       const link = target.closest("a[href]") as HTMLAnchorElement
-
       if (link && link.href) {
         const url = new URL(link.href)
         if (url.origin === window.location.origin && url.pathname !== pathname) {
@@ -379,8 +320,6 @@ export const GrantsNewFormStepCard = () => {
     }
 
     document.addEventListener("click", handleClick, true)
-
-    // Cleanup function
     return () => {
       router.push = originalPush
       router.replace = originalReplace
@@ -388,6 +327,8 @@ export const GrantsNewFormStepCard = () => {
     }
   }, [shouldShowUnsavedModal, pathname, router, openUnsavedModal, bypassInterception])
 
+  const firstStep = 0
+  const lastStep = steps.length - 1
   const currentStep = steps[activeStep]
 
   return (
@@ -400,7 +341,6 @@ export const GrantsNewFormStepCard = () => {
         }}
         onSaveDraft={handleSaveDraftAndLeave}
         onLeaveAnyway={handleLeaveAnyway}
-        projectName={projectDisplayName}
       />
       <Card>
         <CardHeader>
