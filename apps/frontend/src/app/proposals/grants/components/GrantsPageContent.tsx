@@ -17,7 +17,7 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const { open, onOpen, onClose } = useDisclosure({ defaultIsOpen: true })
+  const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
   const { enrichedGrantProposals, totalGrantAmount } = useProposalEnriched()
 
   const stepsArray = useMemo(
@@ -69,7 +69,7 @@ export const GrantsPageContent = () => {
   )
 
   return (
-    <VStack w="full" spacing={8} pb={8}>
+    <VStack w="full" gap={8} pb={8}>
       <HStack
         alignItems="center"
         textAlign="center"
