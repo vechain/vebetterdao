@@ -12,7 +12,7 @@ import {
   HStack,
   useMediaQuery,
 } from "@chakra-ui/react"
-import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch } from "react-hook-form"
+import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch, Control } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
@@ -28,6 +28,7 @@ interface MilestonesProps {
   setData: (data: GrantFormData) => void
   formData: GrantFormData
   watch: UseFormWatch<GrantFormData>
+  control: Control<GrantFormData>
 }
 
 type MilestoneSectionProps = {
@@ -42,7 +43,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
   const { t } = useTranslation()
   const milestoneNumber = index + 1
   const isFirst = index === 0
-  const [isMobile] = useMediaQuery("(max-width: 767px)")
+  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   const formatDuration = (duration: number | string) => {
     const durationInMiliseconds = Number(duration) * 1000 //Convert to miliseconds
@@ -131,7 +132,8 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
             </GridItem>
             {!isFirst && ( //TODO: This information should come from the Smart Contract, to know the minimal amount of milestones
               <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
-                <Button borderRadius="full" leftIcon={<Icon as={UilTrash} />} onClick={() => removeMilestone(index)}>
+                <Button borderRadius="full" onClick={() => removeMilestone(index)}>
+                  <Icon as={UilTrash} />
                   {t("Remove")}
                 </Button>
               </GridItem>
@@ -143,7 +145,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
   )
 }
 
-export const Milestones = ({ register, setValue, getValues, setData, errors, formData }: MilestonesProps) => {
+export const Milestones = ({ register, setValue, getValues, setData, errors, formData, control }: MilestonesProps) => {
   const { t } = useTranslation()
   const milestones = getValues("milestones")
   const handleAddMilestone = () => {
@@ -197,7 +199,8 @@ export const Milestones = ({ register, setValue, getValues, setData, errors, for
       </Accordion.Root>
       <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
         <GridItem>
-          <Button leftIcon={<Icon as={UilPlus} />} variant="primaryLink" onClick={handleAddMilestone}>
+          <Button variant="primaryLink" onClick={handleAddMilestone}>
+            <Icon as={UilPlus} />
             {t("Add milestone")}
           </Button>
         </GridItem>
@@ -213,11 +216,12 @@ export const Milestones = ({ register, setValue, getValues, setData, errors, for
         </GridItem>
         <GridItem colSpan={2}>
           <FormCheckbox
-            label={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
-            register={register("termsOfService", {
-              required: t("Please agree to the Terms of Service"),
-            })}
+            name="termsOfService"
+            key="termsOfService"
+            control={control}
+            description={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
             error={errors.termsOfService?.message}
+            label={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
           />
         </GridItem>
       </Grid>

@@ -6,7 +6,7 @@ import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
-import { FormAccordionSection, FormSocialConnectButton } from "@/components/CustomFormFields"
+import { FormSocialConnectButton } from "@/components/CustomFormFields"
 
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
@@ -42,9 +42,14 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
   }
   return (
     <Grid templateColumns={{ base: "1fr", md: "1fr" }} w="full" gap={8}>
-      <Accordion allowMultiple w="full">
-        <GridItem>
-          <FormAccordionSection title={t("Project details")}>
+      <Accordion.Root multiple w="full">
+        <Accordion.Item value="project-details">
+          <Accordion.ItemTrigger>
+            <Text fontSize="lg" fontWeight="semibold">
+              {t("Project details")}
+            </Text>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent>
             <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
               <GridItem>
                 <FormItem
@@ -188,11 +193,16 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                 />
               </GridItem>
             </Grid>
-          </FormAccordionSection>
-        </GridItem>
-        <GridItem>
-          <FormAccordionSection title={t("Outcomes")}>
-            <VStack grant={6} align="stretch" w="full">
+          </Accordion.ItemContent>
+        </Accordion.Item>
+        <Accordion.Item value="outcomes">
+          <Accordion.ItemTrigger>
+            <Text fontSize="lg" fontWeight="semibold">
+              {t("Outcomes")}
+            </Text>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent>
+            <VStack gap={6} align="stretch" w="full">
               <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
                 <GridItem>
                   <FormItem
@@ -256,9 +266,9 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                 </GridItem>
               </Grid>
             </VStack>
-          </FormAccordionSection>
-        </GridItem>
-      </Accordion>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+      </Accordion.Root>
     </Grid>
   )
 }

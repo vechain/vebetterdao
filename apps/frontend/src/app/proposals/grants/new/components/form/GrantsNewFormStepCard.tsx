@@ -134,6 +134,7 @@ export const GrantsNewFormStepCard = () => {
       key: GrantFormStep.MILESTONES,
       content: (
         <Milestones
+          control={control}
           register={register}
           setValue={setValue}
           watch={watch}

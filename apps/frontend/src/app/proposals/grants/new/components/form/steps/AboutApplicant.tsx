@@ -1,4 +1,4 @@
-import { VStack, Text, Grid, GridItem, Divider } from "@chakra-ui/react"
+import { VStack, Text, Grid, GridItem, Separator } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
@@ -72,7 +72,7 @@ export const AboutApplicant = ({ register, errors }: AboutApplicantProps) => {
           </Grid>
         </VStack>
       </GridItem>
-      <Divider />
+      <Separator />
       <GridItem>
         <VStack gap={6} align="stretch" w="full">
           <VStack align="flex-start" gap={1}>

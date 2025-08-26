@@ -3,14 +3,14 @@ import { BsCheck, BsChevronRight } from "react-icons/bs"
 import { GrantStep } from "./GrantsNewFormStepCard"
 
 export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: number; steps: GrantStep[] }) => {
-  const [isMobile] = useMediaQuery("(max-width: 768px)")
+  const [isMobile] = useMediaQuery(["(max-width: 768px)"])
 
   return (
     <Flex
       overflowX="auto"
       overflowY="hidden"
       whiteSpace="nowrap"
-      sx={{
+      css={{
         "&::-webkit-scrollbar": { display: "none" },
         "-ms-overflow-style": "none",
         "scrollbar-width": "none",
@@ -29,7 +29,7 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
                   </Steps.Indicator>
 
                   {showStepTitle && (
-                    <Steps.Title fontSize={{ base: "sm", md: "sm" }} isTruncated noOfLines={1}>
+                    <Steps.Title fontSize={{ base: "sm", md: "sm" }} truncate>
                       {step.title}
                     </Steps.Title>
                   )}

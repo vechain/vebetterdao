@@ -1,6 +1,7 @@
 import { Checkbox, Field, Text } from "@chakra-ui/react"
 import { Control, Controller } from "react-hook-form"
 import { SubmitCreatorFormData } from "../SubmitCreatorForm/SubmitCreatorForm"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
 
 type FormCheckboxProps = {
   label: string
@@ -10,8 +11,9 @@ type FormCheckboxProps = {
     | "securityDeviceFingerprint"
     | "securitySecureKeyManagement"
     | "securityAntiFarming"
+    | "termsOfService"
   description?: string
-  control: Control<SubmitCreatorFormData>
+  control: Control<SubmitCreatorFormData> | Control<GrantFormData>
   error?: string
   onBlur?: () => void
 }
