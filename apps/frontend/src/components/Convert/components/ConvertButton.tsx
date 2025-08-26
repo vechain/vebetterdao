@@ -17,19 +17,19 @@ export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
 
   const buttonDisabled = isLoading || hasNoBalance
 
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
 
   return (
     <>
       <ConvertModal isOpen={isOpen} onClose={onClose} />
       {isIconButton ? (
-        <Button isDisabled={buttonDisabled} onClick={onOpen}>
+        <Button disabled={buttonDisabled} onClick={onOpen}>
           <FaRepeat />
         </Button>
       ) : (
         <Button
-          isDisabled={buttonDisabled}
+          disabled={buttonDisabled}
           onClick={onOpen}
           borderRadius={"full"}
           variant={"primaryAction"}

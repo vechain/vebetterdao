@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AddTweetModal } from "./components/AddTweetModal"
@@ -14,6 +14,7 @@ import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.jso
 import { StepModal } from "@/components/StepModal/StepModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import Lottie from "react-lottie"
+import "./components/tweetStyle.css"
 
 enum AppTweetsStep {
   UPLOADING = "UPLOADING",
@@ -21,12 +22,12 @@ enum AppTweetsStep {
 
 export const AppTweets = () => {
   const [editMode, setEditMode] = useState(false)
-  const { isOpen: isNewTweetModalOpen, onOpen: onNewTweetModalOpen, onClose: onNewTweetModalClose } = useDisclosure()
+  const { open: isNewTweetModalOpen, onOpen: onNewTweetModalOpen, onClose: onNewTweetModalClose } = useDisclosure()
 
   const { isAdminOrModerator } = useCurrentAppRole()
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { isTxModalOpen } = useTransactionModal()
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
   const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
@@ -133,34 +134,28 @@ export const AppTweets = () => {
             <>
               {editMode ? (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-                  <Button
-                    variant="primaryGhost"
-                    leftIcon={<UilTimes color="#004CFC" fontSize="16px" />}
-                    onClick={handleCancelEdit}>
+                  <Button variant="primaryGhost" onClick={handleCancelEdit}>
+                    <UilTimes color="#004CFC" fontSize="16px" />
                     {t("Cancel")}
                   </Button>
                   <Button
                     variant="primaryAction"
-                    leftIcon={<UilCheckCircle color="#FFFFFF" fontSize="16px" />}
-                    isDisabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
+                    disabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
+                    <UilCheckCircle color="#FFFFFF" fontSize="16px" />
                     {t("Save changes")}
                   </Button>
                 </HStack>
               ) : (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
                   {!isListEmpty && (
-                    <Button
-                      variant="primaryGhost"
-                      leftIcon={<UilPen color="#004CFC" fontSize="16px" />}
-                      onClick={handleEdit}>
+                    <Button variant="primaryGhost" onClick={handleEdit}>
+                      <UilPen color="#004CFC" fontSize="16px" />
                       {t("Edit feed")}
                     </Button>
                   )}
-                  <Button
-                    variant="primaryAction"
-                    leftIcon={<UilPlus color="#FFFFFF" fontSize="16px" />}
-                    onClick={onNewTweetModalOpen}>
+                  <Button variant="primaryAction" onClick={onNewTweetModalOpen}>
+                    <UilPlus color="#FFFFFF" fontSize="16px" />
                     {t("Add X post")}
                   </Button>
                 </HStack>
@@ -175,16 +170,16 @@ export const AppTweets = () => {
           )}
         </HStack>
         {isListEmpty ? (
-          <Card w="full">
-            <CardBody>
+          <Card.Root w="full">
+            <Card.Body>
               <VStack align={"center"} justify={"center"} w="full" minH="200px">
                 <OkHandIcon color="#757575" />
                 <Heading fontSize={"20px"} fontWeight={500} textAlign={"center"}>
                   {t("App will add updates here.")}
                 </Heading>
               </VStack>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         ) : (
           <TweetList editMode={editMode} tweets={tweets} setTweets={setTweets} />
         )}

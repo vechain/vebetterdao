@@ -17,6 +17,8 @@ export const GmCard = ({
 }) => {
   const { t } = useTranslation()
 
+  const plusCount = images?.length ? images?.length - 2 : 0
+
   return (
     <VStack
       position="relative"
@@ -43,32 +45,29 @@ export const GmCard = ({
       </HStack>
 
       <HStack alignItems="start">
-        <AvatarGroup
-          size="md"
-          max={2}
-          spacing={"-0.75rem"}
-          sx={{
-            ".chakra-avatar__excess": {
-              borderRadius: "8px",
-              border: "1px solid #E5EEFF",
-              background: "#6194F5",
-              fontSize: "12px",
-            },
-          }}>
-          {images?.map(image => (
-            <Avatar key={image} name={image} src={image} border="none" borderRadius="8px" />
+        <AvatarGroup rounded="8px" shape="square" size="xl" stacking="last-on-top" spaceX={"-1.5rem"}>
+          {images?.slice(0, 2)?.map(image => (
+            <Avatar.Root key={image} border="none" rounded="8px">
+              <Avatar.Image rounded="8px" src={image} />
+            </Avatar.Root>
           ))}
+
+          {plusCount > 0 && (
+            <Avatar.Root rounded="8px" border="1px solid #E5EEFF" background="#6194F5">
+              <Avatar.Fallback fontSize="12px">{`+${plusCount}`}</Avatar.Fallback>
+            </Avatar.Root>
+          )}
         </AvatarGroup>
 
-        <VStack flex="1" flexDirection={"column-reverse"} alignItems="start" alignSelf="end" spacing={0}>
+        <VStack flex="1" flexDirection={"column-reverse"} alignItems="start" alignSelf="end" gap={0}>
           <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-            <Text fontSize="xs" fontWeight={600} noOfLines={1}>
+            <Text fontSize="xs" fontWeight={600} lineClamp={1}>
               {footer}
             </Text>
           </HStack>
 
           {title && (
-            <Text fontWeight={700} noOfLines={1}>
+            <Text fontWeight={700} lineClamp={1}>
               {title}
             </Text>
           )}

@@ -4,18 +4,7 @@ import { AppCardOptionsMobileModal } from "@/app/apps/components/AppCardOptionsM
 import { CreateEditAppFormData } from "@/components/CreateEditAppForm"
 import { notFoundImage } from "@/constants"
 import { useBreakpoints } from "@/hooks"
-import {
-  useDisclosure,
-  IconButton,
-  Card,
-  CardBody,
-  VStack,
-  Skeleton,
-  HStack,
-  Heading,
-  Text,
-  Image,
-} from "@chakra-ui/react"
+import { useDisclosure, IconButton, Card, VStack, Skeleton, HStack, Heading, Text, Image } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { FaEllipsisVertical } from "react-icons/fa6"
 
@@ -28,25 +17,22 @@ type Props = {
 }
 export const AppPreviewDetailCard = ({
   app,
-  appMetadataLoading,
+  appMetadataLoading = false,
   appMetadataError,
   isLogoLoading,
   isBannerLoading,
 }: Props) => {
   const { isMobile } = useBreakpoints()
 
-  const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
+  const { open: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
 
   const renderAppOptions = useCallback(() => {
     if (isMobile) {
       return (
         <>
-          <IconButton
-            isRound={true}
-            icon={<FaEllipsisVertical />}
-            onClick={openMobileOptions}
-            aria-label="Open app options"
-          />
+          <IconButton variant="subtle" rounded={"full"} onClick={openMobileOptions} aria-label="Open app options">
+            <FaEllipsisVertical />
+          </IconButton>
           <AppCardOptionsMobileModal
             isOpen={isMobileOptionsOpen}
             onClose={closeMobileOptions}
@@ -60,10 +46,10 @@ export const AppPreviewDetailCard = ({
   }, [isMobile, openMobileOptions, isMobileOptionsOpen, closeMobileOptions, app])
 
   return (
-    <Card variant={"baseWithBorder"} w="full">
-      <CardBody>
-        <VStack w="full" spacing={4} align="flex-start">
-          <Skeleton w="full" h={200} isLoaded={!isBannerLoading} rounded={"3xl"}>
+    <Card.Root variant={"baseWithBorder"} w="full">
+      <Card.Body>
+        <VStack w="full" gap={4} align="flex-start">
+          <Skeleton asChild w="full" h={200} loading={!!isBannerLoading} rounded={"3xl"}>
             <Image
               w="full"
               src={app.banner ?? notFoundImage}
@@ -74,23 +60,23 @@ export const AppPreviewDetailCard = ({
             />
           </Skeleton>
           <HStack w="full" justify={"space-between"}>
-            <HStack spacing={4} mt={4}>
-              <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+            <HStack gap={4} mt={4}>
+              <Skeleton loading={!!isLogoLoading} alignContent={"start"}>
                 <Image src={app.logo ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
               </Skeleton>
-              <Skeleton isLoaded={!appMetadataLoading}>
+              <Skeleton loading={appMetadataLoading}>
                 <Heading size={"md"}>{app.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
               </Skeleton>
             </HStack>
-            <HStack spacing={4}>{renderAppOptions()}</HStack>
+            <HStack gap={4}>{renderAppOptions()}</HStack>
           </HStack>
 
-          <Skeleton isLoaded={!appMetadataLoading} w={["full", "70%"]}>
+          <Skeleton loading={appMetadataLoading} w={["full", "70%"]}>
             <Text fontSize={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
           </Skeleton>
           <AppDetailSocials socialUrls={[]} />
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -18,7 +18,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   const endOfDay = dayjs(date).endOf("day").unix()
 
   const actionsOfDayQuery = useSustainabilityActions({
-    wallet: date ? address ?? "" : undefined,
+    wallet: date ? (address ?? "") : undefined,
     after: startOfDay,
     before: endOfDay,
   })
@@ -44,7 +44,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
       ariaTitle={`ActivityDayModal for ${date}`}
       ariaDescription={`ActivityDayModal for ${date}`}
       modalBodyProps={{ maxH: "80vh", overflowY: "auto" }}>
-      <VStack spacing={3} align="stretch">
+      <VStack gap={3} align="stretch">
         <Text fontWeight="600" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
         </Text>

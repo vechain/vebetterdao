@@ -1,8 +1,7 @@
 import {
   Button,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   HStack,
   Stack,
   Heading,
@@ -29,7 +28,7 @@ import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
 import { TransferAppFundsModal } from "./TransferAppFundsModal"
 import { ManagementCenterModal } from "./ManagementCenterModal"
 
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { FiInfo } from "react-icons/fi"
 import { useMemo } from "react"
 import { FaArrowUpRightFromSquare } from "react-icons/fa6"
@@ -42,18 +41,18 @@ export const AppBalanceCard = () => {
   const { account } = useWallet()
 
   const {
-    isOpen: isOpenRewardsPoolAccess,
+    open: isOpenRewardsPoolAccess,
     onOpen: onOpenRewardsPoolAccess,
     onClose: onCloseRewardsPoolAccess,
   } = useDisclosure()
   const {
-    isOpen: isOpenDepositOrWithdraw,
+    open: isOpenDepositOrWithdraw,
     onOpen: onOpenDepositOrWithdraw,
     onClose: onCloseDepositOrWithdraw,
   } = useDisclosure()
 
   const {
-    isOpen: isOpenManagementCenter,
+    open: isOpenManagementCenter,
     onOpen: onOpenManagementCenter,
     onClose: onCloseManagementCenter,
   } = useDisclosure()
@@ -74,33 +73,37 @@ export const AppBalanceCard = () => {
 
   return (
     <>
-      <Card
+      <Card.Root
         w={"full"}
         border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
         boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}>
-        <CardBody pt={3} pb={2}>
+        <Card.Body pt={3} pb={2}>
           <HStack justify={"space-between"} w={"full"}>
-            <VStack alignItems={"start"} spacing={0}>
+            <VStack alignItems={"start"} gap={0}>
               <HStack>
-                <Text size="md">{t("Balance")}</Text>
-                <BaseTooltip
-                  text={t(
-                    "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
-                  )}>
+                <Text textStyle="md">{t("Balance")}</Text>
+                <Tooltip
+                  content={
+                    <Text>
+                      {t(
+                        "Amount of B3TR tokens that the app has available for withdrawal, and that can be used to distribute rewards if the rewards pool is enabled.",
+                      )}
+                    </Text>
+                  }>
                   <span>
                     <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
                   </span>
-                </BaseTooltip>
+                </Tooltip>
               </HStack>
-              <Skeleton isLoaded={!isBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+              <Skeleton loading={isBalanceLoading}>
+                <Heading size={{ base: "2xl", md: "4xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
               </Skeleton>
             </VStack>
 
-            <VStack spacing={2}>
+            <VStack gap={2}>
               <Button
                 mt={1}
-                isDisabled={!isAppAdminOrTreasuryAddress}
+                disabled={!isAppAdminOrTreasuryAddress}
                 onClick={onOpenDepositOrWithdraw}
                 variant={"primaryAction"}
                 borderRadius={"full"}
@@ -111,29 +114,29 @@ export const AppBalanceCard = () => {
           </HStack>
           {/* Manage App Funds Section*/}
           <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
-            <Divider borderColor="#E2E8F0" />
+            <Separator borderColor="#E2E8F0" />
           </Box>
 
           <Stack direction="row" w="full" justifyContent={"space-between"} alignItems="center" pt={2}>
-            <VStack alignItems={"start"} spacing={0}>
+            <VStack alignItems={"start"} gap={0}>
               <HStack>
-                <Text size="md">{t("Rewards Pool")}</Text>
-                <BaseTooltip text={t("Amount of B3TR available for rewards distribution")}>
+                <Text textStyle="md">{t("Rewards Pool")}</Text>
+                <Tooltip content={<Text>{t("Amount of B3TR available for rewards distribution")}</Text>}>
                   <span>
                     <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
                   </span>
-                </BaseTooltip>
+                </Tooltip>
               </HStack>
-              <Skeleton isLoaded={!isRewardsBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "xl" }} color={rewardsPoolColor}>
+              <Skeleton loading={isRewardsBalanceLoading}>
+                <Heading size={{ base: "2xl", md: "4xl" }} color={rewardsPoolColor}>
                   {compactFormatter.format(Number(rewardsBalance?.scaled || 0))}
                 </Heading>
               </Skeleton>
             </VStack>
-            <VStack alignItems={"flex-end"} spacing={0}>
+            <VStack alignItems={"flex-end"} gap={0}>
               <Button
                 mt={1}
-                isDisabled={!isAppAdmin}
+                disabled={!isAppAdmin}
                 onClick={onOpenManagementCenter}
                 variant={isPaused ? "dangerFilledTonal" : "primaryAction"}
                 color={isPaused ? "#C84968" : "white"}
@@ -144,7 +147,7 @@ export const AppBalanceCard = () => {
             </VStack>
           </Stack>
           <Box position="relative" my={2} pt={3} mx="-24px" width="calc(100% + 48px)">
-            <Divider borderColor="#E2E8F0" />
+            <Separator borderColor="#E2E8F0" />
           </Box>
           <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
             <Text fontSize="md" fontWeight={500} color="#004CFC">
@@ -160,8 +163,8 @@ export const AppBalanceCard = () => {
               message={t("Only app admin can transfer and manage the rewards pool")}
             />
           )}
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
       {app && (
         <>

@@ -71,7 +71,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
 
     if (leaderboardQuery.isError || !visibleRankings.length)
       return (
-        <VStack spacing={4} align="stretch" w="full" h="full" pos="relative">
+        <VStack gap={4} align="stretch" w="full" h="full" pos="relative">
           <VStack
             pos={"absolute"}
             backdropFilter="blur(10px)"
@@ -80,12 +80,12 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             left={0}
             w={"full"}
             justify={"center"}
-            spacing={1}
+            gap={1}
             p={4}
             h="full"
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
-            <Heading size="sm">{t("Not enough data for the week")}</Heading>
+            <Heading size="md">{t("Not enough data for the week")}</Heading>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
@@ -133,7 +133,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
   }, [leaderboardQuery, account, visibleRankings])
 
   return (
-    <VStack spacing={8} data-testid="leaderboard-page" maxW={"container.md"} mx="auto" align="stretch" w="full">
+    <VStack gap={8} data-testid="leaderboard-page" maxW="breakpoint-md" mx="auto" align="stretch" w="full">
       {yourRaking && (
         <VStack
           pos="fixed"
@@ -147,18 +147,22 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           right={0}
           borderTopWidth={1}
           borderColor="gray.200">
-          <VStack w="full" maxW={"container.md"} mx="auto" align="stretch">
+          <VStack w="full" maxW={"breakpoint-md"} mx="auto" align="stretch">
             <LeaderboardRankingComponent ranking={yourRaking} isYourRanking={true} />
           </VStack>
         </VStack>
       )}
-      <VStack spacing={8} align="flex-start" w="full">
+      <VStack gap={8} align="flex-start" w="full">
         <Button
-          leftIcon={<FaAngleLeft />}
-          variant="link"
-          colorScheme="primary"
+          px={0}
+          variant="plain"
+          color="primary"
+          _hover={{
+            textDecoration: "underline",
+          }}
           size="sm"
           onClick={() => router.push("/")}>
+          <FaAngleLeft />
           {t("Go back")}
         </Button>
         <HStack justify={"space-between"} w="full">
@@ -166,14 +170,14 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             minW={0}
             size={"lg"}
             aria-label="Next round"
-            variant="link"
-            colorScheme="primary"
-            icon={<Icon as={FaAngleLeft} boxSize={5} />}
-            isDisabled={isFirstRound}
-            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-          />
+            variant="plain"
+            color="primary"
+            disabled={isFirstRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+            <Icon as={FaAngleLeft} boxSize={5} />
+          </IconButton>
 
-          <Heading size={["sm", "sm", "md"]}>
+          <Heading size={{ base: "md", lg: "xl" }} fontWeight="bold">
             {t("Round {{id}} leaderboard", {
               id: selectedRoundId ?? "",
             })}
@@ -183,12 +187,12 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             minW={0}
             size={"lg"}
             aria-label="Next round"
-            variant="link"
-            colorScheme="primary"
-            icon={<Icon as={FaAngleRight} boxSize={5} />}
-            isDisabled={isLastRound}
-            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
-          />
+            variant="plain"
+            color="primary"
+            disabled={isLastRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+            <Icon as={FaAngleRight} boxSize={5} />
+          </IconButton>
         </HStack>
       </VStack>
       {renderRankings}

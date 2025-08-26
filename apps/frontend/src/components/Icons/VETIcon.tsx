@@ -1,4 +1,5 @@
-import { Image, ImageProps, useColorModeValue } from "@chakra-ui/react"
+import { Image, ImageProps } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import React from "react"
 
 type Props = ImageProps & {

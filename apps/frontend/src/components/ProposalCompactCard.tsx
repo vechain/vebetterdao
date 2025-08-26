@@ -1,4 +1,4 @@
-import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Skeleton, IconButton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
@@ -36,7 +36,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     switch (proposalState) {
       case ProposalState.Pending:
         return (
-          <Skeleton isLoaded={!isVotingStartDateLoading}>
+          <Skeleton loading={isVotingStartDateLoading}>
             <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
               {t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })}
             </Text>
@@ -68,16 +68,16 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   }, [votingStartDate, proposalState, t, isVotingStartDateLoading, proposalId])
 
   return (
-    <Card
+    <Card.Root
       variant={["filledSmall", "filledSmall", "filled"]}
       onClick={goToProposal}
       _hover={{ bg: "light-contrast-on-card-bg" }}
       cursor={"pointer"}
       alignSelf={"flex-start"}
       w={"full"}>
-      <CardBody>
+      <Card.Body>
         <HStack justifyContent={"space-between"} w="full">
-          <VStack w="full" justifyContent={"space-between"} spacing={3} align={"flex-start"}>
+          <VStack w="full" justifyContent={"space-between"} gap={3} align={"flex-start"}>
             <ProposalStatusBadge
               proposalId={proposal.proposalId}
               proposalState={proposalState}
@@ -86,29 +86,25 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                 px: 2,
               }}
             />
-            <VStack w="full" spacing={1} align={"flex-start"}>
-              <SkeletonText
-                isLoaded={proposalMetadata.data !== undefined}
-                noOfLines={3}
+            <VStack w="full" gap={1} align={"flex-start"}>
+              <Skeleton
+                loading={proposalMetadata.isLoading}
+                lineClamp={3}
                 flex={2.5}
                 mr={{ base: 0, md: 10 }}
                 alignSelf={"flex-start"}>
                 <Text fontSize={"14px"} fontWeight={600}>
                   {proposalMetadata.data?.title}
                 </Text>
-              </SkeletonText>
+              </Skeleton>
               {!!account?.address && hasVotedText}
             </VStack>
           </VStack>
-          <IconButton
-            aria-label="Go to proposal"
-            icon={<FaAngleRight />}
-            onClick={goToProposal}
-            variant={"link"}
-            colorScheme="primary"
-          />
+          <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
+            <FaAngleRight />
+          </IconButton>
         </HStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

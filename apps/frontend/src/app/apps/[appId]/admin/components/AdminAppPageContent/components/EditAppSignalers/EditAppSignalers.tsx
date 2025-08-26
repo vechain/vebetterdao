@@ -30,7 +30,7 @@ export const EditAppSignalers = ({ form }: Props) => {
       <Text color="#6A6A6A">
         {t("These users will have the ability to bot-signal and reset signal counts for individual users.")}
       </Text>
-      <VStack align="stretch" spacing={4} my={4} gap={4}>
+      <VStack align="stretch" gap={4} my={4}>
         {signalers?.map((signaler, index) => (
           <SignalerItem key={signaler} signaler={signaler} handleDeleteSignaler={handleDeleteSignaler(index)} />
         ))}

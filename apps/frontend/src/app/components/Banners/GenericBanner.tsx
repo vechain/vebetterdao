@@ -1,16 +1,4 @@
-import {
-  Heading,
-  Text,
-  VStack,
-  Card,
-  CardBody,
-  HStack,
-  Image,
-  Button,
-  Show,
-  useMediaQuery,
-  Box,
-} from "@chakra-ui/react"
+import { Heading, Text, VStack, Card, HStack, Image, Button, useMediaQuery, Box } from "@chakra-ui/react"
 import React from "react"
 
 type GenericBannerProps = {
@@ -46,7 +34,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   customButton,
   imagePosition = "center",
 }) => {
-  const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
+  const [isVerySmallMobile] = useMediaQuery(["(max-height: 667px)"])
   const isOutlineBtn = buttonVariant === "outline"
   const isIconLeft = buttonIconPosition === "left"
   const hasButton = buttonLabel ?? buttonIcon ?? customButton
@@ -72,15 +60,16 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
           bg: "transparent",
           border: "1px solid #5F4400",
           _hover: { bg: "#5F440020" },
-        })}
-        {...(isIconLeft ? { leftIcon: buttonIcon } : { rightIcon: buttonIcon })}>
+        })}>
+        {isIconLeft && buttonIcon}
         <Text fontWeight="500">{buttonLabel}</Text>
+        {!isIconLeft && buttonIcon}
       </Button>
     )
   }
 
   return (
-    <Card
+    <Card.Root
       bg={backgroundColor}
       borderRadius="xl"
       w="full"
@@ -100,7 +89,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
           zIndex={0}
           bgImage={backgroundImageSrc ? `url(${backgroundImageSrc})` : undefined}
           bgSize="cover"
-          bgPosition={imagePosition}
+          backgroundPosition={imagePosition}
           bgRepeat="no-repeat"
           _before={{
             content: '""',
@@ -111,55 +100,52 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
           }}
         />
       )}
-      <CardBody
+      <Card.Body
         position="relative"
         zIndex={1}
         alignContent="center"
         justifyContent="center"
         borderRadius="xl"
         padding={{ base: 4, md: 6 }}>
-        <Show breakpoint="(min-width: 768px)">
-          <HStack align="stretch" position="relative" w="full">
-            {logoSrc &&
-              (typeof logoSrc === "string" ? (
-                <Image src={logoSrc} alt="logo" objectFit="cover" w={24} h={24} />
-              ) : (
-                logoSrc
-              ))}
-            <HStack flex={1}>
-              <VStack gap={2} align="stretch" flex={1}>
-                <Text size="xs" color={titleColor} fontWeight="600">
-                  {title}
-                </Text>
-                {descriptionElement}
-              </VStack>
-              {hasButton && renderButton()}
-            </HStack>
-          </HStack>
-        </Show>
-        <Show breakpoint="(max-width: 767px)">
-          <HStack align="center" position="relative" w="full" alignItems="center">
-            <VStack gap={2} align="stretch" justify="space-between">
-              <Text fontSize={12} color={titleColor} fontWeight="600">
+        <HStack hideBelow="md" align="stretch" position="relative" w="full">
+          {logoSrc &&
+            (typeof logoSrc === "string" ? (
+              <Image src={logoSrc} alt="logo" objectFit="cover" w={24} h={24} />
+            ) : (
+              logoSrc
+            ))}
+          <HStack flex={1}>
+            <VStack gap={2} align="stretch" flex={1}>
+              <Text color={titleColor} fontWeight="600">
                 {title}
               </Text>
-              <Heading fontSize="18" fontWeight="700" color={descriptionColor}>
-                {description}
-              </Heading>
-              {hasButton && renderButton()}
+              {descriptionElement}
             </VStack>
-            {logoSrc &&
-              (typeof logoSrc === "string" ? (
-                <Image src={logoSrc} alt="logo" w={isVerySmallMobile ? 16 : 24} h={isVerySmallMobile ? 16 : 24} />
-              ) : (
-                React.cloneElement(logoSrc, {
-                  w: isVerySmallMobile ? 16 : 24,
-                  h: isVerySmallMobile ? 16 : 24,
-                })
-              ))}
+            {hasButton && renderButton()}
           </HStack>
-        </Show>
-      </CardBody>
-    </Card>
+        </HStack>
+
+        <HStack hideFrom="md" align="center" position="relative" w="full" alignItems="center">
+          <VStack gap={2} align="stretch" justify="space-between">
+            <Text fontSize={12} color={titleColor} fontWeight="600">
+              {title}
+            </Text>
+            <Heading fontSize={18} fontWeight="700" color={descriptionColor}>
+              {description}
+            </Heading>
+            {hasButton && renderButton()}
+          </VStack>
+          {logoSrc &&
+            (typeof logoSrc === "string" ? (
+              <Image src={logoSrc} alt="logo" w={isVerySmallMobile ? 16 : 24} h={isVerySmallMobile ? 16 : 24} />
+            ) : (
+              React.cloneElement(logoSrc, {
+                w: isVerySmallMobile ? 16 : 24,
+                h: isVerySmallMobile ? 16 : 24,
+              })
+            ))}
+        </HStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

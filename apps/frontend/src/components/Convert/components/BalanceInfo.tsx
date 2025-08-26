@@ -30,7 +30,7 @@ export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
     <VStack bg={bgColor} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"} align="center">
       <HStack>
         {image}
-        <Text fontSize={20} fontWeight={500} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
+        <Text fontSize={20} fontWeight={500}>
           {compactFormatter.format(Number(balanceScaled))}
         </Text>
       </HStack>

@@ -1,5 +1,5 @@
 import { B3trTransaction } from "@/api"
-import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
@@ -25,10 +25,10 @@ export const SwapCard = ({ transaction }: Props) => {
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
-    <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
-      <CardBody>
-        <HStack spacing={3} w="full" justify="space-between">
-          <HStack spacing={4}>
+    <Card.Root variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+      <Card.Body>
+        <HStack gap={3} w="full" justify="space-between">
+          <HStack gap={4}>
             <Flex
               w="fit-content"
               h="fit-content"
@@ -39,7 +39,7 @@ export const SwapCard = ({ transaction }: Props) => {
               borderRadius={"full"}>
               <UilExchangeAlt size={"1rem"} color="#004CFC" />
             </Flex>
-            <VStack spacing={0} align="stretch">
+            <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
                   {isConnectedUser ? t("You converted") : t("Converted")}
@@ -53,8 +53,8 @@ export const SwapCard = ({ transaction }: Props) => {
               </Text>
             </VStack>
           </HStack>
-          <VStack spacing={0} align="stretch">
-            <HStack spacing={2}>
+          <VStack gap={0} align="stretch">
+            <HStack gap={2}>
               <Text fontWeight={600}>
                 {"+"}
                 {vot3ToB3tr
@@ -65,7 +65,7 @@ export const SwapCard = ({ transaction }: Props) => {
                 {vot3ToB3tr ? "B3TR" : "VOT3"}
               </Text>
             </HStack>
-            <HStack spacing={2} fontSize={"xs"} color={"#6A6A6A"}>
+            <HStack gap={2} fontSize={"xs"} color={"#6A6A6A"}>
               <Text fontWeight={600}>
                 {vot3ToB3tr
                   ? compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))
@@ -75,7 +75,7 @@ export const SwapCard = ({ transaction }: Props) => {
             </HStack>
           </VStack>
         </HStack>
-      </CardBody>
+      </Card.Body>
       <ActionModal
         actionModal={actionModal}
         appId={transaction?.appId}
@@ -83,6 +83,6 @@ export const SwapCard = ({ transaction }: Props) => {
         blockTimestamp={transaction?.blockTimestamp}
         txId={transaction?.txId}
       />
-    </Card>
+    </Card.Root>
   )
 }

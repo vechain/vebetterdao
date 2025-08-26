@@ -100,7 +100,7 @@ export const ProposalStatusBadge = ({
     case ProposalState.Pending:
       if (isDepositReached)
         return (
-          <Skeleton isLoaded={!isDepositReachedLoading}>
+          <Skeleton loading={isDepositReachedLoading}>
             <Badge
               textProps={{
                 color: "#004CFC",
@@ -125,7 +125,7 @@ export const ProposalStatusBadge = ({
         )
 
       return (
-        <Skeleton isLoaded={!isDepositReachedLoading}>
+        <Skeleton loading={isDepositReachedLoading}>
           <Badge
             textProps={{
               color: "#F29B32",

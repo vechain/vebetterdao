@@ -1,25 +1,13 @@
 import { WalletAddressInput } from "@/app/components/Input"
 import { useUpdateXAppReceiverAddress } from "@/hooks"
-import {
-  VStack,
-  Button,
-  FormControl,
-  FormLabel,
-  InputGroup,
-  Input,
-  Heading,
-  Select,
-  Card,
-  CardHeader,
-  CardBody,
-} from "@chakra-ui/react"
+import { VStack, Button, Field, InputGroup, Input, Heading, NativeSelect, Card } from "@chakra-ui/react"
 import { useXApps } from "@/api"
 import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const UpdateReceiverAddress = () => {
-  const [appId, setAppId] = useState<string | undefined>()
+  const [appId, setAppId] = useState<string>("")
   const [newAddress, setNewAddress] = useState("")
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
@@ -54,66 +42,70 @@ export const UpdateReceiverAddress = () => {
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">{t("Update Team Wallet Address")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={8} alignItems={"start"} w="full">
+    <Card.Root w={"full"}>
+      <Card.Header>
+        <Heading size="3xl">{t("Update Team Wallet Address")}</Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={8} alignItems={"start"} w="full">
           <form
             onSubmit={handleSubmit}
             style={{
               width: "100%",
             }}>
-            <VStack spacing={4} alignItems={"start"}>
-              <FormControl isRequired>
-                <FormLabel>
+            <VStack gap={4} alignItems={"start"}>
+              <Field.Root required>
+                <Field.Label>
                   <strong>{"App"}</strong>
-                </FormLabel>
-                <Select
-                  placeholder="Select app"
-                  isDisabled={isLoading}
-                  onChange={e => setAppId(e.target.value)}
-                  value={appId}>
-                  {allApps?.map(item => {
-                    return (
-                      <option key={"Select" + item.name} value={item.id}>
-                        {item.name}
-                      </option>
-                    )
-                  })}
-                </Select>
-              </FormControl>
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <NativeSelect.Root disabled={isLoading} rounded="full">
+                  <NativeSelect.Indicator />
+                  <NativeSelect.Field
+                    placeholder="Select app"
+                    value={appId}
+                    onChange={e => setAppId(e.currentTarget.value)}>
+                    {allApps?.map(item => {
+                      return (
+                        <option key={"Select" + item.name} value={item.id}>
+                          {item.name}
+                        </option>
+                      )
+                    })}
+                  </NativeSelect.Field>
+                </NativeSelect.Root>
+              </Field.Root>
 
-              <FormControl>
-                <FormLabel>
+              <Field.Root>
+                <Field.Label>
                   <strong>{"Current Address"}</strong>
-                </FormLabel>
+                </Field.Label>
                 <InputGroup>
-                  <Input value={currentAddress} disabled />
+                  <Input value={currentAddress} placeholder={currentAddress} disabled />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
 
-              <FormControl isRequired isInvalid={!isValidAddress}>
-                <FormLabel>
+              <Field.Root required invalid={!isValidAddress}>
+                <Field.Label>
                   <strong>{"New Address"}</strong>
-                </FormLabel>
+                  <Field.RequiredIndicator />
+                </Field.Label>
                 <InputGroup>
                   <WalletAddressInput
                     placeholder={t("Where should the allocation tokens be sent?")}
                     onAddressResolved={address => setNewAddress(address ?? "")}
-                    isDisabled={isLoading}
+                    disabled={isLoading}
                   />
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
 
-              <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+              <Button disabled={!isFormValid} colorPalette="blue" type="submit" loading={isLoading}>
                 {t("Save")}
               </Button>
             </VStack>
           </form>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -71,7 +71,7 @@ export const SuccessModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Heading size="lg" data-testid={"tx-modal-title"}>
+      <Heading size="3xl" data-testid={"tx-modal-title"}>
         {title}
       </Heading>
 
@@ -84,7 +84,8 @@ export const SuccessModalContent = ({
       <Flex w={"full"} justifyContent={"center"} mt={6}>
         <Link
           href={getExplorerTxLink(txId)}
-          isExternal
+          target="_blank"
+          rel="noopener noreferrer"
           color="gray.500"
           fontSize={"14px"}
           style={{ textDecoration: "none" }}

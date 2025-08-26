@@ -12,14 +12,14 @@ export const JoinB3TRAppsBanner = () => {
   }
 
   return (
-    <Card
+    <Card.Root
       w={"full"}
       bg="#B1F16C"
       color="black"
       overflow={"hidden"}
       borderRadius={"12px"}
       bgImage="url('/assets/backgrounds/community-green-blob.webp')"
-      bgPosition="center"
+      backgroundPosition="center"
       bgSize="full">
       <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
         <VStack
@@ -37,7 +37,7 @@ export const JoinB3TRAppsBanner = () => {
               objectPosition="top"
             />
           )}
-          <Heading fontSize="2xl" fontWeight="bold">
+          <Heading fontSize="2xl" fontWeight="bold" lineHeight={1.2}>
             {t("Do you have a dApp to join the VeBetter DAO ecosystem?")}
           </Heading>
           <Text>
@@ -45,7 +45,8 @@ export const JoinB3TRAppsBanner = () => {
               "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!",
             )}
           </Text>
-          <Button variant="applyButton" onClick={openGrantPage} leftIcon={<FaPlus />}>
+          <Button variant="applyButton" onClick={openGrantPage}>
+            <FaPlus />
             {t("Apply now")}
           </Button>
         </VStack>
@@ -61,6 +62,6 @@ export const JoinB3TRAppsBanner = () => {
           />
         )}
       </HStack>
-    </Card>
+    </Card.Root>
   )
 }

@@ -1,14 +1,11 @@
 import {
   Card,
-  CardHeader,
-  CardBody,
   Stack,
   VStack,
   Image,
   Text,
   Box,
   Heading,
-  CardFooter,
   Button,
   useDisclosure,
   Spinner,
@@ -23,11 +20,11 @@ import { useTranslation } from "react-i18next"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { useState } from "react"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: userGMs, isLoading: isUserGMsLoading } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
@@ -46,13 +43,13 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const attachedNode = userNodes?.allNodes?.find(node => node.nodeId === gm?.nodeIdAttached)
 
   const {
-    isOpen: isAttachGMToXNodeModalOpen,
+    open: isAttachGMToXNodeModalOpen,
     onOpen: onAttachGMToXNodeModalOpen,
     onClose: onAttachGMToXNodeModalClose,
   } = useDisclosure()
 
   const {
-    isOpen: isDetachGMToXNodeModalOpen,
+    open: isDetachGMToXNodeModalOpen,
     onOpen: onDetachGMToXNodeModalOpen,
     onClose: onDetachGMToXNodeModalClose,
   } = useDisclosure()
@@ -64,15 +61,15 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader gm={gm} />
-      <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
-        {userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
-          <Card flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
-            <CardHeader p="1.25rem" pb="0">
+      <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
+        {!!userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
+          <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
+            <Card.Header p="1.25rem" pb="0">
               <Heading fontSize="lg" lineHeight={1}>
                 {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
               </Heading>
-            </CardHeader>
-            <CardBody p={isAbove800 ? "1.25rem" : "0.5rem"}>
+            </Card.Header>
+            <Card.Body p={isAbove800 ? "1.25rem" : "0.5rem"}>
               <VStack align={"stretch"} gap="4">
                 {userNodes?.allNodes
                   ?.sort((a, b) => {
@@ -82,25 +79,25 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                     return 0
                   })
                   ?.map(node => (
-                    <Card
+                    <Card.Root
                       key={node.nodeId}
                       variant="outline"
                       alignItems="center"
-                      direction="row"
+                      flexDirection="row"
                       gap="8px"
                       p="16px"
                       rounded="8px">
-                      <CardHeader p="0">
+                      <Card.Header p="0">
                         <Image
                           src={node?.image}
-                          fallbackSrc="/assets/icons/not-found-image-fallback.svg"
+                          // fallbackSrc="/assets/icons/not-found-image-fallback.svg"
                           alt={node?.name}
                           boxSize="62px"
                           rounded="8px"
                         />
-                      </CardHeader>
+                      </Card.Header>
 
-                      <CardBody p="0" gap="8px">
+                      <Card.Body p="0" gap="8px">
                         <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                           {t("Node")}
                         </Text>
@@ -108,17 +105,17 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                           fontSize={isAbove800 ? "sm" : "xs"}
                           fontWeight={700}
                           lineHeight={isAbove800 ? 1.6 : 1.2}
-                          noOfLines={isAbove800 ? 1 : undefined}>
+                          lineClamp={isAbove800 ? 1 : undefined}>
                           {`${node.name} #${node.nodeId}`}
                         </Text>
-                        <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
+                        <Box display="inline-block" w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
                           <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
                             {t("{{value}} points", { value: node.xNodePoints })}
                           </Text>
                         </Box>
-                      </CardBody>
+                      </Card.Body>
 
-                      <CardFooter p="0">
+                      <Card.Footer p="0">
                         {attachedNode?.nodeId === node.nodeId ? (
                           <Button
                             variant="dangerFilledTonal"
@@ -127,7 +124,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                             {t("Detach")}
                           </Button>
                         ) : nodesAttachedToGMs?.[node.nodeId] ? (
-                          <BaseTooltip text={t("This node is already attached to another GM")}>
+                          <Tooltip content={t("This node is already attached to another GM")}>
                             <span>
                               <Button
                                 disabled={!!nodesAttachedToGMs?.[node.nodeId]}
@@ -140,9 +137,9 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                                 {t("Attached")}
                               </Button>
                             </span>
-                          </BaseTooltip>
+                          </Tooltip>
                         ) : (
-                          <BaseTooltip showTooltip={!!attachedNode} text={t("Only one node can be attached to a GM")}>
+                          <Tooltip disabled={!attachedNode} content={t("Only one node can be attached to a GM")}>
                             <span>
                               <Button
                                 disabled={!!attachedNode}
@@ -155,14 +152,14 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                                 {t("Attach")}
                               </Button>
                             </span>
-                          </BaseTooltip>
+                          </Tooltip>
                         )}
-                      </CardFooter>
-                    </Card>
+                      </Card.Footer>
+                    </Card.Root>
                   ))}
               </VStack>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         )}
         <VStack flex={1.5} align={"stretch"}>
           <GalaxyRewardCalculatorCard />

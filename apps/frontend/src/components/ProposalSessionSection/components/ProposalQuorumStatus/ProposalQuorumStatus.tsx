@@ -43,11 +43,6 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
 
   const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
 
-  const quorumQueryReady = !quorumQuery.isLoading && quorumQuery.status === "success" && quorumQuery.data !== undefined
-
-  const votesQueryReady =
-    !currentVotesQuery.isLoading && currentVotesQuery.status === "success" && currentVotesQuery.data !== undefined
-
   return (
     <VStack align="stretch">
       <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
@@ -56,14 +51,14 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       <HStack justify={"space-between"} align={"baseline"}>
         <HStack gap={2}>
           <Image h="20px" w="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-          <Skeleton isLoaded={votesQueryReady && quorumQueryReady}>
+          <Skeleton loading={currentVotesQuery.isLoading || quorumQuery.isLoading}>
             <Text fontSize="24px" fontWeight={700} data-testid={"total-votes"}>
               {compactFormatter.format(Number(currentVotesQuery.data ?? 0))}
             </Text>
           </Skeleton>
         </HStack>
-        <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
-          <HStack spacing={1} align="center">
+        <Skeleton loading={quorumQuery.isLoading || currentVotesQuery.isLoading}>
+          <HStack gap={1} align="center">
             {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
             {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
             <Text fontWeight={600} fontSize={"14px"} color={stateColor}>
@@ -74,7 +69,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
         </Skeleton>
       </HStack>
       <Box position="relative">
-        <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
+        <Skeleton loading={quorumQuery.isLoading || currentVotesQuery.isLoading}>
           <Box bg="#D5D5D5" h="8px" rounded="full" />
           <Box
             bg={stateColor}
@@ -89,7 +84,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       </Box>
       {showQuorumNeeded ? (
         <HStack>
-          <Skeleton isLoaded={quorumQueryReady}>
+          <Skeleton loading={quorumQuery.isLoading}>
             <Text fontWeight={600} fontSize={"14px"}>
               {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
             </Text>

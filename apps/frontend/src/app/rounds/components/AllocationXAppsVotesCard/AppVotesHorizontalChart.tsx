@@ -71,11 +71,11 @@ Props) => {
     renderMaxAllocation && maxAllocation && Number(forecastedEarnings?.amount) >= Number(maxAllocation)
 
   return (
-    <VStack spacing={4} align={"flex-start"} w="full">
+    <VStack gap={4} align={"flex-start"} w="full">
       <HStack justify={"space-between"} w="full" align="center">
-        <HStack spacing={3} align={"center"} justify={"flex-start"}>
-          <VStack spacing={0} align={"flex-start"}>
-            <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
+        <HStack gap={3} align={"center"} justify={"flex-start"}>
+          <VStack gap={0} align={"flex-start"}>
+            <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
               <Image
                 _hover={{ cursor: "pointer", transform: "scale(1.05)", transition: "transform 0.2s" }}
                 onClick={onIconClick}
@@ -86,13 +86,13 @@ Props) => {
               />
             </Skeleton>
           </VStack>
-          <VStack spacing={0} align={"flex-start"}>
+          <VStack gap={0} align={"flex-start"}>
             <Heading fontSize={["16px"]} fontWeight={600}>
               {appMetadata?.name}
             </Heading>
-            <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
+            <VStack gap={0} align={"flex-start"} justify={"flex-start"}>
               <Heading
-                size={["16px"]}
+                fontSize={["16px"]}
                 fontWeight={600}
                 color="#6DCB09"
                 data-testid={`${appMetadata?.name}-votes-percentage`}>
@@ -104,18 +104,18 @@ Props) => {
           </VStack>
         </HStack>
 
-        <HStack spacing={[4, 8]} align={"center"} justify={"flex-start"}>
+        <HStack gap={[4, 8]} align={"center"} justify={"flex-start"}>
           {showReceived && (
-            <VStack spacing={0} align={["flex-end"]}>
-              <Skeleton isLoaded={!forecastedEarningsLoading}>
-                <HStack spacing={1} align={"center"} justify={"flex-start"} w="full">
-                  <Heading size={["14px", "16px"]} fontWeight={600}>
+            <VStack gap={0} align={["flex-end"]}>
+              <Skeleton loading={forecastedEarningsLoading}>
+                <HStack gap={1} align={"center"} justify={"flex-start"} w="full">
+                  <Heading fontSize={["14px", "16px"]} fontWeight={600}>
                     {compactFormatter.format(Number(forecastedEarnings?.amount))}
                   </Heading>
                   <B3TRIcon boxSize={["14px", "16px"]} colorVariant="dark" />
                 </HStack>
               </Skeleton>
-              <Skeleton isLoaded={appVotes !== undefined} textAlign={"right"}>
+              <Skeleton loading={appVotes === undefined} textAlign={"right"}>
                 <Text fontSize={["12px", "14px"]} fontWeight={"400"} color="#6A6A6A">
                   {t("voted by")}{" "}
                   <span style={{ fontWeight: 600 }}>
@@ -127,7 +127,7 @@ Props) => {
           )}
         </HStack>
       </HStack>
-      <VStack spacing={1} w="full">
+      <VStack gap={1} w="full">
         <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"} pos="relative">
           <Box pos="absolute" w={`${data.percentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
           <Box

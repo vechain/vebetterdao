@@ -1,6 +1,6 @@
 "use client"
 
-import { useColorMode } from "@chakra-ui/react"
+import { useColorMode } from "@/components/ui/color-mode"
 import { getConfig } from "@repo/config"
 import { NETWORK_TYPE } from "@repo/constants"
 import dynamic from "next/dynamic"

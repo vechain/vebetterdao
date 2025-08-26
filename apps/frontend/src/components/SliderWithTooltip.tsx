@@ -1,26 +1,38 @@
-import { useTokenColors } from "@/hooks"
-import { Slider, SliderFilledTrack, SliderProps, SliderThumb, SliderTrack, Tooltip } from "@chakra-ui/react"
 import { useState } from "react"
+import { Slider, SliderRootProps } from "@chakra-ui/react"
+import { useTokenColors } from "@/hooks"
+import { Tooltip } from "./ui/tooltip"
 
-type Props = SliderProps & { tooltipLabel?: string }
+type Props = SliderRootProps & { tooltipLabel?: string }
+
 export const SliderWithTooltip: React.FC<Props> = ({ tooltipLabel, ...props }) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const { b3trColor, vot3Color } = useTokenColors()
   return (
-    <Slider
+    <Slider.Root
       id="slider"
-      defaultValue={5}
+      defaultValue={[5]}
       min={0}
       max={100}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
       {...props}>
-      <SliderTrack bg={vot3Color}>
-        <SliderFilledTrack bg={b3trColor} />
-      </SliderTrack>
-      <Tooltip hasArrow bg="teal.500" color="white" placement="top" isOpen={showTooltip} label={tooltipLabel}>
-        <SliderThumb />
-      </Tooltip>
-    </Slider>
+      <Slider.Control>
+        <Slider.Track bg={vot3Color}>
+          <Slider.Range bg={b3trColor} />
+        </Slider.Track>
+
+        <Slider.Thumb index={0}>
+          <Tooltip
+            showArrow
+            contentProps={{ css: { "--tooltip-bg": "colors.teal.500" } }}
+            positioning={{ placement: "top" }}
+            open={showTooltip}
+            content={tooltipLabel}>
+            <Slider.DraggingIndicator />
+          </Tooltip>
+        </Slider.Thumb>
+      </Slider.Control>
+    </Slider.Root>
   )
 }

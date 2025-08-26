@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Heading, Image, Stack, Text, Link, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, Heading, Image, Stack, Text, Link, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { SubmitCreatorFormModal } from "../SubmitCreatorFormModal"
 import { useRouter } from "next/navigation"
@@ -9,10 +9,10 @@ export const CreatorApplicationRejected = () => {
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
   }
-  const { onOpen, isOpen, onClose } = useDisclosure()
+  const { onOpen, open: isOpen, onClose } = useDisclosure()
   return (
     <>
-      <Card
+      <Card.Root
         variant={"baseWithBorder"}
         w="full"
         maxW="100%"
@@ -21,10 +21,10 @@ export const CreatorApplicationRejected = () => {
           borderRadius: "20px",
           border: "2px solid #F29B32",
         }}>
-        <CardBody px={{ base: 5, md: 5 }} py={{ base: 5, md: 5 }}>
+        <Card.Body px={{ base: 5, md: 5 }} py={{ base: 5, md: 5 }}>
           <Stack direction={{ base: "column", md: "row" }} w="full" h="full">
             {/* Left Section: Image, Title, and Description */}
-            <Stack direction="row" spacing={{ base: 2, md: 2, lg: 4 }} align="center">
+            <Stack direction="row" gap={{ base: 2, md: 2, lg: 4 }} align="center">
               <Image
                 src="/assets/mascot/mascot-warning-head.webp"
                 alt="logo"
@@ -53,7 +53,8 @@ export const CreatorApplicationRejected = () => {
               w={{ base: "100%", md: "30%" }}
               alignSelf="center">
               <Link
-                isExternal
+                target="_blank"
+                rel="noopener noreferrer"
                 href="https://support.vechain.org/support/home"
                 fontSize="14px"
                 fontWeight={600}
@@ -73,8 +74,8 @@ export const CreatorApplicationRejected = () => {
               </Button>
             </Stack>
           </Stack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
       <SubmitCreatorFormModal isOpen={isOpen} onClose={onClose} buttonAction={goToCreatorForm} />
     </>
   )

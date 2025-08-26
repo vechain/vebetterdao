@@ -7,20 +7,7 @@ import {
   useGetUserNodes,
 } from "@/api"
 import { useEndorseApp } from "@/hooks"
-import {
-  VStack,
-  Heading,
-  Box,
-  Text,
-  Button,
-  Skeleton,
-  Card,
-  CardHeader,
-  CardBody,
-  Image,
-  Radio,
-  RadioGroup,
-} from "@chakra-ui/react"
+import { VStack, Heading, Box, Text, Button, Skeleton, Card, Image, RadioGroup } from "@chakra-ui/react"
 
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
@@ -48,7 +35,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
       .sort((a, b) => Number(b.xNodePoints) - Number(a.xNodePoints))
   }, [nodes])
 
-  const [selectedNodeId, setSelectedNodeId] = useState<string | undefined>()
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
@@ -82,11 +69,13 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     <BaseModal
       isOpen={isOpen && !isTxModalOpen}
       onClose={() => {
-        setSelectedNodeId(undefined)
+        setSelectedNodeId(null)
         onClose()
       }}>
-      <VStack spacing={6} align="flex-start" w="full">
-        <Heading size="lg">{t("Endorse {{appName}} dApp", { appName: xApp?.name })}</Heading>
+      <VStack gap={6} align="flex-start" w="full">
+        <Heading size="xl" fontWeight={700}>
+          {t("Endorse {{appName}} dApp", { appName: xApp?.name })}
+        </Heading>
 
         <Text
           as="span"
@@ -99,47 +88,50 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           {t("Select your node")}
         </Text>
 
-        <VStack w="full" alignItems="stretch" spacing={4}>
-          <RadioGroup onChange={setSelectedNodeId} value={selectedNodeId}>
-            <VStack w="full" spacing={4} alignItems="stretch">
+        <VStack w="full" alignItems="stretch" gap={4}>
+          <RadioGroup.Root onValueChange={details => setSelectedNodeId(details.value)} value={selectedNodeId}>
+            <VStack w="full" gap={4} alignItems="stretch">
               {nodesNotEndorsingApp?.map(node => (
-                <Card
+                <Card.Root
                   key={node.nodeId}
                   variant="outline"
                   alignItems="flex-start"
-                  direction="row"
+                  flexDirection="row"
                   gap="8px"
                   p="16px"
                   rounded="8px">
-                  <CardHeader p="0">
-                    <Image
-                      src={node?.image}
-                      fallbackSrc="/assets/icons/not-found-image-fallback.svg"
-                      alt={node?.name}
-                      boxSize="62px"
-                      rounded="8px"
-                    />
-                  </CardHeader>
+                  <Card.Header p="0">
+                    <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
+                  </Card.Header>
 
-                  <Radio value={node.nodeId} flex={1} justifyContent="space-between" flexDirection="row-reverse">
-                    <CardBody p="0" gap="8px">
+                  <RadioGroup.Item
+                    value={node.nodeId}
+                    flex={1}
+                    justifyContent="space-between"
+                    alignItems="center"
+                    flexDirection="row">
+                    <Card.Body p="0" gap="0">
                       <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                         {t("Node")}
                       </Text>
-                      <Text fontWeight={700} lineHeight={1.6} noOfLines={1}>
+                      <Text fontWeight={700} lineHeight={1.6} lineClamp={1}>
                         {`${node.name} #${node.nodeId}`}
                       </Text>
-                      <Box display="inline-block" p="4px 8px" rounded="8px" bg="#F2F2F269">
+                      <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
                         <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
                           {t("{{value}} points", { value: node.xNodePoints })}
                         </Text>
                       </Box>
-                    </CardBody>
-                  </Radio>
-                </Card>
+                    </Card.Body>
+                    <Card.Footer p="0">
+                      <RadioGroup.ItemHiddenInput />
+                      <RadioGroup.ItemIndicator />
+                    </Card.Footer>
+                  </RadioGroup.Item>
+                </Card.Root>
               ))}
             </VStack>
-          </RadioGroup>
+          </RadioGroup.Root>
 
           <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
             {t("Current DApp score: {{score}}", { score: appScore })}
@@ -161,8 +153,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           />
         ) : null}
 
-        <Skeleton w="full" isLoaded={!isUserNodesLoading}>
-          <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement} isDisabled={!selectedNodeId}>
+        <Skeleton w="full" loading={isUserNodesLoading}>
+          <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement} disabled={!selectedNodeId}>
             {t("Endorse now")}
           </Button>
         </Skeleton>

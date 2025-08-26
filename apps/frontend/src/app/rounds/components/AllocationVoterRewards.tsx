@@ -143,7 +143,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
       <VStack alignItems={"flex-start"}>
         <Image src="/assets/icons/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
-        <Text fontSize={24} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
+        <Text fontSize={24} fontWeight={700}>
           {t("Voting rewards")}
         </Text>
         <Box mt={3} mb={1}>
@@ -152,15 +152,15 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         <Button
           zIndex={1}
           mt={2}
-          isDisabled={!canClaim}
-          isLoading={isRoundRewardLoading}
+          disabled={!canClaim}
+          loading={isRoundRewardLoading}
           onClick={handleClaim}
           variant={"primaryAction"}
           borderRadius={"full"}
           w={"full"}
-          leftIcon={!isFinished ? <FaRegClock /> : undefined}
           bg={canClaim ? "primary" : "#abb0b0"}
-          textColor={canClaim ? "white" : "black"}>
+          color={canClaim ? "white" : "black"}>
+          {!isFinished ? <FaRegClock /> : undefined}
           <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
         </Button>
       </VStack>

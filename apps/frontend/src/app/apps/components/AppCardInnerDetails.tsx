@@ -5,7 +5,7 @@ import {
   useXAppRoundEarnings,
   useXAppTotalEarnings,
 } from "@/api"
-import { Card, CardBody, Box, Text, HStack, Skeleton, Grid, GridItem } from "@chakra-ui/react"
+import { Card, Box, Text, HStack, Skeleton, Grid, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -35,8 +35,8 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
   const { data: totalEarnings, isLoading: totalEarningsLoading } = useXAppTotalEarnings(roundIds, xApp.id)
 
   return (
-    <Card variant={"filled"} w="full" rounded={"xl"}>
-      <CardBody>
+    <Card.Root variant={"filled"} w="full" rounded={"xl"}>
+      <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
           <Box>
             <Text fontSize="md" color="gray.500">
@@ -48,8 +48,8 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             <Text fontSize="md" color="gray.500">
               {t("Accumulated")}
             </Text>
-            <HStack spacing={1} fontWeight={500} align={"flex-end"}>
-              <Skeleton isLoaded={!totalEarningsLoading}>
+            <HStack gap={1} fontWeight={500} align={"flex-end"}>
+              <Skeleton loading={totalEarningsLoading}>
                 <Text fontSize="sm">{compactFormatter.format(totalEarnings ?? 0)}</Text>
               </Skeleton>
               <Text fontSize="sm" fontWeight={400}>
@@ -62,8 +62,8 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
               <Text fontSize="md" color="gray.500">
                 {t("Previous allocation")}
               </Text>
-              <HStack spacing={1} fontWeight={500} align={"flex-end"}>
-                <Skeleton isLoaded={!currentRoundIdLoading && !prevRoundEarningLoading}>
+              <HStack gap={1} fontWeight={500} align={"flex-end"}>
+                <Skeleton loading={currentRoundIdLoading || prevRoundEarningLoading}>
                   <Text fontSize="sm">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
                 </Skeleton>
                 <Text fontSize="sm" fontWeight={400}>
@@ -73,7 +73,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             </Box>
           </GridItem>
         </Grid>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

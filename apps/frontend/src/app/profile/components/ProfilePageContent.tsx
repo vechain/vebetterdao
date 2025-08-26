@@ -1,4 +1,4 @@
-import { VStack, HStack, Button, Box } from "@chakra-ui/react"
+import { VStack, HStack, Button, Box, Icon, Text, Link } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { useMemo, useCallback, memo, useState, useEffect } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
@@ -140,23 +140,15 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     [updateURLWithTab],
   )
 
-  // Go back to the home page
-  const onGoBack = useCallback(() => {
-    router.push("/")
-  }, [router])
-
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
+    <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Button
-          variant={"link"}
-          colorScheme="primary"
-          onClick={onGoBack}
-          leftIcon={<FaAngleLeft />}
-          size="sm"
-          alignSelf={"flex-start"}>
-          {t("Go back")}
-        </Button>
+        <Link href="/" color="primary.500">
+          <Icon as={FaAngleLeft} boxSize={3} />
+          <Text fontSize="sm" fontWeight="semibold" lineHeight="1.2">
+            {t("Go back")}
+          </Text>
+        </Link>
       )}
       <ProfileHeader address={parsedAddress} />
       <Box
@@ -168,7 +160,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}>
-        <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
+        <HStack gap={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
           {tabs.map(({ tab, label }) => (
             <Button
               key={tab}

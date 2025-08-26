@@ -113,8 +113,10 @@ export const NewAppPageFormContent = () => {
           </form>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} minH={0} minW={0}>
-          <VStack spacing={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
-            <Heading size="md">{t("App preview")}</Heading>
+          <VStack gap={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
+            <Heading size="xl" fontWeight="bold">
+              {t("App preview")}
+            </Heading>
             <AppPreviewDetailCard app={watch()} />
           </VStack>
         </GridItem>

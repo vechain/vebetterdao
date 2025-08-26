@@ -48,7 +48,7 @@ interface TransactionModalProviderProps {
 
 export const TransactionModalProvider: React.FC<TransactionModalProviderProps> = ({ children }) => {
   const [transactionModalState, setTransactionModalState] = useState<TransactionState | null>(null)
-  const { isOpen: isTxModalOpen, onOpen, onClose } = useDisclosure()
+  const { open: isTxModalOpen, onOpen, onClose } = useDisclosure()
 
   const handleClose = useCallback(() => {
     if (transactionModalState?.status === "pending" || transactionModalState?.status === "waitingConfirmation") return //Prevent closing the modal if the transaction is pending or waiting for confirmation

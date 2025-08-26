@@ -13,17 +13,14 @@ import {
   useMediaQuery,
   VStack,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
+  Dialog,
+  Portal,
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { motion } from "framer-motion"
 import { useGetB3trBalance } from "@/hooks"
 import { gmNfts } from "@/constants/gmNfts"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
@@ -32,9 +29,9 @@ const compactFormatter = getCompactFormatter(4)
 
 export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
   const { account } = useWallet()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(account?.address ?? "")
   const { data: gmMaxLevel } = useGMMaxLevel()
@@ -65,7 +62,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
         <HStack>
           <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
           <HStack gap={0} alignItems={"baseline"}>
-            <Skeleton isLoaded={!isB3trBalanceLoading}>
+            <Skeleton loading={isB3trBalanceLoading}>
               <Text color="#B1F16C" fontSize="lg" fontWeight={700}>
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
@@ -92,7 +89,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
   }, [b3trBalance?.scaled, b3trLeftover, b3trToUpgrade, gmMaxLevel, isAbove800, isB3trBalanceLoading, t, tokenLevel])
 
   return (
-    <Card>
+    <Card.Root>
       <Image
         src={"/assets/backgrounds/nft-page-background.webp"}
         alt="gm-nft-header"
@@ -105,7 +102,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
         direction={isAbove800 ? "row" : "column"}
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
-        spacing={4}
+        gap={4}
         zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
@@ -135,10 +132,10 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           </Box>
 
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
+            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
               {t("LEVEL {{level}}", { level: tokenLevel })}
             </Text>
-            <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "xl" : "md"}>
               {metadata?.name}
             </Text>
             <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
@@ -146,7 +143,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
                 {multiplier}
                 {"x"}
               </Text>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
                 {t("GM reward weight")}
               </Text>
             </HStack>
@@ -175,34 +172,36 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
         </VStack>
       </Stack>
       {/* Modal for Image Preview */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
-        <ModalOverlay />
-        <ModalContent
-          as={motion.div}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: "0.3", ease: "easeOut" }}
-          boxShadow="none"
-          background="transparent"
-          maxW="500px"
-          w="full"
-          p={0}
-          m={0}>
-          <ModalBody p={0}>
-            <Box
-              position="relative"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              overflow="hidden"
-              bgGradient={getLevelGradient(Number(tokenLevel))}
-              p={1}
-              rounded="16px">
-              <Image src={metadata?.image} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
-            </Box>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </Card>
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={details => {
+          if (!details.open) {
+            onClose()
+          }
+        }}
+        placement="center"
+        size="xl">
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content boxShadow="none" background="transparent" maxW="500px" w="full" p={0} m={0}>
+              <Dialog.Body p={0}>
+                <Box
+                  position="relative"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  overflow="hidden"
+                  bgGradient={getLevelGradient(Number(tokenLevel))}
+                  p={1}
+                  rounded="16px">
+                  <Image src={metadata?.image} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
+                </Box>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+    </Card.Root>
   )
 }

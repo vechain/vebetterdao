@@ -1,5 +1,4 @@
 "use-client"
-import { useSteps } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import {
   useConvertB3tr,
@@ -28,16 +27,26 @@ export enum ConvertStep {
   REVIEW_TX = "REVIEW_TX",
 }
 
+const STEP_COUNT = Object.keys(ConvertStep).length
+
 export const ConvertModal = ({ isOpen, onClose }: Props) => {
+  const { account } = useWallet()
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
   const { isTxModalOpen } = useTransactionModal()
   const { t } = useTranslation()
+  const [step, setStep] = useState(0)
 
-  const { account } = useWallet()
-  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
-    index: 0,
-    count: Object.keys(ConvertStep).length,
-  })
+  const goToNextStep = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose()
+    else setStep(nextStep)
+  }, [step, onClose])
+
+  const goToPrevStep = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose()
+    else setStep(prevStep)
+  }, [step, onClose])
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
@@ -74,8 +83,8 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     onClose()
     setIsB3trToVot3(undefined)
     setValue("amount", "")
-    setActiveStep(0)
-  }, [onClose, setActiveStep, setValue])
+    setStep(0)
+  }, [onClose, setStep, setValue])
 
   const convertB3trMutation = useConvertB3tr({
     amount,
@@ -156,7 +165,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     () => [
       {
         key: ConvertStep.SELECT_TOKEN,
-        content: <TokenSelectionContent onSubmit={goToNext} setIsB3trToVot3={setIsB3trToVot3} />,
+        content: <TokenSelectionContent onSubmit={goToNextStep} setIsB3trToVot3={setIsB3trToVot3} />,
         title: t("Convert tokens"),
       },
       {
@@ -164,7 +173,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         content: (
           <SwapTokenContent
             formData={formData}
-            goToNextStep={goToNext}
+            goToNextStep={goToNextStep}
             amount={amount}
             isB3trToVot3={isB3trToVot3}
             swappableVot3Balance={swappableVot3Balance}
@@ -196,7 +205,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       convertDescription,
       convertTitle,
       formData,
-      goToNext,
+      goToNextStep,
       handleConvertB3tr,
       invalidAmount,
       isB3trToVot3,
@@ -212,11 +221,11 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     <StepModal
       isOpen={isOpen && !isTxModalOpen}
       onClose={handleClose}
-      goToPrevious={goToPrevious}
-      goToNext={goToNext}
-      setActiveStep={setActiveStep}
+      goToPrevious={goToPrevStep}
+      goToNext={goToNextStep}
+      setActiveStep={setStep}
       steps={steps}
-      activeStep={activeStep}
+      activeStep={step}
     />
   )
 }

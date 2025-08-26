@@ -78,7 +78,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
       )
 
     return (
-      <HStack spacing={1}>
+      <HStack gap={1}>
         {support.icon}
 
         <Text fontSize={["lg", "lg", "md"]} fontWeight={600} {...textProps}>
@@ -159,8 +159,8 @@ const NoVoteAndActiveCheckVotingPower = ({
   }, [userSnapshot, threshold])
 
   return (
-    <Skeleton isLoaded={!snapshotLoading}>
-      <HStack spacing={2}>
+    <Skeleton loading={snapshotLoading}>
+      <HStack gap={2}>
         <Icon as={MdHowToVote} boxSize={4} color={"contrast-fg-on-muted"} />
 
         <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>

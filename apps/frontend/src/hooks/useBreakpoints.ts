@@ -1,10 +1,8 @@
 "use client"
-import { useMediaQuery, useTheme } from "@chakra-ui/react"
+import { useMediaQuery } from "@chakra-ui/react"
 
 export const useBreakpoints = () => {
-  const { __breakpoints } = useTheme()
-
-  const [isDesktop] = useMediaQuery(`(min-width: ${__breakpoints?.asObject.lg})`)
+  const [isDesktop] = useMediaQuery(["(min-width: 768px)"])
 
   return { isDesktop, isMobile: !isDesktop }
 }

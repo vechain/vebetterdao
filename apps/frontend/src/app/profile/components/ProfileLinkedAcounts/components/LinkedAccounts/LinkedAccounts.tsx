@@ -1,4 +1,4 @@
-import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { LinkedAccountsItem } from "./components/LinkedAccountsItem"
 import { useAccountLinking } from "@/api"
@@ -17,8 +17,8 @@ export const LinkedAccounts = ({ address }: Props) => {
 
   if (isLoading || (!isLinked && !outgoingPendingLink)) return null
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody borderRadius="xl">
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={8}>
           <HStack justify={"space-between"} align={"flex-start"}>
             <VStack align="start">
@@ -64,7 +64,7 @@ export const LinkedAccounts = ({ address }: Props) => {
             </VStack>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -8,7 +8,7 @@ import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/cons
 export const JoinCommunity = () => {
   const { t } = useTranslation()
 
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
 
   const onJoinClick = useCallback(() => {
     onOpen()
@@ -22,7 +22,7 @@ export const JoinCommunity = () => {
           src="/assets/backgrounds/community-green-blob.webp"
           alt="VeBetterDAO community"
           position={"absolute"}
-          transform={"rotate(-90deg)"}
+          rotate="-90deg"
           top={-48}
           right={-32}
           boxSize={"400px"}

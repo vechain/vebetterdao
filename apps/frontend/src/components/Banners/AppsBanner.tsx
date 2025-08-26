@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 export const AppsBanner = () => {
   const { t } = useTranslation()
   return (
-    <Card
+    <Card.Root
       bg="#004CFC"
       h={{ base: "220px", md: "195px" }}
       p="24px"
@@ -16,10 +16,10 @@ export const AppsBanner = () => {
       objectFit="contain"
       bgImage={"/assets/backgrounds/cloud-background.webp"}
       bgSize="cover"
-      bgPosition="center"
+      backgroundPosition="center"
       bgRepeat="no-repeat"
       w="full">
-      <Stack align="stretch">
+      <Stack alignItems="stretch">
         <Text fontSize={{ base: "28px", md: "36px" }} fontWeight={700}>
           {t("Explore apps")}
         </Text>
@@ -38,6 +38,6 @@ export const AppsBanner = () => {
         overflow="visible"
         objectFit="contain"
       />
-    </Card>
+    </Card.Root>
   )
 }

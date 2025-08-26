@@ -32,7 +32,7 @@ export const EditAppCreatorNFT = ({ form }: Props) => {
           "These users will be able to join the Discord channels, participate in the endorsement phases, and submit new apps.",
         )}
       </Text>
-      <VStack align="stretch" spacing={4} my={4} gap={4}>
+      <VStack align="stretch" gap={4} my={4}>
         {creators?.map((creator, index) => (
           <CreatorNFTItem key={creator} creator={creator} handleDeleteCreator={handleDeleteCreator(index)} />
         ))}

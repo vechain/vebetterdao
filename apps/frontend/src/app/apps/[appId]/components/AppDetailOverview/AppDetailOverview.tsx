@@ -3,13 +3,11 @@ import { XAppStatus } from "@/types"
 import {
   Button,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   Flex,
   HStack,
   Heading,
   Image,
-  Show,
   Skeleton,
   Stack,
   Text,
@@ -29,6 +27,7 @@ import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
 import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 import { DistributionStrategyModal } from "./components/DistributionStrategyModal"
+import { useBreakpoints } from "@/hooks"
 
 export const AppDetailOverview = ({
   endorsementStatus,
@@ -43,10 +42,11 @@ export const AppDetailOverview = ({
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
   const {
-    isOpen: isDistributionStrategyModalOpen,
+    open: isDistributionStrategyModalOpen,
     onOpen: onDistributionStrategyModalOpen,
     onClose: onDistributionStrategyModalClose,
   } = useDisclosure()
+  const { isMobile } = useBreakpoints()
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -60,12 +60,12 @@ export const AppDetailOverview = ({
 
   return (
     <>
-      <VStack spacing={4} align="stretch">
+      <VStack gap={4} align="stretch">
         {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
-        <Card variant="baseWithBorder">
-          <CardBody>
+        <Card.Root variant="baseWithBorder">
+          <Card.Body>
             <VStack align="stretch" gap={4}>
-              <Skeleton isLoaded={!isBannerLoading}>
+              <Skeleton loading={isBannerLoading}>
                 <Image
                   src={banner ?? notFoundImage}
                   alt={"banner"}
@@ -86,18 +86,16 @@ export const AppDetailOverview = ({
                       align={["stretch", "stretch", "center"]}
                       gap={[4, 4, 0]}>
                       <HStack gap={4}>
-                        <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+                        <Skeleton loading={isLogoLoading} alignContent={"start"}>
                           <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
                         </Skeleton>
-                        <Skeleton isLoaded={!appMetadataLoading && !!appMetadata}>
+                        <Skeleton loading={appMetadataLoading && !!appMetadata}>
                           <Heading fontSize={"28px"} fontWeight={700}>
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
                         </Skeleton>
                       </HStack>
-                      <Skeleton
-                        isLoaded={!isEndorsementStatusLoading}
-                        alignSelf={["flex-start", "flex-start", "center"]}>
+                      <Skeleton loading={isEndorsementStatusLoading} alignSelf={["flex-start", "flex-start", "center"]}>
                         <EndorsementStatusCallout
                           endorsementStatus={endorsementStatus}
                           showDescription={false}
@@ -106,8 +104,8 @@ export const AppDetailOverview = ({
                     </Stack>
                     <AppDetailSocials socialUrls={appMetadata?.social_urls || []} />
                   </HStack>
-                  <Skeleton isLoaded={!appMetadataLoading && !!appMetadata}>
-                    <Text fontSize={"md"}>
+                  <Skeleton loading={appMetadataLoading || !appMetadata}>
+                    <Text textStyle={"md"}>
                       {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                     </Text>
                   </Skeleton>
@@ -122,9 +120,9 @@ export const AppDetailOverview = ({
                       w={{ base: "full", md: "auto" }}
                       justifyContent={{ base: "space-between", md: "flex-start" }}>
                       <AppReceiverAddress />
-                      <Show below="md">
-                        <Divider />
-                      </Show>
+
+                      <Separator hideFrom="md" />
+
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
                           <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
@@ -145,13 +143,13 @@ export const AppDetailOverview = ({
                             h="auto"
                             p={0}
                             m={0}
-                            variant={"link"}
+                            variant={"ghost"}
                             color="#6A6A6A"
-                            rightIcon={<UilArrowUpRight />}
                             onClick={() => {
                               onDistributionStrategyModalOpen()
                             }}>
                             {t("View Details")}
+                            <UilArrowUpRight />
                           </Button>
                         </VStack>
                       ) : null}
@@ -160,29 +158,30 @@ export const AppDetailOverview = ({
                       justifyContent={{ base: "space-between", md: "flex-end" }}
                       w={{ base: "full", md: "auto" }}
                       mt={{ base: 4, md: 0 }}>
-                      <Show above="sm">
-                        <EditAppPageButton />
-                        <AdminAppPageButton />
-                      </Show>
-                      <Button
-                        w={["full", "full", "auto"]}
-                        variant={"primaryAction"}
-                        rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
-                        onClick={goToWebsite}>
+                      {!isMobile && (
+                        <>
+                          <EditAppPageButton />
+                          <AdminAppPageButton />
+                        </>
+                      )}
+                      <Button flex={1} variant={"primaryAction"} onClick={goToWebsite}>
                         {t("Go to Website")}
+                        <UilArrowUpRight color="#FFFFFF" size={"16px"} />
                       </Button>
-                      <Show below="sm">
-                        <EditAppPageButton />
-                        <AdminAppPageButton />
-                      </Show>
+                      {isMobile && (
+                        <>
+                          <EditAppPageButton />
+                          <AdminAppPageButton />
+                        </>
+                      )}
                     </HStack>
                   </Stack>
                 </VStack>
                 <AppDetailAllocationInfo />
               </Flex>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </VStack>
       <DistributionStrategyModal
         isOpen={isDistributionStrategyModalOpen}

@@ -22,14 +22,14 @@ export type XAppInformations = {
 export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: endorsedApps, isLoading: isEndorsedAppsLoading } = useNodesEndorsedApps(
     nodes?.allNodes?.map(node => node.nodeId) ?? [],
   )
   const isXNodeLoading = isUserNodesLoading || isEndorsedAppsLoading
-  const isEndorsingApp = endorsedApps?.length && endorsedApps?.length > 0
+  const isEndorsingApp = !!endorsedApps?.length && endorsedApps?.length > 0
 
   const { data: xAppsNotSorted, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
@@ -52,12 +52,12 @@ export const AppsPageContent = () => {
   const activeAppsWithoutGracePeriod = currentActiveApps.filter(app => !gracePeriodIds.has(app.id))
 
   return (
-    <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
+    <VStack alignItems={"flex-start"} position={"relative"} gap={8} w="full">
       <AppsBanner />
 
       {!isXNodeLoading && isEndorsingApp && (
-        <VStack alignItems={"flex-start"} spacing={4}>
-          <Heading size="lg">{t("Your endorsed apps")}</Heading>
+        <VStack alignItems={"flex-start"} gap={4}>
+          <Heading size="3xl">{t("Your endorsed apps")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
           </Text>
@@ -79,8 +79,8 @@ export const AppsPageContent = () => {
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
       {!isAbove800 ? (
-        <VStack alignItems={"flex-start"} spacing={4} w="full">
-          <Heading size="lg">{t("Sustainability apps")}</Heading>
+        <VStack alignItems={"flex-start"} gap={4} w="full">
+          <Heading size="3xl">{t("Sustainability apps")}</Heading>
           <AllApps
             newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
@@ -90,9 +90,9 @@ export const AppsPageContent = () => {
           />
         </VStack>
       ) : (
-        <HStack w="full" alignItems={"flex-start"} spacing={0}>
+        <HStack w="full" alignItems={"flex-start"} gap={0}>
           <AllApps
-            headingComponent={<Heading size="lg">{t("Sustainability apps")}</Heading>}
+            headingComponent={<Heading size="3xl">{t("Sustainability apps")}</Heading>}
             newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}

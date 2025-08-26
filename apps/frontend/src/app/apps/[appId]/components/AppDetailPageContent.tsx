@@ -50,7 +50,7 @@ export const AppDetailPageContent = () => {
         />
       </GridItem>
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>
-        <Stack direction="column" spacing={8}>
+        <Stack direction="column" gap={8}>
           {shouldRenderCreationSteps ? <AppCreationSteps /> : null}
           <AppScreenshots />
           <AppTweets />
@@ -58,7 +58,7 @@ export const AppDetailPageContent = () => {
       </GridItem>
 
       <GridItem w="full" colSpan={1} order={[1, 1, 2]}>
-        <Stack direction="column" spacing={8}>
+        <Stack direction="column" gap={8}>
           {shouldRenderBalance && <AppBalanceCard />}
           <AppEndorsementInfoCard
             endorsementScore={endorsementScore}

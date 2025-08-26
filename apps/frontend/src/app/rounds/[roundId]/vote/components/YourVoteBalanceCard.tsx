@@ -1,6 +1,7 @@
 "use client"
 import { useAllocationsRound, useIsQuadraticFundingDisabled, useTotalVotesOnBlock } from "@/api"
-import { BaseTooltip, ResponsiveCard, VOT3Icon } from "@/components"
+import { ResponsiveCard, VOT3Icon } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { useBreakpoints } from "@/hooks"
 import { VStack, Heading, Box, HStack, Skeleton, Text, Icon } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
@@ -32,16 +33,16 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
 
   return (
     <ResponsiveCard>
-      <VStack spacing={8} align="flex-start">
+      <VStack gap={8} align="flex-start">
         {isDesktop && (
           <Heading fontSize="24px" fontWeight={700}>
             {t("Your V0T3 balance")}
           </Heading>
         )}
         <VStack w="full" align="flex-start">
-          <HStack spacing={2}>
+          <HStack gap={2}>
             <VOT3Icon boxSize={["28px"]} colorVariant="dark" />
-            <Skeleton isLoaded={!votesAtSnapshotLoading}>
+            <Skeleton loading={votesAtSnapshotLoading}>
               <Heading fontSize={["28px"]} fontWeight={700}>
                 {compactFormatter.format(Number(votesAtSnapshot))}
               </Heading>
@@ -52,9 +53,9 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
               {t("VOT3 balance at snapshot")}
             </Text>
             {depositsVotes && (
-              <BaseTooltip
-                showTooltip={depositsVotes !== "0"}
-                text={
+              <Tooltip
+                disabled={depositsVotes === "0"}
+                content={
                   <Text>
                     <Trans
                       i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
@@ -66,7 +67,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
                 <span>
                   <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
                 </span>
-              </BaseTooltip>
+              </Tooltip>
             )}
           </HStack>
         </VStack>

@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
-import { useToast, Button, VStack } from "@chakra-ui/react"
+import { Button, VStack } from "@chakra-ui/react"
+import { toaster } from "@/components/ui/toaster"
 
 interface Props {
   data: {
@@ -18,8 +19,6 @@ interface AggregatedData {
 const levels = [250, 50, 10, 1] // Levels of aggregation
 
 export const DrillDownBarChart: React.FC<Props> = ({ data }) => {
-  const toast = useToast()
-
   // State to keep track of drill-down levels
   const [currentLevelData, setCurrentLevelData] = useState<AggregatedData[]>([])
   const [breadcrumbs, setBreadcrumbs] = useState<string[]>([])
@@ -80,12 +79,11 @@ export const DrillDownBarChart: React.FC<Props> = ({ data }) => {
       setBreadcrumbs([...breadcrumbs, data.key])
     } else {
       // Already at the lowest level (individual users)
-      toast({
+      toaster.info({
         title: "Reached the lowest level",
         description: "You are viewing individual users.",
-        status: "info",
         duration: 2000,
-        isClosable: true,
+        closable: true,
       })
     }
   }
@@ -130,12 +128,11 @@ export const DrillDownBarChart: React.FC<Props> = ({ data }) => {
       navigator.clipboard
         .writeText(label)
         .then(() => {
-          toast({
+          toaster.success({
             title: "Address Copied",
             description: "The account address has been copied to your clipboard.",
-            status: "success",
             duration: 2000,
-            isClosable: true,
+            closable: true,
           })
         })
         .catch(err => {

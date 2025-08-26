@@ -9,7 +9,7 @@ import { useEffect } from "react"
 const AppsPageContent = dynamic(() => import("./components/AppsPageContent").then(mod => mod.AppsPageContent), {
   ssr: false,
   loading: () => (
-    <VStack w="full" spacing={12} h="80vh" justify="center">
+    <VStack w="full" gap={12} h="80vh" justify="center">
       <Spinner size={"lg"} />
     </VStack>
   ),

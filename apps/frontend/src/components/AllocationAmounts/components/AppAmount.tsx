@@ -20,19 +20,19 @@ export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
 
   return (
     <HStack justify={"space-between"} alignItems={"center"}>
-      <HStack spacing={3}>
-        <Skeleton isLoaded={!isLogoLoading && !isLoading}>
+      <HStack gap={3}>
+        <Skeleton loading={isLogoLoading || isLoading}>
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"32px"} borderRadius="9px" />
         </Skeleton>
-        <Skeleton isLoaded={!appMetadataLoading && !isLoading}>
+        <Skeleton loading={appMetadataLoading || isLoading}>
           <Text fontWeight={"600"} fontSize={"16px"}>
             {appMetadata?.name}
           </Text>
         </Skeleton>
       </HStack>
-      <VStack spacing={0} alignItems={"flex-end"}>
-        <Skeleton isLoaded={!isLoading}>
-          <HStack alignItems={"center"} spacing={1}>
+      <VStack gap={0} alignItems={"flex-end"}>
+        <Skeleton loading={isLoading}>
+          <HStack alignItems={"center"} gap={1}>
             <Text fontSize="20px" fontWeight={700}>
               {compactFormatter.format(Number(amount))}
             </Text>
