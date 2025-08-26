@@ -9,7 +9,7 @@ import { useEffect } from "react"
 const GrantsPageContent = dynamic(() => import("./components/GrantsPageContent").then(mod => mod.GrantsPageContent), {
   ssr: false,
   loading: () => (
-    <VStack w="full" spacing={12} h="80vh" justify="center">
+    <VStack w="full" gap={12} h="80vh" justify="center">
       <Spinner size={"lg"} />
     </VStack>
   ),

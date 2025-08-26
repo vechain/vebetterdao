@@ -15,7 +15,7 @@ export const AboutApplicant = ({ register, errors }: AboutApplicantProps) => {
   return (
     <Grid templateColumns={{ base: "1fr", md: "1fr" }} w="full" gap={8}>
       <GridItem>
-        <VStack spacing={6} align="stretch" w="full">
+        <VStack gap={6} align="stretch" w="full">
           <Text fontSize="lg" fontWeight="semibold">
             {t("Member")}
           </Text>
@@ -74,8 +74,8 @@ export const AboutApplicant = ({ register, errors }: AboutApplicantProps) => {
       </GridItem>
       <Divider />
       <GridItem>
-        <VStack spacing={6} align="stretch" w="full">
-          <VStack align="flex-start" spacing={1}>
+        <VStack gap={6} align="stretch" w="full">
+          <VStack align="flex-start" gap={1}>
             <Text fontSize="lg" fontWeight="semibold">
               {t("Address")}
             </Text>

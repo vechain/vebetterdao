@@ -12,12 +12,12 @@ export const HowGrantWorks = () => {
   }
 
   return (
-    <Card variant="base">
+    <Card.Root variant="base">
       <CardHeader pb={3}>
         <Heading size="md">{t("How grant application works?")}</Heading>
       </CardHeader>
       <CardBody>
-        <VStack borderBottom="1px solid #D5D5D5" pb={8} spacing={5} align="stretch">
+        <VStack borderBottom="1px solid #D5D5D5" pb={8} gap={5} align="stretch">
           <Text fontWeight="bold">{t("1. Submit your application")}</Text>
           <List.Root gap={2} color="#6A6A6A" listStyle="disc">
             <List.Item>
@@ -30,7 +30,7 @@ export const HowGrantWorks = () => {
           </List.Root>
         </VStack>
 
-        <VStack borderBottom="1px solid #D5D5D5" pb={8} pt={4} spacing={5} align="stretch">
+        <VStack borderBottom="1px solid #D5D5D5" pb={8} pt={4} gap={5} align="stretch">
           <Text fontWeight="bold">{t("2. Get early support from the community")}</Text>
           <List.Root gap={2} color="#6A6A6A" listStyle="disc">
             <List.Item>
@@ -55,7 +55,7 @@ export const HowGrantWorks = () => {
 
         <VStack
           pt={4}
-          spacing={5}
+          gap={5}
           align="stretch"
           borderBottom={show4thStep ? "1px solid #D5D5D5" : "none"}
           pb={show4thStep ? 8 : 0}>
@@ -98,7 +98,7 @@ export const HowGrantWorks = () => {
           </List.Root>
         </VStack>
         {show4thStep && (
-          <VStack align="stretch" pt={4} spacing={5}>
+          <VStack align="stretch" pt={4} gap={5}>
             <Text fontWeight="bold">{t("4. Receive funds and start developing")}</Text>
             <List.Root gap={2} color="#6A6A6A" listStyle="disc">
               <List.Item>
@@ -123,6 +123,6 @@ export const HowGrantWorks = () => {
           </Text>
         )}
       </CardBody>
-    </Card>
+    </Card.Root>
   )
 }

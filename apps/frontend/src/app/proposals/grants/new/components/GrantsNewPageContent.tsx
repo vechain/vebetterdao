@@ -17,16 +17,16 @@ const BreadcrumItems = [
 
 export const GrantsNewPageContent = () => {
   return (
-    <VStack w="full" spacing={8} pb={8} align="flex-start">
+    <VStack w="full" gap={8} pb={8} align="flex-start">
       <PageBreadcrumb items={BreadcrumItems} />
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <GrantsNewFormStepCard />
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
-          <Card variant="base">
+          <Card.Root variant="base">
             <HowGrantWorks />
-          </Card>
+          </Card.Root>
         </GridItem>
       </Grid>
     </VStack>

@@ -8,7 +8,7 @@ interface StatsCardProps {
 }
 
 const StatsCard = ({ icon, value, label, alt }: StatsCardProps) => (
-  <Card
+  <Card.Root
     variant="base"
     flex={{ base: "0 0 40%", lg: "1 0 calc(30% - 10px)" }}
     flexDirection="row"
@@ -28,13 +28,13 @@ const StatsCard = ({ icon, value, label, alt }: StatsCardProps) => (
       justifyContent="center">
       <Image src={icon} alt={alt} boxSize={{ base: "40px", lg: "50px" }} />
     </Box>
-    <VStack alignItems="flex-start" spacing={1}>
+    <VStack alignItems="flex-start" gap={1}>
       <Heading size={{ base: "md", lg: "lg" }}>{value}</Heading>
       <Text fontSize={{ base: "xs", lg: "sm" }} color="gray.600">
         {label}
       </Text>
     </VStack>
-  </Card>
+  </Card.Root>
 )
 export const GrantsStatsCards = ({
   totalApplications,

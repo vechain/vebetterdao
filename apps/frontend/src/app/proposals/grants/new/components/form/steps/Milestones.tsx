@@ -57,7 +57,7 @@ export const MilestoneSection = ({ register, errors, index, removeMilestone, get
   return (
     <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })}>
       <Accordion.ItemTrigger w="full" py={4} textAlign="left" justifyContent="space-between">
-        <HStack w="full" spacing={4}>
+        <HStack w="full" gap={4}>
           <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
           {hasDurationInfo && !isMobile && (
             <Badge variant="outline" size="sm">
@@ -179,7 +179,7 @@ export const Milestones = ({ register, setValue, getValues, setData, errors, for
   }
 
   return (
-    <VStack spacing={6} align="stretch" w="full">
+    <VStack gap={6} align="stretch" w="full">
       <Accordion.Root multiple>
         {milestones.map((milestone, index) => {
           const uniqueKey = `${milestone.durationFrom}-${milestone.durationTo}`

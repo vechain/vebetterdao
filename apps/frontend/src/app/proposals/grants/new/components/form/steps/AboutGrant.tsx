@@ -95,8 +95,8 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                 />
               </GridItem>
               <GridItem colSpan={{ base: 1, md: 2 }}>
-                <VStack spacing={6} align="stretch" w="full">
-                  <VStack align="flex-start" spacing={1}>
+                <VStack gap={6} align="stretch" w="full">
+                  <VStack align="flex-start" gap={1}>
                     <Text fontSize="lg" fontWeight="semibold">
                       {t("Connect accounts")}
                     </Text>
@@ -192,7 +192,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
         </GridItem>
         <GridItem>
           <FormAccordionSection title={t("Outcomes")}>
-            <VStack spacing={6} align="stretch" w="full">
+            <VStack grant={6} align="stretch" w="full">
               <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
                 <GridItem>
                   <FormItem
