@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Flex, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Flex, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
 import {
   VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES,
   AVG_PHONE_WIDTH,
@@ -14,6 +14,7 @@ import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
 import { useTranslation } from "react-i18next"
 import { validateImage } from "@/utils"
+import { toaster } from "@/components/ui/toaster"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -22,7 +23,6 @@ type Props = {
 export const EditVeWorldFeatureImage = ({ form }: Props) => {
   const featuredImage = form.watch("ve_world_featured_image")
   const inputRef = useRef<HTMLInputElement>(null)
-  const toast = useToast()
   const { t } = useTranslation()
   const [invalidFormat, setInvalidFormat] = useState(false)
   const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
@@ -61,16 +61,15 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
         })
       } catch (error) {
         console.error("Upload error:", error)
-        toast({
+        toaster.error({
           title: "Error",
           description: "An error occurred while uploading the featured image",
-          status: "error",
           duration: 5000,
-          isClosable: true,
+          closable: true,
         })
       }
     },
-    [form, toast],
+    [form],
   )
 
   return (
@@ -103,13 +102,9 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
           cursor={"pointer"}
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
-          <IconButton
-            aria-label="Edit featured image"
-            rounded={"full"}
-            bg={"#00000033"}
-            _hover={{ bg: "#00000033" }}
-            icon={<UilPen color="#FFFFFF" />}
-          />
+          <IconButton aria-label="Edit featured image" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
+            <UilPen color="#FFFFFF" />
+          </IconButton>
         </Flex>
       </Flex>
       <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>

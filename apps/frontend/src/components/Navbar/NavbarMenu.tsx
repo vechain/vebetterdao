@@ -1,16 +1,6 @@
-import {
-  Button,
-  Heading,
-  Icon,
-  Popover,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Text,
-  useMediaQuery,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Heading, Icon, Popover, Portal, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
 import { Route } from "./Routes"
 import { FaChevronDown, FaChevronRight } from "react-icons/fa6"
 import { motion } from "framer-motion"
@@ -50,27 +40,32 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
   //TODO: Move this to a separate component
   const router = useRouter()
   const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Popover placement="bottom-start" closeOnBlur>
-      {({ isOpen }) => (
-        <>
-          <PopoverTrigger>
-            <Button
-              colorScheme={selected ? "primary" : "gray"}
-              variant={selected ? "primaryAction" : "ghost"}
-              rounded="full">
-              <Text fontWeight={selected ? "bold" : "normal"}>{route.name}</Text>
-              <Icon
-                ml={2}
-                as={FaChevronDown}
-                transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
-                transition="transform 0.2s"
-              />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent w="400px" mt={2}>
-            <PopoverBody>
+    <Popover.Root
+      positioning={{ placement: "bottom-start" }}
+      closeOnInteractOutside={true}
+      open={isOpen}
+      onOpenChange={e => setIsOpen(e.open)}>
+      <Popover.Trigger asChild>
+        <Button
+          colorScheme={selected ? "primary" : "gray"}
+          variant={selected ? "primaryAction" : "ghost"}
+          rounded="full">
+          <Text fontWeight={selected ? "bold" : "normal"}>{route.name}</Text>
+          <Icon
+            ml={2}
+            as={FaChevronDown}
+            transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+            transition="transform 0.2s"
+          />
+        </Button>
+      </Popover.Trigger>
+      <Portal>
+        <Popover.Positioner>
+          <Popover.Content w="400px" mt={2}>
+            <Popover.Body>
               <VStack align="stretch">
                 {route.subRoutes?.map(subRoute => {
                   const isSubRouteSelected = typeof subRoute.onClick === "string" && pathname === subRoute.onClick
@@ -112,19 +107,19 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
                   )
                 })}
               </VStack>
-            </PopoverBody>
-          </PopoverContent>
-        </>
-      )}
-    </Popover>
+            </Popover.Body>
+          </Popover.Content>
+        </Popover.Positioner>
+      </Portal>
+    </Popover.Root>
   )
 }
 
 export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
-  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
-  //TODO: Reuse same component for mobile and desktop
+  const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
+
   return (
     <>
       {isLargerThan1200 ? (
@@ -141,21 +136,24 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           }
           return (
             <Button
-              colorScheme={selected ? "primary" : "gray"}
+              border="none"
+              colorPalette={selected ? "primary" : "gray"}
               rounded={"full"}
               w={["full", "full", "auto"]}
               key={route.name}
               variant={selected ? "primaryAction" : "ghost"}
               onClick={onClick}
-              data-testid={selected ? "current-section" : ""}
-              fontWeight={fontWeight}>
+              size="md"
+              fontWeight={fontWeight}
+              fontSize="md"
+              data-testid={selected ? "current-section" : ""}>
               {route.name}
               {hasSubRoutes && <FaChevronRight size={16} />}
             </Button>
           )
         })
       ) : (
-        <MotionVStack w={"full"} alignItems={"flex-start"} spacing={0}>
+        <MotionVStack initial={"hidden"} animate="visible" gap={0}>
           {routesToRender.map(route => {
             if (route.component) return route.component
             const hasSubRoutes = route?.subRoutes?.length
@@ -168,16 +166,15 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
             return (
               <Button
-                variant="unstyled"
                 w={"full"}
                 display="flex"
                 justifyContent="flex-start"
                 alignItems="center"
-                leftIcon={<Icon as={route.icon} color="gray.600" />}
                 key={route.name}
                 onClick={onClick}
                 pl={2}
                 data-testid={selected ? "current-section" : ""}>
+                <Icon as={route.icon} color="gray.600" />
                 <Text textAlign="left">{route.name}</Text>
               </Button>
             )

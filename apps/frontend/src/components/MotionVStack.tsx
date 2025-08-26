@@ -1,11 +1,14 @@
 "use client"
-import { Stack, StackProps, VStack } from "@chakra-ui/react"
-import { motion } from "framer-motion"
+
+import { Stack, VStack, StackProps } from "@chakra-ui/react"
+import { motion, MotionProps } from "framer-motion"
+
+type MotionVStackProps = StackProps & MotionProps
 
 type Props = {
   children: React.ReactNode
   renderInnerStack?: boolean
-} & StackProps
+} & MotionVStackProps
 
 export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps }: Props) => {
   const MotionVStack = motion(VStack)
@@ -14,7 +17,7 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
     return (
       <MotionVStack
         w="full"
-        spacing={12}
+        gap={12}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{
@@ -28,7 +31,7 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
           w="full"
           justify="space-between"
           align={["stretch", "stretch", "flex-start"]}
-          spacing={12}>
+          gap={12}>
           {children}
         </Stack>
       </MotionVStack>
@@ -37,7 +40,7 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
   return (
     <MotionVStack
       w="full"
-      spacing={12}
+      gap={12}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{

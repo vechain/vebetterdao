@@ -1,5 +1,6 @@
 "use client"
-import { useColorModeValue, Image } from "@chakra-ui/react"
+import { Image } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import React from "react"
 
 export const VeBetterDaoLogo: React.FC = () => {

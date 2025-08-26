@@ -30,7 +30,7 @@ export const EditAppModerators = ({ form }: Props) => {
       <Text color="#6A6A6A">
         {t("These users will be able to manage the information in the feed and update the visual data on the profile.")}
       </Text>
-      <VStack align="stretch" spacing={4} my={4} gap={4}>
+      <VStack align="stretch" gap={4} my={4}>
         {moderators?.map((moderator, index) => (
           <ModeratorItem key={moderator} moderator={moderator} handleDeleteModerator={handleDeleteModerator(index)} />
         ))}

@@ -1,4 +1,4 @@
-import { FormControl, FormErrorMessage, Input, InputGroup, InputLeftElement, Text, VStack } from "@chakra-ui/react"
+import { Field, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
@@ -87,9 +87,8 @@ export const EditAppSocialUrls = ({ form }: Props) => {
         {t("Social media links")}
       </Text>
       {inputData.map(({ inputKey, url, error, placeholder, icon }) => (
-        <FormControl isInvalid={!!error} key={inputKey}>
-          <InputGroup>
-            <InputLeftElement>{icon}</InputLeftElement>
+        <Field.Root invalid={!!error} key={inputKey}>
+          <InputGroup startElement={icon}>
             <Input
               rounded="full"
               fontSize={"14px"}
@@ -104,8 +103,8 @@ export const EditAppSocialUrls = ({ form }: Props) => {
               })}
             />
           </InputGroup>
-          <FormErrorMessage fontSize={"12px"}>{error?.message || ""}</FormErrorMessage>
-        </FormControl>
+          <Field.ErrorText fontSize={"12px"}>{error?.message || ""}</Field.ErrorText>
+        </Field.Root>
       ))}
     </VStack>
   )

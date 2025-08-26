@@ -1,6 +1,6 @@
 import { useAccountLinking, useCanUserVote, useUserDelegation } from "@/api"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { Card, CardBody, HStack, Text, VStack, Button } from "@chakra-ui/react"
+import { Card, HStack, Text, VStack, Button } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
@@ -99,12 +99,12 @@ export const CantVoteCard = () => {
   if (!cantVoteReasonText) return null
 
   return (
-    <Card bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"}>
-      <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
-        <VStack spacing={0} w="full" align="flex-start">
+    <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"}>
+      <Card.Body position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
+        <VStack gap={0} w="full" align="flex-start">
           <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
             <UilInfoCircle size={36} color="#AF5F00" />
-            <VStack spacing={0} w="full" align="flex-start">
+            <VStack gap={0} w="full" align="flex-start">
               <Text fontWeight="700" color="#AF5F00" as="span">
                 {cantVoteReasonText?.title}
               </Text>
@@ -116,7 +116,7 @@ export const CantVoteCard = () => {
           </HStack>
           {!!cantVoteReasonText?.onLearnMoreClick && (
             <Button
-              variant="link"
+              variant="plain"
               alignSelf={"flex-end"}
               textDecoration="underline"
               color="#AF5F00"
@@ -125,7 +125,7 @@ export const CantVoteCard = () => {
             </Button>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

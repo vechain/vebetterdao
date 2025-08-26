@@ -1,18 +1,5 @@
 import { useCancelProposal } from "@/hooks/useCancelProposal"
-import {
-  Button,
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalOverlay,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, Dialog, Text, VStack, useDisclosure, Portal } from "@chakra-ui/react"
 import { UilBan } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -56,9 +43,9 @@ export const CancelProposalSection = () => {
   }
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
-        <VStack align="stretch" gap={6}>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
+        <VStack alignItems="stretch" gap={6}>
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("Cancel proposal")}
           </Heading>
@@ -67,41 +54,49 @@ export const CancelProposalSection = () => {
               "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.",
             )}
           </Text>
-          <Button variant={"dangerFilledTonal"} leftIcon={<UilBan size="18px" />} onClick={confirmationModal.onOpen}>
+          <Button variant={"dangerFilledTonal"} onClick={confirmationModal.onOpen}>
+            <UilBan size="18px" />
             {t("Cancel this proposal")}
           </Button>
         </VStack>
-      </CardBody>
-      <Modal isOpen={confirmationModal.isOpen} onClose={handleCloseConfirmationModal}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalBody py="16px">
-            <VStack align="stretch" gap={6}>
-              <Heading fontSize={"24px"} fontWeight={700}>
-                {t("Cancel proposal")}
-              </Heading>
-              <VStack align="stretch" gap={0}>
-                <Text fontSize={"14px"}>
-                  {t(
-                    "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
-                  )}
-                </Text>
-                <Text fontWeight={600} fontSize={"14px"}>
-                  {t("This action cannot be undone.")}
-                </Text>
-              </VStack>
-              <HStack justify={"flex-end"}>
-                <Button variant={"primaryGhost"} onClick={handleCloseConfirmationModal}>
-                  {t("Go back")}
-                </Button>
-                <Button variant={"dangerFilled"} leftIcon={<UilBan size="18px" />} onClick={handleCancelProposal}>
-                  {t("Cancel this proposal")}
-                </Button>
-              </HStack>
-            </VStack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </Card>
+      </Card.Body>
+      <Dialog.Root
+        open={confirmationModal.open}
+        onOpenChange={details => !details.open && handleCloseConfirmationModal()}>
+        <Portal>
+          <Dialog.Positioner>
+            <Dialog.Backdrop />
+            <Dialog.Content>
+              <Dialog.Body py="16px">
+                <VStack alignItems="stretch" gap={6}>
+                  <Heading fontSize={"24px"} fontWeight={700}>
+                    {t("Cancel proposal")}
+                  </Heading>
+                  <VStack alignItems="stretch" gap={0}>
+                    <Text fontSize={"14px"}>
+                      {t(
+                        "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
+                      )}
+                    </Text>
+                    <Text fontWeight={600} fontSize={"14px"}>
+                      {t("This action cannot be undone.")}
+                    </Text>
+                  </VStack>
+                  <HStack justifyContent={"flex-end"}>
+                    <Button variant={"primaryGhost"} onClick={handleCloseConfirmationModal}>
+                      {t("Go back")}
+                    </Button>
+                    <Button variant={"dangerFilled"} onClick={handleCancelProposal}>
+                      <UilBan size="18px" />
+                      {t("Cancel this proposal")}
+                    </Button>
+                  </HStack>
+                </VStack>
+              </Dialog.Body>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+    </Card.Root>
   )
 }

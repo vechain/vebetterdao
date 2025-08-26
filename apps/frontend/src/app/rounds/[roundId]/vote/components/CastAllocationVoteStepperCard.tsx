@@ -1,21 +1,9 @@
 "use client"
 import { ResponsiveCard } from "@/components"
 import { useBreakpoints } from "@/hooks"
-import {
-  Box,
-  Circle,
-  Heading,
-  Step,
-  StepIndicator,
-  StepSeparator,
-  StepStatus,
-  StepTitle,
-  Stepper,
-  VStack,
-  useSteps,
-} from "@chakra-ui/react"
+import { Box, Circle, Heading, Steps, VStack } from "@chakra-ui/react"
 import { useParams, usePathname } from "next/navigation"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const CastAllocationVoteStepperCard = () => {
@@ -24,7 +12,7 @@ export const CastAllocationVoteStepperCard = () => {
   const pathname = usePathname()
   const params = useParams()
 
-  const Steps = useMemo(
+  const steps = useMemo(
     () => [
       { key: "selectApps", title: t("Select Apps"), pathnames: ["/rounds/:roundId/vote"] },
       { key: "AssignPercentages", title: t("Assign percentages"), pathnames: ["/rounds/:roundId/vote/percentages"] },
@@ -33,10 +21,7 @@ export const CastAllocationVoteStepperCard = () => {
     [t],
   )
 
-  const { activeStep, setActiveStep } = useSteps({
-    index: 1,
-    count: Steps.length,
-  })
+  const [step, setStep] = useState(1)
 
   //set active step based on the current pathname
   useEffect(() => {
@@ -44,63 +29,69 @@ export const CastAllocationVoteStepperCard = () => {
       (acc, key) => acc.replace(params[key] as string, `:${key}`),
       pathname,
     )
-    const step = Steps.find(step => step.pathnames?.includes(pathPattern))
+    const step = steps.find(step => step.pathnames?.includes(pathPattern))
     if (step) {
-      setActiveStep(Steps.indexOf(step))
+      setStep(steps.indexOf(step))
     }
-  }, [pathname, params, setActiveStep, Steps])
+  }, [pathname, params, setStep, steps])
 
   const height = useMemo(() => {
-    return Steps.length * 60
-  }, [Steps])
+    return steps.length * 60
+  }, [steps])
 
   return (
     <ResponsiveCard>
-      <VStack spacing={8} w="full" align={"flex-start"}>
+      <VStack gap={8} w="full" align={"flex-start"}>
         {isDesktop && (
           <Heading fontSize="24px" fontWeight={700}>
             {t("Progress")}
           </Heading>
         )}
-        <Stepper
+        <Steps.Root
           w="full"
           size="sm"
-          index={activeStep}
+          step={step}
+          onStepChange={e => setStep(e.step)}
+          count={steps.length}
           orientation={isDesktop ? "vertical" : "horizontal"}
           variant="primaryVertical"
           gap={0}
           height={isDesktop ? height : "auto"}>
-          {Steps.map(step => (
-            <Step
-              key={`cast-vote-step-${step.key}`}
-              {...(!isDesktop && {
-                style: {
-                  gap: 0,
-                },
-              })}>
-              <StepIndicator>
-                <StepStatus
-                  complete={<Circle bg="#004CFC" size={"30%"} />}
-                  active={<Circle bg="#004CFC" size={"60%"} />}
-                />
-              </StepIndicator>
-
-              {isDesktop && (
-                <Box flexShrink="0">
-                  <StepTitle>{step.title}</StepTitle>
-                </Box>
-              )}
-
-              <StepSeparator
+          <Steps.List>
+            {steps.map((step, index) => (
+              <Steps.Item
+                key={`cast-vote-step-${step.key}`}
+                index={index}
                 {...(!isDesktop && {
                   style: {
-                    marginInlineStart: 0,
+                    gap: 0,
                   },
-                })}
-              />
-            </Step>
-          ))}
-        </Stepper>
+                })}>
+                <Steps.Indicator>
+                  <Steps.Status
+                    incomplete={<Circle bg="#004CFC" size="0" />}
+                    complete={<Circle bg="#004CFC" size="2" />}
+                    current={<Circle bg="#004CFC" size="3" />}
+                  />
+                </Steps.Indicator>
+
+                {isDesktop && (
+                  <Box flexShrink="0">
+                    <Steps.Title>{step.title}</Steps.Title>
+                  </Box>
+                )}
+
+                <Steps.Separator
+                  {...(!isDesktop && {
+                    style: {
+                      marginInlineStart: 0,
+                    },
+                  })}
+                />
+              </Steps.Item>
+            ))}
+          </Steps.List>
+        </Steps.Root>
       </VStack>
     </ResponsiveCard>
   )

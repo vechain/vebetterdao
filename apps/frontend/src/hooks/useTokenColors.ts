@@ -1,4 +1,5 @@
-import { useColorModeValue, useToken } from "@chakra-ui/react"
+import { useToken } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 export const useTokenColors = () => {
   const [primary500, primary200, secondary500, secondary200] = useToken("colors", [

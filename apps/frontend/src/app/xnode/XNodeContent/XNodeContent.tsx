@@ -31,7 +31,7 @@ export const XNodeContent = ({ xNodeId }: Props) => {
   return (
     <VStack align="stretch" flex="1" gap="4">
       <XNodePageHeader xNode={xNode} />
-      <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
+      <Stack direction={["column", "column", "column", "row"]} gap="4" align={"stretch"}>
         <VStack flex={3}>
           <DelegateXNodeCard xNode={xNode} />
           <AttachGMNFTCard xNode={xNode} />

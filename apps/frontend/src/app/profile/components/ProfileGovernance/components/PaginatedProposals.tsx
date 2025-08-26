@@ -1,4 +1,4 @@
-import { VStack, HStack, Text, Spinner, Box } from "@chakra-ui/react"
+import { VStack, Spinner, Box, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
 import { useMemo } from "react"
@@ -6,7 +6,7 @@ import { toIPFSURL, validateIpfsUri } from "@/utils"
 import { useIpfsMetadatas } from "@/api/ipfs"
 import { useInfiniteScroll, usePagination } from "@/hooks"
 import { ProposalBox } from "./ProposalBox"
-import { IoIosArrowBack } from "react-icons/io"
+import { FaAngleLeft } from "react-icons/fa"
 
 type PaginatedProposalsProps = {
   proposals: ProposalCreatedEvent[]
@@ -47,17 +47,16 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
   })
 
   return (
-    <VStack w="full" spacing={4}>
+    <VStack w="full" gap={4}>
       {/* Back Button */}
-      <HStack w="full" mb={{ base: 2, md: 4 }} color="#004CFC" cursor="pointer" onClick={goBack}>
-        <IoIosArrowBack size={16} />
-        <Text fontSize={{ base: 14, md: 16 }} fontWeight="500">
-          {t("go back")}
-        </Text>
-      </HStack>
+
+      <Button variant={"plain"} color="primary" onClick={goBack} size="sm" alignItems="center" alignSelf={"flex-start"}>
+        <FaAngleLeft />
+        {t("Go back")}
+      </Button>
 
       {/* Proposals List */}
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         {itemsWithMetadata?.map(proposal => (
           <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
         ))}

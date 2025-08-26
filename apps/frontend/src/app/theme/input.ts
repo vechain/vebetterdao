@@ -1,13 +1,15 @@
-import { ComponentStyleConfig } from "@chakra-ui/react"
+import { defineRecipe, defineSlotRecipe } from "@chakra-ui/react"
+import { numberInputAnatomy } from "@chakra-ui/react/anatomy"
 
-export const InputStyle: ComponentStyleConfig = {
+export const inputRecipe = defineRecipe({
+  base: { rounded: "md" },
   variants: {
-    amountInput: {
-      field: {
+    variant: {
+      amountInput: {
+        variant: "unstyled",
         height: "50px",
         fontSize: { base: "30px", md: "36px" },
         fontWeight: 700,
-        variant: "unstyled",
         _placeholder: {
           color: "gray.500",
         },
@@ -21,4 +23,36 @@ export const InputStyle: ComponentStyleConfig = {
       },
     },
   },
-}
+})
+
+export const numberInputSlotRecipe = defineSlotRecipe({
+  slots: numberInputAnatomy.keys(),
+  base: {
+    input: {
+      rounded: "md",
+    },
+  },
+})
+
+// export const InputStyle: ComponentStyleConfig = {
+//   variants: {
+//     amountInput: {
+//       field: {
+//         height: "50px",
+//         fontSize: { base: "30px", md: "36px" },
+//         fontWeight: 700,
+//         variant: "unstyled",
+//         _placeholder: {
+//           color: "gray.500",
+//         },
+//         _dark: {
+//           _placeholder: {
+//             color: "whiteAlpha.600",
+//           },
+//           bg: "transparent",
+//         },
+//         bg: "transparent",
+//       },
+//     },
+//   },
+// }

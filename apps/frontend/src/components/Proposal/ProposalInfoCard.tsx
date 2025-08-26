@@ -1,16 +1,4 @@
-import {
-  Text,
-  Card,
-  CardHeader,
-  CardBody,
-  VStack,
-  HStack,
-  Box,
-  SkeletonText,
-  Show,
-  Skeleton,
-  Stack,
-} from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Box, Stack } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { parseDate } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
@@ -48,16 +36,34 @@ export const ProposalInfoCard: React.FC<{
   }, [description])
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       onClick={goToProposal}
       _hover={{ bg: "hover-contrast-bg" }}
       cursor={"pointer"}
       alignSelf={"flex-start"}
       w={"full"}>
-      <CardHeader>
-        <Show below="sm">
-          <HStack w={"full"} justifyContent={"space-between"} mb={2}>
+      <Card.Header>
+        <HStack hideFrom="md" w={"full"} justifyContent={"space-between"} mb={2}>
+          <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
+            {t("Round #{{round}}", {
+              round: votingRoundId,
+            })}
+          </Text>
+          <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
+            <Text color="#979797" fontWeight="400">
+              {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
+            </Text>
+            <Text color="#979797" fontWeight="400"></Text>
+          </HStack>
+        </HStack>
+
+        <HStack justifyContent="space-between" alignItems="center" w={"full"}>
+          <Text fontSize={20} fontWeight={700} lineClamp={2}>
+            {title}
+          </Text>
+
+          <VStack hideBelow="md" alignItems="flex-end" gap={0} flex={1}>
             <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
               {t("Round #{{round}}", {
                 round: votingRoundId,
@@ -69,43 +75,14 @@ export const ProposalInfoCard: React.FC<{
               </Text>
               <Text color="#979797" fontWeight="400"></Text>
             </HStack>
-          </HStack>
-        </Show>
-        <HStack justifyContent="space-between" alignItems="center" w={"full"}>
-          <Skeleton isLoaded={description !== undefined} minH={"20px"} flex={2.5} maxW={{ base: "300px", md: "full" }}>
-            <Text fontSize={20} fontWeight={700} noOfLines={2}>
-              {title ?? "---"}
-            </Text>
-          </Skeleton>
-          <Show above="sm">
-            <VStack alignItems="flex-end" spacing={0} flex={1}>
-              <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
-                {t("Round #{{round}}", {
-                  round: votingRoundId,
-                })}
-              </Text>
-              <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
-                <Text color="#979797" fontWeight="400">
-                  {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
-                </Text>
-                <Text color="#979797" fontWeight="400"></Text>
-              </HStack>
-            </VStack>
-          </Show>
+          </VStack>
         </HStack>
-      </CardHeader>
-      <CardBody py={2} mb={4}>
-        <Stack direction={["column", "row"]} w="full" justifyContent={"space-between"} spacing={4}>
-          <SkeletonText
-            isLoaded={description !== undefined}
-            minW={"300px"}
-            noOfLines={3}
-            flex={2}
-            alignSelf={"flex-start"}>
-            <Text fontSize={16} fontWeight={400} noOfLines={3}>
-              {descriptionText}
-            </Text>
-          </SkeletonText>
+      </Card.Header>
+      <Card.Body py={2} mb={4}>
+        <Stack direction={["column", "row"]} w="full" justifyContent={"space-between"} gap={4}>
+          <Text lineClamp="2" fontSize={16} fontWeight={400} minW={"300px"} flex={2} alignSelf={"flex-start"}>
+            {descriptionText}
+          </Text>
 
           <Box flex={1}>
             <VotingProposalProgress proposalId={id} proposalState={state} isDepositReached={isDepositReached} />
@@ -127,8 +104,8 @@ export const ProposalInfoCard: React.FC<{
             <MdArrowOutward color="rgba(0, 76, 252, 1)" size={16} />
           </HStack>
         </HStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }
 

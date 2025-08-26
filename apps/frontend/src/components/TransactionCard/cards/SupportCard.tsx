@@ -1,4 +1,4 @@
-import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilHeart } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
@@ -19,10 +19,10 @@ export const SupportCard = ({ transaction }: Props) => {
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
-    <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
-      <CardBody>
-        <HStack spacing={3} w="full" justify="space-between">
-          <HStack spacing={4}>
+    <Card.Root variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+      <Card.Body>
+        <HStack gap={3} w="full" justify="space-between">
+          <HStack gap={4}>
             <Flex
               w="fit-content"
               h="fit-content"
@@ -33,7 +33,7 @@ export const SupportCard = ({ transaction }: Props) => {
               borderRadius={"full"}>
               <UilHeart size={"1rem"} color="#004CFC" />
             </Flex>
-            <VStack spacing={0} align="stretch">
+            <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
                   {isConnectedUser ? t("You supported a") : t("Supported a")}
@@ -47,8 +47,8 @@ export const SupportCard = ({ transaction }: Props) => {
               </Text>
             </VStack>
           </HStack>
-          <VStack spacing={0} align="stretch">
-            <HStack spacing={2}>
+          <VStack gap={0} align="stretch">
+            <HStack gap={2}>
               <Text fontWeight={600}>
                 {"-"}
                 {compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))}
@@ -59,7 +59,7 @@ export const SupportCard = ({ transaction }: Props) => {
             </HStack>
           </VStack>
         </HStack>
-      </CardBody>
+      </Card.Body>
       <ActionModal
         actionModal={actionModal}
         appId={transaction?.appId}
@@ -67,6 +67,6 @@ export const SupportCard = ({ transaction }: Props) => {
         blockTimestamp={transaction?.blockTimestamp}
         txId={transaction?.txId}
       />
-    </Card>
+    </Card.Root>
   )
 }

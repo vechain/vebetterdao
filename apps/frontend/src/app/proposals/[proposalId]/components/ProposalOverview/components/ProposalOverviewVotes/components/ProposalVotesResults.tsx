@@ -16,14 +16,14 @@ export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
     case ProposalState.Defeated:
       if (!isQuorumReached)
         return (
-          <Skeleton isLoaded={!isQuorumReachedLoading}>
+          <Skeleton loading={isQuorumReachedLoading}>
             <Text fontSize="14px" color="#D23F63" fontWeight={600}>
               {t("Quorum was not reached")}
             </Text>
           </Skeleton>
         )
       return (
-        <Skeleton isLoaded={!isQuorumReachedLoading}>
+        <Skeleton loading={isQuorumReachedLoading}>
           <Text fontSize="14px" color="#D23F63" fontWeight={600}>
             {t("Proposal rejected by voting")}
           </Text>
@@ -48,7 +48,7 @@ export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
       )
     case ProposalState.Active:
       return (
-        <Skeleton isLoaded={!isQuorumReachedLoading}>
+        <Skeleton loading={isQuorumReachedLoading}>
           <HStack>
             <UilExclamationCircle />
             <Text fontSize="14px" color="#6A6A6A" fontWeight={isQuorumReached ? 600 : 400}>

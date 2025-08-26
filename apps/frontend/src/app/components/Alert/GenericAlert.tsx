@@ -1,4 +1,4 @@
-import { Skeleton, Alert, HStack, AlertDescription, Icon, Text, Stack } from "@chakra-ui/react"
+import { Skeleton, Alert, HStack, Icon, Text, Stack } from "@chakra-ui/react"
 import { UilExclamationCircle, UilInfoCircle } from "@iconscout/react-unicons"
 
 enum AlertType {
@@ -41,8 +41,8 @@ export const GenericAlert = ({ isLoading = false, title, message, type }: Props)
   const colorScheme = colorSchemes[type] || colorSchemes["info"]
 
   return (
-    <Skeleton isLoaded={!isLoading}>
-      <Alert bg={colorScheme.primaryColor} borderRadius="8px" my={3}>
+    <Skeleton loading={isLoading}>
+      <Alert.Root bg={colorScheme.primaryColor} borderRadius="8px" my={3}>
         <Stack flexDir={title ? "column" : "row"}>
           <HStack w={title ? "full" : "auto"}>
             <Icon as={colorScheme.icon} boxSize={7} color={colorScheme.secondaryColor} />
@@ -52,11 +52,11 @@ export const GenericAlert = ({ isLoading = false, title, message, type }: Props)
               </Text>
             )}
           </HStack>
-          <AlertDescription as="span" fontSize="sm" color="#6A6A6A" alignSelf={title ? "flex-start" : "center"}>
+          <Alert.Description as="span" fontSize="sm" color="#6A6A6A" alignSelf={title ? "flex-start" : "center"}>
             {message}
-          </AlertDescription>
+          </Alert.Description>
         </Stack>
-      </Alert>
+      </Alert.Root>
     </Skeleton>
   )
 }

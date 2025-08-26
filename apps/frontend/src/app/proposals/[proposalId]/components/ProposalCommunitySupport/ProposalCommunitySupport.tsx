@@ -6,8 +6,8 @@ import { useMemo } from "react"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
-import { BaseTooltip } from "@/components"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export const ProposalCommunitySupport = () => {
   const { proposal } = useProposalDetail()
@@ -39,17 +39,15 @@ export const ProposalCommunitySupport = () => {
     return null
   }
   return (
-    <Card border={`1px solid ${borderColor}`} rounded="16px" p="24px" boxShadow={boxShadow}>
+    <Card.Root border={`1px solid ${borderColor}`} rounded="16px" p="24px" boxShadow={boxShadow}>
       <VStack alignItems={"stretch"} gap={6}>
         <HStack justify="space-between">
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("Community Support")}
           </Heading>
-          <BaseTooltip text={t("You will not be able to vote on this proposal with the tokens used for support.")}>
-            <span>
-              <UilInfoCircle size="24px" color={"#004CFC"} />
-            </span>
-          </BaseTooltip>
+          <Tooltip content={t("You will not be able to vote on this proposal with the tokens used for support.")}>
+            <UilInfoCircle size="24px" color={"#004CFC"} />
+          </Tooltip>
         </HStack>
         <Text fontSize={"14px"}>
           {isDepositNotMet
@@ -83,6 +81,6 @@ export const ProposalCommunitySupport = () => {
           </HStack>
         )}
       </VStack>
-    </Card>
+    </Card.Root>
   )
 }

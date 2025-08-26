@@ -1,4 +1,4 @@
-import { Box, Card, CardBody, Heading, Image, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Card, Heading, Image, useDisclosure, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 
@@ -9,14 +9,14 @@ export const AppScreenshots = () => {
   const { t } = useTranslation()
   const { screenshots } = useCurrentAppScreenshots()
 
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
 
   if (screenshots.length === 0) {
     return null
   }
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <Heading fontSize="24px" fontWeight="700">
             {t("Screenshots")}
@@ -39,7 +39,7 @@ export const AppScreenshots = () => {
           </Box>
         </VStack>
         <AppScreenshotModal images={screenshots} isOpen={isOpen} onClose={onClose} />
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

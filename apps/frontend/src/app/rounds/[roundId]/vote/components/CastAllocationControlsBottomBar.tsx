@@ -17,7 +17,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
       <Stack
         direction={["column", "column", "row"]}
         w="full"
-        spacing={4}
+        gap={4}
         justify={"space-between"}
         align={"center"}
         pos="fixed"
@@ -32,61 +32,48 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         <HStack
           alignSelf={"flex-end"}
           justify={["space-between", "space-between", "flex-end"]}
-          spacing={4}
+          gap={4}
           w={["full", "full", "auto"]}>
           <Button
             borderRadius={"16px"}
             flex={1}
             size="lg"
-            leftIcon={<UilArrowLeft />}
             data-testid="go-back"
             variant="primarySubtle"
             onClick={router.back}>
+            <UilArrowLeft />
             {t("Go back")}
           </Button>
           <Button
             flex={1}
             borderRadius={"16px"}
             size="lg"
-            rightIcon={<UilArrowRight />}
             fontSize="18px"
             data-testid="continue"
             variant="primaryAction"
             onClick={onContinue}>
             {t("Continue")}
+            <UilArrowRight />
           </Button>
         </HStack>
       </Stack>
     )
 
   return (
-    <Stack direction={["column", "column", "row"]} w="full" spacing={4} justify={"space-between"} align={"center"}>
+    <Stack direction={["column", "column", "row"]} w="full" gap={4} justify={"space-between"} align={"center"}>
       {helperText}
       <HStack
         alignSelf={"flex-end"}
         justify={["space-between", "space-between", "flex-end"]}
-        spacing={4}
+        gap={4}
         w={["full", "full", "auto"]}>
-        <Button
-          //   borderRadius={"16px"}
-          flex={1}
-          size="lg"
-          leftIcon={<UilArrowLeft />}
-          data-testid="go-back"
-          variant="primarySubtle"
-          onClick={router.back}>
+        <Button flex={1} size="lg" data-testid="go-back" variant="primarySubtle" onClick={router.back}>
+          <UilArrowLeft />
           {t("Go back")}
         </Button>
-        <Button
-          flex={1}
-          //   borderRadius={"16px"}
-          size="lg"
-          rightIcon={<UilArrowRight />}
-          fontSize="18px"
-          data-testid="continue"
-          variant="primaryAction"
-          onClick={onContinue}>
+        <Button flex={1} size="lg" fontSize="18px" data-testid="continue" variant="primaryAction" onClick={onContinue}>
           {t("Continue")}
+          <UilArrowRight />
         </Button>
       </HStack>
     </Stack>

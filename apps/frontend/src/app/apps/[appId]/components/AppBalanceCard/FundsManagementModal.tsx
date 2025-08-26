@@ -1,14 +1,9 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalHeader,
-  ModalCloseButton,
+  Dialog,
   Text,
   HStack,
   Button,
   Heading,
-  ModalContent,
-  ModalBody,
   VStack,
   Icon,
   Box,
@@ -16,6 +11,8 @@ import {
   Input,
   Circle,
   Skeleton,
+  Portal,
+  CloseButton,
 } from "@chakra-ui/react"
 import { useAppAvailableFunds, useAppRewardsBalance, useRefillRewardsPool } from "@/api/contracts/x2EarnRewardsPool"
 import { useTranslation } from "react-i18next"
@@ -181,144 +178,153 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
   }, [availableBalanceFormatted, rewardsBalanceFormatted])
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} isCentered={true} size={"xl"}>
-      <ModalOverlay />
-      <ModalContent borderRadius="20px">
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <ModalHeader>
-          <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-            {t("Refill Pools")}
-          </Text>
-        </ModalHeader>
+    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content borderRadius="20px">
+            <Dialog.CloseTrigger top={{ base: 5, md: 6 }} right={4} asChild>
+              <CloseButton />
+            </Dialog.CloseTrigger>
+            <Dialog.Header>
+              <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+                {t("Refill Pools")}
+              </Text>
+            </Dialog.Header>
 
-        <ModalBody pb={6} gap={4}>
-          <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
-            <Text fontSize={14} fontWeight={400} color="#6A6A6A">
-              {t(
-                "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
-              )}
-            </Text>
-          </Box>
+            <Dialog.Body pb={6} gap={4}>
+              <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
+                <Text fontSize={14} fontWeight={400} color="#6A6A6A">
+                  {t(
+                    "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
+                  )}
+                </Text>
+              </Box>
 
-          {tabs.map(
-            tab =>
-              activeTab === tab.id && (
-                <VStack
-                  key={`content-${tab.id}`}
-                  w={"full"}
-                  mt={4}
-                  justifyContent={"space-between"}
-                  position="relative"
-                  alignItems={"flex-start"}
-                  gap={1}>
-                  <VStack
-                    bg="info-bg"
-                    alignItems={"flex-start"}
-                    borderRadius={"12px"}
-                    p={"20px"}
-                    pl={"20px"}
-                    w={"full"}>
-                    <Text fontWeight="500">
-                      {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
-                    </Text>
-                    <HStack>
-                      {isLoading ? (
-                        <Skeleton height="20px" width="60px" />
-                      ) : (
-                        <Heading fontSize={{ base: 30, md: 36 }} color="#6A6A6A">
-                          {formatDisplayValue(activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards)}
-                        </Heading>
-                      )}
-                    </HStack>
-                  </VStack>
-                  {/* The line between the two sections */}
-                  <Flex
-                    position="absolute"
-                    top="40%"
-                    left="0"
-                    transform="translateY(-50%)"
-                    width={"full"}
-                    alignItems="center"
-                    justifyContent="center"
-                    zIndex={1}>
-                    <Circle
-                      size="60px"
-                      bg="contrast-fg-on-strong"
-                      border="1px solid #D5D5D5"
-                      position="absolute"
-                      right="30px"
-                      justifyContent="center"
-                      alignItems="center"
-                      cursor="pointer"
-                      onClick={() => {
-                        const newTab = activeTab === "balance-to-rewards" ? "rewards-to-balance" : "balance-to-rewards"
-                        handleTabChange(newTab)
-                      }}
-                      boxShadow="sm"
-                      _hover={{
-                        border: "1px solid #004CFC",
-                        boxShadow: "0px 0px 16px rgba(0, 76, 252, 0.29)",
-                        "& > svg": {
-                          color: "#004CFC",
-                        },
-                      }}>
-                      <Icon
-                        as={HiMiniArrowsUpDown}
-                        boxSize="35px"
-                        transform={activeTab === "balance-to-rewards" ? "rotate(0deg)" : "rotate(180deg)"}
-                        transition="transform 0.3s ease"
-                        _hover={{
-                          color: "#004CFC",
-                        }}
-                      />
-                    </Circle>
-                  </Flex>
-
-                  <VStack
-                    bg="info-bg"
-                    alignItems={"flex-start"}
-                    borderRadius={"12px"}
-                    p={"20px"}
-                    pl={"20px"}
-                    w={"full"}>
+              {tabs.map(
+                tab =>
+                  activeTab === tab.id && (
                     <VStack
+                      key={`content-${tab.id}`}
                       w={"full"}
+                      mt={4}
+                      justifyContent={"space-between"}
+                      position="relative"
                       alignItems={"flex-start"}
-                      borderBottomWidth={2}
-                      borderColor={"rgba(213, 213, 213, 1)"}>
-                      <Text fontWeight="500">
-                        {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
-                      </Text>
-                      <Input
-                        placeholder="0"
-                        type="text"
-                        value={amount}
-                        onChange={e => handleAmountChange(e.target.value)}
-                        variant="amountInput"
-                      />
-                    </VStack>
-                    <Text fontSize={14} fontWeight={400}>
-                      {t("Current {{value}}: ", {
-                        value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
-                      })}
-                      {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}
-                    </Text>
-                  </VStack>
-                </VStack>
-              ),
-          )}
+                      gap={1}>
+                      <VStack
+                        bg="info-bg"
+                        alignItems={"flex-start"}
+                        borderRadius={"12px"}
+                        p={"20px"}
+                        pl={"20px"}
+                        w={"full"}>
+                        <Text fontWeight="500">
+                          {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
+                        </Text>
+                        <HStack>
+                          {isLoading ? (
+                            <Skeleton height="20px" width="60px" />
+                          ) : (
+                            <Heading fontSize={{ base: 30, md: 36 }} color="#6A6A6A">
+                              {formatDisplayValue(
+                                activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards,
+                              )}
+                            </Heading>
+                          )}
+                        </HStack>
+                      </VStack>
+                      {/* The line between the two sections */}
+                      <Flex
+                        position="absolute"
+                        top="40%"
+                        left="0"
+                        transform="translateY(-50%)"
+                        width={"full"}
+                        alignItems="center"
+                        justifyContent="center"
+                        zIndex={1}>
+                        <Circle
+                          size="60px"
+                          bg="contrast-fg-on-strong"
+                          border="1px solid #D5D5D5"
+                          position="absolute"
+                          right="30px"
+                          justifyContent="center"
+                          alignItems="center"
+                          cursor="pointer"
+                          onClick={() => {
+                            const newTab =
+                              activeTab === "balance-to-rewards" ? "rewards-to-balance" : "balance-to-rewards"
+                            handleTabChange(newTab)
+                          }}
+                          boxShadow="sm"
+                          _hover={{
+                            border: "1px solid #004CFC",
+                            boxShadow: "0px 0px 16px rgba(0, 76, 252, 0.29)",
+                            "& > svg": {
+                              color: "#004CFC",
+                            },
+                          }}>
+                          <Icon
+                            as={HiMiniArrowsUpDown}
+                            boxSize="35px"
+                            transform={activeTab === "balance-to-rewards" ? "rotate(0deg)" : "rotate(180deg)"}
+                            transition="transform 0.3s ease"
+                            _hover={{
+                              color: "#004CFC",
+                            }}
+                          />
+                        </Circle>
+                      </Flex>
 
-          <Button
-            mt={8}
-            isDisabled={isTransferDisabled || isLoading}
-            onClick={handleTransfer}
-            variant={"primaryAction"}
-            borderRadius={"full"}
-            w={"full"}>
-            {t("Transfer token")}
-          </Button>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+                      <VStack
+                        bg="info-bg"
+                        alignItems={"flex-start"}
+                        borderRadius={"12px"}
+                        p={"20px"}
+                        pl={"20px"}
+                        w={"full"}>
+                        <VStack
+                          w={"full"}
+                          alignItems={"flex-start"}
+                          borderBottomWidth={2}
+                          borderColor={"rgba(213, 213, 213, 1)"}>
+                          <Text fontWeight="500">
+                            {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
+                          </Text>
+                          <Input
+                            placeholder="0"
+                            type="text"
+                            value={amount}
+                            onChange={e => handleAmountChange(e.target.value)}
+                            variant="amountInput"
+                          />
+                        </VStack>
+                        <Text fontSize={14} fontWeight={400}>
+                          {t("Current {{value}}: ", {
+                            value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
+                          })}
+                          {activeTab === "balance-to-rewards" ? rewardsBalanceFormatted : availableBalanceFormatted}
+                        </Text>
+                      </VStack>
+                    </VStack>
+                  ),
+              )}
+
+              <Button
+                mt={8}
+                disabled={isTransferDisabled || isLoading}
+                onClick={handleTransfer}
+                variant={"primaryAction"}
+                borderRadius={"full"}
+                w={"full"}>
+                {t("Transfer token")}
+              </Button>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

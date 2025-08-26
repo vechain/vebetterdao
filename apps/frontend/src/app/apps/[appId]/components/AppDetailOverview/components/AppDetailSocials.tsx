@@ -35,12 +35,12 @@ export const AppDetailSocials = ({ socialUrls }: { socialUrls: Social[] }) => {
           <Link key={socialUrl.name} href={socialUrl.url} target="_blank" rel="noreferrer">
             <IconButton
               aria-label={socialUrl.name}
-              icon={<SocialIcon size={"16px"} color={socialIconColor} />}
               border="1px solid #EFEFEF"
               bg="#FFFFFF"
               rounded="full"
-              _hover={{ bg: "#FBFBFB" }}
-            />
+              _hover={{ bg: "#FBFBFB" }}>
+              <SocialIcon size={"16px"} color={socialIconColor} />
+            </IconButton>
           </Link>
         )
       })}

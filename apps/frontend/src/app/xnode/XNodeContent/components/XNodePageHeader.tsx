@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next"
 
 export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
 
   const { image: xNodeImage, name: xNodeName, nodeType, xNodePoints, isXNodeDelegator, isXNodeDelegatee } = xNode
 
   return (
-    <Card>
+    <Card.Root>
       <Image
         src={"/assets/backgrounds/xnode-page-background.webp"}
         alt="gm-nft-header"
@@ -22,7 +22,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
         direction={isAbove800 ? "row" : "column"}
         p={isAbove800 ? "24px" : "16px"}
         align={isAbove800 ? "stretch" : "flex-start"}
-        spacing={4}
+        gap={4}
         zIndex={"0"}>
         <HStack
           align={isAbove800 ? "stretch" : "center"}
@@ -41,11 +41,11 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
             rounded="8px"
           />
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
+            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
               {nodeType}
             </Text>
 
-            <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "xl" : "md"}>
               {xNodeName}
             </Text>
 
@@ -59,7 +59,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                   {xNodePoints}
                 </Text>
-                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
                   {t("points to endorse")}
                 </Text>
               </HStack>
@@ -67,6 +67,6 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           </VStack>
         </HStack>
       </Stack>
-    </Card>
+    </Card.Root>
   )
 }

@@ -1,18 +1,5 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import {
-  Box,
-  Button,
-  Divider,
-  HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalOverlay,
-  Show,
-  Text,
-  VStack,
-  useBreakpointValue,
-} from "@chakra-ui/react"
+import { Box, Button, HStack, Heading, Dialog, Text, VStack, Separator, useBreakpointValue } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../AdminAppPageContent"
@@ -24,7 +11,7 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 
 type Props = {
   onClose: () => void
-  isOpen: boolean
+  open: boolean
   form: UseFormReturn<AdminAppForm, any, AdminAppForm>
   onSubmit: () => void
   isAdminAddressChanged: boolean
@@ -33,7 +20,7 @@ type Props = {
 
 export const UpdateConfirmationModal = ({
   onClose,
-  isOpen,
+  open,
   onSubmit,
   form,
   isAdminAddressChanged,
@@ -42,6 +29,7 @@ export const UpdateConfirmationModal = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { admin } = useCurrentAppAdmin()
+
   const handleSubmit = useCallback(() => {
     onSubmit()
     onClose()
@@ -65,10 +53,16 @@ export const UpdateConfirmationModal = ({
     sm: humanAddress(form.getValues("adminAddress"), 10, 12),
   })
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
-      <ModalOverlay />
+    <Dialog.Root
+      open={open}
+      onOpenChange={details => {
+        if (!details.open) {
+          onClose()
+        }
+      }}
+      size={"xl"}>
       <CustomModalContent>
-        <ModalBody px="40px" py="20px">
+        <Dialog.Body px="40px" py="20px">
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 100, sm: 180 })} />
             <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
@@ -88,7 +82,7 @@ export const UpdateConfirmationModal = ({
                 </VStack>
               </VStack>
             )}
-            {isTeamWalletAddressChanged && isAdminAddressChanged && <Divider />}
+            {isTeamWalletAddressChanged && isAdminAddressChanged && <Separator />}
             {isAdminAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
@@ -109,17 +103,16 @@ export const UpdateConfirmationModal = ({
                     <Text as="span" fontSize="14px" fontWeight={600}>
                       {t("You will not be able to manage the app anymore.")}
                     </Text>
-                    <Show above="sm">
-                      <Text as="span" fontSize="14px">
-                        {t("This change is applied when the new address logs in.")}
-                      </Text>
-                    </Show>
+
+                    <Text hideBelow="md" as="span" fontSize="14px">
+                      {t("This change is applied when the new address logs in.")}
+                    </Text>
                   </Box>
                 </HStack>
               </VStack>
             )}
 
-            <VStack align="center" gap="20px" mt={"20px"}>
+            <VStack alignItems="center" gap="20px" mt={"20px"}>
               <Button variant="primaryAction" onClick={onClose}>
                 {t("No, go back")}
               </Button>
@@ -128,8 +121,8 @@ export const UpdateConfirmationModal = ({
               </Button>
             </VStack>
           </VStack>
-        </ModalBody>
+        </Dialog.Body>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

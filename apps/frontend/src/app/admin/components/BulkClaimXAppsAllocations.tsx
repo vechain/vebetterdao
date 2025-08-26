@@ -6,31 +6,12 @@ import {
   useRoundXApps,
 } from "@/api"
 import { useClaimXAppsAllocations } from "@/hooks"
-import {
-  VStack,
-  Button,
-  FormControl,
-  FormLabel,
-  InputGroup,
-  Input,
-  Heading,
-  FormErrorMessage,
-  Text,
-  InputRightAddon,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  Card,
-  CardHeader,
-  CardBody,
-} from "@chakra-ui/react"
+import { VStack, Button, Field, InputGroup, Input, Heading, Text, NumberInput, Card } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const BulkClaimXAppsAllocations = () => {
-  const [roundId, setRoundId] = useState<number>(1)
+  const [roundId, setRoundId] = useState<string>("1")
   const { t } = useTranslation()
 
   const { data: xApps } = useRoundXApps(roundId?.toString() ?? "")
@@ -83,21 +64,21 @@ export const BulkClaimXAppsAllocations = () => {
   // Validate roundId input
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
-    if (roundId === parseInt(currentRoundId) && currentRound.state === 0) return false
-    if (roundId > parseInt(currentRoundId) || roundId === 0) return false
+    if (parseInt(roundId) === parseInt(currentRoundId) && currentRound.state === 0) return false
+    if (parseInt(roundId) > parseInt(currentRoundId) || parseInt(roundId) === 0) return false
 
     return true
   }, [roundId, currentRoundId, currentRound])
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">{t("Bulk allocation claiming")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={8} alignItems={"start"} flex={1} w="full">
+    <Card.Root w={"full"}>
+      <Card.Header>
+        <Heading size="3xl">{t("Bulk allocation claiming")}</Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={8} alignItems={"start"} flex={1} w="full">
           <VStack align={"start"}>
-            <VStack spacing={0} align={"start"}>
+            <VStack gap={0} align={"start"}>
               <Text>
                 {" "}
                 {t("Total apps:")} {xApps?.length}
@@ -113,70 +94,73 @@ export const BulkClaimXAppsAllocations = () => {
             style={{
               width: "100%",
             }}>
-            <VStack spacing={4} alignItems={"start"} w="full">
-              <FormControl isRequired isInvalid={!isRoundValid}>
-                <FormLabel>
+            <VStack gap={4} alignItems={"start"} w="full">
+              <Field.Root required invalid={!isRoundValid}>
+                <Field.Label>
                   <strong>{"Round #"}</strong>
-                </FormLabel>
-                <NumberInput
+                  <Field.RequiredIndicator />
+                </Field.Label>
+                <NumberInput.Root
+                  w="full"
                   min={0}
                   value={roundId}
-                  isDisabled={isLoading}
-                  onChange={value => setRoundId(parseInt(value))}>
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-                <FormErrorMessage>{"Invalid round"}</FormErrorMessage>
-              </FormControl>
+                  disabled={isLoading}
+                  onValueChange={e => setRoundId(e.value)}>
+                  <NumberInput.Input />
+                  <NumberInput.Control />
+                </NumberInput.Root>
+                <Field.ErrorText>{"Invalid round"}</Field.ErrorText>
+              </Field.Root>
 
-              <FormControl>
-                <FormLabel>
+              <Field.Root>
+                <Field.Label>
                   <strong>{"Total"}</strong>
-                </FormLabel>
-                <InputGroup>
+                </Field.Label>
+                <InputGroup
+                  endElement={
+                    <Text
+                      pointerEvents="none"
+                      pl={1}
+                      pr={1}
+                      ml={0}
+                      backgroundColor={"transparent"}
+                      borderColor={"inherit"}
+                      borderLeft={"none"}>
+                      {t("B3TR")}
+                    </Text>
+                  }>
                   <Input value={total} disabled={true} />
-                  <InputRightAddon
-                    pointerEvents="none"
-                    pl={1}
-                    pr={1}
-                    ml={0}
-                    backgroundColor={"transparent"}
-                    borderColor={"inherit"}
-                    borderLeft={"none"}>
-                    {t("B3TR")}
-                  </InputRightAddon>
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
 
-              <FormControl>
-                <FormLabel>
+              <Field.Root>
+                <Field.Label>
                   <strong>{"Remaining"}</strong>
-                </FormLabel>
-                <InputGroup>
+                </Field.Label>
+                <InputGroup
+                  endElement={
+                    <Text
+                      pointerEvents="none"
+                      pl={1}
+                      pr={1}
+                      ml={0}
+                      backgroundColor={"transparent"}
+                      borderColor={"inherit"}
+                      borderLeft={"none"}>
+                      {t("B3TR")}
+                    </Text>
+                  }>
                   <Input value={amountToClaim ?? 0} disabled={true} />
-                  <InputRightAddon
-                    pointerEvents="none"
-                    pl={1}
-                    pr={1}
-                    ml={0}
-                    backgroundColor={"transparent"}
-                    borderColor={"inherit"}
-                    borderLeft={"none"}>
-                    {t("B3TR")}
-                  </InputRightAddon>
                 </InputGroup>
-              </FormControl>
+              </Field.Root>
 
-              <Button isDisabled={allClaimed} colorScheme="blue" type="submit" isLoading={isLoading}>
+              <Button disabled={allClaimed} colorPalette="blue" type="submit" loading={isLoading}>
                 {allClaimed ? "Already claimed" : "Claim for all"}
               </Button>
             </VStack>
           </form>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

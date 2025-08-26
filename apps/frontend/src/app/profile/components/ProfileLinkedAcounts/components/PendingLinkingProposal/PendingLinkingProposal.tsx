@@ -1,5 +1,5 @@
 import { useAccountLinking } from "@/api"
-import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingLinkingProposalItem } from "./components/PendingLinkingProposalItem/PendingLinkingProposalItem"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -17,8 +17,8 @@ export const PendingLinkingProposal = ({ address }: Props) => {
   const { incomingPendingLinkings, isLoading } = useAccountLinking(address)
   if (isLoading || !incomingPendingLinkings?.length) return null
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody borderRadius="xl">
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -42,7 +42,7 @@ export const PendingLinkingProposal = ({ address }: Props) => {
             ))}
           </VStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

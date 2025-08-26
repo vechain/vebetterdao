@@ -66,10 +66,10 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
           <Button
             bg={"#E0E9FE"}
             color="#004CFC"
-            leftIcon={<VeBetterIcon size={20} />}
             rounded={"full"}
             _hover={{ bg: "#E0E9FEDD" }}
             onClick={handleConnectWallet}>
+            <VeBetterIcon size={20} />
             {t("Connect Wallet")}
           </Button>
         </VStack>
@@ -78,9 +78,9 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
 
   return (
     <Box w={"full"} onClick={onClick}>
-      <HStack w={"full"} justifyContent={"flex-start"} py={4} spacing={5}>
+      <HStack w={"full"} justifyContent={"flex-start"} py={4}>
         <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
-        <VStack align={"flex-start"} spacing={0}>
+        <VStack align={"flex-start"} gap={0}>
           <HStack>
             <Text fontSize={18} fontWeight={600}>
               {domain ?? humanAddress(account?.address ?? "", 4, 6)}

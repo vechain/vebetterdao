@@ -34,8 +34,8 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       <VStack align="flex-start" gap={1}>
         <HStack>
           <Icon as={LeafIcon} color="#6DCB09" boxSize={4} />
-          <Skeleton isLoaded={!isLoading}>
-            <Heading size="md" fontWeight="700" color="#004CFC">
+          <Skeleton loading={isLoading}>
+            <Heading size="xl" fontWeight="700" color="#004CFC">
               {compactFormatter.format(parsedData.totalActions)}
             </Heading>
           </Skeleton>
@@ -48,8 +48,8 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       <VStack align="flex-start" gap={1}>
         <HStack>
           <B3TRIcon boxSize={4} />
-          <Skeleton isLoaded={!isLoading}>
-            <Heading size="md" fontWeight="700" color="#004CFC">
+          <Skeleton loading={isLoading}>
+            <Heading size="xl" fontWeight="700" color="#004CFC">
               {compactFormatter.format(parsedData.totalRewards)}
             </Heading>
           </Skeleton>
@@ -61,8 +61,8 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
       <VStack align="flex-start" gap={1}>
         <HStack>
           <Icon as={IoGridOutline} color="#6DCB09" boxSize={4} />
-          <Skeleton isLoaded={!isLoading}>
-            <Heading size="md" fontWeight="700" color="#004CFC">
+          <Skeleton loading={isLoading}>
+            <Heading size="xl" fontWeight="700" color="#004CFC">
               {parsedData.apps}
             </Heading>
           </Skeleton>

@@ -14,7 +14,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
   const router = useRouter()
   const { data: proposalState } = useProposalState(proposalId)
 
-  const [isDesktop] = useMediaQuery("(min-width: 500px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
 
   const title = useMemo(() => {
     if (!metadata?.title) return "Proposal title temporarily unavailable"
@@ -40,7 +40,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
         bg: "hover-contrast-bg",
       }}
       p={{ base: 3, md: 4 }}>
-      <VStack w={"full"} alignItems={"start"} spacing={2}>
+      <VStack w={"full"} alignItems={"start"} gap={2}>
         <ProposalStatusBadge
           proposalState={proposalState}
           isDepositReached={false} //TODO: Implement this, fix the type expected

@@ -44,7 +44,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
   )
 
   return (
-    <Skeleton isLoaded={!isLoading} w={"full"}>
+    <Skeleton loading={isLoading} w={"full"}>
       <HStack
         bg={"light-contrast-on-card-bg"}
         py={6}
@@ -54,7 +54,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
         borderRadius={"2xl"}
         justify={"space-between"}
         alignItems={"center"}>
-        <VStack align="self-start" spacing={0}>
+        <VStack align="self-start" gap={0}>
           <HStack>
             <Image h="24px" w="24px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Heading fontSize="24px">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
@@ -64,7 +64,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
           </Text>
         </VStack>
 
-        <VStack align="self-start" color={percentageChange >= 0 ? "#3DBA67" : "#C84968"} fontSize="14px" spacing={0}>
+        <VStack align="self-start" color={percentageChange >= 0 ? "#3DBA67" : "#C84968"} fontSize="14px" gap={0}>
           <Text>
             {percentageChange >= 0 ? "+" : ""}
             {compactFormatter.format(percentageChange)}

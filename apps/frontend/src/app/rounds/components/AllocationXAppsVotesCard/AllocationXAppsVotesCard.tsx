@@ -1,20 +1,5 @@
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Box,
-  Card,
-  CardBody,
-  CardHeader,
-  Flex,
-  HStack,
-  Heading,
-  Spinner,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Card, Flex, HStack, Heading, Spinner, VStack } from "@chakra-ui/react"
 import { useAllocationsRound, useRoundXApps, useXAppsShares } from "@/api"
-import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { useTranslation } from "react-i18next"
 import { AllocationXAppsDistributionChart } from "./AllocationXAppsDistributionChart"
@@ -45,7 +30,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
     if (error) {
       return (
-        <Alert
+        <Alert.Root
           w={["80%", "70%", "50%"]}
           status="error"
           variant="subtle"
@@ -55,14 +40,14 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           textAlign="center"
           height="200px"
           borderRadius={"xl"}>
-          <AlertIcon boxSize="40px" mr={0} />
-          <AlertTitle mt={4} mb={1} fontSize="lg">
+          <Alert.Indicator boxSize="40px" mr={0} />
+          <Alert.Title mt={4} mb={1} fontSize="lg">
             {t("Error loading votes")}
-          </AlertTitle>
-          <AlertDescription maxWidth="sm">
+          </Alert.Title>
+          <Alert.Description maxWidth="sm">
             {error.message || "An error occurred while loading the votes"}
-          </AlertDescription>
-        </Alert>
+          </Alert.Description>
+        </Alert.Root>
       )
     }
 
@@ -70,37 +55,39 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   }
 
   return (
-    <Card flex={1} h="full" w="full" variant={"baseWithBorder"}>
-      <CardHeader>
+    <Card.Root flex={1} h="full" w="full" variant={"baseWithBorder"}>
+      <Card.Header>
         <HStack justify={"space-between"} w="full">
           <Heading fontSize="24px" fontWeight={700}>
             {title}
           </Heading>
         </HStack>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={12} align={"flex-start"} w="full">
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={12} align={"flex-start"} w="full">
           {roundInfo.state === 1 && (
-            <Alert status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
-              <UilInfoCircle size={"36px"} color="#D23F63" />
-              <Box>
-                <AlertTitle color="#D23F63" ml={2} fontSize="14px" fontWeight={600} data-testid={"round-error-msg"}>
+            <Alert.Root status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
+              <Alert.Indicator>
+                <UilInfoCircle size={"36px"} color="#D23F63" />
+              </Alert.Indicator>
+              <Alert.Content>
+                <Alert.Title color="#D23F63" ml={2} fontSize="14px" fontWeight={600} data-testid={"round-error-msg"}>
                   {t("Quorum was not reached for this round")}
-                </AlertTitle>
-                <AlertDescription color="#D23F63" ml={2} fontSize="14px">
+                </Alert.Title>
+                <Alert.Description color="#D23F63" ml={2} fontSize="14px">
                   {t("B3TR allocation will be distributed according to the votes of the previous round")}
-                </AlertDescription>
-              </Box>
-            </Alert>
+                </Alert.Description>
+              </Alert.Content>
+            </Alert.Root>
           )}
           <AllocationXAppsDistributionChart roundId={roundId} />
           <AllocationXAppsVotesRankingChart roundId={roundId} />
         </VStack>
-      </CardBody>
+      </Card.Body>
       {(isLoading || error) && (
         <Flex
           backdropFilter="blur(10px)"
-          animation={backdropBlurAnimation("0px", "10px")}
+          animation="backdropBlur"
           position={"absolute"}
           h={"100%"}
           w={"100%"}
@@ -110,6 +97,6 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           {renderContent()}
         </Flex>
       )}
-    </Card>
+    </Card.Root>
   )
 }

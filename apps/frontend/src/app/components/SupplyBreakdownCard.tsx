@@ -1,14 +1,13 @@
 import { useB3trTokenDetails } from "@/api"
-import { Box, Card, CardBody, CardHeader, Grid, HStack, Heading, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, HStack, Heading, Icon, Skeleton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
-import { motion } from "framer-motion"
-import { BaseTooltip } from "../../components/BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useGetB3trBalance } from "@/hooks"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()
@@ -60,82 +59,64 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardHeader>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Header>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="md">{t("Supply breakdown")}</Heading>
-          <BaseTooltip
-            text={t(
-              `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
-            )}>
+          <Heading size="xl" fontWeight="bold">
+            {t("Supply breakdown")}
+          </Heading>
+          <Tooltip
+            content={
+              <Text>
+                {t(
+                  `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
+                )}
+              </Text>
+            }>
             <span>
               <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
             </span>
-          </BaseTooltip>
+          </Tooltip>
         </HStack>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={4} align="flex-start">
-          <Grid templateColumns={["repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
-            <VStack spacing={1} align="flex-start">
-              <Text size={["sm", "sm", "xs"]} fontWeight="400">
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={4} align="flex-start">
+          <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
+            <VStack gap={1} align="flex-start">
+              <Text textStyle="md" fontWeight="400">
                 {t("B3TR in circulation")}
               </Text>
-              <Skeleton isLoaded={!!data}>
-                <Heading size={["lg", "lg", "md"]} color={"#004CFC"}>
+              <Skeleton loading={!data}>
+                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
-            <VStack spacing={1} align="flex-start">
-              <Text size={["sm", "sm", "xs"]} fontWeight="400">
+            <VStack gap={1} align="flex-start">
+              <Text textStyle="md" fontWeight="400">
                 {t("VOT3 in circulation")}
               </Text>
-              <Skeleton isLoaded={!!data}>
-                <Heading size={["lg", "lg", "md"]} color={"#3DBA67"}>
+              <Skeleton loading={!data}>
+                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
-          </Grid>
+          </SimpleGrid>
           {!data ? (
             <Skeleton h={10} w="full" />
           ) : (
-            <HStack spacing={1} w="full" h={5}>
+            <HStack gap={1} w="full" h={5}>
               <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.b3trCirculatingSupply.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
                 zIndex={2}
-                w={data.b3trCirculatingSupply.percentage}
+                w={`${data.b3trCirculatingSupply.percentage}%`}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #004CFC , #447CFF)"}
                 borderRadius={"md"}
               />
               <Box
-                as={motion.div}
-                initial={{
-                  width: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  opacity: 1,
-                  width: `${data.vot3CirculatingSupply.percentage}%`,
-                  transition: {
-                    duration: 0.25,
-                  },
-                }}
                 zIndex={1}
-                w={data.vot3CirculatingSupply.percentage}
+                w={`${data.vot3CirculatingSupply.percentage}%`}
                 h={"full"}
                 bg={" linear-gradient(to bottom, #84E718 , #A0F04A)"}
                 borderRadius={"md"}
@@ -143,7 +124,7 @@ export const SupplyBreakdownCard = () => {
             </HStack>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -1,5 +1,5 @@
 import { filterAmountInput } from "@/utils"
-import { Box, Button, Divider, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Separator, HStack, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -94,7 +94,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
           {Number(vot3Balance?.original) !== Number(amount) && (
             <Box>
               <Button
-                isDisabled={!vot3Balance?.scaled}
+                disabled={!vot3Balance?.scaled}
                 onClick={depositMax}
                 color="#004CFC"
                 fontSize="14px"
@@ -108,7 +108,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             </Box>
           )}
         </HStack>
-        <Divider />
+        <Separator />
       </VStack>
       <VStack alignItems={"stretch"}>
         <Text fontSize={"14px"} color="#6A6A6A">
@@ -127,7 +127,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
       <Text fontWeight={600} fontSize={"14px"}>
         {t("You can claim your tokens back when the proposal voting round starts.")}
       </Text>
-      <Button isDisabled={!Number(amount)} w="full" variant="primaryAction" type="submit">
+      <Button disabled={!Number(amount)} w="full" variant="primaryAction" type="submit">
         {t("Deposit VOT3")}
       </Button>
     </VStack>

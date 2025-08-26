@@ -42,10 +42,11 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: { roundId: string 
   if (isLoading) return <Spinner size={"lg"} alignSelf="center" />
 
   return (
-    <VStack spacing={8} align={"flex-start"} w="full">
-      {sortedData.map(app => (
+    <VStack gap={8} align={"flex-start"} w="full">
+      {sortedData.map((app, index) => (
         <AppVotesHorizontalChart
-          key={`app-votes-chart-${roundId}-${app.app}`}
+          // eslint-disable-next-line react/no-array-index-key
+          key={`app-votes-chart-${roundId}-${app.app}-${index}`}
           data={app}
           roundId={roundId}
           showReceived={true}

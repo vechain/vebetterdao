@@ -1,4 +1,4 @@
-import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ChangeEvent, useCallback, useRef, useState } from "react"
@@ -9,6 +9,7 @@ import { blobToBase64 } from "@/utils/BlobUtils"
 import { Reorder, useDragControls } from "framer-motion"
 import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "@/constants"
 import { validateImage } from "@/utils"
+import { toaster } from "@/components/ui/toaster"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -18,7 +19,6 @@ export const EditScreenshots = ({ form }: Props) => {
   const { t } = useTranslation()
   const inputFile = useRef<HTMLInputElement>(null)
   const screenshots = form.watch("screenshots")
-  const toast = useToast()
   const [loadingScreenshot, setLoadingScreenshot] = useState(false)
   const [invalidFormat, setInvalidFormat] = useState(false)
   const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
@@ -50,12 +50,11 @@ export const EditScreenshots = ({ form }: Props) => {
         form.setValue("screenshots", [...screenshots, ...base64Files])
         setInvalidFormat(false)
       } catch (error) {
-        toast({
+        toaster.error({
           title: "Error",
           description: "An error occurred while uploading the images",
-          status: "error",
           duration: 5000,
-          isClosable: true,
+          closable: true,
         })
         console.error(error)
         setInvalidFormat(true)
@@ -64,7 +63,7 @@ export const EditScreenshots = ({ form }: Props) => {
         setLoadingScreenshot(false)
       }
     },
-    [form, screenshots, toast],
+    [form, screenshots],
   )
 
   const reorderScreenshots = useCallback(
@@ -77,7 +76,7 @@ export const EditScreenshots = ({ form }: Props) => {
   return (
     <VStack align="stretch" gap={6}>
       <HStack justify={"space-between"} flexWrap={"wrap"}>
-        <VStack align="flex-start" spacing={1}>
+        <VStack align="flex-start" gap={1}>
           <Heading fontSize="24px" fontWeight="700">
             {t("Edit screenshots")}
           </Heading>
@@ -85,11 +84,8 @@ export const EditScreenshots = ({ form }: Props) => {
             {invalidFormat ? invalidMessage : t(SCREENSHOT_UPLOAD_GUIDELINES)}
           </Text>
         </VStack>
-        <Button
-          variant="primaryAction"
-          onClick={handleUpload}
-          leftIcon={<UilUpload size="16px" />}
-          isLoading={loadingScreenshot}>
+        <Button variant="primaryAction" onClick={handleUpload} loading={loadingScreenshot}>
+          <UilUpload size="16px" />
           {t("Upload")}
         </Button>
         <Controller
@@ -171,23 +167,23 @@ const DraggableScreenshot = ({
           bgColor="transparent"
           _hover={{ bgColor: "gray.600" }}
           aria-label="Drag screenshot"
-          icon={<UilDraggabledots size="24px" />}
-          onPointerDown={event => dragControls.start(event)}
-        />
+          onPointerDown={event => dragControls.start(event)}>
+          <UilDraggabledots size="24px" />
+        </IconButton>
         <IconButton
           rounded="full"
           color="#D23F63"
           bgColor="#FCEEF1"
           _hover={{ bgColor: "#FCEEF1DD" }}
           aria-label="Delete screenshot"
-          icon={<UilTrash size="24px" />}
           onClick={() => {
             form.setValue(
               "screenshots",
               screenshots.filter((_, i) => i !== index),
             )
-          }}
-        />
+          }}>
+          <UilTrash size="24px" />
+        </IconButton>
       </HStack>
       <Image src={screenshot} alt={`Screenshot ${index + 1}`} h="full" objectFit="contain" draggable="false" />
     </Reorder.Item>

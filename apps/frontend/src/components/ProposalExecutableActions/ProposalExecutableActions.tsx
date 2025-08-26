@@ -60,7 +60,7 @@ export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
   }, [actions, setValue])
 
   return (
-    <VStack spacing={4} align="flex-start" w="full" mt={4}>
+    <VStack gap={4} align="flex-start" w="full" mt={4}>
       <Heading size="md">{t("Executable functions")}</Heading>
       {fields?.map((field, index) => (
         <ExecutableFunctionCard

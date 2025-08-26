@@ -32,10 +32,8 @@ export const EditAppPageButton = () => {
   }
 
   return (
-    <>
-      <IconButton variant="primaryIconButton" aria-label="Edit App Page" onClick={handleEdit}>
-        <UilPen size="20px" />
-      </IconButton>
-    </>
+    <IconButton variant="primaryIconButton" aria-label="Edit App Page" onClick={handleEdit}>
+      <UilPen size="20px" />
+    </IconButton>
   )
 }

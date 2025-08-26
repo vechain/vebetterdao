@@ -2,7 +2,7 @@
 
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Button, Card, CardBody, Divider, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
@@ -108,10 +108,12 @@ export const PublishAndPreviewPageContent = () => {
   ])
 
   return (
-    <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
-      <CardBody py={8}>
-        <VStack spacing={8} align="flex-start" divider={<Divider />}>
-          <Heading size={["md", "lg"]}>{t("Check your proposal before publishing")}</Heading>
+    <Card.Root w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
+      <Card.Body py={8}>
+        <VStack gap={8} align="flex-start" separator={<Separator />}>
+          <Heading size={["xl", "2xl"]} fontWeight="bold">
+            {t("Check your proposal before publishing")}
+          </Heading>
           <MDEditor.Markdown
             source={markdownDescription}
             style={{
@@ -128,7 +130,7 @@ export const PublishAndPreviewPageContent = () => {
             />
           )}
 
-          <VStack spacing={4} align="flex-start" w="full">
+          <VStack gap={4} align="flex-start" w="full">
             <Heading size={["sm", "md"]}>{t("Voting session")}</Heading>
             {votingStartRoundId && (
               <SelectedRoundRadioCard
@@ -142,7 +144,7 @@ export const PublishAndPreviewPageContent = () => {
             )}
           </VStack>
 
-          <VStack spacing={4} align="flex-start" w="full">
+          <VStack gap={4} align="flex-start" w="full">
             <Heading size={["sm", "md"]}>{t("Community support")}</Heading>
             {depositAmount !== undefined && threshold && (
               <ProposalSupportProgressChart
@@ -157,7 +159,7 @@ export const PublishAndPreviewPageContent = () => {
             )}
           </VStack>
 
-          <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+          <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
               {t("Go back")}
             </Button>
@@ -166,7 +168,7 @@ export const PublishAndPreviewPageContent = () => {
             </Button>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -4,29 +4,7 @@ import { useTranslation } from "react-i18next"
 import { AnalyticsUtils } from "@/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { queryClient, useUserBotSignals, useUserSignalEvents, useXApps } from "@/api"
-import {
-  VStack,
-  Heading,
-  Spinner,
-  Stepper,
-  Step,
-  StepIndicator,
-  StepStatus,
-  StepNumber,
-  StepIcon,
-  StepTitle,
-  StepDescription,
-  StepSeparator,
-  Box,
-  useSteps,
-  Link,
-  Text,
-  Alert,
-  AlertTitle,
-  List,
-  ListItem,
-} from "@chakra-ui/react"
-import { UilTimesCircle } from "@iconscout/react-unicons"
+import { VStack, Heading, Spinner, Steps, Box, Link, Text, Alert, List } from "@chakra-ui/react"
 
 import { useRouter } from "next/navigation"
 import { getVerifiedVetDomainQueryKey, useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
@@ -107,10 +85,7 @@ export const AppealSteps = () => {
     }
   }
 
-  const { activeStep, setActiveStep } = useSteps({
-    index: getActiveStepIndex(),
-    count: STEPS.length,
-  })
+  const [step, setStep] = useState(getActiveStepIndex())
 
   const handleResetingSignal = useCallback(async () => {
     if (!connectedAccount?.address) {
@@ -140,7 +115,7 @@ export const AppealSteps = () => {
 
         setResetingStatus(RESET_STATUS.SUCCESS)
         setApiResponse(data.message)
-        setActiveStep(3) // After successful reseting signal count
+        setStep(3) // After successful reseting signal count
 
         AnalyticsUtils.trackEvent(signalReset, signalResetActions(SignalResetProperties.SIGNAL_RESET_SUCCESS))
       } else {
@@ -151,17 +126,17 @@ export const AppealSteps = () => {
       setResetingStatus(RESET_STATUS.ERROR)
       setApiResponse(error)
     }
-  }, [connectedAccount?.address, setActiveStep])
+  }, [connectedAccount?.address, setStep])
 
   useEffect(() => {
     if (resetingStatus === RESET_STATUS.SUCCESS) {
-      setActiveStep(3)
+      setStep(3)
     } else if (isVerified) {
-      setActiveStep(2)
+      setStep(2)
     } else {
-      setActiveStep(1)
+      setStep(1)
     }
-  }, [resetingStatus, isVerified, setActiveStep])
+  }, [resetingStatus, isVerified, setStep])
 
   // Refresh verification status when returning from vet.domains
   useEffect(() => {
@@ -219,7 +194,7 @@ export const AppealSteps = () => {
   // Return null to prevent flash of content before redirect
   if (!isConnectedUser) {
     return (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
+      <VStack w="full" gap={12} h="80vh" justify="center">
         <Spinner size="lg" />
       </VStack>
     )
@@ -230,7 +205,7 @@ export const AppealSteps = () => {
       return (
         <Text>
           {step.description}{" "}
-          <Link color="blue.500" href={step.linkUrl} isExternal textDecoration="underline">
+          <Link color="blue.500" href={step.linkUrl} textDecoration="underline">
             {step.linkText}
           </Link>
         </Text>
@@ -240,7 +215,7 @@ export const AppealSteps = () => {
   }
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto" data-testid="appeal-page">
+    <VStack gap={6} align="stretch" w="full" maxW="breakpoint-md" mx="auto" data-testid="appeal-page">
       <Heading size={"xl"}>{t("Wallet Restriction Appeal")}</Heading>
 
       <Text>
@@ -249,44 +224,48 @@ export const AppealSteps = () => {
         }
       </Text>
 
-      <Stepper index={activeStep} size="lg" orientation="vertical" height="350px" gap="0" overflow="visible">
-        {STEPS.map((step, index) => (
-          <Step key={step.id}>
-            <StepIndicator>
-              {index === 2 && resetingStatus === RESET_STATUS.PENDING ? (
-                <Spinner size="sm" />
-              ) : index === 2 && resetingStatus === RESET_STATUS.ERROR ? (
-                <UilTimesCircle color="#FF0000" />
-              ) : (
-                <StepStatus complete={<StepIcon />} incomplete={<StepNumber />} active={<StepNumber />} />
-              )}
-            </StepIndicator>
+      <Steps.Root
+        defaultStep={1}
+        step={step}
+        onStepChange={e => setStep(e.step)}
+        count={STEPS.length}
+        size="lg"
+        orientation="vertical"
+        height="350px"
+        gap="0"
+        overflow="visible"
+        colorPalette="blue">
+        <Steps.List>
+          {STEPS.map((step, index) => (
+            <Steps.Item key={step.id} index={index}>
+              <Steps.Indicator colorPalette="blue.500" />
 
-            <Box flexShrink="1" minWidth="0">
-              <StepTitle>{step.title}</StepTitle>
-              <StepDescription>{renderStepDescription(step)}</StepDescription>
-            </Box>
+              <Box flexShrink="1" minWidth="0">
+                <Steps.Title>{step.title}</Steps.Title>
+                <Steps.Description>{renderStepDescription(step)}</Steps.Description>
+              </Box>
 
-            <StepSeparator />
-          </Step>
-        ))}
-      </Stepper>
+              <Steps.Separator />
+            </Steps.Item>
+          ))}
+        </Steps.List>
+      </Steps.Root>
 
       {userSignaledCount >= 1 && hasSuccessfulReset && (
         <VStack align="stretch" gap={2}>
-          <Alert status="warning" size="md" borderRadius="16px">
+          <Alert.Root status="warning" size="md" borderRadius="16px">
             <Box lineHeight={"1.20rem"} fontSize="md" color="#F29B32">
-              <AlertTitle>
+              <Alert.Title>
                 {
                   "You have been flagged again after your KYC. Please reach out to the app admin that flagged you to restore your access."
                 }
-              </AlertTitle>
+              </Alert.Title>
 
-              <List styleType="-" p={3}>
+              <List.Root listStyleType="-" p={3}>
                 {userSignalEvents?.activeSignalEvents
                   .filter((event, index, self) => self.findIndex(e => e.appId === event.appId) === index)
                   .map(event => (
-                    <ListItem
+                    <List.Item
                       key={event.appId}
                       onClick={() => {
                         AnalyticsUtils.trackEvent(
@@ -302,11 +281,11 @@ export const AppealSteps = () => {
                         textDecoration: "underline",
                       }}>
                       {getAppName(event.appId)}
-                    </ListItem>
+                    </List.Item>
                   ))}
-              </List>
+              </List.Root>
             </Box>
-          </Alert>
+          </Alert.Root>
         </VStack>
       )}
 

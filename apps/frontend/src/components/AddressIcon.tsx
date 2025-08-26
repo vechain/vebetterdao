@@ -1,5 +1,5 @@
 import React from "react"
-import { HTMLChakraProps, Img } from "@chakra-ui/react"
+import { HTMLChakraProps, Image } from "@chakra-ui/react"
 import { PicassoUtils } from "@repo/utils"
 import { useGetAvatarOfAddress } from "@vechain/vechain-kit"
 const { getPicassoImgSrc } = PicassoUtils
@@ -16,7 +16,7 @@ const Picasso: React.FC<IPicasso> = ({ address, ...props }) => {
   const { data: avatar, isLoading: isLoadingAvatar } = useGetAvatarOfAddress(address ?? "")
 
   return (
-    <Img
+    <Image
       data-cy={`address-icon-${address}`}
       objectFit={"cover"}
       src={avatar && !isLoadingAvatar ? avatar : getPicassoImgSrc(address ?? "")}

@@ -2,7 +2,7 @@ import { useB3TRGovernorPaused, useB3trPaused, useVot3Paused } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
-import { Button, HStack, VStack, Text, Show, Card, CardHeader, Heading, CardBody } from "@chakra-ui/react"
+import { Button, HStack, VStack, Text, Card, Heading } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
@@ -104,9 +104,9 @@ export const Pause: React.FC = () => {
   const pauseB3TR = (
     <>
       <Button
-        colorScheme={`${isB3trPaused ? "blue" : "red"}`}
+        colorPalette={`${isB3trPaused ? "blue" : "red"}`}
         onClick={handleToggleB3trPause}
-        isLoading={isToggleB3trPausedLoading}>
+        loading={isToggleB3trPausedLoading}>
         {isB3trPaused ? "Unpause B3TR" : "Pause B3TR"}
       </Button>
       <Text>{t("Pausing disables: Transfers, Minting, New Emissions, Swaps")}</Text>
@@ -116,9 +116,9 @@ export const Pause: React.FC = () => {
   const pauseVOT3 = (
     <>
       <Button
-        colorScheme={`${isVot3Paused ? "blue" : "red"}`}
+        colorPalette={`${isVot3Paused ? "blue" : "red"}`}
         onClick={handleToggleVot3Pause}
-        isLoading={isToggleVot3PausedLoading}>
+        loading={isToggleVot3PausedLoading}>
         {isVot3Paused ? "Unpause VOT3" : "Pause VOT3"}
       </Button>
       <Text>{t("Pausing disables: Transfers, Minting, Swaps, Delegation of voting power")}</Text>
@@ -128,9 +128,9 @@ export const Pause: React.FC = () => {
   const pauseGalaxyMember = (
     <>
       <Button
-        colorScheme={`${isGalaxyMemberPaused ? "blue" : "red"}`}
+        colorPalette={`${isGalaxyMemberPaused ? "blue" : "red"}`}
         onClick={handleToggleGalaxyMemberPause}
-        isLoading={isToggleGalaxyMemberPausedLoading}>
+        loading={isToggleGalaxyMemberPausedLoading}>
         {isGalaxyMemberPaused ? "Unpause Galaxy Member" : "Pause Galaxy Member"}
       </Button>
       <Text>{t("Pausing disables: Transfers, Minting")}</Text>
@@ -140,9 +140,9 @@ export const Pause: React.FC = () => {
   const pauseB3TRGovernor = (
     <>
       <Button
-        colorScheme={`${isB3TRGovernorPaused ? "blue" : "red"}`}
+        colorPalette={`${isB3TRGovernorPaused ? "blue" : "red"}`}
         onClick={handleToggleB3TRGovernorPause}
-        isLoading={isToggleB3TRGovernorPausedLoading}>
+        loading={isToggleB3TRGovernorPausedLoading}>
         {isB3TRGovernorPaused ? "Unpause B3TRGovernor" : "Pause B3TRGovernor"}
       </Button>
       <Text>
@@ -154,57 +154,49 @@ export const Pause: React.FC = () => {
   )
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">{t("Pausing")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={6} align={"flex-start"}>
+    <Card.Root w={"full"}>
+      <Card.Header>
+        <Heading size="3xl">{t("Pausing")}</Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={6} align={"flex-start"}>
           {permissions?.isAdminOfVot3 && (
             <>
-              <Show above="sm">
-                <HStack>{pauseB3TR}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseB3TR}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseB3TR}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseB3TR}
+              </VStack>
             </>
           )}
 
           {permissions?.isAdminOfB3tr && (
             <>
-              <Show above="sm">
-                <HStack>{pauseVOT3}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseVOT3}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseVOT3}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseVOT3}
+              </VStack>
             </>
           )}
 
           {permissions?.isAdminOfGalaxyMember && (
             <>
-              <Show above="sm">
-                <HStack>{pauseGalaxyMember}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseGalaxyMember}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseGalaxyMember}
+              </VStack>
             </>
           )}
 
           {permissions?.isAdminOfB3TRGovernor && (
             <>
-              <Show above="sm">
-                <HStack>{pauseB3TRGovernor}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseB3TRGovernor}</VStack>
-              </Show>
+              <HStack hideBelow="sm">{pauseB3TRGovernor}</HStack>
+              <VStack align={"flex-start"} hideFrom="sm">
+                {pauseB3TRGovernor}
+              </VStack>
             </>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

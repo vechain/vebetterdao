@@ -1,6 +1,6 @@
 import { useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text, useDisclosure } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Box, Button, Spinner, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { RequirementModal, ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
@@ -16,11 +16,7 @@ export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const { t } = useTranslation()
-  const {
-    isOpen: isRequirementModalOpen,
-    onOpen: openRequirementModal,
-    onClose: closeRequirementModal,
-  } = useDisclosure()
+  const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
@@ -55,39 +51,36 @@ export const ProposalsPageContent = () => {
 
   if (isLoading)
     return (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
+      <VStack w="full" gap={12} h="80vh" justify="center">
         <Spinner size={"lg"} />
       </VStack>
     )
 
   return (
-    <VStack w={"full"} spacing={4}>
+    <VStack w={"full"} gap={4}>
       <VStack w={"full"} alignContent={"flex-start"}>
-        <HStack spacing={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
+        <HStack gap={4} w="full" justify={"space-between"} alignItems={"center"} mb={2}>
           <Box>
-            <HStack spacing={3} alignItems={"center"}>
-              <Heading as="h1" size="xl">
+            <HStack gap={3} alignItems={"center"}>
+              <Heading as="h1" size="4xl">
                 {t("Proposals")}
               </Heading>
             </HStack>
           </Box>
-          <Show below="sm">
-            {filteredProposals.length > 0 && (
-              <Button onClick={onNewClick} variant={"primaryAction"}>
-                {t("Create proposal")}
-              </Button>
-            )}
-          </Show>
+
+          {filteredProposals.length > 0 && (
+            <Button hideFrom="md" onClick={onNewClick} variant={"primaryAction"}>
+              {t("Create proposal")}
+            </Button>
+          )}
         </HStack>
       </VStack>
       <ProposalsFilters alignSelf={"flex-start"} w="full" />
-      <Show below="sm">
-        {totalClaimableDeposits > 0 && (
-          <Box mb={2} mt={3}>
-            <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
-          </Box>
-        )}
-      </Show>
+      {totalClaimableDeposits > 0 && (
+        <Box hideFrom="md" mb={2} mt={3}>
+          <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
+        </Box>
+      )}
       <HStack w={"full"} gap={8} mt={3}>
         <VStack
           flex={{ base: undefined, md: 4.5 }}
@@ -120,21 +113,18 @@ export const ProposalsPageContent = () => {
             />
           )}
         </VStack>
-        <Show above="sm">
-          <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
-            {totalClaimableDeposits > 0 && (
-              <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
-            )}
-            {sortedProposals.length > 0 && <CreateProposalCard />}
-            <JoinCommunity />
-          </VStack>
-        </Show>
-      </HStack>
-      <Show below="sm">
-        <Box mt={2} w={"full"}>
+
+        <VStack hideBelow="md" flex={2} alignSelf="flex-start" gap={6} position={"sticky"} top={24}>
+          {totalClaimableDeposits > 0 && (
+            <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
+          )}
+          {sortedProposals.length > 0 && <CreateProposalCard />}
           <JoinCommunity />
-        </Box>
-      </Show>
+        </VStack>
+      </HStack>
+      <Box hideFrom="md" mt={2} w={"full"}>
+        <JoinCommunity />
+      </Box>
       <RequirementModal
         isOpen={isRequirementModalOpen}
         onClose={closeRequirementModal}

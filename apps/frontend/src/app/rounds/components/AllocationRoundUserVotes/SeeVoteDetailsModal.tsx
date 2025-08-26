@@ -1,5 +1,5 @@
 import { CustomModalContent } from "@/components"
-import { Heading, Modal, ModalOverlay, Text, VStack } from "@chakra-ui/react"
+import { Heading, Dialog, Text, VStack } from "@chakra-ui/react"
 import { AppVotesHorizontalChart } from "../AllocationXAppsVotesCard/AppVotesHorizontalChart"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -25,10 +25,9 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
   const totalVotesCast = useMemo(() => sortedVotes.reduce((acc, vote) => acc + vote.rawValue, 0), [sortedVotes])
   const totalAppsVoted = sortedVotes.length
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"xl"} trapFocus={true} isCentered={true} closeOnOverlayClick={true}>
-      <ModalOverlay />
+    <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
       <CustomModalContent>
-        <VStack spacing={4} w="full" align="flex-start" p={"24px"}>
+        <VStack gap={4} w="full" align="flex-start" p={"24px"}>
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("Your votes")}
           </Heading>
@@ -39,7 +38,7 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
               t={t}
             />
           </Text>
-          <VStack spacing={6} mt={2} w="full" align="flex-start">
+          <VStack gap={6} mt={2} w="full" align="flex-start">
             {sortedVotes.map(vote => {
               const percentage = (vote.rawValue / totalVotesCast) * 100
               return (
@@ -54,6 +53,6 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
           </VStack>
         </VStack>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

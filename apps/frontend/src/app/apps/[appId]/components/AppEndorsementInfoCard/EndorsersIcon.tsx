@@ -12,7 +12,7 @@ export const EndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: strin
   const otherAppsBoxColor = "#C9EAA3"
   const otherAppsTextColor = "#5C6C4A"
   return (
-    <HStack spacing={0}>
+    <HStack gap={0}>
       {endorsersToRender.map((endorser: string, index: number) => {
         const ml = index > 0 ? `-${marginleft}px` : "0"
         return <AddressIcon key={endorser} address={endorser} rounded="full" boxSize={`${boxSize}px`} ml={ml} />

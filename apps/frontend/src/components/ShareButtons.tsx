@@ -32,21 +32,21 @@ export const ShareButtons = ({ descriptionEncoded }: { descriptionEncoded: strin
   return (
     <HStack gap={4}>
       <BouncingAnimation>
-        <Link href={`${TWITTER_INJECT}${descriptionEncoded}`} isExternal>
+        <Link href={`${TWITTER_INJECT}${descriptionEncoded}`}>
           <Box bg={"lightgrey"} p={2} borderRadius={"full"}>
             <RiTwitterXFill size={22} />
           </Box>
         </Link>
       </BouncingAnimation>
       <BouncingAnimation>
-        <Link href={`${TELEGRAM_INJECT}${descriptionEncoded}`} isExternal>
+        <Link href={`${TELEGRAM_INJECT}${descriptionEncoded}`}>
           <Box bg={"#30abec"} p={2} borderRadius={"full"}>
             <FaTelegramPlane color="white" size={22} />
           </Box>
         </Link>
       </BouncingAnimation>
       <BouncingAnimation>
-        <Link href={`${WHATSAPP_INJECT}${descriptionEncoded}`} isExternal>
+        <Link href={`${WHATSAPP_INJECT}${descriptionEncoded}`}>
           <Box bg={"#01cb37"} p={2} borderRadius={"full"}>
             <FaWhatsapp size={22} color="white" />
           </Box>

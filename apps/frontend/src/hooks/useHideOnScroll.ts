@@ -9,7 +9,7 @@ import { useMediaQuery } from "@chakra-ui/react"
 export const useHideOnScroll = (): boolean => {
   const [isNavbarVisible, setIsNavbarVisible] = useState<boolean>(true)
   const [lastScrollY, setLastScrollY] = useState<number>(0)
-  const [isMobile] = useMediaQuery("(max-width: 767px)")
+  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   useEffect(() => {
     // Always show navbar on non-mobile devices

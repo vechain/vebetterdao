@@ -1,5 +1,6 @@
 import React from "react"
-import { Button, ButtonProps, Icon, IconButton, useColorMode } from "@chakra-ui/react"
+import { Button, ButtonProps, Icon, IconButton } from "@chakra-ui/react"
+import { useColorMode } from "@/components/ui/color-mode"
 import { FaMoon, FaSun } from "react-icons/fa"
 
 type Props = {
@@ -18,10 +19,10 @@ export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
         fontSize="18px"
         bg="none"
         borderRadius="full"
-        icon={<Icon as={isDark ? FaSun : FaMoon} />}
         onClick={toggleColorMode}
-        {...otherProps}
-      />
+        {...otherProps}>
+        <Icon as={isDark ? FaSun : FaMoon} />
+      </IconButton>
     )
 
   return (
@@ -29,11 +30,11 @@ export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
       data-cy="theme-switcher-with-text"
       aria-label={isDark ? "dark" : "light"}
       fontSize="18px"
-      variant="unstyled"
+      variant="ghost"
       borderRadius="full"
-      leftIcon={<Icon as={isDark ? FaSun : FaMoon} />}
       onClick={toggleColorMode}
       {...otherProps}>
+      <Icon as={isDark ? FaSun : FaMoon} />
       {text}
     </Button>
   )

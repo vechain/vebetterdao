@@ -29,7 +29,7 @@ export const ConnectWithCreators = () => {
             {t("Connect with app creators to know more about their apps and endorse them.")}
           </Text>
         </HStack>
-        <Link href={DISCORD_URL} isExternal w={"full"} onClick={onJoinClick}>
+        <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" w={"full"} onClick={onJoinClick}>
           <Button w={"full"} variant={"primaryAction"}>
             {t("Connect with Creators")}
           </Button>

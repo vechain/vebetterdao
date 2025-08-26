@@ -1,17 +1,5 @@
 import { CustomModalContent } from "@/components"
-import {
-  Button,
-  FormControl,
-  HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalOverlay,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, CloseButton } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -27,7 +15,7 @@ type Props = {
 
 export const AddSignalerButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ signalerAddress: string }>()
   const { setValue, watch } = addressForm
   const signalerAddress = watch("signalerAddress")
@@ -49,11 +37,12 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={false}>
-        <ModalOverlay />
+      <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>
         <CustomModalContent>
-          <ModalCloseButton />
-          <ModalBody p={"40px"}>
+          <Dialog.CloseTrigger asChild>
+            <CloseButton />
+          </Dialog.CloseTrigger>
+          <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
               <UilUser size="54px" color="#004CFC" />
               <Heading fontSize="28px">{t("Add a new signaler")}</Heading>
@@ -67,7 +56,7 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isRequired isInvalid={!signalerAddress}>
+                <Field.Root required invalid={!signalerAddress}>
                   <WalletAddressInput
                     onAddressResolved={address => setValue("signalerAddress", address ?? "")}
                     customValidation={({ address }) => {
@@ -77,11 +66,11 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
                         : ""
                     }}
                   />
-                </FormControl>
+                </Field.Root>
               </VStack>
               <VStack align="stretch">
                 <Button
-                  isDisabled={!signalerAddress}
+                  disabled={!signalerAddress}
                   variant="primaryAction"
                   type="submit"
                   onClick={addressForm.handleSubmit(onSubmit)}>
@@ -92,16 +81,16 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
                 </Button>
               </VStack>
             </VStack>
-          </ModalBody>
+          </Dialog.Body>
         </CustomModalContent>
-      </Modal>
+      </Dialog.Root>
       <Button
         mt={4}
         onClick={onOpen}
         variant="primarySubtle"
-        isDisabled={editAdminForm.getValues("signalers").length >= 3}
-        leftIcon={<UilPlus size="14px" />}
+        disabled={editAdminForm.getValues("signalers").length >= 3}
         alignSelf={"flex-start"}>
+        <UilPlus size="14px" />
         {editAdminForm.getValues("signalers").length >= 3 ? t("Max 3 signalers") : t("Add signaler")}
       </Button>
     </>

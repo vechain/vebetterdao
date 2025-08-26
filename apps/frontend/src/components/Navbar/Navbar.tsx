@@ -1,5 +1,6 @@
 "use client"
-import { Box, HStack, useColorModeValue, useMediaQuery } from "@chakra-ui/react"
+import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
@@ -10,7 +11,7 @@ import { Routes } from "./Routes"
 import { useHideOnScroll } from "@/hooks"
 
 export const Navbar: React.FC = () => {
-  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
+  const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()

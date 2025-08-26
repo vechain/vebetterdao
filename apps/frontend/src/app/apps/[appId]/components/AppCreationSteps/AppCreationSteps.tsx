@@ -1,6 +1,6 @@
 import { useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
 import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
-import { Box, Card, CardBody, Grid, Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Grid, Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
@@ -28,19 +28,16 @@ export const AppCreationSteps = () => {
 
   return (
     <Box>
-      <Card>
-        <CardBody>
-          <VStack spacing={8} align="flex-start">
+      <Card.Root>
+        <Card.Body>
+          <VStack gap={8} align="flex-start">
             <HStack w="full">
               <HStack w="full" justify="start">
-                <Heading size="lg">{t("Your App is almost ready!")}</Heading>
+                <Heading size="3xl">{t("Your App is almost ready!")}</Heading>
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
                 <Icon as={UilInfoCircle} color="rgba(0, 76, 252, 1)" />
-                <Link
-                  color="#004CFC"
-                  isExternal
-                  href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
+                <Link color="#004CFC" href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
                   {t("Know more about Apps")}
                 </Link>
               </HStack>
@@ -58,7 +55,7 @@ export const AppCreationSteps = () => {
             </Text>
 
             <Box w="full" maxW={"100%"} overflowX="auto">
-              <Skeleton isLoaded={!isLoading}>
+              <Skeleton loading={isLoading}>
                 <Grid gridTemplateColumns={["repeat(1,  1fr)", "repeat(3,  1fr)"]} gap={4} w="full">
                   <StepBoxes
                     stepText={t("STEP {{value}}", { value: XAppsCreationSteps.SUBMISSION + 1 })}
@@ -92,8 +89,8 @@ export const AppCreationSteps = () => {
               </Skeleton>
             </Box>
           </VStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </Box>
   )
 }

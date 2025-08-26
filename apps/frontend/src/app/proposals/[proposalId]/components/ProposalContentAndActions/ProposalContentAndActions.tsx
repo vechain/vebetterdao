@@ -4,7 +4,7 @@ import { ProposalExecutableActions } from "@/components/ProposalExecutableAction
 import { GovernanceFeaturedContractsWithFunctions, getActionsFromTargetsAndCalldatas } from "@/constants"
 import { ProposalFormAction } from "@/store"
 import { toIPFSURL } from "@/utils"
-import { Card, CardBody, Heading, Alert, AlertIcon, AlertDescription, AlertTitle, Box, VStack } from "@chakra-ui/react"
+import { Card, Heading, Alert, Box, VStack } from "@chakra-ui/react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -39,9 +39,9 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   }, [proposal])
 
   return (
-    <Card w="full" variant="baseWithBorder">
-      <CardBody py={8}>
-        <VStack spacing={8} align="flex-start">
+    <Card.Root w="full" variant="baseWithBorder">
+      <Card.Body py={8}>
+        <VStack gap={8} align="flex-start">
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("About the proposal")}
           </Heading>
@@ -58,17 +58,17 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             }}
           />
           {proposalDecodeError && (
-            <Alert status="error" borderRadius={"lg"}>
-              <AlertIcon />
+            <Alert.Root status="error" borderRadius={"lg"}>
+              <Alert.Indicator />
               <Box>
-                <AlertTitle>{t("Error decoding the proposal calldatas")}</AlertTitle>
-                <AlertDescription>{proposalDecodeError}</AlertDescription>
+                <Alert.Title>{t("Error decoding the proposal calldatas")}</Alert.Title>
+                <Alert.Description>{proposalDecodeError}</Alert.Description>
               </Box>
-            </Alert>
+            </Alert.Root>
           )}
           {!!actions.length && <ProposalExecutableActions actions={actions} />}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

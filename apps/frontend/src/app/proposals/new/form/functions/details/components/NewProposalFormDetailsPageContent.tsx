@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, HStack, Heading, VStack } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, VStack } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { FormData, NewProposalForm } from "./NewProposalForm"
@@ -64,13 +64,13 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
   )
 
   return (
-    <Card w="full" data-testid="new-proposal-form" variant="baseWithBorder">
-      <CardBody py={8}>
-        <VStack spacing={[4, 8]} align="flex-start">
-          <Heading size="lg">{t("What is your proposal about?")}</Heading>
+    <Card.Root w="full" data-testid="new-proposal-form" variant="baseWithBorder">
+      <Card.Body py={8}>
+        <VStack gap={[4, 8]} align="flex-start">
+          <Heading size="3xl">{t("What is your proposal about?")}</Heading>
           <Heading size="md">{t("Basic information")}</Heading>
           <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
-          <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+          <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
               {t("Go back")}
             </Button>
@@ -79,7 +79,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
             </Button>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

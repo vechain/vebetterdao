@@ -38,7 +38,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
 
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
-      <VStack spacing={6} align="flex-start" w="full">
+      <VStack gap={6} align="flex-start" w="full">
         <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
 
         <Flex position="relative" alignSelf={"center"}>
@@ -58,7 +58,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
             {nodePoints}
           </Text>
         </Flex>
-        <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} spacing={4}>
+        <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} gap={4}>
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
             <Text fontSize={"16px"} as="span">

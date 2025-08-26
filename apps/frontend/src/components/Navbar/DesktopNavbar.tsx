@@ -4,7 +4,7 @@ import { NavbarMenu } from "./NavbarMenu"
 import dynamic from "next/dynamic"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
-import { ThemeSwitcher } from "@/components/ThemeSwitcher"
+import { ColorModeButton } from "../ui/color-mode"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -15,7 +15,7 @@ type Props = {
   routesToRender: Route[]
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
-  const [isLargerThan1800] = useMediaQuery("(min-width: 1800px)")
+  const [isLargerThan1800] = useMediaQuery(["(min-width: 1800px)"])
 
   return (
     <>
@@ -25,7 +25,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
 
       {!!routesToRender.length && (
         <HStack
-          spacing={4}
+          gap={4}
           justifyContent={"center"}
           borderRadius={"full"}
           borderWidth={1}
@@ -36,8 +36,8 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
           <NavbarMenu routesToRender={routesToRender} />
         </HStack>
       )}
-      <HStack flexShrink={0} spacing={4} justifyContent={"end"} alignItems={"center"}>
-        <ThemeSwitcher />
+      <HStack flexShrink={0} gap={4} justifyContent={"end"} alignItems={"center"}>
+        <ColorModeButton />
         {isLargerThan1800 && <NavbarBalance />}
         <Box as="span">
           <ConnectWalletButton />
