@@ -21,9 +21,10 @@ type Props = {
   isOpen: UseDisclosureProps["isOpen"]
   onClose: UseDisclosureProps["onClose"]
   hasNft: boolean
+  isGrants?: boolean
 }
 
-export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
+export const RequirementModal = ({ isOpen, onClose, hasNft, isGrants }: Props) => {
   const { t } = useTranslation()
   const modalIcon = useColorModeValue("/assets/icons/nft-earth-light.png", "/assets/icons/nft-earth-dark.png")
   const { data: gmRequired } = useGMRequiredByProposalType()
@@ -81,12 +82,14 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
                   />
                 </Text>
               </ListItem>
-              <ListItem>
-                <Trans
-                  i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
-                  components={{ b: <Text as="span" fontWeight="bold" /> }}
-                />
-              </ListItem>
+              {!isGrants && (
+                <ListItem>
+                  <Trans
+                    i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
+                    components={{ b: <Text as="span" fontWeight="bold" /> }}
+                  />
+                </ListItem>
+              )}
             </OrderedList>
           ) : (
             <Text fontSize="16px" fontWeight={400}>
@@ -98,14 +101,15 @@ export const RequirementModal = ({ isOpen, onClose, hasNft }: Props) => {
           )}
         </VStack>
         <HStack w="full" h="full" justifyContent="center" pt={4}>
-          <Button
-            variant="secondary"
-            w="full"
-            py={6}
-            onClick={() => window.open("https://vechain.discourse.group", "_blank")}>
-            {t("Create Discourse")}
-          </Button>
-
+          {!isGrants && (
+            <Button
+              variant="secondary"
+              w="full"
+              py={6}
+              onClick={() => window.open("https://vechain.discourse.group", "_blank")}>
+              {t("Create Discourse")}
+            </Button>
+          )}
           <Button variant="primaryAction" w="full" py={6} onClick={handleGetNftOrApply}>
             {getNftOrApplyButtonText}
           </Button>

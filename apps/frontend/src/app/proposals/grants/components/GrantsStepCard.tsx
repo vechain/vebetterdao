@@ -15,6 +15,7 @@ import {
   ListIcon,
   List,
   Card,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
@@ -22,6 +23,9 @@ import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { UilArrowLeft, UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { RequirementModal } from "@/app/proposals/components/components"
+import { useCallback } from "react"
 
 export type Step = {
   key: string
@@ -49,9 +53,22 @@ export const GrantsStepsCard = ({
   const router = useRouter()
   const currentStep = steps[activeStep]
   const isLastStep = activeStep === steps.length - 1
-  const handleApply = () => {
-    router.push("/proposals/grants/new")
-  }
+
+  const {
+    isOpen: isRequirementModalOpen,
+    onOpen: openRequirementModal,
+    onClose: closeRequirementModal,
+  } = useDisclosure()
+
+  const hasMetProposalCriteria = useMetProposalCriteria()
+
+  const handleApply = useCallback(() => {
+    if (!hasMetProposalCriteria) {
+      openRequirementModal()
+    } else {
+      router.push("/proposals/grants/new")
+    }
+  }, [openRequirementModal, router, hasMetProposalCriteria])
 
   if (!currentStep) {
     return null
@@ -168,6 +185,12 @@ export const GrantsStepsCard = ({
             />
           </motion.div>
         </Box>
+        <RequirementModal
+          isOpen={isRequirementModalOpen}
+          onClose={closeRequirementModal}
+          hasNft={hasMetProposalCriteria}
+          isGrants
+        />
       </Flex>
     </Card>
   )
