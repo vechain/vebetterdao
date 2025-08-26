@@ -153,7 +153,7 @@ export const AppEndorsementInfoCard = ({
           <Button
             key="removeEndorsementButton"
             variant="plain"
-            color="red.500"
+            color="red.300"
             fontSize="md"
             fontWeight="semibold"
             onClick={onOpenUnendorsementModal}

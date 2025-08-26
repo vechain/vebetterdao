@@ -13,7 +13,7 @@ export const UpdateReceiverAddress = () => {
   const { data: xApps } = useXApps()
 
   const { sendTransaction, isTransactionPending, status } = useUpdateXAppReceiverAddress({
-    appId: appId[0] ?? "",
+    appId: appId ?? "",
     newAddress,
   })
   const isLoading = isTransactionPending || status === "pending"
@@ -31,7 +31,7 @@ export const UpdateReceiverAddress = () => {
 
   const currentAddress = useMemo(() => {
     if (appId === undefined) return ""
-    const app = allApps.find(item => item.id === appId[0])
+    const app = allApps.find(item => item.id === appId)
     return app?.teamWalletAddress
   }, [appId, allApps])
 
@@ -39,12 +39,12 @@ export const UpdateReceiverAddress = () => {
     return AddressUtils.isValid(newAddress)
   }, [newAddress])
 
-  const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId[0] !== "", [appId, isValidAddress])
+  const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Update Team Wallet Address")}</Heading>
+        <Heading size="3xl">{t("Update Team Wallet Address")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} alignItems={"start"} w="full">
@@ -57,6 +57,7 @@ export const UpdateReceiverAddress = () => {
               <Field.Root required>
                 <Field.Label>
                   <strong>{"App"}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <NativeSelect.Root disabled={isLoading} rounded="full">
                   <NativeSelect.Indicator />
@@ -80,7 +81,7 @@ export const UpdateReceiverAddress = () => {
                   <strong>{"Current Address"}</strong>
                 </Field.Label>
                 <InputGroup>
-                  <Input variant="subtle" value={currentAddress} disabled />
+                  <Input value={currentAddress} placeholder={currentAddress} disabled />
                 </InputGroup>
               </Field.Root>
 

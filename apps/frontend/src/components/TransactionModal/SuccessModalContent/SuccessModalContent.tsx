@@ -71,7 +71,7 @@ export const SuccessModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Heading size="2xl" data-testid={"tx-modal-title"}>
+      <Heading size="3xl" data-testid={"tx-modal-title"}>
         {title}
       </Heading>
 

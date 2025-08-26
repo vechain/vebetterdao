@@ -35,7 +35,7 @@ export const ParticipationScoreThreshold = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Participation score threshold")}</Heading>
+        <Heading size="3xl">{t("Participation score threshold")}</Heading>
         <Text fontSize="sm">{t("Change the minimum participation score required to be considered a person.")}</Text>
       </Card.Header>
       <Card.Body>
@@ -53,7 +53,6 @@ export const ParticipationScoreThreshold = () => {
                   <strong>{t("New threshold")}</strong>
                 </Field.Label>
                 <NumberInput.Root
-                  min={1}
                   value={threshold}
                   disabled={isLoading}
                   onValueChange={e => {

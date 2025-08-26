@@ -59,7 +59,7 @@ export const ClaimXAppAllocations = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Allocation claiming")}</Heading>
+        <Heading size="3xl">{t("Allocation claiming")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack flex={1} align="flex-start" gap={8}>
@@ -74,6 +74,7 @@ export const ClaimXAppAllocations = () => {
                 <Field.Root required>
                   <Field.Label>
                     <strong>{"App"}</strong>
+                    <Field.RequiredIndicator />
                   </Field.Label>
                   <NativeSelect.Root disabled={isLoading}>
                     <NativeSelect.Indicator />
@@ -92,8 +93,10 @@ export const ClaimXAppAllocations = () => {
                 <Field.Root required invalid={!isRoundValid}>
                   <Field.Label>
                     <strong>{"Round #"}</strong>
+                    <Field.RequiredIndicator />
                   </Field.Label>
                   <NumberInput.Root
+                    w="full"
                     min={0}
                     value={roundId}
                     disabled={isLoading}

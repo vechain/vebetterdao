@@ -1,4 +1,4 @@
-import { useSteps, HStack, Text, Button, VStack, Box } from "@chakra-ui/react"
+import { HStack, Text, Button, VStack, Box } from "@chakra-ui/react"
 import { useTranslation, Trans } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
 import { ExclamationTriangle } from "@/components"
@@ -22,6 +22,8 @@ enum ManagementStep {
   CONFIRMATION = "CONFIRMATION",
 }
 
+const STEP_COUNT = Object.keys(ManagementStep).length
+
 export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const [actionToConfirm, setActionToConfirm] = useState<"enable" | "disable" | "pause" | "resume">()
@@ -30,20 +32,23 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   const { data: isEnabled } = useIsRewardsPoolEnabled(appId)
   const { data: isPaused } = useIsDistributionPaused(appId)
   const { isTxModalOpen } = useTransactionModal()
-  const {
-    value: activeStep,
-    goToPrevStep: goToPrevious,
-    setStep: setActiveStep,
-    goToNextStep: goToNext,
-  } = useSteps({
-    defaultStep: 0,
-    count: Object.keys(ManagementStep).length,
-  })
+
+  const [step, setStep] = useState(0)
+  const goToNext = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose()
+    else setStep(nextStep)
+  }, [step, onClose])
+  const goToPrevious = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose()
+    else setStep(prevStep)
+  }, [step, onClose])
 
   const handleClose = useCallback(() => {
-    setActiveStep(0)
+    setStep(0)
     onClose()
-  }, [onClose, setActiveStep])
+  }, [onClose, setStep])
 
   // Pause, resume and toggle hooks
   const { pauseDistribution, unpauseDistribution, toggleRewardsPool } = useDistributionManagement({
@@ -290,9 +295,9 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
       onClose={handleClose}
       goToPrevious={goToPrevious}
       goToNext={goToNext}
-      setActiveStep={setActiveStep}
+      setActiveStep={setStep}
       steps={steps}
-      activeStep={activeStep}
+      activeStep={step}
     />
   )
 }

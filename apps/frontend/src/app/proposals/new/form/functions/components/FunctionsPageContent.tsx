@@ -74,7 +74,7 @@ export const FunctionsPageContent = () => {
         <VStack gap={8} align="flex-start">
           <Box>
             <Stack direction={["column", "row"]} w="full" justify={"space-between"}>
-              <Heading size="2xl">{t("What is your proposal about?")}</Heading>
+              <Heading size="3xl">{t("What is your proposal about?")}</Heading>
               {devEnvs.includes(env) && (
                 <Field.Root w="auto" data-testid="dev__select_env">
                   <Field.Label>{t("Dev: Choose an environment")}</Field.Label>

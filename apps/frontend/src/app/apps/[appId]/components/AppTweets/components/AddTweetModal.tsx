@@ -1,6 +1,6 @@
 import { useTweet } from "@/api/twitter/hooks/useTweets"
-import { Button, Field, Heading, Input, InputGroup, VStack, useSteps } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { Button, Field, Heading, Input, InputGroup, VStack } from "@chakra-ui/react"
+import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
@@ -28,26 +28,30 @@ enum AddTweetModalStep {
   SUBMIT = "SUBMIT",
   UPLOADING = "UPLOADING",
 }
+const STEP_COUNT = Object.keys(AddTweetModalStep).length
+
 export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploadMetadataMutation }: Props) => {
   const { t } = useTranslation()
   const form = useForm<TweetForm>()
   const { errors } = form.formState
   const { appMetadata } = useCurrentAppMetadata()
-  const {
-    value: activeStep,
-    setStep: setActiveStep,
-    goToPrevStep: goToPrevious,
-    goToNextStep: goToNext,
-  } = useSteps({
-    defaultStep: 0,
-    count: Object.keys(AddTweetModalStep).length + 1, // +1 for the upload metadata status
-  })
+
+  const [step, setStep] = useState(0)
+  const goToNext = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose()
+    else setStep(nextStep)
+  }, [step, onClose])
+  const goToPrevious = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose()
+    else setStep(prevStep)
+  }, [step, onClose])
 
   const handleClose = useCallback(() => {
+    setStep(0)
     onClose()
-    form.reset()
-    setActiveStep(0)
-  }, [form, onClose, setActiveStep])
+  }, [onClose, setStep])
 
   const tweetUrl = form.watch("tweetUrl")
 
@@ -154,8 +158,8 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
           description: "Please wait while we upload the metadata",
         },
       ]}
-      activeStep={activeStep}
-      setActiveStep={setActiveStep}
+      activeStep={step}
+      setActiveStep={setStep}
       goToPrevious={goToPrevious}
       goToNext={goToNext}
       isOpen={isOpen}

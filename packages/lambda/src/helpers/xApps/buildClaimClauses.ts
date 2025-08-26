@@ -1,5 +1,5 @@
 import { AppConfig } from "@repo/config"
-import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
+import { XAllocationPool__factory as XAllocationPool } from "@vechain/vebetterdao-contracts"
 import { ABIContract, Address, Clause } from "@vechain/sdk-core"
 
 /**

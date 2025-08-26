@@ -8,12 +8,11 @@ import {
   Box,
   Alert,
   useBreakpointValue,
-  useSteps,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { useDelegatePassport } from "@/hooks/useDelegatePassport"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useAccountLinking } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
@@ -29,6 +28,8 @@ enum DelegationStep {
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
 
+const STEP_COUNT = Object.keys(DelegationStep).length
+
 export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
@@ -36,18 +37,21 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { isEntity } = useAccountLinking()
   const { open: isOpen = false, onClose } = modal
 
-  const {
-    value: activeStep,
-    goToPrevStep: goToPrevious,
-    goToNextStep: goToNext,
-    setStep: setActiveStep,
-  } = useSteps({
-    defaultStep: 0,
-    count: Object.keys(DelegationStep).length,
-  })
+  const [step, setStep] = useState(0)
 
   const delegatee = watch("walletAddress")
 
+  const goToNext = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose?.()
+    else setStep(nextStep)
+  }, [step, onClose])
+
+  const goToPrevious = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose?.()
+    else setStep(prevStep)
+  }, [step, onClose])
   const handleClose = useCallback(() => {
     onClose?.()
   }, [onClose])
@@ -162,9 +166,9 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
       onClose={handleClose}
       goToPrevious={goToPrevious}
       goToNext={goToNext}
-      setActiveStep={setActiveStep}
+      setActiveStep={setStep}
       steps={steps}
-      activeStep={activeStep}
+      activeStep={step}
     />
   )
 }

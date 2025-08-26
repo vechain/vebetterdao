@@ -150,6 +150,7 @@ export const NewProposalForm: React.FC<Props> = ({
               data-testid="proposal-title-input"
               disabled={isDisabled}
               placeholder={t("Enter proposal title")}
+              colorPalette="blue"
               {...register("title", {
                 required: t("This field is required"),
               })}
@@ -171,6 +172,7 @@ export const NewProposalForm: React.FC<Props> = ({
               {...register("description", {
                 required: t("This field is required"),
               })}
+              colorPalette="blue"
             />
             {errors.description && (
               <Field.ErrorText data-testid="newproposal-form-description-error-message">

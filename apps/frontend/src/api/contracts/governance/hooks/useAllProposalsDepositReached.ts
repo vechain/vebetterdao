@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { getIsDepositReachedQueryKey } from "./useIsDepositReached"
 
 const abi = B3TRGovernor__factory.abi

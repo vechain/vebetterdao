@@ -1,6 +1,6 @@
 import { FunctionFragment } from "ethers"
 
-import { VeBetterPassport__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import localConfig from "@repo/config/local"
 
 import { ThorClient } from "@vechain/sdk-network"

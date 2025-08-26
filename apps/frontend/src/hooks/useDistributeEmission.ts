@@ -9,7 +9,7 @@ import {
 } from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
-import { Emissions__factory } from "@repo/contracts"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"

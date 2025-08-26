@@ -1,7 +1,7 @@
 import { AppConfig } from "@repo/config"
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract } from "@vechain/sdk-core"
-import { XAllocationPool__factory as XAllocationPool } from "@repo/contracts"
+import { XAllocationPool__factory as XAllocationPool } from "@vechain/vebetterdao-contracts"
 
 /**
  * Retrieves the IDs of the xApps that have not yet claimed their rewards for the specified round.

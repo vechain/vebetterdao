@@ -21,7 +21,7 @@ export const UpdateAppsEligibility = () => {
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="2xl">{"Apps eligible in next round"}</Heading>
+        <Heading size="3xl">{"Apps eligible in next round"}</Heading>
       </Card.Header>
       <Card.Body>
         <Field.Root as={SimpleGrid} gap={3}>

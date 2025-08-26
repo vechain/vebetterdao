@@ -1,6 +1,6 @@
 import { useEvents } from "@/hooks"
 import { useMemo, useCallback } from "react"
-import { X2EarnRewardsPool__factory } from "@repo/contracts"
+import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 

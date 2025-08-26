@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const contractAddress = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi

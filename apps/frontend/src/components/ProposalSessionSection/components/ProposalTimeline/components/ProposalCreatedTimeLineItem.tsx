@@ -27,15 +27,15 @@ export const ProposalCreatedTimelineItem = () => {
         </Accordion.ItemTrigger>
         <Accordion.ItemContent p={"8px"}>
           <VStack py={2}>
-            <HStack align={"flex-start"} w="full">
-              <Circle size="8px" bg={activeColor} mt={2} />
+            <HStack alignItems="center" w="full">
+              <Circle size="8px" bg={activeColor} />
               <VStack align="flex-start" gap={0}>
                 <Text fontSize={"14px"}>{t("Looking for support")}</Text>
               </VStack>
             </HStack>
             {proposal.state === ProposalState.DepositNotMet ? (
-              <HStack align={"flex-start"} w="full">
-                <Circle size="8px" bg={"#D23F63"} mt={2} />
+              <HStack alignItems={"center"} w="full">
+                <Circle size="8px" bg={"#D23F63"} />
                 <VStack align="flex-start" gap={0}>
                   <Text fontSize={"14px"} color="#D23F63">
                     {t("Support not reached")}
@@ -43,8 +43,8 @@ export const ProposalCreatedTimelineItem = () => {
                 </VStack>
               </HStack>
             ) : (
-              <HStack align={"flex-start"} w="full">
-                <Circle size="8px" bg={proposal.isDepositReached ? activeColor : inactiveColor} mt={2} />
+              <HStack alignItems={"center"} w="full">
+                <Circle size="8px" bg={proposal.isDepositReached ? activeColor : inactiveColor} />
                 <VStack align="flex-start" gap={0}>
                   <Text fontSize={"14px"}>{t("Support reached")}</Text>
                 </VStack>

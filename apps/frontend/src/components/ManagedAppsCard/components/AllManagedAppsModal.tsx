@@ -29,7 +29,7 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
         <Dialog.Positioner>
           <Dialog.Content>
             <Dialog.Header>
-              <Heading size="2xl">{t("Managed apps")}</Heading>
+              <Heading size="3xl">{t("Managed apps")}</Heading>
             </Dialog.Header>
             <Dialog.CloseTrigger asChild>
               <CloseButton />

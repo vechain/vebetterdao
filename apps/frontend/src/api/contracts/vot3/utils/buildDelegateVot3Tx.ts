@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { FormattingUtils } from "@repo/utils"
-import { VOT3__factory } from "@repo/contracts"
+import { VOT3__factory } from "@vechain/vebetterdao-contracts"
 import { EnhancedClause, ThorClient } from "@vechain/vechain-kit"
 
 const abi = VOT3__factory.abi

@@ -156,7 +156,7 @@ export const Pause: React.FC = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Pausing")}</Heading>
+        <Heading size="3xl">{t("Pausing")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={6} align={"flex-start"}>

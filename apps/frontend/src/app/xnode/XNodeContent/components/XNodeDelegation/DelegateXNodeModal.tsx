@@ -12,11 +12,10 @@ import {
   useBreakpointValue,
   UseDisclosureProps,
   VStack,
-  useSteps,
 } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
@@ -31,6 +30,8 @@ enum DelegateXNodeStep {
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
 
+const STEP_COUNT = Object.keys(DelegateXNodeStep).length
+
 export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
@@ -38,15 +39,17 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
   const { open: isOpen = false, onClose } = modal
   const isXNodeAttachedToGM = !!xNode?.gmTokenIdAttachedToNode
 
-  const {
-    value: activeStep,
-    goToPrevStep: goToPrevious,
-    goToNextStep: goToNext,
-    setStep: setActiveStep,
-  } = useSteps({
-    defaultStep: 0,
-    count: Object.keys(DelegateXNodeStep).length,
-  })
+  const [step, setStep] = useState(0)
+  const goToNext = useCallback(() => {
+    const nextStep = step + 1
+    if (nextStep > STEP_COUNT) onClose?.()
+    else setStep(nextStep)
+  }, [step, onClose])
+  const goToPrevious = useCallback(() => {
+    const prevStep = step - 1
+    if (prevStep < 1) onClose?.()
+    else setStep(prevStep)
+  }, [step, onClose])
 
   const {
     register,
@@ -59,8 +62,8 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
 
   const handleClose = useCallback(() => {
     onClose?.()
-    setActiveStep(0)
-  }, [onClose, setActiveStep])
+    setStep(0)
+  }, [onClose, setStep])
 
   const delegateXNode = useDelegateXNode({
     xNode,
@@ -192,9 +195,9 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
       onClose={handleClose}
       goToPrevious={goToPrevious}
       goToNext={goToNext}
-      setActiveStep={setActiveStep}
+      setActiveStep={setStep}
       steps={steps}
-      activeStep={activeStep}
+      activeStep={step}
     />
   )
 }

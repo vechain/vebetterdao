@@ -1,6 +1,6 @@
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
+import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const address = getConfig().x2EarnCreatorContractAddress as `0x${string}`
 const abi = X2EarnCreator__factory.abi

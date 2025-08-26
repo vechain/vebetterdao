@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { VoterRewards__factory } from "@repo/contracts"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().voterRewardsContractAddress

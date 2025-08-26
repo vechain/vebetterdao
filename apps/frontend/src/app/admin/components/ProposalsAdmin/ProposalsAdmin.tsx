@@ -6,7 +6,7 @@ export const ProposalsAdmin = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Proposals and Governance")}</Heading>
+        <Heading size="3xl">{t("Proposals and Governance")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack w={"full"} gap={4} alignItems={"start"}></VStack>

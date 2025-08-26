@@ -100,7 +100,7 @@ export const ManageCreatorsNFT = () => {
   return (
     <Card.Root w="full">
       <Card.Header>
-        <Heading size="2xl">{t("Manage Creator NFT")}</Heading>
+        <Heading size="3xl">{t("Manage Creator NFT")}</Heading>
       </Card.Header>
 
       <Card.Body>
@@ -152,6 +152,7 @@ export const ManageCreatorsNFT = () => {
                 <Field.Root required invalid={Boolean(errors.tokenId)}>
                   <Field.Label>
                     <strong>{t("Token ID")}</strong>
+                    <Field.RequiredIndicator />
                   </Field.Label>
                   <InputGroup>
                     <Input

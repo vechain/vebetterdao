@@ -29,7 +29,6 @@ export const SwapTokenContent = ({
   vot3BalanceScaled,
   disableSubmitButton,
 }: Props) => {
-  console.log("aaa", !isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR)
   return (
     <>
       <Flex

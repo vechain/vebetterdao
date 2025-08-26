@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
 import { FilterCriteria } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
-import { XAllocationPool__factory } from "@repo/contracts/typechain-types"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { decodeEventLog } from "../../governance"
 
 const abi = XAllocationPool__factory.abi

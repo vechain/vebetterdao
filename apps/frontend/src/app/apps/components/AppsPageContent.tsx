@@ -57,7 +57,7 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && isEndorsingApp && (
         <VStack alignItems={"flex-start"} gap={4}>
-          <Heading size="2xl">{t("Your endorsed apps")}</Heading>
+          <Heading size="3xl">{t("Your endorsed apps")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
           </Text>
@@ -80,7 +80,7 @@ export const AppsPageContent = () => {
 
       {!isAbove800 ? (
         <VStack alignItems={"flex-start"} gap={4} w="full">
-          <Heading size="2xl">{t("Sustainability apps")}</Heading>
+          <Heading size="3xl">{t("Sustainability apps")}</Heading>
           <AllApps
             newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
@@ -92,7 +92,7 @@ export const AppsPageContent = () => {
       ) : (
         <HStack w="full" alignItems={"flex-start"} gap={0}>
           <AllApps
-            headingComponent={<Heading size="2xl">{t("Sustainability apps")}</Heading>}
+            headingComponent={<Heading size="3xl">{t("Sustainability apps")}</Heading>}
             newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}

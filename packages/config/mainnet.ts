@@ -23,16 +23,16 @@ const config: AppConfig = {
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
   b3trMultiSigAddress: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
   stargateNFTContractAddress: "0x1856c533ac2d94340aaa8544d35a5c1d4a21dee7",
-  grantsManagerContractAddress: "0x0000000000000000000000000000000000000001",
+  grantsManagerContractAddress: "0x055d20914657834c914d7c44bf65b566ab4b45a2",
   b3trGovernorLibraries: {
-    governorClockLogicAddress: "0xF8746E74334218d79e951313A87D82954b3dF5Ea",
-    governorConfiguratorAddress: "0x8E4B5503DbBBCD7A4407b3B3cFE9306F758AFBe9",
-    governorDepositLogicAddress: "0x9cb90470CC69b6C0b8709e237efC38410F4AC5F8",
-    governorFunctionRestrictionsLogicAddress: "0x6a9331336c33F750E3eb562Fe2F4ffa339793d35",
-    governorProposalLogicAddressAddress: "0x1B7E1DB94Fd6De974138b59F41d87EB78be92ba1",
-    governorQuorumLogicAddress: "0x21d7Be787b92C1d4E760dE2f9bBf88F69678eddB",
-    governorStateLogicAddress: "0x8Ff6e6926D583FEE68B4092e7cc4F4446bFDCB97",
-    governorVotesLogicAddress: "0xFdD2F1D4fb6d6660FAe38596ba8fd501623ffDa8",
+    governorClockLogicAddress: "0xed6137b125bc40834fa06e800c5a72013ef9d91c",
+    governorConfiguratorAddress: "0xc2428c4608f97d21034ae32f104587c9c045a8a2",
+    governorDepositLogicAddress: "0x00f1cf9847b149e594c23a15db0976a2ae0b49b2",
+    governorFunctionRestrictionsLogicAddress: "0x1a430095eed7f87f5b41a3025c1463f68bbc2a1e",
+    governorProposalLogicAddressAddress: "0xe37a44f0ec996ef8618e083d9d7406db1ccc395d",
+    governorQuorumLogicAddress: "0xfbb42dc5e87105a270cab3422cc3e3b51b8af152",
+    governorStateLogicAddress: "0x38e4cfebcc414902d2846b699224b26a10144ff1",
+    governorVotesLogicAddress: "0x5d340fa12d11a4bab44ce8c907380a47226ef44c",
   },
   passportLibraries: {
     passportChecksLogicAddress: "0xDB5b259E4BfbfD8353cfcea695bbB583eE58F77a",
@@ -45,7 +45,6 @@ const config: AppConfig = {
     passportWhitelistAndBlacklistLogicAddress: "0x2D326f99e4251436F03eaab8b1af6875D984fD84",
   },
   externalContractIntegrations: {
-    // This is a VetDomains contract
     vetDomainsContractAddress: "0xbd7832FdacCB89FAB522e5B4Afb415A999b8a201",
   },
   nodeUrl: "https://mainnet.vechain.org",

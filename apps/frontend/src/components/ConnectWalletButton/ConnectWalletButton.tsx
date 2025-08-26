@@ -87,6 +87,7 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
           width: "100%",
           height: "100%",
           ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "10px" }),
+          _hover: { bg: "whiteAlpha.300" },
         }}
       />
     </Box>

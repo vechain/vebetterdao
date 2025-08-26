@@ -73,7 +73,7 @@ export const BulkClaimXAppsAllocations = () => {
   return (
     <Card.Root w={"full"}>
       <Card.Header>
-        <Heading size="2xl">{t("Bulk allocation claiming")}</Heading>
+        <Heading size="3xl">{t("Bulk allocation claiming")}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} alignItems={"start"} flex={1} w="full">
@@ -98,8 +98,14 @@ export const BulkClaimXAppsAllocations = () => {
               <Field.Root required invalid={!isRoundValid}>
                 <Field.Label>
                   <strong>{"Round #"}</strong>
+                  <Field.RequiredIndicator />
                 </Field.Label>
-                <NumberInput.Root min={0} value={roundId} disabled={isLoading} onValueChange={e => setRoundId(e.value)}>
+                <NumberInput.Root
+                  w="full"
+                  min={0}
+                  value={roundId}
+                  disabled={isLoading}
+                  onValueChange={e => setRoundId(e.value)}>
                   <NumberInput.Input />
                   <NumberInput.Control />
                 </NumberInput.Root>

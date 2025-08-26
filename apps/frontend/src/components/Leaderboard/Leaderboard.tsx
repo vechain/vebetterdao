@@ -184,6 +184,7 @@ export const Leaderboard = () => {
             href={`/leaderboard/${selectedRoundId}`}
             variant={"plain"}
             color="primary"
+            _hover={{ textDecoration: "underline" }}
             fontWeight="semibold"
             mx="auto">
             {t("See full leaderboard")}
