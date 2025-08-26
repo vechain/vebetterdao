@@ -4,7 +4,7 @@ import dayjs from "dayjs"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useTranslation } from "react-i18next"
 
-export const ProposalCreatedTimelineItem = () => {
+export const ProposalCreatedTimeLineItem = () => {
   const { t } = useTranslation()
   const { proposal } = useProposalDetail()
   const activeColor = "#004CFC"

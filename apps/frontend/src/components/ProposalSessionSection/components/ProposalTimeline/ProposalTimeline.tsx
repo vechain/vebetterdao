@@ -2,7 +2,7 @@ import { Heading, Steps, Circle, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
-import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
+import { ProposalCreatedTimeLineItem } from "./components/ProposalCreatedTimeLineItem"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { useAccountPermissions } from "@/api/contracts/account"
@@ -51,7 +51,7 @@ export const ProposalTimeline = () => {
     () =>
       isCanceled
         ? [
-            <ProposalCreatedTimelineItem key={0} />,
+            <ProposalCreatedTimeLineItem key={0} />,
             <TimelineItem key={1} title={t("Waiting for the round to start")} />,
             <TimelineItem
               key={3}
@@ -60,7 +60,7 @@ export const ProposalTimeline = () => {
             />,
           ]
         : [
-            <ProposalCreatedTimelineItem key={0} />,
+            <ProposalCreatedTimeLineItem key={0} />,
             <TimelineItem key={1} title={t("Waiting for the round to start")} />,
             <TimelineItem
               key={2}
