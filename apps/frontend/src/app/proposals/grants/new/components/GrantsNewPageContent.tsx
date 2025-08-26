@@ -1,7 +1,7 @@
-import { useTranslation } from "react-i18next"
-import { VStack, Text, CardHeader, CardBody, Card, Grid, GridItem } from "@chakra-ui/react"
+import { VStack, Card, Grid, GridItem } from "@chakra-ui/react"
 import { GrantsNewFormStepCard } from "./form"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
+import { HowGrantWorks } from "../components/form"
 
 const BreadcrumItems = [
   {
@@ -16,8 +16,6 @@ const BreadcrumItems = [
 ]
 
 export const GrantsNewPageContent = () => {
-  const { t } = useTranslation()
-
   return (
     <VStack w="full" spacing={8} pb={8} align="flex-start">
       <PageBreadcrumb items={BreadcrumItems} />
@@ -27,12 +25,7 @@ export const GrantsNewPageContent = () => {
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
           <Card variant="base">
-            <CardHeader>
-              <Text fontWeight="bold">{t("Apply for grant")}</Text>
-            </CardHeader>
-            <CardBody>
-              <Text>{t("Apply for grant")}</Text>
-            </CardBody>
+            <HowGrantWorks />
           </Card>
         </GridItem>
       </Grid>
