@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd apps/frontend && yarn build",
+  "buildCommand": "yarn build",
   "outputDirectory": "apps/frontend/.next",
   "installCommand": "yarn install",
   "framework": null,
