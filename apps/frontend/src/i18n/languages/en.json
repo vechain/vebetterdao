@@ -1934,5 +1934,17 @@
   "Your Grant needs early backing from the community and must receive a minimum deposit of over 3.5M VOT3 tokens within 1 week (1 round) of submission to proceed.": "Your Grant needs early backing from the community and must receive a minimum deposit of over 3.5M VOT3 tokens within 1 week (1 round) of submission to proceed.",
   "3. Get final approval from the community": "3. Get final approval from the community",
   "If the Grant is approved, you will receive funds.": "If the Grant is approved, you will receive funds.",
-  "The community and VeChain Foundation express support as <thumbsUp/>, <thumbsDown/>, <abstain/>": "The community and VeChain Foundation express support as <thumbsUp/>, <thumbsDown/> <abstain/>"
+  "The community and VeChain Foundation express support as <thumbsUp/>, <thumbsDown/>, <abstain/>": "The community and VeChain Foundation express support as <thumbsUp/>, <thumbsDown/> <abstain/>",
+  "Assign App Categories": "Assign App Categories",
+  "Loading apps without categories...": "Loading apps without categories...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Assign categories to apps that don't have any. Maximum {{max}} categories per app.",
+  "All apps have categories assigned! 🎉": "All apps have categories assigned! 🎉",
+  "Apps without categories: {{count}}": "Apps without categories: {{count}}",
+  "Category Assignments ({{count}})": "Category Assignments ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Selected Categories ({{count}}/{{max}})",
+  "Uploading metadata...": "Uploading metadata...",
+  "Maximum {{max}} categories per app.": "Maximum {{max}} categories per app.",
+  "Previous app": "Previous app",
+  "Next app": "Next app",
+  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps"
 }
