@@ -284,15 +284,15 @@ jobs:
       - name: Compile contracts
         run: yarn contracts:compile
 
-      - name: Run Slither
-        uses: crytic/slither-action@v0.4.0
-        id: slither
-        with:
-          ignore-compile: true
-          target: "packages/contracts/"
-          solc-version: "0.8.20"
-          fail-on: none
-          slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+      #- name: Run Slither
+      #  uses: crytic/slither-action@v0.4.0
+      #  id: slither
+      #  with:
+      #    ignore-compile: true
+      #    target: "packages/contracts/"
+      #    solc-version: "0.8.20"
+      #    fail-on: none
+      #    slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
 
       - name: Run Slither
         uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
