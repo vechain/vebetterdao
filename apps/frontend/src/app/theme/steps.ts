@@ -34,11 +34,12 @@ export const stepsSlotRecipe = defineSlotRecipe({
         indicator: {
           bg: "#EFEFEF",
           color: "#6A6A6A",
-          "&[data-status=complete]": {
+          "&[data-complete]": {
             bg: "#E0E9FE",
             color: "#004CFC",
+            borderColor: "#004CFC",
           },
-          "&[data-status=active]": {
+          "&[data-current]": {
             bg: "#004CFC",
             color: "#FFFFFF",
           },
