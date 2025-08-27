@@ -11,7 +11,7 @@ export const GrantsStepIndicator = ({
   width?: string
 }) => {
   return (
-    <HStack gap={2} w={width} justify="start">
+    <HStack gap={2} w={width} justify="center">
       {steps.map((step, index) => (
         <Box
           key={`${step.key}`}

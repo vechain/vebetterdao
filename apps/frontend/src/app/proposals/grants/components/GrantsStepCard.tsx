@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { RequirementModal } from "@/app/proposals/components/components"
 import { useCallback } from "react"
+import { GrantsStepIndicator } from "./GrantsStepIndicator"
 
 export type Step = {
   key: string
@@ -91,14 +92,7 @@ export const GrantsStepsCard = ({
         <Steps.Root step={stepsUI.value} count={steps.length} size="sm">
           <HStack w="full" justify="space-between" alignItems="center">
             <UilArrowLeft onClick={goToPrevious} cursor="pointer" />
-            <Steps.List width="70%">
-              {steps.map((step, index) => (
-                <Steps.Item key={step.key} index={index}>
-                  <Steps.Indicator />
-                  <Steps.Separator />
-                </Steps.Item>
-              ))}
-            </Steps.List>
+            <GrantsStepIndicator activeStep={stepsUI.value} steps={steps} />
             <UilTimes onClick={onClose} cursor="pointer" size={24} />
           </HStack>
           <Box pt={5}>
@@ -143,15 +137,8 @@ export const GrantsStepsCard = ({
       <Steps.Root step={stepsUI.value} count={steps.length}>
         <Flex h="full">
           <Box flex="1">
-            <Box pl={8} pt={8} pb={4}>
-              <Steps.List width="35%">
-                {steps.map((step, index) => (
-                  <Steps.Item key={step.key} index={index}>
-                    <Steps.Indicator />
-                    <Steps.Separator />
-                  </Steps.Item>
-                ))}
-              </Steps.List>
+            <Box pl={8} pt={8} pb={4} w={{ base: "100%", lg: "35%" }}>
+              <GrantsStepIndicator activeStep={stepsUI.value} steps={steps} />
             </Box>
             <VStack gap={10} alignItems="flex-start" w="full" p={10}>
               <VStack alignItems="flex-start" w="full">
