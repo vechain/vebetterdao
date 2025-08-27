@@ -20,7 +20,7 @@ export const DashboardSideBar = () => {
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
   return (
-    <VStack gap={4} position="relative" pos={"sticky"} top={24} left={0}>
+    <VStack gap={4}>
       {isMobile && <CantVoteCard />}
       <YourBetterActionsCard address={account?.address ?? ""} />
       <Leaderboard />
