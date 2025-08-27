@@ -5,12 +5,9 @@ export const HowToSupportCard = () => {
   const { t } = useTranslation()
 
   return (
-    <Card.Root w="full" variant="subtle" p={8} gap={3}>
-      <Card.Header>
-        <Heading size="sm">{t("How to support Grant and Proposal?")}</Heading>
-      </Card.Header>
-
-      <Card.Body>
+    <Card.Root w="full" variant="ghost">
+      <Card.Body gap={2}>
+        <Heading size="md">{t("How to support Grant and Proposal?")}</Heading>
         <Text color="text.subtle" fontSize="sm">
           <Trans
             i18nKey="Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>"
