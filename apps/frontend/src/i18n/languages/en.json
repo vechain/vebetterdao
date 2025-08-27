@@ -1946,5 +1946,20 @@
   "Maximum {{max}} categories per app.": "Maximum {{max}} categories per app.",
   "Previous app": "Previous app",
   "Next app": "Next app",
-  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps"
+  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps",
+  "Please enter your company registered number": "Please enter your company registered number",
+  "Please enter the receiver address": "Please enter the receiver address",
+  "Please enter the email of the company": "Please enter the email of the company",
+  "Please enter the link of the company's telegram": "Please enter the link of the company's telegram",
+  "Registered number": "Registered number",
+  "Intro": "Intro",
+  "Tell about your team and experience with similar projects": "Tell about your team and experience with similar projects",
+  "Please describe your team and experience with similar projects": "Please describe your team and experience with similar projects",
+  "Receiver Address": "Receiver Address",
+  "Enter the email of the company": "Enter the email of the company",
+  "Enter link here": "Enter link here",
+  "Grant details": "Grant details",
+  "Attachments": "Attachments",
+  "Upload file": "Upload file",
+  "PDF, JPG, JPEG, PNG, less than 20MB": "PDF, JPG, JPEG, PNG, less than 20MB"
 }
