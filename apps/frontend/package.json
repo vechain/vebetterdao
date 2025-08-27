@@ -5,6 +5,8 @@
   "scripts": {
     "postinstall": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
     "typecheck": "tsc --noEmit",
+    "chakra:typegen": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
+    "chakra:typegen:watch": "npx @chakra-ui/cli typegen src/app/theme/theme.ts --watch",
     "dev": "next dev --turbo",
     "dev:staging": "next dev --turbo",
     "dev:testnet": "next dev --turbo",
@@ -79,6 +81,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@chakra-ui/cli": "^3.25.0",
     "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
