@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - main
-      - slither-add
+      - add-slither
   pull_request:
 
 jobs:
   slither:
-      - name: Run Slither
         uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
         with:
           solc-version: '0.8.20'
