@@ -1,1 +1,5 @@
 export * from "./useCreateGrantProposal"
+export * from "./useGrantProposalDetails"
+export * from "./useMilestoneClaimedEvents"
+export * from "./useIsMilestoneClaimable"
+export * from "./types"

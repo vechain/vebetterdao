@@ -2,6 +2,7 @@ import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions"
 import { useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
+import { useProposalCreatedEvents } from "@/hooks/proposals/common/useProposalCreatedEvents"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
@@ -12,8 +13,9 @@ import { ProposalTimeline } from "@/components/ProposalSessionSection/components
 import { useMemo } from "react"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
+import { ProposalOverviewVotes } from "./ProposalOverview/components/ProposalOverviewVotes/ProposalOverviewVotes"
 
 type Props = {
   proposalId: string
@@ -22,6 +24,7 @@ type Props = {
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { data: proposalCreatedEvent } = useProposalCreatedEvent(proposalId)
   const { proposal } = useProposalDetail()
+  const { allProposals } = useProposalCreatedEvents()
 
   const votesAtSnapshotQuery = useVot3PastSupply(proposal.votingStartBlock)
 
@@ -58,23 +61,43 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       href: `/proposals/${proposalId}`,
     },
   ]
+
+  const currentProposal = allProposals.find(proposal => proposal.id === proposalId)
+  const isGrantProposal = currentProposal?.type === ProposalType.Grant
+
+  const overviewContent = (
+    <VStack align="stretch" gap={8}>
+      <ProposalContentAndActions proposal={proposalCreatedEvent} />
+    </VStack>
+  )
+
+  const rightSidebarContent = (
+    <VStack align="stretch" gap={8}>
+      <ProposalCommunitySupport />
+      {proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
+      {!proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
+      <CancelProposalSection />
+    </VStack>
+  )
+
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
       <PageBreadcrumb items={BreadcrumItems} />
       {proposal.state === ProposalState.Canceled && <ProposalCanceledAlert />}
       {proposal.state === ProposalState.Active && <CantVoteCard />}
-      <ProposalOverview />
+
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
-        <GridItem colSpan={[3, 3, 2]} gap={8}>
-          <VStack align="stretch" gap={8}>
-            <ProposalCommunitySupport />
-            <ProposalContentAndActions proposal={proposalCreatedEvent} />
-            <ProposalVoteCommentList proposalId={proposalId} />
-          </VStack>
+        <GridItem colSpan={[3, 3, 2]}>
+          <ProposalOverview
+            overviewContent={overviewContent}
+            proposalCreatedEvent={proposalCreatedEvent}
+            isGrantProposal={isGrantProposal}
+          />
+          <ProposalVoteCommentList proposalId={proposalId} />
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>
           <VStack align="stretch" gap={8}>
-            {proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
+            <ProposalOverviewVotes proposalId={proposalId} />
             <ProposalSessionSection
               quorumQuery={proposal.quorumQuery}
               votesAtSnapshotQuery={votesAtSnapshotQuery}
@@ -84,8 +107,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}
             />
-            {!proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
-            <CancelProposalSection />
+            {rightSidebarContent}
           </VStack>
         </GridItem>
       </Grid>
