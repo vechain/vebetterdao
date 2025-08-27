@@ -40,13 +40,18 @@ export const useProposalCreatedEvents = (): {
   })
 
   const { standardProposals, grantProposals, allProposals } = useMemo(() => {
+    // Early return if no data to prevent unnecessary processing
+    if (!proposalEvents.data?.length) {
+      return { standardProposals: [], grantProposals: [], allProposals: [] }
+    }
+
     const typeMap = new Map(proposalTypeEvents.data?.map(proposal => [proposal.id, proposal.type]) ?? [])
 
     const standard: ProposalCreatedEvent[] = []
     const grant: ProposalCreatedEvent[] = []
     const all: ProposalCreatedEvent[] = []
 
-    proposalEvents.data?.forEach(proposal => {
+    proposalEvents.data.forEach(proposal => {
       const type = typeMap.get(proposal.id) ?? ProposalType.Standard
 
       const enhancedProposal = {
@@ -58,7 +63,11 @@ export const useProposalCreatedEvents = (): {
       type === ProposalType.Grant ? grant.push(enhancedProposal) : standard.push(enhancedProposal)
     })
 
-    return { standardProposals: standard, grantProposals: grant, allProposals: all }
+    return {
+      standardProposals: standard,
+      grantProposals: grant,
+      allProposals: all,
+    }
   }, [proposalEvents.data, proposalTypeEvents.data])
 
   return { standardProposals, grantProposals, allProposals }
