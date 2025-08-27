@@ -91,7 +91,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
           )}
         </VStack>
 
-        <SimpleGrid w="full" gap={2} columns={2} pt={4}>
+        <SimpleGrid w="full" gap={2} columns={isGrants ? 1 : 2} pt={4}>
           {!isGrants && (
             <Button
               variant="secondary"
