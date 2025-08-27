@@ -2,18 +2,47 @@ import { Card, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportButton } from "./components/CommunitySupportButton"
-import { ProposalState } from "@/api"
-import { useMemo } from "react"
+import { ProposalState, useTotalVotesOnBlock } from "@/api"
+import { useMemo, useRef, useEffect } from "react"
 import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { Tooltip } from "@/components/ui/tooltip"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const ProposalCommunitySupport = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
+  const { account } = useWallet()
+  const userDepositsVotes = useTotalVotesOnBlock(
+    proposal.votingStartDate ? Number(proposal.votingStartDate) : undefined,
+    account?.address ?? "",
+  )
+
   const isDepositNotMet = proposal.state === ProposalState.DepositNotMet
+
+  const lastKnownValueRef = useRef<string | number>(0)
+
+  useEffect(() => {
+    if (userDepositsVotes.data?.depositsVotes && Number(userDepositsVotes.data.depositsVotes) > 0) {
+      lastKnownValueRef.current = userDepositsVotes.data.depositsVotes
+    }
+  }, [userDepositsVotes.data?.depositsVotes])
+
+  // Use the stable value that doesn't reset during refetches
+  const totalDepositsVotingPower = useMemo(() => {
+    // If we have current data, use it; otherwise use the last known value
+    if (userDepositsVotes.data?.depositsVotes) {
+      return userDepositsVotes.data.depositsVotes
+    }
+    return lastKnownValueRef.current
+  }, [userDepositsVotes.data?.depositsVotes])
+
+  // Only show card when we have a positive value
+  const shouldShowDepositCard = useMemo(() => {
+    return Number(totalDepositsVotingPower) > 0
+  }, [totalDepositsVotingPower])
 
   const boxShadow = useMemo(() => {
     if (isDepositNotMet) {
@@ -64,6 +93,34 @@ export const ProposalCommunitySupport = () => {
           othersDeposits={proposal.othersSupport}
           otherDepositsUsersCount={proposal.othersSupportUserCount}
         />
+
+        {/* Total Deposit Voting Power Section */}
+        {shouldShowDepositCard && (
+          <Card.Root bg="rgba(0, 76, 252, 0.05)" border="1px solid rgba(0, 76, 252, 0.2)" rounded="12px" p="16px">
+            <VStack alignItems="stretch" gap={3}>
+              <HStack justify="space-between" align="baseline">
+                <HStack>
+                  <Text fontSize="24px" fontWeight={700} color="#004CFC">
+                    {Number(totalDepositsVotingPower).toLocaleString()}
+                  </Text>
+                  <Tooltip
+                    content={t(
+                      "This is your additional voting power from deposits across all proposals you've supported. This voting power is available for allocation voting.",
+                    )}>
+                    <UilInfoCircle size="16px" color={"#004CFC"} />
+                  </Tooltip>
+                </HStack>
+                <Text fontSize="12px" color="#6A6A6A">
+                  {t("VOT3 from all proposals")}
+                </Text>
+              </HStack>
+
+              <Text fontSize="12px" color="#6A6A6A">
+                {t("Available for allocation voting in addition to your regular VOT3 balance")}
+              </Text>
+            </VStack>
+          </Card.Root>
+        )}
         {isDepositNotMet ? (
           <>
             {proposal.isUserSupportLeft && (
@@ -75,7 +132,9 @@ export const ProposalCommunitySupport = () => {
         ) : (
           <HStack alignItems={"flex-end"} justify={"space-between"} flexWrap={"wrap"}>
             <Text fontSize="14px" fontWeight={600}>
-              {t("You can claim your tokens back when the proposal voting round starts.")}
+              {t(
+                "Each deposit is counted in the allocation voting. You can claim your tokens back when the proposal voting round starts.",
+              )}
             </Text>
             <CommunitySupportButton />
           </HStack>
