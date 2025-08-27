@@ -12,8 +12,14 @@ import { headingRecipe } from "./heading"
 import { badgeRecipe } from "./badge"
 
 const config = defineConfig({
-  //preflight: true,
+  preflight: true,
   cssVarsPrefix: "vbd",
+
+  globalCss: {
+    ":where(button, [role=button], a)": {
+      cursor: "pointer",
+    },
+  },
 
   theme: {
     recipes: {
