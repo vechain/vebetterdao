@@ -255,34 +255,34 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  run-slither:
-    name: Slither Analysis
-    runs-on: ubuntu-latest
-    needs: check-changes
-    if: false
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#  run-slither:
+#    name: Slither Analysis
+#    runs-on: ubuntu-latest
+#    needs: check-changes
+#    if: false
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: Use Node v20
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version-file: .nvmrc
+#          cache: "yarn"
 
-      - name: Use Node v20
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .nvmrc
-          cache: "yarn"
+#      - name: Install dependencies
+#       run: yarn install --frozen-lockfile
+#
+#      - name: Cache Solidity compilers
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.cache/hardhat-nodejs
+#          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+#          restore-keys: |
+#            ${{ runner.os }}-solc-
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Cache Solidity compilers
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/hardhat-nodejs
-          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-solc-
-
-      - name: Compile contracts
-        run: yarn contracts:compile
+#      - name: Compile contracts
+#        run: yarn contracts:compile
 
       #- name: Run Slither
       #  uses: crytic/slither-action@v0.4.0
@@ -294,32 +294,32 @@ jobs:
       #    fail-on: none
       #    slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
 
-      - name: Run Slither
-        uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
-        with:
-          solc-version: '0.8.20'
-          target: 'packages/contracts/'
-          fail-on: 'none'
-          cache: 'yarn'
+#      - name: Run Slither
+#        uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
+#        with:
+#          solc-version: '0.8.20'
+#          target: 'packages/contracts/'
+#          fail-on: 'none'
+#          cache: 'yarn'
           #compile-command: 'yarn contracts:compile'
-          ignore-compile: true
-          slither-args: |
-            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+#          ignore-compile: true
+#          slither-args: |
+#            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
 
-      - name: Upload Slither report
-        uses: actions/upload-artifact@v4
-        with:
-          name: slither-report
-          path: slither-report.md
+#      - name: Upload Slither report
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: slither-report
+#          path: slither-report.md
 
-      - name: Create/update checklist as PR comment
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
-        env:
-          REPORT: ${{ steps.slither.outputs.stdout }}
-        with:
-          script: |
-            const script = require('.github/scripts/comment')
-            const header = '# Slither report'
-            const body = process.env.REPORT
-            await script({ github, context, header, body })
+#      - name: Create/update checklist as PR comment
+#        uses: actions/github-script@v7
+#        if: github.event_name == 'pull_request'
+#        env:
+#          REPORT: ${{ steps.slither.outputs.stdout }}
+#        with:
+#          script: |
+#            const script = require('.github/scripts/comment')
+#            const header = '# Slither report'
+#            const body = process.env.REPORT
+#            await script({ github, context, header, body })

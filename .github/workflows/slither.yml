@@ -1,0 +1,22 @@
+name: Slither
+
+on:
+  push:
+    branches:
+      - main
+      - slither-add
+  pull_request:
+
+jobs:
+  slither:
+      - name: Run Slither
+        uses: vechain/github-actions/.github/workflows/slither.yaml@57aaf426374fa4d13d91d6039c1cc063a59bbf3c
+        with:
+          solc-version: '0.8.20'
+          target: 'packages/contracts/'
+          fail-on: 'none'
+          cache: 'yarn'
+          compile-command: 'yarn contracts:compile'
+          ignore-compile: true
+          slither-args: |
+            --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
