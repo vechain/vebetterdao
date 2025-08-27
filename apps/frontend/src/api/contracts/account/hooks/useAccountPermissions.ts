@@ -42,6 +42,8 @@ type AccountPermissionResponse = {
   isMinterOfX2EarnCreator: boolean
   isBurnerOfX2EarnCreator: boolean
   isAdminOfX2EarnCreator: boolean
+  isGrantApprover: boolean
+  isGrantRejector: boolean
 }
 
 const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
@@ -176,6 +178,14 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
   isAdminOfX2EarnCreator: {
     role: "DEFAULT_ADMIN_ROLE",
     contractAddress: config.x2EarnCreatorContractAddress,
+  },
+  isGrantApprover: {
+    role: "GRANTS_APPROVER_ROLE",
+    contractAddress: config.grantsManagerContractAddress,
+  },
+  isGrantRejector: {
+    role: "GRANTS_REJECTOR_ROLE",
+    contractAddress: config.grantsManagerContractAddress,
   },
 }
 
