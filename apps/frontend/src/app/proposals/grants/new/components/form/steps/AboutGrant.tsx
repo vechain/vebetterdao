@@ -1,4 +1,4 @@
-import { VStack, Text, Grid, GridItem, Accordion } from "@chakra-ui/react"
+import { VStack, Text, Grid, GridItem, Accordion, Field, FileUpload, Icon, Box, HStack } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
@@ -7,6 +7,7 @@ import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { FormSocialConnectButton } from "@/components/CustomFormFields"
+import { LuUpload } from "react-icons/lu"
 
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
@@ -40,18 +41,95 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
 
     setValue(usernameField as keyof GrantFormData, `testSignedIn-${platform}`)
   }
+
   return (
     <Grid templateColumns={{ base: "1fr", md: "1fr" }} w="full" gap={8}>
-      <Accordion.Root multiple w="full">
-        <Accordion.Item value="project-details">
+      <Accordion.Root multiple w="full" defaultValue={["company-details", "project-details", "outcomes"]} spaceY={4}>
+        <Accordion.Item value="company-details" spaceY={2}>
           <Accordion.ItemTrigger>
             <Text fontSize="lg" fontWeight="semibold">
-              {t("Project details")}
+              {t("Company details")}
+            </Text>
+          </Accordion.ItemTrigger>
+          <Accordion.ItemContent>
+            <VStack gap={6} align="stretch" w="full">
+              <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
+                <GridItem>
+                  <FormItem
+                    label={t("Name")}
+                    placeholder={"Eg. Mugshot Inc"}
+                    register={register("companyName", {
+                      required: t("Please enter your company name"),
+                    })}
+                    error={errors.companyName?.message}
+                  />
+                </GridItem>
+                <GridItem>
+                  <FormItem
+                    label={t("Registered number")}
+                    placeholder={"Eg. 01234567"}
+                    register={register("companyRegisteredNumber", {
+                      required: t("Please enter your company registered number"),
+                    })}
+                    error={errors.companyRegisteredNumber?.message}
+                  />
+                </GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <FormItem
+                    label={t("Intro")}
+                    type="textarea"
+                    placeholder={t("Tell about your team and experience with similar projects")}
+                    register={register("companyIntro", {
+                      required: t("Please describe your team and experience with similar projects"),
+                    })}
+                    error={errors.companyIntro?.message}
+                  />
+                </GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <FormItem
+                    label={t("Receiver Address")}
+                    placeholder={"e.g. 0x1234567890123456789012345678901234567890"}
+                    register={register("grantsReceiverAddress", {
+                      required: t("Please enter the receiver address"),
+                    })}
+                    error={errors.grantsReceiverAddress?.message}
+                  />
+                </GridItem>
+                <GridItem>
+                  <FormItem
+                    label={t("Email")}
+                    placeholder={t("Enter the email of the company")}
+                    register={register("companyEmail")}
+                    error={errors.companyEmail?.message}
+                  />
+                </GridItem>
+                <GridItem>
+                  <FormItem
+                    label={"Telegram"}
+                    placeholder={t("Enter link here")}
+                    register={register("companyTelegram", {
+                      required: t("Please enter the link of the company's telegram"),
+                      pattern: {
+                        value: /^https?:\/\/.+/,
+                        message: t("Please enter a valid URL starting with http:// or https://"),
+                      },
+                    })}
+                    error={errors.companyTelegram?.message}
+                  />
+                </GridItem>
+              </Grid>
+            </VStack>
+          </Accordion.ItemContent>
+        </Accordion.Item>
+        <Accordion.Item value="project-details" spaceY={2}>
+          <Accordion.ItemTrigger>
+            <Text fontSize="lg" fontWeight="semibold">
+              {t("Grant details")}
             </Text>
           </Accordion.ItemTrigger>
           <Accordion.ItemContent>
             <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
-              <GridItem>
+              <GridItem colSpan={{ base: 1, md: 2 }}>
                 <FormItem
                   label={t("Project name")}
                   placeholder="e.g. My Awesome Project"
@@ -59,17 +137,6 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                     required: t("Please enter your project name"),
                   })}
                   error={errors.projectName?.message}
-                />
-              </GridItem>
-
-              <GridItem>
-                <FormItem
-                  label={t("Company name")}
-                  placeholder="e.g. My Awesome Company"
-                  register={register("companyName", {
-                    required: t("Please enter your company name"),
-                  })}
-                  error={errors.companyName?.message}
                 />
               </GridItem>
 
@@ -195,7 +262,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
             </Grid>
           </Accordion.ItemContent>
         </Accordion.Item>
-        <Accordion.Item value="outcomes">
+        <Accordion.Item value="outcomes" spaceY={2}>
           <Accordion.ItemTrigger>
             <Text fontSize="lg" fontWeight="semibold">
               {t("Outcomes")}
@@ -263,6 +330,32 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                     })}
                     error={errors.highLevelRoadmap?.message}
                   />
+                </GridItem>
+
+                <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <Field.Root invalid={!!errors.outcomesAttachment?.message}>
+                    <Field.Label fontSize="sm" fontWeight="medium" htmlFor={register.name}>
+                      {t("Attachments")}
+                    </Field.Label>
+                    <FileUpload.Root w="full" alignItems="stretch" maxFiles={10}>
+                      <FileUpload.HiddenInput />
+                      <FileUpload.Dropzone>
+                        <FileUpload.DropzoneContent>
+                          <HStack>
+                            <Icon size="md" color="fg.muted">
+                              <LuUpload />
+                            </Icon>
+                            <Box>{t("Upload file")}</Box>
+                          </HStack>
+                          <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 20MB")}</Box>
+                        </FileUpload.DropzoneContent>
+                      </FileUpload.Dropzone>
+                      <FileUpload.List />
+                    </FileUpload.Root>
+                    {errors.outcomesAttachment?.message && (
+                      <Field.ErrorText>{errors.outcomesAttachment?.message}</Field.ErrorText>
+                    )}
+                  </Field.Root>
                 </GridItem>
               </Grid>
             </VStack>

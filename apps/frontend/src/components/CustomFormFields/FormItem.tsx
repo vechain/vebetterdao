@@ -25,7 +25,7 @@ export const FormItem = ({
   return (
     <Field.Root invalid={!!error}>
       {label && (
-        <Field.Label fontSize="md" mb={description ? 0 : undefined} htmlFor={register.name}>
+        <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
           {label}
         </Field.Label>
       )}
