@@ -75,7 +75,7 @@ export const RoundInfoBottomSheet = () => {
           borderTopRadius="20px"
           boxShadow="0px -5px 16px 0px #0000000F"
           cursor="pointer"
-          zIndex={3}>
+          zIndex={2}>
           <Box>
             <Skeleton loading={isCardLoading}>
               <Heading fontSize={"20px"} fontWeight={400}>

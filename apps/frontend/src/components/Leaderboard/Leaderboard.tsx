@@ -47,7 +47,7 @@ export const Leaderboard = () => {
     setSelectedRoundId(roundId)
   }
 
-  const yourRaking = useMemo(() => {
+  const yourRanking = useMemo(() => {
     if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined
     if (userRoundOverview.isError) {
@@ -172,10 +172,10 @@ export const Leaderboard = () => {
           </VStack>
           <VStack gap={4} align="stretch" w="full" h="full">
             {renderRankings}
-            {!isRankingInTop5 && (
+            {!isRankingInTop5 && yourRanking && (
               <>
                 <Separator w="full" h={1} />
-                {yourRaking && <LeaderboardRankingComponent ranking={yourRaking} isYourRanking />}
+                {yourRanking && <LeaderboardRankingComponent ranking={yourRanking} isYourRanking />}
               </>
             )}
           </VStack>
