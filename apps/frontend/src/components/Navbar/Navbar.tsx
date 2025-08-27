@@ -51,7 +51,7 @@ export const Navbar: React.FC = () => {
       h={"auto"}
       w={"full"}
       transition="transform 0.3s ease-in-out"
-      transform={isNavbarVisible ? "translateY(0)" : "translateY(-100%)"}>
+      transform={isNavbarVisible ? "undefined" : "translateY(-100%)"}>
       <HStack
         justify={"space-between"}
         p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
