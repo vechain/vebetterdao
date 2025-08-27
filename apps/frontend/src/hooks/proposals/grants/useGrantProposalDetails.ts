@@ -81,6 +81,15 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
   }
 }
 
+const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Promise<T | undefined> => {
+  try {
+    return await getIpfsMetadata<T>(ipfsUri, parseJson)
+  } catch (error) {
+    console.error("Error fetching proposal IPFS metadata:", error)
+    return undefined
+  }
+}
+
 /**
  * Hook to fetch detailed information for grant proposals including IPFS metadata
  * @param standardProposals Array of standard proposal event data containing IPFS hashes and proposer addresses
@@ -110,7 +119,7 @@ export const useGrantProposalDetails = ({
       // Batch fetch IPFS metadata for grant proposals
       const grantProposalsIpfsMetadataPromises = grantProposals.map(event =>
         event.ipfsDescription
-          ? getIpfsMetadata<GrantProposalEnriched>(`ipfs://${event.ipfsDescription}`, false)
+          ? safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${event.ipfsDescription}`, false)
           : Promise.resolve(undefined),
       )
       const grantProposalsIpfsMetadatas = await Promise.all(grantProposalsIpfsMetadataPromises)
@@ -118,7 +127,7 @@ export const useGrantProposalDetails = ({
       // Batch fetch IPFS metadata for standard proposals
       const standardProposalsIpfsMetadataPromises = standardProposals.map(event =>
         event.ipfsDescription
-          ? getIpfsMetadata<ProposalEnriched>(`ipfs://${event.ipfsDescription}`, false)
+          ? safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${event.ipfsDescription}`, false)
           : Promise.resolve(undefined),
       )
       const standardProposalsIpfsMetadatas = await Promise.all(standardProposalsIpfsMetadataPromises)
