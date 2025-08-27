@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/frontend/package.json",
+      "use": "@vercel/node",
+      "config": {
+        "memory": 3000,
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "buildCommand": "cd apps/frontend && yarn build",
+  "outputDirectory": "apps/frontend/.next",
+  "installCommand": "yarn install",
+  "framework": null,
+  "functions": {
+    "apps/frontend/**": {
+      "memory": 3000,
+      "maxDuration": 60
+    }
+  },
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=8192"
+    }
+  }
+}
