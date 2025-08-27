@@ -50,12 +50,15 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
       onOpenChange={e => setIsOpen(e.open)}>
       <Popover.Trigger asChild>
         <Button
+          w={{ base: "full", md: "auto" }}
           colorScheme={selected ? "primary" : "gray"}
           variant={selected ? "primaryAction" : "ghost"}
           rounded="full">
-          <Text fontWeight={selected ? "bold" : "normal"}>{route.name}</Text>
+          <Text fontSize="sm" fontWeight={selected ? "bold" : "normal"}>
+            {route.name}
+          </Text>
           <Icon
-            ml={2}
+            size="xs"
             as={FaChevronDown}
             transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
             transition="transform 0.2s"
@@ -145,7 +148,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
               onClick={onClick}
               size="md"
               fontWeight={fontWeight}
-              fontSize="md"
+              fontSize="sm"
               data-testid={selected ? "current-section" : ""}>
               {route.name}
               {hasSubRoutes && <FaChevronRight size={16} />}
@@ -153,7 +156,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           )
         })
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" gap={0}>
+        <MotionVStack initial={"hidden"} animate="visible" gap={0} w="full">
           {routesToRender.map(route => {
             if (route.component) return route.component
             const hasSubRoutes = route?.subRoutes?.length
@@ -166,6 +169,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
             return (
               <Button
+                variant="ghost"
                 w={"full"}
                 display="flex"
                 justifyContent="flex-start"
@@ -174,7 +178,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
                 onClick={onClick}
                 pl={2}
                 data-testid={selected ? "current-section" : ""}>
-                <Icon as={route.icon} color="gray.600" />
+                <Icon as={route.icon} />
                 <Text textAlign="left">{route.name}</Text>
               </Button>
             )
