@@ -7,6 +7,7 @@ import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { useProposalEnriched } from "@/hooks/proposals/common"
 import { HowToSupportCard } from "../../components/components"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -18,7 +19,7 @@ enum GrantsStep {
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
-  const { enrichedGrantProposals, totalGrantAmount } = useProposalEnriched()
+  const { enrichedGrantProposals, grantAnalytics } = useProposalEnriched()
 
   const stepsArray = useMemo(
     () => [
@@ -68,6 +69,19 @@ export const GrantsPageContent = () => {
     [t],
   )
 
+  const totalApproved = useMemo(() => {
+    return (
+      grantAnalytics.grantsByState[ProposalState.Succeeded] +
+      grantAnalytics.grantsByState[ProposalState.InDevelopment] +
+      grantAnalytics.grantsByState[ProposalState.Completed] +
+      grantAnalytics.grantsByState[ProposalState.Executed]
+    )
+  }, [grantAnalytics.grantsByState])
+
+  const totalDistributedAmount = useMemo(() => {
+    return grantAnalytics.totalDistributedAmount.toNumber()
+  }, [grantAnalytics.totalDistributedAmount])
+
   return (
     <VStack w="full" gap={8} pb={8}>
       <HStack
@@ -95,8 +109,8 @@ export const GrantsPageContent = () => {
       <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
       <GrantsStatsCards
         totalApplications={enrichedGrantProposals.length}
-        totalApproved={enrichedGrantProposals.length}
-        totalFunds={totalGrantAmount.toNumber()}
+        totalApproved={totalApproved}
+        totalFunds={totalDistributedAmount}
       />
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
