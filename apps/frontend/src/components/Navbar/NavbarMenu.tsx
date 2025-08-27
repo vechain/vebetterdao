@@ -62,6 +62,10 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
             as={FaChevronDown}
             transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
             transition="transform 0.2s"
+            transformOrigin="center"
+            width="12px"
+            height="12px"
+            flexShrink={0}
           />
         </Button>
       </Popover.Trigger>
