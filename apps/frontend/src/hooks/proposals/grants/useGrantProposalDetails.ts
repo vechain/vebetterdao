@@ -68,6 +68,11 @@ const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnr
     applicantProfileUrl: ipfsMetadata?.applicantProfileUrl ?? "",
     applicantCountry: ipfsMetadata?.applicantCountry ?? "",
     applicantCity: ipfsMetadata?.applicantCity ?? "",
+    companyRegisteredNumber: ipfsMetadata?.companyRegisteredNumber ?? "",
+    companyIntro: ipfsMetadata?.companyIntro ?? "",
+    companyEmail: ipfsMetadata?.companyEmail ?? "",
+    companyTelegram: ipfsMetadata?.companyTelegram ?? "",
+    grantsReceiverAddress: ipfsMetadata?.grantsReceiverAddress ?? "",
   }
 }
 

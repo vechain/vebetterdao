@@ -41,6 +41,12 @@ const initialFormData: GrantFormData = {
   githubUsername: "",
   twitterUsername: "",
   discordUsername: "",
+  // About company
+  companyRegisteredNumber: "",
+  companyIntro: "",
+  companyEmail: "",
+  companyTelegram: "",
+  grantsReceiverAddress: "",
   // Project details
   problemDescription: "",
   solutionDescription: "",
@@ -187,7 +193,6 @@ const initializePlaceholderStores = () => {
         version: 0,
       }
       localStorage.setItem(storageKey, JSON.stringify(placeholder))
-      console.log("Created placeholder for grant type:", type)
     }
   })
 }
