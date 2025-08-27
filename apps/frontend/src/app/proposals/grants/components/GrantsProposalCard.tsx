@@ -92,7 +92,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             )}
           </HStack>
           {isSupportOrVotingPhase && endsAt ? (
-            <Text fontSize="12px" alignSelf="flex-start" color="subtle.active" pl={2}>
+            <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
               {t("End: {{endDate}}", {
                 endDate: formatTimeLeft(endsAt),
               })}
@@ -105,7 +105,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
           <HStack gap={4}>
             <GrantsProposalStatusBadge state={proposal.state} />
             {isSupportOrVotingPhase && endsAt ? (
-              <Text fontSize="14px" color="subtle.active">
+              <Text fontSize="14px" color="text.subtle">
                 {t("End: {{endDate}}", {
                   endDate: formatTimeLeft(endsAt),
                 })}

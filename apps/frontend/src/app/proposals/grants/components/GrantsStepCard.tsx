@@ -155,7 +155,7 @@ export const GrantsStepsCard = ({
             </Box>
             <VStack gap={10} alignItems="flex-start" w="full" p={10}>
               <VStack alignItems="flex-start" w="full">
-                <Text fontSize="sm" fontWeight="bold" color="subtle.active">
+                <Text fontSize="sm" fontWeight="bold" color="text.subtle">
                   {currentStep.title}
                 </Text>
                 <motion.div
@@ -171,7 +171,7 @@ export const GrantsStepsCard = ({
                     {currentStep.listItems.length > 0 ? (
                       <List.Root pl={2} fontSize="sm" listStyle="disc">
                         {currentStep?.listItems?.map(item => (
-                          <List.Item key={item} fontWeight="500" color="subtle.active">
+                          <List.Item key={item} fontWeight="500" color="text.subtle">
                             {item}
                           </List.Item>
                         ))}
