@@ -1,5 +1,5 @@
 import { Grid, GridItem, HStack, Text, Skeleton, VStack, Card } from "@chakra-ui/react"
-import { Control, FieldErrors, UseFormRegister } from "react-hook-form"
+import { Control, FieldErrors, UseFormRegister, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { useCanProposalStartInNextRound, useCurrentAllocationsRoundDeadline, useCurrentAllocationsRoundId } from "@/api"
@@ -33,8 +33,9 @@ interface ScheduleProps {
   register: UseFormRegister<GrantFormData>
   errors: FieldErrors<GrantFormData>
   control: Control<GrantFormData>
+  watch: UseFormWatch<GrantFormData>
 }
-export const Schedule = ({ register, errors, control }: ScheduleProps) => {
+export const Schedule = ({ register, errors, control, watch }: ScheduleProps) => {
   const { t } = useTranslation()
 
   const { data: currentRoundId, isLoading: isCurrentRoundIdLoading } = useCurrentAllocationsRoundId()
@@ -62,9 +63,21 @@ export const Schedule = ({ register, errors, control }: ScheduleProps) => {
         label: `${t("From today")}   - ${dayjs(roundStartDate).format("DD/MM/YYYY")}`,
         value: roundId,
         canStart: canStartInNextRound,
+        endDate: roundStartDate,
       }
     })
   }, [currentRoundId, canStartInNextRound, currentRoundDeadlineDate, t])
+
+  // Watch the selected value
+  const selectedRoundId = watch("supportDeadline")
+
+  // Find selected option for countdown calculation
+  const selectedOption = useMemo(() => {
+    return options.find(option => option.value === Number(selectedRoundId))
+  }, [options, selectedRoundId])
+
+  // Calculate countdown based on selected option
+  const countdownDate = selectedOption?.endDate || currentRoundDeadlineDate
 
   return (
     <Grid templateColumns={{ base: 5, md: 5 }} w="full" gap={6}>
@@ -85,6 +98,7 @@ export const Schedule = ({ register, errors, control }: ScheduleProps) => {
             options={options}
             control={control}
             error={errors.supportDeadline?.message}
+            defaultValue={options[0]?.value}
           />
         </Skeleton>
       </GridItem>
@@ -94,8 +108,8 @@ export const Schedule = ({ register, errors, control }: ScheduleProps) => {
             {t("Support ends in")}
           </Text>
           <HStack gap={2} w="full">
-            <CountdownUnit value={dayjs(currentRoundDeadlineDate).diff(dayjs(), "days")} label="Days" />
-            <CountdownUnit value={dayjs(currentRoundDeadlineDate).diff(dayjs(), "hours") % 24} label="Hours" />
+            <CountdownUnit value={dayjs(countdownDate).diff(dayjs(), "days")} label="Days" />
+            <CountdownUnit value={dayjs(countdownDate).diff(dayjs(), "hours") % 24} label="Hours" />
           </HStack>
         </VStack>
       </GridItem>

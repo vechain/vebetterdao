@@ -11,6 +11,7 @@ type FormDateSelectProps = {
   isOptional?: boolean
   options: { label: string; value: number }[]
   placeholder?: string
+  defaultValue?: number
 }
 
 export const FormDateSelect = ({
@@ -22,6 +23,7 @@ export const FormDateSelect = ({
   options,
   isOptional = false,
   placeholder,
+  defaultValue,
 }: FormDateSelectProps) => {
   const { t } = useTranslation()
 
@@ -48,6 +50,7 @@ export const FormDateSelect = ({
       <Controller
         name={register.name}
         control={control}
+        defaultValue={defaultValue}
         {...(!isOptional && { required: t("This field is required") })}
         render={({ field }) => (
           <NativeSelect.Root>

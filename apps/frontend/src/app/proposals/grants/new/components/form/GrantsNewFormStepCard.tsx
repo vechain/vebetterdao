@@ -149,7 +149,7 @@ export const GrantsNewFormStepCard = () => {
     },
     {
       key: GrantFormStep.SCHEDULE,
-      content: <Schedule register={register} errors={errors} control={control} />,
+      content: <Schedule register={register} errors={errors} control={control} watch={watch} />,
       title: t("Schedule"),
     },
   ]
