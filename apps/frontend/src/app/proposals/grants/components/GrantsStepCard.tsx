@@ -1,20 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
-import {
-  VStack,
-  HStack,
-  Text,
-  Button,
-  Box,
-  Steps,
-  Flex,
-  Heading,
-  Image,
-  List,
-  Card,
-  useDisclosure,
-  useSteps,
-} from "@chakra-ui/react"
+import { VStack, HStack, Text, Button, Box, Steps, Flex, Heading, Image, List, Card } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -22,7 +8,7 @@ import { UilArrowLeft, UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { RequirementModal } from "@/app/proposals/components/components"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
 
 export type Step = {
@@ -46,27 +32,24 @@ export const GrantsStepsCard = ({
   const { isMobile } = useBreakpoints()
   const router = useRouter()
 
-  const stepsUI = useSteps({
-    defaultStep: 0,
-    count: steps.length,
-  })
-
-  const currentStep = steps[stepsUI.value]
-  const isLastStep = stepsUI.value === steps.length - 1
+  //MIMIC USE STEPS HOOK
+  const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
   const goToNext = () => {
-    if (stepsUI.value < steps.length - 1) {
-      stepsUI.setStep(stepsUI.value + 1)
-    }
+    setCurrentStepIndex(prev => prev + 1)
   }
 
   const goToPrevious = () => {
-    if (stepsUI.value > 0) {
-      stepsUI.setStep(stepsUI.value - 1)
-    }
+    setCurrentStepIndex(prev => prev - 1)
   }
 
-  const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
+  const currentStep = steps[currentStepIndex]
+  const isLastStep = currentStepIndex === steps.length - 1
+
+  //MIMIC use disclosure hook
+  const [isRequirementModalOpen, setIsRequirementModalOpen] = useState(false)
+  const openRequirementModal = useCallback(() => setIsRequirementModalOpen(true), [])
+  const closeRequirementModal = useCallback(() => setIsRequirementModalOpen(false), [])
 
   const hasMetProposalCriteria = useMetProposalCriteria()
 
@@ -89,10 +72,10 @@ export const GrantsStepsCard = ({
         ariaTitle={currentStep.title}
         ariaDescription={currentStep.heading}
         height="100%">
-        <Steps.Root step={stepsUI.value} count={steps.length} size="sm">
+        <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
           <HStack w="full" justify="space-between" alignItems="center">
             <UilArrowLeft onClick={goToPrevious} cursor="pointer" />
-            <GrantsStepIndicator activeStep={stepsUI.value} steps={steps} />
+            <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
             <UilTimes onClick={onClose} cursor="pointer" size={24} />
           </HStack>
           <Box pt={5}>
@@ -102,7 +85,7 @@ export const GrantsStepsCard = ({
               </Heading>
               <Image
                 src={currentStep.image}
-                alt={`Step ${stepsUI.value + 1}`}
+                alt={`Step ${currentStepIndex + 1}`}
                 objectFit="contain"
                 maxW="150px"
                 maxH="150px"
@@ -134,11 +117,11 @@ export const GrantsStepsCard = ({
 
   return (
     <Card.Root display={isOpen ? "block" : "none"} w="full" h="full" borderRadius="xl" overflow="hidden">
-      <Steps.Root step={stepsUI.value} count={steps.length}>
+      <Steps.Root step={currentStepIndex} count={steps.length}>
         <Flex h="full">
           <Box flex="1">
             <Box pl={8} pt={8} pb={4} w={{ base: "100%", lg: "35%" }}>
-              <GrantsStepIndicator activeStep={stepsUI.value} steps={steps} />
+              <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
             </Box>
             <VStack gap={10} alignItems="flex-start" w="full" p={10}>
               <VStack alignItems="flex-start" w="full">
@@ -168,7 +151,7 @@ export const GrantsStepsCard = ({
                 </motion.div>
               </VStack>
               <HStack w="full" justifyContent="flex-start">
-                {stepsUI.value > 0 && (
+                {currentStepIndex > 0 && (
                   <Button variant="primarySubtle" onClick={goToPrevious}>
                     {t("Previous")}
                   </Button>
@@ -191,7 +174,7 @@ export const GrantsStepsCard = ({
               key={currentStep.key}>
               <Image
                 src={currentStep.image}
-                alt={`Step ${stepsUI.value + 1}`}
+                alt={`Step ${currentStepIndex + 1}`}
                 objectFit="contain"
                 maxW="220px"
                 maxH="320px"
