@@ -133,7 +133,7 @@ export const ProposalsFilters = (props: Props) => {
                 key={filterKey}
                 onClick={onClick}>
                 <HStack gap={2} alignItems={"center"}>
-                  <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
+                  <Text textStyle="sm" fontWeight={600} whiteSpace={"nowrap"}>
                     {t("Filters")}
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
@@ -191,7 +191,7 @@ export const ProposalsFilters = (props: Props) => {
                   key={optionKey}
                   variant={isSelected ? "solid" : "outline"}
                   onClick={() => handleFilterClick(optionKey as StateFilter)}>
-                  <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
+                  <Text textStyle="sm" fontWeight={600} whiteSpace={"nowrap"}>
                     {optionKey}
                   </Text>
                 </Button>

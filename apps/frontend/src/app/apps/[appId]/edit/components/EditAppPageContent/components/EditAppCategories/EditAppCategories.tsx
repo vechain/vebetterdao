@@ -76,7 +76,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
 
   return (
     <VStack align="flex-start" gap={4} width="full">
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight={500}>
         {t("App Categories")}
       </Text>
 

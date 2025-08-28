@@ -106,7 +106,7 @@ export const LowOnVthoCard: React.FC = () => {
             <VStack gap={4} w="full" justifyContent={"start"} alignItems={"start"}>
               <Heading size="2xl">{labels?.heading}</Heading>
 
-              <Text fontSize={"16px"} fontWeight={400}>
+              <Text textStyle={"md"}>
                 {labels?.body} <b>{t("Get more VTHO to get the best experience in the platform.")}</b>
               </Text>
 

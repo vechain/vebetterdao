@@ -65,7 +65,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
                 _dark={{ bg: "#FFFFFF4A" }}
                 rounded="8px"
                 padding="4px 8px">
-                <Text fontSize={"xs"} fontWeight={400} lineClamp={1}>
+                <Text textStyle={"xs"} lineClamp={1}>
                   {t("{{value}}x reward weight", { value: gm.multiplier || 0 })}
                 </Text>
               </Box>

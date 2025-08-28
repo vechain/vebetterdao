@@ -36,7 +36,7 @@ export const CommunityModal = ({ isOpen, onClose }: Props) => {
         <Dialog.CloseTrigger top={6} right={4} asChild>
           <CloseButton />
         </Dialog.CloseTrigger>
-        <Text fontSize={20} fontWeight={700}>
+        <Text textStyle="xl" fontWeight={700}>
           {t("Join Our Community!")}
         </Text>
         <MotionVStack

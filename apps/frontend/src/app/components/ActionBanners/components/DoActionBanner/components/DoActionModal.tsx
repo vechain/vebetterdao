@@ -50,7 +50,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                 position="relative"
                 overflow={"hidden"}>
                 <Flex position="absolute" top={0} left={0} bottom={0} w={`${scorePercentage}%`} bg="#F29B32"></Flex>
-                <Text fontSize={"xs"} zIndex={1}>
+                <Text textStyle={"xs"} zIndex={1}>
                   {t("YOU CANNOT VOTE YET")}
                 </Text>
               </Flex>
@@ -63,7 +63,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
           </Card.Body>
         </Card.Root>
         <Heading size="2xl">{missingActionsLabel.long}</Heading>
-        <Text color="#6A6A6A" fontWeight={400}>
+        <Text color="#6A6A6A">
           {t(
             "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
           )}

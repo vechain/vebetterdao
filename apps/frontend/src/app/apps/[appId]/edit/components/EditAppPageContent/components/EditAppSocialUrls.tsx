@@ -83,7 +83,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
 
   return (
     <VStack align={"stretch"} flex={1.5} gap={4} w="full">
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight={500}>
         {t("Social media links")}
       </Text>
       {inputData.map(({ inputKey, url, error, placeholder, icon }) => (

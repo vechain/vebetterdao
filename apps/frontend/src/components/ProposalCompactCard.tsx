@@ -37,7 +37,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       case ProposalState.Pending:
         return (
           <Skeleton loading={isVotingStartDateLoading}>
-            <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+            <Text textStyle={"sm"} color={"gray.500"}>
               {t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })}
             </Text>
           </Skeleton>
@@ -45,7 +45,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       case ProposalState.Canceled:
       case ProposalState.DepositNotMet:
         return (
-          <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+          <Text textStyle={"sm"} color={"gray.500"}>
             {t("Vote didn't start")}
           </Text>
         )
@@ -93,7 +93,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                 flex={2.5}
                 mr={{ base: 0, md: 10 }}
                 alignSelf={"flex-start"}>
-                <Text fontSize={"14px"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight={600}>
                   {proposalMetadata.data?.title}
                 </Text>
               </Skeleton>

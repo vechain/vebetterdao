@@ -27,7 +27,7 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
   }
 
   const renderStep = (step: number) => (
-    <Text fontSize={10} color={"#6A6A6A"}>
+    <Text textStyle="xs" color={"#6A6A6A"}>
       {t("STEP {{value}}", { value: step })}
     </Text>
   )
@@ -76,7 +76,7 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                       </Box>
                       <VStack gap={0} alignItems={"start"} p={1}>
                         {renderStep(1)}
-                        <Text fontSize={["12px", "16px"]}>{step.title}</Text>
+                        <Text textStyle={["xs", "md"]}>{step.title}</Text>
                       </VStack>
                     </Card.Root>
                   ))}

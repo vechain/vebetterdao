@@ -91,7 +91,7 @@ export const AppCard = ({ xApp }: Props) => {
               )}
             </HStack>
             <Skeleton loading={appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text textStyle={"sm"} color={"gray.500"}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>

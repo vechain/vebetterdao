@@ -107,7 +107,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                       {attachedGMNFT?.multiplier}
                       {"x"}
                     </Text>
-                    <Text textStyle="sm" fontWeight={400} lineClamp={1}>
+                    <Text textStyle="sm" lineClamp={1}>
                       {t("GM reward weight")}
                     </Text>
                   </HStack>

@@ -30,7 +30,7 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
           <Skeleton loading={isLogoLoading}>
             <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"32px"} borderRadius="9px" />
           </Skeleton>
-          <Text fontSize="18px" fontWeight={600}>
+          <Text textStyle="lg" fontWeight={600}>
             {app.name}
           </Text>
         </HStack>

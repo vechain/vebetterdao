@@ -24,9 +24,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
         w={"full"}
         h={"30px"}
         variant={"secondary"}>
-        <Text fontSize={14} fontWeight={400}>
-          {t("10%")}
-        </Text>
+        <Text textStyle="sm">{t("10%")}</Text>
       </Button>
     ),
     [availableAmount, setValue, t],
@@ -39,9 +37,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
         w={"full"}
         h={"30px"}
         variant={"secondary"}>
-        <Text fontSize={14} fontWeight={400}>
-          {t("25%")}
-        </Text>
+        <Text textStyle="sm">{t("25%")}</Text>
       </Button>
     ),
     [availableAmount, setValue, t],
@@ -54,9 +50,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
         w={"full"}
         h={"30px"}
         variant={"secondary"}>
-        <Text fontSize={14} fontWeight={400}>
-          {t("50%")}
-        </Text>
+        <Text textStyle="sm">{t("50%")}</Text>
       </Button>
     ),
     [availableAmount, setValue, t],
@@ -69,9 +63,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
         w={"full"}
         h={"30px"}
         variant={"secondary"}>
-        <Text fontSize={14} fontWeight={400}>
-          {t("75%")}
-        </Text>
+        <Text textStyle="sm">{t("75%")}</Text>
       </Button>
     ),
     [availableAmount, setValue, t],
@@ -80,9 +72,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
   const maxButton = useMemo(
     () => (
       <Button onClick={() => setValue("amount", availableAmount)} variant={"secondary"} w={"full"} h={"30px"}>
-        <Text fontSize={14} fontWeight={400}>
-          {isMobile ? t("100%") : t("Deposit all")}
-        </Text>
+        <Text textStyle="sm">{isMobile ? t("100%") : t("Deposit all")}</Text>
       </Button>
     ),
     [availableAmount, setValue, t, isMobile],

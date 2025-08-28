@@ -126,8 +126,8 @@ export const NewAppPageFormContent = () => {
     return (
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "3fr 4fr"]} gap={6} w="full" mt={6}>
         <VStack alignItems={"flex-start"} order={[2, 2, 1]}>
-          <Text fontSize={[24, 36]}>{t("Congratulations, Your App is part of VeBetter DAO!")}</Text>
-          <Text fontSize={[14, 16]} fontWeight={400}>
+          <Text textStyle={["2xl", "4xl"]}>{t("Congratulations, Your App is part of VeBetter DAO!")}</Text>
+          <Text textStyle={["sm", "md"]}>
             {t(
               "Now, to qualify for allocations and have founding from the community, you have to gain endorsements from X-node holders to reach 100 points.",
             )}

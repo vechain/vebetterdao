@@ -105,12 +105,10 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
                     <Icon as={route.icon} />
                   </Box>
                   <VStack alignItems={"start"} gap={0}>
-                    <Text fontSize={16} fontWeight={600}>
+                    <Text textStyle="md" fontWeight={600}>
                       {route.name}
                     </Text>
-                    <Text fontSize={13} fontWeight={400}>
-                      {t(route.description as any)}
-                    </Text>
+                    <Text textStyle="sm">{t(route.description as any)}</Text>
                   </VStack>
                 </HStack>
                 {!selected && <FaChevronRight size={16} />}

@@ -47,7 +47,7 @@ export const ProposalCommunitySupport = () => {
             <UilInfoCircle size="24px" color={"#004CFC"} />
           </Tooltip>
         </HStack>
-        <Text fontSize={"14px"}>
+        <Text textStyle={"sm"}>
           {isDepositNotMet
             ? t("This proposal won’t reach enough support and it was canceled.")
             : t("This proposal needs to get enough support for the community to be voted on Round {{round}}.", {
@@ -72,7 +72,7 @@ export const ProposalCommunitySupport = () => {
           </>
         ) : (
           <HStack alignItems={"flex-end"} justify={"space-between"} flexWrap={"wrap"}>
-            <Text fontSize="14px" fontWeight={600}>
+            <Text textStyle="sm" fontWeight={600}>
               {t("You can claim your tokens back when the proposal voting round starts.")}
             </Text>
             <CommunitySupportButton />

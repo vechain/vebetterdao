@@ -51,7 +51,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
             )}
           </HStack>
 
-          <Text fontSize={"md"} color={"gray.500"}>
+          <Text textStyle={"md"} color={"gray.500"}>
             {t("Use our apps to complete sustainable actions and earn token rewards.")}
           </Text>
         </VStack>
@@ -104,7 +104,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
 
           <HStack gap={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
             <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text textStyle={"sm"} color={"gray.500"}>
                 {appMetadata?.description
                   ? appMetadata.description.slice(0, 150) + "..."
                   : appMetadataError?.message

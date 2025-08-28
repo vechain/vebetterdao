@@ -29,7 +29,7 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
       <CustomModalContent>
         <VStack gap={4} w="full" align="flex-start" p={"24px"}>
           <Heading size="2xl">{t("Your votes")}</Heading>
-          <Text fontSize="16px" fontWeight="400">
+          <Text textStyle="md" fontWeight="400">
             <Trans
               i18nKey={"{{amount}} distributed among {{apps}} apps"}
               values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}

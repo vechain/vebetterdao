@@ -80,7 +80,7 @@ export const DashboardAllocationRounds = () => {
             </Heading>
             <HStack gap={2}>
               <Skeleton loading={roundInfoLoading}>
-                <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
+                <Text textStyle="sm" color="#6A6A6A">
                   {t("{{from}} to {{to}}", {
                     from: roundInfo.voteStartTimestamp?.format("MMM D"),
                     to: roundInfo.voteEndTimestamp?.format("MMM D"),
@@ -89,7 +89,7 @@ export const DashboardAllocationRounds = () => {
               </Skeleton>
               <DotSymbol color="#6A6A6A" size="2px" />
               <Skeleton loading={roundInfoLoading}>
-                <Text fontSize="14px" color="primary.500" fontWeight={600}>
+                <Text textStyle="sm" color="primary.500" fontWeight={600}>
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
               </Skeleton>

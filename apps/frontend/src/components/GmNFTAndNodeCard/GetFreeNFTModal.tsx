@@ -30,20 +30,20 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>
-              <Text fontSize={["16px"]}>
+              <Text textStyle="md">
                 {t(
                   "A GM Earth NFT is your entry pass into DAO governance and rewards. It gives you access to extra features, and you can later upgrade it to boost your rewards with multipliers.",
                 )}
               </Text>
               <br />
-              <Text fontSize={["16px"]}>{t("How to Get One (Free):")}</Text>
+              <Text textStyle="md">{t("How to Get One (Free):")}</Text>
               <Box as="ol">
                 {listItems.map((item, index) => (
                   // eslint-disable-next-line react/no-array-index-key
                   <li key={`get-free-nft-${index}`}>{item}</li>
                 ))}
               </Box>
-              <Text fontSize={["16px"]}>
+              <Text textStyle="md">
                 {t("Once minted, you can keep it as-is or upgrade it (paid) to unlock other DAO features.")}
               </Text>
             </Dialog.Body>

@@ -25,7 +25,7 @@ export const ProposalWithdrawDeposit = () => {
               <Heading size="2xl">{t("Community Support")}</Heading>
               <UilInfoCircle size="24px" color={"#004CFC"} />
             </HStack>
-            <Text fontSize={"14px"}>
+            <Text textStyle={"sm"}>
               {t(proposal.isUserSupportLeft ? "This round is ended, claim your tokens back." : "This round is ended.")}
             </Text>
             <VStack alignItems={"stretch"} gap={4}>
@@ -34,17 +34,17 @@ export const ProposalWithdrawDeposit = () => {
                   <Flex position="relative" top="7px" display={"inline-flex"}>
                     <FaRegHeart color={"#004CFC"} size={"36"} />
                   </Flex>
-                  <Text fontSize={"28px"} color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"3xl"} color={"contrast-fg-on-dark-bg"}>
                     {compactFormatter.format(Number(proposal.communityDeposits))}
                   </Text>
-                  <Text fontSize={"20px"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"xl"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
                     {t("/")}
                   </Text>
-                  <Text fontSize={"20px"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"xl"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
                     {compactFormatter.format(Number(proposal.depositThreshold))}
                   </Text>
                 </HStack>
-                <Text fontSize={"18px"} fontWeight={400} color={"#6A6A6A"}>
+                <Text textStyle={"lg"} color={"#6A6A6A"}>
                   {compactFormatter.format(proposal.communityDepositPercentage * 100)}
                   {t("%")}
                 </Text>
@@ -73,7 +73,7 @@ export const ProposalWithdrawDeposit = () => {
               <VStack align={"stretch"}>
                 <HStack>
                   <Circle size="12px" bg={"#77A0FF"} />
-                  <Text fontSize="14px" fontWeight={400}>
+                  <Text textStyle="sm">
                     {t("From {{users}} users {{vot3}} VOT3.", {
                       vot3: compactFormatter.format(proposal.othersSupport || 0),
                       users: compactFormatter.format(Number(proposal.othersSupportUserCount)),
@@ -82,7 +82,7 @@ export const ProposalWithdrawDeposit = () => {
                 </HStack>
                 <HStack>
                   <Circle size="12px" bg={"#004CFC"} />
-                  <Text fontSize="14px" fontWeight={400}>
+                  <Text textStyle="sm">
                     {t("From you {{vot3}} VOT3.", { vot3: compactFormatter.format(Number(proposal.userSupport)) })}
                   </Text>
                 </HStack>

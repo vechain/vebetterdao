@@ -59,7 +59,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
             <Image h="24px" w="24px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Heading size="2xl">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
           </HStack>
-          <Text fontSize={"sm"} color={"gray.500"}>
+          <Text textStyle={"sm"} color={"gray.500"}>
             {t("Latest allocation")}
           </Text>
         </VStack>

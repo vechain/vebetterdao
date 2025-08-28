@@ -143,7 +143,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
             mt={4}
             color={"rgba(0, 76, 252, 1)"}
             cursor={"pointer"}>
-            <Text fontSize={16} fontWeight={500}>
+            <Text textStyle="md" fontWeight={500}>
               {t("See more details on")} Vechain Stats
             </Text>
             <UilArrowUpRight size={16} />

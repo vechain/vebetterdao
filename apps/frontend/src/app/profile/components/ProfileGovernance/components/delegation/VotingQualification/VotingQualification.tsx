@@ -92,7 +92,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                   w={`${scorePercentage}%`}
                   bg={darkColor}
                   rounded="full"></Flex>
-                <Text fontSize={"xs"} zIndex={1} color={scorePercentage > 60 ? "white" : "black"}>
+                <Text textStyle={"xs"} zIndex={1} color={scorePercentage > 60 ? "white" : "black"}>
                   {progressLabel}
                 </Text>
               </Flex>

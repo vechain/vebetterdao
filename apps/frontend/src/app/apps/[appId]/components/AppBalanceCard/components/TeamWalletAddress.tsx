@@ -27,7 +27,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
           }>
           <Flex w={"fit-content"} justifyContent={"center"} mt={1}>
             <HStack alignSelf={"center"} w={"fit-content"}>
-              <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A" w={"full"}>
+              <Text textStyle={"sm"} color="#6A6A6A" w={"full"}>
                 {t("Treasury address")}
               </Text>
               <FiInfo color="rgba(0, 76, 252, 1)" size={14} />
@@ -41,9 +41,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
           ) : (
             <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyLink} cursor="pointer" />
           )}
-          <Text fontSize={"20px"} fontWeight={400}>
-            {humanAddress(teamWalletAddress, 6, 6)}
-          </Text>
+          <Text textStyle={"xl"}>{humanAddress(teamWalletAddress, 6, 6)}</Text>
         </HStack>
       </VStack>
     </VStack>

@@ -265,7 +265,7 @@ export const EditAppPageContent = () => {
             <EditAppLogo form={form} />
 
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={16} fontWeight={500}>
+              <Text textStyle="md" fontWeight={500}>
                 {t("Project URL")}
               </Text>
               <Field.Root invalid={!!errors.external_url}>
@@ -284,7 +284,7 @@ export const EditAppPageContent = () => {
             </VStack>
 
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={16} fontWeight={500}>
+              <Text textStyle="md" fontWeight={500}>
                 {t("Description")}
               </Text>
               <Field.Root invalid={!!errors.description}>
@@ -301,7 +301,7 @@ export const EditAppPageContent = () => {
               </Field.Root>
             </VStack>
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={16} fontWeight={500}>
+              <Text textStyle="md" fontWeight={500}>
                 {t("Distribution Strategy")}
               </Text>
               <Field.Root invalid={!!errors.distribution_strategy}>
@@ -330,7 +330,7 @@ export const EditAppPageContent = () => {
 
         <VStack align={"flex-start"} gap={4}>
           <Heading size="2xl">{t("VeWorld assets")}</Heading>
-          <Text fontSize={14} color={"gray"} pt={0}>
+          <Text textStyle="sm" color={"gray"} pt={0}>
             {t(
               "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨",
             )}

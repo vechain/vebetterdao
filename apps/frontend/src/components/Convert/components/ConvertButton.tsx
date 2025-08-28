@@ -35,7 +35,7 @@ export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
           variant={"primaryAction"}
           w="full"
           data-testid="convert-tokens-button">
-          <Text fontSize={16} fontStyle={"normal"} fontWeight={500}>
+          <Text textStyle="md" fontStyle={"normal"} fontWeight={500}>
             {t("Convert tokens")}
           </Text>
         </Button>

@@ -50,7 +50,7 @@ export const UnknownModalContent = ({
       </motion.div>
       <VStack gap={4}>
         {description && (
-          <Text fontSize={"14px"} textAlign={"center"}>
+          <Text textStyle={"sm"} textAlign={"center"}>
             {description}
           </Text>
         )}

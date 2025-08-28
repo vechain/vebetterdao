@@ -39,7 +39,7 @@ export const CreatorApplicationInProgress = () => {
               align="flex-start"
               justify="center">
               <Heading size="lg">{t("We're reviewing your Creator's NFT application form")}</Heading>
-              <Text fontSize="15px" color="#6A6A6A" fontWeight={400}>
+              <Text textStyle="md" color="#6A6A6A">
                 {t(
                   "If it’s approved you’ll receive a Creator’s NFT and you’ll be able to submit your app to VeBetterDAO!",
                 )}

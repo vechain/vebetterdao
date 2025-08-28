@@ -46,12 +46,12 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           <HStack>
             <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"}>
                 {t("You reached the max GM NFT level")}
               </Text>
             </HStack>
           </HStack>
-          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"}>
             {t("You can't upgrade your GM NFT anymore")}
           </Text>
         </>
@@ -67,14 +67,14 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>
-            <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+            <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"}>
               {"/"}
               {compactFormatter.format(Number(b3trToUpgrade))}
               {" B3TR"}
             </Text>
           </HStack>
         </HStack>
-        <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+        <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"}>
           {t("B3TR needed to upgrade your GM level")}
         </Text>
         {b3trLeftover > 0 && (
@@ -143,7 +143,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
                 {multiplier}
                 {"x"}
               </Text>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
+              <Text fontSize={isAbove800 ? "md" : "xs"} lineClamp={1}>
                 {t("GM reward weight")}
               </Text>
             </HStack>

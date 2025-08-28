@@ -43,7 +43,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
             </Skeleton>
           </HStack>
           <HStack>
-            <Text fontSize="14px" fontWeight={400} color="#6A6A6A">
+            <Text textStyle="sm" color="#6A6A6A">
               {t("VOT3 balance at snapshot")}
             </Text>
             {depositsVotes && (

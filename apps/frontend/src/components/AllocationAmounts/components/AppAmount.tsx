@@ -25,7 +25,7 @@ export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"32px"} borderRadius="9px" />
         </Skeleton>
         <Skeleton loading={appMetadataLoading || isLoading}>
-          <Text fontWeight={"600"} fontSize={"16px"}>
+          <Text fontWeight={"600"} textStyle="md">
             {appMetadata?.name}
           </Text>
         </Skeleton>
@@ -33,13 +33,13 @@ export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
       <VStack gap={0} alignItems={"flex-end"}>
         <Skeleton loading={isLoading}>
           <HStack alignItems={"center"} gap={1}>
-            <Text fontSize="20px" fontWeight={700}>
+            <Text textStyle="xl" fontWeight={700}>
               {compactFormatter.format(Number(amount))}
             </Text>
             <B3TRIcon boxSize={"20px"} colorVariant="dark" />
           </HStack>
         </Skeleton>
-        <Text fontSize={"12px"} fontWeight={400} color="#6A6A6A">
+        <Text textStyle={"xs"} color="#6A6A6A">
           {t("received")}
         </Text>
       </VStack>

@@ -67,12 +67,12 @@ export const StepBoxes = ({
           <IconComponent size={124} color={iconColor} />
         </HStack>
         <VStack alignItems="start" w="full">
-          <Text fontSize="12px" color="#6A6A6A" lineHeight={"1px"}>
+          <Text textStyle="xs" color="#6A6A6A" lineHeight={"1px"}>
             {stepText}
           </Text>
           <Heading size={["md", "sm", "sm"]}>{title}</Heading>
         </VStack>
-        <Text fontSize="14px" color="#6A6A6A" w="full">
+        <Text textStyle="sm" color="#6A6A6A" w="full">
           {description}
         </Text>
       </Stack>

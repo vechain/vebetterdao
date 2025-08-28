@@ -53,7 +53,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                 _dark={{ bg: "#FFFFFF4A" }}
                 rounded="8px"
                 padding="4px 8px">
-                <Text fontSize={"xs"} fontWeight={400} lineClamp={1}>
+                <Text textStyle={"xs"} lineClamp={1}>
                   {t("{{value}} points", { value: node.xNodePoints })}
                 </Text>
               </Box>

@@ -82,12 +82,10 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
         <HStack w="full">
           <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
           <VStack gap={0} align={"flex-start"}>
-            <Text fontSize={18} fontWeight={600}>
+            <Text textStyle="lg" fontWeight={600}>
               {domain ?? humanAddress(account?.address ?? "", 4, 6)}
             </Text>
-            <Text fontSize={12} fontWeight={400}>
-              {t("View your Better Profile")}
-            </Text>
+            <Text textStyle="xs">{t("View your Better Profile")}</Text>
           </VStack>
         </HStack>
         <FaChevronRight size={16} />

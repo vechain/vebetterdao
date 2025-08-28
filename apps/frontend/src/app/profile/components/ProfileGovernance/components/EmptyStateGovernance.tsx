@@ -13,7 +13,7 @@ type Props = {
 export const EmptyStateGovernance = ({ title, description, illustration, buttonText, buttonIcon, onClick }: Props) => {
   return (
     <VStack w={"full"}>
-      <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"} alignSelf={"start"}>
+      <Text textStyle={{ base: "lg", md: "xl" }} fontWeight={"bold"} alignSelf={"start"}>
         {title}
       </Text>
       <VStack w={"full"} borderRadius={12} borderWidth={1} borderColor={"#D5D5D5"} p={10}>

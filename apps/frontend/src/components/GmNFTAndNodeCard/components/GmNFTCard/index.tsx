@@ -63,7 +63,7 @@ export const GmNFTCard = ({
               {gmRewardMultiplier}
               {"x"}
             </Text>
-            <Text textStyle="xs" fontWeight={400} lineClamp={1}>
+            <Text textStyle="xs" lineClamp={1}>
               {t("GM reward weight")}
             </Text>
           </HStack>

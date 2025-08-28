@@ -38,12 +38,11 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                 <VStack alignItems={"center"}>
                   <Text
                     alignSelf={"center"}
-                    textStyle={"lg"}
                     mb={{ base: 4, md: 8 }}
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={28}
+                    textStyle="3xl"
                     fontWeight={700}>
                     {t("VeBetterDAO")} <br /> {t("Governance")}
                   </Text>
@@ -51,22 +50,20 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                   <NFTWithRings image={imageData?.image ?? notFoundImage} tokenID={tokenID} />
                   <Text
                     alignSelf={"center"}
-                    textStyle="lg"
                     mt={{ base: 4, md: 8 }}
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={24}
+                    textStyle="2xl"
                     fontWeight={600}>
                     {"Earth"}
                   </Text>
                   <Text
                     alignSelf={"center"}
-                    textStyle={"lg"}
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={16}
+                    textStyle="md"
                     fontWeight={500}>
                     {t("#")}
                     {tokenID}

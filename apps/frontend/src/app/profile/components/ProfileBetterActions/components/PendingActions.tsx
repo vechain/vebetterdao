@@ -58,7 +58,7 @@ export const PendingActions = ({ address }: Props) => {
                   bottom={0}
                   w={`${scorePercentage * 100}%`}
                   bg="#F29B32"></Flex>
-                <Text fontSize={"xs"} zIndex={1}>
+                <Text textStyle={"xs"} zIndex={1}>
                   {t("YOU CANNOT VOTE YET")}
                 </Text>
               </Flex>
@@ -92,7 +92,7 @@ export const PendingActions = ({ address }: Props) => {
             position="relative"
             overflow={"hidden"}>
             <Flex position="absolute" top={0} left={0} bottom={0} w={`${scorePercentage}%`} bg="#F29B32"></Flex>
-            <Text fontSize={"xs"} zIndex={1}>
+            <Text textStyle={"xs"} zIndex={1}>
               {t("YOU CANNOT VOTE YET")}
             </Text>
           </Flex>

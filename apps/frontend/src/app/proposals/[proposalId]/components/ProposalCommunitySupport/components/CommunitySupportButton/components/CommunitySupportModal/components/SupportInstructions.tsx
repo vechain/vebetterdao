@@ -17,7 +17,7 @@ export const SupportInstructions = ({ goToNextStep }: { goToNextStep: () => void
           )}
         </Text>
       </HStack>
-      <Text fontWeight={600} fontSize={"16px"}>
+      <Text fontWeight={600} textStyle="md">
         {t("You can claim your tokens back when the proposal voting round starts.")}
       </Text>
       <Button onClick={goToNextStep} w="full" variant="primaryAction">

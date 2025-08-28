@@ -42,14 +42,14 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
             </Flex>
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
-                <Text fontSize={"sm"} mr="1">
+                <Text textStyle={"sm"} mr="1">
                   {t("Better action on")}
                 </Text>
-                <Text fontSize={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight={600}>
                   {getAppName(appId ?? "")}
                 </Text>
               </HStack>
-              <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+              <Text textStyle={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
                 {dayjs.unix(blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>
@@ -59,9 +59,7 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
               {"+"}
               {compactFormatter.format(Number(amountB3tr))}
             </Text>
-            <Text fontWeight={400} fontSize={"sm"}>
-              {"B3TR"}
-            </Text>
+            <Text textStyle="sm">{"B3TR"}</Text>
           </HStack>
         </HStack>
       </Card.Body>

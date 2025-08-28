@@ -87,15 +87,11 @@ Props) => {
             </Skeleton>
           </VStack>
           <VStack gap={0} align={"flex-start"}>
-            <Heading size={["md"]} fontWeight={600}>
+            <Heading size="md" fontWeight={600}>
               {appMetadata?.name}
             </Heading>
             <VStack gap={0} align={"flex-start"} justify={"flex-start"}>
-              <Heading
-                size={["md"]}
-                fontWeight={600}
-                color="#6DCB09"
-                data-testid={`${appMetadata?.name}-votes-percentage`}>
+              <Heading size="md" fontWeight={600} color="#6DCB09" data-testid={`${appMetadata?.name}-votes-percentage`}>
                 {t("{{percentage}}%", {
                   percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
@@ -116,7 +112,7 @@ Props) => {
                 </HStack>
               </Skeleton>
               <Skeleton loading={appVotes === undefined} textAlign={"right"}>
-                <Text fontSize={["12px", "14px"]} fontWeight={"400"} color="#6A6A6A">
+                <Text textStyle={["xs", "sm"]} fontWeight={"400"} color="#6A6A6A">
                   {t("voted by")}{" "}
                   <span style={{ fontWeight: 600 }}>
                     {appVotes} {t("wallets")}
@@ -141,7 +137,7 @@ Props) => {
           />
         </Box>
         {showMaxAllocation && (
-          <Text color={"#3DBA67"} fontSize={["12px", "14px"]} fontWeight={600} alignSelf={"flex-end"}>
+          <Text color={"#3DBA67"} textStyle={["xs", "sm"]} fontWeight={600} alignSelf={"flex-end"}>
             {t("Max allocation reached!")}
           </Text>
         )}

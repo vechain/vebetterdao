@@ -62,7 +62,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     if (!account?.address) return null
     if (!userVote)
       return (
-        <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} {...textProps}>
+        <Text textStyle="xs" color={"#6A6A6A"} {...textProps}>
           {t("You haven't voted")}
         </Text>
       )
@@ -72,7 +72,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     //if for some reason we are not able to map the support
     if (!support)
       return (
-        <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} {...textProps}>
+        <Text textStyle="xs" color={"#6A6A6A"} {...textProps}>
           {t("You have voted")}
         </Text>
       )
@@ -110,12 +110,12 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     return (
       <Box>
         {renderTitle && (
-          <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+          <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
             {t("Your vote")}
           </Text>
         )}
         {isFinished ? (
-          <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
+          <Text fontSize={["lg", "lg", "md"]} {...textProps}>
             {t("You have not voted")}
           </Text>
         ) : (
@@ -127,7 +127,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   return (
     <Box>
       {renderTitle && (
-        <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
+        <Text fontSize={["lg", "lg", "md"]} {...textProps}>
           {t("Your vote")}
         </Text>
       )}
@@ -163,7 +163,7 @@ const NoVoteAndActiveCheckVotingPower = ({
       <HStack gap={2}>
         <Icon as={MdHowToVote} boxSize={4} color={"contrast-fg-on-muted"} />
 
-        <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
+        <Text fontSize={["lg", "lg", "md"]} {...textProps}>
           {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}
         </Text>
       </HStack>

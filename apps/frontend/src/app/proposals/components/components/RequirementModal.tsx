@@ -63,7 +63,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
           {!hasNft ? (
             <List.Root as="ol" gap={2}>
               <List.Item>
-                <Text fontSize="16px" fontWeight={400}>
+                <Text textStyle="md">
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
                     values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
@@ -79,7 +79,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
               </List.Item>
             </List.Root>
           ) : (
-            <Text fontSize="16px" fontWeight={400}>
+            <Text textStyle="md">
               <Trans
                 i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
                 components={{ b: <Text as="span" /> }}

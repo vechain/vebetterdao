@@ -56,7 +56,7 @@ export const EditAppLogo = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight={500}>
         {t("Logo")}
       </Text>
       <Flex w="64px" h="64px" flexBasis={"64px"} position={"relative"} rounded="16px">
@@ -92,7 +92,7 @@ export const EditAppLogo = ({ form }: Props) => {
           </Flex>
         </Box>
       </Flex>
-      <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>
+      <Text textStyle="sm" color={invalidFormat ? "red" : "gray"} pt={0}>
         {invalidFormat ? invalidMessage : t(LOGO_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>

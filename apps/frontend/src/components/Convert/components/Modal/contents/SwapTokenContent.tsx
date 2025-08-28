@@ -57,7 +57,7 @@ export const SwapTokenContent = ({
       {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
         <HStack px={4} py={3} bg={"dark-contrast-on-card-bg"} borderRadius={8} mt={2}>
           <FiInfo size={36} color="#6a6a6a" />
-          <Text fontSize={{ base: 14 }} fontWeight={400}>
+          <Text textStyle={{ base: "sm" }}>
             {t("The maximum amount of VOT3 you can convert is ")}
             <b>{swappableVot3Balance?.formatted}</b>
             {t(". You can’t convert VOT3 that ")}
@@ -83,7 +83,7 @@ export const SwapTokenContent = ({
         onClick={goToNextStep}
         size={"lg"}
         data-testid={"confirm-swap-button"}>
-        <Text fontSize={{ base: 14, md: 18 }}>{t("Review operation")}</Text>
+        <Text textStyle={{ base: "sm", md: "lg" }}>{t("Review operation")}</Text>
       </Button>
     </>
   )

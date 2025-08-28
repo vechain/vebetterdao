@@ -79,7 +79,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
           </IconButton>
         </Flex>
       </Flex>
-      <Text fontSize={14} color={"gray"} pt={0}>
+      <Text textStyle="sm" color={"gray"} pt={0}>
         {t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>

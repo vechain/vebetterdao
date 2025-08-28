@@ -49,7 +49,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
       return (
         <VStack w={"full"} gap={1} align={"center"}>
           <Icon as={UilBan} boxSize={["28px", "28px", "24px"]} color={againstColor} />
-          <Text fontSize={["16px", "16px", "12px"]} fontWeight={400} color={"#6A6A6A"} textAlign={"center"}>
+          <Text textStyle={["md", "md", "xs"]} color={"#6A6A6A"} textAlign={"center"}>
             {t("Proposal canceled by creator or VeBetter")}
           </Text>
         </VStack>
@@ -66,7 +66,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             return (
               <HStack key={key} color={vote.color}>
                 {vote.icon}
-                <Text fontSize={["16px", "16px", "12px"]} fontWeight={400}>
+                <Text textStyle={["md", "md", "xs"]}>
                   {getCompactFormatter(1).format(vote.percentage)} {t("%")}
                 </Text>
               </HStack>
@@ -167,7 +167,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
       <HStack w="full">
         <Icon as={FaRegHeart} boxSize={["20px", "20px", "16px"]} color={stateColor} />
 
-        <Text fontSize={"16px"} fontWeight={400} color={stateColor}>
+        <Text textStyle={"md"} color={stateColor}>
           <b>{isDepositReached ? 100 : communityDepositPercentage}</b> {t("%")}
         </Text>
       </HStack>
@@ -182,12 +182,12 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
         />
       </Box>
       {hasUserDeposited === true ? (
-        <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
+        <Text textStyle="xs" color={"#6A6A6A"} mt={1}>
           {t("You ")}
           <b>{t("Supported")}</b>
         </Text>
       ) : (
-        <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
+        <Text textStyle="xs" color={"#6A6A6A"} mt={1}>
           {t("You haven't supported")}
         </Text>
       )}

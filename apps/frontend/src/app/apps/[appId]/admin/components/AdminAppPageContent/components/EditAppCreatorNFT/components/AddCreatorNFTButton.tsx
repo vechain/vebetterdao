@@ -52,9 +52,9 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
               <Heading size="3xl">{t("Add a new Creator NFT")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
-                  <Text fontSize="14px">{t("User wallet address")}</Text>
+                  <Text textStyle="sm">{t("User wallet address")}</Text>
                   {domain && (
-                    <Text fontSize="14px" fontWeight={"600"}>
+                    <Text textStyle="sm" fontWeight={"600"}>
                       {"@"}
                       {domain}
                     </Text>

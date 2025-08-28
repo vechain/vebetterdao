@@ -76,7 +76,7 @@ export const ProposalShareButton = () => {
                 </Box>
                 <VStack>
                   <Heading size="3xl">{t("Share this proposal")}</Heading>
-                  <Text fontSize="16px" fontWeight={400} color="#6A6A6A" textAlign={"center"}>
+                  <Text textStyle="md" color="#6A6A6A" textAlign={"center"}>
                     {t("Share the proposal on social media and invite people to vote")}
                   </Text>
                 </VStack>
@@ -88,7 +88,7 @@ export const ProposalShareButton = () => {
                 {showCopiedLink ? (
                   <HStack color="#6DCB09">
                     <UilCheckCircle size="20px" />
-                    <Text fontSize="18px" fontWeight={500}>
+                    <Text textStyle="lg" fontWeight={500}>
                       {t("Copied!")}
                     </Text>
                   </HStack>
@@ -98,7 +98,7 @@ export const ProposalShareButton = () => {
                     color="#004CFC"
                     onClick={handleCopyLink}>
                     <UilLink size="18px" />
-                    <Text fontSize="18px" fontWeight={500}>
+                    <Text textStyle="lg" fontWeight={500}>
                       {t("Copy link to proposal")}
                     </Text>
                   </HStack>

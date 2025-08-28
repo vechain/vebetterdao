@@ -62,10 +62,10 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
     <Card.Root key={vote.voter} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"baseline"}>
-          <Text color={textColor} fontSize={"20px"} fontWeight={600}>
+          <Text color={textColor} textStyle="xl" fontWeight={600}>
             {voteLabel}
           </Text>
-          <Text color={textColor} fontSize={"14px"}>
+          <Text color={textColor} textStyle="sm">
             {dayjs(vote.blockTimestamp * 1000).fromNow()}
           </Text>
         </HStack>

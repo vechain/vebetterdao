@@ -187,14 +187,14 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
               <CloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Header>
-              <Text fontSize={{ base: 18, md: 24 }} alignSelf={"center"}>
+              <Text textStyle={{ base: "lg", md: "2xl" }} alignSelf={"center"}>
                 {t("Refill Pools")}
               </Text>
             </Dialog.Header>
 
             <Dialog.Body pb={6} gap={4}>
               <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
-                <Text fontSize={14} fontWeight={400} color="#6A6A6A">
+                <Text textStyle="sm" color="#6A6A6A">
                   {t(
                     "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
                   )}
@@ -301,7 +301,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                             variant="amountInput"
                           />
                         </VStack>
-                        <Text fontSize={14} fontWeight={400}>
+                        <Text textStyle="sm">
                           {t("Current {{value}}: ", {
                             value: activeTab === "balance-to-rewards" ? "Rewards Pool" : "Balance",
                           })}

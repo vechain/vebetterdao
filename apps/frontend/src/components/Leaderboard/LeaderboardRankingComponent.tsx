@@ -121,7 +121,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                 )}
               </HStack>
 
-              <Text textStyle="sm" color={grayColor} fontWeight={400}>
+              <Text textStyle="sm" color={grayColor}>
                 <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
               </Text>
             </Box>

@@ -70,7 +70,7 @@ export const EndorsersItem = ({
         <VStack align="start" justify={"center"} gap={0}>
           <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress, 6, 3)}</Text>
           <Skeleton loading={endorserNodesLoading}>
-            <Text fontSize="12" fontWeight={400} color="#6A6A6A">
+            <Text textStyle="xs" color="#6A6A6A">
               {t("Endorsing since {{date}}", { date: endorsingSince })}
             </Text>
           </Skeleton>
@@ -78,7 +78,7 @@ export const EndorsersItem = ({
       </HStack>
       <HStack alignItems={"center"} gap={4}>
         <Skeleton loading={endorserNodesLoading || nodePointsLoading}>
-          <Text fontSize={"16px"} fontWeight={600}>
+          <Text textStyle={"md"} fontWeight={600}>
             <Trans
               i18nKey="{{value}} pts."
               values={{ value: nodePoints }}

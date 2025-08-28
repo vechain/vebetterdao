@@ -91,10 +91,10 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
         <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} gap={4}>
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
-            <Text fontSize={"16px"} as="span">
+            <Text textStyle={"md"} as="span">
               {t("Removing your endorsement from an app may result in it")}
             </Text>{" "}
-            <Text fontSize={"16px"} as="span" fontWeight="600">
+            <Text textStyle={"md"} as="span" fontWeight="600">
               {t("no longer being selected for allocations.")}
             </Text>
           </Box>

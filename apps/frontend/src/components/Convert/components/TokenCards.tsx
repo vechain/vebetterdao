@@ -109,7 +109,7 @@ export const TokenCards = ({
   const renderMaxButton = useMemo(
     () => (
       <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"} data-testid={"convert-all-button"}>
-        <Text fontSize={14} fontWeight={500}>
+        <Text textStyle="sm" fontWeight={500}>
           {t("Convert all")}
         </Text>
       </Button>
@@ -132,9 +132,7 @@ export const TokenCards = ({
             <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text fontSize={14} fontWeight={400}>
-                    {isB3trToVot3 ? t("You'll convert") : t("You'll receive")}
-                  </Text>
+                  <Text textStyle="sm">{isB3trToVot3 ? t("You'll convert") : t("You'll receive")}</Text>
                 </HStack>
                 <HStack w="full" data-testid={"B3TR"}>
                   <HStack flex={1}>
@@ -159,9 +157,7 @@ export const TokenCards = ({
             <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                  <Text fontSize={14} fontWeight={400}>
-                    {isB3trToVot3 ? t("You'll receive") : t("You'll convert")}
-                  </Text>
+                  <Text textStyle="sm">{isB3trToVot3 ? t("You'll receive") : t("You'll convert")}</Text>
                 </HStack>
                 <HStack w="full" data-testid={"VOT3"}>
                   <HStack flex={1}>

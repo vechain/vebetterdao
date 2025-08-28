@@ -94,7 +94,7 @@ export const FunctionsPageContent = () => {
                 </Field.Root>
               )}
             </Stack>
-            <Text textStyle="sm" fontWeight={400} color={"gray.500"} mt={4}>
+            <Text textStyle="sm" color={"gray.500"} mt={4}>
               {t(
                 "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
               )}

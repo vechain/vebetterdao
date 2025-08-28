@@ -23,7 +23,7 @@ export const StepCard: React.FC<StepCardProps> = ({
         <Stack gap={4} align={"flex-start"} {...stackProps}>
           <Image src={stepImageSrc} boxSize={32} alt={`step-${stepNumber}-image`} />
           <Box>
-            <Text textTransform={"uppercase"} fontWeight={400} color="gray.500">
+            <Text textTransform={"uppercase"} color="gray.500">
               {t("Step {{number}}", { number: stepNumber })}
             </Text>
             <Heading size={["lg", "xl"]}>{t(stepTitle as any)}</Heading>

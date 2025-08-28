@@ -70,9 +70,9 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
             <Heading size="3xl">{t("Add a new reward distributor")}</Heading>
             <VStack align="stretch">
               <HStack justify={"space-between"}>
-                <Text fontSize="14px">{t("Contract or wallet address")}</Text>
+                <Text textStyle="sm">{t("Contract or wallet address")}</Text>
                 {distributorDomain && (
-                  <Text fontSize="14px" fontWeight={"600"}>
+                  <Text textStyle="sm" fontWeight={"600"}>
                     {"@"}
                     {distributorDomain}
                   </Text>

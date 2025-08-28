@@ -98,7 +98,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                 </HStack>
               </Skeleton>
               <Skeleton loading={appMetadataLoading}>
-                <Text fontSize="14px" color="text.subtle" fontWeight={400} lineClamp={2}>
+                <Text textStyle="sm" color="text.subtle" lineClamp={2}>
                   {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                 </Text>
               </Skeleton>
@@ -119,13 +119,13 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
               <VStack gap={0} alignItems="flex-start">
                 <Skeleton loading={isEndorsementStatusLoading}>
                   <HStack gap={1}>
-                    <Text fontSize="24px" color={color}>
+                    <Text textStyle="2xl" color={color}>
                       {endorsementScore}
                     </Text>
-                    <Text fontSize="14px" color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
+                    <Text textStyle="sm" color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
                   </HStack>
                 </Skeleton>
-                <Text fontSize="12px" color="#6A6A6A">
+                <Text textStyle="xs" color="#6A6A6A">
                   {t("Total score")}
                 </Text>
               </VStack>
@@ -133,11 +133,11 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
               {isUserAppEndorser && (
                 <VStack gap={0} alignItems="flex-start">
                   <Skeleton loading={isUserNodesLoading}>
-                    <Text fontSize="24px" color="#004CFC">
+                    <Text textStyle="2xl" color="#004CFC">
                       {nodeEndorsingApp?.xNodePoints}
                     </Text>
                   </Skeleton>
-                  <Text fontSize="12px" color="#6A6A6A">
+                  <Text textStyle="xs" color="#6A6A6A">
                     {t("Your score")}
                   </Text>
                 </VStack>

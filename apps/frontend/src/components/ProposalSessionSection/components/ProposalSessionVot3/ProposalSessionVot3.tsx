@@ -46,7 +46,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
         <Skeleton loading={votesAtSnapshotQuery.isLoading}>
           <Text fontWeight={700}>{FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}</Text>
         </Skeleton>
-        <Text color="#6A6A6A" fontSize="12px">
+        <Text color="#6A6A6A" textStyle="xs">
           {t("Votes at snapshot")}
         </Text>
       </VStack>
@@ -57,7 +57,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
         </Skeleton>
 
         <HStack gap={1} alignItems="center">
-          <Text color="#6A6A6A" fontSize="12px">
+          <Text color="#6A6A6A" textStyle="xs">
             {t("Your votes at snapshot")}
           </Text>
 

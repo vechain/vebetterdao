@@ -138,7 +138,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
           <Heading size={["2xl", "2xl", "4xl"]} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
-          <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
+          <Text textStyle={"md"} color="#6A6A6A">
             {t(
               "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
             )}
@@ -156,7 +156,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                   </Button>
                 </HStack>
                 <Skeleton loading={votesAtSnapshotLoading}>
-                  <Text fontSize="16px" fontWeight="400">
+                  <Text textStyle="md" fontWeight="400">
                     <Trans
                       i18nKey={"{{amount}} distributed among {{apps}} apps"}
                       values={{ amount: compactFormatter.format(totalVotesToCast ?? 0), apps: votes.length }}
@@ -172,7 +172,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
           <CastAllocationControlsBottomBar
             onContinue={onContinue}
             helperText={
-              <Text fontSize={"16px"} fontWeight={400} color={"#F29B32"} textAlign={["center", "center", "left"]}>
+              <Text textStyle={"md"} color={"#F29B32"} textAlign={["center", "center", "left"]}>
                 <Trans i18nKey={"Once your vote has been cast, you will not be able to revert it."} t={t} />
               </Text>
             }

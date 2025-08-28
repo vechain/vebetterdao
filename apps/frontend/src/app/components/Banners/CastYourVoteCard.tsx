@@ -70,7 +70,7 @@ export const CastYourVoteCard: React.FC = () => {
                 {t("Time to cast your vote and earn rewards!")}
               </Heading>
 
-              <Text fontSize={["16px"]} fontWeight={400} zIndex={1}>
+              <Text textStyle="md" zIndex={1}>
                 {t(
                   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
                   {

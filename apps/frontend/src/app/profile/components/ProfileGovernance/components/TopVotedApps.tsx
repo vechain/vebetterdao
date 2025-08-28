@@ -16,12 +16,12 @@ export const TopVotedApps = ({ votedApps, isMoreTopVotedApps, onSeeAllAppsVoted 
   return (
     <VStack w={"full"}>
       <HStack w={"full"} justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
-        <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"}>
+        <Text textStyle={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
           {t("Most Voted Apps")}
         </Text>
         {isMoreTopVotedApps && (
           <HStack color={"#004CFC"} cursor={"pointer"} onClick={onSeeAllAppsVoted}>
-            <Text fontSize={{ base: 14, md: 16 }}>{t("See All")}</Text>
+            <Text textStyle={{ base: "sm", md: "md" }}>{t("See All")}</Text>
             <FiArrowUpRight size={16} />
           </HStack>
         )}

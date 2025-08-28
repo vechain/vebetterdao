@@ -105,7 +105,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
       <Card.Body>
         <Stack flexDir={["column", "column", "row"]} gap={12} as="form" onSubmit={handleCastVote}>
           <VStack alignItems={"stretch"} flex={1} gap={4}>
-            <Text fontSize="14px" color="#6A6A6A" wordBreak={"break-word"}>
+            <Text textStyle="sm" color="#6A6A6A" wordBreak={"break-word"}>
               {proposal.title}
             </Text>
             <Heading>{t("Vote on this proposal")}</Heading>
@@ -122,8 +122,8 @@ export const ProposalVote = ({ proposalId }: Props) => {
                   direction={["column", "column", "row"]}
                   align={["flex-start", "flex-start", "center"]}>
                   <Image h="24px" w="24px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-                  <Text fontSize={"28px"}>{compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}</Text>
-                  <Text fontSize={"14px"} fontWeight={600}>
+                  <Text textStyle={"3xl"}>{compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}</Text>
+                  <Text textStyle={"sm"} fontWeight={600}>
                     {t("VOT3 BALANCE ON SNAPSHOT")}
                   </Text>
                 </Stack>
@@ -131,7 +131,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                 {!isQuadraticVotingDisabled && ( // Show "equal to" only when quadratic voting is disabled
                   <HStack w="full" justify="center">
                     <Separator flex={0.8} />
-                    <Text fontSize={"12px"}>{t("equal to")}</Text>
+                    <Text textStyle={"xs"}>{t("equal to")}</Text>
                     <Separator flex={0.8} />
                   </HStack>
                 )}
@@ -144,10 +144,10 @@ export const ProposalVote = ({ proposalId }: Props) => {
                       direction={["column", "column", "row"]}
                       align={["flex-start", "flex-start", "center"]}>
                       <VoteIcon boxSize={"36px"} color="#004CFC" />
-                      <Text fontSize={"36px"} color="#004CFC">
+                      <Text textStyle={"4xl"} color="#004CFC">
                         {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
                       </Text>
-                      <Text fontSize={"14px"} fontWeight={600}>
+                      <Text textStyle={"sm"} fontWeight={600}>
                         {t("VOTING POWER")}
                       </Text>
                     </Stack>
@@ -157,21 +157,16 @@ export const ProposalVote = ({ proposalId }: Props) => {
                         <UilInfoCircle size={14} color="#969696" />
                       </Box>
                       <VStack alignItems={"stretch"}>
-                        <Text fontSize={"14px"} color="#6A6A6A" fontWeight={600}>
+                        <Text textStyle={"sm"} color="#6A6A6A" fontWeight={600}>
                           {t("How is the voting power calculated?")}
                         </Text>
-                        <Text fontSize={"14px"} color="#6A6A6A" fontWeight={400} as="span">
+                        <Text textStyle={"sm"} color="#6A6A6A" as="span">
                           {t(
                             "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.",
                           )}
                         </Text>
                         <Link href={QUADRATIC_DOCS_URL} target="_blank">
-                          <Text
-                            fontSize={"14px"}
-                            fontWeight={400}
-                            as="span"
-                            textDecoration={"underline"}
-                            color="#004CFC">
+                          <Text textStyle="sm" as="span" textDecoration={"underline"} color="#004CFC">
                             {t("Learn more")}
                           </Text>
                         </Link>
@@ -183,7 +178,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
             </Card.Root>
           </VStack>
           <VStack alignItems={"stretch"} flex={1} gap={6}>
-            <Text fontSize={"20px"}>{t("Select your vote")}</Text>
+            <Text textStyle={"xl"}>{t("Select your vote")}</Text>
             <RadioGroup.Root onValueChange={e => setSelectedVote(e.value)} value={selectedVote}>
               <VStack alignItems={"stretch"}>
                 {votes.map(vote => {
@@ -200,7 +195,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                       <HStack justify="space-between">
                         <HStack>
                           {vote.icon}
-                          <Text fontSize={"18px"} fontWeight={600}>
+                          <Text textStyle={"lg"} fontWeight={600}>
                             {vote.title}
                           </Text>
                         </HStack>
@@ -214,7 +209,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                 })}
               </VStack>
             </RadioGroup.Root>
-            <Text fontSize={"20px"}>{t("Add comment")}</Text>
+            <Text textStyle={"xl"}>{t("Add comment")}</Text>
             <Textarea resize={"none"} onChange={handleChangeComment} />
             <Button type="submit" variant="primaryAction" w="full" disabled={!selectedVote}>
               <VoteIcon boxSize={"20px"} color="white" />

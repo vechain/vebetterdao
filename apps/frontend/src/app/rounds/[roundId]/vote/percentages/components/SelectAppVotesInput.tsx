@@ -46,7 +46,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
         <Field.Root invalid={!!error} disabled={isDisabled}>
           <InputGroup
             endElement={
-              <Text fontWeight={400} color="#6A6A6A" fontSize={"16px"}>
+              <Text color="#6A6A6A" textStyle="md">
                 {t("%")}
               </Text>
             }>

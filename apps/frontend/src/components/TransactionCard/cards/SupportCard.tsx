@@ -35,14 +35,14 @@ export const SupportCard = ({ transaction }: Props) => {
             </Flex>
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
-                <Text fontSize={"sm"} mr="1">
+                <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You supported a") : t("Supported a")}
                 </Text>
-                <Text fontSize={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight={600}>
                   {t("proposal")}
                 </Text>
               </HStack>
-              <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+              <Text textStyle={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
                 {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>
@@ -53,9 +53,7 @@ export const SupportCard = ({ transaction }: Props) => {
                 {"-"}
                 {compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))}
               </Text>
-              <Text fontWeight={400} fontSize={"sm"}>
-                {"VOT3"}
-              </Text>
+              <Text textStyle="sm">{"VOT3"}</Text>
             </HStack>
           </VStack>
         </HStack>

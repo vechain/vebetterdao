@@ -93,7 +93,7 @@ export const SuccessModalContent = ({
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
           }>
           <HStack alignSelf={"center"}>
-            <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
+            <Text textStyle="sm" fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
               {t("See transaction information")}
             </Text>
             <MdArrowOutward size={20} color={"rgba(0, 76, 252, 1)"} />

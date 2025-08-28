@@ -73,11 +73,11 @@ export const UpdateConfirmationModal = ({
                 <VStack align="stretch">
                   <Text fontWeight={600}>{t("Treasury address")}</Text>
                   <HStack>
-                    <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
+                    <Text textStyle={"sm"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldTeamWalletAddress}
                     </Text>
                     <Text>{t("→")}</Text>
-                    <Text fontSize={"14px"}>{newTeamWalletAddress}</Text>
+                    <Text textStyle={"sm"}>{newTeamWalletAddress}</Text>
                   </HStack>
                 </VStack>
               </VStack>
@@ -88,11 +88,11 @@ export const UpdateConfirmationModal = ({
                 <VStack align="stretch">
                   <Text fontWeight={600}>{t("Admin address")}</Text>
                   <HStack>
-                    <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
+                    <Text textStyle={"sm"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldAdminAddress}
                     </Text>
                     <Text>{t("→")}</Text>
-                    <Text fontSize={"14px"}>{newAdminAddress}</Text>
+                    <Text textStyle={"sm"}>{newAdminAddress}</Text>
                   </HStack>
                 </VStack>
                 <HStack rounded="16px" bg="#FCEEF1" p="16px 12px" color="#D23F63">
@@ -100,11 +100,11 @@ export const UpdateConfirmationModal = ({
                     <UilInfoCircle color="#D23F63" size="36px" />
                   </Box>
                   <Box display={"inline-block"}>
-                    <Text as="span" fontSize="14px" fontWeight={600}>
+                    <Text as="span" textStyle="sm" fontWeight={600}>
                       {t("You will not be able to manage the app anymore.")}
                     </Text>
 
-                    <Text hideBelow="md" as="span" fontSize="14px">
+                    <Text hideBelow="md" as="span" textStyle="sm">
                       {t("This change is applied when the new address logs in.")}
                     </Text>
                   </Box>

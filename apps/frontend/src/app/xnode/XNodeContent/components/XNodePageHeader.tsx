@@ -59,7 +59,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                   {xNodePoints}
                 </Text>
-                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
+                <Text fontSize={isAbove800 ? "md" : "xs"} lineClamp={1}>
                   {t("points to endorse")}
                 </Text>
               </HStack>

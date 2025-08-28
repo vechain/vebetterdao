@@ -144,7 +144,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     <ResponsiveCard>
       <VStack w="full" gap={8} align={"flex-start"}>
         <Heading size={["2xl", "2xl", "4xl"]}>{t("Assign percentage of VOT3 to the apps")}</Heading>
-        <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
+        <Text textStyle={"md"} color="#6A6A6A">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
           )}
@@ -175,11 +175,11 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           onContinue={onContinue}
           helperText={
             error ? (
-              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+              <Text textStyle={"md"} fontWeight={600} color="#C84968">
                 {error}
               </Text>
             ) : showWarning ? (
-              <Text fontSize={"16px"} fontWeight={400} color="success.primary">
+              <Text textStyle={"md"} color="success.primary">
                 <Trans
                   t={t}
                   i18nKey={
@@ -189,7 +189,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
                 />
               </Text>
             ) : (
-              <Text fontSize={"16px"} fontWeight={400} color={isFullyDistributed ? "#3DBA67" : "#252525"}>
+              <Text textStyle={"md"} color={isFullyDistributed ? "#3DBA67" : "#252525"}>
                 <Trans
                   i18nKey={"{{amount}}% distributed"}
                   values={{ amount: percentageDistributed.toFixed(2) }}

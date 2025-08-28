@@ -43,21 +43,21 @@ export const Footer: React.FC = () => {
         borderTopWidth={1}
         py={8}>
         <VStack align={"start"}>
-          <Text fontWeight={400} fontSize="14px" color="#8c8c8c">
+          <Text textStyle="sm" color="#8c8c8c">
             {t("{{currentYear}} VeBetterDAO. All rights reserved.", { currentYear })}
           </Text>
-          <Text fontSize="14px" color="#8c8c8c">
+          <Text textStyle="sm" color="#8c8c8c">
             {t("Version")} {packageJson.version}
           </Text>
         </VStack>
         <HStack gap={4}>
           <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
-            <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+            <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Privacy & Policy")}
             </Text>
           </Link>
           <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
-            <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+            <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Terms & Conditions")}
             </Text>
           </Link>
@@ -92,19 +92,19 @@ export const Footer: React.FC = () => {
       </VStack>
       <VStack borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
         <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
-          <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+          <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Privacy & Policy")}
           </Text>
         </Link>
         <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
-          <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+          <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Terms & Conditions")}
           </Text>
         </Link>
-        <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" mt={6}>
+        <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" mt={6}>
           {t("{{currentYear}} VeBetterDAO. All rights reserved.", { currentYear })}
         </Text>
-        <Text fontSize="14px" color="#8c8c8c">
+        <Text textStyle="sm" color="#8c8c8c">
           {t("Version")} {packageJson.version}
         </Text>
       </VStack>

@@ -52,9 +52,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
               <Skeleton loading={totalEarningsLoading}>
                 <Text textStyle="sm">{compactFormatter.format(totalEarnings ?? 0)}</Text>
               </Skeleton>
-              <Text textStyle="sm" fontWeight={400}>
-                {t("B3TR")}
-              </Text>
+              <Text textStyle="sm">{t("B3TR")}</Text>
             </HStack>
           </Box>
           <GridItem colSpan={2}>
@@ -66,9 +64,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
                 <Skeleton loading={currentRoundIdLoading || prevRoundEarningLoading}>
                   <Text textStyle="sm">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
                 </Skeleton>
-                <Text textStyle="sm" fontWeight={400}>
-                  {t("B3TR")}
-                </Text>
+                <Text textStyle="sm">{t("B3TR")}</Text>
               </HStack>
             </Box>
           </GridItem>

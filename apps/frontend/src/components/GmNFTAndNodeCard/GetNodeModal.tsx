@@ -28,7 +28,7 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>
-              <Text fontSize={["16px"]}>
+              <Text textStyle="md">
                 {t("A VeChain Node gives you rewards, voting power in the DAO, and the ability to endorse apps.")}
                 <br /> <br />
                 {t(

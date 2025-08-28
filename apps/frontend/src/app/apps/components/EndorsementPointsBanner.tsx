@@ -53,7 +53,7 @@ export const EndorsementPointsBanner = () => {
           </Heading>
         </Skeleton>
         <Skeleton loading={requiredPoints.isLoading}>
-          <Text fontSize={"14px"} fontWeight={400} color="white">
+          <Text textStyle={"sm"} color="white">
             {t("Help a project to reach {{value}} points and join the next allocation round and secure funding.", {
               value: requiredPoints.data,
             })}

@@ -166,9 +166,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("Specify your reason")}
-                      </Text>
+                      <Text textStyle="sm">{t("Specify your reason")}</Text>
                     </HStack>
                     <HStack w="full">
                       <Input type="text" value={value} onChange={e => onChange(e.target.value)} variant="amountInput" />
@@ -191,11 +189,11 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
-            <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight={700} alignSelf={"center"}>
               {t("Withdraw from your balance")}
             </Text>
           </HStack>
-          <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} opacity={0.7}>
+          <Text textStyle={{ base: "sm", md: "md" }} opacity={0.7}>
             {t("Send your app’s funds received from allocations to your team wallet address.")}
           </Text>
 
@@ -208,7 +206,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
               </Skeleton>
             </HStack>
 
-            <Text fontSize="12px" fontWeight="400" opacity={0.7}>
+            <Text textStyle="xs" fontWeight="400" opacity={0.7}>
               {t("Current B3TR Balance")}
             </Text>
           </VStack>
@@ -219,9 +217,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={2}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("Withdraw reason")}
-                      </Text>
+                      <Text textStyle="sm">{t("Withdraw reason")}</Text>
                     </HStack>
                     <HStack w="full">{reasonInput}</HStack>
                   </VStack>
@@ -241,9 +237,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("You'll withdraw")}
-                      </Text>
+                      <Text textStyle="sm">{t("You'll withdraw")}</Text>
                     </HStack>
                     <HStack w="full">
                       <B3TRIcon boxSize={"30px"} />
@@ -268,7 +262,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             disabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
             size={"lg"}>
             <Icon as={IoWalletOutline} mr={2} />
-            <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
+            <Text textStyle={{ base: "sm", md: "lg" }}>{t("Withdraw now")}</Text>
           </Button>
         </VStack>
       </form>

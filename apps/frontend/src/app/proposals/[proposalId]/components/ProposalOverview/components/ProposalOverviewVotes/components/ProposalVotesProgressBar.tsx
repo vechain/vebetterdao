@@ -25,7 +25,7 @@ export const ProposalVotesProgressBar = ({ isLoading, text, percentage, voters, 
         </HStack>
         <HStack alignItems={"baseline"} gap={1}>
           <Skeleton loading={isLoading}>
-            <Text color={color} fontSize="14px">
+            <Text color={color} textStyle="sm">
               {t("{{percentage}}%", {
                 percentage: compactFormatter.format(Number(percentage)),
               })}

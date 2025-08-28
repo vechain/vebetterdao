@@ -125,17 +125,17 @@ export const AppDetailOverview = ({
 
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
-                          <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+                          <Text textStyle={"sm"} color="#6A6A6A">
                             {t("Member since")}
                           </Text>
-                          <Text fontSize={"16px"} fontWeight={400}>
+                          <Text textStyle={"md"}>
                             {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
                           </Text>
                         </VStack>
                       )}
                       {appMetadata?.distribution_strategy ? (
                         <VStack align="flex-start" justify={"flex-start"}>
-                          <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+                          <Text textStyle={"sm"} color="#6A6A6A">
                             {t("Distribution Strategy")}
                           </Text>
                           <Button

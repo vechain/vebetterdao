@@ -105,7 +105,7 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
           </IconButton>
         </Flex>
       </Flex>
-      <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>
+      <Text textStyle="sm" color={invalidFormat ? "red" : "gray"} pt={0}>
         {invalidFormat ? invalidMessage : t(VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>

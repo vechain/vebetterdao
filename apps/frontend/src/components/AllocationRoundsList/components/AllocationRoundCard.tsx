@@ -77,7 +77,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
 
               <DotSymbol boxProps={{ hideBelow: "md" }} color={"#6A6A6A"} size={"4px"} />
               <Skeleton hideBelow="md" loading={isLoading}>
-                <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
+                <Text color={"#6A6A6A"} textStyle="sm">
                   {isActive
                     ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
                     : allocationRound.voteEndTimestamp?.fromNow()}
@@ -113,9 +113,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                         <Heading size="2xl">{compactFormatter.format(Number(totalAmount))}</Heading>
                         <B3TRIcon boxSize={"20px"} colorVariant="dark" />
                       </HStack>
-                      <Text fontSize={"14px"} fontWeight={400}>
-                        {t("total allocation")}
-                      </Text>
+                      <Text textStyle={"sm"}>{t("total allocation")}</Text>
                     </Box>
                   )}
                 </Skeleton>

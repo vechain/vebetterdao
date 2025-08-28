@@ -81,13 +81,13 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
           </VStack>
         </Dialog.Header>
         <Dialog.Body gap={[0, 4]} pt={0}>
-          <Text fontSize={["16px"]} color="#6A6A6A">
+          <Text textStyle="md" color="#6A6A6A">
             {t(
               "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
             )}
           </Text>
           <VStack align="stretch" w="full" py={[2, 5]}>
-            <Text color="#6A6A6A" fontSize={["16px"]}>
+            <Text color="#6A6A6A" textStyle="md">
               {t("You'll donate")}
             </Text>
             <HStack>
@@ -154,7 +154,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                           {nextLevelGM?.multiplier}
                         </Text>
-                        <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
+                        <Text fontSize={isAbove800 ? "md" : "xs"} lineClamp={1}>
                           {t("GM reward weight").toLowerCase()}
                         </Text>
                       </HStack>
@@ -169,7 +169,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             <Alert.Root bg={"rgb(255, 250, 235)"} borderRadius="2xl">
               <UilInfoCircle color={"rgb(217, 119, 6)"} size={"50px"} />
               <Box lineHeight="1.20rem">
-                <Text px={3} color={"rgb(217, 119, 6)"} fontSize={["12px", "16px"]}>
+                <Text px={3} color={"rgb(217, 119, 6)"} textStyle={["xs", "md"]}>
                   {t(
                     "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
                   )}

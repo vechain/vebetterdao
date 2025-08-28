@@ -47,7 +47,7 @@ export const EditAppAddresses = ({ form }: Props) => {
 
   return (
     <VStack align="stretch" gap="32px">
-      <Text color="#D23F63" fontSize={"24px"} fontWeight={700}>
+      <Text color="#D23F63" textStyle="2xl" fontWeight={700}>
         {t("Sensitive parameters")}
       </Text>
       <VStack align="stretch">

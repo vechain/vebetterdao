@@ -40,18 +40,18 @@ export const AppVotedBox = ({ appVoted }: Props) => {
             <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
               <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
             </Skeleton>
-            <Text fontSize={14} fontWeight={"600"}>
+            <Text textStyle="sm" fontWeight={"600"}>
               {appVoted.appName}
             </Text>
           </HStack>
           <VStack justifyContent={"center"} alignContent={"center"} gap={0}>
             <HStack>
               <Image src="/assets/logos/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
-              <Text fontSize={20} fontWeight={"700"}>
+              <Text textStyle="xl" fontWeight={"700"}>
                 {compactFormatter.format(appVoted.votes)}
               </Text>
             </HStack>
-            <Text color="#6A6A6A" fontSize={12} fontWeight={400}>
+            <Text color="#6A6A6A" textStyle="xs">
               {t("Total assigned")}
             </Text>
           </VStack>

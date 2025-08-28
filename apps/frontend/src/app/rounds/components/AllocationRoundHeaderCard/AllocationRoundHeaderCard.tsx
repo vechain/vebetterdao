@@ -120,35 +120,31 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Skeleton loading={roundStateLoading}>
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
                       {isFinished ? t("Finished") : t("Finishes in")}
                     </Text>
                   </Skeleton>
                   <Skeleton loading={isLoading || roundStateLoading}>
                     <HStack gap={2}>
                       <Icon as={FaClock} boxSize={4} color="contrast-fg-on-muted" />
-                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                        {remainingTime}
-                      </Text>
+                      <Text fontSize={["lg", "lg", "md"]}>{remainingTime}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 <Box>
-                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
                     {t("Participating")}
                   </Text>
                   <Skeleton loading={roundAppsLoading}>
                     <HStack gap={2}>
                       <Icon as={PiSquaresFourFill} boxSize={4} />
-                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                        {t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}
-                      </Text>
+                      <Text fontSize={["lg", "lg", "md"]}>{t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 {!!account?.address && (
                   <Box data-testid="your-vote-box">
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
                       {t("Your vote")}
                     </Text>
                     <Skeleton loading={hasVotedLoading || userVotesLoading || votesAtSnapshotLoading}>
@@ -158,9 +154,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                         ) : (
                           <Icon as={MdHowToVote} boxSize={4} />
                         )}
-                        <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                          {yourVoteText}
-                        </Text>
+                        <Text fontSize={["lg", "lg", "md"]}>{yourVoteText}</Text>
                       </HStack>
                     </Skeleton>
                   </Box>

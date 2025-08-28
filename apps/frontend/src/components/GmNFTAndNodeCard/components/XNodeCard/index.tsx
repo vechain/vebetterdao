@@ -47,9 +47,7 @@ export const XNodeCard = ({
           <Text textStyle="xs" fontWeight={600}>
             {xNodePoints}
           </Text>
-          <Text textStyle="xs" fontWeight={400}>
-            {t("points")}
-          </Text>
+          <Text textStyle="xs">{t("points")}</Text>
         </HStack>
       </VStack>
     </HStack>

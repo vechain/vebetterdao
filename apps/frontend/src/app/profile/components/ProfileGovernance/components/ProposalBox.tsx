@@ -48,7 +48,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
             fontSize: 12,
           }}
         />
-        <Text fontSize={14} fontWeight={"600"}>
+        <Text textStyle="sm" fontWeight={"600"}>
           {title}
         </Text>
       </VStack>

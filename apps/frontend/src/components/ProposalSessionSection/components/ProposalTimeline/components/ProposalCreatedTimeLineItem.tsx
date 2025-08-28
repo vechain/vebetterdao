@@ -17,7 +17,7 @@ export const ProposalCreatedTimelineItem = () => {
             <VStack flex={1} align="flex-start" gap={0}>
               <Text>{t("Proposal created")}</Text>
               {proposal.proposalCreationDate && (
-                <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
+                <Text color="#6A6A6A" textStyle="sm">
                   {dayjs(proposal.proposalCreationDate).format("MMM D, YYYY")}
                 </Text>
               )}
@@ -30,14 +30,14 @@ export const ProposalCreatedTimelineItem = () => {
             <HStack alignItems="center" w="full">
               <Circle size="8px" bg={activeColor} />
               <VStack align="flex-start" gap={0}>
-                <Text fontSize={"14px"}>{t("Looking for support")}</Text>
+                <Text textStyle={"sm"}>{t("Looking for support")}</Text>
               </VStack>
             </HStack>
             {proposal.state === ProposalState.DepositNotMet ? (
               <HStack alignItems={"center"} w="full">
                 <Circle size="8px" bg={"#D23F63"} />
                 <VStack align="flex-start" gap={0}>
-                  <Text fontSize={"14px"} color="#D23F63">
+                  <Text textStyle={"sm"} color="#D23F63">
                     {t("Support not reached")}
                   </Text>
                 </VStack>
@@ -46,7 +46,7 @@ export const ProposalCreatedTimelineItem = () => {
               <HStack alignItems={"center"} w="full">
                 <Circle size="8px" bg={proposal.isDepositReached ? activeColor : inactiveColor} />
                 <VStack align="flex-start" gap={0}>
-                  <Text fontSize={"14px"}>{t("Support reached")}</Text>
+                  <Text textStyle={"sm"}>{t("Support reached")}</Text>
                 </VStack>
               </HStack>
             )}

@@ -46,7 +46,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
       w={"full"}>
       <Card.Header>
         <HStack hideFrom="md" w={"full"} justifyContent={"space-between"} mb={2}>
-          <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
+          <Text textStyle="md" fontWeight="600" color="#6A6A6A">
             {t("Round #{{round}}", {
               round: roundIdVoteStart,
             })}
@@ -61,13 +61,13 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
 
         <HStack justifyContent="space-between" alignItems="center" w={"full"}>
           <Skeleton loading={proposalMetadata.isLoading} minH={"20px"} flex={2.5} maxW={{ base: "300px", md: "full" }}>
-            <Text fontSize={20} fontWeight={700} lineClamp={2}>
+            <Text textStyle="xl" fontWeight={700} lineClamp={2}>
               {proposalMetadata.data?.title}
             </Text>
           </Skeleton>
 
           <VStack hideBelow="md" alignItems="flex-end" gap={0} flex={1}>
-            <Text fontSize="16px" fontWeight="600" color="#6A6A6A">
+            <Text textStyle="md" fontWeight="600" color="#6A6A6A">
               {t("Round #{{round}}", {
                 round: roundIdVoteStart,
               })}
@@ -86,7 +86,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           {proposalMetadata.isLoading ? (
             <SkeletonText noOfLines={3} flex={2} />
           ) : (
-            <Text lineClamp="2" fontSize={16} fontWeight={400} minW={"300px"} flex={2} alignSelf={"flex-start"}>
+            <Text lineClamp="2" textStyle="md" minW={"300px"} flex={2} alignSelf={"flex-start"}>
               {descriptionText}
             </Text>
           )}
@@ -105,7 +105,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
             }}
           />
           <HStack cursor={"pointer"}>
-            <Text fontWeight={500} color="rgba(0, 76, 252, 1)" fontSize={16}>
+            <Text fontWeight={500} color="rgba(0, 76, 252, 1)" textStyle="md">
               {t("See proposal")}
             </Text>
             <MdArrowOutward color="rgba(0, 76, 252, 1)" size={16} />

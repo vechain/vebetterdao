@@ -40,7 +40,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
               <Heading size="xl">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
             </VStack>
             {isConnectedUser && (
-              <Text textStyle="sm" color="#6A6A6A" fontWeight={400}>
+              <Text textStyle="sm" color="#6A6A6A">
                 {t("Use Apps to earn B3TR tokens through your Better Actions")}
               </Text>
             )}

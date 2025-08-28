@@ -65,7 +65,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
         <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
           <VStack>
             <ExclamationTriangle color="#757575" />
-            <Text fontWeight={"500"} textAlign={"center"} fontSize="20px">
+            <Text fontWeight={"500"} textAlign={"center"} textStyle="xl">
               {t("The community has not supported this proposal and was canceled")}
             </Text>
           </VStack>
@@ -78,10 +78,10 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
           <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
             <VStack>
               <Image w="88px" h="88px" color="#004CFC" src="/assets/icons/vote.svg" alt="vote-icon" />
-              <Text fontWeight={"500"} textAlign={"center"} fontSize="20px">
+              <Text fontWeight={"500"} textAlign={"center"} textStyle="xl">
                 {t("This proposal will be voted in")}
               </Text>
-              <Text textAlign={"center"} fontSize="36px">
+              <Text textAlign={"center"} textStyle="4xl">
                 {timestampToTimeLeft(proposal.votingStartDate)}
               </Text>
             </VStack>
@@ -92,10 +92,10 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
         <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
           <VStack>
             <ExclamationTriangle />
-            <Text fontWeight={"500"} textAlign={"center"} fontSize="20px">
+            <Text fontWeight={"500"} textAlign={"center"} textStyle="xl">
               {t("This proposal must get the support of the community before the round starts")}
             </Text>
-            <Text textAlign={"center"} fontSize="36px">
+            <Text textAlign={"center"} textStyle="4xl">
               {timestampToTimeLeft(proposal.votingStartDate)}
             </Text>
           </VStack>

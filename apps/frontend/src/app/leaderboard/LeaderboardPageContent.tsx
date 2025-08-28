@@ -86,7 +86,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
             <Heading size="md">{t("Not enough data for the week")}</Heading>
-            <Text textStyle="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
+            <Text textStyle="sm" color="#6A6A6A" textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
           </VStack>

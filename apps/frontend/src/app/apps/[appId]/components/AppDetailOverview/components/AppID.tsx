@@ -21,7 +21,7 @@ export const AppID = () => {
 
   return (
     <VStack align={"stretch"}>
-      <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+      <Text textStyle={"sm"} color="#6A6A6A">
         {t("App ID")}
       </Text>
       <HStack>
@@ -30,9 +30,7 @@ export const AppID = () => {
         ) : (
           <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyLink} cursor="pointer" />
         )}
-        <Text fontSize={"14px"} fontWeight={400}>
-          {humanAddress(app?.id || "", 4, 2)}
-        </Text>
+        <Text textStyle={"sm"}>{humanAddress(app?.id || "", 4, 2)}</Text>
       </HStack>
     </VStack>
   )

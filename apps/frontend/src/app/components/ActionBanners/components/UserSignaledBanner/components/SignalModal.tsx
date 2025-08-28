@@ -17,13 +17,13 @@ export const SignalModal = ({ open, onClose, signals }: Props) => {
     <BaseModal isOpen={open || false} onClose={onClose || (() => {})}>
       <VStack align="stretch" gap={4}>
         <Heading size="md">{t("You have been signalled")}</Heading>
-        <Text color="#6A6A6A" fontWeight={400}>
+        <Text color="#6A6A6A">
           {t(
             "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.",
           )}
         </Text>
 
-        <Text color="#6A6A6A" fontWeight={400}>
+        <Text color="#6A6A6A">
           {t(
             "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue or you can file an appeal by clicking on the button below.",
           )}

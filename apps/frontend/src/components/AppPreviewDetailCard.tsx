@@ -72,7 +72,7 @@ export const AppPreviewDetailCard = ({
           </HStack>
 
           <Skeleton loading={appMetadataLoading} w={["full", "70%"]}>
-            <Text fontSize={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
+            <Text textStyle={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
           </Skeleton>
           <AppDetailSocials socialUrls={[]} />
         </VStack>

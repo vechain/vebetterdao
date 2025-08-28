@@ -30,7 +30,7 @@ export const ProposalExecuteButton = () => {
   }
   if (isOperationWaiting) {
     return (
-      <Text color="orange" my={2} fontSize={"14px"}>
+      <Text color="orange" my={2} textStyle="sm">
         {t("Executable in {{timestamp}}", {
           timestamp: timestampToTimeLeft(readyTimestamp * 1000),
         })}

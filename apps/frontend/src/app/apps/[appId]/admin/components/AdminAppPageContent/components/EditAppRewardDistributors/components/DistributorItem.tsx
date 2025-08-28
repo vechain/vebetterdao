@@ -65,10 +65,10 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         <HStack hideBelow="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="#6A6A6A" fontWeight={600}>
               {domain}
             </Text>
-            <Text fontSize={"14px"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="#6A6A6A">
               {distributor}
             </Text>
           </VStack>
@@ -82,7 +82,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
 
         <HStack hideBelow="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
-          <Text fontSize={"14px"} color="#6A6A6A">
+          <Text textStyle={"sm"} color="#6A6A6A">
             {humanAddress(distributor, 8, 6)}
           </Text>
         </HStack>

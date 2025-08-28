@@ -47,7 +47,7 @@ export const CancelProposalSection = () => {
       <Card.Body>
         <VStack alignItems="stretch" gap={6}>
           <Heading size="2xl">{t("Cancel proposal")}</Heading>
-          <Text fontSize={"14px"}>
+          <Text textStyle={"sm"}>
             {t(
               "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.",
             )}
@@ -69,12 +69,12 @@ export const CancelProposalSection = () => {
                 <VStack alignItems="stretch" gap={6}>
                   <Heading size="2xl">{t("Cancel proposal")}</Heading>
                   <VStack alignItems="stretch" gap={0}>
-                    <Text fontSize={"14px"}>
+                    <Text textStyle={"sm"}>
                       {t(
                         "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
                       )}
                     </Text>
-                    <Text fontWeight={600} fontSize={"14px"}>
+                    <Text fontWeight={600} textStyle="sm">
                       {t("This action cannot be undone.")}
                     </Text>
                   </VStack>

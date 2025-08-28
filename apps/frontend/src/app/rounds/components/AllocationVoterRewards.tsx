@@ -62,7 +62,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const description = useMemo(() => {
     if (hasVoted && !isFinished) {
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <b>{t("You’ve voted on this allocation round!")}</b>
           {!isFinished && ` ${t("You’ll be able to claim your reward when the round is over.")}`}
         </Text>
@@ -71,7 +71,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (!hasVoted && !isFinished)
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <Trans
             i18nKey={"Vote on this allocation round to receive rewards after the voting session has ended."}
             t={t}
@@ -81,7 +81,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (!hasVoted && isFinished)
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <Trans
             i18nKey={"You didn't vote on this allocation round. You can still vote on the next one to receive rewards."}
             t={t}
@@ -91,7 +91,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (formattedRoundReward > 0)
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <Trans
             i18nKey={
               "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!"
@@ -103,7 +103,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       )
 
     return (
-      <Text fontSize={14} fontWeight={400}>
+      <Text textStyle="sm">
         <Trans
           i18nKey={
             "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards."
@@ -143,7 +143,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
       <VStack alignItems={"flex-start"}>
         <Image src="/assets/icons/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
-        <Text fontSize={24} fontWeight={700}>
+        <Text textStyle="2xl" fontWeight={700}>
           {t("Voting rewards")}
         </Text>
         <Box mt={3} mb={1}>
@@ -161,7 +161,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           bg={canClaim ? "primary" : "#abb0b0"}
           color={canClaim ? "white" : "black"}>
           {!isFinished ? <FaRegClock /> : undefined}
-          <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
+          <Text textStyle={{ base: "sm", md: "md" }}>{buttonText}</Text>
         </Button>
       </VStack>
     </Box>

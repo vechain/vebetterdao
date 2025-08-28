@@ -127,7 +127,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
 
         <HStack hideFrom="md" align="center" position="relative" w="full" alignItems="center">
           <VStack gap={2} align="stretch" justify="space-between">
-            <Text fontSize={12} color={titleColor} fontWeight="600">
+            <Text textStyle="xs" color={titleColor} fontWeight="600">
               {title}
             </Text>
             <Heading size="lg" color={descriptionColor}>

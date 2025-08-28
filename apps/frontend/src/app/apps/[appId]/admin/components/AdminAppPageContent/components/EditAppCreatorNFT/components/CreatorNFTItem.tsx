@@ -62,10 +62,10 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         <HStack hideBelow="md">
           <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="#6A6A6A" fontWeight={600}>
               {domain}
             </Text>
-            <Text fontSize={"14px"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="#6A6A6A">
               {creator}
             </Text>
           </VStack>
@@ -78,10 +78,10 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         <HStack hideFrom="md">
           <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="#6A6A6A" fontWeight={600}>
               {domain}
             </Text>
-            <Text fontSize={"14px"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="#6A6A6A">
               {humanAddress(creator, 8, 6)}
             </Text>
           </VStack>
