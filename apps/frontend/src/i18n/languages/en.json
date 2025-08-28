@@ -1772,5 +1772,17 @@
   "Apply": "Apply",
   "Get NFT": "Get NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals",
-  "More info about your votes at snapshot": "More info about your votes at snapshot"
+  "More info about your votes at snapshot": "More info about your votes at snapshot",
+  "Assign App Categories": "Assign App Categories",
+  "Loading apps without categories...": "Loading apps without categories...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Assign categories to apps that don't have any. Maximum {{max}} categories per app.",
+  "All apps have categories assigned! 🎉": "All apps have categories assigned! 🎉",
+  "Apps without categories: {{count}}": "Apps without categories: {{count}}",
+  "Category Assignments ({{count}})": "Category Assignments ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Selected Categories ({{count}}/{{max}})",
+  "Uploading metadata...": "Uploading metadata...",
+  "Maximum {{max}} categories per app.": "Maximum {{max}} categories per app.",
+  "Previous app": "Previous app",
+  "Next app": "Next app",
+  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps"
 }

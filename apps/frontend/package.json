@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.25.0",
+  "version": "1.26.0",
   "private": true,
   "scripts": {
     "postinstall": "npx @chakra-ui/cli typegen src/app/theme/theme.ts",
