@@ -344,9 +344,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                       <FileUpload.Dropzone>
                         <FileUpload.DropzoneContent>
                           <HStack>
-                            <Icon size="md" color="fg.muted">
-                              <LuUpload />
-                            </Icon>
+                            <Icon as={LuUpload} size="md" color="fg.muted" />
                             <Box>{t("Upload file")}</Box>
                           </HStack>
                           <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 20MB")}</Box>
