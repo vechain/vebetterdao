@@ -46,7 +46,7 @@ export const GrantsNewFormStepCard = () => {
     },
     {
       key: GrantFormStep.ABOUT_GRANT,
-      content: <AboutGrant register={register} setValue={setValue} watch={watch} errors={errors} />,
+      content: <AboutGrant register={register} setData={setData} setValue={setValue} watch={watch} errors={errors} />,
       title: t("About grant"),
     },
     {

@@ -8,16 +8,20 @@ import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { FormSocialConnectButton } from "@/components/CustomFormFields"
 import { LuUpload } from "react-icons/lu"
+import { useEffect } from "react"
+import { signIn, signOut, useSession } from "next-auth/react"
 
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
   errors: FieldErrors<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   watch: UseFormWatch<GrantFormData>
+  setData: (data: Partial<GrantFormData>) => void
 }
 
-export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProps) => {
+export const AboutGrant = ({ register, setData, setValue, watch, errors }: AboutGrantProps) => {
   const { t } = useTranslation()
+  const { data: session } = useSession()
 
   // Custom validation function to ensure at least one social account is connected
   const validateAtLeastOneSocial = (_value: string): string | boolean => {
@@ -31,15 +35,34 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
     return true
   }
 
+  // Set linked social media usernames if available in session
+  useEffect(() => {
+    if (session?.user?.githubUsername || session?.user?.twitterUsername || session?.user?.discordUsername) {
+      if (session.user.githubUsername) {
+        setValue("githubUsername", session.user.githubUsername)
+        setData({ githubUsername: session.user.githubUsername })
+      }
+      if (session.user.twitterUsername) {
+        setValue("twitterUsername", session.user.twitterUsername)
+        setData({ twitterUsername: session.user.twitterUsername })
+      }
+      if (session.user.discordUsername) {
+        setValue("discordUsername", session.user.discordUsername)
+        setData({ discordUsername: session.user.discordUsername })
+      }
+    }
+  }, [session?.user, setValue, setData])
+
   // Handle social media auth
   const handleAuth = (platform: "github" | "twitter" | "discord") => {
-    const usernameField = {
-      github: "githubUsername",
-      twitter: "twitterUsername",
-      discord: "discordUsername",
-    }[platform]
-
-    setValue(usernameField as keyof GrantFormData, `testSignedIn-${platform}`)
+    const usernameField = platform.concat("Username")
+    const isSignedIn = !!watch(usernameField as keyof GrantFormData)
+    if (isSignedIn) {
+      signOut({ redirect: false })
+      setValue(usernameField as keyof GrantFormData, "")
+    } else {
+      signIn(platform)
+    }
   }
 
   return (
