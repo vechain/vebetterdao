@@ -15,32 +15,44 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
         "-ms-overflow-style": "none",
         "scrollbar-width": "none",
       }}>
-      <Steps.Root step={activeStep} count={steps.length} display="flex" overflowX="hidden" w="full" maxW="80vw">
-        <Steps.List>
+      <Steps.Root
+        variant="grants"
+        step={activeStep}
+        count={steps.length}
+        display="flex"
+        overflowX="hidden"
+        w="full"
+        maxW="80vw"
+        gap={{ base: 2, md: 4 }}>
+        <Steps.List gap={{ base: 2, md: 4 }}>
           {steps.map((step, index) => {
             const isActiveStep = activeStep === index
             const showStepTitle = (isMobile && isActiveStep) || !isMobile
 
             return (
-              <Flex key={step.key} align="center">
-                <Steps.Item index={index}>
-                  <Steps.Indicator>
-                    <Steps.Status complete={<Icon as={BsCheck} boxSize={7} />} incomplete={<Steps.Number />} />
-                  </Steps.Indicator>
+              <Steps.Item key={step.key} index={index}>
+                <Steps.Indicator>
+                  <Steps.Status complete={<Icon as={BsCheck} boxSize={7} />} incomplete={<Steps.Number />} />
+                </Steps.Indicator>
 
-                  {showStepTitle && (
-                    <Steps.Title fontSize={{ base: "sm", md: "sm" }} truncate>
-                      {step.title}
-                    </Steps.Title>
-                  )}
+                {showStepTitle && <Steps.Title fontSize={{ base: "sm", md: "sm" }}>{step.title}</Steps.Title>}
 
-                  {index < steps.length - 1 && (
-                    <Flex w={"full"} align="center" justify="center" minW={{ base: "10px", md: "24px" }}>
-                      <Icon as={BsChevronRight} boxSize={4} color={index < activeStep ? "blue.500" : "gray.400"} />
-                    </Flex>
-                  )}
-                </Steps.Item>
-              </Flex>
+                {index < steps.length - 1 && (
+                  <Steps.Separator
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flex="1"
+                    minW={{ base: "20px", md: "40px" }}
+                    _before={{ display: "none" }}
+                    _after={{ display: "none" }}
+                    borderWidth="0"
+                    height="auto"
+                    bg="transparent">
+                    <Icon as={BsChevronRight} boxSize={4} color={index < activeStep ? "blue.500" : "gray.400"} />
+                  </Steps.Separator>
+                )}
+              </Steps.Item>
             )
           })}
         </Steps.List>

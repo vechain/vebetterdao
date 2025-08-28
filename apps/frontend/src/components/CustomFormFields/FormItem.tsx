@@ -1,4 +1,4 @@
-import { Field, Input, Text, Textarea } from "@chakra-ui/react"
+import { Field, HStack, Input, Text, Textarea } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
 
 type FormItemProps = {
@@ -9,6 +9,7 @@ type FormItemProps = {
   register: UseFormRegisterReturn
   error?: string
   onBlur?: () => void
+  isOptional?: boolean
 }
 
 export const FormItem = ({
@@ -19,15 +20,23 @@ export const FormItem = ({
   register,
   error,
   onBlur,
+  isOptional = false,
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
 
   return (
     <Field.Root invalid={!!error}>
       {label && (
-        <Field.Label fontSize="md" mb={description ? 0 : undefined} htmlFor={register.name}>
-          {label}
-        </Field.Label>
+        <HStack justify="space-between" w="full">
+          <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
+            {label}
+          </Field.Label>
+          {isOptional && (
+            <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+              {"Optional"}
+            </Text>
+          )}
+        </HStack>
       )}
       {description && (
         <Text fontSize="xs" color="gray.500" mb={2}>

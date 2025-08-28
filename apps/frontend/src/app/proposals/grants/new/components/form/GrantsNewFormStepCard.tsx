@@ -1,20 +1,16 @@
 import { useTranslation } from "react-i18next"
-import { VStack, Card, Button, HStack, Stack, useDisclosure, Text, useSteps } from "@chakra-ui/react"
+import { VStack, Card, Button, HStack, Stack } from "@chakra-ui/react"
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
-import { AboutGrant } from "./steps"
+import { AboutGrant, Schedule, Milestones } from "./steps"
 import { useForm } from "react-hook-form"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import { Milestones } from "./steps/Milestones"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 import { useCurrentAllocationsRoundId } from "@/api"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
-import { useRouter, usePathname } from "next/navigation"
-import { UnsavedChangesModal } from "@/components/UnsavedChangesModal"
-import { useGrantDraftStore } from "@/store"
-import { useEffect, useCallback, useMemo, useRef, useState } from "react"
-// import { SuccessToastModal } from "@/app/components/Toast/SuccessToastModal"
-import { toaster } from "@/components/ui/toaster"
+import { useRouter } from "next/navigation"
+import { useGrantProposalFormStore } from "@/store"
+import { useState } from "react"
 
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
@@ -31,93 +27,16 @@ export type GrantStep = {
 
 export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
-  const { open: isUnsavedModalOpen, onOpen: openUnsavedModal, onClose: closeUnsavedModal } = useDisclosure()
 
   const router = useRouter()
-  const pathname = usePathname()
 
-  const [selectedGrantType, setSelectedGrantType] = useState<string>("dapp")
-  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
-  const [lastSavedFormData, setLastSavedFormData] = useState<string>("")
-  const [bypassInterception, setBypassInterception] = useState(false)
+  const { setData, ...formData } = useGrantProposalFormStore()
 
-  const store = useGrantDraftStore(selectedGrantType)
-  const { setData, saveDraft: saveDraftToStore } = store
-
-  const getCleanDraftFromStore = useCallback(() => {
-    const { ...rest } = store as any
-    return rest as Partial<GrantFormData>
-  }, [store])
-
-  const initialDefaults = useMemo(
-    () => (getCleanDraftFromStore() as GrantFormData) ?? ({} as GrantFormData),
-    // only depend on the type to avoid re-initting while typing
-    // we want a fresh snapshot when the page first renders for that type
-    [getCleanDraftFromStore],
-  )
-
-  const { handleSubmit, control, register, formState, setValue, getValues, watch, reset } = useForm<GrantFormData>({
-    defaultValues: initialDefaults,
+  const { handleSubmit, control, register, formState, setValue, getValues, watch } = useForm<GrantFormData>({
+    defaultValues: formData,
   })
 
-  const currentFormData = watch()
   const { errors } = formState
-
-  useEffect(() => {
-    if (currentFormData.grantType && currentFormData.grantType !== selectedGrantType) {
-      setSelectedGrantType(currentFormData.grantType)
-    }
-  }, [currentFormData.grantType, selectedGrantType])
-
-  // Reset ONLY when the grant type changes
-  const prevTypeRef = useRef<string>(selectedGrantType)
-  useEffect(() => {
-    if (prevTypeRef.current !== selectedGrantType) {
-      const freshDraft = getCleanDraftFromStore()
-      // if you want to avoid wiping completely empty drafts, keep as-is:
-      reset({ ...(freshDraft as GrantFormData), grantType: selectedGrantType })
-      setLastSavedFormData(JSON.stringify(getValues()))
-      prevTypeRef.current = selectedGrantType
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGrantType, reset, getCleanDraftFromStore])
-
-  // Check if form has changed vs. last saved snapshot
-  const hasChangedSinceLastSave = useCallback(() => {
-    const currentDataString = JSON.stringify(getValues())
-    return currentDataString !== lastSavedFormData
-  }, [getValues, lastSavedFormData])
-
-  const isSaveDraftDisabled = !hasChangedSinceLastSave()
-  const shouldShowUnsavedModal = hasChangedSinceLastSave()
-
-  // Initialize "last saved" on mount
-  useEffect(() => {
-    setLastSavedFormData(JSON.stringify(getValues()))
-    // we intentionally run this once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Debounced store sync — guarded to avoid spamming store & causing feedback
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>
-    const sub = watch(data => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        if (!data) return
-        if (data.grantType !== selectedGrantType) return
-        // avoid noisy writes: only push if different from lastSavedFormData
-        const serialized = JSON.stringify(data)
-        if (serialized !== lastSavedFormData) {
-          setData(data as GrantFormData)
-        }
-      }, 300)
-    })
-    return () => {
-      sub.unsubscribe()
-      clearTimeout(timeoutId)
-    }
-  }, [watch, setData, selectedGrantType, lastSavedFormData])
 
   const steps: GrantStep[] = [
     {
@@ -149,19 +68,22 @@ export const GrantsNewFormStepCard = () => {
     },
     {
       key: GrantFormStep.SCHEDULE,
-      content: (
-        <>
-          <Text>{t("Schedule")}</Text>
-        </>
-      ),
+      content: <Schedule register={register} errors={errors} control={control} watch={watch} />,
       title: t("Schedule"),
     },
   ]
 
-  const stepsUI = useSteps({
-    defaultStep: 0,
-    count: steps.length,
-  })
+  //MIMIC USE STEPS HOOK
+
+  const [currentStepIndex, setCurrentStepIndex] = useState(0)
+
+  const goToNext = () => {
+    setCurrentStepIndex(prev => prev + 1)
+  }
+
+  const goToPrevious = () => {
+    setCurrentStepIndex(prev => prev - 1)
+  }
 
   const { onMetadataUpload } = useUploadGrantProposalMetadata()
   const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
@@ -172,9 +94,8 @@ export const GrantsNewFormStepCard = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const onSubmit = async (data: GrantFormData) => {
-    setData({ ...data })
-    if (stepsUI.value !== lastStep) {
-      return stepsUI.setStep(stepsUI.value + 1)
+    if (currentStepIndex !== lastStep) {
+      return goToNext()
     }
 
     if (!currentRoundId || isNaN(Number(currentRoundId))) return
@@ -186,148 +107,27 @@ export const GrantsNewFormStepCard = () => {
 
     const milestonesIpfsCID = await onMetadataUpload(data.milestones)
     if (!milestonesIpfsCID) return console.error("Error uploading milestones")
+    if (!data.votingRoundId) return console.error("Support round ID is required")
 
     await createGrantProposal({
       metadataIpfsCID: proposalMetadataURI,
       milestonesIpfsCID,
       milestones: data.milestones,
-      votingRoundId: Number(currentRoundId) + 2,
+      grantsReceiver: data.grantsReceiverAddress,
+      votingRoundId: Number(data.votingRoundId),
       depositAmount: "0",
     })
   }
 
-  const handleSaveDraft = useCallback(() => {
-    if (!hasChangedSinceLastSave()) return
-    const currentFormData = getValues()
-    const dataToSave = { ...currentFormData, grantType: selectedGrantType }
-    if (dataToSave.grantType === selectedGrantType) {
-      setData(dataToSave)
-      saveDraftToStore()
-      setLastSavedFormData(JSON.stringify(dataToSave))
-      toaster.success({
-        title: "Draft saved successfully",
-        duration: 3000,
-      })
-    }
-  }, [getValues, setData, saveDraftToStore, hasChangedSinceLastSave, selectedGrantType])
-
-  const handleLeaveAnyway = useCallback(() => {
-    if (pendingNavigation) {
-      setBypassInterception(true)
-      setTimeout(() => {
-        window.location.href = pendingNavigation
-      }, 0)
-      setPendingNavigation(null)
-      closeUnsavedModal()
-    }
-  }, [pendingNavigation, closeUnsavedModal])
-
-  const handleSaveDraftAndLeave = useCallback(() => {
-    const currentFormData = getValues()
-    const dataToSave = { ...currentFormData, grantType: selectedGrantType }
-    if (dataToSave.grantType === selectedGrantType) {
-      setData(dataToSave)
-      saveDraftToStore()
-      toaster.success({
-        title: "Draft saved successfully",
-        duration: 1500,
-      })
-    }
-    if (pendingNavigation) {
-      closeUnsavedModal()
-      setPendingNavigation(null)
-      setTimeout(() => {
-        window.location.href = pendingNavigation
-      }, 100)
-    }
-  }, [getValues, setData, saveDraftToStore, pendingNavigation, closeUnsavedModal, selectedGrantType])
-
-  // beforeunload guard
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const currentData = getValues()
-      const dataToSave = { ...currentData, grantType: selectedGrantType }
-      if (dataToSave.applicantName && dataToSave.grantType === selectedGrantType) {
-        setData(dataToSave)
-      }
-      if (shouldShowUnsavedModal) {
-        e.preventDefault()
-        return ""
-      }
-    }
-    window.addEventListener("beforeunload", handleBeforeUnload)
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [shouldShowUnsavedModal, getValues, setData, selectedGrantType])
-
-  // Intercept router navigation (unchanged)
-  useEffect(() => {
-    if (!shouldShowUnsavedModal || bypassInterception) return
-    const originalPush = router.push
-    const originalReplace = router.replace
-
-    router.push = (url: any, options?: any) => {
-      if (bypassInterception) return originalPush.call(router, url, options)
-      const targetPath = typeof url === "string" ? url : url.toString()
-      if (targetPath !== pathname && !targetPath.startsWith("#")) {
-        setPendingNavigation(targetPath)
-        openUnsavedModal()
-        return Promise.resolve(true)
-      }
-      return originalPush.call(router, url, options)
-    }
-
-    router.replace = (url: any, options?: any) => {
-      if (bypassInterception) return originalReplace.call(router, url, options)
-      const targetPath = typeof url === "string" ? url : url.toString()
-      if (targetPath !== pathname && !targetPath.startsWith("#")) {
-        setPendingNavigation(targetPath)
-        openUnsavedModal()
-        return Promise.resolve(true)
-      }
-      return originalReplace.call(router, url, options)
-    }
-
-    const handleClick = (e: MouseEvent) => {
-      if (bypassInterception) return
-      const target = e.target as HTMLElement
-      const link = target.closest("a[href]") as HTMLAnchorElement
-      if (link && link.href) {
-        const url = new URL(link.href)
-        if (url.origin === window.location.origin && url.pathname !== pathname) {
-          e.preventDefault()
-          e.stopPropagation()
-          setPendingNavigation(url.pathname + url.search + url.hash)
-          openUnsavedModal()
-        }
-      }
-    }
-
-    document.addEventListener("click", handleClick, true)
-    return () => {
-      router.push = originalPush
-      router.replace = originalReplace
-      document.removeEventListener("click", handleClick, true)
-    }
-  }, [shouldShowUnsavedModal, pathname, router, openUnsavedModal, bypassInterception])
-
   const firstStep = 0
   const lastStep = steps.length - 1
-  const currentStep = steps[stepsUI.value]
+  const currentStep = steps[currentStepIndex]
 
   return (
     <>
-      <UnsavedChangesModal
-        isOpen={isUnsavedModalOpen}
-        onClose={() => {
-          closeUnsavedModal()
-          setPendingNavigation(null)
-        }}
-        onSaveDraft={handleSaveDraftAndLeave}
-        onLeaveAnyway={handleLeaveAnyway}
-      />
       <Card.Root>
         <Card.Header>
-          <GrantsNewFormStepIndicator activeStep={stepsUI.value} steps={steps} />
+          <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
         </Card.Header>
         <Card.Body px={{ base: 3, md: 8 }}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
@@ -335,21 +135,16 @@ export const GrantsNewFormStepCard = () => {
               {currentStep?.content}
               <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
                 <HStack gap={4} w="full">
-                  {stepsUI.value !== firstStep && (
-                    <Button
-                      onClick={() => stepsUI.setStep(stepsUI.value - 1)}
-                      variant="secondary"
-                      px={8}
-                      size="lg"
-                      w={{ base: "full", md: "auto" }}>
+                  {currentStepIndex !== firstStep && (
+                    <Button onClick={goToPrevious} variant="secondary" px={8} size="lg">
                       {t("Back")}
                     </Button>
                   )}
-                  <Button type="submit" variant="primaryAction" px={8} size="lg" w={{ base: "full", md: "auto" }}>
-                    {stepsUI.value === lastStep ? t("Apply") : t("Continue")}
+                  <Button type="submit" variant="primaryAction" px={8} size="lg">
+                    {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
                   </Button>
                 </HStack>
-                {stepsUI.value !== firstStep && (
+                {/* {stepsUI.value !== firstStep && (
                   <Button
                     variant="primaryLink"
                     onClick={handleSaveDraft}
@@ -361,7 +156,7 @@ export const GrantsNewFormStepCard = () => {
                     }}>
                     {t("Save draft")}
                   </Button>
-                )}
+                )} */}
               </Stack>
             </VStack>
           </form>

@@ -20,6 +20,7 @@ type BuildClausesProps = {
   metadataIpfsCID: string
   milestonesIpfsCID: string
   milestones: GrantFormData["milestones"]
+  grantsReceiver: string
   votingRoundId: number
   depositAmount: string
 }
@@ -42,7 +43,14 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
   const { account } = useWallet()
 
   const buildClauses = useCallback(
-    ({ metadataIpfsCID, milestones, depositAmount, votingRoundId, milestonesIpfsCID }: BuildClausesProps) => {
+    ({
+      metadataIpfsCID,
+      milestones,
+      depositAmount,
+      votingRoundId,
+      milestonesIpfsCID,
+      grantsReceiver,
+    }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = []
 
       const calldatas = milestones.map((milestone: GrantFormData["milestones"][0]) =>
@@ -58,7 +66,7 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
         metadataIpfsCID,
         votingRoundId,
         ethers.parseEther(depositAmount).toString(),
-        account?.address, //TODO: change to grantsReceiver
+        grantsReceiver,
         milestonesIpfsCID,
       ]
       const createProposalClause = buildClause({
@@ -73,7 +81,7 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
 
       return clauses
     },
-    [account?.address],
+    [],
   )
 
   const refetchQueryKeys = useMemo(() => {

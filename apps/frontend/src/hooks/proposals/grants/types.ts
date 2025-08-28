@@ -48,9 +48,15 @@ export type GrantFormData = {
   applicantPostalCode?: string
   applicantBackground?: string
   proposerAddress: string
+  // About company
+  companyName: string
+  companyRegisteredNumber: string
+  companyIntro: string
+  companyEmail: string
+  companyTelegram: string
+  grantsReceiverAddress: string
   // About project
   projectName: string
-  companyName: string
   appTestnetUrl: string
   projectWebsite: string
   githubUsername: string
@@ -68,6 +74,7 @@ export type GrantFormData = {
   x2EModel: string
   revenueModel: string
   highLevelRoadmap: string
+  outcomesAttachment?: File[]
   // Milestones
   milestones: Array<{
     description: string
@@ -75,6 +82,8 @@ export type GrantFormData = {
     durationFrom: number //Unix timestamp in seconds
     durationTo: number //Unix timestamp in seconds
   }>
+  // Voting round ID (Deadline round + 1 for the support phase)
+  votingRoundId: string
   // Terms of service
   termsOfService: boolean
 }
