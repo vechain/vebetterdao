@@ -48,36 +48,29 @@
     "//#solo-up": {
       "cache": false
     },
-    "chakra:typegen": {
-      "cache": true
-    },
-    "chakra:typegen:watch": {
-      "cache": false,
-      "persistent": true
-    },
     "dev": {
       "cache": false,
-      "dependsOn": ["^setup-contracts", "chakra:typegen"]
+      "dependsOn": ["^setup-contracts"]
     },
     "dev:staging": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^setup-contracts:staging", "chakra:typegen"]
+      "dependsOn": ["^setup-contracts:staging"]
     },
     "dev:testnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^setup-contracts:testnet", "chakra:typegen"]
+      "dependsOn": ["^setup-contracts:testnet"]
     },
     "dev:mainnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^setup-contracts:mainnet", "chakra:typegen"]
+      "dependsOn": ["^setup-contracts:mainnet"]
     },
     "dev:galactica-test": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["^setup-contracts:galactica-test", "chakra:typegen"]
+      "dependsOn": ["^setup-contracts:galactica-test"]
     },
     "dev:simulation": {
       "cache": false,
