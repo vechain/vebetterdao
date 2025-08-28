@@ -35,7 +35,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             textAlign="center"
             height="150px">
             <Alert.Indicator boxSize="40px" mr={0} />
-            <Alert.Title mt={4} mb={1} fontSize="lg">
+            <Alert.Title mt={4} mb={1} textStyle="lg">
               {t("Waiting for confirmation")}
             </Alert.Title>
             <Alert.Description maxWidth="sm">{t("Please confirm the transaction in your wallet.")}</Alert.Description>
@@ -53,7 +53,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             textAlign="center"
             height="150px">
             <Alert.Indicator boxSize="40px" mr={0} />
-            <Alert.Title mt={4} mb={1} fontSize="lg">
+            <Alert.Title mt={4} mb={1} textStyle="lg">
               {t("Waiting for confirmation")}
             </Alert.Title>
             <Alert.Description maxWidth="sm">
@@ -73,7 +73,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             textAlign="center"
             height="150px">
             <Alert.Indicator boxSize="40px" mr={0} />
-            <Alert.Title mt={4} mb={1} fontSize="lg">
+            <Alert.Title mt={4} mb={1} textStyle="lg">
               {t("Transaction successful!")}
             </Alert.Title>
             <Alert.Description maxWidth="sm">
@@ -94,7 +94,7 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
               textAlign="center"
               height="150px">
               <Alert.Indicator boxSize="40px" mr={0} />
-              <Alert.Title mt={4} mb={1} fontSize="lg">
+              <Alert.Title mt={4} mb={1} textStyle="lg">
                 {t("Something went wrong!")}
               </Alert.Title>
               <Alert.Description maxWidth="sm">

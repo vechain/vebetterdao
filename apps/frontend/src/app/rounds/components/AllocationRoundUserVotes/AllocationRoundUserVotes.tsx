@@ -106,9 +106,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
           <VStack flex={1} w="full" gap={8} align={"flex-start"}>
             <VStack gap={2} align="flex-start" w="full">
               <HStack w="full" justify="space-between">
-                <Heading fontSize="24px" fontWeight={700}>
-                  {t("Your vote")}
-                </Heading>
+                <Heading size="2xl">{t("Your vote")}</Heading>
                 <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
                   {t("See details")}
                   <FiArrowUpRight />

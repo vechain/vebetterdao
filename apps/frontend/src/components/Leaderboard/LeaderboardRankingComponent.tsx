@@ -93,20 +93,20 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
             <Box>
               <HStack gap={1}>
                 {isYourRanking && (
-                  <Text fontSize="sm" fontWeight={600}>
+                  <Text textStyle="sm" fontWeight={600}>
                     {`(${t("You")})`}
                   </Text>
                 )}
 
                 {domain && (
-                  <Text fontSize="md" fontWeight={600} h="auto" colorPalette={"gray"}>
+                  <Text textStyle="md" fontWeight={600} h="auto" colorPalette={"gray"}>
                     {domain}
                   </Text>
                 )}
                 {!domain && (
                   <AddressButton
                     unstyled
-                    fontSize="sm"
+                    textStyle="sm"
                     fontWeight={600}
                     h="auto"
                     address={ranking.address}
@@ -121,7 +121,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                 )}
               </HStack>
 
-              <Text fontSize="sm" color={grayColor} fontWeight={400}>
+              <Text textStyle="sm" color={grayColor} fontWeight={400}>
                 <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
               </Text>
             </Box>

@@ -34,9 +34,7 @@ export const UserTransactions = ({ address }: Props) => {
       <Card.Body>
         <VStack gap={4} align="stretch">
           <VStack gap={2} align="stretch">
-            <Heading size="xl" fontWeight="bold">
-              {t("Last Transactions")}
-            </Heading>
+            <Heading size="xl">{t("Last Transactions")}</Heading>
           </VStack>
 
           {transactions.length > 0 ? (

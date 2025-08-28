@@ -99,7 +99,7 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
                 alignContent={"center"}
                 cursor="pointer">
                 <Flex direction="column" alignItems="center">
-                  <Text fontSize="xl" fontWeight="bold" color="white">
+                  <Text textStyle="xl" fontWeight="bold" color="white">
                     {t("{{name}}", { name: nft.name })}
                   </Text>
                   <Image

@@ -58,9 +58,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
       </InputGroup>
       <HStack w="full" gap={4} justify={"space-between"}>
         <Skeleton loading={isLoading}>
-          <Heading fontSize={"20px"} fontWeight={700}>
-            {t("{{amount}} participating apps", { amount: xApps?.length ?? "0" })}
-          </Heading>
+          <Heading size="xl">{t("{{amount}} participating apps", { amount: xApps?.length ?? "0" })}</Heading>
         </Skeleton>
         <Checkbox.Root
           colorPalette="primary"

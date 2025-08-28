@@ -122,9 +122,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                   direction={["column", "column", "row"]}
                   align={["flex-start", "flex-start", "center"]}>
                   <Image h="24px" w="24px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-                  <Text fontSize={"28px"} fontWeight={700}>
-                    {compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}
-                  </Text>
+                  <Text fontSize={"28px"}>{compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}</Text>
                   <Text fontSize={"14px"} fontWeight={600}>
                     {t("VOT3 BALANCE ON SNAPSHOT")}
                   </Text>
@@ -146,7 +144,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                       direction={["column", "column", "row"]}
                       align={["flex-start", "flex-start", "center"]}>
                       <VoteIcon boxSize={"36px"} color="#004CFC" />
-                      <Text fontSize={"36px"} fontWeight={700} color="#004CFC">
+                      <Text fontSize={"36px"} color="#004CFC">
                         {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
                       </Text>
                       <Text fontSize={"14px"} fontWeight={600}>
@@ -185,9 +183,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
             </Card.Root>
           </VStack>
           <VStack alignItems={"stretch"} flex={1} gap={6}>
-            <Text fontSize={"20px"} fontWeight={700}>
-              {t("Select your vote")}
-            </Text>
+            <Text fontSize={"20px"}>{t("Select your vote")}</Text>
             <RadioGroup.Root onValueChange={e => setSelectedVote(e.value)} value={selectedVote}>
               <VStack alignItems={"stretch"}>
                 {votes.map(vote => {
@@ -218,9 +214,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                 })}
               </VStack>
             </RadioGroup.Root>
-            <Text fontSize={"20px"} fontWeight={700}>
-              {t("Add comment")}
-            </Text>
+            <Text fontSize={"20px"}>{t("Add comment")}</Text>
             <Textarea resize={"none"} onChange={handleChangeComment} />
             <Button type="submit" variant="primaryAction" w="full" disabled={!selectedVote}>
               <VoteIcon boxSize={"20px"} color="white" />

@@ -34,7 +34,7 @@ export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
           <Dialog.Body p={"40px"}>
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
-              <Heading fontSize={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
+              <Heading size={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
                 {t("Delete {{address}} as signaler?", { address: domain || humanAddress(signaler, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>

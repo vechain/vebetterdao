@@ -75,8 +75,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
                 h="20px"
                 justify="center"
                 align="center"
-                fontSize="xs"
-                fontWeight="bold"
+                textStyle="xs"
                 boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
                 {activeFiltersCount}
               </Flex>
@@ -86,9 +85,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
         <Portal>
           <Menu.Positioner>
             <Menu.Content maxW="300px" bg="gray.800" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
-              <Text fontWeight="bold" mb={2}>
-                {t("Vote Type")}
-              </Text>
+              <Text mb={2}>{t("Vote Type")}</Text>
               <Flex flexWrap="wrap" gap={2} mb={4} flexDir="column">
                 {["All", "For", "Against", "Abstain"].map(status => (
                   <Button
@@ -127,9 +124,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
       <Card.Body>
         <VStack alignItems="stretch" gap={4}>
           <HStack justifyContent="space-between" w="full">
-            <Heading fontWeight={700} fontSize="24px">
-              {t("Proposal Comments")}
-            </Heading>
+            <Heading size="2xl">{t("Proposal Comments")}</Heading>
             {filterMenu()}
           </HStack>
 

@@ -74,7 +74,6 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
               <Skeleton loading={appMetadataLoading}>
                 <HStack gap={4} align="center">
                   <Heading
-                    fontWeight={700}
                     fontSize="20px"
                     lineClamp={1}
                     maxW={{ base: "full", md: "150px", lg: "200px" }}
@@ -84,7 +83,6 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                   </Heading>
                   {isNewApp && (
                     <HStack
-                      fontWeight={700}
                       color={"#3B3B3B"}
                       bg={"#B1F16C"}
                       px={2}
@@ -121,7 +119,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
               <VStack gap={0} alignItems="flex-start">
                 <Skeleton loading={isEndorsementStatusLoading}>
                   <HStack gap={1}>
-                    <Text fontSize="24px" fontWeight="700" color={color}>
+                    <Text fontSize="24px" color={color}>
                       {endorsementScore}
                     </Text>
                     <Text fontSize="14px" color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
@@ -135,7 +133,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
               {isUserAppEndorser && (
                 <VStack gap={0} alignItems="flex-start">
                   <Skeleton loading={isUserNodesLoading}>
-                    <Text fontSize="24px" fontWeight="700" color="#004CFC">
+                    <Text fontSize="24px" color="#004CFC">
                       {nodeEndorsingApp?.xNodePoints}
                     </Text>
                   </Skeleton>

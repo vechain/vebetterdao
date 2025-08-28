@@ -86,7 +86,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
             </HStack>
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
-              <Heading as="h3" fontSize="20px" fontWeight={700}>
+              <Heading as="h3" size="xl">
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
@@ -110,9 +110,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                   ) : (
                     <Box textAlign={"end"} color={cardTextColor}>
                       <HStack gap={1}>
-                        <Heading fontSize="24px" fontWeight={700}>
-                          {compactFormatter.format(Number(totalAmount))}
-                        </Heading>
+                        <Heading size="2xl">{compactFormatter.format(Number(totalAmount))}</Heading>
                         <B3TRIcon boxSize={"20px"} colorVariant="dark" />
                       </HStack>
                       <Text fontSize={"14px"} fontWeight={400}>

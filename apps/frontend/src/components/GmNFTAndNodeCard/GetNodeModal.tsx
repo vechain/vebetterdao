@@ -24,7 +24,7 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
               <VStack gap={4} align="flex-start">
                 <Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />
 
-                <Heading fontSize="2xl">{t("Become a node holder")}</Heading>
+                <Heading textStyle="2xl">{t("Become a node holder")}</Heading>
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>

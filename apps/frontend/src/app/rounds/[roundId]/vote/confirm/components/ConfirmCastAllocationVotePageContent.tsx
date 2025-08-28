@@ -135,7 +135,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
       <ResponsiveCard>
         <VStack w="full" gap={8} align={"flex-start"}>
-          <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700} data-testid={"voting-confirmation-page-title"}>
+          <Heading size={["2xl", "2xl", "4xl"]} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
           <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
@@ -147,7 +147,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
             <VStack flex={1} w="full" gap={8} align={"flex-start"}>
               <VStack gap={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">
-                  <Heading fontSize={["20px", "20px", "24px"]} fontWeight={700}>
+                  <Heading size={["xl", "xl", "2xl"]} fontWeight={700}>
                     {t("Your vote")}
                   </Heading>
                   <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>

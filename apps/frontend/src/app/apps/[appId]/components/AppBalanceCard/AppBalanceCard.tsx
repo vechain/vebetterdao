@@ -150,7 +150,7 @@ export const AppBalanceCard = () => {
             <Separator borderColor="#E2E8F0" />
           </Box>
           <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
-            <Text fontSize="md" fontWeight={500} color="#004CFC">
+            <Text textStyle="md" fontWeight={500} color="#004CFC">
               {t("View history")}
             </Text>
             <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />

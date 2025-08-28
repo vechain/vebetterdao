@@ -38,9 +38,9 @@ export const ProfileHeader = ({ address }: Props) => {
               align={["flex-start", "flex-start", "column"]}
               w="full"
               gap={1}>
-              <Heading fontSize="xl">{humanDomain(domain ?? "", 15)}</Heading>
+              <Heading textStyle="xl">{humanDomain(domain ?? "", 15)}</Heading>
               <HStack gap={2}>
-                <Text fontSize="xl" fontWeight="500">
+                <Text textStyle="xl" fontWeight="500">
                   {humanAddress(address ?? "", 6, 4)}
                 </Text>
 

@@ -90,7 +90,7 @@ export const AppDetailOverview = ({
                           <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
                         </Skeleton>
                         <Skeleton loading={appMetadataLoading && !!appMetadata}>
-                          <Heading fontSize={"28px"} fontWeight={700}>
+                          <Heading size="3xl">
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
                         </Skeleton>

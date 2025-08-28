@@ -22,9 +22,7 @@ export const ProposalWithdrawDeposit = () => {
           boxShadow={proposal.isUserSupportLeft ? "0px 0px 16px 0px #004CFC59" : undefined}>
           <VStack alignItems={"stretch"} gap={6}>
             <HStack justify="space-between">
-              <Heading fontSize={"24px"} fontWeight={700}>
-                {t("Community Support")}
-              </Heading>
+              <Heading size="2xl">{t("Community Support")}</Heading>
               <UilInfoCircle size="24px" color={"#004CFC"} />
             </HStack>
             <Text fontSize={"14px"}>
@@ -36,7 +34,7 @@ export const ProposalWithdrawDeposit = () => {
                   <Flex position="relative" top="7px" display={"inline-flex"}>
                     <FaRegHeart color={"#004CFC"} size={"36"} />
                   </Flex>
-                  <Text fontSize={"28px"} color={"contrast-fg-on-dark-bg"} fontWeight={700}>
+                  <Text fontSize={"28px"} color={"contrast-fg-on-dark-bg"}>
                     {compactFormatter.format(Number(proposal.communityDeposits))}
                   </Text>
                   <Text fontSize={"20px"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>

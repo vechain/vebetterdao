@@ -233,7 +233,7 @@ export const DatePicker = ({
             <Grid templateColumns="repeat(7, 1fr)" gap={1}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
-                  <Text fontSize="xs" fontWeight="medium" color="#D9D9D9">
+                  <Text textStyle="xs" fontWeight="medium" color="#D9D9D9">
                     {day}
                   </Text>
                 </Box>
@@ -290,7 +290,7 @@ export const DatePicker = ({
 
             {/* Reminder to select an end date */}
             {tempStartDate && !tempEndDate && (
-              <Text fontSize="xs" color="#D9D9D9" textAlign="center">
+              <Text textStyle="xs" color="#D9D9D9" textAlign="center">
                 {t("Select end date")}
               </Text>
             )}

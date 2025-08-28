@@ -31,7 +31,7 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions, type }) => 
 
   return (
     <Box w="full" mb={8}>
-      <Text fontSize="lg" mb={2} onClick={onAddressClick} cursor={"pointer"}>
+      <Text textStyle="lg" mb={2} onClick={onAddressClick} cursor={"pointer"}>
         <Trans i18nKey={"User: {{user}}"} values={{ user: FormattingUtils.humanAddress(userId, 6, 8) }} t={t} />
       </Text>
       <ResponsiveContainer width="100%" height={200}>

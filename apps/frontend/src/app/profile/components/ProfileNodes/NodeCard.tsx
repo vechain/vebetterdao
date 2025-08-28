@@ -37,7 +37,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                     {children}
                   </LinkOverlay>
                 )}>
-                <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                   {t("Node")}
                 </Text>
               </ConditionalWrapper>
@@ -59,7 +59,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
               </Box>
             </>
           ) : (
-            <Text fontSize="sm" _dark={{ color: "#FFFFFFB2" }}>
+            <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
               {t("No Node attached")}
             </Text>
           )}

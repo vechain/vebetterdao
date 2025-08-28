@@ -78,18 +78,14 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
           </Stack>
           <HStack hideFrom="md" gap={1}>
             <LeafIcon color="#448300" size="24" />
-            <Heading fontWeight="700" fontSize={"xl"}>
-              {userOverview?.actionsRewarded ?? 0}
-            </Heading>
+            <Heading size="xl">{userOverview?.actionsRewarded ?? 0}</Heading>
           </HStack>
         </HStack>
       </HStack>
       <HStack gap={2} flex={[1, 1, 0]}>
         <HStack hideBelow="md" gap={1}>
           <LeafIcon color="#448300" size="24" />
-          <Heading fontWeight="700" fontSize={"xl"}>
-            {userOverview?.actionsRewarded ?? 0}
-          </Heading>
+          <Heading size="xl">{userOverview?.actionsRewarded ?? 0}</Heading>
         </HStack>
         {canUnlinkAccount && (
           <Button

@@ -58,7 +58,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
               <WalletIcon size={"3.5rem"} />
             </Flex>
             <VStack align="stretch" color="white">
-              <Text fontSize="md" fontWeight={"400"}>
+              <Text textStyle="md" fontWeight={"400"}>
                 {t("Connect your wallet to see your profile")}
               </Text>
             </VStack>

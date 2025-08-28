@@ -76,7 +76,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
     <VStack key={contract.name} gap={4} align="flex-start" w="full">
       <Box>
         <Heading size="md">{contract.name}</Heading>
-        <Text fontSize="sm" fontWeight={400} color={"gray.500"}>
+        <Text textStyle="sm" fontWeight={400} color={"gray.500"}>
           {contract.description}
         </Text>
       </Box>
@@ -114,7 +114,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
                     <Heading size="md" fontWeight={600}>
                       {func.name}
                     </Heading>
-                    <Text fontSize="sm" fontWeight={400}>
+                    <Text textStyle="sm" fontWeight={400}>
                       {func.description}
                     </Text>
                   </VStack>

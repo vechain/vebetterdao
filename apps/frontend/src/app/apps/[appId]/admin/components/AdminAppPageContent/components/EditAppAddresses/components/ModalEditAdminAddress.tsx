@@ -16,7 +16,7 @@ export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }:
         <Dialog.Body p={"40px"}>
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
-            <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+            <Heading size={["xl", "3xl"]} textAlign={"center"}>
               {t("Change admin address")}
             </Heading>
             <Box textAlign={"center"}>

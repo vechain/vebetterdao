@@ -27,7 +27,7 @@ export const EndorsementInfoBadge = ({
             whiteSpace="normal"
             wordBreak="break-word"
             flexWrap="wrap"
-            fontSize="sm">
+            textStyle="sm">
             <Trans
               i18nKey={
                 endorsementLost

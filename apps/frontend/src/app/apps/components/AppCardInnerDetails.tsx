@@ -39,34 +39,34 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
       <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
           <Box>
-            <Text fontSize="md" color="gray.500">
+            <Text textStyle="md" color="gray.500">
               {t("Member since")}
             </Text>
-            <Text fontSize="sm">{dayjs.unix(Number(xApp.createdAtTimestamp)).format("MMMM D, YYYY")}</Text>
+            <Text textStyle="sm">{dayjs.unix(Number(xApp.createdAtTimestamp)).format("MMMM D, YYYY")}</Text>
           </Box>
           <Box>
-            <Text fontSize="md" color="gray.500">
+            <Text textStyle="md" color="gray.500">
               {t("Accumulated")}
             </Text>
             <HStack gap={1} fontWeight={500} align={"flex-end"}>
               <Skeleton loading={totalEarningsLoading}>
-                <Text fontSize="sm">{compactFormatter.format(totalEarnings ?? 0)}</Text>
+                <Text textStyle="sm">{compactFormatter.format(totalEarnings ?? 0)}</Text>
               </Skeleton>
-              <Text fontSize="sm" fontWeight={400}>
+              <Text textStyle="sm" fontWeight={400}>
                 {t("B3TR")}
               </Text>
             </HStack>
           </Box>
           <GridItem colSpan={2}>
             <Box>
-              <Text fontSize="md" color="gray.500">
+              <Text textStyle="md" color="gray.500">
                 {t("Previous allocation")}
               </Text>
               <HStack gap={1} fontWeight={500} align={"flex-end"}>
                 <Skeleton loading={currentRoundIdLoading || prevRoundEarningLoading}>
-                  <Text fontSize="sm">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
+                  <Text textStyle="sm">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
                 </Skeleton>
-                <Text fontSize="sm" fontWeight={400}>
+                <Text textStyle="sm" fontWeight={400}>
                   {t("B3TR")}
                 </Text>
               </HStack>

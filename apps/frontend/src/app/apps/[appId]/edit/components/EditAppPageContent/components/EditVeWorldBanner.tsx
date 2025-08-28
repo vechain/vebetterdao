@@ -52,9 +52,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Heading fontSize="24px" fontWeight="700">
-        {t("Banner")}
-      </Heading>
+      <Heading size="2xl">{t("Banner")}</Heading>
       <Flex w={computedWidth} h="76px" position={"relative"} rounded="12px" mt={4}>
         <Image
           src={banner ?? notFoundImage}

@@ -45,7 +45,7 @@ export const ManageUserStatus = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Manage User Status")}</Heading>
-        <Text fontSize="sm">
+        <Text textStyle="sm">
           {t("Manage user participation by adding them to a whitelist, blacklist, or removing their status")}
         </Text>
       </Card.Header>

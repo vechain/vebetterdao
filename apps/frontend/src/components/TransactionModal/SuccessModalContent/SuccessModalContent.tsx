@@ -77,7 +77,7 @@ export const SuccessModalContent = ({
 
       {showSocialButtons && (
         <VStack>
-          <Text fontSize="sm">{t("Share your success on social media")}</Text>
+          <Text textStyle="sm">{t("Share your success on social media")}</Text>
           <ShareButtons descriptionEncoded={socialDescriptionEncoded} />
         </VStack>
       )}

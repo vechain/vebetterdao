@@ -102,9 +102,9 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               </Text>
             </Box>
             <VStack align="stretch">
-              <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
+              <Heading textStyle="lg">{t("Who do you want to add as a manager?")}</Heading>
               <Field.Root invalid={!!errors.walletAddress}>
-                <Field.Label color="#6A6A6A" fontSize="sm">
+                <Field.Label color="#6A6A6A" textStyle="sm">
                   {t("User wallet address")}
                 </Field.Label>
                 <Input
@@ -140,21 +140,21 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
           <VStack align="stretch" gap={6}>
             <VStack justify="center" align="center" gap={10}>
               <ExclamationTriangle color="#C84968" size={triangleSize} />
-              <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
+              <Heading size={["lg", "lg", "2xl"]} textAlign="center">
                 {t("Are you sure you want to add a manager to your Node?")}
               </Heading>
             </VStack>
             <VStack align="stretch">
               <Text fontWeight="600">{t("You're adding the following manager to your Node")}</Text>
-              <Text fontSize="sm">{finalAddress}</Text>
+              <Text textStyle="sm">{finalAddress}</Text>
             </VStack>
             <Alert.Root status="warning" borderRadius="2xl">
               <Alert.Indicator w={5} h={5} />
-              <Box lineHeight={"1.20rem"} fontSize="sm">
+              <Box lineHeight={"1.20rem"} textStyle="sm">
                 <Alert.Title as="span">{t("The manager won't be able to transfer or sell your Node.")}</Alert.Title>
                 <Alert.Description as="span">{t("but won't be able to transfer or sell your Node.")}</Alert.Description>
                 {isXNodeAttachedToGM && (
-                  <Text mt={2} fontSize="sm" color="#C84968" fontWeight={600}>
+                  <Text mt={2} textStyle="sm" color="#C84968" fontWeight={600}>
                     {t("Notice: the GM NFT attached to this Node will be detached and will lose the free levels.")}
                   </Text>
                 )}

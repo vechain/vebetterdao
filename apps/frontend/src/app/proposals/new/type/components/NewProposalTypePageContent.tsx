@@ -75,9 +75,7 @@ export const NewProposalTypePageContent = () => {
         <Card.Root variant="baseWithBorder">
           <Card.Body py={8}>
             <VStack gap={8} align="flex-start">
-              <Heading size={["xl", "2xl"]} fontWeight="bold">
-                {t("Select proposal type")}
-              </Heading>
+              <Heading size={["xl", "2xl"]}>{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" gap={4}>
                 {Steps(t).map(step => (
                   <CheckableCard

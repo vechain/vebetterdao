@@ -36,9 +36,7 @@ export const CreatorApplicationRejected = () => {
               />
 
               <Stack w={{ base: "full", md: "90%", lg: "80%" }} align="flex-start" justify="center">
-                <Heading fontWeight={700} fontSize={{ base: "15px", md: "15px" }}>
-                  {t("Your Creator's NFT application was rejected")}
-                </Heading>
+                <Heading size={{ base: "sm", md: "sm" }}>{t("Your Creator's NFT application was rejected")}</Heading>
                 <Text fontSize={{ base: "14px", md: "14px" }} color="#6A6A6A" fontWeight={400}>
                   {t("You're not cleared to receive a Creator's NFT")}
                 </Text>

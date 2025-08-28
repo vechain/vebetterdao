@@ -56,7 +56,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
       <VStack align="stretch" gap={4} alignItems="center">
         <Image src={modalIcon} alt="NFT Requirement icon" boxSize={180} />
         <VStack align="stretch" gap={6}>
-          <Heading alignSelf="center" fontSize="28px">
+          <Heading alignSelf="center" size="3xl">
             {t("To apply for a proposal, you must")}
           </Heading>
 
@@ -67,14 +67,14 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
                     values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
-                    components={{ b: <Text as="span" fontWeight="bold" /> }}
+                    components={{ b: <Text as="span" /> }}
                   />
                 </Text>
               </List.Item>
               <List.Item>
                 <Trans
                   i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
-                  components={{ b: <Text as="span" fontWeight="bold" /> }}
+                  components={{ b: <Text as="span" /> }}
                 />
               </List.Item>
             </List.Root>
@@ -82,7 +82,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
             <Text fontSize="16px" fontWeight={400}>
               <Trans
                 i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
-                components={{ b: <Text as="span" fontWeight="bold" /> }}
+                components={{ b: <Text as="span" /> }}
               />
             </Text>
           )}

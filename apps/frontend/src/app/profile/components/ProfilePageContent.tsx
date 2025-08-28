@@ -145,7 +145,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
       {!isConnectedUser && (
         <Link href="/" color="primary.500">
           <Icon as={FaAngleLeft} boxSize={3} />
-          <Text fontSize="sm" fontWeight="semibold" lineHeight="1.2">
+          <Text textStyle="sm" fontWeight="semibold" lineHeight="1.2">
             {t("Go back")}
           </Text>
         </Link>

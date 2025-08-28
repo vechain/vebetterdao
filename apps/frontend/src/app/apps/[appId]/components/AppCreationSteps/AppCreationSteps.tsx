@@ -42,7 +42,7 @@ export const AppCreationSteps = () => {
                 </Link>
               </HStack>
             </HStack>
-            <Text fontSize="md" color="#6A6A6A">
+            <Text textStyle="md" color="#6A6A6A">
               {t(
                 "Before adding your App to the public listing and seeing stats and updates, it has to go through these three steps.",
               )}

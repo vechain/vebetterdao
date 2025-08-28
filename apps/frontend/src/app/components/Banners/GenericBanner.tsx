@@ -41,7 +41,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
 
   const descriptionElement =
     typeof description === "string" ? (
-      <Heading fontSize="lg" fontWeight="700" color={descriptionColor}>
+      <Heading textStyle="lg" color={descriptionColor}>
         {description}
       </Heading>
     ) : (
@@ -130,7 +130,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
             <Text fontSize={12} color={titleColor} fontWeight="600">
               {title}
             </Text>
-            <Heading fontSize={18} fontWeight="700" color={descriptionColor}>
+            <Heading size="lg" color={descriptionColor}>
               {description}
             </Heading>
             {hasButton && renderButton()}

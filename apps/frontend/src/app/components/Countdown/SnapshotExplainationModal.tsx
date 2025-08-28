@@ -76,9 +76,7 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                       </Box>
                       <VStack gap={0} alignItems={"start"} p={1}>
                         {renderStep(1)}
-                        <Text fontSize={["12px", "16px"]} fontWeight={700}>
-                          {step.title}
-                        </Text>
+                        <Text fontSize={["12px", "16px"]}>{step.title}</Text>
                       </VStack>
                     </Card.Root>
                   ))}

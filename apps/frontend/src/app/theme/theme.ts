@@ -8,6 +8,7 @@ import { buttonRecipe } from "./button"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
 import { headingRecipe } from "./heading"
+import { textRecipe } from "./text"
 
 const config = defineConfig({
   preflight: true,
@@ -23,67 +24,67 @@ const config = defineConfig({
     textStyles: {
       "6xl": {
         value: {
-          fontSize: "3.75rem",
+          fontSize: "3.75rem", // 60px
           lineHeight: "3.75rem",
         },
       },
       "5xl": {
         value: {
-          fontSize: "3rem",
+          fontSize: "3rem", // 48px
           lineHeight: "3.25rem",
         },
       },
       "4xl": {
         value: {
-          fontSize: "2.25rem",
+          fontSize: "2.25rem", // 36px
           lineHeight: "2.75rem",
         },
       },
       "3xl": {
         value: {
-          fontSize: "1.75rem",
+          fontSize: "1.75rem", // 28px
           lineHeight: "2.25rem",
         },
       },
       "2xl": {
         value: {
-          fontSize: "1.5rem",
+          fontSize: "1.5rem", // 24px
           lineHeight: "2rem",
         },
       },
       xl: {
         value: {
-          fontSize: "1.25rem",
+          fontSize: "1.25rem", // 20px
           lineHeight: "1.875rem",
         },
       },
       lg: {
         value: {
-          fontSize: "1.125rem",
+          fontSize: "1.125rem", // 18px
           lineHeight: "1.75rem",
         },
       },
       md: {
         value: {
-          fontSize: "1rem",
+          fontSize: "1rem", // 16px
           lineHeight: "1.5rem",
         },
       },
       sm: {
         value: {
-          fontSize: "0.875rem",
+          fontSize: "0.875rem", // 14px
           lineHeight: "1.25rem",
         },
       },
       xs: {
         value: {
-          fontSize: "0.75rem",
+          fontSize: "0.75rem", // 12px
           lineHeight: "1rem",
         },
       },
       xxs: {
         value: {
-          fontSize: "0.625rem",
+          fontSize: "0.625rem", // 10px
           lineHeight: "0.875rem",
         },
       },
@@ -93,6 +94,7 @@ const config = defineConfig({
       heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
+      text: textRecipe,
     },
 
     slotRecipes: {

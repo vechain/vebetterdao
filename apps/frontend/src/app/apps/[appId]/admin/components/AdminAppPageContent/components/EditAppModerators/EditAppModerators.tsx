@@ -24,9 +24,7 @@ export const EditAppModerators = ({ form }: Props) => {
 
   return (
     <VStack align="stretch">
-      <Heading fontSize={"24px"} fontWeight={700}>
-        {t("Moderators")}
-      </Heading>
+      <Heading size="2xl">{t("Moderators")}</Heading>
       <Text color="#6A6A6A">
         {t("These users will be able to manage the information in the feed and update the visual data on the profile.")}
       </Text>

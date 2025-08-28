@@ -39,9 +39,7 @@ export const ProposalSessionSection = ({
     <Card.Root variant="baseWithBorder">
       <Card.Body>
         <VStack align="stretch" gap={6}>
-          <Heading fontSize={"24px"} fontWeight={700}>
-            {t("Session information")}
-          </Heading>
+          <Heading size="2xl">{t("Session information")}</Heading>
           {renderQuroum === "upcoming" ? (
             <Alert.Root status="error" borderRadius="16px" bg="#FFF3E5">
               <Alert.Indicator>

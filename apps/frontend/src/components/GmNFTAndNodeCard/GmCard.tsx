@@ -33,7 +33,7 @@ export const GmCard = ({
       cursor={onCardClick ? "pointer" : "default"}
       onClick={onCardClick}>
       <HStack w="full" justifyContent="space-between">
-        <Text display="block" fontSize="sm" color="#FFFFFFB2">
+        <Text display="block" textStyle="sm" color="#FFFFFFB2">
           {subtitle}
         </Text>
         {images && images?.length > 1 && (
@@ -61,7 +61,7 @@ export const GmCard = ({
 
         <VStack flex="1" flexDirection={"column-reverse"} alignItems="start" alignSelf="end" gap={0}>
           <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-            <Text fontSize="xs" fontWeight={600} lineClamp={1}>
+            <Text textStyle="xs" fontWeight={600} lineClamp={1}>
               {footer}
             </Text>
           </HStack>

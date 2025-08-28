@@ -96,12 +96,10 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
           <HStack gap={3} align="center">
             <B3TRIcon boxSize="28px" colorVariant="dark" />
             <Skeleton loading={roundAmountLoading}>
-              <Heading fontSize="28px" fontWeight={700}>
-                {compactFormatter.format(totalDistributed)}
-              </Heading>
+              <Heading size="3xl">{compactFormatter.format(totalDistributed)}</Heading>
             </Skeleton>
           </HStack>
-          <Text fontSize="md" color="#6A6A6A">
+          <Text textStyle="md" color="#6A6A6A">
             {t("To distribute among apps")}
           </Text>
         </VStack>
@@ -168,10 +166,10 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
           <Skeleton loading={info.isLoading} key={`distribution-chart-amount-${info.amount}-${info.color}`}>
             <HStack w="full" gap={1}>
               <DotSymbol size={4} color={info.color} />
-              <Text ml={1} fontSize="md" fontWeight={600}>
+              <Text ml={1} textStyle="md" fontWeight={600}>
                 {compactFormatter.format(Number(info.amount))}
               </Text>
-              <Text fontSize="md">
+              <Text textStyle="md">
                 {t("({{percentage}}%) as {{label}}", {
                   percentage: info.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                   label: info.label,

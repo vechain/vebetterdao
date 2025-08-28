@@ -140,7 +140,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
 
                   <HStack gap={4} mb={4} justifyContent="space-between" w="full">
                     <VStack alignItems="start" gap={0} flex="0.75">
-                      <Text fontSize="sm" mb={1}>
+                      <Text textStyle="sm" mb={1}>
                         {t("Type")}
                       </Text>
                       <NativeSelect.Root size="sm">
@@ -160,7 +160,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                     </VStack>
 
                     <VStack alignItems="start" gap={0} flex="1">
-                      <Text fontSize="sm" mb={1}>
+                      <Text textStyle="sm" mb={1}>
                         {t("Date Range")}
                       </Text>
                       <DatePicker startDate={startDate} endDate={endDate} onChange={handleDateRangeChange} size="sm" />

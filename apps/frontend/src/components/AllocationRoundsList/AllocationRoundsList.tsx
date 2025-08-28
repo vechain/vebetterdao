@@ -40,7 +40,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
       <VStack gap={8} w="full" align={"flex-start"}>
         {!renderInsideCard && (
           <HStack w="full" justify="space-between" alignItems={"baseline"}>
-            <Heading size={["3xl", "4xl"]} fontWeight="bold" lineHeight={1.2}>
+            <Heading size={["3xl", "4xl"]} lineHeight={1.2}>
               {t("Allocations")}
             </Heading>
             {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (

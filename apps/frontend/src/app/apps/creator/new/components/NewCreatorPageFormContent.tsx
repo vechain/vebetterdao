@@ -100,7 +100,7 @@ export const NewCreatorPageFormContent = () => {
           px={4}>
           {/* Text Container */}
           <Stack w="60%" minW="200px" py={2} pl={{ base: 0, md: 4 }}>
-            <Heading color="white" fontWeight="bold" fontSize={{ base: "md", md: "xl", lg: "2xl" }}>
+            <Heading color="white" size={{ base: "md", md: "xl", lg: "2xl" }}>
               {t("Apply for Creator's NFT")}
             </Heading>
             <Text color="white" fontSize={{ base: "sm", md: "md", lg: "lg" }}>

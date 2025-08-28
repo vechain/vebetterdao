@@ -64,7 +64,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
           </HStack>
         </Skeleton>
 
-        <Text fontSize="xs" color="#6A6A6A">
+        <Text textStyle="xs" color="#6A6A6A">
           {t("{{date}}", {
             date: endorsingDate,
           })}

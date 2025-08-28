@@ -33,7 +33,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
       <VStack align="stretch" gap={6}>
         <VStack align="stretch">
           <HStack justify="space-between">
-            <Heading fontSize="xl" fontWeight="700">
+            <Heading textStyle="xl">
               {t(
                 isConnectedUser
                   ? "You’ve requested to delegate your qualification"
@@ -41,7 +41,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
               )}
             </Heading>
           </HStack>
-          <Text color="#6A6A6A" fontSize="md">
+          <Text color="#6A6A6A" textStyle="md">
             {t(
               isConnectedUser
                 ? "You are not currently able to vote due other user is using your Voting Qualification."

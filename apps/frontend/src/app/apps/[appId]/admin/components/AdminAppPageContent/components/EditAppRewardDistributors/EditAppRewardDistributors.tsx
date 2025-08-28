@@ -24,10 +24,10 @@ export const EditAppRewardDistributors = ({ form }: Props) => {
 
   return (
     <VStack align="stretch">
-      <Text fontSize="md" fontWeight={"800"}>
+      <Text textStyle="md" fontWeight={"800"}>
         {t("Reward distributors")}
       </Text>
-      <Text fontSize="sm">
+      <Text textStyle="sm">
         {t(
           "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.",
         )}

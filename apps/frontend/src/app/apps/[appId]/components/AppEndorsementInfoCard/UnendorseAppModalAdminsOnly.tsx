@@ -39,7 +39,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
+        <Heading textStyle="2xl">{t("Remove endorsement")}</Heading>
 
         <Flex position="relative" alignSelf={"center"}>
           <Image src={logo?.image ?? ""} alt="app-logo" w="28" h="28" rounded="md" />
@@ -51,9 +51,8 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
             py={0.5}
             bg="white"
             borderRadius="full"
-            fontSize="2xl"
-            color="#D23F63"
-            fontWeight="700">
+            textStyle="2xl"
+            color="#D23F63">
             {"-"}
             {nodePoints}
           </Text>

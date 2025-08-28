@@ -63,7 +63,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
           <HStack gap={0} alignItems={"baseline"}>
             <Skeleton loading={isB3trBalanceLoading}>
-              <Text color="#B1F16C" fontSize="lg" fontWeight={700}>
+              <Text color="#B1F16C" textStyle="lg" fontWeight={700}>
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>

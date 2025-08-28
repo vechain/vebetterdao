@@ -44,9 +44,7 @@ export const TotalAllocations = () => {
   return (
     <Card.Root flex={1} h="full" w="full" variant="baseWithBorder">
       <Card.Header>
-        <Heading size="xl" fontWeight="bold">
-          {t("Most voted apps")}
-        </Heading>
+        <Heading size="xl">{t("Most voted apps")}</Heading>
       </Card.Header>
       <Card.Body>
         <Stack gap={5} w={"full"}>

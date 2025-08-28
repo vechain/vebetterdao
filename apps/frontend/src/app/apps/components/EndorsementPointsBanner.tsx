@@ -45,7 +45,7 @@ export const EndorsementPointsBanner = () => {
 
       <VStack w="full" gap={2} align="start">
         <Skeleton loading={isLoading}>
-          <Heading fontSize={"16px"} fontWeight={700} color="white">
+          <Heading size="md" color="white">
             {t("As {{nodeType}} holder, you have {{value}} available points to endorse Apps", {
               nodeType,
               value: availablePoints,

@@ -65,7 +65,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
         {!!userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
           <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
             <Card.Header p="1.25rem" pb="0">
-              <Heading fontSize="lg" lineHeight={1}>
+              <Heading textStyle="lg" lineHeight={1}>
                 {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
               </Heading>
             </Card.Header>
@@ -98,18 +98,17 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                       </Card.Header>
 
                       <Card.Body p="0" gap="8px">
-                        <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                        <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                           {t("Node")}
                         </Text>
                         <Text
                           fontSize={isAbove800 ? "sm" : "xs"}
-                          fontWeight={700}
                           lineHeight={isAbove800 ? 1.6 : 1.2}
                           lineClamp={isAbove800 ? 1 : undefined}>
                           {`${node.name} #${node.nodeId}`}
                         </Text>
                         <Box display="inline-block" w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                          <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
+                          <Text textStyle="xs" _dark={{ color: "#FFFFFFB2" }}>
                             {t("{{value}} points", { value: node.xNodePoints })}
                           </Text>
                         </Box>

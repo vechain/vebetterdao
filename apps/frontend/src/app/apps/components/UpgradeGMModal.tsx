@@ -77,7 +77,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
         <Dialog.Header>
           <VStack gap={4} align="flex-start">
             <UilArrowCircleUp cursor="pointer" size="50px" color="#004CFC" />
-            <Heading fontSize="xl">{t("Upgrade GM NFT")}</Heading>
+            <Heading textStyle="xl">{t("Upgrade GM NFT")}</Heading>
           </VStack>
         </Dialog.Header>
         <Dialog.Body gap={[0, 4]} pt={0}>
@@ -92,9 +92,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             </Text>
             <HStack>
               <B3TRIcon boxSize={7} />
-              <Heading fontSize="x-large" fontWeight={700}>
-                {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
-              </Heading>
+              <Heading size="xl">{compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}</Heading>
             </HStack>
           </VStack>
           <VStack align="stretch" py={[2, 5]}>
@@ -148,7 +146,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     </Skeleton>
                   </Box>
                   <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
-                    <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "x-large" : "md"}>
+                    <Text lineClamp={1} fontSize={isAbove800 ? "x-large" : "md"}>
                       {`${nextLevelGM?.name} #${tokenId}`}
                     </Text>
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
@@ -186,7 +184,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
             </Button>
-            <Button variant={"primaryGhost"} fontWeight={700} color={"#004CFC"} w={"full"} onClick={handleClose}>
+            <Button variant={"primaryGhost"} color={"#004CFC"} w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

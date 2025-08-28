@@ -54,7 +54,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                   {isPaused && (
                     <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
                       <Alert.Indicator w={5} h={5} />
-                      <Box lineHeight={"1.20rem"} fontSize="sm">
+                      <Box lineHeight={"1.20rem"} textStyle="sm">
                         <Alert.Description as="span">
                           {t(
                             "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",

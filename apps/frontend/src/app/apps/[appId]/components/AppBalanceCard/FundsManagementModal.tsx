@@ -187,7 +187,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
               <CloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Header>
-              <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+              <Text fontSize={{ base: 18, md: 24 }} alignSelf={"center"}>
                 {t("Refill Pools")}
               </Text>
             </Dialog.Header>
@@ -226,7 +226,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                           {isLoading ? (
                             <Skeleton height="20px" width="60px" />
                           ) : (
-                            <Heading fontSize={{ base: 30, md: 36 }} color="#6A6A6A">
+                            <Heading size={{ base: "3xl", md: "4xl" }} color="#6A6A6A">
                               {formatDisplayValue(
                                 activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards,
                               )}

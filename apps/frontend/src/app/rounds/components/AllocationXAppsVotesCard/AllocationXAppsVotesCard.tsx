@@ -41,7 +41,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           height="200px"
           borderRadius={"xl"}>
           <Alert.Indicator boxSize="40px" mr={0} />
-          <Alert.Title mt={4} mb={1} fontSize="lg">
+          <Alert.Title mt={4} mb={1} textStyle="lg">
             {t("Error loading votes")}
           </Alert.Title>
           <Alert.Description maxWidth="sm">
@@ -58,9 +58,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
     <Card.Root flex={1} h="full" w="full" variant={"baseWithBorder"}>
       <Card.Header>
         <HStack justify={"space-between"} w="full">
-          <Heading fontSize="24px" fontWeight={700}>
-            {title}
-          </Heading>
+          <Heading size="2xl">{title}</Heading>
         </HStack>
       </Card.Header>
       <Card.Body>

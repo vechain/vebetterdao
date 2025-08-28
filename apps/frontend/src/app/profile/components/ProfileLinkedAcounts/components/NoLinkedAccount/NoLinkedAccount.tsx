@@ -22,10 +22,10 @@ export const NoLinkedAccount = ({ address }: Props) => {
     <Flex align="center" justify="center" w="full" minH="80">
       <VStack gap={4}>
         <PeopleIcon color="#757575" size="105" />
-        <Heading fontSize="xl" fontWeight="500" textAlign="center">
+        <Heading textStyle="xl" fontWeight="500" textAlign="center">
           {isConnectedUser ? t("You have no linked accounts") : t("No linked accounts")}
         </Heading>
-        <Text fontSize="sm" color="#757575" textAlign="center">
+        <Text textStyle="sm" color="#757575" textAlign="center">
           {isConnectedUser
             ? t("You can merge several secondary accounts with your main one")
             : t("Several secondary accounts can be merged with the user's account.")}

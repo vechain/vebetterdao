@@ -94,7 +94,7 @@ export const FunctionsPageContent = () => {
                 </Field.Root>
               )}
             </Stack>
-            <Text fontSize="sm" fontWeight={400} color={"gray.500"} mt={4}>
+            <Text textStyle="sm" fontWeight={400} color={"gray.500"} mt={4}>
               {t(
                 "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
               )}
@@ -108,7 +108,7 @@ export const FunctionsPageContent = () => {
             handleRemoveFunction={handleRemoveFunction}
           />
           <HStack w="full" justify={"space-between"}>
-            <Text color="red.500" fontSize="md" fontWeight={600}>
+            <Text color="red.500" textStyle="md" fontWeight={600}>
               {submitError}
             </Text>
             <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>

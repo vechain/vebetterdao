@@ -60,11 +60,11 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">
+              <Heading textStyle="lg">
                 {t(isXNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
               </Heading>
             </HStack>
-            <Text fontSize="sm">
+            <Text textStyle="sm">
               {t(
                 isXNodeAttachedToGM
                   ? "Your Node is attached to the following GM NFT"
@@ -100,16 +100,14 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                 </Box>
               </Skeleton>
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} lineClamp={1}>
-                  {attachedGMNFT?.metadata?.name}
-                </Text>
+                <Text lineClamp={1}>{attachedGMNFT?.metadata?.name}</Text>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
-                    <Text fontSize="sm" fontWeight={600}>
+                    <Text textStyle="sm" fontWeight={600}>
                       {attachedGMNFT?.multiplier}
                       {"x"}
                     </Text>
-                    <Text fontSize="sm" fontWeight={400} lineClamp={1}>
+                    <Text textStyle="sm" fontWeight={400} lineClamp={1}>
                       {t("GM reward weight")}
                     </Text>
                   </HStack>

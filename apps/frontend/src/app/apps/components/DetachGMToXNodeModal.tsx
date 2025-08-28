@@ -44,7 +44,7 @@ export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }
           <CloseButton />
         </Dialog.CloseTrigger>
         <Dialog.Header>
-          <Heading fontSize="xl">{t("Detach Node from GM NFT")}</Heading>
+          <Heading textStyle="xl">{t("Detach Node from GM NFT")}</Heading>
         </Dialog.Header>
         {levelAfterDetach && gmLevel !== levelAfterDetach && (
           <Dialog.Body>

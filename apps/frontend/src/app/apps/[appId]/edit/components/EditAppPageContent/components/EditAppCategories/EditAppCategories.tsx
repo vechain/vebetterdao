@@ -167,7 +167,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
       </HStack>
 
       {selectedCategories.length === 0 && (
-        <Text color="#6A6A6A" fontSize="sm">
+        <Text color="#6A6A6A" textStyle="sm">
           {t("No categories selected. Select up to 2 categories.")}
         </Text>
       )}

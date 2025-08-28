@@ -245,7 +245,7 @@ export const StatsPageContent = () => {
             {"%"}
           </ProgressCircle.Label>
         </ProgressCircle.Root>
-        <Text fontSize="lg" color="gray.600">
+        <Text textStyle="lg" color="gray.600">
           {t("Fetching data...")}
         </Text>
       </VStack>

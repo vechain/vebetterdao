@@ -42,11 +42,7 @@ export const CastAllocationVoteStepperCard = () => {
   return (
     <ResponsiveCard>
       <VStack gap={8} w="full" align={"flex-start"}>
-        {isDesktop && (
-          <Heading fontSize="24px" fontWeight={700}>
-            {t("Progress")}
-          </Heading>
-        )}
+        {isDesktop && <Heading size="2xl">{t("Progress")}</Heading>}
         <Steps.Root
           w="full"
           size="sm"

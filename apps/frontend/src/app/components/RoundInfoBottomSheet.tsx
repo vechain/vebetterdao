@@ -78,7 +78,7 @@ export const RoundInfoBottomSheet = () => {
           zIndex={2}>
           <Box>
             <Skeleton loading={isCardLoading}>
-              <Heading fontSize={"20px"} fontWeight={400}>
+              <Heading size={"xl"} fontWeight={400}>
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
@@ -111,7 +111,7 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading fontSize={"20px"} fontWeight={400} color="#252525">
+                <Heading size={"xl"} fontWeight={400} color="#252525">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
@@ -135,9 +135,7 @@ export const RoundInfoBottomSheet = () => {
           </HStack>
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
-              <Heading fontSize="18px" fontWeight={700}>
-                {t("Allocations voting")}
-              </Heading>
+              <Heading size="lg">{t("Allocations voting")}</Heading>
               <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
                 {t("Each week, you can vote for your favorite apps to help distribute resources among them!")}
               </Text>
@@ -166,9 +164,7 @@ export const RoundInfoBottomSheet = () => {
                   <HStack gap={1} align="center">
                     <B3TRIcon boxSize="16px" colorVariant="dark" />
                     <Skeleton loading={amountsLoading}>
-                      <Heading fontSize="16x" fontWeight={700}>
-                        {getCompactFormatter(2).format(totalAmount)}
-                      </Heading>
+                      <Heading size="md">{getCompactFormatter(2).format(totalAmount)}</Heading>
                     </Skeleton>
                   </HStack>
                   <Text fontSize="10px" color="#6A6A6A">
@@ -198,9 +194,7 @@ export const RoundInfoBottomSheet = () => {
           </VStack>
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
-              <Heading fontSize="18px" fontWeight={700}>
-                {t("Proposals in this round or looking for support")}
-              </Heading>
+              <Heading size="lg">{t("Proposals in this round or looking for support")}</Heading>
               <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
               </Text>

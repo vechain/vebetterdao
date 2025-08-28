@@ -73,9 +73,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         onClose()
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading size="xl" fontWeight={700}>
-          {t("Endorse {{appName}} dApp", { appName: xApp?.name })}
-        </Heading>
+        <Heading size="xl">{t("Endorse {{appName}} dApp", { appName: xApp?.name })}</Heading>
 
         <Text
           as="span"
@@ -84,7 +82,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           whiteSpace="normal"
           wordBreak="break-word"
           flexWrap="wrap"
-          fontSize="sm">
+          textStyle="sm">
           {t("Select your node")}
         </Text>
 
@@ -111,14 +109,14 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                     alignItems="center"
                     flexDirection="row">
                     <Card.Body p="0" gap="0">
-                      <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                      <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                         {t("Node")}
                       </Text>
-                      <Text fontWeight={700} lineHeight={1.6} lineClamp={1}>
+                      <Text lineHeight={1.6} lineClamp={1}>
                         {`${node.name} #${node.nodeId}`}
                       </Text>
                       <Box w="fit-content" p="4px 8px" rounded="8px" bg="#F2F2F269">
-                        <Text fontSize="xs" _dark={{ color: "#FFFFFFB2" }}>
+                        <Text textStyle="xs" _dark={{ color: "#FFFFFFB2" }}>
                           {t("{{value}} points", { value: node.xNodePoints })}
                         </Text>
                       </Box>
@@ -133,7 +131,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </VStack>
           </RadioGroup.Root>
 
-          <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+          <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
             {t("Current DApp score: {{score}}", { score: appScore })}
             <br />
             {t("DApp score after endorsement: {{score}}", { score: newScore })}

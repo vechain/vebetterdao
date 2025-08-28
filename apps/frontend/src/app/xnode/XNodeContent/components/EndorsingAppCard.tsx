@@ -85,11 +85,11 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Endorsed app")}</Heading>
+              <Heading textStyle="lg">{t("Endorsed app")}</Heading>
               {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
             </HStack>
             {!isEndorsingApp && (
-              <Text fontSize="sm">
+              <Text textStyle="sm">
                 {t(
                   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.",
                 )}
@@ -120,7 +120,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
                     <Image src={endorsedApp?.metadata.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
-                    <Heading fontSize="lg" fontWeight={"600"}>
+                    <Heading textStyle="lg" fontWeight={"600"}>
                       {endorsedApp?.name}
                     </Heading>
                   </HStack>
@@ -144,7 +144,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                       {endorsingSince}
                     </Text>
                     <Text
-                      fontSize="xs"
+                      textStyle="xs"
                       color="#6A6A6A"
                       order={[0, 0, 1]} // Change order for large viewports
                       pr={[1, 2, 0]} // Change padding for large viewports
@@ -186,7 +186,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
             <Flex align="center" justify={"center"} p={["8", "8", "12"]} bg="#F8F8F8" rounded="2xl" mt="2">
               <VStack align="center" gap={2} maxW="27rem" textAlign={"center"}>
                 <UilSearch size={searchIconSize} color="#757575" />
-                <Heading fontSize="xl" color="#757575" fontWeight={"500"}>
+                <Heading textStyle="xl" color="#757575" fontWeight={"500"}>
                   {t("You’re not endorsing any app")}
                 </Heading>
                 {xNode.isXNodeDelegator ? (

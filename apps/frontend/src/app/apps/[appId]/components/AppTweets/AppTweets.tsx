@@ -127,9 +127,7 @@ export const AppTweets = () => {
       />
       <VStack align="stretch" gap={4}>
         <HStack justify={"space-between"} flexWrap={"wrap"}>
-          <Heading fontSize={"36px"} fontWeight={700}>
-            {t("App updates")}
-          </Heading>
+          <Heading size="4xl">{t("App updates")}</Heading>
           {isAdminOrModerator && (
             <>
               {editMode ? (
@@ -174,7 +172,7 @@ export const AppTweets = () => {
             <Card.Body>
               <VStack align={"center"} justify={"center"} w="full" minH="200px">
                 <OkHandIcon color="#757575" />
-                <Heading fontSize={"20px"} fontWeight={500} textAlign={"center"}>
+                <Heading size="xl" fontWeight={500} textAlign={"center"}>
                   {t("App will add updates here.")}
                 </Heading>
               </VStack>

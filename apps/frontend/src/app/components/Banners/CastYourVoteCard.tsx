@@ -61,12 +61,12 @@ export const CastYourVoteCard: React.FC = () => {
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={2} order={[2, 2, 1]}>
             <VStack gap={4} w="full" justifyContent={"start"} alignItems={"start"}>
-              <Heading fontSize="16px" fontWeight={"700"} textTransform={"uppercase"} color="primary.500" zIndex={1}>
+              <Heading size="md" textTransform={"uppercase"} color="primary.500" zIndex={1}>
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
               </Heading>
-              <Heading fontSize={["24px", "24px", "36px"]} fontWeight={"700"} zIndex={1}>
+              <Heading size={["2xl", "2xl", "4xl"]} zIndex={1}>
                 {t("Time to cast your vote and earn rewards!")}
               </Heading>
 

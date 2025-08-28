@@ -37,7 +37,7 @@ export const PendingActions = ({ address }: Props) => {
                 <Text textStyle="xs" color="#8D6602" fontWeight="600">
                   {t("PENDING ACTIONS")}
                 </Text>
-                <Heading fontSize="lg" fontWeight="700" color="#5F4400">
+                <Heading textStyle="lg" color="#5F4400">
                   {missingActionsLabel.long}
                 </Heading>
               </VStack>
@@ -58,12 +58,12 @@ export const PendingActions = ({ address }: Props) => {
                   bottom={0}
                   w={`${scorePercentage * 100}%`}
                   bg="#F29B32"></Flex>
-                <Text fontWeight={700} fontSize={"xs"} zIndex={1}>
+                <Text fontSize={"xs"} zIndex={1}>
                   {t("YOU CANNOT VOTE YET")}
                 </Text>
               </Flex>
               <Flex justify="center">
-                <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
+                <Text color="#6A6A6A" fontWeight="400" textStyle="xs">
                   {missingActions ? missingActionsLabel.short : t("You are qualified!")}
                 </Text>
               </Flex>
@@ -77,7 +77,7 @@ export const PendingActions = ({ address }: Props) => {
               <Text textStyle="xs" color="#8D6602" fontWeight="600">
                 {t("PENDING ACTIONS")}
               </Text>
-              <Heading fontSize="lg" fontWeight="700" color="#5F4400">
+              <Heading textStyle="lg" color="#5F4400">
                 {t("Increase your sustainable score to become eligible for voting.")}
               </Heading>
             </VStack>
@@ -92,12 +92,12 @@ export const PendingActions = ({ address }: Props) => {
             position="relative"
             overflow={"hidden"}>
             <Flex position="absolute" top={0} left={0} bottom={0} w={`${scorePercentage}%`} bg="#F29B32"></Flex>
-            <Text fontWeight={700} fontSize={"xs"} zIndex={1}>
+            <Text fontSize={"xs"} zIndex={1}>
               {t("YOU CANNOT VOTE YET")}
             </Text>
           </Flex>
           <Flex justify="flex-end">
-            <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
+            <Text color="#6A6A6A" fontWeight="400" textStyle="xs">
               {missingActions
                 ? t("You need {{missingActions}} more actions", {
                     missingActions,

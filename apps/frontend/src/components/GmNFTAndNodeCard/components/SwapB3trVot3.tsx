@@ -56,7 +56,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
           direction={isAbove600 ? "row" : "column"}
           justify={"space-between"}
           align={isAbove600 ? "center" : "flex-start"}>
-          <Text fontSize="xl" fontWeight={700}>
+          <Text textStyle="xl">
             {t("{{value}} tokens", {
               value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
             })}
@@ -73,13 +73,13 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             borderColor={"#FFFFFF33"}
             p="12px 16px"
             rounded="8px">
-            <Text fontSize="sm" color="#FFFFFFB2">
+            <Text textStyle="sm" color="#FFFFFFB2">
               {t("Total B3TR Balance")}
             </Text>
             <HStack>
               <B3TRIcon boxSize={"30px"} />
               <Skeleton loading={isB3trBalanceLoading}>
-                <Heading fontSize="1.75rem">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
+                <Heading size="3xl">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
           </VStack>
@@ -91,13 +91,13 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             borderColor={"#FFFFFF33"}
             p="12px 16px"
             rounded="8px">
-            <Text fontSize="sm" color="#FFFFFFB2">
+            <Text textStyle="sm" color="#FFFFFFB2">
               {t("Total VOT3 Balance")}
             </Text>
             <HStack>
               <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
               <Skeleton loading={isVot3BalanceLoading}>
-                <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
+                <Heading size="3xl">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
           </VStack>

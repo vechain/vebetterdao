@@ -193,9 +193,7 @@ export const AdminAppPageContent = () => {
     <Card.Root variant="baseWithBorder" w="full">
       <Card.Body>
         <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
-          <Heading fontSize={"36px"} fontWeight={700}>
-            {t("{{app}} settings", { app: appMetadata?.name })}
-          </Heading>
+          <Heading size="4xl">{t("{{app}} settings", { app: appMetadata?.name })}</Heading>
           <EditAppCreatorNFT form={form} />
           <Separator />
           <EditAppModerators form={form} />

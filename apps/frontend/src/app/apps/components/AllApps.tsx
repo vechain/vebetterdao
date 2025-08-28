@@ -158,7 +158,7 @@ export const AllApps = ({
                       <Text fontWeight={sortOption === option.id && sortOption !== "default" ? "semibold" : "normal"}>
                         {option.label}
                       </Text>
-                      <Text fontSize="xs" color="gray.500">
+                      <Text textStyle="xs" color="gray.500">
                         {option.description}
                       </Text>
                     </VStack>
@@ -197,7 +197,7 @@ export const AllApps = ({
               h="20px"
               justify="center"
               align="center"
-              fontSize="xs"
+              textStyle="xs"
               fontWeight="bold"
               boxShadow="0px 0px 4px rgba(0, 0, 0, 0.2)">
               {activeFiltersCount}

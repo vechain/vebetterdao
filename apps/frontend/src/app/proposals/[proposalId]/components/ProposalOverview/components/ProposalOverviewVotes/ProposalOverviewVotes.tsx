@@ -81,7 +81,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
               <Text fontWeight={"500"} textAlign={"center"} fontSize="20px">
                 {t("This proposal will be voted in")}
               </Text>
-              <Text fontWeight={"700"} textAlign={"center"} fontSize="36px">
+              <Text textAlign={"center"} fontSize="36px">
                 {timestampToTimeLeft(proposal.votingStartDate)}
               </Text>
             </VStack>
@@ -95,7 +95,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
             <Text fontWeight={"500"} textAlign={"center"} fontSize="20px">
               {t("This proposal must get the support of the community before the round starts")}
             </Text>
-            <Text fontWeight={"700"} textAlign={"center"} fontSize="36px">
+            <Text textAlign={"center"} fontSize="36px">
               {timestampToTimeLeft(proposal.votingStartDate)}
             </Text>
           </VStack>
@@ -126,9 +126,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
             borderWidth: 1,
           }}>
           <VStack alignItems={"stretch"} w="full" justify={"space-between"} gap={3}>
-            <Heading fontWeight={"700"} fontSize="20px">
-              {t("Real time votes")}
-            </Heading>
+            <Heading size="xl">{t("Real time votes")}</Heading>
             <VStack w="full" justify={"space-between"} gap={0} align={"flex-start"}>
               <Text fontWeight={"400"} color="#6A6A6A">
                 {t("Wallets voted")}

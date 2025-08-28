@@ -44,10 +44,10 @@ export const XNodeCard = ({
           {xNodeName}
         </Text>
         <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-          <Text fontSize="xs" fontWeight={600}>
+          <Text textStyle="xs" fontWeight={600}>
             {xNodePoints}
           </Text>
-          <Text fontSize="xs" fontWeight={400}>
+          <Text textStyle="xs" fontWeight={400}>
             {t("points")}
           </Text>
         </HStack>

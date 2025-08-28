@@ -31,13 +31,13 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="xl" fontWeight="700">
+              <Heading textStyle="xl">
                 {t("You are using {{delegatorAddress}} voting qualification", {
                   delegatorAddress: domain ?? humanAddress(delegatorAddress, 6, 6),
                 })}
               </Heading>
             </HStack>
-            <Text color="#6A6A6A" fontSize="md">
+            <Text color="#6A6A6A" textStyle="md">
               {isPerson
                 ? t("While this account keeps their qualification, you’ll be able to use it to vote.")
                 : t("This account is not currently qualified to vote.")}

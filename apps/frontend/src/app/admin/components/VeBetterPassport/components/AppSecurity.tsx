@@ -36,7 +36,7 @@ export const AppSecurity = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("App Security")}</Heading>
-        <Text fontSize="sm">{t("Change an app's security level")}</Text>
+        <Text textStyle="sm">{t("Change an app's security level")}</Text>
       </Card.Header>
       <Card.Body>
         <form onSubmit={handleSubmit}>

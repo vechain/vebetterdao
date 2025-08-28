@@ -36,7 +36,7 @@ export const ManagedAppsCard = () => {
       <Card.Body>
         <VStack gap={4} align="flex-start" w={"full"}>
           <HStack justifyContent={"space-between"} w="full">
-            <Heading fontSize="24px">{t("Managed apps")}</Heading>
+            <Heading size="2xl">{t("Managed apps")}</Heading>
 
             {userAppRoles.length > 1 && (
               <HStack justifyContent={"flex-end"}>

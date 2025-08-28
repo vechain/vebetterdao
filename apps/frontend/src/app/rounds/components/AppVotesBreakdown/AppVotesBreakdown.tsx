@@ -139,7 +139,7 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
                   <Image src={logo ?? notFoundImage} alt={metadata?.name} boxSize={"32px"} borderRadius="9px" />
                 )}
               </Skeleton>
-              <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
+              <Text textStyle="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
                 {t("{{percentage}}%", { percentage: vote.value })}
               </Text>
             </VStack>

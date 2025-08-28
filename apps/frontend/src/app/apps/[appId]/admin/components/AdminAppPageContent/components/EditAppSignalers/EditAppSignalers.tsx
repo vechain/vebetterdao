@@ -24,9 +24,7 @@ export const EditAppSignalers = ({ form }: Props) => {
 
   return (
     <VStack align="stretch">
-      <Heading fontSize={"24px"} fontWeight={700}>
-        {t("Signalers")}
-      </Heading>
+      <Heading size="2xl">{t("Signalers")}</Heading>
       <Text color="#6A6A6A">
         {t("These users will have the ability to bot-signal and reset signal counts for individual users.")}
       </Text>

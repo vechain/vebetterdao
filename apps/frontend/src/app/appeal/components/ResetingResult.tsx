@@ -31,7 +31,7 @@ export const ResetingResult = ({
         <VStack align="stretch" gap={2}>
           <Alert.Root status="error" size="md" borderRadius="16px">
             <Alert.Indicator w={4} h={4} color="#C84968" />
-            <Box lineHeight={"1.20rem"} fontSize="md" color="#C84968">
+            <Box lineHeight={"1.20rem"} textStyle="md" color="#C84968">
               <Alert.Title>
                 {t("Unable to process request. Try refreshing or contact support.")}{" "}
                 <Button
@@ -50,7 +50,7 @@ export const ResetingResult = ({
 
               <Collapsible.Root open={isOpen}>
                 <Collapsible.Content mt={2} borderRadius="md" bg={"gray.50"} overflowX="auto">
-                  <Text fontSize="xs" p={2} fontWeight="bold" color={"gray.600"}>
+                  <Text textStyle="xs" p={2} fontWeight="bold" color={"gray.600"}>
                     {t("Error Details")}
                   </Text>
                   <Code
@@ -60,7 +60,7 @@ export const ResetingResult = ({
                     borderRadius="md"
                     bg={"gray.100"}
                     color={"black"}
-                    fontSize="xs">
+                    textStyle="xs">
                     {apiResponse}
                   </Code>
                 </Collapsible.Content>

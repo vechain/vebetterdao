@@ -65,7 +65,7 @@ export const UpdateConfirmationModal = ({
         <Dialog.Body px="40px" py="20px">
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 100, sm: 180 })} />
-            <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+            <Heading size={["xl", "3xl"]} textAlign={"center"}>
               {t("Just to be sure, you’re updating:")}
             </Heading>
             {isTeamWalletAddressChanged && (

@@ -22,7 +22,7 @@ export const NotConnectedWallet = () => {
         <Stack direction={isAbove1200 ? "row" : "column"} gap="24px" align="center">
           <WalletIcon />
           <Stack align="stretch">
-            <Text fontSize="2xl" fontWeight={600} textAlign={isAbove1200 ? "left" : "center"}>
+            <Text textStyle="2xl" fontWeight={600} textAlign={isAbove1200 ? "left" : "center"}>
               {t("Wallet not connected")}
             </Text>
             <Text textAlign={isAbove1200 ? "left" : "center"}>

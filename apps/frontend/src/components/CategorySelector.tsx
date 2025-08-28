@@ -108,9 +108,9 @@ export const CategorySelector = <T extends FieldValues>({
 
   return (
     <Field.Root invalid={!!error}>
-      <Field.Label fontSize="md">{t("App Categories")}</Field.Label>
+      <Field.Label textStyle="md">{t("App Categories")}</Field.Label>
 
-      <Text fontSize="xs" color="gray.500" mb={2}>
+      <Text textStyle="xs" color="gray.500" mb={2}>
         {t("Select up to 2 categories that best describe your app.")}
       </Text>
 

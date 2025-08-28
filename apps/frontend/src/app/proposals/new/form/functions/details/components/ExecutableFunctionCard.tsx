@@ -43,7 +43,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
                   top="50%"
                   left="50%"
                   transform="translate(-50%, -50%)"
-                  fontSize="sm"
+                  textStyle="sm"
                   color="contrast-bg-on-muted"
                   fontWeight={600}>
                   {index + 1}
@@ -51,7 +51,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               </Box>
               <Box>
                 <Heading size="md">{field.name}</Heading>
-                <Text fontSize="sm" color="contrast-bg-strong">
+                <Text textStyle="sm" color="contrast-bg-strong">
                   {field.description}
                 </Text>
               </Box>

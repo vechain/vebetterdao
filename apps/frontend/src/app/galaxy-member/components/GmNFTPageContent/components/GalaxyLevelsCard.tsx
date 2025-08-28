@@ -49,7 +49,7 @@ export const GalaxyLevelsCard = () => {
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Reward Weight")}</Heading>
+              <Heading textStyle="lg">{t("Reward Weight")}</Heading>
               <Tooltip
                 content={
                   <Table.ScrollArea maxW="280px" maxH="400px" overflowY="auto">
@@ -84,7 +84,7 @@ export const GalaxyLevelsCard = () => {
                 </span>
               </Tooltip>
             </HStack>
-            <Text fontSize="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="#6A6A6A">
               {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
             </Text>
           </VStack>
@@ -96,23 +96,23 @@ export const GalaxyLevelsCard = () => {
                   <Flex position="relative" w="10" h="10" rounded="full" overflow={"hidden"}>
                     <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position={"absolute"} />
                     <Flex w="full" h="full" align="center" justify="center" bg={"rgba(0, 0, 0, 0.2)"} zIndex={1}>
-                      <Text fontSize="md" color="#FFFFFF" fontWeight={700}>
+                      <Text textStyle="md" color="#FFFFFF">
                         {gmNft.level}
                       </Text>
                     </Flex>
                   </Flex>
                   <VStack align="stretch" gap={0}>
-                    <Text fontSize="lg" fontWeight={"600"}>
+                    <Text textStyle="lg" fontWeight={"600"}>
                       {gmNft.name}
                     </Text>
-                    <Text fontSize="sm" color="#6A6A6A">
+                    <Text textStyle="sm" color="#6A6A6A">
                       {getLevelText(Number(gmNft.level), maxGMLevel, Number(tokenLevel))}
                     </Text>
                   </VStack>
                 </HStack>
                 {isCurrentLevel ? (
                   <Heading
-                    fontSize="2xl"
+                    textStyle="2xl"
                     bg={getLevelGradient(Number(tokenLevel))}
                     style={{
                       WebkitBackgroundClip: "text",
@@ -121,7 +121,7 @@ export const GalaxyLevelsCard = () => {
                     {gmNft.multiplier}
                   </Heading>
                 ) : (
-                  <Text fontSize="lg" color="#6A6A6A">
+                  <Text textStyle="lg" color="#6A6A6A">
                     {gmNft.multiplier}
                   </Text>
                 )}
@@ -129,7 +129,7 @@ export const GalaxyLevelsCard = () => {
             )
           })}
           {showShortened && gmNfts.slice(0, maxGMLevel).length > gmNftsShortened.length && (
-            <Button variant={"primaryLink"} onClick={() => setShowShortened(false)} fontSize="lg">
+            <Button variant={"primaryLink"} onClick={() => setShowShortened(false)} textStyle="lg">
               {t("See all levels")}
             </Button>
           )}

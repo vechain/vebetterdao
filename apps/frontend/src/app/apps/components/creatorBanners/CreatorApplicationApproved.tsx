@@ -39,9 +39,7 @@ export const CreatorApplicationApproved = () => {
           <Stack direction={{ base: "column" }} w="full" h="full" align={"center"} justify={"center"} py={4}>
             {/* Right Section: Image, Title, and Description */}
             <Stack align={"center"} justify={"center"}>
-              <Heading fontWeight={700} fontSize={"15px"}>
-                {t("Your Creator's NFT application was approved")}
-              </Heading>
+              <Heading size={"sm"}>{t("Your Creator's NFT application was approved")}</Heading>
               <Text fontSize={"14px"} color="#6A6A6A" fontWeight={400}>
                 {t("You can now submit your app to the VeBetterDAO ecosystem")}
               </Text>

@@ -33,17 +33,17 @@ export const RejectLinkingModal = ({
       <VStack alignItems="stretch" gap={6}>
         <VStack justifyContent="center" alignItems="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
-          <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
+          <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to reject the linking proposal?")}
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
           <Text fontWeight="600">{t("You’re rejecting it from")}</Text>
-          <Text fontSize="sm">{secondaryAccount}</Text>
+          <Text textStyle="sm">{secondaryAccount}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
+          <Box lineHeight={"1.20rem"} color="#C84968" textStyle="sm">
             <Alert.Title as="span">{t("You will not able to use the actions performed in this address.")}</Alert.Title>
             <Alert.Description as="span">{t("once you have rejected the linking proposal.")}</Alert.Description>
           </Box>

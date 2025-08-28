@@ -76,7 +76,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
               onClick={onClick}
               size="md"
               fontWeight="semibold"
-              fontSize="md"
+              textStyle="md"
               data-testid={selected ? "current-section" : ""}>
               <Icon as={route.icon} boxSize={4} />
               {route.name}

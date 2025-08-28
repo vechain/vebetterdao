@@ -75,7 +75,7 @@ export const DashboardAllocationRounds = () => {
           )}
 
           <VStack gap={2}>
-            <Heading fontSize="24px" fontWeight={400}>
+            <Heading size="2xl" fontWeight="normal">
               <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: selectedRoundId }} t={t} />
             </Heading>
             <HStack gap={2}>
@@ -124,7 +124,7 @@ export const DashboardAllocationRounds = () => {
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack gap={4} w="full">
-          <Heading fontSize="24px" fontWeight={400}>
+          <Heading size="2xl" fontWeight="normal">
             {t("Proposals in this round or looking for support")}
           </Heading>
 

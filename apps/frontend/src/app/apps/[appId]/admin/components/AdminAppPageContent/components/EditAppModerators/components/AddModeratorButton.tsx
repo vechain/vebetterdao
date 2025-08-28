@@ -45,7 +45,7 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
               <UilUser size="54px" color="#004CFC" />
-              <Heading fontSize="28px">{t("Add a new moderator")}</Heading>
+              <Heading size="3xl">{t("Add a new moderator")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
                   <Text fontSize="14px">{t("User wallet address")}</Text>

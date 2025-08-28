@@ -143,16 +143,14 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   return (
     <ResponsiveCard>
       <VStack w="full" gap={8} align={"flex-start"}>
-        <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
-          {t("Assign percentage of VOT3 to the apps")}
-        </Heading>
+        <Heading size={["2xl", "2xl", "4xl"]}>{t("Assign percentage of VOT3 to the apps")}</Heading>
         <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
           )}
         </Text>
         <HStack w="full" gap={4} justify={"space-between"}>
-          <Heading fontSize={"20px"} fontWeight={700}>
+          <Heading size={"xl"}>
             <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: votes.length }} t={t} />
           </Heading>
           <Button variant={"primaryLink"} onClick={splitEvenly}>

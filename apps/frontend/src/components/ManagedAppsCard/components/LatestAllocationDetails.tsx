@@ -57,7 +57,7 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
         <VStack align="self-start" gap={0}>
           <HStack>
             <Image h="24px" w="24px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Heading fontSize="24px">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
+            <Heading size="2xl">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
           </HStack>
           <Text fontSize={"sm"} color={"gray.500"}>
             {t("Latest allocation")}

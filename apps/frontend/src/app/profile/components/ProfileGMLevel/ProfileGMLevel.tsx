@@ -13,7 +13,7 @@ export const ProfileGMLevel = ({ address }: { address: string }) => {
     <VStack gap="4" align="stretch">
       <Card.Root variant="baseWithBorder">
         <Card.Header p="1.25rem" pb="0">
-          <Heading fontSize="1.25rem">{t("Galaxy Member")}</Heading>
+          <Heading size="xl">{t("Galaxy Member")}</Heading>
         </Card.Header>
 
         <Card.Body>

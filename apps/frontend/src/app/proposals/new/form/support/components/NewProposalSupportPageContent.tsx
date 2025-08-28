@@ -58,9 +58,7 @@ export const NewProposalSupportPageContent = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[6, 8]} alignItems="flex-start">
             <VStack gap={[4, 6]} alignItems="flex-start">
-              <Heading size={["xl", "2xl"]} fontWeight="bold">
-                {t("Community support")}
-              </Heading>
+              <Heading size={["xl", "2xl"]}>{t("Community support")}</Heading>
               <Text fontSize={["sm", "md"]} color="gray.500">
                 {t(
                   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",
@@ -71,7 +69,7 @@ export const NewProposalSupportPageContent = () => {
             </VStack>
             <VStack gap={2} align="flex-start" w="full">
               <Heading size={["sm", "md"]}>{t("How much VOT3 do you want to lock to fund this proposal?")}</Heading>
-              <Text fontSize="sm" color="gray.500">
+              <Text textStyle="sm" color="gray.500">
                 {t("Your VOT3 will be unlocked when the voting session ends.")}
               </Text>
 

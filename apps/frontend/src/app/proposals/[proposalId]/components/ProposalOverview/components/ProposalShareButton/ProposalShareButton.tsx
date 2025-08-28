@@ -75,9 +75,7 @@ export const ProposalShareButton = () => {
                   />
                 </Box>
                 <VStack>
-                  <Heading fontSize="28px" fontWeight={700}>
-                    {t("Share this proposal")}
-                  </Heading>
+                  <Heading size="3xl">{t("Share this proposal")}</Heading>
                   <Text fontSize="16px" fontWeight={400} color="#6A6A6A" textAlign={"center"}>
                     {t("Share the proposal on social media and invite people to vote")}
                   </Text>

@@ -87,12 +87,12 @@ Props) => {
             </Skeleton>
           </VStack>
           <VStack gap={0} align={"flex-start"}>
-            <Heading fontSize={["16px"]} fontWeight={600}>
+            <Heading size={["md"]} fontWeight={600}>
               {appMetadata?.name}
             </Heading>
             <VStack gap={0} align={"flex-start"} justify={"flex-start"}>
               <Heading
-                fontSize={["16px"]}
+                size={["md"]}
                 fontWeight={600}
                 color="#6DCB09"
                 data-testid={`${appMetadata?.name}-votes-percentage`}>
@@ -109,7 +109,7 @@ Props) => {
             <VStack gap={0} align={["flex-end"]}>
               <Skeleton loading={forecastedEarningsLoading}>
                 <HStack gap={1} align={"center"} justify={"flex-start"} w="full">
-                  <Heading fontSize={["14px", "16px"]} fontWeight={600}>
+                  <Heading size={["sm", "md"]} fontWeight={600}>
                     {compactFormatter.format(Number(forecastedEarnings?.amount))}
                   </Heading>
                   <B3TRIcon boxSize={["14px", "16px"]} colorVariant="dark" />

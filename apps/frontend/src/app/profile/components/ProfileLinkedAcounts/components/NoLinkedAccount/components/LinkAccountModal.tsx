@@ -34,7 +34,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
         <UilLink color="#004CFC" size={"3rem"} />
-        <Heading fontSize="2xl">{t("Become a secondary account")}</Heading>
+        <Heading textStyle="2xl">{t("Become a secondary account")}</Heading>
         <Box>
           <Text color="#6A6A6A" as="span">
             {t(
@@ -43,9 +43,9 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
           </Text>
         </Box>
         <VStack align="stretch">
-          <Heading fontSize="lg">{t("Which Primary Account would you like to link to?")}</Heading>
+          <Heading textStyle="lg">{t("Which Primary Account would you like to link to?")}</Heading>
           <Field.Root invalid={!accountToConnect}>
-            <Field.Label color="#6A6A6A" fontSize="sm">
+            <Field.Label color="#6A6A6A" textStyle="sm">
               {t("Wallet address")}
             </Field.Label>
             <WalletAddressInput onAddressResolved={address => setValue("accountToConnect", address ?? "")} />

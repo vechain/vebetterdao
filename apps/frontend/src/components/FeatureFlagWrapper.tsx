@@ -22,7 +22,7 @@ export const FeatureFlagWrapper = ({ feature, children, fallback }: Props) => {
 
   return (
     <VStack w="full" p={4} bg="gray.50" borderRadius="xl" border="1px dashed" borderColor="gray.200" opacity={0.7}>
-      <Text color="gray.600" fontSize="sm" fontWeight="medium">
+      <Text color="gray.600" textStyle="sm" fontWeight="medium">
         {comingSoonText}
       </Text>
     </VStack>

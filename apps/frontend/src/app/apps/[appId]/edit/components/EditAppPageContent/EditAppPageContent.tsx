@@ -243,7 +243,6 @@ export const EditAppPageContent = () => {
                 })}
                 defaultValue={appMetadata?.name ?? ""}
                 fontSize={"28px"}
-                fontWeight={700}
               />
               <Field.ErrorText fontSize={"12px"}>{errors?.name?.message ?? ""}</Field.ErrorText>
             </Field.Root>
@@ -330,9 +329,7 @@ export const EditAppPageContent = () => {
         <Separator />
 
         <VStack align={"flex-start"} gap={4}>
-          <Heading fontSize="24px" fontWeight="700">
-            {t("VeWorld assets")}
-          </Heading>
+          <Heading size="2xl">{t("VeWorld assets")}</Heading>
           <Text fontSize={14} color={"gray"} pt={0}>
             {t(
               "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨",

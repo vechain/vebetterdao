@@ -67,7 +67,7 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
         <Dialog.Body p={"40px"}>
           <VStack align="stretch" gap="32px">
             <UilFileContract size="54px" color="#004CFC" />
-            <Heading fontSize="28px">{t("Add a new reward distributor")}</Heading>
+            <Heading size="3xl">{t("Add a new reward distributor")}</Heading>
             <VStack align="stretch">
               <HStack justify={"space-between"}>
                 <Text fontSize="14px">{t("Contract or wallet address")}</Text>

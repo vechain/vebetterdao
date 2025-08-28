@@ -82,7 +82,7 @@ export const ManageCreatorsNFT = () => {
   const renderBadge = (colorScheme: string, icon: IconType, text: string) => (
     <Badge
       textTransform="none"
-      fontSize="sm"
+      textStyle="sm"
       colorPalette={colorScheme}
       display="flex"
       alignItems="center"

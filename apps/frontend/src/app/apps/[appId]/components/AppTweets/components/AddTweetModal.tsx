@@ -103,9 +103,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
       </Field.Root>
       {tweetId && !errors.tweetUrl && !tweetError && (
         <VStack align="stretch">
-          <Heading fontSize="20px" fontWeight={700}>
-            {t("Preview")}
-          </Heading>
+          <Heading size="xl">{t("Preview")}</Heading>
           {tweet && !isTweetLoading ? <EmbeddedTweet key={tweet.id_str} tweet={tweet} /> : <TweetSkeleton />}
         </VStack>
       )}

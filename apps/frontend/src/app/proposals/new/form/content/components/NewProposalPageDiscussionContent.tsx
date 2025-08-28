@@ -86,9 +86,7 @@ export const NewProposalPageDiscussionContent = () => {
       <Card.Body py={8}>
         <VStack gap={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[4, 6]} align="flex-start">
-            <Heading size={["xl", "2xl"]} fontWeight="bold">
-              {t("Share more about your idea")}
-            </Heading>
+            <Heading size={["xl", "2xl"]}>{t("Share more about your idea")}</Heading>
             <Text fontSize={["sm", "md"]} color="gray.500">
               {t(
                 "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
@@ -136,7 +134,7 @@ export const NewProposalPageDiscussionContent = () => {
               {errors.markdownDescription ? (
                 <Field.ErrorText data-testid="form-error-message">{errors.markdownDescription.message}</Field.ErrorText>
               ) : (
-                <Field.HelperText color="gray.500" fontSize="sm">
+                <Field.HelperText color="gray.500" textStyle="sm">
                   {t("Make sure to replace all the placeholders with your own content.")}
                 </Field.HelperText>
               )}

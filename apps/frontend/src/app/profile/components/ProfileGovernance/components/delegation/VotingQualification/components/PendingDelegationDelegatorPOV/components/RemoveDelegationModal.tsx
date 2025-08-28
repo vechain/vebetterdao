@@ -30,17 +30,17 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
       <VStack alignItems="stretch" gap={6}>
         <VStack justifyContent="center" alignItems="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
-          <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
+          <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to remove the voting qualification request?")}
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
           <Text fontWeight="600">{t("You're removing it to")}</Text>
-          <Text fontSize="sm">{delegatee}</Text>
+          <Text textStyle="sm">{delegatee}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
+          <Box lineHeight={"1.20rem"} color="#C84968" textStyle="sm">
             <Alert.Title as="span">
               {t("The delegatee won't be able to vote using your voting qualification")}
             </Alert.Title>

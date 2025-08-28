@@ -86,9 +86,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
     <BaseModal isOpen={isOpen} onClose={onClose} modalProps={{ size: "6xl" }}>
       <VStack gap={6} align="flex-start" w="full">
         <HStack w="full" justify="space-between">
-          <Heading fontSize={"24px"} fontWeight="bold">
-            {t("Endorsement history")}
-          </Heading>
+          <Heading size={"2xl"}>{t("Endorsement history")}</Heading>
           <Flex>
             <EndorsementStatusCallout
               endorsementStatus={endorsementStatus}
@@ -128,7 +126,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               height={["auto", "auto", "40vh"]}
               overflowY="auto">
               <Card.Header p={0}>
-                <Heading fontWeight="700" fontSize="20px" alignSelf="flex-start">
+                <Heading size="xl" alignSelf="flex-start">
                   {t("Endorsers")}
                 </Heading>
               </Card.Header>
@@ -215,7 +213,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
             minHeight={["auto", "auto", "50vh"]}
             maxH={["auto", "auto", "50vh"]}>
             <Card.Header p={0}>
-              <Heading fontWeight="bold" fontSize="20px" alignSelf={"flex-start"}>
+              <Heading size="xl" alignSelf={"flex-start"}>
                 {t("Endorsement history")}
               </Heading>
             </Card.Header>

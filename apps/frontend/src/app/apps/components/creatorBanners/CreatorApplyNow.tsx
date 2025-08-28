@@ -61,9 +61,7 @@ export const CreatorApplyNow = () => {
                   align={{ base: "center", md: "end" }}
                   justify={{ base: "center", md: "end" }}
                   py={isMobile ? 4 : 2}>
-                  <Heading fontWeight={700} fontSize={"17px"}>
-                    {t("Do you have a dApp to join the VeBetter DAO ecosystem?")}
-                  </Heading>
+                  <Heading size={"lg"}>{t("Do you have a dApp to join the VeBetter DAO ecosystem?")}</Heading>
                 </Stack>
               </HStack>
 

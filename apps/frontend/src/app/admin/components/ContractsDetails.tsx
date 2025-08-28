@@ -149,55 +149,55 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
       <Card.Body>
         <VStack gap={4}>
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
               {"Address"}
             </Text>
             <AddressButton address={address} size={"sm"} showAddressIcon={false} />
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
               {"Version"}
             </Text>
             <Skeleton loading={!version}>
-              <Text fontSize="md">{version}</Text>
+              <Text textStyle="md">{version}</Text>
             </Skeleton>
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
               {"Balance"}
             </Text>
           </HStack>
           <HStack w="full" justify={"space-between"}>
             <HStack gap={1}>
               <Skeleton loading={b3trBalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(b3trBalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(b3trBalanceScaled))}</Text>
               </Skeleton>
               <B3TRIcon boxSize={5} />
             </HStack>
             <HStack gap={1}>
               <Skeleton loading={vot3BalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(vot3BalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(vot3BalanceScaled))}</Text>
               </Skeleton>
               <VOT3Icon boxSize={5} />
             </HStack>
             <HStack gap={1}>
               <Skeleton loading={accountBalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(vetBalanceScaled))}</Text>
               </Skeleton>
               <VETIcon boxSize={5} />
             </HStack>
             <HStack gap={1}>
               <Skeleton loading={accountBalanceLoading}>
-                <Text fontSize="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
+                <Text textStyle="md"> {compactFormatter.format(Number(vthoBalanceScaled))}</Text>
               </Skeleton>
               <VTHOIcon boxSize={5} />
             </HStack>
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
               {"Roles"}
             </Text>
           </HStack>
@@ -205,8 +205,8 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
             <VStack align="flex-start" w={"full"}>
               {userRoles.map(role => (
                 <HStack key={role.name + address} w={"full"} justify={"space-between"}>
-                  <Text fontSize="xs">{role.name}</Text>
-                  <Text fontSize="xs" justifyContent={"flex-end"}>
+                  <Text textStyle="xs">{role.name}</Text>
+                  <Text textStyle="xs" justifyContent={"flex-end"}>
                     {role.hasRole ? "✅" : "❌"}
                   </Text>
                 </HStack>

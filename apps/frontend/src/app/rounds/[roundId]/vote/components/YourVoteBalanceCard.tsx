@@ -34,18 +34,12 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   return (
     <ResponsiveCard>
       <VStack gap={8} align="flex-start">
-        {isDesktop && (
-          <Heading fontSize="24px" fontWeight={700}>
-            {t("Your V0T3 balance")}
-          </Heading>
-        )}
+        {isDesktop && <Heading size="2xl">{t("Your V0T3 balance")}</Heading>}
         <VStack w="full" align="flex-start">
           <HStack gap={2}>
             <VOT3Icon boxSize={["28px"]} colorVariant="dark" />
             <Skeleton loading={votesAtSnapshotLoading}>
-              <Heading fontSize={["28px"]} fontWeight={700}>
-                {compactFormatter.format(Number(votesAtSnapshot))}
-              </Heading>
+              <Heading size="3xl">{compactFormatter.format(Number(votesAtSnapshot))}</Heading>
             </Skeleton>
           </HStack>
           <HStack>

@@ -26,7 +26,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
             <Dialog.Header>
               <VStack gap={4} align="flex-start">
                 <Image src="/assets/icons/nft-earth.svg" alt="NFT Earth Illustration" boxSize="80px" />
-                <Heading fontSize="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
+                <Heading textStyle="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>
@@ -36,9 +36,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
                 )}
               </Text>
               <br />
-              <Text fontSize={["16px"]} fontWeight={700}>
-                {t("How to Get One (Free):")}
-              </Text>
+              <Text fontSize={["16px"]}>{t("How to Get One (Free):")}</Text>
               <Box as="ol">
                 {listItems.map((item, index) => (
                   // eslint-disable-next-line react/no-array-index-key

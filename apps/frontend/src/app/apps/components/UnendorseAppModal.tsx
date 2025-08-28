@@ -64,7 +64,7 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
         size: "lg",
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
+        <Heading textStyle="2xl">{t("Remove endorsement")}</Heading>
 
         <Flex position="relative" alignSelf={"center"}>
           <Image
@@ -82,9 +82,8 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
             py={0.5}
             bg="white"
             borderRadius="full"
-            fontSize="2xl"
-            color="#D23F63"
-            fontWeight="700">
+            textStyle="2xl"
+            color="#D23F63">
             {"-"}
             {node?.xNodePoints}
           </Text>

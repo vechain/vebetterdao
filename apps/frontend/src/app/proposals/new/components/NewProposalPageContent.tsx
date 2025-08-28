@@ -72,9 +72,7 @@ export const NewProposalPageContent = () => {
           <Card.Body>
             <VStack gap={[6, 8]} align="flex-start">
               <VStack gap={[4, 6]} align="flex-start">
-                <Heading size={["xl", "2xl"]} fontWeight="bold">
-                  {t("Create a new proposal")}
-                </Heading>
+                <Heading size={["xl", "2xl"]}>{t("Create a new proposal")}</Heading>
                 <Text fontSize={["sm", "md"]}>
                   {t(
                     "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",

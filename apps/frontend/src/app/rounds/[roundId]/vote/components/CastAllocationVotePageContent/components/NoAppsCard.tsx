@@ -26,7 +26,7 @@ export const NoAppsCard = ({ onShowAllApps }: Props) => {
         zIndex={0}
       />
       <VStack w={{ base: "100%", md: "60%" }} alignContent={"flex-start"} zIndex={2} position={"relative"}>
-        <Heading fontSize={24} fontWeight={700} alignSelf={"flex-start"}>
+        <Heading size="2xl" alignSelf={"flex-start"}>
           {t("No Apps found")}
         </Heading>
 

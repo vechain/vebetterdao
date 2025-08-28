@@ -102,9 +102,7 @@ export const ProposalTimeline = () => {
 
   return (
     <VStack align="stretch" gap={6}>
-      <Heading fontSize={"20px"} fontWeight={700}>
-        {t("Timeline")}
-      </Heading>
+      <Heading size="xl">{t("Timeline")}</Heading>
       <Steps.Root
         size="sm"
         step={activeStep}

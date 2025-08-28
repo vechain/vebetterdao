@@ -20,9 +20,7 @@ export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
     <Card.Root variant="baseWithBorder">
       <Card.Body>
         <VStack align="stretch" gap={6}>
-          <Heading fontSize="xl" fontWeight="700">
-            {t("Endorsement history")}
-          </Heading>
+          <Heading textStyle="xl">{t("Endorsement history")}</Heading>
 
           {events?.length ? (
             events.map(event => (

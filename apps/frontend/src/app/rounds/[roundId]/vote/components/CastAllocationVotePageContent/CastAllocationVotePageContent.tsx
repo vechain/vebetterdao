@@ -75,9 +75,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   return (
     <ResponsiveCard>
       <VStack w="full" gap={8} align={"flex-start"}>
-        <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
-          {t("Select the apps you want to vote")}
-        </Heading>
+        <Heading size={["2xl", "2xl", "4xl"]}>{t("Select the apps you want to vote")}</Heading>
         <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",

@@ -49,7 +49,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
                     {children}
                   </LinkOverlay>
                 )}>
-                <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
                   {t("NFT")}
                 </Text>
               </ConditionalWrapper>
@@ -71,7 +71,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
               </Box>
             </>
           ) : (
-            <Text fontSize="sm" _dark={{ color: "#FFFFFFB2" }}>
+            <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
               {t("No NFT attached")}
             </Text>
           )}

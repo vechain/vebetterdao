@@ -62,9 +62,7 @@ export const SupplyBreakdownCard = () => {
     <Card.Root variant="baseWithBorder" w="full">
       <Card.Header>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="xl" fontWeight="bold">
-            {t("Supply breakdown")}
-          </Heading>
+          <Heading size="xl">{t("Supply breakdown")}</Heading>
           <Tooltip
             content={
               <Text>
@@ -87,7 +85,7 @@ export const SupplyBreakdownCard = () => {
                 {t("B3TR in circulation")}
               </Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
+                <Heading size={["2xl", "2xl", "xl"]} color={"#004CFC"}>
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
@@ -97,7 +95,7 @@ export const SupplyBreakdownCard = () => {
                 {t("VOT3 in circulation")}
               </Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
+                <Heading size={["2xl", "2xl", "xl"]} color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>

@@ -65,7 +65,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
           <VStack align="stretch" gap={6}>
             <VStack align="stretch">
               <HStack justify="space-between">
-                <Heading fontSize="xl" fontWeight="700">
+                <Heading textStyle="xl">
                   {t(isConnectedUser ? "Your Voting Qualification" : "Voting qualification")}
                 </Heading>
                 {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
@@ -75,7 +75,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                   </Button>
                 )}
               </HStack>
-              <Text color="#6A6A6A" fontSize="md">
+              <Text color="#6A6A6A" textStyle="md">
                 {isConnectedUser &&
                   t(
                     "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",
@@ -92,13 +92,13 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                   w={`${scorePercentage}%`}
                   bg={darkColor}
                   rounded="full"></Flex>
-                <Text fontWeight={700} fontSize={"xs"} zIndex={1} color={scorePercentage > 60 ? "white" : "black"}>
+                <Text fontSize={"xs"} zIndex={1} color={scorePercentage > 60 ? "white" : "black"}>
                   {progressLabel}
                 </Text>
               </Flex>
               <HStack gap={1}>
                 <UilCheck color={darkColor} />
-                <Text fontSize="xs" color={darkColor}>
+                <Text textStyle="xs" color={darkColor}>
                   {descriptionLabel}
                 </Text>
               </HStack>

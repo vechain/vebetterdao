@@ -37,7 +37,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
             <Dialog.Body p={"40px"}>
               <VStack align="center" gap="20px">
                 <ExclamationTriangle color="#D23F63" size={iconSize} />
-                <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+                <Heading size={["xl", "3xl"]} textAlign={"center"}>
                   {t("Delete {{address}} as reward distributor?", {
                     address: domain ?? humanAddress(distributor, 4, 4),
                   })}

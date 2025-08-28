@@ -24,11 +24,11 @@ export const FormItem = ({
 
   return (
     <Field.Root invalid={!!error}>
-      <Field.Label fontSize="md" mb={description ? 0 : undefined} htmlFor={register.name}>
+      <Field.Label textStyle="md" mb={description ? 0 : undefined} htmlFor={register.name}>
         {label}
       </Field.Label>
       {description && (
-        <Text fontSize="xs" color="gray.500" mb={2}>
+        <Text textStyle="xs" color="gray.500" mb={2}>
           {description}
         </Text>
       )}

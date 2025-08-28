@@ -113,9 +113,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">
-              <Heading size="xl" fontWeight="bold">
-                {t("Actions History")}
-              </Heading>
+              <Heading size="xl">{t("Actions History")}</Heading>
               <Button variant="primaryLink" size="sm" onClick={handleSetListView}>
                 {t("List View")}
               </Button>
@@ -136,7 +134,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
             <Grid templateColumns="repeat(7, 1fr)" gap={1}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
-                  <Text fontSize="xs" fontWeight="medium" color="gray.500">
+                  <Text textStyle="xs" fontWeight="medium" color="gray.500">
                     {day}
                   </Text>
                 </Box>
@@ -160,7 +158,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                       w="full"
                       h="full"
                       disabled={isDisabled}
-                      fontSize="sm"
+                      textStyle="sm"
                       fontWeight="medium"
                       bg={getActivityColor(activityNumber)}
                       color={getActivityFontColor(activityNumber)}
@@ -178,13 +176,13 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                 <HStack key={item.label} gap={1}>
                   <Box w={4} h={4} bg={item.color} borderRadius="md" border="1px solid #ccc" />
 
-                  <Text fontSize="xs" color="gray.600">
+                  <Text textStyle="xs" color="gray.600">
                     {item.label}
                   </Text>
                 </HStack>
               ))}
               {!isMobile && (
-                <Text fontSize="xs" color="gray.600">
+                <Text textStyle="xs" color="gray.600">
                   {t("activities")}
                 </Text>
               )}
