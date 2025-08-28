@@ -1,2 +1,3 @@
 export * from "./AboutGrant"
-// export * from "./GrantMilestones"
+export * from "./Milestones"
+export * from "./Schedule"

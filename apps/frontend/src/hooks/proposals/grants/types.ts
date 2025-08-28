@@ -82,6 +82,8 @@ export type GrantFormData = {
     durationFrom: number //Unix timestamp in seconds
     durationTo: number //Unix timestamp in seconds
   }>
+  // Support deadline
+  supportDeadline: string
   // Terms of service
   termsOfService: boolean
 }

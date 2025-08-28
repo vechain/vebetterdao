@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next"
-import { VStack, Card, Button, HStack, Stack, useDisclosure, Text, useSteps } from "@chakra-ui/react"
+import { VStack, Card, Button, HStack, Stack, useDisclosure, useSteps } from "@chakra-ui/react"
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
-import { AboutGrant } from "./steps"
+import { AboutGrant, Schedule } from "./steps"
 import { useForm } from "react-hook-form"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { Milestones } from "./steps/Milestones"
@@ -149,11 +149,7 @@ export const GrantsNewFormStepCard = () => {
     },
     {
       key: GrantFormStep.SCHEDULE,
-      content: (
-        <>
-          <Text>{t("Schedule")}</Text>
-        </>
-      ),
+      content: <Schedule register={register} errors={errors} control={control} />,
       title: t("Schedule"),
     },
   ]
