@@ -13,11 +13,11 @@ export const compressImages = async (images: UploadedImage[]) => {
   const compressedImages: File[] = []
   try {
     for (const image of images) {
-      console.log(`originalFile size ${image.file.size / 1024 / 1024} MB`)
+      console.info(`originalFile size ${image.file.size / 1024 / 1024} MB`)
 
-      console.log("Mime: ", image.file.type)
+      console.info("Mime: ", image.file.type)
       const parsedFile = await imageCompression(image.file, imageCompressionOptions)
-      console.log(`compressFile size ${parsedFile.size / 1024 / 1024} MB`)
+      console.info(`compressFile size ${parsedFile.size / 1024 / 1024} MB`)
       compressedImages.push(parsedFile)
     }
     return compressedImages
@@ -61,7 +61,7 @@ export const useUploadImages = ({ compressImages, defaultImages, requirePictureA
 
       const parsedUploads: UploadedImage[] = []
       for (const file of acceptedFiles) {
-        console.log("file", file)
+        console.info("file", file)
         let parsedFile = file
         if (requirePictureAfterDate) {
           const fileDate = dayjs(file.lastModified)
