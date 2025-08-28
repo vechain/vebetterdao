@@ -61,7 +61,7 @@ export const Schedule = ({ register, errors, control, watch }: ScheduleProps) =>
       return {
         id: roundId,
         label: `${t("From today")}   - ${dayjs(roundStartDate).format("DD/MM/YYYY")}`,
-        value: roundId,
+        value: Number(roundId),
         canStart: canStartInNextRound,
         endDate: roundStartDate,
       }
@@ -69,7 +69,7 @@ export const Schedule = ({ register, errors, control, watch }: ScheduleProps) =>
   }, [currentRoundId, canStartInNextRound, currentRoundDeadlineDate, t])
 
   // Watch the selected value
-  const selectedRoundId = watch("supportDeadline")
+  const selectedRoundId = watch("votingRoundId")
 
   // Find selected option for countdown calculation
   const selectedOption = useMemo(() => {
@@ -94,10 +94,10 @@ export const Schedule = ({ register, errors, control, watch }: ScheduleProps) =>
           <FormDateSelect
             label={t("Date")}
             placeholder={t("Select date")}
-            register={register("supportDeadline")}
+            register={register("votingRoundId", { required: t("This field is required") })}
             options={options}
             control={control}
-            error={errors.supportDeadline?.message}
+            error={errors.votingRoundId?.message}
             defaultValue={options[0]?.value}
           />
         </Skeleton>

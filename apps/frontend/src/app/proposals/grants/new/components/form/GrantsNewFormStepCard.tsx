@@ -182,12 +182,14 @@ export const GrantsNewFormStepCard = () => {
 
     const milestonesIpfsCID = await onMetadataUpload(data.milestones)
     if (!milestonesIpfsCID) return console.error("Error uploading milestones")
+    if (!data.votingRoundId) return console.error("Support round ID is required")
 
     await createGrantProposal({
       metadataIpfsCID: proposalMetadataURI,
       milestonesIpfsCID,
       milestones: data.milestones,
-      votingRoundId: Number(currentRoundId) + 2,
+      grantsReceiver: data.grantsReceiverAddress,
+      votingRoundId: Number(data.votingRoundId),
       depositAmount: "0",
     })
   }
