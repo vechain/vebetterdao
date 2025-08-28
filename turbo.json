@@ -49,8 +49,7 @@
       "cache": false
     },
     "chakra:typegen": {
-      "cache": true,
-      "outputs": ["src/app/theme/generated/**"]
+      "cache": true
     },
     "chakra:typegen:watch": {
       "cache": false,
