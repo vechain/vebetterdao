@@ -27,6 +27,8 @@
     "dev:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo dev:mainnet --",
     "dev:galactica-test": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=galactica-test -e .env -- turbo dev:galactica-test --",
     "dev:e2e": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo dev --",
+    "chakra:typegen": "yarn workspace frontend chakra:typegen",
+    "chakra:typegen:watch": "yarn workspace frontend chakra:typegen:watch",
     "lint": "turbo lint --",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
