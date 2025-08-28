@@ -20,6 +20,75 @@ const config = defineConfig({
   },
 
   theme: {
+    textStyles: {
+      "6xl": {
+        value: {
+          fontSize: "3.75rem",
+          lineHeight: "3.75rem",
+        },
+      },
+      "5xl": {
+        value: {
+          fontSize: "3rem",
+          lineHeight: "3.25rem",
+        },
+      },
+      "4xl": {
+        value: {
+          fontSize: "2.25rem",
+          lineHeight: "2.75rem",
+        },
+      },
+      "3xl": {
+        value: {
+          fontSize: "1.75rem",
+          lineHeight: "2.25rem",
+        },
+      },
+      "2xl": {
+        value: {
+          fontSize: "1.5rem",
+          lineHeight: "2rem",
+        },
+      },
+      xl: {
+        value: {
+          fontSize: "1.25rem",
+          lineHeight: "1.875rem",
+        },
+      },
+      lg: {
+        value: {
+          fontSize: "1.125rem",
+          lineHeight: "1.75rem",
+        },
+      },
+      md: {
+        value: {
+          fontSize: "1rem",
+          lineHeight: "1.5rem",
+        },
+      },
+      sm: {
+        value: {
+          fontSize: "0.875rem",
+          lineHeight: "1.25rem",
+        },
+      },
+      xs: {
+        value: {
+          fontSize: "0.75rem",
+          lineHeight: "1rem",
+        },
+      },
+      xxs: {
+        value: {
+          fontSize: "0.625rem",
+          lineHeight: "0.875rem",
+        },
+      },
+    },
+
     recipes: {
       heading: headingRecipe,
       button: buttonRecipe,
@@ -69,10 +138,10 @@ const config = defineConfig({
     semanticTokens: {
       fonts: {
         body: {
-          value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
+          value: `var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
         },
         heading: {
-          value: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
+          value: `var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
         },
       },
 
