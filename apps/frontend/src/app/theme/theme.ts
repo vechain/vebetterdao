@@ -490,12 +490,6 @@ const config = defineConfig({
               base: "#F8F8F8",
             },
           },
-          unnamed: {
-            value: {
-              _dark: "#17293E",
-              base: "#004CFC",
-            },
-          },
         },
 
         // Border Colors

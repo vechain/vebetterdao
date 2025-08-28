@@ -62,7 +62,7 @@ export const GmNFTAndNodeCard = () => {
 
   return (
     <Card.Root
-      bg="bg.unnamed"
+      bg="banner.blue"
       rounded="12px"
       p="24px"
       color="white"
