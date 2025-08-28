@@ -69,6 +69,8 @@ const initialFormData: GrantFormData = {
     },
   ],
   termsOfService: false,
+  // Voting round ID
+  votingRoundId: "",
 }
 
 const getTitle = (data: GrantFormData): string => {

@@ -83,7 +83,7 @@ export type GrantFormData = {
     durationTo: number //Unix timestamp in seconds
   }>
   // Voting round ID (Deadline round + 1 for the support phase)
-  votingRoundId: number
+  votingRoundId: string
   // Terms of service
   termsOfService: boolean
 }
