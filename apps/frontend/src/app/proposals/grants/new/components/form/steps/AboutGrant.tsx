@@ -53,7 +53,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
           </Accordion.ItemTrigger>
           <Accordion.ItemContent>
             <VStack gap={6} align="stretch" w="full">
-              <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
+              <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={10}>
                 <GridItem>
                   <FormItem
                     label={t("Name")}
@@ -78,10 +78,9 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                   <FormItem
                     label={t("Intro")}
                     type="textarea"
+                    isOptional
                     placeholder={t("Tell about your team and experience with similar projects")}
-                    register={register("companyIntro", {
-                      required: t("Please describe your team and experience with similar projects"),
-                    })}
+                    register={register("companyIntro")}
                     error={errors.companyIntro?.message}
                   />
                 </GridItem>
@@ -98,6 +97,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                 <GridItem>
                   <FormItem
                     label={t("Email")}
+                    isOptional
                     placeholder={t("Enter the email of the company")}
                     register={register("companyEmail")}
                     error={errors.companyEmail?.message}
@@ -107,8 +107,8 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                   <FormItem
                     label={"Telegram"}
                     placeholder={t("Enter link here")}
+                    isOptional
                     register={register("companyTelegram", {
-                      required: t("Please enter the link of the company's telegram"),
                       pattern: {
                         value: /^https?:\/\/.+/,
                         message: t("Please enter a valid URL starting with http:// or https://"),
@@ -128,7 +128,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
             </Text>
           </Accordion.ItemTrigger>
           <Accordion.ItemContent>
-            <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
+            <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={10}>
               <GridItem colSpan={{ base: 1, md: 2 }}>
                 <FormItem
                   label={t("Project name")}
@@ -144,9 +144,8 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                 <FormItem
                   label={t("Testnet/App URL")}
                   placeholder="Enter link here"
-                  register={register("appTestnetUrl", {
-                    required: t("Please enter your app testnet URL"),
-                  })}
+                  isOptional
+                  register={register("appTestnetUrl")}
                   error={errors.appTestnetUrl?.message}
                 />
               </GridItem>
@@ -156,8 +155,8 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                   label={t("Website URL")}
                   placeholder="Enter link here"
                   type="url"
+                  isOptional
                   register={register("projectWebsite", {
-                    required: t("Please provide your project website"),
                     pattern: {
                       value: /^https?:\/\/.+/,
                       message: t("Please enter a valid URL starting with http:// or https://"),
@@ -270,7 +269,7 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
           </Accordion.ItemTrigger>
           <Accordion.ItemContent>
             <VStack gap={6} align="stretch" w="full">
-              <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
+              <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={10}>
                 <GridItem>
                   <FormItem
                     label={t("Benefits to users")}
@@ -315,9 +314,8 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                   <FormItem
                     label={t("Revenue model")}
                     placeholder={t("Describe your revenue model")}
-                    register={register("revenueModel", {
-                      required: t("Please describe revenue model"),
-                    })}
+                    isOptional
+                    register={register("revenueModel")}
                     error={errors.revenueModel?.message}
                   />
                 </GridItem>
@@ -325,18 +323,22 @@ export const AboutGrant = ({ register, setValue, watch, errors }: AboutGrantProp
                   <FormItem
                     label={t("High level roadmap")}
                     placeholder={t("Describe your high level roadmap or add attachment below")}
-                    register={register("highLevelRoadmap", {
-                      required: t("Please describe your high-level roadmap"),
-                    })}
+                    isOptional
+                    register={register("highLevelRoadmap")}
                     error={errors.highLevelRoadmap?.message}
                   />
                 </GridItem>
 
                 <GridItem colSpan={{ base: 1, md: 2 }}>
                   <Field.Root invalid={!!errors.outcomesAttachment?.message}>
-                    <Field.Label fontSize="sm" fontWeight="medium" htmlFor={register.name}>
-                      {t("Attachments")}
-                    </Field.Label>
+                    <HStack justify="space-between" w="full">
+                      <Field.Label fontSize="sm" fontWeight="medium" htmlFor={register.name}>
+                        {t("Attachments")}
+                      </Field.Label>
+                      <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+                        {"Optional"}
+                      </Text>
+                    </HStack>
                     <FileUpload.Root w="full" alignItems="stretch" maxFiles={10}>
                       <FileUpload.HiddenInput />
                       <FileUpload.Dropzone>
