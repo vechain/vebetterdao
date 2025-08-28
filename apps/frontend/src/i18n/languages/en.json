@@ -1962,5 +1962,11 @@
   "Attachments": "Attachments",
   "Upload file": "Upload file",
   "PDF, JPG, JPEG, PNG, less than 20MB": "PDF, JPG, JPEG, PNG, less than 20MB",
-  "Company details": "Company details"
+  "Company details": "Company details",
+  "Support deadline": "Support deadline",
+  "Choose when support phase for your Grant must end.": "Choose when support phase for your Grant must end.",
+  "Date": "Date",
+  "Select date": "Select date",
+  "Support ends in": "Support ends in",
+  "From today": "From today"
 }
