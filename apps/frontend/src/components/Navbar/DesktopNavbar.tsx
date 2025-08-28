@@ -29,8 +29,8 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
           justifyContent={"center"}
           borderRadius={"full"}
           borderWidth={1}
-          borderColor={"rgba(0,0,0, 0.06)"}
-          bg={"light-contrast-on-card-bg"}
+          borderColor={"border.secondary"}
+          bg={"bg.tertiary"}
           py={2}
           px={4}>
           <NavbarMenu routesToRender={routesToRender} />

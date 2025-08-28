@@ -46,11 +46,12 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
       w="full"
       onClick={onCardClick}
       maxW="100%"
-      _hover={{
-        cursor: "pointer",
-        backgroundColor: "hover-contrast-bg",
-        transition: "all 0.3s",
-      }}>
+      // _hover={{
+      //   cursor: "pointer",
+      //   backgroundColor: "hover-contrast-bg",
+      //   transition: "all 0.3s",
+      // }}
+    >
       <Card.Body py="16px" px="24px">
         <Stack
           direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
@@ -99,7 +100,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                 </HStack>
               </Skeleton>
               <Skeleton loading={appMetadataLoading}>
-                <Text fontSize="14px" color="#6A6A6A" fontWeight={400} lineClamp={2}>
+                <Text fontSize="14px" color="text.subtle" fontWeight={400} lineClamp={2}>
                   {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                 </Text>
               </Skeleton>
@@ -144,7 +145,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                 </VStack>
               )}
             </Stack>
-            <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
+            <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color="icon.default" alignSelf={"center"} />
           </Stack>
         </Stack>
       </Card.Body>

@@ -5,7 +5,7 @@ import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
 import { A11y } from "swiper/modules"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 import "swiper/css"
 import "@/app/theme/swiper-custom.css"
 
@@ -92,25 +92,29 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
           hideBelow="md"
           pos={"absolute"}
           zIndex={2}
-          variant={"primarySubtle"}
+          rounded="full"
+          bg="actions.secondary.default"
+          _hover={{ bg: "actions.secondary.hover" }}
           left={5}
           top={"50%"}
           transform={"translateY(-50%)"}
           onClick={() => swiperRef.current?.slidePrev()}
           aria-label="Previous app">
-          <FaChevronLeft />
+          <FaArrowLeft />
         </IconButton>
         <IconButton
           hideBelow="md"
           pos={"absolute"}
           zIndex={2}
-          variant={"primarySubtle"}
+          rounded="full"
+          bg="actions.secondary.default"
+          _hover={{ bg: "actions.secondary.hover" }}
           right={5}
           top={"50%"}
           transform={"translateY(-50%)"}
           onClick={() => swiperRef.current?.slideNext()}
           aria-label="Next app">
-          <FaChevronRight />
+          <FaArrowRight />
         </IconButton>
       </Swiper>
     </VStack>

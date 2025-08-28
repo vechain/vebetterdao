@@ -40,11 +40,11 @@ export const buttonRecipe = defineRecipe({
         fontWeight: 500,
         px: "24px",
         color: "#FFFFFF",
-        bgColor: "rgba(0, 76, 252, 1)",
+        bgColor: "actions.primary.default",
         _hover: {
-          bg: "rgba(0, 76, 252, 0.9)",
+          bg: "actions.primary.hover",
           _disabled: {
-            bg: "rgba(0, 76, 252, 0.7)",
+            bg: "actions.primary.disabled",
           },
         },
       },

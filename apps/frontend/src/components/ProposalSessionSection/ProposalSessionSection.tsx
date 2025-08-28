@@ -45,9 +45,9 @@ export const ProposalSessionSection = ({
           {renderQuroum === "upcoming" ? (
             <Alert.Root status="error" borderRadius="16px" bg="#FFF3E5">
               <Alert.Indicator>
-                <UilClock size={"36px"} color="#F29B32" />
+                <UilClock size={"36px"} color="success.primary" />
               </Alert.Indicator>
-              <Alert.Title color="#F29B32" ml={2} fontSize="14px">
+              <Alert.Title color="success.primary" ml={2} fontSize="14px">
                 {t("Quorum information will be available once the round starts.")}
               </Alert.Title>
             </Alert.Root>

@@ -16,8 +16,8 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
     [XAppStatus.LOOKING_FOR_ENDORSEMENT]: {
       title: t("Looking for endorsement"),
       description: "This app needs to be endorsed by Node holders to qualify for allocation rounds.",
-      backgroundColor: "#FFF3E5",
-      color: "#F29B32",
+      backgroundColor: "bg.tertiary",
+      color: "success.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.ENDORSED_AND_ELIGIBLE]: {

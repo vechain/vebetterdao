@@ -10,8 +10,14 @@ import { nativeSelectSlotRecipe } from "./native-select"
 import { headingRecipe } from "./heading"
 
 const config = defineConfig({
-  //preflight: true,
+  preflight: true,
   cssVarsPrefix: "vbd",
+
+  globalCss: {
+    ":where(button), [role='button']": {
+      cursor: "pointer",
+    },
+  },
 
   theme: {
     recipes: {
@@ -207,35 +213,59 @@ const config = defineConfig({
           },
         },
 
-        // // Brand Colors
-        // primary: {
-        //   _dark: { value: "#277CDF" },
-        //   base: { value: "#004CFC" },
-        // },
-        // secondary: {
-        //   _dark: { value: "#B4EA82" },
-        //   base: { value: "#B1F16C" },
-        // },
-        // tertiary: {
-        //   _dark: { value: "#FFFFFF" },
-        //   base: { value: "#000000" },
-        // },
-        "secondary-strong": {
-          value: {
-            _dark: "#4F5945",
-            base: "#6DCB09",
+        // Brand Colors
+        brand: {
+          primary: {
+            _dark: { value: "#277CDF" },
+            base: { value: "#004CFC" },
+          },
+          secondary: {
+            _dark: { value: "#B4EA82" },
+            base: { value: "#B1F16C" },
+          },
+          tertiary: {
+            _dark: { value: "#FFFFFF" },
+            base: { value: "#000000" },
+          },
+          "secondary-strong": {
+            value: {
+              _dark: "#4F5945",
+              base: "#6DCB09",
+            },
+          },
+          "secondary-stronger": {
+            value: {
+              _dark: "#383F31",
+              base: "#448300",
+            },
+          },
+          "secondary-subtle": {
+            value: {
+              _dark: "#CDFF9F",
+              base: "#CDFF9F",
+            },
           },
         },
-        "secondary-stronger": {
-          value: {
-            _dark: "#383F31",
-            base: "#448300",
+
+        // Banner Colors
+        banner: {
+          blue: {
+            value: {
+              _dark: "#17293E",
+              base: "#004CFC",
+            },
+          },
+          green: {
+            value: {
+              _dark: "#314421",
+              base: "#B1F16C",
+            },
           },
         },
-        "secondary-subtle": {
+        yellow: {
           value: {
-            _dark: "#CDFF9F",
-            base: "#CDFF9F",
+            _dark: "#54441A",
+            base: "#FFD979",
           },
         },
 
@@ -389,6 +419,12 @@ const config = defineConfig({
             value: {
               _dark: "#2F2F2F",
               base: "#F8F8F8",
+            },
+          },
+          unnamed: {
+            value: {
+              _dark: "#17293E",
+              base: "#004CFC",
             },
           },
         },

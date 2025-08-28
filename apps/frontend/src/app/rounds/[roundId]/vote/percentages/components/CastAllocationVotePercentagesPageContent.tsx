@@ -181,7 +181,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
                 {error}
               </Text>
             ) : showWarning ? (
-              <Text fontSize={"16px"} fontWeight={400} color="#F29B32">
+              <Text fontSize={"16px"} fontWeight={400} color="success.primary">
                 <Trans
                   t={t}
                   i18nKey={

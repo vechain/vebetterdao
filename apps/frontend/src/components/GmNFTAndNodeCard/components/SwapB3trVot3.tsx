@@ -107,7 +107,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             disabled={isSwapDisabled}
             onClick={onOpen}
             mt="auto"
-            variant={"whiteAction"}
+            variant={"primaryAction"}
             rounded={"full"}
             fontWeight={500}
             px="24px">

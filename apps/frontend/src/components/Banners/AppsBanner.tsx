@@ -5,7 +5,7 @@ export const AppsBanner = () => {
   const { t } = useTranslation()
   return (
     <Card.Root
-      bg="#004CFC"
+      bg="bg.unnamed"
       h={{ base: "220px", md: "195px" }}
       p="24px"
       justifyContent="center"

@@ -62,16 +62,17 @@ export const GmNFTAndNodeCard = () => {
 
   return (
     <Card.Root
-      bg="#004CFC"
+      bg="bg.unnamed"
       rounded="12px"
       p="24px"
       color="white"
       position="relative"
       overflow={"hidden"}
-      bgImage="url('/assets/backgrounds/cloud-background.webp')"
-      bgSize="cover"
-      backgroundPosition="center"
-      bgRepeat="no-repeat">
+      // bgImage="url('/assets/backgrounds/cloud-background.webp')"
+      //bgSize="cover"
+      //backgroundPosition="center"
+      //bgRepeat="no-repeat"
+    >
       <Card.Body p={0}>
         <Stack
           gap={8}

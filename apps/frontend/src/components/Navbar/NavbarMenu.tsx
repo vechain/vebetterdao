@@ -64,12 +64,15 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
 
           return (
             <Button
+              key={route.name}
               border="none"
-              colorPalette={selected ? "primary" : "gray"}
+              bgColor={selected ? "actions.primary.default" : "transparent"}
+              _hover={{ bgColor: selected ? "actions.primary.default" : "bg.subtle" }}
+              color={selected ? "white" : "inherit"}
+              // colorPalette={selected ? "primary" : "gray"}
+              // variant={selected ? "primaryAction" : "ghost"}
               rounded={"full"}
               w={["full", "full", "auto"]}
-              key={route.name}
-              variant={selected ? "primaryAction" : "ghost"}
               onClick={onClick}
               size="md"
               fontWeight="semibold"
@@ -84,24 +87,18 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         <MotionVStack initial={"hidden"} animate="visible" variants={containerVariants} gap={0}>
           {routesToRender.map((route, index) => {
             if (route.component) return route.component
-
             const selected = isSelected(route, pathname)
-            const bgColor = selected ? "rgba(0, 76, 252, 1)" : "transparent"
-            const textColor = selected ? "white" : "inherit"
-            const onClick = handleClick(route, router, onMenuClick)
-
             return (
               <MotionHStack
                 key={route.name}
+                bgColor={selected ? "actions.primary.default" : "transparent"}
+                color={selected ? "white" : "inherit"}
                 w={"full"}
                 borderRadius={9}
-                bgColor={bgColor}
                 p={4}
-                color={textColor}
                 mt={index === 0 ? 4 : 0}
                 justifyContent={"space-between"}
-                onClick={onClick}
-                // Apply animation variants
+                onClick={() => handleClick(route, router, onMenuClick)}
                 variants={itemVariants}>
                 <HStack alignItems={"flex-start"}>
                   <Box p={0.5}>
