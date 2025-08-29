@@ -1,6 +1,7 @@
 export * from "./useDepositThreshold"
 export * from "./useProposalsEvents"
 export * from "./useProposalState"
+export * from "./useGrantProposalState"
 export * from "./useProposalVotes"
 export * from "./useVotesOnBlock"
 export * from "./useProposalQuorum"
