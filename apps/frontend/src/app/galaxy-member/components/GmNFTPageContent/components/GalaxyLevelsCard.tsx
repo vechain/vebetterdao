@@ -60,9 +60,9 @@ export const GalaxyLevelsCard = () => {
                       alignItems="center"
                       columns={3}
                       gap={2}
-                      p={"2"}
+                      py={2}
                       borderBottom="1px solid"
-                      borderColor="border.solid">
+                      borderColor="border.emphasized">
                       <Text fontSize="sm" fontWeight="bold">
                         {t("Name")}
                       </Text>
