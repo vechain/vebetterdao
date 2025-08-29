@@ -109,7 +109,7 @@ export const NewProposalRoundPageContent = () => {
         <VStack gap={8} align="flex-start">
           <VStack gap={[4, 6]} align="flex-start">
             <Heading size={["xl", "2xl"]}>{t("Select a voting session date")}</Heading>
-            <Text fontSize={["sm", "md"]}>
+            <Text textStyle={["sm", "md"]}>
               {t("Choose the")}{" "}
               <Text as="span" fontWeight={600}>
                 {t("weekly round")}{" "}

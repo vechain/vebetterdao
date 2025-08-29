@@ -127,7 +127,7 @@ export const GmActionButton = ({
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
-            fontSize={"lg"}
+            textStyle={"lg"}
             fontWeight={"bold"}
             lineClamp={1}>
             {t("Max Level Reached!")}

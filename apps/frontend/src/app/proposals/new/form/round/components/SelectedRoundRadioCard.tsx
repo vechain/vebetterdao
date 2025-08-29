@@ -88,7 +88,7 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
               </Heading>
             </Skeleton>
             <Skeleton loading={isEstimatedStartTimeLoading}>
-              <Text fontSize={["sm", "md"]} as="span" display={"inline-flex"} gap={1}>
+              <Text textStyle={["sm", "md"]} as="span" display={"inline-flex"} gap={1}>
                 {t("Starts on")}
                 <Text fontWeight="600">{estimatedStartTime?.format("MMM D")}</Text>
               </Text>

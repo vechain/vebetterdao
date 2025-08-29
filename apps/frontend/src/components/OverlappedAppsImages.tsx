@@ -49,7 +49,7 @@ export const OverlappedAppsImages: React.FC<Props> = ({
             bgColor={otherAppsBoxColor}>
             <Avatar.Fallback>
               <Text
-                fontSize={`${(boxSize ?? 0) / 2}px`}
+                textStyle={`${(boxSize ?? 0) / 2}px`}
                 fontWeight={600}
                 data-testid="participating-add-more-apps"
                 color={otherAppsTextColor}>

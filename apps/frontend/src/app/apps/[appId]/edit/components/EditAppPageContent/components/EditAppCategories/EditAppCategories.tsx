@@ -89,7 +89,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             <Tag.Root
               key={categoryId}
               size="lg"
-              fontSize="14px"
+              textStyle="sm"
               borderRadius="full"
               variant="solid"
               backgroundColor={category.color}
@@ -113,7 +113,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             positioning={{ placement: "bottom-start" }}
             closeOnInteractOutside={true}>
             <Popover.Trigger asChild>
-              <Button onClick={() => setOpen(true)} variant="outline" fontSize="14px" borderRadius="full" size="sm">
+              <Button onClick={() => setOpen(true)} variant="outline" textStyle="sm" borderRadius="full" size="sm">
                 <FaPlus />
                 {t("Add Category")}
               </Button>

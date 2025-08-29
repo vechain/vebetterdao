@@ -137,7 +137,7 @@ export const ProposalsFilters = (props: Props) => {
                     {t("Filters")}
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
-                    <Badge variant="solid" rounded="full" size="sm" fontSize={12} fontWeight={600} lineHeight={1}>
+                    <Badge variant="solid" rounded="full" size="sm" textStyle="xs" fontWeight={600} lineHeight={1}>
                       {stateCount}
                     </Badge>
                   )}

@@ -48,7 +48,7 @@ export const ProposalOverview = () => {
               <Skeleton loading={proposal.isDescriptionLoading}>
                 <Text
                   color="gray.500"
-                  fontSize={["sm", "md"]}
+                  textStyle={["sm", "md"]}
                   wordBreak="break-word"
                   overflowWrap="break-word"
                   whiteSpace="pre-wrap"

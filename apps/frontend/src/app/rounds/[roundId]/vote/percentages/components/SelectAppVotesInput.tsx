@@ -90,7 +90,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
             <Field.HelperText
               data-testid={`${appMetadata?.name}-vote-estimated-votes`}
               fontWeight={400}
-              fontSize={"16px"}
+              textStyle="md"
               color="#6A6A6A">
               {t("=~ {{value}} votes", {
                 value: new BigNumber(estimateVotes(vote.rawValue, totalVotesAvailable)).toFixed(
@@ -100,7 +100,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
               })}
             </Field.HelperText>
           ) : (
-            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} fontWeight={400} fontSize={"16px"}>
+            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} fontWeight={400} textStyle="md">
               {error}
             </Field.ErrorText>
           )}

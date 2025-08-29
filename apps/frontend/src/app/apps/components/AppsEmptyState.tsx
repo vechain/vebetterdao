@@ -13,7 +13,7 @@ export const AppsEmptyState = () => {
           <OkHandIcon color="#757575" size={200} />
           <Heading textAlign={"center"}>{t("No results found")}</Heading>
           <List.Root gap={1} textAlign="center" mt={2}>
-            <List.Item display="flex" alignItems="center" fontSize="16px" color="#757575">
+            <List.Item display="flex" alignItems="center" textStyle="md" color="#757575">
               <List.Indicator asChild>
                 <UilCircle color="#757575" size={3} />
               </List.Indicator>

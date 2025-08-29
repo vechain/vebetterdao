@@ -30,7 +30,7 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnect
         <HStack gap={4}>
           <AddressIcon address={delegationAddress} w={12} h={12} rounded="full" />
           <VStack align="start">
-            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+            <Text fontWeight="600" textStyle={["sm", "sm", "lg"]}>
               {domain ?? humanAddress(delegationAddress, 4, 4)}
             </Text>
           </VStack>

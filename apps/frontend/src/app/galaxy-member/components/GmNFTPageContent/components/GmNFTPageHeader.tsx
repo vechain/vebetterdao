@@ -46,12 +46,12 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           <HStack>
             <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"}>
+              <Text color="#FFFFFF" textStyle={isAbove800 ? "md" : "xs"}>
                 {t("You reached the max GM NFT level")}
               </Text>
             </HStack>
           </HStack>
-          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"}>
+          <Text color="#FFFFFFBF" textStyle={isAbove800 ? "md" : "xs"}>
             {t("You can't upgrade your GM NFT anymore")}
           </Text>
         </>
@@ -67,18 +67,18 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>
-            <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"}>
+            <Text color="#FFFFFF" textStyle={isAbove800 ? "md" : "xs"}>
               {"/"}
               {compactFormatter.format(Number(b3trToUpgrade))}
               {" B3TR"}
             </Text>
           </HStack>
         </HStack>
-        <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"}>
+        <Text color="#FFFFFFBF" textStyle={isAbove800 ? "md" : "xs"}>
           {t("B3TR needed to upgrade your GM level")}
         </Text>
         {b3trLeftover > 0 && (
-          <Text color="#B1F16C" fontSize={isAbove800 ? "sm" : "xs"} fontWeight={500}>
+          <Text color="#B1F16C" textStyle={isAbove800 ? "sm" : "xs"} fontWeight={500}>
             {t("You have {{amount}} B3TR leftover from a previous upgrade", {
               amount: compactFormatter.format(Number(b3trLeftover)),
             })}
@@ -132,18 +132,18 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           </Box>
 
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
+            <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
               {t("LEVEL {{level}}", { level: tokenLevel })}
             </Text>
-            <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight={700} lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
               {metadata?.name}
             </Text>
             <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
+              <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight={600}>
                 {multiplier}
                 {"x"}
               </Text>
-              <Text fontSize={isAbove800 ? "md" : "xs"} lineClamp={1}>
+              <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
                 {t("GM reward weight")}
               </Text>
             </HStack>

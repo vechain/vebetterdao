@@ -46,12 +46,12 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
             </Dialog.Header>
             <Dialog.Body alignItems={"center"}>
               <VStack alignItems={"center"} gap={8}>
-                <Text fontSize={["sm", "lg"]}>
+                <Text textStyle={["sm", "lg"]}>
                   {t(
                     "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
                   )}
                 </Text>
-                <Text fontSize={["sm", "lg"]}>
+                <Text textStyle={["sm", "lg"]}>
                   {t("Swap your B3TR for VOT3 before the snapshot to increase your voting power.")}
                 </Text>
 

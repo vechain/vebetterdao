@@ -50,7 +50,7 @@ export const DashboardAllocationRounds = () => {
           {isDesktop ? (
             <Button
               px={0}
-              fontSize={"md"}
+              textStyle={"md"}
               variant="plain"
               _hover={{
                 textDecoration: "underline",
@@ -64,7 +64,7 @@ export const DashboardAllocationRounds = () => {
             </Button>
           ) : (
             <IconButton
-              fontSize={"md"}
+              textStyle={"md"}
               aria-label="Previous round"
               variant="ghost"
               colorPalette="primary"
@@ -103,7 +103,7 @@ export const DashboardAllocationRounds = () => {
                 textDecoration: "underline",
               }}
               variant="plain"
-              fontSize={"md"}
+              textStyle={"md"}
               color="primary"
               disabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
@@ -112,7 +112,7 @@ export const DashboardAllocationRounds = () => {
             </Button>
           ) : (
             <IconButton
-              fontSize={"md"}
+              textStyle={"md"}
               aria-label="Next round"
               variant="ghost"
               colorPalette="primary"

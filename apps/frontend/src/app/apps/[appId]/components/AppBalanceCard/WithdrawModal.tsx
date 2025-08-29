@@ -200,7 +200,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
               <Skeleton loading={isBalanceLoading}>
-                <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
+                <Text textStyle={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
                   {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
                 </Text>
               </Skeleton>

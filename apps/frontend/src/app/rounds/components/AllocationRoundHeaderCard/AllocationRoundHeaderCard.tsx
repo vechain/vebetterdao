@@ -102,7 +102,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
             </VStack>
 
             <Skeleton loading={isLoading}>
-              <Text color="gray.500" fontSize={["sm", "md"]}>
+              <Text color="gray.500" textStyle={["sm", "md"]}>
                 {t(
                   "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.",
                 )}
@@ -120,31 +120,31 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Skeleton loading={roundStateLoading}>
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
+                    <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
                       {isFinished ? t("Finished") : t("Finishes in")}
                     </Text>
                   </Skeleton>
                   <Skeleton loading={isLoading || roundStateLoading}>
                     <HStack gap={2}>
                       <Icon as={FaClock} boxSize={4} color="contrast-fg-on-muted" />
-                      <Text fontSize={["lg", "lg", "md"]}>{remainingTime}</Text>
+                      <Text textStyle={["lg", "lg", "md"]}>{remainingTime}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 <Box>
-                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
+                  <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
                     {t("Participating")}
                   </Text>
                   <Skeleton loading={roundAppsLoading}>
                     <HStack gap={2}>
                       <Icon as={PiSquaresFourFill} boxSize={4} />
-                      <Text fontSize={["lg", "lg", "md"]}>{t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}</Text>
+                      <Text textStyle={["lg", "lg", "md"]}>{t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 {!!account?.address && (
                   <Box data-testid="your-vote-box">
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]}>
+                    <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
                       {t("Your vote")}
                     </Text>
                     <Skeleton loading={hasVotedLoading || userVotesLoading || votesAtSnapshotLoading}>
@@ -154,7 +154,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                         ) : (
                           <Icon as={MdHowToVote} boxSize={4} />
                         )}
-                        <Text fontSize={["lg", "lg", "md"]}>{yourVoteText}</Text>
+                        <Text textStyle={["lg", "lg", "md"]}>{yourVoteText}</Text>
                       </HStack>
                     </Skeleton>
                   </Box>

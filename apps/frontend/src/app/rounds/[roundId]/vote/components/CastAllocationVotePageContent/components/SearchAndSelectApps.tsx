@@ -53,7 +53,7 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
           placeholder="Search for an app"
           value={appsToSearch}
           onChange={e => setAppsToSearch(e.target.value)}
-          fontSize={"16px"}
+          textStyle="md"
         />
       </InputGroup>
       <HStack w="full" gap={4} justify={"space-between"}>

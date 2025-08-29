@@ -53,7 +53,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
               {domain && (
                 <Text
                   fontWeight="600"
-                  fontSize={["sm", "sm", "lg"]}
+                  textStyle={["sm", "sm", "lg"]}
                   borderRight={"1px solid"}
                   paddingRight={2}
                   lineClamp={1}
@@ -61,7 +61,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
                   {humanDomain(domain, 8, 4)}
                 </Text>
               )}
-              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} lineClamp={1} title={account}>
+              <Text fontWeight="600" textStyle={["sm", "sm", "lg"]} lineClamp={1} title={account}>
                 {humanAddress(account, 4, 4)}
               </Text>
             </HStack>

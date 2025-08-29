@@ -263,7 +263,7 @@ export const DatePicker = ({
                     p="0"
                     disabled={!isSelectable}
                     unstyled
-                    fontSize={isMobile ? "2xs" : "xs"}
+                    textStyle={isMobile ? "2xs" : "xs"}
                     fontWeight="medium"
                     bg={isStartOrEnd ? "#004CFC" : isInRange ? "#E0E9FE" : "transparent"}
                     color={isStartOrEnd ? "white" : "inherit"}

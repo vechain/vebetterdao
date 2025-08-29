@@ -87,7 +87,7 @@ export const NewProposalPageDiscussionContent = () => {
         <VStack gap={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[4, 6]} align="flex-start">
             <Heading size={["xl", "2xl"]}>{t("Share more about your idea")}</Heading>
-            <Text fontSize={["sm", "md"]} color="gray.500">
+            <Text textStyle={["sm", "md"]} color="gray.500">
               {t(
                 "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
               )}

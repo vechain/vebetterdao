@@ -26,11 +26,11 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
         </Box>
       </Box>
       <VStack align="stretch" gap={0}>
-        <HStack gap={1} fontSize={["sm", "sm", "md"]}>
+        <HStack gap={1} textStyle={["sm", "sm", "md"]}>
           <Text>{t(event.endorsed ? "You endorsed" : "You unendorsed")} </Text>
           <Text fontWeight="600">{appMetadata?.name}</Text>
         </HStack>
-        <Text fontSize={["2xs", "2xs", "sm"]} color="#6A6A6A">
+        <Text textStyle={["2xs", "2xs", "sm"]} color="#6A6A6A">
           {dayjs(eventTimestamp).fromNow()}
         </Text>
       </VStack>

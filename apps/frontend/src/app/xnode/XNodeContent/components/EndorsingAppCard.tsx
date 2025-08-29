@@ -137,7 +137,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                     justifyContent={["flex-start", "flex-start", "flex-end"]}
                     gap={0}>
                     <Text
-                      fontSize={["xs", "xs", "md"]}
+                      textStyle={["xs", "xs", "md"]}
                       color={["#6A6A6A", "#6A6A6A", "inherit"]}
                       order={[1, 1, 2]} // Change order for large viewports
                     >

@@ -102,7 +102,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                           {t("Node")}
                         </Text>
                         <Text
-                          fontSize={isAbove800 ? "sm" : "xs"}
+                          textStyle={isAbove800 ? "sm" : "xs"}
                           lineHeight={isAbove800 ? 1.6 : 1.2}
                           lineClamp={isAbove800 ? 1 : undefined}>
                           {`${node.name} #${node.nodeId}`}

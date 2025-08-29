@@ -167,7 +167,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
               variant="primaryGhost"
               borderBottom={activeTab === tab ? "2px solid #004CFC" : "none"}
               rounded="none"
-              fontSize={["xs", "xs", "md"]}
+              textStyle={["xs", "xs", "md"]}
               onClick={() => handleTabChange(tab)}>
               {label}
             </Button>

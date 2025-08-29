@@ -108,14 +108,14 @@ export const EndorsersItem = ({
                     {isAppAdmin && (
                       <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
                         <UilTrash />
-                        <Text whiteSpace="nowrap" fontSize={["sm", "md"]}>
+                        <Text whiteSpace="nowrap" textStyle={["sm", "md"]}>
                           {t("Remove this endorsement")}
                         </Text>
                       </HStack>
                     )}
                     <HStack onClick={goToEndorserUserProfilePage} cursor="pointer">
                       <UilCheck color={"#004CFC"} />
-                      <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
+                      <Text textStyle={["sm", "md"]}>{t("See endorser info")}</Text>
                     </HStack>
                   </VStack>
                 </Popover.Body>

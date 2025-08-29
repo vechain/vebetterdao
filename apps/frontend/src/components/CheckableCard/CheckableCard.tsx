@@ -70,7 +70,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
           </HStack>
           <Box>
             <Heading size={["sm", "md"]}>{title}</Heading>
-            <Text fontSize={["sm", "md"]} mt={2}>
+            <Text textStyle={["sm", "md"]} mt={2}>
               {description}
             </Text>
           </Box>

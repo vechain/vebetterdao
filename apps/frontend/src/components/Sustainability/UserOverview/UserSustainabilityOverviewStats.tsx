@@ -41,7 +41,7 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
           </Skeleton>
         </HStack>
 
-        <Text fontSize={["xs", "sm"]} color="#6A6A6A">
+        <Text textStyle={["xs", "sm"]} color="#6A6A6A">
           {t("total actions")}
         </Text>
       </VStack>
@@ -54,7 +54,7 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
             </Heading>
           </Skeleton>
         </HStack>
-        <Text fontSize={["xs", "sm"]} color="#6A6A6A">
+        <Text textStyle={["xs", "sm"]} color="#6A6A6A">
           {t("total B3TR earnt")}
         </Text>
       </VStack>
@@ -67,7 +67,7 @@ export const UserSustainabilityOverviewStats = ({ address }: Props) => {
             </Heading>
           </Skeleton>
         </HStack>
-        <Text fontSize={["xs", "sm"]} color="#6A6A6A">
+        <Text textStyle={["xs", "sm"]} color="#6A6A6A">
           {t("used apps")}
         </Text>
       </VStack>

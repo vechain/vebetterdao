@@ -146,15 +146,15 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     </Skeleton>
                   </Box>
                   <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
-                    <Text lineClamp={1} fontSize={isAbove800 ? "x-large" : "md"}>
+                    <Text lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
                       {`${nextLevelGM?.name} #${tokenId}`}
                     </Text>
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                       <HStack rounded="8px" justifyContent="space-between">
-                        <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                        <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight={600}>
                           {nextLevelGM?.multiplier}
                         </Text>
-                        <Text fontSize={isAbove800 ? "md" : "xs"} lineClamp={1}>
+                        <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
                           {t("GM reward weight").toLowerCase()}
                         </Text>
                       </HStack>

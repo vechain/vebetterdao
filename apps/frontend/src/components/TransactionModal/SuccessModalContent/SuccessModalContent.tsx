@@ -87,7 +87,7 @@ export const SuccessModalContent = ({
           target="_blank"
           rel="noopener noreferrer"
           color="gray.500"
-          fontSize={"14px"}
+          textStyle="sm"
           style={{ textDecoration: "none" }}
           onClick={() =>
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))

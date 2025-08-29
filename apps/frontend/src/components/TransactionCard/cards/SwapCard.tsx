@@ -63,7 +63,7 @@ export const SwapCard = ({ transaction }: Props) => {
               </Text>
               <Text textStyle="sm">{vot3ToB3tr ? "B3TR" : "VOT3"}</Text>
             </HStack>
-            <HStack gap={2} fontSize={"xs"} color={"#6A6A6A"}>
+            <HStack gap={2} textStyle={"xs"} color={"#6A6A6A"}>
               <Text fontWeight={600}>
                 {vot3ToB3tr
                   ? compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))

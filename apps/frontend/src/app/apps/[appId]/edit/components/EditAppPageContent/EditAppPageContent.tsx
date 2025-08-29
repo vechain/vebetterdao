@@ -242,9 +242,9 @@ export const EditAppPageContent = () => {
                   minLength: { value: 3, message: t("Name must be at least 3 characters") },
                 })}
                 defaultValue={appMetadata?.name ?? ""}
-                fontSize={"28px"}
+                textStyle="3xl"
               />
-              <Field.ErrorText fontSize={"12px"}>{errors?.name?.message ?? ""}</Field.ErrorText>
+              <Field.ErrorText textStyle="xs">{errors?.name?.message ?? ""}</Field.ErrorText>
             </Field.Root>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
@@ -279,7 +279,7 @@ export const EditAppPageContent = () => {
                     },
                   })}
                 />
-                <Field.ErrorText fontSize={"12px"}>{errors?.external_url?.message ?? ""}</Field.ErrorText>
+                <Field.ErrorText textStyle="xs">{errors?.external_url?.message ?? ""}</Field.ErrorText>
               </Field.Root>
             </VStack>
 
@@ -297,7 +297,7 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <Field.ErrorText fontSize={"12px"}>{errors?.description?.message ?? ""}</Field.ErrorText>
+                <Field.ErrorText textStyle="xs">{errors?.description?.message ?? ""}</Field.ErrorText>
               </Field.Root>
             </VStack>
             <VStack align={"stretch"} gap={4}>
@@ -317,7 +317,7 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <Field.ErrorText fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</Field.ErrorText>
+                <Field.ErrorText textStyle="xs">{errors?.distribution_strategy?.message ?? ""}</Field.ErrorText>
               </Field.Root>
             </VStack>
             <EditAppCategories form={form} />

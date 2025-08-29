@@ -43,7 +43,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
         px={3}
         py={1}
         rounded={"full"}
-        fontSize={isAbove500 ? "13px" : "10px"}
+        textStyle={isAbove500 ? "xs" : "xxs"}
         height="24px"
       />
     )
@@ -72,7 +72,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
             color={isNearEndText}
             bg={isNearEndBg}
             borderColor={"#F2F2F2"}
-            fontSize={isAbove500 ? "xs" : "xxs"}
+            textStyle={isAbove500 ? "xs" : "xxs"}
             fontWeight={600}
             gap={1}>
             <Image src={isNearEndIcon} alt="clock" boxSize={"20px"} />

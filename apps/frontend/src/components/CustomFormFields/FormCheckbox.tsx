@@ -32,10 +32,10 @@ export const FormCheckbox = ({ label, name, description, control, error, onBlur 
             <Checkbox.HiddenInput />
             <Checkbox.Control />
             <Checkbox.Label>
-              <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>
+              <Text fontWeight="500" textStyle={{ base: "xs", sm: "xs", md: "sm" }}>
                 {label}
               </Text>
-              <Text fontSize={{ base: "xs", sm: "xs", md: "sm" }}>{description}</Text>
+              <Text textStyle={{ base: "xs", sm: "xs", md: "sm" }}>{description}</Text>
             </Checkbox.Label>
           </Checkbox.Root>
           {error && <Field.ErrorText>{error}</Field.ErrorText>}

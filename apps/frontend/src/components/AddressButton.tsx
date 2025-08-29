@@ -52,7 +52,7 @@ export const AddressButton: React.FC<IAddressButton> = ({
       {...otherProps}>
       <HStack justify={"flex-start"} gap={spacing} roundedLeft={"md"}>
         {showAddressIcon && <AddressIcon address={address} roundedLeft={"md"} {...addressIconProps} />}
-        <Text fontSize={addressFontSize}>{humanAddress(address, digitsBeforeEllipsis, digitsAfterEllipsis)}</Text>
+        <Text textStyle={addressFontSize}>{humanAddress(address, digitsBeforeEllipsis, digitsAfterEllipsis)}</Text>
         {showCopyIcon && (
           <Icon
             data-cy="address-button-copy-icon"

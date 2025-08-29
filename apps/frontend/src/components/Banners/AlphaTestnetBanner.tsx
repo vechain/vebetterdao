@@ -70,7 +70,7 @@ export const AlphaTestnetBanner = () => {
         {texts.map(text => (
           <Text
             key={`alpha-testnet-banner-text-${uuid()}`}
-            fontSize={["sm", "md"]}
+            textStyle={["sm", "md"]}
             color="secondary.500"
             whiteSpace="nowrap"
             textTransform={"uppercase"}

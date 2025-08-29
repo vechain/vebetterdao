@@ -75,7 +75,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
           <VStack alignItems={"flex-start"}>
             <Text color={textColor}>{t("Voting power")}</Text>
             <HStack align={"baseline"}>
-              <Text color={textColor} fontSize={"32px"} fontWeight={600}>
+              <Text color={textColor} textStyle="3xl" fontWeight={600}>
                 {compactFormatter.format(Number(votePower))}
               </Text>
             </HStack>

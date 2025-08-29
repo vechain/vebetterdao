@@ -76,7 +76,7 @@ export const CreatorApplyNow = () => {
                 <Button
                   variant="primarySubtle"
                   alignSelf="center"
-                  fontSize={{ base: "14px" }}
+                  textStyle="sm"
                   fontWeight={600}
                   borderRadius="full"
                   onClick={onOpen}

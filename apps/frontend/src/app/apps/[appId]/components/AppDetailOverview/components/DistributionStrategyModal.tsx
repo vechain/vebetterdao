@@ -26,7 +26,7 @@ export const DistributionStrategyModal = ({
 
         <VStack gap={3}>
           <Heading
-            fontSize={{
+            textStyle={{
               base: "xl",
               md: "2xl",
             }}>
@@ -34,7 +34,7 @@ export const DistributionStrategyModal = ({
           </Heading>
 
           <Text
-            fontSize={{
+            textStyle={{
               base: "md",
               md: "lg",
             }}

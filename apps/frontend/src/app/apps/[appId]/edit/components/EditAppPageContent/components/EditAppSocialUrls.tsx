@@ -91,7 +91,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
           <InputGroup startElement={icon}>
             <Input
               rounded="full"
-              fontSize={"14px"}
+              textStyle="sm"
               type="url"
               placeholder={placeholder}
               defaultValue={url}
@@ -103,7 +103,7 @@ export const EditAppSocialUrls = ({ form }: Props) => {
               })}
             />
           </InputGroup>
-          <Field.ErrorText fontSize={"12px"}>{error?.message || ""}</Field.ErrorText>
+          <Field.ErrorText textStyle="xs">{error?.message || ""}</Field.ErrorText>
         </Field.Root>
       ))}
     </VStack>
