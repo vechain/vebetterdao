@@ -24,6 +24,7 @@ export default function GrantsNew() {
     AnalyticsUtils.trackPage(`Grants New`)
   }, [])
 
+  //TODO: This should be handled as in Proposals with a wrapper layout
   const metGrantCriteria = useMetProposalCriteria()
 
   // Show requirement modal if criteria not met

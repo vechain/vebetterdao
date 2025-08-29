@@ -68,6 +68,11 @@ const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnr
     applicantProfileUrl: ipfsMetadata?.applicantProfileUrl ?? "",
     applicantCountry: ipfsMetadata?.applicantCountry ?? "",
     applicantCity: ipfsMetadata?.applicantCity ?? "",
+    companyRegisteredNumber: ipfsMetadata?.companyRegisteredNumber ?? "",
+    companyIntro: ipfsMetadata?.companyIntro ?? "",
+    companyEmail: ipfsMetadata?.companyEmail ?? "",
+    companyTelegram: ipfsMetadata?.companyTelegram ?? "",
+    grantsReceiverAddress: ipfsMetadata?.grantsReceiverAddress ?? "",
   }
 }
 
@@ -103,8 +108,8 @@ export const useGrantProposalDetails = ({
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
 }): UseQueryResult<{
-  standardProposalsDetailsMap: Record<string, Omit<ProposalEnriched, "state">>
-  grantProposalsDetailsMap: Record<string, Omit<GrantProposalEnriched, "state">>
+  standardProposalsDetailsMap: Record<string, Omit<ProposalEnriched, "state" | "votingRoundId">>
+  grantProposalsDetailsMap: Record<string, Omit<GrantProposalEnriched, "state" | "votingRoundId">>
 }> => {
   return useQuery({
     queryKey: getGrantProposalDetailsQueryKey(standardProposals, grantProposals),
@@ -133,8 +138,8 @@ export const useGrantProposalDetails = ({
       const standardProposalsIpfsMetadatas = await Promise.all(standardProposalsIpfsMetadataPromises)
 
       // Create detailed proposal objects mapped by ID
-      const grantProposalsDetailsMap: Record<string, Omit<GrantProposalEnriched, "state">> = {}
-      const standardProposalsDetailsMap: Record<string, Omit<ProposalEnriched, "state">> = {}
+      const grantProposalsDetailsMap: Record<string, Omit<GrantProposalEnriched, "state" | "votingRoundId">> = {}
+      const standardProposalsDetailsMap: Record<string, Omit<ProposalEnriched, "state" | "votingRoundId">> = {}
 
       grantProposals.forEach((event, index) => {
         const ipfsMetadata = grantProposalsIpfsMetadatas[index]

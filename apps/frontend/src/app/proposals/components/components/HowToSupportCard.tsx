@@ -5,7 +5,7 @@ export const HowToSupportCard = () => {
   const { t } = useTranslation()
 
   return (
-    <Card.Root w="full" variant="ghost">
+    <Card.Root w="full" variant="subtle">
       <Card.Body gap={2}>
         <Heading size="md">{t("How to support Grant and Proposal?")}</Heading>
         <Text color="text.subtle" fontSize="sm">

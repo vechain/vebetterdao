@@ -7,6 +7,8 @@ declare module "next-auth" {
     user: {
       githubUsername: string | null
       twitterUsername: string | null
+      discordUsername: string | null
+      linkedinUsername: string | null
     } & DefaultSession["user"]
   }
 }
@@ -15,5 +17,7 @@ declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     githubUsername: string | null
     twitterUsername: string | null
+    discordUsername: string | null
+    linkedinUsername: string | null
   }
 }

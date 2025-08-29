@@ -35,12 +35,12 @@ export const FormSocialConnectButton = ({
         onClick={handleAuth}
         borderRadius="md"
         w="full"
-        {...(isConnected && { rightIcon: <UilCheck /> })}
         alignItems="center"
         justifyContent="center"
         gap={2}>
         {leftIcon}
         <Text truncate>{label}</Text>
+        {isConnected && <UilCheck />}
       </Button>
       <Input type="hidden" {...register} />
       <Field.ErrorText>{error}</Field.ErrorText>

@@ -160,8 +160,9 @@
       "cache": false
     },
     "compile": {
-      "cache": false,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+      "cache": true,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": ["dist/**", "artifacts/**", "typechain-types/**"]
     },
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
