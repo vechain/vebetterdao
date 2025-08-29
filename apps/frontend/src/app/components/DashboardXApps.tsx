@@ -71,10 +71,10 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
   const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
 
-  const nonActiveBackgroundColor = theme === "light" ? "rgba(166, 217, 110, 0.12)" : "rgba(166, 217, 110, 0.12)"
-  const cardBackgroundColor = theme === "light" ? "#F7F7F7" : "#131313"
+  const nonActiveBackgroundColor = resolvedTheme === "light" ? "rgba(166, 217, 110, 0.12)" : "rgba(166, 217, 110, 0.12)"
+  const cardBackgroundColor = resolvedTheme === "light" ? "#F7F7F7" : "#131313"
   const navigateToAppDetail = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
   }, [router, xApp.id])
