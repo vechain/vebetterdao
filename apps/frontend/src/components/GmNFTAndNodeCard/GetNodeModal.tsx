@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Dialog, Button, Heading, Text, VStack, Stack, Image, Portal } from "@chakra-ui/react"
+import { Dialog, Button, Heading, Text, VStack, Image, Portal, SimpleGrid } from "@chakra-ui/react"
 
 interface UpgradeGMModalProps {
   isOpen: boolean
@@ -38,14 +38,14 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
             </Dialog.Body>
 
             <Dialog.Footer w="full" px={4} pt={1}>
-              <Stack direction={["column", "row"]} align="stretch" w="full">
-                <Button variant={"whiteAction"} color={"#004CFC"} w={"full"} onClick={onClose}>
+              <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} w="full">
+                <Button variant={"whiteAction"} color={"#004CFC"} onClick={onClose}>
                   {t("Maybe later")}
                 </Button>
-                <Button variant={"primaryAction"} w={"full"} onClick={onGetNodeClick}>
+                <Button variant={"primaryAction"} onClick={onGetNodeClick}>
                   {t("Get a node")}
                 </Button>
-              </Stack>
+              </SimpleGrid>
             </Dialog.Footer>
           </Dialog.Content>
         </Dialog.Positioner>

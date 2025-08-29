@@ -1,8 +1,8 @@
 import { useGetUserGMs, useGMMaxLevel, UserGM } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { Tooltip } from "@/components/ui/tooltip"
+import { ToggleTip } from "@/components/ui/toggle-tip"
 import { gmNfts } from "@/constants/gmNfts"
-import { Button, Card, Flex, Heading, HStack, Image, Table, VStack, Text } from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, HStack, Image, SimpleGrid, VStack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
@@ -50,39 +50,44 @@ export const GalaxyLevelsCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading textStyle="lg">{t("Reward Weight")}</Heading>
-              <Tooltip
+              <ToggleTip
+                contentProps={{
+                  p: "0.25rem 0.5rem",
+                }}
                 content={
-                  <Table.ScrollArea maxW="280px" maxH="400px" overflowY="auto">
-                    <Table.Root variant="line" size="sm">
-                      <Table.Header position="sticky" top={0}>
-                        <Table.Row>
-                          <Table.ColumnHeader color="white" py={2}>
-                            {t("Name")}
-                          </Table.ColumnHeader>
-                          <Table.ColumnHeader color="white" py={2}>
-                            {t("Reward Weight")}
-                          </Table.ColumnHeader>
-                          <Table.ColumnHeader color="white" py={2}>
-                            {t("Cost")}
-                          </Table.ColumnHeader>
-                        </Table.Row>
-                      </Table.Header>
-                      <Table.Body>
-                        {gmNfts.map(nft => (
-                          <Table.Row key={nft.level} p={0}>
-                            <Table.Cell py={2}>{nft.name}</Table.Cell>
-                            <Table.Cell py={2}>{nft.multiplier}</Table.Cell>
-                            <Table.Cell py={2}>{compactFormatter.format(nft.b3trToUpgrade)}</Table.Cell>
-                          </Table.Row>
-                        ))}
-                      </Table.Body>
-                    </Table.Root>
-                  </Table.ScrollArea>
+                  <VStack maxW="280px" maxH="400px" overflowY="auto" align="stretch" gap={2}>
+                    <SimpleGrid
+                      alignItems="center"
+                      columns={3}
+                      gap={2}
+                      py={2}
+                      borderBottom="1px solid"
+                      borderColor="border.emphasized">
+                      <Text textStyle="sm" fontWeight="bold">
+                        {t("Name")}
+                      </Text>
+                      <Text textStyle="sm" fontWeight="bold">
+                        {t("Reward Weight")}
+                      </Text>
+                      <Text textStyle="sm" fontWeight="bold">
+                        {t("Cost")}
+                      </Text>
+                    </SimpleGrid>
+                    {gmNfts.map(nft => (
+                      <SimpleGrid key={nft.level} alignItems="center" columns={3} gap={2} py={2}>
+                        <Text textStyle="sm" fontWeight="bold">
+                          {nft.name}
+                        </Text>
+                        <Text textStyle="sm">{nft.multiplier}</Text>
+                        <Text textStyle="sm">{compactFormatter.format(nft.b3trToUpgrade)}</Text>
+                      </SimpleGrid>
+                    ))}
+                  </VStack>
                 }>
-                <span>
+                <Button size="xs" variant="ghost">
                   <UilInfoCircle color="#004CFC" />
-                </span>
-              </Tooltip>
+                </Button>
+              </ToggleTip>
             </HStack>
             <Text textStyle="sm" color="#6A6A6A">
               {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}

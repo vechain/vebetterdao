@@ -20,7 +20,7 @@ const compactFormatter = getCompactFormatter()
 export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { theme } = useTheme()
+  const { resolvedTheme: theme } = useTheme()
 
   const { data: allocationRound, isLoading } = useAllocationsRound(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
