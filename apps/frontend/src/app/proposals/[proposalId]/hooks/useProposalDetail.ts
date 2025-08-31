@@ -24,6 +24,7 @@ import {
 import { ethers } from "ethers"
 import dayjs from "dayjs"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useProposalType } from "@/hooks"
 
 export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()
@@ -102,6 +103,8 @@ export const useProposalDetailById = (proposalId: string) => {
       proposalMetadata,
     ],
   )
+
+  const proposalType = useProposalType(proposalId)
 
   const {
     votingStartDate,
@@ -217,6 +220,7 @@ export const useProposalDetailById = (proposalId: string) => {
       votingStartBlock,
       votingEndBlock,
       proposalVotesQuery: proposalVotes,
+      proposalType,
     }
 
     const mock = {}
@@ -246,6 +250,7 @@ export const useProposalDetailById = (proposalId: string) => {
     votingStartBlock,
     votingEndBlock,
     isVotesLoading,
+    proposalType,
   ])
 
   const error = useMemo(() => calls.find(call => call.error)?.error || null, [calls])
@@ -258,7 +263,7 @@ export const useProposalDetailById = (proposalId: string) => {
   }
 }
 
-export const useProposalDetail = () => {
+export const useProposalDetail = (_proposalId?: string) => {
   const { proposalId } = useParams<{ proposalId: string }>()
-  return useProposalDetailById(proposalId)
+  return useProposalDetailById(_proposalId ?? proposalId)
 }

@@ -16,6 +16,8 @@ export enum StateFilter {
   Queued = "Queued",
   Executed = "Executed",
   DepositNotMet = "Support not reached",
+  InDevelopment = "In development",
+  Completed = "Completed",
 }
 
 export const initialProposalsFilterValues = [

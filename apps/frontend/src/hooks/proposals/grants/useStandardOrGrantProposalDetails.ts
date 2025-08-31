@@ -20,6 +20,7 @@ const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
  * @returns The query key for fetching proposal details
  */
 export const getGrantProposalDetailsQueryKey = (
+  // why do we have the standard in the key for the grant ?
   standardProposals: ProposalCreatedEvent[],
   grantProposals: ProposalCreatedEvent[],
 ) => [
@@ -101,15 +102,21 @@ const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Pr
  * @param grantProposals Array of grant proposal event data containing IPFS hashes and proposer addresses
  * @returns Object with detailed proposal information mapped by proposal ID
  */
-export const useGrantProposalDetails = ({
+export const useStandardOrGrantProposalDetails = ({
   standardProposals,
   grantProposals,
 }: {
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
 }): UseQueryResult<{
-  standardProposalsDetailsMap: Record<string, Omit<ProposalEnriched, "state" | "votingRoundId">>
-  grantProposalsDetailsMap: Record<string, Omit<GrantProposalEnriched, "state" | "votingRoundId">>
+  standardProposalsDetailsMap: Record<
+    string,
+    Omit<ProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
+  >
+  grantProposalsDetailsMap: Record<
+    string,
+    Omit<GrantProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
+  >
 }> => {
   return useQuery({
     queryKey: getGrantProposalDetailsQueryKey(standardProposals, grantProposals),
@@ -138,22 +145,29 @@ export const useGrantProposalDetails = ({
       const standardProposalsIpfsMetadatas = await Promise.all(standardProposalsIpfsMetadataPromises)
 
       // Create detailed proposal objects mapped by ID
-      const grantProposalsDetailsMap: Record<string, Omit<GrantProposalEnriched, "state" | "votingRoundId">> = {}
-      const standardProposalsDetailsMap: Record<string, Omit<ProposalEnriched, "state" | "votingRoundId">> = {}
+      const grantProposalsDetailsMap: Record<
+        string,
+        Omit<GrantProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
+      > = {}
+      const standardProposalsDetailsMap: Record<
+        string,
+        Omit<ProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
+      > = {}
 
       grantProposals.forEach((event, index) => {
         const ipfsMetadata = grantProposalsIpfsMetadatas[index]
         const allCalldatas = event.calldatas.map(calldata => getAndDecodeGrantAmount(calldata))
-        const grantAmount = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
+        const grantAmountRequested = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
         grantProposalsDetailsMap[event.id] = {
           ...event,
           ...getGrantProposalMetadataOrReturnDefault(ipfsMetadata),
-          grantAmount: grantAmount.toNumber(),
+          grantAmountRequested: grantAmountRequested.toNumber(),
         }
       })
 
       standardProposals.forEach((event, index) => {
         const ipfsMetadata = standardProposalsIpfsMetadatas[index]
+
         standardProposalsDetailsMap[event.id] = {
           ...event,
           ...getStandardProposalMetadataOrReturnDefault(ipfsMetadata),

@@ -19,7 +19,7 @@ export type ProposalEnriched = ProposalCreatedEvent & {
 export type GrantProposalEnriched = ProposalEnriched &
   Omit<GrantFormData, "termsOfService"> & {
     grantType: string
-    grantAmount: number
+    grantAmountRequested: number // Amount requested by the grantee
   }
 
 export type ProposalCreatedEvent = {
