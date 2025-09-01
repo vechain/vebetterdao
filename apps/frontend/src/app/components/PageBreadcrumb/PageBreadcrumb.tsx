@@ -11,28 +11,23 @@ type PageBreadcrumbProps = {
 
 export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
   return (
-    <Breadcrumb.Root fontSize="lg">
+    <Breadcrumb.Root>
       <Breadcrumb.List gap={2}>
         {items.map((item, index) => {
           const isCurrentPage = window.location.pathname === item.href
           const isLast = index === items.length - 1
+          const highlightedText = isCurrentPage || isLast
+          const fontWeight = highlightedText ? "bold" : "normal"
+          const color = highlightedText ? "text.subtle" : "auto"
 
           return (
             <React.Fragment key={item.label}>
-              <Breadcrumb.Item>
-                {isCurrentPage || isLast ? (
-                  <Breadcrumb.CurrentLink>
-                    <Text fontWeight="bold" color={index === 0 ? "#747C89" : "auto"}>
-                      {item.label}
-                    </Text>
-                  </Breadcrumb.CurrentLink>
-                ) : (
-                  <Breadcrumb.Link href={item.href}>
-                    <Text fontWeight="bold" color={index === 0 ? "#747C89" : "auto"}>
-                      {item.label}
-                    </Text>
-                  </Breadcrumb.Link>
-                )}
+              <Breadcrumb.Item fontSize="lg">
+                <Breadcrumb.CurrentLink>
+                  <Text fontWeight={fontWeight} color={color}>
+                    {item.label}
+                  </Text>
+                </Breadcrumb.CurrentLink>
               </Breadcrumb.Item>
               {!isLast && (
                 <Breadcrumb.Separator>
