@@ -90,7 +90,8 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
       isOpen={actionModal.open ?? false}
       onClose={actionModal.onClose ?? (() => {})}
       ariaTitle="ActionModal"
-      ariaDescription="ActionModal">
+      ariaDescription="ActionModal"
+      showCloseButton>
       <VStack align="stretch" gap={4}>
         <Text textStyle="sm" color="black" bg="#F8F8F8" py={1} px={3} borderRadius="full" alignSelf="flex-start">
           {dayjs.unix(blockTimestamp ?? 0).fromNow()}

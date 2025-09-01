@@ -32,6 +32,9 @@ export const dialogSlotRecipe = defineSlotRecipe({
       },
     },
   },
+  defaultVariants: {
+    variant: "base",
+  },
 
   base: {
     content: {

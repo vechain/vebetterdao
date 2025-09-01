@@ -57,8 +57,6 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
       renderer={({ days, hours, minutes, seconds }) => {
         // Check if near end (1 hour or less)
         const isNearEnd = days === 0 && hours <= 1
-        const isNearEndText = isNearEnd ? "#C84968" : "#004CFC"
-        const isNearEndBg = isNearEnd ? "#FCEEF1" : "#E5EEFF"
         const isNearEndIcon = isNearEnd ? "/assets/icons/clock-red.svg" : "/assets/icons/clock-blue.svg"
 
         return (
@@ -69,10 +67,10 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
             px={3}
             py={1}
             rounded={"full"}
-            color={isNearEndText}
-            bg={isNearEndBg}
+            color="actions.primary.text"
+            bg="transparent"
             borderColor={"#F2F2F2"}
-            textStyle={isAbove500 ? "xs" : "xxs"}
+            textStyle={isAbove500 ? "sm" : "md"}
             fontWeight={600}
             gap={1}>
             <Image src={isNearEndIcon} alt="clock" boxSize={"20px"} />

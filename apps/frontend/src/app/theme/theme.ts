@@ -15,7 +15,7 @@ const config = defineConfig({
   cssVarsPrefix: "vbd",
 
   globalCss: {
-    ":where(button, [role=button], a)": {
+    ":where(button, [role=button], [type=button], a)": {
       cursor: "pointer",
     },
   },

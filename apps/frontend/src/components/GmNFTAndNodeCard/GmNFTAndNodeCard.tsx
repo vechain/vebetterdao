@@ -81,7 +81,7 @@ export const GmNFTAndNodeCard = () => {
           direction={isAbove1200 ? "row" : "column-reverse"}>
           <VStack flex="3" align={"stretch"} gap="24px" px="2px">
             <HStack gap="40px" align={"baseline"} justify={"space-between"}>
-              <Heading textStyle="xl" fontWeight={600} lineHeight={"30px"}>
+              <Heading textStyle="xl" fontWeight="bold" color="text.strong">
                 {t("Your NFTs")}
               </Heading>
             </HStack>
@@ -132,12 +132,12 @@ export const GmNFTAndNodeCard = () => {
               </Stack>
             )}
 
-            <Box>
+            <Box ml="auto">
               <GmActionButton
                 b3trBalanceScaled={b3trBalance?.scaled}
                 buttonProps={{
                   size: "md",
-                  variant: "whiteAction",
+                  variant: "secondary",
                   w: "fit-content",
                 }}
               />

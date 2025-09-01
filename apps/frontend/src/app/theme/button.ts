@@ -7,6 +7,38 @@ export const buttonRecipe = defineRecipe({
   },
   variants: {
     variant: {
+      primary: {
+        rounded: "full",
+        fontSize: "16px",
+        fontWeight: 500,
+        px: 6,
+        py: 3,
+        color: "actions.primary.text",
+        bgColor: "actions.primary.default",
+        _hover: {
+          bg: "actions.primary.hover",
+          _disabled: {
+            bg: "actions.primary.disabled",
+          },
+        },
+      },
+
+      secondary: {
+        rounded: "full",
+        fontSize: "16px",
+        fontWeight: 500,
+        px: 6,
+        py: 3,
+        color: "actions.secondary.text",
+        bgColor: "actions.secondary.default",
+        _hover: {
+          bg: "actions.secondary.hover",
+          _disabled: {
+            bg: "actions.secondary.disabled",
+          },
+        },
+      },
+
       primarySubtle: {
         rounded: "full",
         fontSize: "16px",
@@ -38,8 +70,9 @@ export const buttonRecipe = defineRecipe({
         rounded: "full",
         fontSize: "16px",
         fontWeight: 500,
-        px: "24px",
-        color: "#FFFFFF",
+        px: 6,
+        py: 3,
+        color: "actions.primary.text",
         bgColor: "actions.primary.default",
         _hover: {
           bg: "actions.primary.hover",
@@ -76,17 +109,17 @@ export const buttonRecipe = defineRecipe({
           },
         },
       },
-      secondary: {
-        rounded: "full",
-        color: "rgba(0, 76, 252, 1)",
-        bgColor: "rgba(224, 233, 254, 1)",
-        _hover: {
-          bg: "#7b818e",
-          _disabled: {
-            bg: "rgba(224, 233, 254, 0.7)",
-          },
-        },
-      },
+      // secondary: {
+      //   rounded: "full",
+      //   color: "rgba(0, 76, 252, 1)",
+      //   bgColor: "rgba(224, 233, 254, 1)",
+      //   _hover: {
+      //     bg: "#7b818e",
+      //     _disabled: {
+      //       bg: "rgba(224, 233, 254, 0.7)",
+      //     },
+      //   },
+      // },
       primaryGhost: {
         rounded: "full",
         fontSize: "16px",

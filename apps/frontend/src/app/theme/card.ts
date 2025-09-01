@@ -13,6 +13,14 @@ export const cardSlotRecipe = defineSlotRecipe({
   },
   variants: {
     variant: {
+      primary: {
+        root: {
+          bg: "bg.primary",
+          borderWidth: "1px",
+          borderColor: "border.secondary",
+        },
+      },
+
       base: {
         root: {
           bg: {

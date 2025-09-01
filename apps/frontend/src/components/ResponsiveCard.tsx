@@ -19,7 +19,7 @@ export const ResponsiveCard = ({ children, cardProps = {}, mobileStrategy = "non
 
   if (shouldRenderInCard) {
     return (
-      <Card.Root variant={"baseWithBorder"} w="full" {...cardProps}>
+      <Card.Root variant="primary" w="full" {...cardProps}>
         <Card.Body p={6}>{children}</Card.Body>
       </Card.Root>
     )
@@ -28,7 +28,7 @@ export const ResponsiveCard = ({ children, cardProps = {}, mobileStrategy = "non
   if (mobileStrategy === "none") return children
 
   return (
-    <Box w={"100vw"} bg="#FFF" px={4} py={2} ml={"-16px"}>
+    <Box w={"100vw"} bg="bg.primary" px={4} py={2} ml={"-16px"}>
       {children}
     </Box>
   )

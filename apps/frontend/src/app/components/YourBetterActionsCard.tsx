@@ -32,15 +32,17 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const lastActionsData = lastActions.slice(0, maxActions)
 
   return (
-    <Card.Root w={"full"} variant={"baseWithBorder"}>
+    <Card.Root w={"full"} variant="primary">
       <Card.Body>
         <VStack gap={4} align="stretch">
           <VStack gap={2} align="stretch">
             <VStack w="full" align={"flex-start"}>
-              <Heading size="xl">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
+              <Heading size="xl" color="text.strong">
+                {isConnectedUser ? t("Your better actions") : t("Better actions")}
+              </Heading>
             </VStack>
             {isConnectedUser && (
-              <Text textStyle="sm" color="#6A6A6A">
+              <Text textStyle="sm" color="text.subtle">
                 {t("Use Apps to earn B3TR tokens through your Better Actions")}
               </Text>
             )}
@@ -52,7 +54,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
               <VStack gap={4} align="stretch">
                 {address ? (
                   <>
-                    <Heading size="md" fontWeight={600}>
+                    <Heading size="sm" fontWeight="semibold">
                       {t("Last actions")}
                     </Heading>
                     {lastActionsData.length > 0 ? (
