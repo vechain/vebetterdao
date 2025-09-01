@@ -1,4 +1,4 @@
-import { Field, HStack, Input, Text, Textarea } from "@chakra-ui/react"
+import { Field, HStack, Input, Text, Textarea, InputGroup } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
 
 type FormItemProps = {
@@ -10,6 +10,7 @@ type FormItemProps = {
   error?: string
   onBlur?: () => void
   isOptional?: boolean
+  leftElement?: React.ReactNode
 }
 
 export const FormItem = ({
@@ -21,6 +22,7 @@ export const FormItem = ({
   error,
   onBlur,
   isOptional = false,
+  leftElement,
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
 
@@ -43,19 +45,21 @@ export const FormItem = ({
           {description}
         </Text>
       )}
-      <InputComponent
-        placeholder={placeholder}
-        {...register}
-        {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
-        {...(type === "textarea" && !register?.minLength && { minLength: 20 })}
-        {...(type === "textarea" && {
-          h: "full",
-          minH: "120px",
-          resize: "vertical",
-        })}
-        onBlur={onBlur}
-        rounded="xl"
-      />
+      <InputGroup {...(leftElement && { startElement: leftElement })}>
+        <InputComponent
+          placeholder={placeholder}
+          {...register}
+          {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
+          {...(type === "textarea" && !register?.minLength && { minLength: 20 })}
+          {...(type === "textarea" && {
+            h: "full",
+            minH: "120px",
+            resize: "vertical",
+          })}
+          onBlur={onBlur}
+          rounded="xl"
+        />
+      </InputGroup>
       {error && <Field.ErrorText>{error}</Field.ErrorText>}
     </Field.Root>
   )

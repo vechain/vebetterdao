@@ -19,10 +19,12 @@ import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { FormSocialConnectButton } from "@/components/CustomFormFields"
-import { LuUpload } from "react-icons/lu"
+import { LuMail, LuUpload } from "react-icons/lu"
 import { useEffect } from "react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { WalletAddressInput } from "@/app/components/Input"
+import { RiTelegram2Line } from "react-icons/ri"
+import { PiLinkSimple } from "react-icons/pi"
 
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
@@ -136,6 +138,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                 <GridItem>
                   <FormItem
                     label={t("Email")}
+                    leftElement={<Icon as={LuMail} />}
                     isOptional
                     type="email"
                     placeholder={t("Enter the email of the company")}
@@ -146,6 +149,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                 <GridItem>
                   <FormItem
                     label={"Telegram"}
+                    leftElement={<Icon as={RiTelegram2Line} />}
                     type="url"
                     placeholder={t("Enter link here")}
                     isOptional
@@ -184,6 +188,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
               <GridItem>
                 <FormItem
                   label={t("Testnet/App URL")}
+                  leftElement={<Icon as={PiLinkSimple} />}
                   placeholder="Enter link here"
                   isOptional
                   register={register("appTestnetUrl")}
@@ -194,6 +199,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
               <GridItem>
                 <FormItem
                   label={t("Website URL")}
+                  leftElement={<Icon as={PiLinkSimple} />}
                   placeholder="Enter link here"
                   type="url"
                   isOptional
