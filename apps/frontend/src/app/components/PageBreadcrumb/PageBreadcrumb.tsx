@@ -18,7 +18,7 @@ export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
           const isLast = index === items.length - 1
           const highlightedText = isCurrentPage || isLast
           const fontWeight = highlightedText ? "bold" : "normal"
-          const color = highlightedText ? "text.subtle" : "auto"
+          const color = highlightedText ? "text.default" : "text.subtle"
 
           return (
             <React.Fragment key={item.label}>
