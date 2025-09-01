@@ -23,32 +23,7 @@ import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import dayjs from "dayjs"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
-import { TFunction } from "i18next"
-
-//TODO: Move to constants file
-const MAX_DAPP_GRANT_AMOUNT = 30000
-const MAX_TOOLING_GRANT_AMOUNT = 50000
-
-//TODO: Move to utils file for validation
-const validateMilestoneAmount = (value: number, grantType: string, t: TFunction) => {
-  if (!value) return true
-
-  if (grantType === "dapp") {
-    return value > MAX_DAPP_GRANT_AMOUNT
-      ? t("Dapp grant amount must be less than or equal to {{value}} USD", {
-          value: MAX_DAPP_GRANT_AMOUNT,
-        })
-      : true
-  } else if (grantType === "tooling") {
-    return value > MAX_TOOLING_GRANT_AMOUNT
-      ? t("Tooling grant amount must be less than or equal to {{value}} USD", {
-          value: MAX_TOOLING_GRANT_AMOUNT,
-        })
-      : true
-  }
-
-  return true
-}
+import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
 
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
@@ -131,7 +106,7 @@ export const MilestoneSection = ({
                 conversionRate={b3trPerUsd}
                 register={register(`milestones.${index}.fundingAmount`, {
                   required: t("Please enter the amount for this milestone"),
-                  validate: (value: number) => validateMilestoneAmount(value, grantType, t),
+                  validate: (value: number) => validateMilestoneAmount(value, grantType),
                 })}
                 error={errors.milestones?.[index]?.fundingAmount?.message}
               />
