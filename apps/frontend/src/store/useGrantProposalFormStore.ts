@@ -51,8 +51,20 @@ const initialState: GrantFormData = {
     {
       description: "",
       fundingAmount: 0,
-      durationFrom: dayjs().unix(), //TODO: This should be the current date
-      durationTo: dayjs().add(1, "month").unix(), //TODO: This should be the current date + 1 month
+      durationFrom: dayjs().add(1, "day").unix(),
+      durationTo: dayjs().add(1, "month").unix(),
+    },
+    {
+      description: "",
+      fundingAmount: 0,
+      durationFrom: dayjs().add(2, "month").unix(),
+      durationTo: dayjs().add(3, "month").unix(),
+    },
+    {
+      description: "",
+      fundingAmount: 0,
+      durationFrom: dayjs().add(4, "month").unix(),
+      durationTo: dayjs().add(5, "month").unix(),
     },
   ],
   termsOfService: false,
