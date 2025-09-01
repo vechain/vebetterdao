@@ -3,15 +3,30 @@ import { useDistributeEmission } from "@/hooks"
 import { VStack, Button, Text } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useRouter } from "next/navigation"
 
-export const StartRoundButton = () => {
+export const useCurrentRoundActiveState = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId)
-  const { t } = useTranslation()
+
   const isCurrentRoundActive = useMemo(() => {
     return currentRound?.state === 0
   }, [currentRound])
-  const { sendTransaction, isTransactionPending, status } = useDistributeEmission({})
+
+  return { isCurrentRoundActive, currentRound, currentRoundId }
+}
+
+export const StartRoundButton = ({ redirectTo }: { redirectTo?: string }) => {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const { isCurrentRoundActive, currentRound, currentRoundId } = useCurrentRoundActiveState()
+  const { sendTransaction, isTransactionPending, status } = useDistributeEmission({
+    onSuccess: () => {
+      if (redirectTo) {
+        router.push(redirectTo)
+      }
+    },
+  })
   const distributionLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(() => {
