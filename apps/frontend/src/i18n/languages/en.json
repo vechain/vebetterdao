@@ -1968,5 +1968,7 @@
   "Date": "Date",
   "Select date": "Select date",
   "Support ends in": "Support ends in",
-  "From today": "From today"
+  "From today": "From today",
+  "Dapp grant amount must be less than or equal to {{value}} USD": "Dapp grant amount must be less than or equal to {{value}} USD",
+  "Tooling grant amount must be less than or equal to {{value}} USD": "Tooling grant amount must be less than or equal to {{value}} USD"
 }

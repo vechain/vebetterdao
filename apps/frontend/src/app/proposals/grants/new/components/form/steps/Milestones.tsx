@@ -14,13 +14,40 @@ import {
 } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch, Control } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
-import { FormItem } from "@/components/CustomFormFields/FormItem"
+import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { UilPlus, UilTrash, UilArrowRight } from "@iconscout/react-unicons"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import dayjs from "dayjs"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
+import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
+import { TFunction } from "i18next"
+
+//TODO: Move to constants file
+const MAX_DAPP_GRANT_AMOUNT = 30000
+const MAX_TOOLING_GRANT_AMOUNT = 50000
+
+//TODO: Move to utils file for validation
+const validateMilestoneAmount = (value: number, grantType: string, t: TFunction) => {
+  if (!value) return true
+
+  if (grantType === "dapp") {
+    return value > MAX_DAPP_GRANT_AMOUNT
+      ? t("Dapp grant amount must be less than or equal to {{value}} USD", {
+          value: MAX_DAPP_GRANT_AMOUNT,
+        })
+      : true
+  } else if (grantType === "tooling") {
+    return value > MAX_TOOLING_GRANT_AMOUNT
+      ? t("Tooling grant amount must be less than or equal to {{value}} USD", {
+          value: MAX_TOOLING_GRANT_AMOUNT,
+        })
+      : true
+  }
+
+  return true
+}
 
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
@@ -40,6 +67,9 @@ type MilestoneSectionProps = {
   removeMilestone: (index: number) => void
   getValues: UseFormGetValues<GrantFormData>
   watch: UseFormWatch<GrantFormData>
+  b3trPerUsd: number
+  milestoneMinimumAmount: bigint
+  grantType: string
 }
 
 export const MilestoneSection = ({
@@ -49,15 +79,18 @@ export const MilestoneSection = ({
   removeMilestone,
   getValues,
   watch,
+  b3trPerUsd,
+  milestoneMinimumAmount,
+  grantType,
 }: MilestoneSectionProps) => {
   const { t } = useTranslation()
-  const { data: milestoneMinimumAmount } = useMilestoneMinimumAmount()
+
   const milestoneNumber = index + 1
   const isFirst = index === 0
   const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   const now = dayjs().unix()
-  const canRemoveAnyMilestone = milestoneNumber > (milestoneMinimumAmount ?? 0)
+  const canRemoveAnyMilestone = milestoneNumber > Number(milestoneMinimumAmount)
   const formatDuration = (duration: number | string) => {
     const durationInMiliseconds = Number(duration) * 1000 //Convert to miliseconds
     return dayjs(durationInMiliseconds).format("MM/DD/YYYY")
@@ -90,21 +123,23 @@ export const MilestoneSection = ({
         <Accordion.ItemBody>
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
             {/* Amount */}
-            <GridItem colSpan={{ base: 1, md: 1 }}>
-              <FormItem
+            <GridItem colSpan={1}>
+              <FormMoneyInput
                 label={t("Amount")}
-                placeholder="0 USD"
+                placeholder="10,000"
+                conversionRate={b3trPerUsd}
                 register={register(`milestones.${index}.fundingAmount`, {
                   required: t("Please enter the amount for this milestone"),
+                  validate: (value: number) => validateMilestoneAmount(value, grantType, t),
                 })}
                 error={errors.milestones?.[index]?.fundingAmount?.message}
               />
             </GridItem>
 
             {/* Empty to fill the gap */}
-            <GridItem colSpan={{ base: 1, md: 1 }}></GridItem>
+            <GridItem colSpan={1}></GridItem>
             {/* Duration */}
-            <GridItem colSpan={{ base: 1, md: 1 }}>
+            <GridItem colSpan={1}>
               <FormDateInput
                 label="Duration"
                 placeholder="Select start date"
@@ -121,7 +156,7 @@ export const MilestoneSection = ({
                 watch={watch}
               />
             </GridItem>
-            <GridItem colSpan={{ base: 1, md: 1 }}>
+            <GridItem colSpan={1}>
               <FormDateInput
                 {...(isMobile && { label: "Duration" })}
                 placeholder="Select end date"
@@ -144,7 +179,7 @@ export const MilestoneSection = ({
             </GridItem>
 
             {/* Description */}
-            <GridItem minH="160px" colSpan={{ base: 1, md: 1 }}>
+            <GridItem minH="160px" colSpan={1}>
               <FormItem
                 label={t("Description")}
                 type="textarea"
@@ -203,8 +238,14 @@ export const Milestones = ({
   control,
 }: MilestonesProps) => {
   const { t } = useTranslation()
+  const { data: milestoneMinimumAmount } = useMilestoneMinimumAmount()
+  const { data: conversionRate } = useGetTokenUsdPrice("B3TR")
+
+  const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
+
   const milestones = getValues("milestones")
   const now = dayjs().unix()
+  const grantType = getValues("grantType")
 
   const handleAddMilestone = () => {
     //Get the last milestone
@@ -251,6 +292,9 @@ export const Milestones = ({
               removeMilestone={handleRemoveMilestone}
               getValues={getValues}
               watch={watch}
+              b3trPerUsd={B3TRPerUSD}
+              milestoneMinimumAmount={milestoneMinimumAmount ?? BigInt(0)}
+              grantType={grantType}
             />
           )
         })}
@@ -262,24 +306,24 @@ export const Milestones = ({
             {t("Add milestone")}
           </Button>
         </GridItem>
-        <GridItem bg="#F8F8F8" p={4} borderRadius="xl" colSpan={2}>
-          <Trans
-            color="gray.100"
-            textColor="gray.100"
-            i18nKey="<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly"
-            components={{
-              b: <Text as="span" fontWeight="bold" />,
-            }}
-          />
+        <GridItem bg="bg.tertiary" p={4} borderRadius="xl" colSpan={2}>
+          <Text color="text.subtle">
+            <Trans
+              i18nKey="<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly"
+              components={{
+                b: <b />,
+              }}
+            />
+          </Text>
         </GridItem>
         <GridItem colSpan={2}>
-          <FormCheckbox
+          <FormCheckbox<GrantFormData>
             name="termsOfService"
             key="termsOfService"
             control={control}
-            description={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
-            error={errors.termsOfService?.message}
             label={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
+            rules={{ required: "Please accept the terms of service" }}
+            error={errors.termsOfService?.message}
           />
         </GridItem>
       </Grid>
