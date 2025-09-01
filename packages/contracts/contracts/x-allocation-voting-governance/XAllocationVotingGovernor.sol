@@ -198,6 +198,9 @@ abstract contract XAllocationVotingGovernor is
 
     require(count > 0, "XAllocationVotingGovernor: no eligible apps to vote for");
 
+    // TODO autovoting: if autovoting is enabled and there are no eligible apps to vote for, toggle off autovoting
+    // Then, update this test 'should revert when the users have no eligible apps to vote for'
+
     // Create final arrays with exact size
     finalAppIds = new bytes32[](count);
     voteWeights = new uint256[](count);

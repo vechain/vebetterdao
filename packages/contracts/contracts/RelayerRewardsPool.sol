@@ -89,10 +89,6 @@ contract RelayerRewardsPool is
     address[] relayerAddresses;
     // number of blocks for exclusive early access
     uint256 earlyAccessBlocks;
-    // roundId => relayer => allocated vote actions during early access
-    mapping(uint256 => mapping(address => uint256)) relayerEarlyAccessVoteAllocation;
-    // roundId => relayer => used vote actions during early access
-    mapping(uint256 => mapping(address => uint256)) relayerEarlyAccessVoteUsed;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.RelayerRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -135,9 +131,6 @@ contract RelayerRewardsPool is
 
   /// @notice Custom error for when there are no rewards to claim
   error NoRewardsToClaim(address relayer, uint256 roundId);
-
-  /// @notice Custom error for when a relayer's early access vote allocation exceeds the allocated amount
-  error EarlyAccessVoteAllocationExceeded(address relayer, uint256 roundId, uint256 used, uint256 allocated);
 
   /// @notice Custom error for when transfer fails
   error TransferFailed();
@@ -381,28 +374,6 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Get the early access vote allocation for a relayer in a specific round
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @return The allocated vote actions for early access
-   */
-  function getEarlyAccessVoteAllocation(address relayer, uint256 roundId) external view returns (uint256) {
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    return $.relayerEarlyAccessVoteAllocation[roundId][relayer];
-  }
-
-  /**
-   * @notice Get the early access vote actions used by a relayer in a specific round
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @return The used vote actions during early access
-   */
-  function getEarlyAccessVoteUsed(address relayer, uint256 roundId) external view returns (uint256) {
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-    return $.relayerEarlyAccessVoteUsed[roundId][relayer];
-  }
-
-  /**
    * @notice Check if a relayer can perform a vote action during early access
    * @param relayer The relayer address
    * @param roundId The round ID
@@ -420,16 +391,6 @@ contract RelayerRewardsPool is
       $.registeredRelayers[relayer],
       "RelayerRewardsPool: caller is not a registered relayer during early access period"
     );
-
-    require(
-      $.relayerEarlyAccessVoteAllocation[roundId][relayer] > 0,
-      "RelayerRewardsPool: relayer has no early access vote allocation"
-    );
-
-    // During early access, check if relayer has active allocation left
-    uint256 allocated = $.relayerEarlyAccessVoteAllocation[roundId][relayer];
-    uint256 used = $.relayerEarlyAccessVoteUsed[roundId][relayer];
-    require(used < allocated, "RelayerRewardsPool: relayer has exceeded their early access vote allocation");
   }
 
   // ----------------------- Actions -----------------------
@@ -554,12 +515,6 @@ contract RelayerRewardsPool is
 
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // If this is a VOTE action during early access, update the used count
-    if (action == RelayerAction.VOTE) {
-      uint256 used = $.relayerEarlyAccessVoteUsed[roundId][relayer];
-      $.relayerEarlyAccessVoteUsed[roundId][relayer] = used + 1;
-    }
-
     // Get weight based on action type
     uint256 weight = action == RelayerAction.VOTE ? $.voteWeight : $.claimWeight;
 
@@ -593,8 +548,13 @@ contract RelayerRewardsPool is
     // Weighted actions are the sum of the vote and claim weights
     $.totalWeightedActions[roundId] = totalAutoVotingUsers * ($.voteWeight + $.claimWeight);
 
-    // Set up early access vote allocation for registered relayers
-    _setEarlyAccessVoteAllocations(roundId, totalAutoVotingUsers);
+    emit TotalAutoVotingActionsSet(
+      roundId,
+      totalAutoVotingUsers,
+      $.totalActions[roundId],
+      $.totalWeightedActions[roundId],
+      $.relayerAddresses.length
+    );
   }
 
   /**
@@ -670,38 +630,6 @@ contract RelayerRewardsPool is
     $.totalRewards[roundId] += amount;
 
     emit RewardsDeposited(roundId, amount, $.totalRewards[roundId]);
-  }
-
-  /**
-   * @notice Internal function to allocate vote actions evenly among registered relayers during early access
-   * @param roundId The round ID
-   * @param totalAutoVotingUsers The total number of auto-voting users
-   */
-  function _setEarlyAccessVoteAllocations(uint256 roundId, uint256 totalAutoVotingUsers) internal {
-    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
-
-    uint256 numRelayers = $.relayerAddresses.length;
-    if (numRelayers == 0) return; // No registered relayers
-
-    uint256 totalVoteActions = totalAutoVotingUsers; // 1 vote action per user
-    uint256 actionsPerRelayer = totalVoteActions / numRelayers;
-    uint256 remainingActions = totalVoteActions % numRelayers;
-
-    // Allocate actions evenly among relayers
-    for (uint256 i = 0; i < numRelayers; i++) {
-      address relayer = $.relayerAddresses[i];
-      uint256 allocation = actionsPerRelayer;
-
-      // Distribute remaining actions to the first few relayers
-      if (i < remainingActions) {
-        allocation += 1;
-      }
-
-      $.relayerEarlyAccessVoteAllocation[roundId][relayer] = allocation;
-      $.relayerEarlyAccessVoteUsed[roundId][relayer] = 0; // initialize used count to 0
-    }
-
-    emit EarlyAccessAllocationsSet(roundId, totalVoteActions, numRelayers);
   }
 
   /**

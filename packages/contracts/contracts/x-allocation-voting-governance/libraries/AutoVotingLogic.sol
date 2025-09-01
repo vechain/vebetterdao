@@ -99,7 +99,7 @@ library AutoVotingLogic {
     bytes32[] memory apps
   ) external {
     require(apps.length > 0, "AutoVotingLogic: no apps to vote for");
-    require(apps.length <= 10, "AutoVotingLogic: must vote for less than 10 apps");
+    require(apps.length <= 15, "AutoVotingLogic: must vote for less than 15 apps");
 
     // Iterate through the apps and percentages to calculate the total weight of votes cast by the voter
     for (uint256 i; i < apps.length; i++) {

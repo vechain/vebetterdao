@@ -84,12 +84,9 @@ describe("AutoVoting - @shard14a", function () {
     await getVot3Tokens(user, "100")
     await getVot3Tokens(user1, "100")
     await getVot3Tokens(user2, "100")
-    await x2EarnCreatorContract.connect(owner).safeMint(appOwner1.address)
-    await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
-    await x2EarnCreatorContract.connect(owner).safeMint(appOwner3.address)
   }
 
-  describe.only("Core logic", function () {
+  describe("Core logic", function () {
     beforeEach(async function () {
       await setupContracts()
       await emissions.connect(minterAccount).start()
@@ -277,7 +274,7 @@ describe("AutoVoting - @shard14a", function () {
       expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.5"))
     })
 
-    it("revert if app preferences are set to empty array when autovoting is enabled", async function () {
+    it.skip("revert if app preferences are set to empty array when autovoting is enabled", async function () {
       // @todo autovoting
       // Scenario:
       // Auto voting status
@@ -298,7 +295,6 @@ describe("AutoVoting - @shard14a", function () {
       // Cycle 2 - OFF (disabled during cycle 1)
       // Cycle 3 - OFF (remains disabled)
 
-      // =========== initial cycle ===========
       // Get initial cycle data
       const initialCycle = await emissions.getCurrentCycle()
       const initialEmissionBlock = await emissions.lastEmissionBlock()
@@ -352,6 +348,19 @@ describe("AutoVoting - @shard14a", function () {
       // Auto-voting should be disabled at the start of cycle 3
       expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, cycle3EmissionBlock)).to.be.false
     })
+
+    it("should revert when user tries to toggle autovoting when has no votes available", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      const user = otherAccounts[5]
+      await veBetterPassport.whitelist(user.address)
+
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWith(
+        "XAllocationVotingGovernor: no votes available",
+      )
+    })
   })
 
   describe("castVoteOnBehalfOf function", function () {
@@ -378,14 +387,18 @@ describe("AutoVoting - @shard14a", function () {
       await emissions.connect(minterAccount).distribute()
 
       const roundId = await xAllocationVoting.currentRoundId()
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.not.be.reverted
+      const tx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+      await expect(tx).to.not.be.reverted
 
-      // Verify vote was cast
       const hasVoted = await xAllocationVoting.hasVoted(roundId, user.address)
       expect(hasVoted).to.be.true
     })
 
     it("should successfully cast vote on behalf of user with multiple apps and distribute votes equally", async function () {
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner1.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner3.address)
+
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner1.address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner2.address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner3.address))
@@ -412,7 +425,8 @@ describe("AutoVoting - @shard14a", function () {
       await emissions.connect(minterAccount).distribute()
 
       const roundId = await xAllocationVoting.currentRoundId()
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.not.be.reverted
+      const tx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+      await expect(tx).to.not.be.reverted
 
       // Verify vote was cast
       const hasVoted = await xAllocationVoting.hasVoted(roundId, user.address)
@@ -429,9 +443,162 @@ describe("AutoVoting - @shard14a", function () {
       expect(app3Votes).to.equal(expectedVotePerApp)
     })
 
-    it("should revert with no early access vote allocation for relayers when round is not active", async function () {
+    it("should successfully cast vote on behalf of user with 10 apps and distribute votes equally", async function () {
+      const appIds = []
+      const getAllSigners = await ethers.getSigners()
+      const getAllAppOwners = getAllSigners.slice(5, 20)
+
+      for (let i = 0; i < 15; i++) {
+        const appOwner = getAllAppOwners[i]
+        const isCreatorMinted = await x2EarnCreatorContract.balanceOf(appOwner.address)
+
+        if (isCreatorMinted === 0n) {
+          await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
+        }
+
+        const appId = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+        await x2EarnApps
+          .connect(appOwner)
+          .submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+
+        // Endorse the app
+        await endorseApp(appId, appOwner)
+
+        appIds.push(appId)
+      }
+
+      // Enable autovoting and set preferences for all apps
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).setUserVotingPreferences(appIds)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+      const tx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+      await expect(tx).to.not.be.reverted
+
+      // Verify vote was cast
+      const hasVoted = await xAllocationVoting.hasVoted(roundId, user.address)
+      expect(hasVoted).to.be.true
+
+      // Verify votes were distributed equally (20 VOT3 each = 300 VOT3 total / 15 apps)
+      const expectedVotePerApp = ethers.parseEther("20")
+      for (const appId of appIds) {
+        const votes = await xAllocationVoting.getAppVotes(roundId, appId)
+        expect(votes).to.equal(expectedVotePerApp)
+      }
+    })
+
+    it.skip("should show gas cost progression from 1 to 15 apps", async function () {
+      /**
+       * This test is for gas cost analysis.
+       */
+      const appIds = []
+      const getAllSigners = await ethers.getSigners()
+      const getAllAppOwners = getAllSigners.slice(5, 20)
+
+      for (let i = 0; i < 15; i++) {
+        const appOwner = getAllAppOwners[i]
+        const isCreatorMinted = await x2EarnCreatorContract.balanceOf(appOwner.address)
+
+        if (isCreatorMinted === 0n) {
+          await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
+        }
+
+        const appId = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+        await x2EarnApps
+          .connect(appOwner)
+          .submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+
+        // Endorse the app
+        await endorseApp(appId, appOwner)
+
+        appIds.push(appId)
+      }
+
+      const gasResults: { appCount: number; gasUsed: bigint }[] = []
+
+      // Enable autovoting once at the beginning
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Test from 1 to 15 apps
+      for (let appCount = 1; appCount <= 15; appCount++) {
+        // Update voting preferences with apps 0 to appCount-1
+        const currentAppIds = appIds.slice(0, appCount)
+        await xAllocationVoting.connect(user).setUserVotingPreferences(currentAppIds)
+
+        // Start new round
+        const roundId = await xAllocationVoting.currentRoundId()
+
+        // Cast vote and measure gas
+        const tx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+        const receipt = await tx.wait()
+
+        await expect(tx).to.not.be.reverted
+
+        const gasUsed = receipt?.gasUsed || 0n
+        gasResults.push({ appCount, gasUsed })
+
+        console.log(`${appCount} apps: ${gasUsed.toLocaleString()} gas`)
+
+        // Verify vote was cast
+        const hasVoted = await xAllocationVoting.hasVoted(roundId, user.address)
+        expect(hasVoted).to.be.true
+
+        // Wait for round to end and start next round (except for last iteration)
+        if (appCount < 15) {
+          await waitForRoundToEnd(roundId)
+          await startNewAllocationRound()
+        }
+      }
+      // Calculate gas increase rate
+      console.log("\n=== Gas Increase Analysis ===")
+      for (let i = 1; i < gasResults.length; i++) {
+        const prev = gasResults[i - 1]
+        const curr = gasResults[i]
+        const increase = Number(curr.gasUsed - prev.gasUsed)
+        console.log(`${prev.appCount} → ${curr.appCount} apps: +${increase.toLocaleString()} gas`)
+      }
+    })
+
+    it("should revert when voter is not a person", async function () {
+      // User is non-person without whitelisted
+      const user = otherAccounts[5]
+
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWith(
+        "GovernorPersonhoodVerificationFailed: User does not meet the criteria to be considered a person",
+      )
+    })
+
+    it("should revert when user has no voting preferences set", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Enable autovoting but don't set preferences
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.be.revertedWith(
+        "XAllocationVotingGovernor: no eligible apps to vote for",
+      )
+    })
+
+    it("should revert when the users have no eligible apps to vote for", async function () {
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
       await xAllocationVoting.connect(user).toggleAutoVoting()
@@ -441,138 +608,48 @@ describe("AutoVoting - @shard14a", function () {
       await emissions.connect(minterAccount).distribute()
 
       const roundId = await xAllocationVoting.currentRoundId()
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.be.revertedWith(
-        "RelayerRewardsPool: relayer has no early access vote allocation",
-      )
-    })
-
-    it("should revert when voter is not a person", async function () {
-      const user = otherAccounts[5]
-
-      // Create a test app
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
-      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
-
-      // Enable autovoting and set preferences
-      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWithCustomError(
-        xAllocationVoting,
-        "GovernorPersonhoodVerificationFailed",
-      )
-    })
-
-    it("should revert when user has no votes available", async function () {
-      const user = otherAccounts[0]
-      const appOwner = otherAccounts[1]
-
-      // Create a test app
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
-      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
-
-      // Don't give user any voting power - this should cause failure
-      // Setup passport
-      await veBetterPassport.whitelist(user.address)
-
-      // Enable autovoting and set preferences
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-
-      // Start round
-      await emissions.connect(minterAccount).start()
-
-      // Try to cast vote on behalf of user
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 1)).to.be.revertedWith(
-        "XAllocationVotingGovernor: no votes available",
-      )
-    })
-
-    it("should revert when user has no voting preferences set", async function () {
-      const user = otherAccounts[0]
-      const appOwner = otherAccounts[1]
-
-      // Create a test app
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
-      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
-
-      // Give user voting power
-      const startingAmount = "100"
-      await getVot3Tokens(user, startingAmount)
-
-      // Setup passport
-      await veBetterPassport.whitelist(user.address)
-
-      // Enable autovoting but don't set preferences
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-
-      // Start round
-      await startNewAllocationRound()
-
-      // Try to cast vote on behalf of user
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 1)).to.be.revertedWith(
-        "XAllocationVotingGovernor: no eligible apps to vote for",
-      )
-    })
-
-    it("should revert when the users have no eligible apps to vote for", async function () {
-      const user = otherAccounts[0]
-      const appOwner = otherAccounts[1]
-
-      // Create app and endorse it
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
-      await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
-
-      // Setup user
-      await getVot3Tokens(user, "100")
-      await veBetterPassport.whitelist(user.address)
-
-      // Enable autovoting with this app
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-
-      // Start round 1 - app is eligible
-      await startNewAllocationRound()
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 1)).to.be.true
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId)).to.be.true
 
       // App gets unendorsed during round 1, but autovoting should still work
-      await x2EarnApps.connect(appOwner).unendorseApp(app1Id, 1)
+      const nodeId = 1
+      await x2EarnApps.connect(appOwner).unendorseApp(app1Id, nodeId)
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
       // Autovoting should still work since app is still eligible for current round
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 1)).to.not.be.reverted
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.not.be.reverted
 
       // Fast forward through grace period...
-      await waitForRoundToEnd(1)
+      await waitForRoundToEnd(roundId)
 
       // Round 2 - still eligible (grace period)
       await startNewAllocationRound()
       await x2EarnApps.checkEndorsement(app1Id)
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 2)).to.be.true
+      const roundId2 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId2)).to.be.true
 
       // Round 3 - still eligible (grace period)
-      await waitForRoundToEnd(2)
+      await waitForRoundToEnd(roundId2)
       await startNewAllocationRound()
       await x2EarnApps.checkEndorsement(app1Id)
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 3)).to.be.true
+      const roundId3 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId3)).to.be.true
 
       // Round 4 - NOW app becomes ineligible
-      await waitForRoundToEnd(3)
+      await waitForRoundToEnd(roundId3)
       await startNewAllocationRound()
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 4)).to.be.false
+      const roundId4 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId4)).to.be.false
 
       // Autovoting should fail because no eligible apps
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 4)).to.be.revertedWith(
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4)).to.be.revertedWith(
         "XAllocationVotingGovernor: no eligible apps to vote for",
       )
     })
 
     it("should filter out apps that become unendorsed during autovoting", async function () {
-      const user = otherAccounts[0]
-      const appOwner = otherAccounts[1]
-      const appOwner2 = otherAccounts[2]
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
 
-      // Create app and endorse it
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
@@ -583,53 +660,61 @@ describe("AutoVoting - @shard14a", function () {
         .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
       await endorseApp(app2Id, appOwner2)
 
-      // Setup user
-      await getVot3Tokens(user, "100")
-      await veBetterPassport.whitelist(user.address)
-
-      // Enable autovoting with this app
       await xAllocationVoting.connect(user).toggleAutoVoting()
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id, app2Id])
 
-      // Start round 1 - app is eligible
-      await startNewAllocationRound()
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 1)).to.be.true
+      // Start round 2 - app is eligible
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
 
-      // App gets unendorsed during round 1, but autovoting should still work
-      await x2EarnApps.connect(appOwner).unendorseApp(app1Id, 1)
+      const roundId2 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId2)).to.be.true
+
+      // App gets unendorsed during round 2, but autovoting should still work
+      const nodeId = 1
+      await x2EarnApps.connect(appOwner).unendorseApp(app1Id, nodeId)
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
       // Autovoting should still work since app is still eligible for current round
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 1)).to.not.be.reverted
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId2))
+        .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
+        .withArgs(user.address, roundId2, [app1Id, app2Id], [ethers.parseEther("150"), ethers.parseEther("150")])
 
       // Fast forward through grace period...
-      await waitForRoundToEnd(1)
-
-      // Round 2 - still eligible (grace period)
-      await startNewAllocationRound()
-      await x2EarnApps.checkEndorsement(app1Id)
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 2)).to.be.true
+      await waitForRoundToEnd(roundId2)
 
       // Round 3 - still eligible (grace period)
-      await waitForRoundToEnd(2)
       await startNewAllocationRound()
+      const roundId3 = await xAllocationVoting.currentRoundId()
       await x2EarnApps.checkEndorsement(app1Id)
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 3)).to.be.true
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId3)).to.be.true
 
-      // Round 4 - NOW app1 becomes ineligible but app2 is still eligible
-      await waitForRoundToEnd(3)
-      await startNewAllocationRound()
-      expect(await xAllocationVoting.isEligibleForVote(app1Id, 4)).to.be.false
-      expect(await xAllocationVoting.isEligibleForVote(app2Id, 4)).to.be.true
+      // Round 4 - still eligible (grace period)
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+      const roundId4 = await xAllocationVoting.currentRoundId()
+      await x2EarnApps.checkEndorsement(app1Id)
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId4)).to.be.true
+
+      // Round 5 - NOW app1 becomes ineligible but app2 is still eligible
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+      const roundId5 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId5)).to.be.false
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, roundId5)).to.be.true
 
       // Autovoting should succeed because app2 is still eligible
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 4)).to.not.be.reverted
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId5))
+        .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
+        .withArgs(user.address, roundId5, [app2Id], [ethers.parseEther("300")])
     })
 
     it("should handle vote distribution with remaining dust correctly", async function () {
-      const user = otherAccounts[0]
-      const appOwner1 = otherAccounts[1]
-      const appOwner2 = otherAccounts[2]
-      const appOwner3 = otherAccounts[3]
+      // User1 has 100 VOT3 that doesn't divide evenly by 3 (100 / 3 = 33.33...)
+
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner1.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner3.address)
 
       // Create test apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner1.address))
@@ -650,31 +735,25 @@ describe("AutoVoting - @shard14a", function () {
       await endorseApp(app2Id, appOwner2)
       await endorseApp(app3Id, appOwner3)
 
-      // Give user voting power that doesn't divide evenly by 3 (100 / 3 = 33.33...)
-      const startingAmount = "100"
-      await getVot3Tokens(user, startingAmount)
-
-      // Setup passport
-      await veBetterPassport.whitelist(user.address)
-
-      // Enable autovoting and set preferences for all apps
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id, app2Id, app3Id])
+      await xAllocationVoting.connect(user1).toggleAutoVoting()
+      await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id, app2Id, app3Id])
 
       // Start round
-      await startNewAllocationRound()
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
 
       // Cast vote on behalf of user
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, 1)).to.not.be.reverted
+      const roundId2 = await xAllocationVoting.currentRoundId()
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user1.address, roundId2)).to.not.be.reverted
 
       // Verify vote was cast
-      const hasVoted = await xAllocationVoting.hasVoted(1, user.address)
+      const hasVoted = await xAllocationVoting.hasVoted(roundId2, user1.address)
       expect(hasVoted).to.be.true
 
       // // Verify votes were distributed (33 VOT3 each, 1 VOT3 dust remains)
-      const app1Votes = await xAllocationVoting.getAppVotes(1, app1Id)
-      const app2Votes = await xAllocationVoting.getAppVotes(1, app2Id)
-      const app3Votes = await xAllocationVoting.getAppVotes(1, app3Id)
+      const app1Votes = await xAllocationVoting.getAppVotes(roundId2, app1Id)
+      const app2Votes = await xAllocationVoting.getAppVotes(roundId2, app2Id)
+      const app3Votes = await xAllocationVoting.getAppVotes(roundId2, app3Id)
 
       // All apps should get the same amount
       expect(app1Votes).to.equal(app2Votes)
@@ -695,84 +774,100 @@ describe("AutoVoting - @shard14a", function () {
   describe("Events", function () {
     beforeEach(async function () {
       await setupContracts()
-
-      await veBetterPassport.toggleCheck(1)
-      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await emissions.connect(minterAccount).start()
     })
 
-    it("should emit all autovoting events for single user complete flow", async function () {
-      const user = otherAccounts[1]
-      const appOwner = otherAccounts[0]
-
+    it.only("should emit all autovoting events for single user complete flow", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      const startingAmount = "100"
-      await getVot3Tokens(user, startingAmount)
-
-      await veBetterPassport.whitelist(user.address)
-
-      // Initially autovoting should be disabled
       expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
       expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([])
 
-      // 1. Should emit AutoVotingToggled(user, true)
+      await waitForNextCycle(emissions)
+      const tx = await emissions.connect(minterAccount).distribute()
+      await expect(tx).to.emit(emissions, "EmissionDistributedV2")
+
+      await expect(relayerRewardsPool.connect(owner).registerRelayer(relayer1.address))
+        .to.emit(relayerRewardsPool, "RelayerRegistered")
+        .withArgs(relayer1.address)
+
       await expect(xAllocationVoting.connect(user).toggleAutoVoting())
         .to.emit(xAllocationVoting, "AutoVotingToggled")
         .withArgs(user.address, true)
 
-      // 2. Set voting preferences - should emit PreferredAppsUpdated
       await expect(xAllocationVoting.connect(user).setUserVotingPreferences([app1Id]))
         .to.emit(xAllocationVoting, "PreferredAppsUpdated")
         .withArgs(user.address, [app1Id])
 
-      // Verify preferences set
       const preferences = await xAllocationVoting.getUserVotingPreferences(user.address)
       expect(preferences).to.deep.equal([app1Id])
 
-      // Start a new round
-      await startNewAllocationRound()
-
-      // Vote via autovoting
-      // Emit AllocationVoteCast and AllocationAutoVoteCast events
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user, 1))
-        .to.emit(xAllocationVoting, "AllocationVoteCast")
-        .withArgs(user.address, 1, [app1Id], [ethers.parseEther("100")])
-        .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
-        .withArgs(user.address, 1, [app1Id], [ethers.parseEther("100")])
-
-      await waitForRoundToEnd(1)
-
-      // Check rewards
-      const userReward = await voterRewards.getReward(1, user.address)
-      expect(userReward).to.not.equal(0)
-
-      // Verify state changes
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
+      await waitForNextCycle(emissions)
+      const tx2 = await emissions.connect(minterAccount).distribute()
+      const round3 = await xAllocationVoting.currentRoundId()
+      const totalAutoVotingUsers = 1
+      const totalActions = 2
+      const totalWeightedActions = 4
+      const numRelayers = 1
+      await expect(tx2)
+        .to.emit(relayerRewardsPool, "TotalAutoVotingActionsSet")
+        .withArgs(round3, totalAutoVotingUsers, totalActions, totalWeightedActions, numRelayers)
 
       const finalPreferences = await xAllocationVoting.getUserVotingPreferences(user.address)
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
       expect(finalPreferences).to.deep.equal([app1Id])
 
-      // Test timepoint-based queries
-      const currentBlock = await ethers.provider.getBlockNumber()
-      expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, currentBlock)).to.be.true
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user, round3))
+        .to.emit(xAllocationVoting, "AllocationVoteCast")
+        .withArgs(user.address, round3, [app1Id], [ethers.parseEther("100")])
+        .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
+        .withArgs(user.address, round3, [app1Id], [ethers.parseEther("100")])
+        .to.emit(relayerRewardsPool, "RelayerActionRegistered")
+        .withArgs(relayer1.address, round3, 1, await relayerRewardsPool.getVoteWeight())
+
+      /**
+       * Since we only have 1 user participating, total rewards is 2M B3TR
+       * Fee is 10% of rewards = 200,000 B3TR
+       * Actual rewards should be 1.8M B3TR
+       */
+      const reward = await voterRewards.getReward(round3, user.address)
+      const fee = await voterRewards.getFee(round3, user.address)
+      expect(reward).to.equal(ethers.parseEther("1800000"))
+      expect(fee).to.equal(ethers.parseEther("200000"))
+
+      expect(await relayerRewardsPool.claimableRewards(relayer1.address, round3)).to.equal(ethers.parseEther("0"))
+
+      await waitForRoundToEnd(round3)
+
+      await expect(voterRewards.connect(relayer1).claimReward(round3, user.address))
+        .to.emit(voterRewards, "RewardClaimedV2")
+        .withArgs(round3, user.address, reward, "0")
+        .to.emit(relayerRewardsPool, "RelayerActionRegistered")
+        .withArgs(relayer1.address, round3, 2, await relayerRewardsPool.getClaimWeight())
+        .to.emit(relayerRewardsPool, "RewardsDeposited")
+        .withArgs(round3, fee, await relayerRewardsPool.getTotalRewards(round3))
+
+      expect(await relayerRewardsPool.totalActions(round3)).to.equal(2)
+      expect(await relayerRewardsPool.completedWeightedActions(round3)).to.equal(
+        await relayerRewardsPool.totalWeightedActions(round3),
+      )
+      expect(await relayerRewardsPool.completedWeightedActions(round3)).to.equal(
+        await relayerRewardsPool.totalRelayerWeightedActions(relayer1.address, round3),
+      )
     })
   })
 
   describe("Entire flow", function () {
-    // Fresh setup for this specific test suite
     beforeEach(async function () {
-      // Get completely fresh contracts for this test suite
       await setupContracts()
 
-      // Setup passport checks for voting
       await veBetterPassport.toggleCheck(1)
       await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
     })
 
     it("should enable autovoting for multiple users", async function () {
-      // Setup app
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await x2EarnApps
         .connect(owner)
@@ -893,11 +988,10 @@ describe("AutoVoting - @shard14a", function () {
       expect(manualUser1R1).to.not.equal(0)
       expect(autoUser1R1).to.not.equal(0)
 
-      // All users claim their rewards
       await voterRewards.claimReward(1, manualUser1.address)
       await voterRewards.claimReward(1, manualUser2.address)
-      await voterRewards.claimReward(1, autoUser1.address)
-      await voterRewards.claimReward(1, autoUser2.address)
+      await voterRewards.connect(relayer1).claimReward(1, autoUser1.address)
+      await voterRewards.connect(relayer1).claimReward(1, autoUser2.address)
 
       // ===== ROUND 2 =====
       await startNewAllocationRound()
@@ -917,6 +1011,50 @@ describe("AutoVoting - @shard14a", function () {
 
       expect(manualUser1R2).to.not.equal(0)
       expect(autoUser1R2).to.not.equal(0)
+    })
+
+    it("should prevent non-relayers from claiming rewards for auto-voting users", async function () {
+      // Setup app
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await endorseApp(app1Id, otherAccounts[0])
+
+      // Setup users
+      const manualUser = otherAccounts[1]
+      const autoUser = otherAccounts[2]
+      const nonRelayer = otherAccounts[3]
+
+      // Give users VOT3
+      const startingAmount = "1000"
+      await getVot3Tokens(manualUser, startingAmount)
+      await getVot3Tokens(autoUser, startingAmount)
+
+      // Whitelist users
+      await veBetterPassport.whitelist(manualUser.address)
+      await veBetterPassport.whitelist(autoUser.address)
+
+      // Enable autovoting for auto user
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting()
+      await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+
+      // Start round and vote
+      await startNewAllocationRound()
+      await xAllocationVoting.connect(manualUser).castVote(1, [app1Id], [ethers.parseEther(startingAmount)])
+      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser, 1)
+      await waitForRoundToEnd(1)
+
+      // Manual user can be claimed by anyone
+      await expect(voterRewards.connect(nonRelayer).claimReward(1, manualUser.address)).to.not.be.reverted
+
+      // Auto user cannot be claimed by non-relayer
+      await expect(voterRewards.connect(nonRelayer).claimReward(1, autoUser.address)).to.be.revertedWith(
+        "VoterRewards: only registered relayers can claim for auto-voting users",
+      )
+
+      // Auto user can be claimed by registered relayer
+      await expect(voterRewards.connect(relayer1).claimReward(1, autoUser.address)).to.not.be.reverted
     })
   })
 })

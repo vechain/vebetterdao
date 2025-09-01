@@ -297,6 +297,7 @@ export const getOrDeployContractInstances = async ({
   // Contracts are deployed using the first signer/account by default
   const [owner, otherAccount, minterAccount, timelockAdmin, ...otherAccounts] = await ethers.getSigners()
   const creators = otherAccounts.slice(0, APPS.length) // otherAcounts[1]...otherAccounts[8] reserved for creators
+
   // ---------------------- Deploy Libraries ----------------------
   const {
     GovernorClockLogicLibV1,
