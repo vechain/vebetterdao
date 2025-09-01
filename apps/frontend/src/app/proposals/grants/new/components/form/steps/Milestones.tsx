@@ -17,7 +17,8 @@ import { Trans, useTranslation } from "react-i18next"
 import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
 import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import { UilPlus, UilTrash, UilArrowRight } from "@iconscout/react-unicons"
+import { UilPlus, UilTrash } from "@iconscout/react-unicons"
+import { LuArrowRight } from "react-icons/lu"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import dayjs from "dayjs"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
@@ -107,10 +108,10 @@ export const MilestoneSection = ({
         <HStack w="full" gap={4}>
           <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
           {hasDurationInfo && !isMobile && (
-            <Badge variant="outline" size="sm">
-              <Text fontSize="sm">{formattedDurationFrom}</Text>
-              <UilArrowRight />
-              <Text fontSize="sm">{formattedDurationTo}</Text>
+            <Badge variant="outline" fontSize="sm" fontWeight="regular">
+              <Text>{formattedDurationFrom}</Text>
+              <LuArrowRight color="subtle.active" size={16} />
+              <Text>{formattedDurationTo}</Text>
             </Badge>
           )}
         </HStack>
