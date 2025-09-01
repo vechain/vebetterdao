@@ -1,0 +1,2 @@
+export const MAX_DAPP_GRANT_AMOUNT = 30000
+export const MAX_TOOLING_GRANT_AMOUNT = 50000
