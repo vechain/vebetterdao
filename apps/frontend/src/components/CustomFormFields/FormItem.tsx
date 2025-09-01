@@ -25,7 +25,7 @@ export const FormItem = ({
   const InputComponent = type === "textarea" ? Textarea : Input
 
   return (
-    <Field.Root invalid={!!error}>
+    <Field.Root invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
       {label && (
         <HStack justify="space-between" w="full">
           <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
@@ -47,7 +47,11 @@ export const FormItem = ({
         placeholder={placeholder}
         {...register}
         {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
-        {...(type === "textarea" && { h: "full" })}
+        {...(type === "textarea" && {
+          h: "full",
+          minH: "120px",
+          resize: "vertical",
+        })}
         onBlur={onBlur}
         rounded="xl"
       />

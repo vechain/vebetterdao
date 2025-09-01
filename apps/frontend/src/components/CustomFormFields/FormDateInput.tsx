@@ -286,7 +286,7 @@ export const FormDateInput = ({
   // Note: This is only for visual display - the actual form value remains as Unix timestamp
   const displayValue = useMemo(() => {
     if (!selectedDate) return ""
-    return dayjs(selectedDate).format("DD/MM/YYYY") // e.g., "1/02/2025"
+    return dayjs(selectedDate).format("MM/DD/YYYY") // e.g., "12/29/2025"
   }, [selectedDate])
 
   const isDaySelected = useCallback(
