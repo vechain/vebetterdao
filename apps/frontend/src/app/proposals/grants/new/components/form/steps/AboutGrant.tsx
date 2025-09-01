@@ -1,4 +1,16 @@
-import { VStack, Text, Grid, GridItem, Accordion, Field, FileUpload, Icon, Box, HStack } from "@chakra-ui/react"
+import {
+  VStack,
+  Text,
+  Grid,
+  GridItem,
+  Accordion,
+  Field,
+  FileUpload,
+  Icon,
+  Box,
+  HStack,
+  InputGroup,
+} from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
@@ -10,6 +22,7 @@ import { FormSocialConnectButton } from "@/components/CustomFormFields"
 import { LuUpload } from "react-icons/lu"
 import { useEffect } from "react"
 import { signIn, signOut, useSession } from "next-auth/react"
+import { WalletAddressInput } from "@/app/components/Input"
 
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
@@ -22,6 +35,8 @@ interface AboutGrantProps {
 export const AboutGrant = ({ register, setData, setValue, watch, errors }: AboutGrantProps) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
+
+  const grantsReceiverAddress = watch("grantsReceiverAddress")
 
   // Custom validation function to ensure at least one social account is connected
   const validateAtLeastOneSocial = (_value: string): string | boolean => {
@@ -108,19 +123,21 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                   />
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <FormItem
-                    label={t("Receiver Address")}
-                    placeholder={"e.g. 0x1234567890123456789012345678901234567890"}
-                    register={register("grantsReceiverAddress", {
-                      required: t("Please enter the receiver address"),
-                    })}
-                    error={errors.grantsReceiverAddress?.message}
-                  />
+                  <Field.Root invalid={!grantsReceiverAddress}>
+                    <Field.Label>{t("Receiver Address")}</Field.Label>
+                    <InputGroup>
+                      <WalletAddressInput
+                        placeholder={"e.g. coolName.vet or 0x1a2b3c..."}
+                        onAddressResolved={address => setValue("grantsReceiverAddress", address ?? "")}
+                      />
+                    </InputGroup>
+                  </Field.Root>
                 </GridItem>
                 <GridItem>
                   <FormItem
                     label={t("Email")}
                     isOptional
+                    type="email"
                     placeholder={t("Enter the email of the company")}
                     register={register("companyEmail")}
                     error={errors.companyEmail?.message}
@@ -129,6 +146,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                 <GridItem>
                   <FormItem
                     label={"Telegram"}
+                    type="url"
                     placeholder={t("Enter link here")}
                     isOptional
                     register={register("companyTelegram", {

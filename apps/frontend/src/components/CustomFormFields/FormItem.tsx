@@ -5,7 +5,7 @@ type FormItemProps = {
   label?: string
   description?: string
   placeholder?: string
-  type?: "text" | "textarea" | "email" | "url"
+  type?: "text" | "textarea" | "email" | "url" | "number"
   register: UseFormRegisterReturn
   error?: string
   onBlur?: () => void
@@ -47,6 +47,7 @@ export const FormItem = ({
         placeholder={placeholder}
         {...register}
         {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
+        {...(type === "textarea" && !register?.minLength && { minLength: 20 })}
         {...(type === "textarea" && {
           h: "full",
           minH: "120px",
