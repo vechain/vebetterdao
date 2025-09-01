@@ -1,31 +1,30 @@
 import { Checkbox, Field, Text } from "@chakra-ui/react"
-import { Control, Controller, FieldPath } from "react-hook-form"
-import { SubmitCreatorFormData } from "../SubmitCreatorForm/SubmitCreatorForm"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
+import { Control, Controller, FieldPath, FieldValues, RegisterOptions } from "react-hook-form"
 
-type FormData = SubmitCreatorFormData | GrantFormData
-
-type FormCheckboxProps<TFormData extends FormData = FormData> = {
+type FormCheckboxProps<T extends FieldValues> = {
   label: string
-  name: FieldPath<TFormData>
+  name: FieldPath<T>
   description?: string
-  control: Control<TFormData>
+  control: Control<T>
   error?: string
   onBlur?: () => void
+  rules?: RegisterOptions<T>
 }
 
-export const FormCheckbox = <TFormData extends FormData = FormData>({
+export const FormCheckbox = <T extends FieldValues>({
   label,
   name,
   description,
   control,
   error,
   onBlur,
-}: FormCheckboxProps<TFormData>) => {
+  rules,
+}: FormCheckboxProps<T>) => {
   return (
     <Controller
       control={control}
       name={name}
+      rules={rules}
       render={({ field }) => (
         <Field.Root invalid={!!error}>
           <Checkbox.Root
