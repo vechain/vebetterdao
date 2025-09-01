@@ -9,7 +9,7 @@ export type GrantFormStoreState = GrantFormData & {
 }
 
 const initialState: GrantFormData = {
-  grantType: "",
+  grantType: "dapp",
   // About applicant
   applicantName: "",
   applicantSurname: "",
