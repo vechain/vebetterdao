@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem, Skeleton } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
@@ -19,7 +19,21 @@ enum GrantsStep {
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
-  const { enrichedGrantProposals, grantAnalytics } = useProposalEnriched()
+  const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] }, isLoading } = useProposalEnriched()
+
+  //Reduce all the enrichedGrantProposals [[ProposalState.Succeeded, ProposalState.InDevelopment]]
+  // grantAnalytics.grantsByState[ProposalState.Succeeded] +
+  // grantAnalytics.grantsByState[ProposalState.InDevelopment] +
+  // grantAnalytics.grantsByState[ProposalState.Completed] +
+  // grantAnalytics.grantsByState[ProposalState.Executed]
+
+  const totalGrantsApproved = useMemo(() => {
+    return enrichedGrantProposals.filter(proposal =>
+      [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed].includes(
+        proposal.state,
+      ),
+    ).length
+  }, [enrichedGrantProposals])
 
   const stepsArray = useMemo(
     () => [
@@ -69,18 +83,9 @@ export const GrantsPageContent = () => {
     [t],
   )
 
-  const totalApproved = useMemo(() => {
-    return (
-      grantAnalytics.grantsByState[ProposalState.Succeeded] +
-      grantAnalytics.grantsByState[ProposalState.InDevelopment] +
-      grantAnalytics.grantsByState[ProposalState.Completed] +
-      grantAnalytics.grantsByState[ProposalState.Executed]
-    )
-  }, [grantAnalytics.grantsByState])
-
   const totalDistributedAmount = useMemo(() => {
-    return grantAnalytics.totalDistributedAmount.toNumber()
-  }, [grantAnalytics.totalDistributedAmount])
+    return 0
+  }, [])
 
   return (
     <VStack w="full" gap={8} pb={8}>
@@ -107,17 +112,19 @@ export const GrantsPageContent = () => {
         )}
       </HStack>
       <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
-      <GrantsStatsCards
-        totalApplications={enrichedGrantProposals.length}
-        totalApproved={totalApproved}
-        totalFunds={totalDistributedAmount}
-      />
+      <Skeleton loading={isLoading}>
+        <GrantsStatsCards
+          totalApplications={enrichedGrantProposals?.length || 0}
+          totalApproved={totalGrantsApproved}
+          totalFunds={totalDistributedAmount}
+        />
+      </Skeleton>
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
             {enrichedGrantProposals &&
-              enrichedGrantProposals.map(proposal => (
-                <GridItem colSpan={{ base: 1 }} key={proposal.id}>
+              enrichedGrantProposals?.map(proposal => (
+                <GridItem key={proposal.id}>
                   <GrantsProposalCard key={proposal.id} proposal={proposal} />
                 </GridItem>
               ))}
