@@ -61,12 +61,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
           <HStack justify={"space-between"} w="full">
             <Stack w="full" gap={1} flex={2}>
               <HStack gap={2} w="fit-content" justify="space-between">
-                <AllocationStateBadge
-                  roundId={roundId}
-                  data-testid={`round-card-#${roundId}`}
-                  renderBadge={false}
-                  renderIcon={isActive}
-                />
+                <AllocationStateBadge roundId={roundId} data-testid={`round-card-#${roundId}`} renderIcon={isActive} />
 
                 <DotSymbol
                   boxProps={{ hideBelow: "md" }}
