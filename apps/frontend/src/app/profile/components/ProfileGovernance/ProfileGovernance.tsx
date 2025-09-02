@@ -33,8 +33,9 @@ type Props = {
   address: string
 }
 export const ProfileGovernance = ({ address }: Props) => {
-  const { data: createdProposals } = useUserCreatedProposal(address ?? "")
-  const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
+  //TODO: REFACTOR TO USE USEPROPOSALENRICHED and filter by proposerAddress
+  const { data: createdProposals, isLoading: isCreatedProposalsLoading } = useUserCreatedProposal(address ?? "")
+  const { data: votedProposals, isLoading: isVotedProposalsLoading } = useUserProposalsVoteEvents(address ?? "")
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
@@ -95,6 +96,10 @@ export const ProfileGovernance = ({ address }: Props) => {
   const isFirstVotedProposalsAvailable = firstVotedProposals && firstVotedProposals.length > 0
   const isFirstTopVotedAppsAvailable = firstTopVotedApps && firstTopVotedApps.length > 0
 
+  const isLoading = useMemo(() => {
+    return isCreatedProposalsLoading || isVotedProposalsLoading
+  }, [isCreatedProposalsLoading, isVotedProposalsLoading])
+
   switch (listView) {
     case ListView.ALL:
       return (
@@ -149,9 +154,11 @@ export const ProfileGovernance = ({ address }: Props) => {
         </>
       )
     case ListView.CREATED:
-      return <PaginatedProposals proposals={createdProposals ?? []} goBack={onGoBack} />
+      return <PaginatedProposals proposals={createdProposals ?? []} isLoading={isLoading} goBack={onGoBack} />
     case ListView.VOTED:
-      return <PaginatedProposals proposals={votedProposalsWithDescription ?? []} goBack={onGoBack} />
+      return (
+        <PaginatedProposals proposals={votedProposalsWithDescription ?? []} isLoading={isLoading} goBack={onGoBack} />
+      )
     case ListView.APPS_VOTED:
       return <PaginatedTopVotedApps topVotedApps={topVotedApps ?? []} goBack={onGoBack} />
   }

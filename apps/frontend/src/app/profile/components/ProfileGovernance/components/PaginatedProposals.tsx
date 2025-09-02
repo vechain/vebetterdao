@@ -11,11 +11,12 @@ import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grant
 
 type PaginatedProposalsProps = {
   proposals: ProposalEnriched[] | GrantProposalEnriched[]
+  isLoading: boolean
   itemsPerPage?: number
   goBack: () => void
 }
 
-export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: PaginatedProposalsProps) => {
+export const PaginatedProposals = ({ proposals, isLoading, itemsPerPage = 10, goBack }: PaginatedProposalsProps) => {
   const { t } = useTranslation()
 
   const { currentItems, hasMore, loadMore, loading } = usePagination(proposals ?? [], itemsPerPage)
@@ -59,7 +60,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
       {/* Proposals List */}
       <VStack w="full" gap={4}>
         {itemsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.id} proposalId={proposal.id} metadata={proposal.metadata} />
+          <ProposalBox key={proposal.id} proposal={proposal} isLoading={isLoading} metadata={proposal.metadata} />
         ))}
       </VStack>
 

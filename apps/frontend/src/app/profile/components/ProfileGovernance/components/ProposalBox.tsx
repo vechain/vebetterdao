@@ -4,17 +4,16 @@ import { Box, HStack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
-import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  proposalId: string
+  proposal: ProposalEnriched | GrantProposalEnriched
   metadata?: ProposalMetadata
+  isLoading: boolean
 }
 
-export const ProposalBox = ({ proposalId, metadata }: Props) => {
+export const ProposalBox = ({ proposal, metadata, isLoading }: Props) => {
   const router = useRouter()
-
-  const { proposal } = useProposalDetail(proposalId)
 
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
 
@@ -28,10 +27,10 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
   }, [metadata?.title, isDesktop])
 
   const goToProposal = useCallback(() => {
-    router.push(`/proposals/${proposalId}`)
-  }, [router, proposalId])
+    router.push(`/proposals/${proposal.id}`)
+  }, [router, proposal.id])
 
-  if (proposal.isStateLoading || proposal.state === undefined) {
+  if (isLoading || proposal.state === undefined) {
     return null
   }
 

@@ -8,13 +8,13 @@ import { ProposalStatusBadge } from "@/components"
 import { MilestonesActions } from "../"
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
-const GrantDetailsTab = () => {
+const GrantDetailsTab = ({ proposal }: { proposal: ProposalEnriched | GrantProposalEnriched }) => {
   return (
     <VStack align="stretch" gap={4} p={4}>
       <Text fontSize="lg" fontWeight="600">
         {"WIP"}
       </Text>
-      <MilestonesActions />
+      <MilestonesActions proposal={proposal} />
     </VStack>
   )
 }
@@ -106,7 +106,7 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposal, isLoading
                 <OverviewTabContent />
               </Tabs.Content>
               <Tabs.Content value="milestones" pt={6}>
-                <GrantDetailsTab />
+                <GrantDetailsTab proposal={proposal} />
               </Tabs.Content>
             </Tabs.Root>
           ) : (
