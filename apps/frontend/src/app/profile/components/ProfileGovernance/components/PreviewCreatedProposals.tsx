@@ -1,13 +1,14 @@
-import { ProposalCreatedEvent, ProposalMetadata, useIpfsMetadatas } from "@/api"
+import { ProposalMetadata, useIpfsMetadatas } from "@/api"
 import { toIPFSURL, validateIpfsUri } from "@/utils"
 import { HStack, VStack, Text } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { ProposalBox } from "."
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  firstProposals?: ProposalCreatedEvent[]
+  firstProposals?: ProposalEnriched[] | GrantProposalEnriched[]
   isMoreProposals?: boolean
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
@@ -26,8 +27,7 @@ export const PreviewCreatedProposals = ({
 
     return firstProposals
       .map(proposal => {
-        const ipfsURL = toIPFSURL(proposal.description)
-
+        const ipfsURL = toIPFSURL(proposal.ipfsDescription)
         // Add only if valid IPFS URI
         if (validateIpfsUri(ipfsURL)) return ipfsURL
       })
@@ -64,7 +64,7 @@ export const PreviewCreatedProposals = ({
       </HStack>
       <VStack w={"full"} gap={4}>
         {firstProposalsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
+          <ProposalBox key={proposal.id} proposalId={proposal.id} metadata={proposal.metadata} />
         ))}
       </VStack>
     </VStack>

@@ -1,22 +1,19 @@
-import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
-import { useIpfsMetadata } from "@/api/ipfs"
 import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
 import { GovernanceFeaturedContractsWithFunctions, getActionsFromTargetsAndCalldatas } from "@/constants"
 import { ProposalFormAction } from "@/store"
-import { toIPFSURL } from "@/utils"
-import { Card, Heading, Alert, Box, VStack } from "@chakra-ui/react"
+import { Card, Alert, Box, VStack } from "@chakra-ui/react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import "@uiw/react-md-editor/markdown-editor.css"
 import MDEditor from "@uiw/react-md-editor"
+import { FormattedProposalDetailData } from "../../hooks/useProposalDetail"
 
 type Props = {
-  proposal: ProposalCreatedEvent
+  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData)
 }
-export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
-  const metadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
 
+export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
 
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
@@ -25,8 +22,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     try {
       setProposalDecodeError(null)
       return getActionsFromTargetsAndCalldatas(
-        proposal.targets,
-        proposal.callDatas,
+        proposal.targets as string[],
+        proposal.calldatas as string[],
         GovernanceFeaturedContractsWithFunctions,
       )
     } catch (e: unknown) {
@@ -42,11 +39,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     <Card.Root w="full" variant="baseWithBorder">
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start">
-          <Heading fontSize={"24px"} fontWeight={700}>
-            {t("About the proposal")}
-          </Heading>
           <MDEditor.Markdown
-            source={metadata?.data?.markdownDescription}
+            source={proposal.markdownDescription}
             style={{
               width: "100%",
               wordBreak: "break-word",

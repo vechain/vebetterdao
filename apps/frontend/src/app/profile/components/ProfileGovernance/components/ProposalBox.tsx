@@ -53,6 +53,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
           textProps={{
             fontSize: 12,
           }}
+          proposalType={proposal.type}
         />
         <Text fontSize={14} fontWeight={"600"}>
           {title}

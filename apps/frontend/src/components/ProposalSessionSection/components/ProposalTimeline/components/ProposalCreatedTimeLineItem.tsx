@@ -16,9 +16,9 @@ export const ProposalCreatedTimeLineItem = () => {
           <HStack justify={"space-between"} w="full">
             <VStack flex={1} align="flex-start" gap={0}>
               <Text>{t("Proposal created")}</Text>
-              {proposal.proposalCreationDate && (
+              {proposal.createdAt && (
                 <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
-                  {dayjs(proposal.proposalCreationDate).format("MMM D, YYYY")}
+                  {dayjs(proposal.createdAt).format("MMM D, YYYY")}
                 </Text>
               )}
             </VStack>

@@ -13,7 +13,7 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { MdHowToVote } from "react-icons/md"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { useProposalEnriched } from "@/hooks/proposals/common"
+import { useProposalEnrichedById } from "@/hooks/proposals/common"
 
 type Props = {
   proposalId: string
@@ -27,8 +27,9 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
 
   const { data: userVote, isLoading: userVoteLoading } = useUserSingleProposalVoteEvent(proposalId)
 
-  const { proposals } = useProposalEnriched()
-  const state = proposals.find(proposal => proposal.id === proposalId)?.state
+  const { proposal } = useProposalEnrichedById(proposalId)
+  const state = proposal?.state
+
   const { data: snapshotBlock } = useProposalSnapshot(proposalId)
   const { data: userSnapshot } = useGetVotesOnBlock(
     snapshotBlock ? Number(snapshotBlock) : undefined,

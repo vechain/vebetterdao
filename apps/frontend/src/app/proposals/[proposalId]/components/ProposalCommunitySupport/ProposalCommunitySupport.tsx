@@ -53,13 +53,13 @@ export const ProposalCommunitySupport = () => {
           {isDepositNotMet
             ? t("This proposal won’t reach enough support and it was canceled.")
             : t("This proposal needs to get enough support for the community to be voted on Round {{round}}.", {
-                round: proposal.roundIdVoteStart,
+                round: proposal.votingRoundId,
               })}
         </Text>
         <ProposalSupportProgressChart
           isDepositThresholdReached={proposal.isDepositReached}
           isFailedDueToDeposit={isDepositNotMet}
-          depositThreshold={proposal.depositThreshold}
+          depositThreshold={Number(proposal.depositThreshold)}
           userDeposits={proposal.userSupport}
           othersDeposits={proposal.othersSupport}
           otherDepositsUsersCount={proposal.othersSupportUserCount}

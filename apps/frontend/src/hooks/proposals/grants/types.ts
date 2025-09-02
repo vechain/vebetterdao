@@ -3,6 +3,11 @@ export enum ProposalType {
   Grant,
 }
 
+export enum GovernanceType {
+  OnChain,
+  Text,
+}
+
 export type CommunityInteraction = {
   percentage: number
 }

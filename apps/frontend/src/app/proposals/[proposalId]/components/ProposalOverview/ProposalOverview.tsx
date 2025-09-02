@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
-import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { MilestonesActions } from "../"
 import { useProposalDetail } from "../../hooks"
 
@@ -31,7 +30,7 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
   const { account } = useWallet()
 
   const { proposal } = useProposalDetail(proposalId)
-  const { data: vnsData } = useVechainDomain(proposal?.proposer)
+  const { data: vnsData } = useVechainDomain(proposal?.proposerAddress)
   const proposerName = vnsData?.domain
 
   // Header Content (badge, proposer, title)
@@ -39,23 +38,20 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
     <VStack gap={5} align="flex-start" w="full">
       <HStack justify={"space-between"} align={"flex-start"} w="full">
         <Skeleton loading={!proposal || proposal.isStateLoading}>
-          {isGrant ? (
-            <GrantsProposalStatusBadge state={proposal?.state} />
-          ) : (
-            <ProposalStatusBadge
-              proposalState={proposal?.state}
-              isDepositReached={false} // TODO: Handle deposit reached from separate hook
-            />
-          )}
+          <ProposalStatusBadge
+            proposalState={proposal?.state}
+            isDepositReached={false} // TODO: Handle deposit reached from separate hook
+            proposalType={proposal?.type}
+          />
         </Skeleton>
         <Skeleton loading={!proposal}>
           {proposal && (
             <HStack>
-              <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-              {compareAddresses(proposal.proposer, account?.address || "") ? (
+              <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
+              {compareAddresses(proposal.proposerAddress, account?.address || "") ? (
                 <Text>{t("You")}</Text>
               ) : (
-                <Text>{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
+                <Text>{proposerName || humanAddress(proposal.proposerAddress, 4, 6)}</Text>
               )}
             </HStack>
           )}

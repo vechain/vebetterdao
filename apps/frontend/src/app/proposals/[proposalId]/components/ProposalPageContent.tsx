@@ -1,19 +1,17 @@
 import { Grid, GridItem, VStack, Stack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions"
-import { useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
-// import { useProposalType, useProposalEnriched } from "@/hooks/proposals/common"
+import { useProposalTotalVotes, useVot3PastSupply } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
 import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
-import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 import { useMemo } from "react"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { ProposalOverviewVotes } from "./ProposalOverview/components/ProposalOverviewVotes/ProposalOverviewVotes"
 import { ProposalOverviewTime } from "./ProposalOverview/components/ProposalOverviewTime"
@@ -22,19 +20,20 @@ import { ProposalOverviewCommunitySupport } from "./ProposalOverview/components/
 import { CastProposalVoteButton } from "./ProposalOverview/components/CastProposalVoteButton"
 import { ProposalYourVote } from "@/components"
 import { useWallet } from "@vechain/vechain-kit"
-// import { ProposalType } from "@/types"
+import { useProposalDetail } from "../hooks"
 
 type Props = {
   proposalId: string
 }
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
-  const { data: proposalCreatedEvent } = useProposalCreatedEvent(proposalId)
-  const { proposal } = useProposalDetail() // use useProposalEnriched instead ( maybe )
+  const enrichedProposal = useProposalDetail(proposalId)
+  const proposal = enrichedProposal.proposal
+
   const { account } = useWallet()
   const isGrant = useMemo(() => {
-    return proposal.proposalType?.isGrant
-  }, [proposal.type])
+    return proposal?.type === ProposalType.Grant
+  }, [proposal])
 
   const votesAtSnapshotQuery = useVot3PastSupply(proposal.votingStartBlock)
 
@@ -55,7 +54,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     return proposal.state === ProposalState.Pending
   }, [proposal])
 
-  if (!proposalCreatedEvent) return null
+  if (!proposal) return null
 
   let quorumRenderState: "none" | "upcoming" | "active" = "active"
   if (shouldNotRenderQuorum) quorumRenderState = "none"
@@ -72,7 +71,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     },
   ]
 
-  const overviewContent = <ProposalContentAndActions proposal={proposalCreatedEvent} />
+  const overviewContent = <ProposalContentAndActions proposal={proposal} />
 
   const InfoProposal = () => (
     <Stack

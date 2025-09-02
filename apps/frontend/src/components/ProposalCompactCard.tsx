@@ -86,6 +86,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                 py: 1,
                 px: 2,
               }}
+              proposalType={proposal.type}
             />
             <VStack w="full" gap={1} align={"flex-start"}>
               <Skeleton

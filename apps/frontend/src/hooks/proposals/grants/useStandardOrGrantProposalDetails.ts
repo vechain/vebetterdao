@@ -35,7 +35,7 @@ export const getGrantProposalDetailsQueryKey = (
     .join(","),
 ]
 
-const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnriched | undefined) => {
+export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnriched | undefined) => {
   return {
     //Metadata fields
     title: ipfsMetadata?.projectName ?? ipfsMetadata?.shortDescription ?? "Grant Proposal",

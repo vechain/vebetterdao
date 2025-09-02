@@ -97,6 +97,7 @@ export const ProposalsPageContent = () => {
               title={proposal.title ?? ""}
               state={proposal.state}
               isDepositReached={proposal.isDepositReached ?? false}
+              type={proposal.type}
             />
           ))}
           {sortedProposals.length === 0 && !isLoading && (

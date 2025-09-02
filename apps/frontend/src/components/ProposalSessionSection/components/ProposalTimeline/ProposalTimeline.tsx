@@ -9,7 +9,7 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { GovernanceType, ProposalState } from "@/hooks/proposals/grants/types"
 
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()
@@ -72,7 +72,7 @@ export const ProposalTimeline = () => {
               title={activeStep > 3 ? t("Voting session ended") : t("Voting session ends")}
               description={dayjs(proposal.votingEndDate).format("MMM D, YYYY")}
             />,
-            ...(proposal.type === "on-chain"
+            ...(proposal.governanceType === GovernanceType.OnChain
               ? [
                   <TimelineItem
                     key={4}

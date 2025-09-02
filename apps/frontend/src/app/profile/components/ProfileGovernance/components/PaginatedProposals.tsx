@@ -1,15 +1,16 @@
 import { VStack, Spinner, Box, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
+import { ProposalMetadata } from "@/api"
 import { useMemo } from "react"
 import { toIPFSURL, validateIpfsUri } from "@/utils"
 import { useIpfsMetadatas } from "@/api/ipfs"
 import { useInfiniteScroll, usePagination } from "@/hooks"
 import { ProposalBox } from "./ProposalBox"
 import { FaAngleLeft } from "react-icons/fa"
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type PaginatedProposalsProps = {
-  proposals: ProposalCreatedEvent[]
+  proposals: ProposalEnriched[] | GrantProposalEnriched[]
   itemsPerPage?: number
   goBack: () => void
 }
@@ -22,7 +23,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
   const proposalsURIs = useMemo(() => {
     return currentItems
       .map(proposal => {
-        const ipfsURL = toIPFSURL(proposal.description)
+        const ipfsURL = toIPFSURL(proposal.ipfsDescription)
         if (validateIpfsUri(ipfsURL)) return ipfsURL
         return null
       })
@@ -58,7 +59,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
       {/* Proposals List */}
       <VStack w="full" gap={4}>
         {itemsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
+          <ProposalBox key={proposal.id} proposalId={proposal.id} metadata={proposal.metadata} />
         ))}
       </VStack>
 

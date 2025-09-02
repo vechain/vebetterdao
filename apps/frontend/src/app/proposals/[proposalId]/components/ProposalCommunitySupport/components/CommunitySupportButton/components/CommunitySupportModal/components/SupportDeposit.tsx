@@ -65,7 +65,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const userDepositsForecasted = useMemo(() => Number(amount) + proposal.userSupport, [amount, proposal.userSupport])
 
   const isDepositThresholdReached = useMemo(
-    () => userDepositsForecasted >= proposal.depositThreshold,
+    () => userDepositsForecasted >= Number(proposal.depositThreshold),
     [userDepositsForecasted, proposal.depositThreshold],
   )
 
@@ -74,7 +74,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
       <Text>
         {t(
           "Show your support to this proposal by contributing with your VOT3 tokens, allowing it to be up for voting on Round {{round}}",
-          { round: proposal.roundIdVoteStart },
+          { round: proposal.votingStartBlock },
         )}
       </Text>
       <VStack alignItems={"stretch"}>
@@ -115,7 +115,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
           {t("Forecasted proposal support")}
         </Text>
         <ProposalSupportProgressChart
-          depositThreshold={proposal.depositThreshold}
+          depositThreshold={Number(proposal.depositThreshold)}
           userDeposits={userDepositsForecasted}
           othersDeposits={proposal.othersSupport}
           otherDepositsUsersCount={0}
