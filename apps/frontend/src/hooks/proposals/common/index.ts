@@ -1,3 +1,4 @@
 export * from "./useProposalCreatedEvents"
 export * from "./useProposalEnriched"
-export * from "./useProposalType"
+export * from "./useProposalEnrichedById"
+export * from "./useUserCreatedProposal"

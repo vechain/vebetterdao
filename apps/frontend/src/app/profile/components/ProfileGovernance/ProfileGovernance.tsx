@@ -1,9 +1,4 @@
-import {
-  useProposalsCreatedFromIds,
-  useUserProposalsCreatedEvents,
-  useUserProposalsVoteEvents,
-  useUserTopVotedApps,
-} from "@/api"
+import { useProposalsCreatedFromIds, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
 import { useCallback, useMemo, useState } from "react"
 import {
   EmptyStateGovernance,
@@ -23,6 +18,7 @@ import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/cons
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
+import { useUserCreatedProposal } from "@/hooks/proposals/common"
 
 enum ListView {
   ALL,
@@ -37,7 +33,7 @@ type Props = {
   address: string
 }
 export const ProfileGovernance = ({ address }: Props) => {
-  const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
+  const { data: createdProposals } = useUserCreatedProposal(address ?? "")
   const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
