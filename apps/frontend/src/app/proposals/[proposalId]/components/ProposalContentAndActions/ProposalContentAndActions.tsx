@@ -7,10 +7,9 @@ import { useTranslation } from "react-i18next"
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import "@uiw/react-md-editor/markdown-editor.css"
 import MDEditor from "@uiw/react-md-editor"
-import { FormattedProposalDetailData } from "../../hooks/useProposalDetail"
 
 type Props = {
-  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData)
+  proposal: ProposalEnriched | GrantProposalEnriched
 }
 
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {

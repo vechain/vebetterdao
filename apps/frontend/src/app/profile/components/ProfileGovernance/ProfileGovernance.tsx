@@ -112,6 +112,7 @@ export const ProfileGovernance = ({ address }: Props) => {
               firstProposals={firstCreatedProposals}
               isMoreProposals={isMoreCreatedProposals}
               isCreatedProposals
+              isLoading={isLoading}
               onSeeAllProposals={onSeeAllCreatedProposals}
             />
           )}
@@ -119,6 +120,7 @@ export const ProfileGovernance = ({ address }: Props) => {
             <PreviewCreatedProposals
               firstProposals={firstVotedProposals}
               isMoreProposals={isMoreVotedProposals}
+              isLoading={isLoading}
               onSeeAllProposals={onSeeAllVotedProposals}
             />
           ) : (

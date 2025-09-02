@@ -9,6 +9,7 @@ import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grant
 
 type Props = {
   firstProposals?: ProposalEnriched[] | GrantProposalEnriched[]
+  isLoading: boolean
   isMoreProposals?: boolean
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
@@ -16,6 +17,7 @@ type Props = {
 
 export const PreviewCreatedProposals = ({
   firstProposals,
+  isLoading,
   isCreatedProposals,
   isMoreProposals,
   onSeeAllProposals,
@@ -64,7 +66,7 @@ export const PreviewCreatedProposals = ({
       </HStack>
       <VStack w={"full"} gap={4}>
         {firstProposalsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.id} proposalId={proposal.id} metadata={proposal.metadata} />
+          <ProposalBox key={proposal.id} proposal={proposal} isLoading={isLoading} metadata={proposal.metadata} />
         ))}
       </VStack>
     </VStack>
