@@ -33,10 +33,11 @@ export type ProposalCreatedEvent = {
   targets: readonly string[]
   createdAt: number
   createdAtBlock: number
+  values: readonly string[]
 }
 
 export type GrantFormData = {
-  grantType: string
+  grantType: string // dapp or infra grant
   // About applicant
   applicantName: string
   applicantSurname: string

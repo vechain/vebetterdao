@@ -28,7 +28,7 @@ type UseProposalEnrichedReturn = {
 }
 export const useProposalEnriched = (): UseProposalEnrichedReturn => {
   // Step 1: Fetch events
-  const { allProposals, grantProposals, standardProposals } = useProposalCreatedEvents() // this have to be cached ! calling all the proposal
+  const { allProposals, grantProposals, standardProposals } = useProposalCreatedEvents()
 
   // Step 1.5: Fetch milestone claimed events for analytics
   const { claimedAmountsByProposal } = useMilestoneClaimedEvents()
