@@ -274,9 +274,9 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     })
 
     // Wait for the next round to start before proceeding
-    // If the round does not start within 2 minutes, we will retry 5 times with a 3 second delay
+    // If the round does not start within 5 minutes, we will retry 3 times with a 1 second delay
     try {
-      await withRetry(() => waitForRoundStart(thorClient, CONFIG), maxRetries, delayMs, "Wait for Round Start")
+      await withRetry(() => waitForRoundStart(thorClient, CONFIG), 3, 1000, "Wait for Round Start")
     } catch (error) {
       console.log("Failed to wait for round start after all retries:", error)
       await publishMessage(
