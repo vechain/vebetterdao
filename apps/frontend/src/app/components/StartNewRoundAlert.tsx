@@ -1,8 +1,6 @@
 import { Alert, VStack, Text } from "@chakra-ui/react"
-import {
-  StartRoundButton,
-  useCurrentRoundActiveState,
-} from "@/app/admin/components/StartRoundCard/components/StartRoundButton"
+import { StartRoundButton } from "@/app/admin/components/StartRoundCard/components/StartRoundButton"
+import { useCurrentRoundActiveState } from "@/api"
 
 export const StartNewRoundAlert = () => {
   const { isCurrentRoundActive } = useCurrentRoundActiveState()

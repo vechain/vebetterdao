@@ -1,20 +1,9 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { useDistributeEmission } from "@/hooks"
 import { VStack, Button, Text } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
-
-export const useCurrentRoundActiveState = () => {
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: currentRound } = useAllocationsRound(currentRoundId)
-
-  const isCurrentRoundActive = useMemo(() => {
-    return currentRound?.state === 0
-  }, [currentRound])
-
-  return { isCurrentRoundActive, currentRound, currentRoundId }
-}
+import { useCurrentRoundActiveState } from "@/api"
 
 export const StartRoundButton = ({ redirectTo }: { redirectTo?: string }) => {
   const { t } = useTranslation()
