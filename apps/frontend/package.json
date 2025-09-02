@@ -13,7 +13,7 @@
     "dev:galactica-test": "next dev --turbo",
     "staging": "next dev --turbo",
     "prebuild": "npm run chakra:typegen",
-    "build": "next build",
+    "build": "next build --experimental-debug-memory-usage",
     "start": "next start",
     "start:staging": "next start",
     "start:testnet": "next start",
