@@ -6,7 +6,7 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
 import { MilestonesActions } from "../"
-import { useProposalDetail } from "../../hooks"
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 const GrantDetailsTab = () => {
   return (
@@ -22,14 +22,14 @@ const GrantDetailsTab = () => {
 type ProposalOverviewProps = {
   overviewContent?: React.ReactNode
   isGrant?: boolean
-  proposalId: string
+  proposal: ProposalEnriched | GrantProposalEnriched
+  isLoading: boolean
 }
 
-export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: ProposalOverviewProps) => {
+export const ProposalOverview = ({ overviewContent, isGrant, proposal, isLoading }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { proposal } = useProposalDetail(proposalId)
   const { data: vnsData } = useVechainDomain(proposal?.proposerAddress)
   const proposerName = vnsData?.domain
 
@@ -37,14 +37,14 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
   const HeaderContent = () => (
     <VStack gap={5} align="flex-start" w="full">
       <HStack justify={"space-between"} align={"flex-start"} w="full">
-        <Skeleton loading={!proposal || proposal.isStateLoading}>
+        <Skeleton loading={isLoading}>
           <ProposalStatusBadge
             proposalState={proposal?.state}
             isDepositReached={false} // TODO: Handle deposit reached from separate hook
             proposalType={proposal?.type}
           />
         </Skeleton>
-        <Skeleton loading={!proposal}>
+        <Skeleton loading={isLoading}>
           {proposal && (
             <HStack>
               <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
@@ -58,7 +58,7 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
         </Skeleton>
       </HStack>
 
-      <Skeleton loading={!proposal}>
+      <Skeleton loading={isLoading}>
         <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
       </Skeleton>
     </VStack>
