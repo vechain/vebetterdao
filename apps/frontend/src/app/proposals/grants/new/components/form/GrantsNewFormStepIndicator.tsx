@@ -32,7 +32,7 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
             return (
               <Steps.Item key={step.key} index={index}>
                 <Steps.Indicator>
-                  <Steps.Status complete={<Icon as={BsCheck} boxSize={7} />} incomplete={<Steps.Number />} />
+                  <Steps.Status complete={<Icon as={BsCheck} boxSize={5} />} incomplete={<Steps.Number />} />
                 </Steps.Indicator>
 
                 {showStepTitle && <Steps.Title fontSize={{ base: "sm", md: "sm" }}>{step.title}</Steps.Title>}

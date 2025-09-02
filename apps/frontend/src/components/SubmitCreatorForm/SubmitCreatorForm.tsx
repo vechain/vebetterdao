@@ -14,10 +14,9 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import { useCreatorSubmissionFormStore } from "@/store"
 import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
-import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
-import AppUtils from "@/utils/AppUtils"
 import { FormCheckbox, FormItem } from "../CustomFormFields"
+import { genericValidation, validateUrl, validateEmail, validateAppId } from "../CustomFormFields/validators"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -181,28 +180,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
     if (value) {
       setData({ [field]: value })
     }
-  }
-
-  const validateUrl = (value: string, fieldName: string) => {
-    try {
-      new URL(value)
-      return true
-    } catch {
-      return t("Invalid {{fieldName}}", { fieldName })
-    }
-  }
-
-  const validateEmail = (value: string, fieldName: string) => {
-    const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
-    return emailRegex.test(value) || t("Invalid {{fieldName}}", { fieldName })
-  }
-
-  const validateAppId = (value: string, fieldName: string) => {
-    return AppUtils.isValid(value) || t("Invalid {{fieldName}}", { fieldName })
-  }
-
-  const genericValidation = (value: string, fieldName: string) => {
-    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
   }
 
   return (
