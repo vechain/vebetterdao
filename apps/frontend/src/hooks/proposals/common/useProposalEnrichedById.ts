@@ -15,7 +15,12 @@ export type UseProposalEnrichedByIdReturn = {
  * @returns Proposal data with type information and loading state
  */
 export const useProposalEnrichedById = (proposalId: string): UseProposalEnrichedByIdReturn => {
-  const { enrichedGrantProposals, enrichedStandardProposals } = useProposalEnriched()
+  const {
+    data: { enrichedGrantProposals, enrichedStandardProposals } = {
+      enrichedGrantProposals: [],
+      enrichedStandardProposals: [],
+    },
+  } = useProposalEnriched()
 
   return useMemo(() => {
     const grantProposal = enrichedGrantProposals.find(p => p.id === proposalId)

@@ -9,7 +9,7 @@ import { ProposalState } from "@/hooks/proposals/grants/types"
  */
 export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFilter)[]) => {
   // Step 1: Get the standard proposals
-  const { enrichedStandardProposals } = useProposalEnriched()
+  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] } } = useProposalEnriched()
 
   const proposalsIds = useMemo(() => {
     return enrichedStandardProposals.map(proposal => proposal.id)

@@ -5,7 +5,7 @@ import { useWallet } from "@vechain/vechain-kit"
 export const getUserProposalsCreatedEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "CREATED", user]
 
 export const useUserCreatedProposal = (user?: string) => {
-  const proposal = useProposalEnriched()
+  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
   const { account } = useWallet()
 
   return useQuery({
@@ -14,12 +14,12 @@ export const useUserCreatedProposal = (user?: string) => {
       const lowerCaseUser = user?.toLowerCase()
       const lowerCaseAccount = account?.address?.toLowerCase()
       const filteredProposals =
-        proposal.proposals?.filter(
+        proposals?.filter(
           p =>
             p.proposerAddress.toLowerCase() === lowerCaseUser || p.proposerAddress.toLowerCase() === lowerCaseAccount,
         ) ?? []
       return filteredProposals
     },
-    enabled: !!user || (!!account?.address && !!proposal.proposals),
+    enabled: !!user || (!!account?.address && !!proposals),
   })
 }
