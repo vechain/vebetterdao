@@ -1,4 +1,4 @@
-import { useUserProposalsCreatedEvents } from ".."
+import { useUserCreatedProposal } from "@/hooks/proposals/common"
 import { useMemo } from "react"
 
 /**
@@ -7,10 +7,10 @@ import { useMemo } from "react"
  * @returns The proposals created from the given ids.
  */
 export const useProposalsCreatedFromIds = (proposalIds?: string[]) => {
-  const { data: allCreatedProposals } = useUserProposalsCreatedEvents()
+  const { data: allCreatedProposals } = useUserCreatedProposal()
 
   const createdProposals = useMemo(() => {
-    return allCreatedProposals?.filter(proposal => proposalIds?.includes(proposal.proposalId))
+    return allCreatedProposals?.filter(proposal => proposalIds?.includes(proposal.id))
   }, [allCreatedProposals, proposalIds])
 
   return {

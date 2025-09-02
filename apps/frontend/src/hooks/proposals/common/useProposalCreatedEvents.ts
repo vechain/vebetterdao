@@ -26,6 +26,7 @@ export const useProposalCreatedEvents = (): {
       targets: response.decodedData.args.targets,
       createdAt: response.meta.blockTimestamp,
       createdAtBlock: response.meta.blockNumber,
+      values: response.decodedData.args.values.map(value => value.toString()),
     }),
   })
 

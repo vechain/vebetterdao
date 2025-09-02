@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
 import { ProposalStatusBadge } from "./ProposalStatusBadge"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 
 //TODO: This is a temporary type, we need to fix the type expected
 export const ProposalInfoCard: React.FC<{
@@ -16,8 +16,9 @@ export const ProposalInfoCard: React.FC<{
   votingRoundId: string
   title: string
   state: ProposalState
+  type: ProposalType
   isDepositReached: boolean
-}> = ({ id, description, votingRoundId, title, state, isDepositReached }) => {
+}> = ({ id, description, votingRoundId, title, state, isDepositReached, type }) => {
   const router = useRouter()
 
   const { votingStartDate, votingEndDate } = useProposalVoteDates(id)
@@ -96,6 +97,7 @@ export const ProposalInfoCard: React.FC<{
               py: 1,
               px: 2,
             }}
+            proposalType={type}
           />
           <HStack cursor={"pointer"}>
             <Text fontWeight={500} color="rgba(0, 76, 252, 1)" fontSize={16}>

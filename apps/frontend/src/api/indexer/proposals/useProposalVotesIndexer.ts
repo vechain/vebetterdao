@@ -46,7 +46,7 @@ export const getProposalVotesIndexer = async (data: ProposalVotesRequest): Promi
 
 export const getProposalVotesQueryKey = (proposalId: string) => ["PROPOSAL", proposalId, "VOTES"]
 
-type ParsedProposalVotesResponse = {
+export type ParsedProposalVotesResponse = {
   totalVoters: number
   totalPower: bigint
   totalWeight: bigint

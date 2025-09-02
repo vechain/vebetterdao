@@ -1,13 +1,11 @@
-import { Grid, GridItem, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, VStack, Stack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions"
-import { useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
-import { useProposalCreatedEvents } from "@/hooks/proposals/common/useProposalCreatedEvents"
+import { useProposalTotalVotes, useVot3PastSupply } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
 import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
-import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 import { useMemo } from "react"
@@ -16,15 +14,26 @@ import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { ProposalOverviewVotes } from "./ProposalOverview/components/ProposalOverviewVotes/ProposalOverviewVotes"
+import { ProposalOverviewTime } from "./ProposalOverview/components/ProposalOverviewTime"
+import { ProposalOverviewYourSupport } from "./ProposalOverview/components/ProposalOverviewYourSupport"
+import { ProposalOverviewCommunitySupport } from "./ProposalOverview/components/ProposalOverviewCommunitySupport"
+import { CastProposalVoteButton } from "./ProposalOverview/components/CastProposalVoteButton"
+import { ProposalYourVote } from "@/components"
+import { useWallet } from "@vechain/vechain-kit"
+import { useProposalDetail } from "../hooks"
 
 type Props = {
   proposalId: string
 }
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
-  const { data: proposalCreatedEvent } = useProposalCreatedEvent(proposalId)
-  const { proposal } = useProposalDetail()
-  const { allProposals } = useProposalCreatedEvents()
+  const enrichedProposal = useProposalDetail(proposalId)
+  const proposal = enrichedProposal.proposal
+
+  const { account } = useWallet()
+  const isGrant = useMemo(() => {
+    return proposal?.type === ProposalType.Grant
+  }, [proposal])
 
   const votesAtSnapshotQuery = useVot3PastSupply(proposal.votingStartBlock)
 
@@ -45,7 +54,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     return proposal.state === ProposalState.Pending
   }, [proposal])
 
-  if (!proposalCreatedEvent) return null
+  if (!proposal) return null
 
   let quorumRenderState: "none" | "upcoming" | "active" = "active"
   if (shouldNotRenderQuorum) quorumRenderState = "none"
@@ -62,17 +71,29 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     },
   ]
 
-  const currentProposal = allProposals.find(proposal => proposal.id === proposalId)
-  const isGrantProposal = currentProposal?.type === ProposalType.Grant
+  const overviewContent = <ProposalContentAndActions proposal={proposal} />
 
-  const overviewContent = (
-    <VStack align="stretch" gap={8}>
-      <ProposalContentAndActions proposal={proposalCreatedEvent} />
-    </VStack>
+  const InfoProposal = () => (
+    <Stack
+      direction={["column", "column", "row"]}
+      w="full"
+      justify={["flex-start", "flex-start", "space-between"]}
+      gap={8}>
+      <Stack direction={["column", "column", "row"]} gap={[4, 4, 12]} align={["flex-start", "flex-start", "center"]}>
+        <ProposalOverviewTime />
+        <ProposalOverviewCommunitySupport />
+        <ProposalOverviewYourSupport />
+        <ProposalYourVote proposalId={proposal.id} proposalState={proposal.state} />
+      </Stack>
+
+      {account?.address && <CastProposalVoteButton proposalId={proposal.id} />}
+    </Stack>
   )
 
   const rightSidebarContent = (
     <VStack align="stretch" gap={8}>
+      <InfoProposal />
+
       <ProposalCommunitySupport />
       {proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
       {!proposal.isUserSupportLeft && <ProposalWithdrawDeposit />}
@@ -88,15 +109,13 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]}>
-          <ProposalOverview
-            overviewContent={overviewContent}
-            proposalCreatedEvent={proposalCreatedEvent}
-            isGrantProposal={isGrantProposal}
-          />
+          <ProposalOverview overviewContent={overviewContent} isGrant={isGrant} proposalId={proposalId} />
           <ProposalVoteCommentList proposalId={proposalId} />
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>
           <VStack align="stretch" gap={8}>
+            {rightSidebarContent}
+
             <ProposalOverviewVotes proposalId={proposalId} />
             <ProposalSessionSection
               quorumQuery={proposal.quorumQuery}
@@ -107,7 +126,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}
             />
-            {rightSidebarContent}
           </VStack>
         </GridItem>
       </Grid>

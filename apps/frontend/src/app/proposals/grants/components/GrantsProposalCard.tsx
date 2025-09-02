@@ -56,7 +56,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             {/* Amount and grant type */}
             <B3TRIcon boxSize={{ base: "14px", md: "16px" }} />
             <Text>
-              {proposal.grantAmount} {"B3TR"}
+              {proposal.grantAmountRequested} {"B3TR"}
             </Text>
             <Box hideBelow="md">
               <Text>

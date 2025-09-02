@@ -3,7 +3,8 @@ import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@ic
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 import { Badge, DotSymbol } from "@/components"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { GrantsProposalStatusBadge } from "./Grants/GrantsProposalStatusBadge"
 
 type Props = {
   renderIcon?: boolean
@@ -12,6 +13,7 @@ type Props = {
   containerProps?: StackProps
   proposalState?: ProposalState
   isDepositReached: boolean
+  proposalType?: ProposalType
 }
 
 export const ProposalStatusBadge = ({
@@ -21,9 +23,13 @@ export const ProposalStatusBadge = ({
   containerProps = {},
   proposalState,
   isDepositReached,
+  proposalType,
 }: Props) => {
   const { t } = useTranslation()
 
+  if (proposalType === ProposalType.Grant) {
+    return <GrantsProposalStatusBadge state={proposalState} /> // TODO: extend the exist to remove GrantsBadge
+  }
   switch (proposalState) {
     case ProposalState.Succeeded:
       return (

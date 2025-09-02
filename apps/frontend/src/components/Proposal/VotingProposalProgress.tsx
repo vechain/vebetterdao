@@ -1,14 +1,14 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
-import { useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
+import { useProposalVotesIndexer } from "@/api"
 import { Box, Card, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
-import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ProposalYourVote } from "./ProposalYourVote"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
@@ -153,11 +153,11 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({
   isDepositReached,
 }) => {
   const { t } = useTranslation()
-  const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
+  const proposal = useProposalEnrichedById(proposalId)
 
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
 
-  const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
+  const depositThreshold = Number(proposal.proposal?.depositThreshold)
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = compactFormatter.format((communityDeposits / depositThreshold) * 100)
 

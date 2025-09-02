@@ -3,6 +3,7 @@ import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 import { getProposalStateQueryKey } from "./useProposalState"
+import { getGrantProposalStateQueryKey } from "./useGrantProposalState"
 import { useMemo } from "react"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
@@ -60,11 +61,12 @@ export const useAllProposalsState = ({
       return {
         grantsProposalStates: (res as number[]).slice(0, grantProposalsIds.length).map((state, index) => {
           const proposalId = proposalsIds[index] as string
-          // queryClient.setQueryData(getProposalStateQueryKey(proposalId), [state]) //TODO: This should reset the grants version of the proposal state
+          // Cache grant proposal state using the proper grant query key
+          queryClient.setQueryData(getGrantProposalStateQueryKey(proposalId), [state])
           return { proposalId, state: state as ProposalState }
         }),
         standardProposalStates: (res as number[]).slice(grantProposalsIds.length).map((state, index) => {
-          const proposalId = proposalsIds[index] as string
+          const proposalId = proposalsIds[index + grantProposalsIds.length] as string
           queryClient.setQueryData(getProposalStateQueryKey(proposalId), [state])
           return { proposalId, state: state as ProposalState }
         }),

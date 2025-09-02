@@ -3,7 +3,7 @@ import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconsco
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  state: ProposalState
+  state?: ProposalState
 }
 
 type BadgeConfig = {

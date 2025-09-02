@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 import { useAllProposalsState } from "@/api"
 import BigNumber from "bignumber.js"
-import { useGrantProposalDetails } from "../grants/useGrantProposalDetails"
+import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
 import { useMilestoneClaimedEvents } from "../grants/useMilestoneClaimedEvents"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
 
@@ -49,7 +49,7 @@ export const useProposalEnriched = (): UseProposalEnrichedReturn => {
       standardProposalsDetailsMap: {},
     },
     isLoading: isLoadingDetails,
-  } = useGrantProposalDetails({ standardProposals, grantProposals })
+  } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
 
   const {
     data: { grantsProposalStates, standardProposalStates } = {
@@ -76,7 +76,8 @@ export const useProposalEnriched = (): UseProposalEnrichedReturn => {
 
     // Enrich grant proposals
     const enrichedGrantProposals: GrantProposalEnriched[] = grantProposals.map(event => {
-      const state = grantsProposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
+      const stateData = grantsProposalStates?.find(state => state.proposalId === event.id)
+      const state = stateData?.state ?? ProposalState.Pending
       const details = grantProposalsDetailsMap?.[event.id]
 
       // Get actual distributed amount from claimed events (calculated here, not in useGrantProposalDetails)
@@ -96,7 +97,8 @@ export const useProposalEnriched = (): UseProposalEnrichedReturn => {
 
     // Enrich standard proposals
     const enrichedStandardProposals: ProposalEnriched[] = standardProposals.map(event => {
-      const state = standardProposalStates?.find(state => state.proposalId === event.id)?.state ?? ProposalState.Pending
+      const stateData = standardProposalStates?.find(state => state.proposalId === event.id)
+      const state = stateData?.state ?? ProposalState.Pending
       const details = standardProposalsDetailsMap?.[event.id]
       return {
         ...event,
@@ -112,7 +114,7 @@ export const useProposalEnriched = (): UseProposalEnrichedReturn => {
 
     // Calculate total grant amount
     const totalGrantAmount = enrichedGrantProposals.reduce(
-      (acc, event) => acc.plus(BigNumber(event?.grantAmount) ?? BigNumber(0)),
+      (acc, event) => acc.plus(BigNumber(event?.grantAmountRequested) ?? BigNumber(0)),
       BigNumber(0),
     )
 
@@ -196,9 +198,9 @@ export const useProposalEnriched = (): UseProposalEnrichedReturn => {
     return {
       totalDistributedAmount,
       grantsApproved,
-      grantsByState, // Useful to filter by state later on
-      grantsInDevelopment, // Useful to filter by state later on
-      grantsCompleted, // Useful to filter by state later on
+      grantsByState,
+      grantsInDevelopment,
+      grantsCompleted,
     }
   }, [enrichedData?.enrichedGrantProposals, claimedAmountsByProposal])
 

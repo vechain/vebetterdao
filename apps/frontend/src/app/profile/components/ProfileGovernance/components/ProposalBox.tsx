@@ -1,9 +1,10 @@
-import { ProposalMetadata, useProposalState } from "@/api"
+import { ProposalMetadata } from "@/api"
 import { ProposalStatusBadge } from "@/components"
 import { Box, HStack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
 type Props = {
   proposalId: string
@@ -12,7 +13,8 @@ type Props = {
 
 export const ProposalBox = ({ proposalId, metadata }: Props) => {
   const router = useRouter()
-  const { data: proposalState } = useProposalState(proposalId)
+
+  const { proposal } = useProposalDetail(proposalId)
 
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
 
@@ -29,6 +31,10 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
     router.push(`/proposals/${proposalId}`)
   }, [router, proposalId])
 
+  if (proposal.isStateLoading || proposal.state === undefined) {
+    return null
+  }
+
   return (
     <HStack
       onClick={goToProposal}
@@ -42,11 +48,12 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
       p={{ base: 3, md: 4 }}>
       <VStack w={"full"} alignItems={"start"} gap={2}>
         <ProposalStatusBadge
-          proposalState={proposalState}
+          proposalState={proposal.state}
           isDepositReached={false} //TODO: Implement this, fix the type expected
           textProps={{
             fontSize: 12,
           }}
+          proposalType={proposal.type}
         />
         <Text fontSize={14} fontWeight={"600"}>
           {title}

@@ -30,8 +30,8 @@ export const CancelProposalSection = () => {
   }, [cancelProposalMutation, confirmationModal])
 
   const accountCanCancelProposal = useMemo(
-    () => compareAddresses(proposal.proposer, account?.address || "") || permissions?.isAdminOfB3TRGovernor,
-    [proposal.proposer, account, permissions],
+    () => compareAddresses(proposal.proposerAddress, account?.address || "") || permissions?.isAdminOfB3TRGovernor,
+    [proposal.proposerAddress, account, permissions],
   )
 
   if (accountCanCancelProposal && proposal.state !== ProposalState.Pending) {
