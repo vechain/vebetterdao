@@ -1,15 +1,16 @@
-import { Field, HStack, Input, Text, Textarea } from "@chakra-ui/react"
+import { Field, HStack, Input, Text, Textarea, InputGroup } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
 
 type FormItemProps = {
   label?: string
   description?: string
   placeholder?: string
-  type?: "text" | "textarea" | "email" | "url"
+  type?: "text" | "textarea" | "email" | "url" | "number"
   register: UseFormRegisterReturn
   error?: string
   onBlur?: () => void
   isOptional?: boolean
+  leftElement?: React.ReactNode
 }
 
 export const FormItem = ({
@@ -21,11 +22,12 @@ export const FormItem = ({
   error,
   onBlur,
   isOptional = false,
+  leftElement,
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
 
   return (
-    <Field.Root invalid={!!error}>
+    <Field.Root invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
       {label && (
         <HStack justify="space-between" w="full">
           <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
@@ -43,14 +45,21 @@ export const FormItem = ({
           {description}
         </Text>
       )}
-      <InputComponent
-        placeholder={placeholder}
-        {...register}
-        {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
-        {...(type === "textarea" && { h: "full" })}
-        onBlur={onBlur}
-        rounded="xl"
-      />
+      <InputGroup {...(leftElement && { startElement: leftElement })}>
+        <InputComponent
+          placeholder={placeholder}
+          {...register}
+          {...(type === "textarea" && !register?.maxLength && { maxLength: 100 })}
+          {...(type === "textarea" && !register?.minLength && { minLength: 20 })}
+          {...(type === "textarea" && {
+            h: "full",
+            minH: "120px",
+            resize: "vertical",
+          })}
+          onBlur={onBlur}
+          rounded="xl"
+        />
+      </InputGroup>
       {error && <Field.ErrorText>{error}</Field.ErrorText>}
     </Field.Root>
   )
