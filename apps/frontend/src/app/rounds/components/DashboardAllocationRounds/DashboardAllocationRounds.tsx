@@ -1,8 +1,7 @@
 import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
-import { useBreakpoints } from "@/hooks"
-import { Button, Heading, HStack, Icon, IconButton, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -12,7 +11,6 @@ import { useRoundProposals } from "../../hooks/useRoundProposals"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
-  const { isDesktop } = useBreakpoints()
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
@@ -47,32 +45,19 @@ export const DashboardAllocationRounds = () => {
     <ResponsiveCard>
       <VStack gap={8} w="full">
         <HStack gap={4} justifyContent="space-between" w="full">
-          {isDesktop ? (
-            <Button
-              px={0}
-              textStyle={"md"}
-              variant="plain"
-              _hover={{
-                textDecoration: "underline",
-              }}
-              color="primary"
-              disabled={allocationRound.isFirstRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-              fontWeight="semibold">
-              <Icon as={FaAngleLeft} boxSize={4} />
-              {t("Previous round")}
-            </Button>
-          ) : (
-            <IconButton
-              textStyle={"md"}
-              aria-label="Previous round"
-              variant="ghost"
-              colorPalette="primary"
-              disabled={allocationRound.isFirstRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
-              <Icon as={FaAngleLeft} boxSize={4} />
-            </IconButton>
-          )}
+          <Button
+            px={0}
+            size="sm"
+            textStyle={"md"}
+            variant="plain"
+            _hover={{ textDecoration: "underline" }}
+            color="actions.secondary.text-lighter"
+            disabled={allocationRound.isFirstRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
+            fontWeight="semibold">
+            <Icon as={FaAngleLeft} boxSize={4} />
+            {t("Previous round")}
+          </Button>
 
           <VStack gap={2}>
             <Heading size="2xl" fontWeight="normal">
@@ -80,52 +65,39 @@ export const DashboardAllocationRounds = () => {
             </Heading>
             <HStack gap={2}>
               <Skeleton loading={roundInfoLoading}>
-                <Text textStyle="sm" color="#6A6A6A">
+                <Text textStyle="sm" color="text.subtle">
                   {t("{{from}} to {{to}}", {
                     from: roundInfo.voteStartTimestamp?.format("MMM D"),
                     to: roundInfo.voteEndTimestamp?.format("MMM D"),
                   })}
                 </Text>
               </Skeleton>
-              <DotSymbol color="#6A6A6A" size="2px" />
+              <DotSymbol color="text.subtle" size="2px" />
               <Skeleton loading={roundInfoLoading}>
-                <Text textStyle="sm" color="primary.500" fontWeight={600}>
+                <Text textStyle="sm" color="actions.secondary.text-lighter" fontWeight="semibold">
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
               </Skeleton>
             </HStack>
           </VStack>
-          {isDesktop ? (
-            <Button
-              px={0}
-              fontWeight="semibold"
-              _hover={{
-                textDecoration: "underline",
-              }}
-              variant="plain"
-              textStyle={"md"}
-              color="primary"
-              disabled={allocationRound.isLastRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
-              {t("Next round")}
-              <Icon as={FaAngleRight} boxSize={4} />
-            </Button>
-          ) : (
-            <IconButton
-              textStyle={"md"}
-              aria-label="Next round"
-              variant="ghost"
-              colorPalette="primary"
-              disabled={allocationRound.isLastRound}
-              onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
-              <Icon as={FaAngleRight} boxSize={5} />
-            </IconButton>
-          )}
+
+          <Button
+            px={0}
+            fontWeight="semibold"
+            _hover={{ textDecoration: "underline" }}
+            variant="plain"
+            textStyle={"md"}
+            color="actions.secondary.text-lighter"
+            disabled={allocationRound.isLastRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+            {t("Next round")}
+            <Icon as={FaAngleRight} fill="currentColor" boxSize={4} />
+          </Button>
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
-        <VStack gap={4} w="full">
-          <Heading size="2xl" fontWeight="normal">
-            {t("Proposals in this round or looking for support")}
+        <VStack alignItems="flex-start" gap={4} w="full">
+          <Heading size="md" fontWeight="semibold">
+            {t("Proposals")} {sortedProposals.length ? `(${sortedProposals.length})` : "(0)"}
           </Heading>
 
           {!!sortedProposals.length ? (
@@ -138,7 +110,7 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Link href="/proposals" color="primary" fontWeight="semibold">
+        <Link href="/proposals" color="actions.secondary.text-lighter" fontWeight="semibold">
           {t("View all proposals")}
         </Link>
       </VStack>

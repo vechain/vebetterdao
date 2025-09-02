@@ -16,7 +16,7 @@ export const SignalCard = ({ appName, reason }: Props) => {
             </Flex>
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
-                <Text textStyle={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {appName}
                 </Text>
               </HStack>

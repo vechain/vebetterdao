@@ -172,7 +172,7 @@ export const AppTweets = () => {
             <Card.Body>
               <VStack align={"center"} justify={"center"} w="full" minH="200px">
                 <OkHandIcon color="#757575" />
-                <Heading size="xl" fontWeight={500} textAlign={"center"}>
+                <Heading size="xl" fontWeight="semibold" textAlign={"center"}>
                   {t("App will add updates here.")}
                 </Heading>
               </VStack>

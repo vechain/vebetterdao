@@ -92,13 +92,13 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
             flex={1}
             variant={"dangerGhost"}
             onClick={isPassport ? removeLinkModalPassportPOV.onOpen : removeLinkModalEntityPOV.onOpen}>
-            <UilLinkBroken color="#C84968" />
+            <UilLinkBroken color="error.primary" />
             {t("Unlink account")}
           </Button>
         )}
         {isConnectedUser && pending && (
           <Button flex={1} variant={"dangerGhost"} onClick={removePendingRequestModal.onOpen}>
-            <UilLinkBroken color="#C84968" />
+            <UilLinkBroken color="error.primary" />
             {t("Remove request")}
           </Button>
         )}

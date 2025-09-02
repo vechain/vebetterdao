@@ -1,4 +1,4 @@
-import { Heading, Text, VStack, Link, Image, HStack, Flex, Button } from "@chakra-ui/react"
+import { Heading, Text, VStack, Link, Icon, Image, HStack, Flex, Button } from "@chakra-ui/react"
 import { ShareButtons } from "../../ShareButtons"
 import { ReactNode, useState } from "react"
 import { motion } from "framer-motion"
@@ -93,10 +93,12 @@ export const SuccessModalContent = ({
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
           }>
           <HStack alignSelf={"center"}>
-            <Text textStyle="sm" fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
+            <Text textStyle="sm" fontWeight="semibold" color="brand.primary">
               {t("See transaction information")}
             </Text>
-            <MdArrowOutward size={20} color={"rgba(0, 76, 252, 1)"} />
+            <Icon boxSize={20} color="logo">
+              <MdArrowOutward />
+            </Icon>
           </HStack>
         </Link>
       </Flex>

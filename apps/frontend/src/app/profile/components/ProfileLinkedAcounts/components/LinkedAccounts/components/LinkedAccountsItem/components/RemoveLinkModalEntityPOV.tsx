@@ -29,7 +29,7 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
     <BaseModal onClose={handleClose} isOpen={isOpen && !isTxModalOpen}>
       <VStack alignItems="stretch" gap={6}>
         <VStack justifyContent="center" alignItems="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
+          <ExclamationTriangle color="error.primary" size={triangleSize} />
           <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to remove the linking?")}
           </Heading>
@@ -40,7 +40,7 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" textStyle="sm">
+          <Box color="error.primary" textStyle="sm">
             <Alert.Title as="span">
               {t("Passport will not able to use the actions performed in this address.")}
             </Alert.Title>

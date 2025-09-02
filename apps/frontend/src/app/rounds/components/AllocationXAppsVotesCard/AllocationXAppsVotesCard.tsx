@@ -69,7 +69,12 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
                 <UilInfoCircle size={"36px"} color="#D23F63" />
               </Alert.Indicator>
               <Alert.Content>
-                <Alert.Title color="#D23F63" ml={2} fontSize="14px" fontWeight={600} data-testid={"round-error-msg"}>
+                <Alert.Title
+                  color="#D23F63"
+                  ml={2}
+                  fontSize="14px"
+                  fontWeight="semibold"
+                  data-testid={"round-error-msg"}>
                   {t("Quorum was not reached for this round")}
                 </Alert.Title>
                 <Alert.Description color="#D23F63" ml={2} fontSize="14px">

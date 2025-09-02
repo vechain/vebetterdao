@@ -29,7 +29,7 @@ export const ProposalOverview = () => {
             <VStack gap={2} align="flex-start">
               <HStack justify={"space-between"} align={"center"} w="full">
                 <Skeleton loading={proposal.isRoundIdVoteStartLoading}>
-                  <Text color="#6A6A6A" fontSize="md" textTransform={"uppercase"} fontWeight={600}>
+                  <Text color="text.subtle" fontSize="md" textTransform={"uppercase"} fontWeight="semibold">
                     {t("Round #{{round}}", {
                       round: proposal.roundIdVoteStart,
                     })}
@@ -68,7 +68,7 @@ export const ProposalOverview = () => {
                 gap={[4, 4, 12]}
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
-                  <Text fontWeight={"400"} color="#6A6A6A">
+                  <Text fontWeight={"400"} color="text.subtle">
                     {t("Created by")}
                   </Text>
                   <Skeleton loading={proposal.isProposerLoading}>

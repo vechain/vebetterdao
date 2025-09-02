@@ -43,7 +43,7 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                     data-testid={"gmnft-token-id"}
                     color={"white"}
                     textStyle="3xl"
-                    fontWeight={700}>
+                    fontWeight="bold">
                     {t("VeBetterDAO")} <br /> {t("Governance")}
                   </Text>
 
@@ -55,7 +55,7 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                     data-testid={"gmnft-token-id"}
                     color={"white"}
                     textStyle="2xl"
-                    fontWeight={600}>
+                    fontWeight="semibold">
                     {"Earth"}
                   </Text>
                   <Text
@@ -64,7 +64,7 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                     data-testid={"gmnft-token-id"}
                     color={"white"}
                     textStyle="md"
-                    fontWeight={500}>
+                    fontWeight="semibold">
                     {t("#")}
                     {tokenID}
                   </Text>

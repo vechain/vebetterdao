@@ -30,7 +30,8 @@ export const HomePageContent = () => {
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
             {isAboveMd && (
               <>
-                <CantVoteCard /> <DashboardAllocationRounds />
+                <CantVoteCard />
+                <DashboardAllocationRounds />
               </>
             )}
             <DashboardXApps />

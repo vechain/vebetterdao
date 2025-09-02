@@ -78,7 +78,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
         )}
       </Text>
       <VStack alignItems={"stretch"}>
-        <Text textStyle={"sm"} color="#6A6A6A">
+        <Text textStyle={"sm"} color="text.subtle">
           {t("Your contribution")}
         </Text>
         <HStack>
@@ -98,7 +98,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
                 onClick={depositMax}
                 color="#004CFC"
                 fontSize="14px"
-                fontWeight={500}
+                fontWeight="semibold"
                 bg={"#E0E9FE"}
                 h="30px"
                 px="16px"
@@ -111,7 +111,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
         <Separator />
       </VStack>
       <VStack alignItems={"stretch"}>
-        <Text textStyle={"sm"} color="#6A6A6A">
+        <Text textStyle={"sm"} color="text.subtle">
           {t("Forecasted proposal support")}
         </Text>
         <ProposalSupportProgressChart
@@ -124,7 +124,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
           isDepositThresholdReached={isDepositThresholdReached}
         />
       </VStack>
-      <Text fontWeight={600} textStyle="sm">
+      <Text fontWeight="semibold" textStyle="sm">
         {t("You can claim your tokens back when the proposal voting round starts.")}
       </Text>
       <Button disabled={!Number(amount)} w="full" variant="primaryAction" type="submit">

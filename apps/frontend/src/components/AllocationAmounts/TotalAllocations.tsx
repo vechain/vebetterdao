@@ -1,4 +1,4 @@
-import { Card, Heading, Stack, Button } from "@chakra-ui/react"
+import { Card, Heading, Stack, Button, Text } from "@chakra-ui/react"
 import { useAllocationsRound, useCurrentAllocationsRoundId, useMultipleXAppsTotalEarnings, useXApps } from "@/api"
 import { useMemo, useState } from "react"
 import { AppAmount } from "./components/AppAmount"
@@ -42,12 +42,15 @@ export const TotalAllocations = () => {
   }, [sortedTotalEarnings, displayLimit])
 
   return (
-    <Card.Root flex={1} h="full" w="full" variant="baseWithBorder">
+    <Card.Root flex={1} h="full" w="full" bg="bg.primary" borderColor="borders.secondary">
       <Card.Header>
         <Heading size="xl">{t("Most voted apps")}</Heading>
+        <Text textStyle="sm" color="text.subtle">
+          {t("Use Apps to earn B3TR tokens through your Better Actions")}
+        </Text>
       </Card.Header>
       <Card.Body>
-        <Stack gap={5} w={"full"}>
+        <Stack gap={3} w={"full"}>
           {isTotalEarningsPerAppLoading
             ? activeApps
                 ?.slice(0, displayLimit)
@@ -62,7 +65,13 @@ export const TotalAllocations = () => {
               ))}
 
           {hasMoreApps && (
-            <Button variant="primaryLink" colorPalette="blue" onClick={handleLoadMore}>
+            <Button
+              mx="auto"
+              maxW="fit-content"
+              size="md"
+              variant="ghost"
+              color="actions.secondary.text-lighter"
+              onClick={handleLoadMore}>
               {t("Load more")}
             </Button>
           )}

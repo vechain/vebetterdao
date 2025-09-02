@@ -145,7 +145,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                     </Text>
                     <Text
                       textStyle="xs"
-                      color="#6A6A6A"
+                      color="text.subtle"
                       order={[0, 0, 1]} // Change order for large viewports
                       pr={[1, 2, 0]} // Change padding for large viewports
                     >

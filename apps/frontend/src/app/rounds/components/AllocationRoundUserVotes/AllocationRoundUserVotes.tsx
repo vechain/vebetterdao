@@ -113,7 +113,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
                 </Button>
               </HStack>
               <Skeleton loading={castVotesEventLoading}>
-                <Text textStyle="md" fontWeight="400">
+                <Text textStyle="md">
                   <Trans
                     i18nKey={"{{amount}} distributed among {{apps}} apps"}
                     values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}

@@ -37,12 +37,12 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                     {children}
                   </LinkOverlay>
                 )}>
-                <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
                   {t("Node")}
                 </Text>
               </ConditionalWrapper>
 
-              <Text fontWeight={700} lineHeight={1.6} lineClamp={1}>
+              <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
                 {`${node.name} #${node.nodeId}`}
               </Text>
 

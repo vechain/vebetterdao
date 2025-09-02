@@ -51,9 +51,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       <Card.Header>
         <VStack w="full" justify={"flex-start"} align={"start"}>
           <HStack w="full" justify={"space-between"}>
-            <Heading size="xl" color="text.strong">
-              {t("Explore Apps")}
-            </Heading>
+            <Heading size="xl">{t("Explore Apps")}</Heading>
             {!!xApps && xApps.length > maxApps && (
               <Link asChild variant="plain" color="actions.secondary.text-lighter" textStyle="sm" fontWeight="semibold">
                 <NextLink href="/apps">
@@ -86,37 +84,45 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
 
   return (
     <LinkBox asChild>
-      <Card.Root bg={{ base: "bg.tertiary", _hover: "brand.secondary-stronger" }}>
+      <Card.Root bg={{ base: "bg.tertiary" }}>
         <Card.Body>
-          <VStack alignItems={"start"} justify={"flex-start"} gap={6}>
-            <HStack gap={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
-              <Skeleton loading={isLogoLoading} alignContent={"start"}>
-                <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
-              </Skeleton>
+          <LinkOverlay asChild href={`/apps/${xApp.id}`}>
+            <Link>
+              <VStack alignItems={"start"} justify={"flex-start"} gap={3}>
+                <HStack gap={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
+                  <Skeleton loading={isLogoLoading} alignContent={"start"}>
+                    <Image
+                      src={logo?.image ?? notFoundImage}
+                      alt={"logo"}
+                      aspectRatio={1}
+                      maxW={"40px"}
+                      borderRadius="9px"
+                    />
+                  </Skeleton>
 
-              <VStack gap={1} align="flex-start" w={"fit-content"}>
-                <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-                  <Heading size={"md"}>
-                    <LinkOverlay asChild href={`/apps/${xApp.id}`}>
-                      <Link>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Link>
-                    </LinkOverlay>
-                  </Heading>
-                </Skeleton>
+                  <VStack gap={1} align="flex-start" w={"fit-content"}>
+                    <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
+                      <Heading size={"md"}>
+                        {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                      </Heading>
+                    </Skeleton>
+                  </VStack>
+                </HStack>
+
+                <HStack gap={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
+                  <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
+                    <Text textStyle={"sm"} color={"text.subtle"}>
+                      {appMetadata?.description
+                        ? appMetadata.description.slice(0, 150) + "..."
+                        : appMetadataError?.message
+                          ? appMetadataError.message
+                          : "Error loading description"}
+                    </Text>
+                  </Skeleton>
+                </HStack>
               </VStack>
-            </HStack>
-
-            <HStack gap={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
-              <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-                <Text textStyle={"sm"} color={"text.subtle"}>
-                  {appMetadata?.description
-                    ? appMetadata.description.slice(0, 150) + "..."
-                    : appMetadataError?.message
-                      ? appMetadataError.message
-                      : "Error loading description"}
-                </Text>
-              </Skeleton>
-            </HStack>
-          </VStack>
+            </Link>
+          </LinkOverlay>
         </Card.Body>
       </Card.Root>
     </LinkBox>

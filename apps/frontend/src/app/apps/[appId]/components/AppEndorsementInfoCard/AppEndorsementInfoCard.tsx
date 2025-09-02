@@ -187,7 +187,7 @@ export const AppEndorsementInfoCard = ({
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
             <Heading size="xl">{t("Endorsement")}</Heading>
-            <Link textStyle="md" fontWeight={600} color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+            <Link textStyle="md" fontWeight="semibold" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
               {t("History")}
             </Link>
           </HStack>

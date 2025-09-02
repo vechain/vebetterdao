@@ -38,13 +38,13 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
     <VStack flex="1" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
       <HStack w="full">
         <Icon as={icon} boxSize={6} color={color} />
-        <Text textStyle="md" fontWeight={600} color={color}>
+        <Text textStyle="md" fontWeight="semibold" color={color}>
           {title}
         </Text>
       </HStack>
       {showDescription && (
         <Skeleton loading={isAppInfoLoading || isGracePeriodEventLoading} w="full">
-          <Text textStyle="sm" color="#6A6A6A">
+          <Text textStyle="sm" color="text.subtle">
             <Trans i18nKey={description as any} values={{ gracePeriodEndDate }} t={t} />
           </Text>
         </Skeleton>

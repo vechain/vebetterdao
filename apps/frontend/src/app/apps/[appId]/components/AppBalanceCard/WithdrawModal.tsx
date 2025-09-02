@@ -189,7 +189,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
-            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight={700} alignSelf={"center"}>
+            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               {t("Withdraw from your balance")}
             </Text>
           </HStack>
@@ -206,7 +206,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
               </Skeleton>
             </HStack>
 
-            <Text textStyle="xs" fontWeight="400" opacity={0.7}>
+            <Text textStyle="xs" opacity={0.7}>
               {t("Current B3TR Balance")}
             </Text>
           </VStack>

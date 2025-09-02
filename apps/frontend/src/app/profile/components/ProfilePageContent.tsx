@@ -143,9 +143,9 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Link href="/" color="primary.500">
+        <Link href="/" color="actions.secondary.text-lighter">
           <Icon as={FaAngleLeft} boxSize={3} />
-          <Text textStyle="sm" fontWeight="semibold" lineHeight="1.2">
+          <Text textStyle="sm" fontWeight="semibold">
             {t("Go back")}
           </Text>
         </Link>

@@ -1,5 +1,16 @@
 import { CustomModalContent } from "@/components"
-import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, CloseButton } from "@chakra-ui/react"
+import {
+  Button,
+  Field,
+  HStack,
+  Heading,
+  Dialog,
+  Text,
+  VStack,
+  useDisclosure,
+  CloseButton,
+  Icon,
+} from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -48,7 +59,9 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
 
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
-              <UilUser size="54px" color="#004CFC" />
+              <Icon color="logo" boxSize={14}>
+                <UilUser />
+              </Icon>
               <Heading size="3xl">{t("Add a new Creator NFT")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>

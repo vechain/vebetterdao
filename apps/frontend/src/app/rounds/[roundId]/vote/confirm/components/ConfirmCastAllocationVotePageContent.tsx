@@ -138,7 +138,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
           <Heading size={["2xl", "2xl", "4xl"]} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
-          <Text textStyle={"md"} color="#6A6A6A">
+          <Text textStyle={"md"} color="text.subtle">
             {t(
               "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
             )}
@@ -147,7 +147,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
             <VStack flex={1} w="full" gap={8} align={"flex-start"}>
               <VStack gap={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">
-                  <Heading size={["xl", "xl", "2xl"]} fontWeight={700}>
+                  <Heading size={["xl", "xl", "2xl"]} fontWeight="bold">
                     {t("Your vote")}
                   </Heading>
                   <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
@@ -156,7 +156,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                   </Button>
                 </HStack>
                 <Skeleton loading={votesAtSnapshotLoading}>
-                  <Text textStyle="md" fontWeight="400">
+                  <Text textStyle="md">
                     <Trans
                       i18nKey={"{{amount}} distributed among {{apps}} apps"}
                       values={{ amount: compactFormatter.format(totalVotesToCast ?? 0), apps: votes.length }}

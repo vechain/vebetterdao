@@ -42,10 +42,10 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
                     address: domain ?? humanAddress(distributor, 4, 4),
                   })}
                 </Heading>
-                <Text color="#6A6A6A" textAlign={"center"}>
+                <Text color="text.subtle" textAlign={"center"}>
                   {t("This address won't be able to distribute rewards anymore.")}
                 </Text>
-                <Text color="#6A6A6A" textAlign={"center"}>
+                <Text color="text.subtle" textAlign={"center"}>
                   {`Account: ${domain ?? humanAddress(distributor, 8, 6)}`}
                 </Text>
                 <VStack align="center" gap="20px" mt="20px">
@@ -65,10 +65,10 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         <HStack hideBelow="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text textStyle={"xs"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="text.subtle" fontWeight="semibold">
               {domain}
             </Text>
-            <Text textStyle={"sm"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="text.subtle">
               {distributor}
             </Text>
           </VStack>
@@ -82,7 +82,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
 
         <HStack hideBelow="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
-          <Text textStyle={"sm"} color="#6A6A6A">
+          <Text textStyle={"sm"} color="text.subtle">
             {humanAddress(distributor, 8, 6)}
           </Text>
         </HStack>

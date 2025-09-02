@@ -74,7 +74,7 @@ export const CancelProposalSection = () => {
                         "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
                       )}
                     </Text>
-                    <Text fontWeight={600} textStyle="sm">
+                    <Text fontWeight="semibold" textStyle="sm">
                       {t("This action cannot be undone.")}
                     </Text>
                   </VStack>

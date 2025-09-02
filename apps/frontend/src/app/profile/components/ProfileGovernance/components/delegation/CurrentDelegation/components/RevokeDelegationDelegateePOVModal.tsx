@@ -32,7 +32,7 @@ export const RevokeDelegationDelegateePOVModal = ({
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
+          <ExclamationTriangle color="error.primary" size={triangleSize} />
           <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to remove the Voting Qualification delegation you're using?")}
           </Heading>
@@ -43,7 +43,7 @@ export const RevokeDelegationDelegateePOVModal = ({
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" textStyle="sm">
+          <Box color="error.primary" textStyle="sm">
             <Alert.Title as="span">
               {t("You won’t be able to vote using the delegator's Voting Qualification")}
             </Alert.Title>

@@ -42,7 +42,7 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnect
       <HStack gap={4}>
         {isConnectedUser && (
           <Button variant={"dangerGhost"} p={3} onClick={removeDelegationModal.onOpen}>
-            <UilTimes color="#C84968" />
+            <UilTimes color="error.primary" />
             {t("Cancel request")}
           </Button>
         )}

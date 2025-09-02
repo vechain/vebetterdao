@@ -27,12 +27,12 @@ export const ProposalOverviewTime = () => {
       if (proposal.isDepositReached) {
         return (
           <Box>
-            <Text fontWeight={"400"} color="#6A6A6A">
+            <Text fontWeight={"400"} color="text.subtle">
               {t("Starts in")}
             </Text>
             <HStack color="#004CFC">
               <UilClockEight size="20px" />
-              <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
+              <Text fontWeight="semibold">{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
             </HStack>
           </Box>
         )
@@ -42,14 +42,14 @@ export const ProposalOverviewTime = () => {
           <Text fontWeight={"400"}>{t("Starts in")}</Text>
           <HStack>
             <UilClockEight size="20px" />
-            <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
+            <Text fontWeight="semibold">{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
           </HStack>
         </Box>
       )
     case ProposalState.Active:
       return (
         <Box>
-          <Text fontWeight={"400"} color="#6A6A6A">
+          <Text fontWeight={"400"} color="text.subtle">
             {t("Finish in")}
           </Text>
           <HStack>

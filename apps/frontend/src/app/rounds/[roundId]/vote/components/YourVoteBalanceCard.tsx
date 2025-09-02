@@ -43,7 +43,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
             </Skeleton>
           </HStack>
           <HStack>
-            <Text textStyle="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("VOT3 balance at snapshot")}
             </Text>
             {depositsVotes && (
@@ -54,7 +54,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
                     <Trans
                       i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
                       values={{ depositsVotes: FormattingUtils.humanNumber(Number(depositsVotes ?? 0)) }}
-                      components={{ bold: <Text as="span" fontWeight={600} /> }}
+                      components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                     />
                   </Text>
                 }>
@@ -67,7 +67,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
         </VStack>
         {isDesktop && !isQuadraticFundingDisabled && (
           <Box textStyle="sm" color={"#6A6A6A"} fontWeight={400}>
-            <Text fontWeight={600}>{t("We use the quadratic formula to calculate the results")}</Text>
+            <Text fontWeight="semibold">{t("We use the quadratic formula to calculate the results")}</Text>
             <Text>
               {t(
                 "To aim for the equality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.",

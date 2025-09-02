@@ -36,7 +36,7 @@ export const CreateProposalCard = () => {
         borderWidth={1}
         borderColor={"#D5D5D5"}>
         <Image src="/assets/icons/proposal.svg" alt="Proposal icon" boxSize={24} />
-        <Text textStyle="2xl" fontWeight={700} mt={4}>
+        <Text textStyle="2xl" fontWeight="bold" mt={4}>
           {t("Create a proposal")}
         </Text>
         <Text textStyle="md" mt={2} color={"#6A6A6A"}>

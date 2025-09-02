@@ -38,7 +38,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
       <Card.Body mt={5} px={[4, 6]}>
         <VStack w={"full"}>
           <HStack w={"full"} justifyContent={"space-between"} px={[1, 4]} pt={[1, 4]}>
-            <Text fontWeight={"700"} textStyle={["xxs", "xl"]}>
+            <Text fontWeight="bold" textStyle={["xxs", "xl"]}>
               {name ?? "Error loading name"}
             </Text>
 
@@ -46,7 +46,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
               as={UilArrowUpRight}
               bg={"rgba(224, 233, 254, 1)"}
               borderRadius={"full"}
-              color={"rgba(0, 76, 252, 1)"}
+              color="logo"
               boxSize={[6, 8]}
               p={1}
             />
@@ -62,7 +62,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             <VStack alignItems={"flex-start"}>
               <Text textStyle={["xxs", "sm"]}>{t("Endorsement score")}</Text>
               <HStack alignItems={"flex-end"}>
-                <Text color={"rgba(0, 76, 252, 1)"} textStyle={["xs", "xl"]} fontWeight={700}>
+                <Text color="brand.primary" textStyle={["xs", "xl"]} fontWeight="bold">
                   {"0"}
                 </Text>
                 <Text textStyle="xs">{"/ 100"}</Text>
@@ -71,7 +71,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             <VStack alignItems={"flex-start"}>
               <Text textStyle={["xxs", "sm"]}>{t("Member since")}</Text>
               <HStack alignItems={"flex-end"}>
-                <Text color={"#1E1E1E"} textStyle={["xs", "xl"]} fontWeight={500}>
+                <Text color={"#1E1E1E"} textStyle={["xs", "xl"]} fontWeight="semibold">
                   {t("today")}
                   {" ✨"}
                 </Text>

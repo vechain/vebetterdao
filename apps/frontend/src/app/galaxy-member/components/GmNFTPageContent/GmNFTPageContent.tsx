@@ -65,7 +65,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
         {!!userNodes?.allNodes?.length && userNodes?.allNodes?.length > 0 && (
           <Card.Root flex={3} variant="outline" p={isAbove800 ? "1.25rem" : "0.5rem"} maxH={"fit-content"}>
             <Card.Header p="1.25rem" pb="0">
-              <Heading textStyle="lg" lineHeight={1}>
+              <Heading textStyle="lg">
                 {t("Nodes")} {`(${userNodes?.allNodes?.length})`}
               </Heading>
             </Card.Header>
@@ -98,7 +98,7 @@ export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
                       </Card.Header>
 
                       <Card.Body p="0" gap="8px">
-                        <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                        <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
                           {t("Node")}
                         </Text>
                         <Text

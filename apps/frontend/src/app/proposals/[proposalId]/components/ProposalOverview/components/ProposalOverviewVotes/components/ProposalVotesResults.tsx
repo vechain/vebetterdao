@@ -16,14 +16,14 @@ export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
       if (!isQuorumReached)
         return (
           <Skeleton loading={isQuorumReachedLoading}>
-            <Text textStyle="sm" color="#D23F63" fontWeight={600}>
+            <Text textStyle="sm" color="#D23F63" fontWeight="semibold">
               {t("Quorum was not reached")}
             </Text>
           </Skeleton>
         )
       return (
         <Skeleton loading={isQuorumReachedLoading}>
-          <Text textStyle="sm" color="#D23F63" fontWeight={600}>
+          <Text textStyle="sm" color="#D23F63" fontWeight="semibold">
             {t("Proposal rejected by voting")}
           </Text>
         </Skeleton>
@@ -32,7 +32,7 @@ export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
     case ProposalState.Queued:
     case ProposalState.Executed:
       return (
-        <Text textStyle="sm" color="#38BF66" fontWeight={600}>
+        <Text textStyle="sm" color="#38BF66" fontWeight="semibold">
           {t("Proposal approved by voting")}
         </Text>
       )
@@ -50,7 +50,7 @@ export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
         <Skeleton loading={isQuorumReachedLoading}>
           <HStack>
             <UilExclamationCircle />
-            <Text textStyle="sm" color="#6A6A6A" fontWeight={isQuorumReached ? 600 : 400}>
+            <Text textStyle="sm" color="text.subtle" fontWeight={isQuorumReached ? 600 : 400}>
               {isQuorumReached ? t("Quorum reached") : t("Quorum not reached yet")}
             </Text>
           </HStack>
@@ -59,7 +59,7 @@ export const ProposalVotesResults = ({ proposalId, proposalState }: Props) => {
     default:
       return (
         <Skeleton>
-          <Text textStyle="sm" color="#38BF66" fontWeight={600}>
+          <Text textStyle="sm" color="#38BF66" fontWeight="semibold">
             {t("Proposal approved by voting")}
           </Text>
         </Skeleton>

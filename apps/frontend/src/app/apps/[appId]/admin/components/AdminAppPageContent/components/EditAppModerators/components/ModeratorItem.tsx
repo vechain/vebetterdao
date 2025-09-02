@@ -34,14 +34,14 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
           <Dialog.Body p={"40px"}>
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
-              <Heading size={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
+              <Heading size={["xl", "2xl"]} fontWeight="bold" textAlign={"center"}>
                 {t("Delete {{address}} as moderator?", { address: domain || humanAddress(moderator, 4, 4) })}
               </Heading>
-              <Text color="#6A6A6A" textAlign={"center"}>
+              <Text color="text.subtle" textAlign={"center"}>
                 {t("The user will not be able to access the app edition mode anymore.")}
               </Text>
               {domain && (
-                <Text color="#6A6A6A" textAlign={"center"}>
+                <Text color="text.subtle" textAlign={"center"}>
                   {`Address: ${humanAddress(moderator, 8, 6)}`}
                 </Text>
               )}
@@ -61,10 +61,10 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
         <HStack hideBelow="md">
           <AddressIcon address={moderator} h="48px" w="48px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text textStyle={"xs"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="text.subtle" fontWeight="semibold">
               {domain}
             </Text>
-            <Text textStyle={"sm"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="text.subtle">
               {moderator}
             </Text>
           </VStack>
@@ -77,10 +77,10 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
         <HStack hideBelow="md">
           <AddressIcon address={moderator} h="36px" w="36px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text textStyle={"xs"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="text.subtle" fontWeight="semibold">
               {domain}
             </Text>
-            <Text textStyle={"sm"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="text.subtle">
               {humanAddress(moderator, 8, 6)}
             </Text>
           </VStack>

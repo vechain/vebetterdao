@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } from "@chakra-ui/react"
+import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton, Link } from "@chakra-ui/react"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
@@ -78,7 +78,7 @@ export const RoundInfoBottomSheet = () => {
           zIndex={2}>
           <Box>
             <Skeleton loading={isCardLoading}>
-              <Heading size={"xl"} fontWeight={400}>
+              <Heading size={"xl"} fontWeight="normal">
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
@@ -111,7 +111,7 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading size={"xl"} fontWeight={400} color="#252525">
+                <Heading size={"xl"} fontWeight="normal" color="#252525">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
@@ -136,7 +136,7 @@ export const RoundInfoBottomSheet = () => {
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
               <Heading size="lg">{t("Allocations voting")}</Heading>
-              <Text textStyle="xs" color="#6A6A6A">
+              <Text textStyle="xs" color="text.subtle">
                 {t("Each week, you can vote for your favorite apps to help distribute resources among them!")}
               </Text>
             </VStack>
@@ -156,7 +156,7 @@ export const RoundInfoBottomSheet = () => {
                     renderBadge={false}
                     renderIcon={true}
                   />
-                  <Text textStyle="sm" fontWeight={600}>
+                  <Text textStyle="sm" fontWeight="semibold">
                     {t("#{{round}} allocation round", { round: allocationRound.roundId })}
                   </Text>
                 </VStack>
@@ -167,7 +167,7 @@ export const RoundInfoBottomSheet = () => {
                       <Heading size="md">{getCompactFormatter(2).format(totalAmount)}</Heading>
                     </Skeleton>
                   </HStack>
-                  <Text textStyle="xxs" color="#6A6A6A">
+                  <Text textStyle="xxs" color="text.subtle">
                     {t("Total to distribute")}
                   </Text>
                 </VStack>
@@ -195,7 +195,7 @@ export const RoundInfoBottomSheet = () => {
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
               <Heading size="lg">{t("Proposals in this round or looking for support")}</Heading>
-              <Text textStyle="xs" color="#6A6A6A">
+              <Text textStyle="xs" color="text.subtle">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
               </Text>
             </VStack>
@@ -210,9 +210,10 @@ export const RoundInfoBottomSheet = () => {
               <NoActiveProposalCard />
             )}
           </VStack>
-          <Button onClick={() => router.push("/proposals")} variant="primaryGhost" fontWeight="semibold">
+
+          <Link href="/proposals" color="actions.secondary.text-lighter" fontWeight="semibold">
             {t("View all proposals")}
-          </Button>
+          </Link>
         </VStack>
       </BaseBottomSheet>
     </>

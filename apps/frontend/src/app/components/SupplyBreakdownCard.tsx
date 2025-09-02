@@ -72,7 +72,7 @@ export const SupplyBreakdownCard = () => {
               </Text>
             }>
             <span>
-              <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
+              <Icon as={FiInfo} color="actions.secondary.text-lighter" position={"relative"} />
             </span>
           </Tooltip>
         </HStack>
@@ -81,19 +81,15 @@ export const SupplyBreakdownCard = () => {
         <VStack gap={4} align="flex-start">
           <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
-              <Text textStyle="md" fontWeight="400">
-                {t("B3TR in circulation")}
-              </Text>
+              <Text textStyle="md">{t("B3TR in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} color={"#004CFC"}>
+                <Heading size={["2xl", "2xl", "xl"]} color="brand.primary">
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack gap={1} align="flex-start">
-              <Text textStyle="md" fontWeight="400">
-                {t("VOT3 in circulation")}
-              </Text>
+              <Text textStyle="md">{t("VOT3 in circulation")}</Text>
               <Skeleton loading={!data}>
                 <Heading size={["2xl", "2xl", "xl"]} color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}

@@ -125,7 +125,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                     <Text textStyle="sm" color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
                   </HStack>
                 </Skeleton>
-                <Text textStyle="xs" color="#6A6A6A">
+                <Text textStyle="xs" color="text.subtle">
                   {t("Total score")}
                 </Text>
               </VStack>
@@ -137,7 +137,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                       {nodeEndorsingApp?.xNodePoints}
                     </Text>
                   </Skeleton>
-                  <Text textStyle="xs" color="#6A6A6A">
+                  <Text textStyle="xs" color="text.subtle">
                     {t("Your score")}
                   </Text>
                 </VStack>

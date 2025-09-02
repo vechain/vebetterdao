@@ -40,7 +40,7 @@ export const CreatorApplicationApproved = () => {
             {/* Right Section: Image, Title, and Description */}
             <Stack align={"center"} justify={"center"}>
               <Heading size={"sm"}>{t("Your Creator's NFT application was approved")}</Heading>
-              <Text textStyle={"sm"} color="#6A6A6A">
+              <Text textStyle={"sm"} color="text.subtle">
                 {t("You can now submit your app to the VeBetterDAO ecosystem")}
               </Text>
             </Stack>

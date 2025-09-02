@@ -61,18 +61,7 @@ export const GmNFTAndNodeCard = () => {
   }
 
   return (
-    <Card.Root
-      bg="banner.blue"
-      rounded="12px"
-      p="24px"
-      color="white"
-      position="relative"
-      overflow={"hidden"}
-      // bgImage="url('/assets/backgrounds/cloud-background.webp')"
-      //bgSize="cover"
-      //backgroundPosition="center"
-      //bgRepeat="no-repeat"
-    >
+    <Card.Root bg="banner.blue" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
       <Card.Body p={0}>
         <Stack
           gap={8}
@@ -81,7 +70,7 @@ export const GmNFTAndNodeCard = () => {
           direction={isAbove1200 ? "row" : "column-reverse"}>
           <VStack flex="3" align={"stretch"} gap="24px" px="2px">
             <HStack gap="40px" align={"baseline"} justify={"space-between"}>
-              <Heading textStyle="xl" fontWeight="bold" color="text.strong">
+              <Heading textStyle="xl" fontWeight="bold">
                 {t("Your NFTs")}
               </Heading>
             </HStack>

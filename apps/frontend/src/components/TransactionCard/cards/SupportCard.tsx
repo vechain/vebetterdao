@@ -38,7 +38,7 @@ export const SupportCard = ({ transaction }: Props) => {
                 <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You supported a") : t("Supported a")}
                 </Text>
-                <Text textStyle={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {t("proposal")}
                 </Text>
               </HStack>
@@ -49,7 +49,7 @@ export const SupportCard = ({ transaction }: Props) => {
           </HStack>
           <VStack gap={0} align="stretch">
             <HStack gap={2}>
-              <Text fontWeight={600}>
+              <Text fontWeight="semibold">
                 {"-"}
                 {compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))}
               </Text>

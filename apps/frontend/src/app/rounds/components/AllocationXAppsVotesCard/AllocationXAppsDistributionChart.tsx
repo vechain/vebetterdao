@@ -99,38 +99,38 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
               <Heading size="3xl">{compactFormatter.format(totalDistributed)}</Heading>
             </Skeleton>
           </HStack>
-          <Text textStyle="md" color="#6A6A6A">
+          <Text textStyle="md" color="text.subtle">
             {t("To distribute among apps")}
           </Text>
         </VStack>
         <HStack gap={8} align="center" w={["full", "full", "auto"]} justify={"space-between"}>
           <VStack gap={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton loading={votersLoading}>
-              <Text fontWeight={600} textStyle="lg" data-testid={"total-voters"}>
+              <Text fontWeight="semibold" textStyle="lg" data-testid={"total-voters"}>
                 {compactFormatter.format(Number(voters ?? 0))}
               </Text>
             </Skeleton>
-            <Text textStyle="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("Wallets voted")}
             </Text>
           </VStack>
           <VStack gap={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton loading={xAppsLoading}>
-              <Text fontWeight={600} textStyle="lg">
+              <Text fontWeight="semibold" textStyle="lg">
                 {compactFormatter.format(Number(xApps?.length ?? 0))}
               </Text>
             </Skeleton>
-            <Text textStyle="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("Apps")}
             </Text>
           </VStack>
           <VStack gap={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton loading={maxAmountLoading}>
-              <Text fontWeight={600} textStyle="lg">
+              <Text fontWeight="semibold" textStyle="lg">
                 {compactFormatter.format(Number(maxAmount ?? 0))}
               </Text>
             </Skeleton>
-            <Text textStyle="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("Max app allocation")}
             </Text>
           </VStack>
@@ -166,7 +166,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
           <Skeleton loading={info.isLoading} key={`distribution-chart-amount-${info.amount}-${info.color}`}>
             <HStack w="full" gap={1}>
               <DotSymbol size={4} color={info.color} />
-              <Text ml={1} textStyle="md" fontWeight={600}>
+              <Text ml={1} textStyle="md" fontWeight="semibold">
                 {compactFormatter.format(Number(info.amount))}
               </Text>
               <Text textStyle="md">

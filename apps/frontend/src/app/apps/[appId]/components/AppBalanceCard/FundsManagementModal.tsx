@@ -194,7 +194,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
 
             <Dialog.Body pb={6} gap={4}>
               <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
-                <Text textStyle="sm" color="#6A6A6A">
+                <Text textStyle="sm" color="text.subtle">
                   {t(
                     "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
                   )}
@@ -226,7 +226,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                           {isLoading ? (
                             <Skeleton height="20px" width="60px" />
                           ) : (
-                            <Heading size={{ base: "3xl", md: "4xl" }} color="#6A6A6A">
+                            <Heading size={{ base: "3xl", md: "4xl" }} color="text.subtle">
                               {formatDisplayValue(
                                 activeTab === "balance-to-rewards" ? estimatedBalance : estimatedRewards,
                               )}

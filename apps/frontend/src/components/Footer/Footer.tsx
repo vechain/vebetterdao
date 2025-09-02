@@ -52,12 +52,12 @@ export const Footer: React.FC = () => {
         </VStack>
         <HStack gap={4}>
           <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
-            <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+            <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Privacy & Policy")}
             </Text>
           </Link>
           <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
-            <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+            <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
               {t("Terms & Conditions")}
             </Text>
           </Link>
@@ -92,16 +92,16 @@ export const Footer: React.FC = () => {
       </VStack>
       <VStack borderTopColor={"#3e3c3a"} borderTopWidth={1} py={8}>
         <Link href={PRIVACY_POLICY_LINK} target="_blank" rel="noopener noreferrer">
-          <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+          <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Privacy & Policy")}
           </Text>
         </Link>
         <Link href={TERMS_AND_CONDITIONS_LINK} target="_blank" rel="noopener noreferrer">
-          <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" as="u" cursor={"pointer"}>
+          <Text textStyle="sm" color="#8c8c8c" as="u" cursor={"pointer"}>
             {t("Terms & Conditions")}
           </Text>
         </Link>
-        <Text textStyle="sm" lineHeight="17px" color="#8c8c8c" mt={6}>
+        <Text textStyle="sm" color="#8c8c8c" mt={6}>
           {t("{{currentYear}} VeBetterDAO. All rights reserved.", { currentYear })}
         </Text>
         <Text textStyle="sm" color="#8c8c8c">

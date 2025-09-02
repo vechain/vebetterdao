@@ -161,7 +161,7 @@ export const CategorySelector = <T extends FieldValues>({
                   <Popover.Content width="300px" maxH="400px" overflowY="auto">
                     <Popover.Body p={3}>
                       <VStack gap={3} align="stretch">
-                        <InputGroup startElement={<FaSearch pointerEvents="none" color="#6A6A6A" />}>
+                        <InputGroup startElement={<FaSearch pointerEvents="none" color="text.subtle" />}>
                           <Input
                             size="md"
                             placeholder={t("Find a category")}
@@ -172,7 +172,7 @@ export const CategorySelector = <T extends FieldValues>({
                         </InputGroup>
 
                         {filteredCategories.length === 0 ? (
-                          <Text textAlign="center" py={2} color="#6A6A6A">
+                          <Text textAlign="center" py={2} color="text.subtle">
                             {t("No categories found")}
                           </Text>
                         ) : (

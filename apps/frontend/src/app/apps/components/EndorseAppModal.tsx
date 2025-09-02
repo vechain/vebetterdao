@@ -109,7 +109,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                     alignItems="center"
                     flexDirection="row">
                     <Card.Body p="0" gap="0">
-                      <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                      <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
                         {t("Node")}
                       </Text>
                       <Text lineHeight={1.6} lineClamp={1}>
@@ -131,7 +131,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </VStack>
           </RadioGroup.Root>
 
-          <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+          <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
             {t("Current DApp score: {{score}}", { score: appScore })}
             <br />
             {t("DApp score after endorsement: {{score}}", { score: newScore })}

@@ -75,7 +75,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                   </Button>
                 )}
               </HStack>
-              <Text color="#6A6A6A" textStyle="md">
+              <Text color="text.subtle" textStyle="md">
                 {isConnectedUser &&
                   t(
                     "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",

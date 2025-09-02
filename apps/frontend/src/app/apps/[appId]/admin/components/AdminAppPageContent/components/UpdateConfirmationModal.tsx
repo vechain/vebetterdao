@@ -71,7 +71,7 @@ export const UpdateConfirmationModal = ({
             {isTeamWalletAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("Treasury address")}</Text>
+                  <Text fontWeight="semibold">{t("Treasury address")}</Text>
                   <HStack>
                     <Text textStyle={"sm"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldTeamWalletAddress}
@@ -86,7 +86,7 @@ export const UpdateConfirmationModal = ({
             {isAdminAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("Admin address")}</Text>
+                  <Text fontWeight="semibold">{t("Admin address")}</Text>
                   <HStack>
                     <Text textStyle={"sm"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldAdminAddress}
@@ -100,7 +100,7 @@ export const UpdateConfirmationModal = ({
                     <UilInfoCircle color="#D23F63" size="36px" />
                   </Box>
                   <Box display={"inline-block"}>
-                    <Text as="span" textStyle="sm" fontWeight={600}>
+                    <Text as="span" textStyle="sm" fontWeight="semibold">
                       {t("You will not be able to manage the app anymore.")}
                     </Text>
 

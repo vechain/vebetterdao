@@ -1,10 +1,10 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
-import { Card, Heading, VStack, Text, Button } from "@chakra-ui/react"
+import { Card, Heading, VStack, Text, Link } from "@chakra-ui/react"
+import NextLink from "next/link"
 
 import { useTranslation } from "react-i18next"
 import { NoActionsCard } from "./NoActionsCard"
-import { useRouter } from "next/navigation"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 import { NoAccountActionCard } from "./NoAccountActionCard"
 import { useWallet } from "@vechain/vechain-kit"
@@ -17,8 +17,6 @@ type Props = {
 }
 export const YourBetterActionsCard = ({ address, renderActions = true, maxActions = 3 }: Props) => {
   const { t } = useTranslation()
-
-  const router = useRouter()
 
   const { account } = useWallet()
   const isConnectedUser = compareAddresses(account?.address ?? "", address)
@@ -37,9 +35,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
         <VStack gap={4} align="stretch">
           <VStack gap={2} align="stretch">
             <VStack w="full" align={"flex-start"}>
-              <Heading size="xl" color="text.strong">
-                {isConnectedUser ? t("Your better actions") : t("Better actions")}
-              </Heading>
+              <Heading size="xl">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
             </VStack>
             {isConnectedUser && (
               <Text textStyle="sm" color="text.subtle">
@@ -73,9 +69,14 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
                     )}
 
                     {lastActionsData.length > maxActions && (
-                      <Button variant={"primaryLink"} size={"sm"} onClick={() => router.push("/profile")}>
-                        {t("See all")}
-                      </Button>
+                      <Link
+                        mx="auto"
+                        asChild
+                        variant="plain"
+                        color="actions.secondary.text-lighter"
+                        fontWeight="semibold">
+                        <NextLink href="/apps">{t("See all")}</NextLink>
+                      </Link>
                     )}
                   </>
                 ) : (

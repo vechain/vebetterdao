@@ -36,20 +36,22 @@ export const AppCreationSteps = () => {
                 <Heading size="3xl">{t("Your App is almost ready!")}</Heading>
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
-                <Icon as={UilInfoCircle} color="rgba(0, 76, 252, 1)" />
-                <Link color="#004CFC" href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
+                <Icon color="logo">
+                  <UilInfoCircle />
+                </Icon>
+                <Link color="brand.primary" href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
                   {t("Know more about Apps")}
                 </Link>
               </HStack>
             </HStack>
-            <Text textStyle="md" color="#6A6A6A">
+            <Text textStyle="md" color="text.subtle">
               {t(
                 "Before adding your App to the public listing and seeing stats and updates, it has to go through these three steps.",
               )}
               <Trans
                 i18nKey="You can fill the App information while waiting!"
                 components={{
-                  Link: <Link onClick={redirectToEditPage} color="#004CFC" />,
+                  Link: <Link onClick={redirectToEditPage} color="brand.primary" />,
                 }}
               />
             </Text>

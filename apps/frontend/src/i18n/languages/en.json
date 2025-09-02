@@ -1784,5 +1784,6 @@
   "Maximum {{max}} categories per app.": "Maximum {{max}} categories per app.",
   "Previous app": "Previous app",
   "Next app": "Next app",
-  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps"
+  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps",
+  "You have reached the maximum GM NFT level.": "You have reached the maximum GM NFT level."
 }

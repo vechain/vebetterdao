@@ -38,7 +38,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
         <Skeleton loading={isLogoLoading}>
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"64px"} borderRadius="9px" />
         </Skeleton>
-        <Heading size="md" fontWeight={500}>
+        <Heading size="md" fontWeight="semibold">
           {appMetadata?.name}
         </Heading>
       </HStack>
@@ -46,7 +46,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
         <Field.Root invalid={!!error} disabled={isDisabled}>
           <InputGroup
             endElement={
-              <Text color="#6A6A6A" textStyle="md">
+              <Text color="text.subtle" textStyle="md">
                 {t("%")}
               </Text>
             }>
@@ -57,7 +57,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
               bg="#FFFFFF"
               data-testid={`${appMetadata?.name}-vote-input`}
               w="full"
-              color="#6A6A6A"
+              color="text.subtle"
               placeholder="0"
               value={vote.value}
               onChange={e => {
@@ -91,7 +91,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
               data-testid={`${appMetadata?.name}-vote-estimated-votes`}
               fontWeight={400}
               textStyle="md"
-              color="#6A6A6A">
+              color="text.subtle">
               {t("=~ {{value}} votes", {
                 value: new BigNumber(estimateVotes(vote.rawValue, totalVotesAvailable)).toFixed(
                   2,

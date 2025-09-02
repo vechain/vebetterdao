@@ -62,7 +62,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
     <Card.Root key={vote.voter} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"baseline"}>
-          <Text color={textColor} textStyle="xl" fontWeight={600}>
+          <Text color={textColor} textStyle="xl" fontWeight="semibold">
             {voteLabel}
           </Text>
           <Text color={textColor} textStyle="sm">
@@ -75,7 +75,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
           <VStack alignItems={"flex-start"}>
             <Text color={textColor}>{t("Voting power")}</Text>
             <HStack align={"baseline"}>
-              <Text color={textColor} textStyle="3xl" fontWeight={600}>
+              <Text color={textColor} textStyle="3xl" fontWeight="semibold">
                 {compactFormatter.format(Number(votePower))}
               </Text>
             </HStack>

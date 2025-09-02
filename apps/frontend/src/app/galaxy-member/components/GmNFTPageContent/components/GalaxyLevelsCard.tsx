@@ -89,7 +89,7 @@ export const GalaxyLevelsCard = () => {
                 </Button>
               </ToggleTip>
             </HStack>
-            <Text textStyle="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
             </Text>
           </VStack>
@@ -110,7 +110,7 @@ export const GalaxyLevelsCard = () => {
                     <Text textStyle="lg" fontWeight={"600"}>
                       {gmNft.name}
                     </Text>
-                    <Text textStyle="sm" color="#6A6A6A">
+                    <Text textStyle="sm" color="text.subtle">
                       {getLevelText(Number(gmNft.level), maxGMLevel, Number(tokenLevel))}
                     </Text>
                   </VStack>
@@ -126,7 +126,7 @@ export const GalaxyLevelsCard = () => {
                     {gmNft.multiplier}
                   </Heading>
                 ) : (
-                  <Text textStyle="lg" color="#6A6A6A">
+                  <Text textStyle="lg" color="text.subtle">
                     {gmNft.multiplier}
                   </Text>
                 )}

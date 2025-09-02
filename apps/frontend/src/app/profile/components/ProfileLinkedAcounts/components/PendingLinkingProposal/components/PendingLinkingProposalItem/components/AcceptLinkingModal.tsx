@@ -48,7 +48,7 @@ export const AcceptLinkingModal = ({
         </VStack>
         <Alert.Root status="warning" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} textStyle="sm">
+          <Box textStyle="sm">
             <Alert.Title as="span">{t("You will use the actions performed in this address.")}</Alert.Title>
             <Alert.Description as="span">{t("once you have accepted the linking proposal.")}</Alert.Description>
           </Box>

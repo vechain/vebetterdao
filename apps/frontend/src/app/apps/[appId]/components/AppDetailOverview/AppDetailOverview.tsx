@@ -125,7 +125,7 @@ export const AppDetailOverview = ({
 
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
-                          <Text textStyle={"sm"} color="#6A6A6A">
+                          <Text textStyle={"sm"} color="text.subtle">
                             {t("Member since")}
                           </Text>
                           <Text textStyle={"md"}>
@@ -135,7 +135,7 @@ export const AppDetailOverview = ({
                       )}
                       {appMetadata?.distribution_strategy ? (
                         <VStack align="flex-start" justify={"flex-start"}>
-                          <Text textStyle={"sm"} color="#6A6A6A">
+                          <Text textStyle={"sm"} color="text.subtle">
                             {t("Distribution Strategy")}
                           </Text>
                           <Button
@@ -144,7 +144,7 @@ export const AppDetailOverview = ({
                             p={0}
                             m={0}
                             variant={"ghost"}
-                            color="#6A6A6A"
+                            color="text.subtle"
                             onClick={() => {
                               onDistributionStrategyModalOpen()
                             }}>

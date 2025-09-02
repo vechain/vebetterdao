@@ -47,7 +47,7 @@ export const EditAppAddresses = ({ form }: Props) => {
 
   return (
     <VStack align="stretch" gap="32px">
-      <Text color="#D23F63" textStyle="2xl" fontWeight={700}>
+      <Text color="#D23F63" textStyle="2xl" fontWeight="bold">
         {t("Sensitive parameters")}
       </Text>
       <VStack align="stretch">
@@ -73,7 +73,7 @@ export const EditAppAddresses = ({ form }: Props) => {
                 onClick={modalEditTeamWalletAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
-                fontWeight={500}>
+                fontWeight="semibold">
                 <UilPen size="16px" />
                 {t("Edit")}
               </Button>
@@ -108,7 +108,7 @@ export const EditAppAddresses = ({ form }: Props) => {
                 onClick={modalEditAdminAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
-                fontWeight={500}>
+                fontWeight="semibold">
                 <UilPen size="16px" />
                 {t("Edit")}
               </Button>

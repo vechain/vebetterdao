@@ -24,7 +24,7 @@ export const PendingLinkingProposal = ({ address }: Props) => {
             <HStack justify="space-between">
               <Heading textStyle="xl">{t("These accounts want to become secondary accounts")}</Heading>
             </HStack>
-            <Text color="#6A6A6A" textStyle="md">
+            <Text color="text.subtle" textStyle="md">
               {isConnectedUser
                 ? t("Their actions will be attributed to your main account.")
                 : t("Their actions will be attributed to user's main account.")}

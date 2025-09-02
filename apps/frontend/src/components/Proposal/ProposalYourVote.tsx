@@ -9,7 +9,6 @@ import { Box, HStack, Icon, Image, Skeleton, Text, TextProps } from "@chakra-ui/
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
-import { MdHowToVote } from "react-icons/md"
 import { useWallet } from "@vechain/vechain-kit"
 
 const forColor = "#3DBA67"
@@ -62,7 +61,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     if (!account?.address) return null
     if (!userVote)
       return (
-        <Text textStyle="xs" color={"#6A6A6A"} {...textProps}>
+        <Text textStyle="xs" {...textProps}>
           {t("You haven't voted")}
         </Text>
       )
@@ -72,19 +71,17 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     //if for some reason we are not able to map the support
     if (!support)
       return (
-        <Text textStyle="xs" color={"#6A6A6A"} {...textProps}>
+        <Text textStyle="xs" {...textProps}>
           {t("You have voted")}
         </Text>
       )
 
     return (
       <HStack gap={1}>
-        {support.icon}
-
-        <Text textStyle={["lg", "lg", "md"]} fontWeight={600} {...textProps}>
+        <Text textStyle={["lg", "lg", "md"]} {...textProps}>
           {t("You voted")}
         </Text>
-        <Text textStyle={["lg", "lg", "md"]} fontWeight={600} {...textProps}>
+        <Text textStyle={["lg", "lg", "md"]} {...textProps}>
           {t(support.label as any)}
         </Text>
       </HStack>
@@ -109,11 +106,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   if (!userVote)
     return (
       <Box>
-        {renderTitle && (
-          <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
-            {t("Your vote")}
-          </Text>
-        )}
+        {renderTitle && <Text textStyle={["lg", "lg", "md"]}>{t("Your vote")}</Text>}
         {isFinished ? (
           <Text textStyle={["lg", "lg", "md"]} {...textProps}>
             {t("You have not voted")}
@@ -160,13 +153,9 @@ const NoVoteAndActiveCheckVotingPower = ({
 
   return (
     <Skeleton loading={snapshotLoading}>
-      <HStack gap={2}>
-        <Icon as={MdHowToVote} boxSize={4} color={"contrast-fg-on-muted"} />
-
-        <Text textStyle={["lg", "lg", "md"]} {...textProps}>
-          {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}
-        </Text>
-      </HStack>
+      <Text textStyle={["lg", "lg", "md"]} {...textProps}>
+        {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}
+      </Text>
     </Skeleton>
   )
 }

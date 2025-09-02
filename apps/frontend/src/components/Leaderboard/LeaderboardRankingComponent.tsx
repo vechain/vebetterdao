@@ -55,16 +55,11 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
   return (
     <LinkBox asChild>
       <Card.Root
-        // onClick={onClick}
         bg={{
           base: isYourRanking ? "brand.primary" : "bg.tertiary",
           _hover: isYourRanking ? "actions.primary.hover" : undefined,
         }}
-        // _hover={{
-        //   cursor: "pointer",
-        //   bg: isYourRanking ? "brand.primary" : "hover-contrast-bg",
-        //   transition: "all 0.2s",
-        // }}
+        color={isYourRanking ? "white" : "text.default"}
         boxShadow={positionStyles.boxShadow}
         pos="relative"
         overflow={"hidden"}
@@ -90,9 +85,9 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
               <LinkOverlay asChild>
                 <Link href={`/profile/${ranking.address}`}>
                   <Box>
-                    <HStack gap={1}>
+                    <HStack gap={1} color={isYourRanking ? "white" : "text.default"}>
                       {isYourRanking && (
-                        <Text textStyle="sm" fontWeight={600}>
+                        <Text textStyle="sm" fontWeight="semibold">
                           {`(${t("You")})`}
                         </Text>
                       )}
@@ -106,7 +101,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                         <AddressButton
                           unstyled
                           textStyle="sm"
-                          fontWeight={600}
+                          fontWeight="semibold"
                           h="auto"
                           address={ranking.address}
                           size={"sm"}
@@ -128,7 +123,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
               </LinkOverlay>
             </HStack>
             {ranking.position !== 0 && (
-              <Text textStyle={positionStyles.fontSize} fontWeight={600} zIndex={1}>
+              <Text textStyle={positionStyles.fontSize} fontWeight="semibold" zIndex={1}>
                 {positionStyles.text}
               </Text>
             )}

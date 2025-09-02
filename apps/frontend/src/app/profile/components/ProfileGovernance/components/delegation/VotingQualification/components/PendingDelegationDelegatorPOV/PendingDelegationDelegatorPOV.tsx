@@ -30,7 +30,7 @@ export const PendingDelegationDelegatorPOV = ({ address }: Props) => {
               )}
             </Heading>
           </HStack>
-          <Text color="#6A6A6A" textStyle="md">
+          <Text color="text.subtle" textStyle="md">
             {t(
               isConnectedUser
                 ? "You will not able to vote when the user accept your request."

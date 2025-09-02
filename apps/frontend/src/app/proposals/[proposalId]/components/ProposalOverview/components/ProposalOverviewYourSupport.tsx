@@ -15,12 +15,12 @@ export const ProposalOverviewYourSupport = () => {
     case ProposalState.Pending:
       return (
         <Box>
-          <Text fontWeight={"400"} color="#6A6A6A">
+          <Text fontWeight={"400"} color="text.subtle">
             {t("Your support")}
           </Text>
           <HStack gap={2}>
             <Image h="20px" w="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text fontWeight={600}>{compactFormatter.format(Number(proposal.userSupport))}</Text>
+            <Text fontWeight="semibold">{compactFormatter.format(Number(proposal.userSupport))}</Text>
           </HStack>
         </Box>
       )

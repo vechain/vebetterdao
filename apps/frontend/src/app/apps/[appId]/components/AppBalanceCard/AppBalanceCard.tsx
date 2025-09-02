@@ -91,7 +91,7 @@ export const AppBalanceCard = () => {
                     </Text>
                   }>
                   <span>
-                    <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
+                    <Icon as={FiInfo} color="logo" position={"relative"} />
                   </span>
                 </Tooltip>
               </HStack>
@@ -123,7 +123,7 @@ export const AppBalanceCard = () => {
                 <Text textStyle="md">{t("Rewards Pool")}</Text>
                 <Tooltip content={<Text>{t("Amount of B3TR available for rewards distribution")}</Text>}>
                   <span>
-                    <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
+                    <Icon as={FiInfo} color="logo" position={"relative"} />
                   </span>
                 </Tooltip>
               </HStack>
@@ -150,7 +150,7 @@ export const AppBalanceCard = () => {
             <Separator borderColor="#E2E8F0" />
           </Box>
           <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
-            <Text textStyle="md" fontWeight={500} color="#004CFC">
+            <Text textStyle="md" fontWeight="semibold" color="brand.primary">
               {t("View history")}
             </Text>
             <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />

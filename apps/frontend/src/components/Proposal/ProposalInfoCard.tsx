@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, Box, SkeletonText, Skeleton, Stack } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Box, Icon, SkeletonText, Skeleton, Stack } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
@@ -46,37 +46,37 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
       w={"full"}>
       <Card.Header>
         <HStack hideFrom="md" w={"full"} justifyContent={"space-between"} mb={2}>
-          <Text textStyle="md" fontWeight="600" color="#6A6A6A">
+          <Text textStyle="md" fontWeight="600" color="text.subtle">
             {t("Round #{{round}}", {
               round: roundIdVoteStart,
             })}
           </Text>
           <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
-            <Text color="#979797" fontWeight="400">
+            <Text color="#979797">
               {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
             </Text>
-            <Text color="#979797" fontWeight="400"></Text>
+            <Text color="#979797"></Text>
           </HStack>
         </HStack>
 
         <HStack justifyContent="space-between" alignItems="center" w={"full"}>
           <Skeleton loading={proposalMetadata.isLoading} minH={"20px"} flex={2.5} maxW={{ base: "300px", md: "full" }}>
-            <Text textStyle="xl" fontWeight={700} lineClamp={2}>
+            <Text textStyle="xl" fontWeight="bold" lineClamp={2}>
               {proposalMetadata.data?.title}
             </Text>
           </Skeleton>
 
           <VStack hideBelow="md" alignItems="flex-end" gap={0} flex={1}>
-            <Text textStyle="md" fontWeight="600" color="#6A6A6A">
+            <Text textStyle="md" fontWeight="600" color="text.subtle">
               {t("Round #{{round}}", {
                 round: roundIdVoteStart,
               })}
             </Text>
             <HStack flexDir={{ base: "column", md: "row" }} alignItems="end">
-              <Text color="#979797" fontWeight="400">
+              <Text color="#979797">
                 {parseDate(votingStartDate)} {t("-")} {parseDate(votingEndDate)}
               </Text>
-              <Text color="#979797" fontWeight="400"></Text>
+              <Text color="#979797"></Text>
             </HStack>
           </VStack>
         </HStack>
@@ -105,10 +105,12 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
             }}
           />
           <HStack cursor={"pointer"}>
-            <Text fontWeight={500} color="rgba(0, 76, 252, 1)" textStyle="md">
+            <Text fontWeight="semibold" color="brand.primary" textStyle="md">
               {t("See proposal")}
             </Text>
-            <MdArrowOutward color="rgba(0, 76, 252, 1)" size={16} />
+            <Icon color="brand.primary" boxSize={16}>
+              <MdArrowOutward />
+            </Icon>
           </HStack>
         </HStack>
       </Card.Body>

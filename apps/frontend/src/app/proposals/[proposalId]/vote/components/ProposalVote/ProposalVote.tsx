@@ -105,11 +105,11 @@ export const ProposalVote = ({ proposalId }: Props) => {
       <Card.Body>
         <Stack flexDir={["column", "column", "row"]} gap={12} as="form" onSubmit={handleCastVote}>
           <VStack alignItems={"stretch"} flex={1} gap={4}>
-            <Text textStyle="sm" color="#6A6A6A" wordBreak={"break-word"}>
+            <Text textStyle="sm" color="text.subtle" wordBreak={"break-word"}>
               {proposal.title}
             </Text>
             <Heading>{t("Vote on this proposal")}</Heading>
-            <Text color="#6A6A6A">
+            <Text color="text.subtle">
               {t("Your ")}
               <b>{t("voting power")}</b>
               {t(" will be determined by the amount of VOT3 you had at the time of the snapshot.")}
@@ -123,7 +123,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                   align={["flex-start", "flex-start", "center"]}>
                   <Image h="24px" w="24px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
                   <Text textStyle={"3xl"}>{compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}</Text>
-                  <Text textStyle={"sm"} fontWeight={600}>
+                  <Text textStyle={"sm"} fontWeight="semibold">
                     {t("VOT3 BALANCE ON SNAPSHOT")}
                   </Text>
                 </Stack>
@@ -147,7 +147,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                       <Text textStyle={"4xl"} color="#004CFC">
                         {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
                       </Text>
-                      <Text textStyle={"sm"} fontWeight={600}>
+                      <Text textStyle={"sm"} fontWeight="semibold">
                         {t("VOTING POWER")}
                       </Text>
                     </Stack>
@@ -157,10 +157,10 @@ export const ProposalVote = ({ proposalId }: Props) => {
                         <UilInfoCircle size={14} color="#969696" />
                       </Box>
                       <VStack alignItems={"stretch"}>
-                        <Text textStyle={"sm"} color="#6A6A6A" fontWeight={600}>
+                        <Text textStyle={"sm"} color="text.subtle" fontWeight="semibold">
                           {t("How is the voting power calculated?")}
                         </Text>
-                        <Text textStyle={"sm"} color="#6A6A6A" as="span">
+                        <Text textStyle={"sm"} color="text.subtle" as="span">
                           {t(
                             "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.",
                           )}
@@ -195,7 +195,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                       <HStack justify="space-between">
                         <HStack>
                           {vote.icon}
-                          <Text textStyle={"lg"} fontWeight={600}>
+                          <Text textStyle={"lg"} fontWeight="semibold">
                             {vote.title}
                           </Text>
                         </HStack>

@@ -18,7 +18,7 @@ export const GalaxyRewardCalculatorCard = () => {
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <Heading textStyle="lg">{t("GM Reward Calculator")}</Heading>
-            <Text textStyle="sm" color="#6A6A6A">
+            <Text textStyle="sm" color="text.subtle">
               {t("Estimate your rewards based on your GM NFT level, and potential upgrades")}
             </Text>
           </VStack>

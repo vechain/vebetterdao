@@ -1,7 +1,7 @@
-import { Button, Circle, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Button, Circle, HStack, Icon, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { SustainabilityActionsResponse, useXApps } from "@/api"
 import dayjs from "dayjs"
-import { LeafIcon } from "../../../Icons/LeafIcon"
+import { TbLeaf } from "react-icons/tb"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./components/ActionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -39,8 +39,8 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
         bg={{ base: "bg.tertiary", _hover: "bg.muted" }}
         justifyContent="flex-start"
         alignItems="center">
-        <Circle size="2.5rem" bg="brand.secondary-strong">
-          <LeafIcon color="brand.secondary" />
+        <Circle size={10} bg="brand.secondary-strong">
+          <Icon as={TbLeaf} color="brand.secondary" boxSize={4} />
         </Circle>
 
         <VStack gap={0} alignItems="flex-start" flex={1}>
@@ -48,7 +48,7 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
             <Text textStyle={"sm"} mr="1">
               {t("Better action on")}
             </Text>
-            <Text textStyle={"sm"} fontWeight={600}>
+            <Text textStyle={"sm"} fontWeight="semibold">
               {getAppName(appId ?? "")}
             </Text>
           </HStack>

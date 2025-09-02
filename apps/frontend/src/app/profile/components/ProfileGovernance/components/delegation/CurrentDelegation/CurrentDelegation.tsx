@@ -37,7 +37,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
                 })}
               </Heading>
             </HStack>
-            <Text color="#6A6A6A" textStyle="md">
+            <Text color="text.subtle" textStyle="md">
               {isPerson
                 ? t("While this account keeps their qualification, you’ll be able to use it to vote.")
                 : t("This account is not currently qualified to vote.")}
@@ -64,7 +64,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
             <HStack>
               {isConnectedUser && (
                 <Button variant={"dangerGhost"} p={3} onClick={delegationModal.onOpen}>
-                  <UilTimes color="#C84968" />
+                  <UilTimes color="error.primary" />
                   {t("Remove delegation")}
                 </Button>
               )}

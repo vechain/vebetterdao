@@ -42,7 +42,7 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         </VStack>
         <Alert.Root status="warning" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} textStyle="sm">
+          <Box textStyle="sm">
             <Alert.Title as="span">{t("You will be able to vote using delegator's Voting Qualification")}</Alert.Title>
             <Alert.Description as="span">{t("once you have accepted the delegation.")}</Alert.Description>
           </Box>

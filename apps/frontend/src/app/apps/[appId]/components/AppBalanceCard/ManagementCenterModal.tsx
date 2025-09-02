@@ -148,7 +148,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 bg={isEnabled ? "#3DBA67" : "#C84968"}
                 boxShadow={isEnabled ? "0 0 8px rgba(72, 187, 120, 0.5)" : "0 0 8px rgba(245, 101, 101, 0.5)"}
               />
-              <Text textStyle="lg" fontWeight={600}>
+              <Text textStyle="lg" fontWeight="semibold">
                 {t("Rewards Pool")}
               </Text>
             </HStack>
@@ -200,7 +200,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
             {isPaused && (
               <Box w="8px" h="8px" borderRadius="full" bg={"#C84968"} boxShadow={"0 0 8px rgba(245, 101, 101, 0.5)"} />
             )}
-            <Text textStyle="lg" fontWeight={600}>
+            <Text textStyle="lg" fontWeight="semibold">
               {isPaused ? t("Resume Distribution") : t("Pause Distribution")}
             </Text>
           </HStack>
@@ -215,7 +215,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
               <Button
                 variant="dangerFilledTonal"
                 borderRadius="full"
-                color="#C84968"
+                color="error.primary"
                 w="200px"
                 colorPalette="red"
                 onClick={() => handleShowConfirmation("resume")}>
@@ -234,7 +234,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 variant="dangerFilledTonal"
                 borderRadius="full"
                 w="200px"
-                color="#C84968"
+                color="error.primary"
                 colorPalette="red"
                 onClick={() => handleShowConfirmation("pause")}>
                 {t("Pause Distribution")}
@@ -253,7 +253,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack border="1px solid #D5D5D5" borderRadius="20px" p="20px">
           <ExclamationTriangle size={"100px"} />
 
-          <Text textStyle="md" fontWeight={600}>
+          <Text textStyle="md" fontWeight="semibold">
             {confirmationText}
           </Text>
           <Text textStyle="sm" textAlign={"center"} px={8}>

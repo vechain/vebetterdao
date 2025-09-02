@@ -63,7 +63,7 @@ export const PendingActions = ({ address }: Props) => {
                 </Text>
               </Flex>
               <Flex justify="center">
-                <Text color="#6A6A6A" fontWeight="400" textStyle="xs">
+                <Text color="text.subtle" textStyle="xs">
                   {missingActions ? missingActionsLabel.short : t("You are qualified!")}
                 </Text>
               </Flex>
@@ -97,7 +97,7 @@ export const PendingActions = ({ address }: Props) => {
             </Text>
           </Flex>
           <Flex justify="flex-end">
-            <Text color="#6A6A6A" fontWeight="400" textStyle="xs">
+            <Text color="text.subtle" textStyle="xs">
               {missingActions
                 ? t("You need {{missingActions}} more actions", {
                     missingActions,

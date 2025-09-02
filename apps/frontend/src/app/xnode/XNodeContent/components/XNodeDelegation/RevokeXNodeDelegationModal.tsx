@@ -28,20 +28,20 @@ export const RevokeXNodeDelegationModal = ({ xNode, modal }: { xNode: UserNode; 
     <BaseModal onClose={handleClose} isOpen={open && !isTxModalOpen}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
+          <ExclamationTriangle color="error.primary" size={triangleSize} />
           <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to revoke your Node delegation?")}
           </Heading>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator />
-          <Box lineHeight={"1.20rem"} color="#C84968" textStyle="sm">
+          <Box color="error.primary" textStyle="sm">
             <Alert.Title as="span">
               {t("The delegated address will no longer be able to endorse and upgrade GM NFTs using your Node")}
             </Alert.Title>
             <Alert.Description as="span">{t("once you have revoked the delegation.")}</Alert.Description>
             {isXNodeAttachedToGM && (
-              <Text mt={2} textStyle="sm" color="#C84968" fontWeight={600}>
+              <Text mt={2} textStyle="sm" color="error.primary" fontWeight="semibold">
                 {t("Notice: the GM NFT attached to this Node will be detached and will lose the free levels.")}
               </Text>
             )}

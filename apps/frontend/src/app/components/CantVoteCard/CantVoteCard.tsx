@@ -105,7 +105,7 @@ export const CantVoteCard = () => {
           <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
             <UilInfoCircle size={36} color="#AF5F00" />
             <VStack gap={0} w="full" align="flex-start">
-              <Text fontWeight="700" color="#AF5F00" as="span">
+              <Text fontWeight="bold" color="#AF5F00" as="span">
                 {cantVoteReasonText?.title}
               </Text>
               <Text color="#AF5F00" as="span">

@@ -54,12 +54,12 @@ export const GmNFTCard = ({
         </Box>
       </Skeleton>
       <VStack flex="1" align={"flex-start"}>
-        <Text fontWeight={700} lineClamp={1}>
+        <Text fontWeight="bold" lineClamp={1}>
           {gmName}
         </Text>
         <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
           <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-            <Text textStyle="xs" fontWeight={600}>
+            <Text textStyle="xs" fontWeight="semibold">
               {gmRewardMultiplier}
               {"x"}
             </Text>

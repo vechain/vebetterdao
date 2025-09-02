@@ -71,19 +71,19 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     () => (
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(goToNext)}>
         <Box>
-          <Text color="#6A6A6A" as="span">
+          <Text color="text.subtle" as="span">
             {t(
               "By delegating your qualification, another person will be able to vote on next round's allocation and proposals.",
             )}
           </Text>
-          <Text color="#6A6A6A" as="span" fontWeight="600">
+          <Text color="text.subtle" as="span" fontWeight="600">
             {t("You won't lose any of your VOT3 or B3TR tokens with this operation.")}
           </Text>
         </Box>
         <VStack align="stretch">
           <Heading textStyle="lg">{t("Who do you want to add as a manager?")}</Heading>
           <Field.Root invalid={!delegatee}>
-            <Field.Label color="#6A6A6A" textStyle="sm">
+            <Field.Label color="text.subtle" textStyle="sm">
               {t("User wallet address")}
             </Field.Label>
             <WalletAddressInput
@@ -91,7 +91,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
               onAddressResolved={address => setValue("walletAddress", address ?? "")}
             />
             {isEntity ? (
-              <Text color="#C84968" textStyle="sm">
+              <Text color="error.primary" textStyle="sm">
                 {t("You can't delegate from an account linked as a secondary account")}
               </Text>
             ) : null}
@@ -115,7 +115,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     () => (
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
+          <ExclamationTriangle color="error.primary" size={triangleSize} />
           <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to delegate your Voting Qualification?")}
           </Heading>
@@ -126,7 +126,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" textStyle="sm">
+          <Box color="error.primary" textStyle="sm">
             <Alert.Title as="span">{t("You will not be able to vote until you remove the delegation")}</Alert.Title>
             <Alert.Description as="span">{t("or you receive someone else’s voting qualification.")}</Alert.Description>
           </Box>

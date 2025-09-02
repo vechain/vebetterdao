@@ -109,7 +109,7 @@ export const TokenCards = ({
   const renderMaxButton = useMemo(
     () => (
       <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"} data-testid={"convert-all-button"}>
-        <Text textStyle="sm" fontWeight={500}>
+        <Text textStyle="sm" fontWeight="semibold">
           {t("Convert all")}
         </Text>
       </Button>

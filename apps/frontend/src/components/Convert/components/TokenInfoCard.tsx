@@ -70,7 +70,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       ) : (
         <Image src="/assets/tokens/vot3-to-b3tr.webp" alt="VOT3 to B3TR" h={{ base: "50px", md: "87px" }} w="auto" />
       )}
-      <Text textStyle={{ base: "md", md: "xl" }} fontWeight={700}>
+      <Text textStyle={{ base: "md", md: "xl" }} fontWeight="bold">
         {title}
       </Text>
       {description}

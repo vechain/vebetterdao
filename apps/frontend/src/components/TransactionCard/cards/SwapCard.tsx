@@ -44,7 +44,7 @@ export const SwapCard = ({ transaction }: Props) => {
                 <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You converted") : t("Converted")}
                 </Text>
-                <Text textStyle={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {vot3ToB3tr ? "VOT3" : "B3TR"} {t("to")} {vot3ToB3tr ? "B3TR" : "VOT3"}
                 </Text>
               </HStack>
@@ -55,7 +55,7 @@ export const SwapCard = ({ transaction }: Props) => {
           </HStack>
           <VStack gap={0} align="stretch">
             <HStack gap={2}>
-              <Text fontWeight={600}>
+              <Text fontWeight="semibold">
                 {"+"}
                 {vot3ToB3tr
                   ? compactFormatter.format(Number(transaction?.amountB3TR ?? 0))
@@ -64,7 +64,7 @@ export const SwapCard = ({ transaction }: Props) => {
               <Text textStyle="sm">{vot3ToB3tr ? "B3TR" : "VOT3"}</Text>
             </HStack>
             <HStack gap={2} textStyle={"xs"} color={"#6A6A6A"}>
-              <Text fontWeight={600}>
+              <Text fontWeight="semibold">
                 {vot3ToB3tr
                   ? compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))
                   : compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}

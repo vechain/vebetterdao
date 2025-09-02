@@ -63,7 +63,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
           <HStack gap={0} alignItems={"baseline"}>
             <Skeleton loading={isB3trBalanceLoading}>
-              <Text color="#B1F16C" textStyle="lg" fontWeight={700}>
+              <Text color="#B1F16C" textStyle="lg" fontWeight="bold">
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>
@@ -78,7 +78,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           {t("B3TR needed to upgrade your GM level")}
         </Text>
         {b3trLeftover > 0 && (
-          <Text color="#B1F16C" textStyle={isAbove800 ? "sm" : "xs"} fontWeight={500}>
+          <Text color="#B1F16C" textStyle={isAbove800 ? "sm" : "xs"} fontWeight="semibold">
             {t("You have {{amount}} B3TR leftover from a previous upgrade", {
               amount: compactFormatter.format(Number(b3trLeftover)),
             })}
@@ -132,14 +132,14 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           </Box>
 
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
+            <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
               {t("LEVEL {{level}}", { level: tokenLevel })}
             </Text>
-            <Text fontWeight={700} lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
               {metadata?.name}
             </Text>
             <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-              <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight={600}>
+              <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
                 {multiplier}
                 {"x"}
               </Text>

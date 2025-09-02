@@ -1,4 +1,4 @@
-import { Text, Card, VStack, HStack, Skeleton, IconButton } from "@chakra-ui/react"
+import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
@@ -21,6 +21,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   const { account } = useWallet()
   const { proposalId, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
+  const isActive = proposalState === ProposalState.Active
 
   const router = useRouter()
 
@@ -37,18 +38,14 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       case ProposalState.Pending:
         return (
           <Skeleton loading={isVotingStartDateLoading}>
-            <Text textStyle={"sm"} color={"gray.500"}>
+            <Text textStyle={"sm"}>
               {t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })}
             </Text>
           </Skeleton>
         )
       case ProposalState.Canceled:
       case ProposalState.DepositNotMet:
-        return (
-          <Text textStyle={"sm"} color={"gray.500"}>
-            {t("Vote didn't start")}
-          </Text>
-        )
+        return <Text textStyle={"sm"}>{t("Vote didn't start")}</Text>
       case ProposalState.Active:
       case ProposalState.Executed:
       case ProposalState.Defeated:
@@ -59,7 +56,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
             proposalId={proposalId}
             proposalState={proposalState}
             renderTitle={false}
-            textProps={{ color: "gray.500", fontSize: "14px" }}
+            textProps={{ textStyle: "sm" }}
           />
         )
       default:
@@ -68,43 +65,47 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   }, [votingStartDate, proposalState, t, isVotingStartDateLoading, proposalId])
 
   return (
-    <Card.Root
-      variant={["filledSmall", "filledSmall", "filled"]}
-      onClick={goToProposal}
-      _hover={{ bg: "light-contrast-on-card-bg" }}
-      cursor={"pointer"}
-      alignSelf={"flex-start"}
-      w={"full"}>
-      <Card.Body>
-        <HStack justifyContent={"space-between"} w="full">
-          <VStack w="full" justifyContent={"space-between"} gap={3} align={"flex-start"}>
-            <ProposalStatusBadge
-              proposalId={proposal.proposalId}
-              proposalState={proposalState}
-              containerProps={{
-                py: 1,
-                px: 2,
-              }}
-            />
-            <VStack w="full" gap={1} align={"flex-start"}>
-              <Skeleton
-                loading={proposalMetadata.isLoading}
-                lineClamp={3}
-                flex={2.5}
-                mr={{ base: 0, md: 10 }}
-                alignSelf={"flex-start"}>
-                <Text textStyle={"sm"} fontWeight={600}>
-                  {proposalMetadata.data?.title}
-                </Text>
-              </Skeleton>
-              {!!account?.address && hasVotedText}
+    <LinkBox asChild>
+      <Card.Root
+        bg={isActive ? "success.subtle" : "bg.primary"}
+        boxShadow={isActive ? "0 0 5px 0 rgba(56, 191, 102, 0.40)" : "none"}
+        borderWidth={"1px"}
+        borderColor={isActive ? "success.secondary" : "border.primary"}
+        alignSelf={"flex-start"}
+        w={"full"}>
+        <Card.Body p={4}>
+          <HStack justifyContent={"space-between"} w="full">
+            <VStack w="full" justifyContent={"space-between"} gap={3} align={"flex-start"}>
+              <ProposalStatusBadge
+                proposalId={proposal.proposalId}
+                proposalState={proposalState}
+                containerProps={{
+                  py: 1,
+                  px: 2,
+                }}
+              />
+              <VStack w="full" gap={1} align={"flex-start"}>
+                <Skeleton
+                  loading={proposalMetadata.isLoading}
+                  lineClamp={3}
+                  flex={2.5}
+                  mr={{ base: 0, md: 10 }}
+                  alignSelf={"flex-start"}>
+                  <LinkOverlay>
+                    <Text textStyle={"sm"} fontWeight="semibold">
+                      {proposalMetadata.data?.title}
+                    </Text>
+                  </LinkOverlay>
+                </Skeleton>
+                {!!account?.address && hasVotedText}
+              </VStack>
             </VStack>
-          </VStack>
-          <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
-            <FaAngleRight />
-          </IconButton>
-        </HStack>
-      </Card.Body>
-    </Card.Root>
+            <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
+              <FaAngleRight />
+            </IconButton>
+          </HStack>
+        </Card.Body>
+      </Card.Root>
+    </LinkBox>
   )
 }

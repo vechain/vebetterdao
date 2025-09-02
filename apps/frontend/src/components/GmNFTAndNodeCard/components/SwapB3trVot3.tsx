@@ -56,11 +56,11 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
           direction={isAbove600 ? "row" : "column"}
           justify={"space-between"}
           align={isAbove600 ? "center" : "flex-start"}>
-          <Text textStyle="xl" fontWeight="bold" color="text.strong">
+          <Heading textStyle="xl" fontWeight="bold">
             {t("{{value}} tokens", {
               value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
             })}
-          </Text>
+          </Heading>
           <CountdownVoting onOpen={onOpenSnapshot} />
           <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
         </Stack>
@@ -79,9 +79,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             <HStack>
               <B3TRIcon boxSize={"30px"} />
               <Skeleton loading={isB3trBalanceLoading}>
-                <Heading size="3xl" color="text.strong">
-                  {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
-                </Heading>
+                <Heading size="3xl">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
           </VStack>
@@ -99,9 +97,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             <HStack>
               <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
               <Skeleton loading={isVot3BalanceLoading}>
-                <Heading size="3xl" color="text.strong">
-                  {compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}
-                </Heading>
+                <Heading size="3xl">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
           </VStack>
@@ -113,7 +109,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             mt="auto"
             variant="primaryAction"
             rounded={"full"}
-            fontWeight={500}
+            fontWeight="semibold"
             px="24px">
             <UilExchangeAlt
               size={"16px"}

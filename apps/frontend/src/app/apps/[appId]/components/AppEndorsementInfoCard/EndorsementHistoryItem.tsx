@@ -59,12 +59,12 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
             {showCopiedLink ? (
               <UilCheck size={"18px"} color="#6DCB09" />
             ) : (
-              <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyEndorserAddress} cursor="pointer" />
+              <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyEndorserAddress} cursor="pointer" />
             )}
           </HStack>
         </Skeleton>
 
-        <Text textStyle="xs" color="#6A6A6A">
+        <Text textStyle="xs" color="text.subtle">
           {t("{{date}}", {
             date: endorsingDate,
           })}
@@ -72,16 +72,16 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
       </VStack>
       <VStack align="end" gap={0}>
         <HStack gap={1} align="flex-start">
-          <Text fontWeight={600} color={isEndorsingColor}>
+          <Text fontWeight="semibold" color={isEndorsingColor}>
             {`${isEndorsing ? "+" : "-"}`}
           </Text>
           <Skeleton loading={nodePointsLoading}>
-            <Text fontWeight={600} color={isEndorsingColor}>
+            <Text fontWeight="semibold" color={isEndorsingColor}>
               <Trans
                 i18nKey="{{value}} pts."
                 values={{ value: nodePoints }}
                 components={{
-                  Text: <Text as="span" fontWeight={600} color={isEndorsingColor} />,
+                  Text: <Text as="span" fontWeight="semibold" color={isEndorsingColor} />,
                 }}
               />
             </Text>

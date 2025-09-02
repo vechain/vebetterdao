@@ -30,8 +30,8 @@ export const ResetingResult = ({
       {resetingStatus === RESET_STATUS.ERROR && (
         <VStack align="stretch" gap={2}>
           <Alert.Root status="error" size="md" borderRadius="16px">
-            <Alert.Indicator w={4} h={4} color="#C84968" />
-            <Box lineHeight={"1.20rem"} textStyle="md" color="#C84968">
+            <Alert.Indicator w={4} h={4} color="error.primary" />
+            <Box textStyle="md" color="error.primary">
               <Alert.Title>
                 {t("Unable to process request. Try refreshing or contact support.")}{" "}
                 <Button

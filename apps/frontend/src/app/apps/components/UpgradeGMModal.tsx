@@ -81,13 +81,13 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
           </VStack>
         </Dialog.Header>
         <Dialog.Body gap={[0, 4]} pt={0}>
-          <Text textStyle="md" color="#6A6A6A">
+          <Text textStyle="md" color="text.subtle">
             {t(
               "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
             )}
           </Text>
           <VStack align="stretch" w="full" py={[2, 5]}>
-            <Text color="#6A6A6A" textStyle="md">
+            <Text color="text.subtle" textStyle="md">
               {t("You'll donate")}
             </Text>
             <HStack>
@@ -96,7 +96,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             </HStack>
           </VStack>
           <VStack align="stretch" py={[2, 5]}>
-            <Text color="#6A6A6A" textStyle={"md"}>
+            <Text color="text.subtle" textStyle={"md"}>
               {t("You’re upgrading to")}
             </Text>
             {/*GM CARD */}
@@ -151,7 +151,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     </Text>
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                       <HStack rounded="8px" justifyContent="space-between">
-                        <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                        <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
                           {nextLevelGM?.multiplier}
                         </Text>
                         <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>

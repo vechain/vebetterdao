@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
+import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useMintNFT, useUpgradeGM } from "@/hooks"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
@@ -117,31 +117,16 @@ export const GmActionButton = ({
       )
     }
 
-    // Case 3: Max GM level reached
-    if (isMaxGmLevelReached) {
-      return (
-        <HStack bg={"#ffffff4a"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
-          <Text
-            bg={"linear-gradient(135deg, #a8e5ff -2.65%, #8bff3b 98.11%)"}
-            style={{
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            textStyle={"lg"}
-            fontWeight={"bold"}
-            lineClamp={1}>
-            {t("Max Level Reached!")}
-          </Text>
-        </HStack>
-      )
-    }
-
     // Default case: Upgrade GM
     return (
       <Tooltip
-        positioning={{ placement: "top" }}
-        disabled={!!isEnoughBalanceToUpgradeGM}
-        content={t("Not enough balance to upgrade your GM NFT to the next level.")}>
+        positioning={{ placement: "bottom" }}
+        disabled={!isMaxGmLevelReached && !!isEnoughBalanceToUpgradeGM}
+        content={
+          isMaxGmLevelReached
+            ? t("You have reached the maximum GM NFT level.")
+            : t("Not enough balance to upgrade your GM NFT to the next level.")
+        }>
         <span>
           <Button
             {...buttonProps}

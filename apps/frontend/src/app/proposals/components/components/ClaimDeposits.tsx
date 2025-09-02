@@ -38,7 +38,7 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
       borderColor={"#004CFC"}
       boxShadow={"0px 0px 16px 0px rgba(0, 76, 252, 0.35)"}>
       <Image src="/assets/icons/heart-deposits.svg" alt="Proposal icon" boxSize={14} />
-      <Text textStyle="2xl" fontWeight={700} mt={4}>
+      <Text textStyle="2xl" fontWeight="bold" mt={4}>
         {t("Claim back community support tokens")}
       </Text>
       <Text textStyle="md" mt={2} color={"#6A6A6A"}>

@@ -26,7 +26,7 @@ export const ProposalOverviewCommunitySupport = () => {
     case ProposalState.Pending:
       return (
         <Box>
-          <Text fontWeight={"400"} color="#6A6A6A">
+          <Text fontWeight={"400"} color="text.subtle">
             {t("Community Support")}
           </Text>
           <HStack>

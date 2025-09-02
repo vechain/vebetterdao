@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 export const ProposalCreatedTimelineItem = () => {
   const { t } = useTranslation()
   const { proposal } = useProposalDetail()
-  const activeColor = "#004CFC"
+  const activeColor = "brand.primary"
   const inactiveColor = "#E1E1E1"
   return (
     <Accordion.Root collapsible w="full" defaultValue={[]}>
@@ -17,7 +17,7 @@ export const ProposalCreatedTimelineItem = () => {
             <VStack flex={1} align="flex-start" gap={0}>
               <Text>{t("Proposal created")}</Text>
               {proposal.proposalCreationDate && (
-                <Text color="#6A6A6A" textStyle="sm">
+                <Text color="text.subtle" textStyle="sm">
                   {dayjs(proposal.proposalCreationDate).format("MMM D, YYYY")}
                 </Text>
               )}

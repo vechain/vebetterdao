@@ -48,7 +48,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
             <Text textStyle="md" color="gray.500">
               {t("Accumulated")}
             </Text>
-            <HStack gap={1} fontWeight={500} align={"flex-end"}>
+            <HStack gap={1} fontWeight="semibold" align={"flex-end"}>
               <Skeleton loading={totalEarningsLoading}>
                 <Text textStyle="sm">{compactFormatter.format(totalEarnings ?? 0)}</Text>
               </Skeleton>
@@ -60,7 +60,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
               <Text textStyle="md" color="gray.500">
                 {t("Previous allocation")}
               </Text>
-              <HStack gap={1} fontWeight={500} align={"flex-end"}>
+              <HStack gap={1} fontWeight="semibold" align={"flex-end"}>
                 <Skeleton loading={currentRoundIdLoading || prevRoundEarningLoading}>
                   <Text textStyle="sm">{compactFormatter.format(Number(prevRoundEarning?.amount ?? 0))}</Text>
                 </Skeleton>

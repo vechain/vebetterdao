@@ -72,7 +72,7 @@ export const ProposalCommunitySupport = () => {
           </>
         ) : (
           <HStack alignItems={"flex-end"} justify={"space-between"} flexWrap={"wrap"}>
-            <Text textStyle="sm" fontWeight={600}>
+            <Text textStyle="sm" fontWeight="semibold">
               {t("You can claim your tokens back when the proposal voting round starts.")}
             </Text>
             <CommunitySupportButton />

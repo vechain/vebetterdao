@@ -194,7 +194,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 ) : (
                   <Center w="full" h="full">
                     <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No endorsement" />
-                    <Text textStyle="sm" color="#6A6A6A">
+                    <Text textStyle="sm" color="text.subtle">
                       {t("There is nothing to show here !")}
                     </Text>
                   </Center>
@@ -231,7 +231,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
               ) : (
                 <Center w="full" h="full">
                   <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No endorsement" />
-                  <Text textStyle="sm" color="#6A6A6A">
+                  <Text textStyle="sm" color="text.subtle">
                     {t("There is nothing to show here !")}
                   </Text>
                 </Center>

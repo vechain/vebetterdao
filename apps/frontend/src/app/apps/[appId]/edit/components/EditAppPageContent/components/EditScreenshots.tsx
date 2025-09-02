@@ -94,7 +94,7 @@ export const EditScreenshots = ({ form }: Props) => {
           control={form.control}
         />
       </HStack>
-      {screenshots.length === 0 && <Text color="#6A6A6A">{t("No screenshot added yet")}</Text>}
+      {screenshots.length === 0 && <Text color="text.subtle">{t("No screenshot added yet")}</Text>}
       <Reorder.Group
         axis="x"
         values={screenshots}

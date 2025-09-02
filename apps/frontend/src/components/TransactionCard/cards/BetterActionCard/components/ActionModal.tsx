@@ -127,7 +127,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
           <Heading textStyle="lg">{t("Transaction information")}</Heading>
           <HStack justify="space-between">
             <Text fontWeight="600">{t("Block")}</Text>
-            <Text color="#6A6A6A">{blockNumber}</Text>
+            <Text color="text.subtle">{blockNumber}</Text>
           </HStack>
         </VStack>
         {txId && (
@@ -142,9 +142,9 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
             w={"full"}
             alignItems={"center"}
             mt={4}
-            color={"rgba(0, 76, 252, 1)"}
+            color="brand.primary"
             cursor={"pointer"}>
-            <Text textStyle="md" fontWeight={500}>
+            <Text textStyle="md" fontWeight="semibold">
               {t("See more details on")} Vechain Stats
             </Text>
             <UilArrowUpRight size={16} />

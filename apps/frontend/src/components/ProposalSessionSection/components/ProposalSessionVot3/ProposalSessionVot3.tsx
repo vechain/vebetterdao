@@ -44,20 +44,20 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
       {/* Left: votes at snapshot */}
       <VStack align="stretch" gap={1} flex={1}>
         <Skeleton loading={votesAtSnapshotQuery.isLoading}>
-          <Text fontWeight={700}>{FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}</Text>
+          <Text fontWeight="bold">{FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}</Text>
         </Skeleton>
-        <Text color="#6A6A6A" textStyle="xs">
+        <Text color="text.subtle" textStyle="xs">
           {t("Votes at snapshot")}
         </Text>
       </VStack>
 
       <VStack align="stretch" gap={1} flex={1}>
         <Skeleton loading={userVotesAtSnapshotQuery.isLoading}>
-          <Text fontWeight={700}>{FormattingUtils.humanNumber(Number(totalVotesWithDeposits ?? 0))}</Text>
+          <Text fontWeight="bold">{FormattingUtils.humanNumber(Number(totalVotesWithDeposits ?? 0))}</Text>
         </Skeleton>
 
         <HStack gap={1} alignItems="center">
-          <Text color="#6A6A6A" textStyle="xs">
+          <Text color="text.subtle" textStyle="xs">
             {t("Your votes at snapshot")}
           </Text>
 
@@ -68,7 +68,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
                   <Trans
                     i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
                     values={{ depositsVotes: FormattingUtils.humanNumber(Number(depositsVotes ?? 0)) }}
-                    components={{ bold: <Text as="span" fontWeight={600} /> }}
+                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                   />
                 </Text>
               }>

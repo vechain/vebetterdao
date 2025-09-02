@@ -105,7 +105,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
                     <Icon as={route.icon} />
                   </Box>
                   <VStack alignItems={"start"} gap={0}>
-                    <Text textStyle="md" fontWeight={600}>
+                    <Text textStyle="md" fontWeight="semibold">
                       {route.name}
                     </Text>
                     <Text textStyle="sm">{t(route.description as any)}</Text>

@@ -111,7 +111,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
               <Card.Body>
                 <HStack w="full" justify={"space-between"}>
                   <VStack gap={0} align={"flex-start"}>
-                    <Heading size="md" fontWeight={600}>
+                    <Heading size="md" fontWeight="semibold">
                       {func.name}
                     </Heading>
                     <Text textStyle="sm">{func.description}</Text>

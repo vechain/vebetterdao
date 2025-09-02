@@ -103,7 +103,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                 <Text lineClamp={1}>{attachedGMNFT?.metadata?.name}</Text>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
-                    <Text textStyle="sm" fontWeight={600}>
+                    <Text textStyle="sm" fontWeight="semibold">
                       {attachedGMNFT?.multiplier}
                       {"x"}
                     </Text>
@@ -115,7 +115,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
               </VStack>
               {isXNodeAttachedToGM ? (
                 <Button
-                  color="#C84968"
+                  color="error.primary"
                   variant="dangerFilledTonal"
                   disabled={isXNodeDelegator}
                   onClick={handleDetachOnClick}>

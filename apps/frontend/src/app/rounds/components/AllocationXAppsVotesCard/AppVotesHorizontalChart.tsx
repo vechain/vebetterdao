@@ -87,11 +87,15 @@ Props) => {
             </Skeleton>
           </VStack>
           <VStack gap={0} align={"flex-start"}>
-            <Heading size="md" fontWeight={600}>
+            <Heading size="md" fontWeight="semibold">
               {appMetadata?.name}
             </Heading>
             <VStack gap={0} align={"flex-start"} justify={"flex-start"}>
-              <Heading size="md" fontWeight={600} color="#6DCB09" data-testid={`${appMetadata?.name}-votes-percentage`}>
+              <Heading
+                size="md"
+                fontWeight="semibold"
+                color="#6DCB09"
+                data-testid={`${appMetadata?.name}-votes-percentage`}>
                 {t("{{percentage}}%", {
                   percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
@@ -105,14 +109,14 @@ Props) => {
             <VStack gap={0} align={["flex-end"]}>
               <Skeleton loading={forecastedEarningsLoading}>
                 <HStack gap={1} align={"center"} justify={"flex-start"} w="full">
-                  <Heading size={["sm", "md"]} fontWeight={600}>
+                  <Heading size={["sm", "md"]} fontWeight="semibold">
                     {compactFormatter.format(Number(forecastedEarnings?.amount))}
                   </Heading>
                   <B3TRIcon boxSize={["14px", "16px"]} colorVariant="dark" />
                 </HStack>
               </Skeleton>
               <Skeleton loading={appVotes === undefined} textAlign={"right"}>
-                <Text textStyle={["xs", "sm"]} fontWeight={"400"} color="#6A6A6A">
+                <Text textStyle={["xs", "sm"]} fontWeight={"400"} color="text.subtle">
                   {t("voted by")}{" "}
                   <span style={{ fontWeight: 600 }}>
                     {appVotes} {t("wallets")}
@@ -137,7 +141,7 @@ Props) => {
           />
         </Box>
         {showMaxAllocation && (
-          <Text color={"#3DBA67"} textStyle={["xs", "sm"]} fontWeight={600} alignSelf={"flex-end"}>
+          <Text color={"#3DBA67"} textStyle={["xs", "sm"]} fontWeight="semibold" alignSelf={"flex-end"}>
             {t("Max allocation reached!")}
           </Text>
         )}

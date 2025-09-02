@@ -20,7 +20,7 @@ export const AppsBanner = () => {
       bgRepeat="no-repeat"
       w="full">
       <Stack alignItems="stretch">
-        <Text textStyle={{ base: "3xl", md: "4xl" }} fontWeight={700}>
+        <Text textStyle={{ base: "3xl", md: "4xl" }} fontWeight="bold">
           {t("Explore apps")}
         </Text>
         <Text textStyle="md">{t("Browse and discover dApps where you can earn tokens for sustainable actions.")}</Text>

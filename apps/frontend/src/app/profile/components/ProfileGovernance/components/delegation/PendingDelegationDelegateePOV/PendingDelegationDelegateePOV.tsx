@@ -22,7 +22,7 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
             <HStack justify="space-between">
               <Heading textStyle="xl">{t("Pending delegations for voting qualification")}</Heading>
             </HStack>
-            <Text color="#6A6A6A" textStyle="md">
+            <Text color="text.subtle" textStyle="md">
               {t("While this account keeps their qualification, you’ll be able to use it to vote.")}
             </Text>
           </VStack>

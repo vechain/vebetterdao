@@ -16,7 +16,7 @@ export const TimelineItem = ({
         {title}
       </Text>
       {description && (
-        <Text color="#6A6A6A" textStyle="sm">
+        <Text color="text.subtle" textStyle="sm">
           {description}
         </Text>
       )}

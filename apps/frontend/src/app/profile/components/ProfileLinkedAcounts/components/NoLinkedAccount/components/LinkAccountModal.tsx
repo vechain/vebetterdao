@@ -36,7 +36,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         <UilLink color="#004CFC" size={"3rem"} />
         <Heading textStyle="2xl">{t("Become a secondary account")}</Heading>
         <Box>
-          <Text color="#6A6A6A" as="span">
+          <Text color="text.subtle" as="span">
             {t(
               "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.",
             )}
@@ -45,7 +45,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         <VStack align="stretch">
           <Heading textStyle="lg">{t("Which Primary Account would you like to link to?")}</Heading>
           <Field.Root invalid={!accountToConnect}>
-            <Field.Label color="#6A6A6A" textStyle="sm">
+            <Field.Label color="text.subtle" textStyle="sm">
               {t("Wallet address")}
             </Field.Label>
             <WalletAddressInput onAddressResolved={address => setValue("accountToConnect", address ?? "")} />

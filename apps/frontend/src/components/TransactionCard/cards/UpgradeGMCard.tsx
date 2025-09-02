@@ -38,7 +38,7 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
                 <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You upgraded a") : t("Upgraded a")}
                 </Text>
-                <Text textStyle={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {t("GM NFT")}
                 </Text>
               </HStack>
@@ -49,7 +49,7 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
           </HStack>
           <VStack gap={0} align="stretch">
             <HStack gap={2}>
-              <Text fontWeight={600}>{compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}</Text>
+              <Text fontWeight="semibold">{compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}</Text>
               <Text textStyle="sm">{"B3TR"}</Text>
             </HStack>
           </VStack>

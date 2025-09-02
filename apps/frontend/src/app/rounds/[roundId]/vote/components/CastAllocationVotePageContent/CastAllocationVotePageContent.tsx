@@ -76,7 +76,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
     <ResponsiveCard>
       <VStack w="full" gap={8} align={"flex-start"}>
         <Heading size={["2xl", "2xl", "4xl"]}>{t("Select the apps you want to vote")}</Heading>
-        <Text textStyle={"md"} color="#6A6A6A">
+        <Text textStyle={"md"} color="text.subtle">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
           )}
@@ -93,7 +93,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           onContinue={onContinue}
           helperText={
             onContinueError ? (
-              <Text textStyle={"md"} fontWeight={600} color="#C84968">
+              <Text textStyle={"md"} fontWeight="semibold" color="error.primary">
                 {onContinueError}
               </Text>
             ) : (

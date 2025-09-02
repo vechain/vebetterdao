@@ -45,7 +45,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
                   transform="translate(-50%, -50%)"
                   textStyle="sm"
                   color="contrast-bg-on-muted"
-                  fontWeight={600}>
+                  fontWeight="semibold">
                   {index + 1}
                 </Text>
               </Box>

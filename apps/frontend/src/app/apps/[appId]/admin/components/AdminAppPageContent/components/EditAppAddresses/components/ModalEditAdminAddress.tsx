@@ -20,12 +20,12 @@ export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }:
               {t("Change admin address")}
             </Heading>
             <Box textAlign={"center"}>
-              <Text as="span" color="#6A6A6A">
+              <Text as="span" color="text.subtle">
                 {t(
                   "This address belongs to the App administrator. If you change it, you will not be able to access this configuration anymore. ",
                 )}
               </Text>
-              <Text as="span" fontWeight={600} color="#6A6A6A">
+              <Text as="span" fontWeight="semibold" color="text.subtle">
                 {t("Are you absolutely sure you want to edit it?")}
               </Text>
             </Box>

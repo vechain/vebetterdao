@@ -45,7 +45,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 <CloseButton />
               </Dialog.CloseTrigger>
               <Dialog.Header>
-                <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight={700} alignSelf={"center"}>
+                <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
                   {t("Transfer App Balance")}
                 </Text>
               </Dialog.Header>
@@ -54,7 +54,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                   {isPaused && (
                     <Alert.Root status="error" borderRadius={["xl", "xl", "3xl"]}>
                       <Alert.Indicator w={5} h={5} />
-                      <Box lineHeight={"1.20rem"} textStyle="sm">
+                      <Box textStyle="sm">
                         <Alert.Description as="span">
                           {t(
                             "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
@@ -70,7 +70,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     borderRadius="20px"
                     p="16px"
                     justifyContent="space-between">
-                    <Text textStyle="lg" fontWeight={600}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Withdraw")}
                     </Text>
                     <Text textStyle="sm">
@@ -96,7 +96,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     borderRadius="20px"
                     p="16px"
                     justifyContent="space-between">
-                    <Text textStyle="lg" fontWeight={600}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Deposit")}
                     </Text>
                     <Text textStyle="sm">
@@ -124,7 +124,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     border={"1px solid #D5D5D5"}
                     boxShadow={"none"}
                     justifyContent="space-between">
-                    <Text textStyle="lg" fontWeight={600}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Refill Pools")}
                     </Text>
                     <Text textStyle="sm">

@@ -38,7 +38,7 @@ export const ClaimCard = ({ transaction }: Props) => {
                 <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You claimed") : t("Claimed")}
                 </Text>
-                <Text textStyle={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {t("voting rewards")}
                 </Text>
               </HStack>
@@ -49,7 +49,7 @@ export const ClaimCard = ({ transaction }: Props) => {
           </HStack>
           <VStack gap={0} align="stretch">
             <HStack gap={2}>
-              <Text fontWeight={600}>
+              <Text fontWeight="semibold">
                 {"+"}
                 {compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}
               </Text>

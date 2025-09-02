@@ -100,7 +100,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
             <Heading size="4xl">{compactFormatter.format(totalDistributed)}</Heading>
           </Skeleton>
         </HStack>
-        <Text textStyle="md" color="#6A6A6A">
+        <Text textStyle="md" color="text.subtle">
           {t("Total allocation to distribute")}
         </Text>
       </Box>
@@ -135,7 +135,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
           <Skeleton loading={roundAmountLoading} key={`allocation-chart-amount-${info.amount}-${info.color}`} w="full">
             <HStack w="full" gap={1}>
               <DotSymbol size={4} color={info.color} />
-              <Text ml={1} textStyle="md" fontWeight={600}>
+              <Text ml={1} textStyle="md" fontWeight="semibold">
                 {compactFormatter.format(Number(info.amount))}
               </Text>
               <Text textStyle="md">

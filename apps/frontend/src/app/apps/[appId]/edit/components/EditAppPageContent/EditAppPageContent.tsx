@@ -265,7 +265,7 @@ export const EditAppPageContent = () => {
             <EditAppLogo form={form} />
 
             <VStack align={"stretch"} gap={4}>
-              <Text textStyle="md" fontWeight={500}>
+              <Text textStyle="md" fontWeight="semibold">
                 {t("Project URL")}
               </Text>
               <Field.Root invalid={!!errors.external_url}>
@@ -284,7 +284,7 @@ export const EditAppPageContent = () => {
             </VStack>
 
             <VStack align={"stretch"} gap={4}>
-              <Text textStyle="md" fontWeight={500}>
+              <Text textStyle="md" fontWeight="semibold">
                 {t("Description")}
               </Text>
               <Field.Root invalid={!!errors.description}>
@@ -301,7 +301,7 @@ export const EditAppPageContent = () => {
               </Field.Root>
             </VStack>
             <VStack align={"stretch"} gap={4}>
-              <Text textStyle="md" fontWeight={500}>
+              <Text textStyle="md" fontWeight="semibold">
                 {t("Distribution Strategy")}
               </Text>
               <Field.Root invalid={!!errors.distribution_strategy}>

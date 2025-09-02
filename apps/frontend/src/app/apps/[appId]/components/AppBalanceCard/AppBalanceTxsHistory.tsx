@@ -116,7 +116,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
               <CloseButton />
             </Dialog.CloseTrigger>
             <Dialog.Header>
-              <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight={700} alignSelf={"center"}>
+              <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
                 {t("Transaction history")}
               </Text>
             </Dialog.Header>

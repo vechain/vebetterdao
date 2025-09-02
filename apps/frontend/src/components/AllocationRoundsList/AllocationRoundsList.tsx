@@ -40,9 +40,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
       <VStack gap={8} w="full" align={"flex-start"}>
         {!renderInsideCard && (
           <HStack w="full" justify="space-between" alignItems={"baseline"}>
-            <Heading size={["3xl", "4xl"]} lineHeight={1.2}>
-              {t("Allocations")}
-            </Heading>
+            <Heading size={["2xl", "3xl"]}>{t("Allocations")}</Heading>
             {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
               <Link asChild variant="plain" colorPalette="primary">
                 <NextLink href="/rounds">
@@ -65,7 +63,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           )}
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
-            <Button size="md" variant="ghost" color="primary" onClick={loadMore}>
+            <Button size="md" variant="ghost" color="actions.secondary.text-lighter" onClick={loadMore}>
               {t("Load more")}
             </Button>
           )}

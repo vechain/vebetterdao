@@ -88,10 +88,10 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
           <VStack gap={4} align="flex-start" flex={2}>
             <VStack gap={2} align="flex-start">
               <Text
-                color="#6A6A6A"
+                color="text.subtle"
                 textStyle="lg"
                 textTransform={"uppercase"}
-                fontWeight={600}
+                fontWeight="semibold"
                 data-testid="round-title">
                 {t("Round #{{round}}", {
                   round: roundId,
@@ -120,7 +120,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Skeleton loading={roundStateLoading}>
-                    <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
+                    <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                       {isFinished ? t("Finished") : t("Finishes in")}
                     </Text>
                   </Skeleton>
@@ -132,7 +132,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Skeleton>
                 </Box>
                 <Box>
-                  <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
+                  <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                     {t("Participating")}
                   </Text>
                   <Skeleton loading={roundAppsLoading}>
@@ -144,7 +144,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 </Box>
                 {!!account?.address && (
                   <Box data-testid="your-vote-box">
-                    <Text color="#6A6A6A" textStyle={["lg", "lg", "md"]}>
+                    <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                       {t("Your vote")}
                     </Text>
                     <Skeleton loading={hasVotedLoading || userVotesLoading || votesAtSnapshotLoading}>

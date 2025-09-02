@@ -1,5 +1,5 @@
 import { CustomModalContent } from "@/components"
-import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, Icon } from "@chakra-ui/react"
 import { UilFileContract, UilPlus } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -66,7 +66,9 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
       <CustomModalContent>
         <Dialog.Body p={"40px"}>
           <VStack align="stretch" gap="32px">
-            <UilFileContract size="54px" color="#004CFC" />
+            <Icon color="logo" boxSize={14}>
+              <UilFileContract />
+            </Icon>
             <Heading size="3xl">{t("Add a new reward distributor")}</Heading>
             <VStack align="stretch">
               <HStack justify={"space-between"}>

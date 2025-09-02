@@ -56,7 +56,7 @@ export const SwapTokenContent = ({
 
       {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
         <HStack px={4} py={3} bg={"dark-contrast-on-card-bg"} borderRadius={8} mt={2}>
-          <FiInfo size={36} color="#6a6a6a" />
+          <FiInfo size={36} color="text.subtle" />
           <Text textStyle={{ base: "sm" }}>
             {t("The maximum amount of VOT3 you can convert is ")}
             <b>{swappableVot3Balance?.formatted}</b>

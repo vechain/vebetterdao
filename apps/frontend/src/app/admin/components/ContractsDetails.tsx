@@ -149,14 +149,14 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
       <Card.Body>
         <VStack gap={4}>
           <HStack w="full" justify={"space-between"}>
-            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Address"}
             </Text>
             <AddressButton address={address} size={"sm"} showAddressIcon={false} />
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Version"}
             </Text>
             <Skeleton loading={!version}>
@@ -165,7 +165,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Balance"}
             </Text>
           </HStack>
@@ -197,7 +197,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
           </HStack>
 
           <HStack w="full" justify={"space-between"}>
-            <Text textStyle="md" wordBreak={"break-word"} fontWeight={600}>
+            <Text textStyle="md" wordBreak={"break-word"} fontWeight="semibold">
               {"Roles"}
             </Text>
           </HStack>

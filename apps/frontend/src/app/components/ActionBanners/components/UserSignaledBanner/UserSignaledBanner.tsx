@@ -58,7 +58,7 @@ export const UserSignaledBanner = () => {
         titleColor="#8D6602"
         description={
           <>
-            <Text textStyle="lg" fontWeight="700" color="#5F4400">
+            <Text textStyle="lg" fontWeight="bold" color="#5F4400">
               <Trans
                 as="span"
                 i18nKey="You have been signalled by <em>{{appSignals}}</em>."
@@ -66,7 +66,7 @@ export const UserSignaledBanner = () => {
                 components={{ em: <em />, br: <br /> }}
               />
             </Text>
-            <Text textStyle="lg" fontWeight="700" color="#5F4400">
+            <Text textStyle="lg" fontWeight="bold" color="#5F4400">
               {t(
                 "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
               )}

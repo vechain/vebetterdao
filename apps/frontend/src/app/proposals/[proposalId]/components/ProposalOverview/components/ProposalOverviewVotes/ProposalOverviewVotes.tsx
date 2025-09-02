@@ -128,7 +128,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
           <VStack alignItems={"stretch"} w="full" justify={"space-between"} gap={3}>
             <Heading size="xl">{t("Real time votes")}</Heading>
             <VStack w="full" justify={"space-between"} gap={0} align={"flex-start"}>
-              <Text fontWeight={"400"} color="#6A6A6A">
+              <Text fontWeight={"400"} color="text.subtle">
                 {t("Wallets voted")}
               </Text>
               <Skeleton loading={proposalVotesLoading}>

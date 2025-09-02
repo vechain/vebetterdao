@@ -111,7 +111,7 @@ export const NewProposalRoundPageContent = () => {
             <Heading size={["xl", "2xl"]}>{t("Select a voting session date")}</Heading>
             <Text textStyle={["sm", "md"]}>
               {t("Choose the")}{" "}
-              <Text as="span" fontWeight={600}>
+              <Text as="span" fontWeight="semibold">
                 {t("weekly round")}{" "}
               </Text>
               {t(

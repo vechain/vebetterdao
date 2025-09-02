@@ -56,7 +56,7 @@ export const EditAppLogo = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Text textStyle="md" fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("Logo")}
       </Text>
       <Flex w="64px" h="64px" flexBasis={"64px"} position={"relative"} rounded="16px">

@@ -108,18 +108,18 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                       <step.Icon size={iconSize} />
                     </Flex>
                     <VStack align="flex-start" gap={[0, 0, 2]}>
-                      <Text textStyle="xs" color="#6A6A6A">
+                      <Text textStyle="xs" color="text.subtle">
                         {t("STEP {{value}}", { value: index + 1 })}
                       </Text>
                       <Text textStyle="xl" color="#1E1E1E">
                         {step.title}
                       </Text>
-                      <Text hideBelow="md" textStyle="sm" color="#6A6A6A">
+                      <Text hideBelow="md" textStyle="sm" color="text.subtle">
                         {step.description}
                       </Text>
                     </VStack>
                   </Stack>
-                  <Text hideFrom="md" textStyle="sm" color="#6A6A6A">
+                  <Text hideFrom="md" textStyle="sm" color="text.subtle">
                     {step.description}
                   </Text>
                 </VStack>
@@ -131,7 +131,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
           <VStack align="stretch" w="full">
             <Alert.Root status="info" borderRadius={["xl", "xl", "3xl"]}>
               <Alert.Indicator w={5} h={5} />
-              <Box lineHeight={"1.20rem"} textStyle="sm">
+              <Box textStyle="sm">
                 <Alert.Description as="span">
                   {t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}
                 </Alert.Description>

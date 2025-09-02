@@ -254,7 +254,7 @@ export const AppealSteps = () => {
       {userSignaledCount >= 1 && hasSuccessfulReset && (
         <VStack align="stretch" gap={2}>
           <Alert.Root status="warning" size="md" borderRadius="16px">
-            <Box lineHeight={"1.20rem"} textStyle="md" color="success.primary">
+            <Box textStyle="md" color="success.primary">
               <Alert.Title>
                 {
                   "You have been flagged again after your KYC. Please reach out to the app admin that flagged you to restore your access."

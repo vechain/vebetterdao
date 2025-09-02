@@ -37,10 +37,10 @@ export const ProposalWithdrawDeposit = () => {
                   <Text textStyle={"3xl"} color={"contrast-fg-on-dark-bg"}>
                     {compactFormatter.format(Number(proposal.communityDeposits))}
                   </Text>
-                  <Text textStyle={"xl"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"xl"} fontWeight="semibold" color={"contrast-fg-on-dark-bg"}>
                     {t("/")}
                   </Text>
-                  <Text textStyle={"xl"} fontWeight={500} color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"xl"} fontWeight="semibold" color={"contrast-fg-on-dark-bg"}>
                     {compactFormatter.format(Number(proposal.depositThreshold))}
                   </Text>
                 </HStack>

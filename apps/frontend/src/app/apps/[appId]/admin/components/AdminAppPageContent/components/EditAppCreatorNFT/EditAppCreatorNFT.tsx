@@ -25,7 +25,7 @@ export const EditAppCreatorNFT = ({ form }: Props) => {
   return (
     <VStack align="stretch">
       <Heading size="2xl">{t("Creator NFT")}</Heading>
-      <Text color="#6A6A6A">
+      <Text color="text.subtle">
         {t(
           "These users will be able to join the Discord channels, participate in the endorsement phases, and submit new apps.",
         )}

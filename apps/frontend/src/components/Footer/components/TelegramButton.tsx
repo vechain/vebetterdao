@@ -22,7 +22,7 @@ export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
         borderRadius={22}
         w={isFullWidth ? "full" : undefined}>
         <FaTelegram size={24} />
-        <Text fontWeight={500} textStyle="md" lineHeight="19px">
+        <Text fontWeight="semibold" textStyle="md">
           {t("Join Telegram")}
         </Text>
       </Button>

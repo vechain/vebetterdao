@@ -75,7 +75,7 @@ export const StepModal = <T extends string>({
           justifyContent={["center", "center", "flex-start"]}
           pl={!isFirstStep && !disableBackButton && isDesktop ? 10 : 0}
           width="100%">
-          <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight={700}>
+          <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold">
             {currentStepContent.title}
           </Text>
         </Flex>

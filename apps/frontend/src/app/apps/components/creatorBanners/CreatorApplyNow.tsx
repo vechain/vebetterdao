@@ -77,7 +77,7 @@ export const CreatorApplyNow = () => {
                   variant="primarySubtle"
                   alignSelf="center"
                   textStyle="sm"
-                  fontWeight={600}
+                  fontWeight="semibold"
                   borderRadius="full"
                   onClick={onOpen}
                   w={{ base: "80%", md: "auto" }}>

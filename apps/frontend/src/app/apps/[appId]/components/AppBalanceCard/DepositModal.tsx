@@ -131,7 +131,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
-            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight={700} alignSelf={"center"}>
+            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               <Trans i18nKey={"Deposit B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
             </Text>
           </HStack>
@@ -148,7 +148,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
               </Skeleton>
             </HStack>
 
-            <Text textStyle="xs" fontWeight="400" opacity={0.7}>
+            <Text textStyle="xs" opacity={0.7}>
               {t("App current B3TR Balance")}
             </Text>
           </VStack>

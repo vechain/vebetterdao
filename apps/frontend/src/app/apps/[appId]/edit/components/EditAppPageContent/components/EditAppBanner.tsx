@@ -45,7 +45,7 @@ export const EditAppBanner = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Text textStyle="md" fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("Banner")}
       </Text>
       <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px">

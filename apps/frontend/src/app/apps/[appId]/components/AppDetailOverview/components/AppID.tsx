@@ -21,14 +21,14 @@ export const AppID = () => {
 
   return (
     <VStack align={"stretch"}>
-      <Text textStyle={"sm"} color="#6A6A6A">
+      <Text textStyle={"sm"} color="text.subtle">
         {t("App ID")}
       </Text>
       <HStack>
         {showCopiedLink ? (
           <UilCheck size={"18px"} color="#6DCB09" />
         ) : (
-          <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyLink} cursor="pointer" />
+          <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyLink} cursor="pointer" />
         )}
         <Text textStyle={"sm"}>{humanAddress(app?.id || "", 4, 2)}</Text>
       </HStack>

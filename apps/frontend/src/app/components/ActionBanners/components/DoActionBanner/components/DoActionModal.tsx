@@ -55,7 +55,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                 </Text>
               </Flex>
               <Flex justify="flex-end">
-                <Text color="#6A6A6A" fontWeight="400" textStyle="xs">
+                <Text color="text.subtle" textStyle="xs">
                   {missingActionsLabel.short}
                 </Text>
               </Flex>
@@ -63,7 +63,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
           </Card.Body>
         </Card.Root>
         <Heading size="2xl">{missingActionsLabel.long}</Heading>
-        <Text color="#6A6A6A">
+        <Text color="text.subtle">
           {t(
             "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
           )}

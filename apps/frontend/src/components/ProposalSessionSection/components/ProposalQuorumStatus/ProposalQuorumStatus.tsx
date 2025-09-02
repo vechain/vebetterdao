@@ -45,14 +45,14 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
 
   return (
     <VStack align="stretch">
-      <Text color="#6A6A6A" textStyle="sm">
+      <Text color="text.subtle" textStyle="sm">
         {t("VOT3 used to vote")}
       </Text>
       <HStack justify={"space-between"} align={"baseline"}>
         <HStack gap={2}>
           <Image h="20px" w="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
           <Skeleton loading={currentVotesQuery.isLoading || quorumQuery.isLoading}>
-            <Text textStyle="2xl" fontWeight={700} data-testid={"total-votes"}>
+            <Text textStyle="2xl" fontWeight="bold" data-testid={"total-votes"}>
               {compactFormatter.format(Number(currentVotesQuery.data ?? 0))}
             </Text>
           </Skeleton>
@@ -61,7 +61,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
           <HStack gap={1} align="center">
             {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
             {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
-            <Text fontWeight={600} textStyle="sm" color={stateColor}>
+            <Text fontWeight="semibold" textStyle="sm" color={stateColor}>
               {compactFormatter.format(Number(votesToQuorumPercentage))}
               {t("%")}
             </Text>
@@ -85,11 +85,11 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, 
       {showQuorumNeeded ? (
         <HStack>
           <Skeleton loading={quorumQuery.isLoading}>
-            <Text fontWeight={600} textStyle="sm">
+            <Text fontWeight="semibold" textStyle="sm">
               {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
             </Text>
           </Skeleton>
-          <Text color="#6A6A6A" textStyle="sm">
+          <Text color="text.subtle" textStyle="sm">
             {t("needed for quorum")}
           </Text>
         </HStack>

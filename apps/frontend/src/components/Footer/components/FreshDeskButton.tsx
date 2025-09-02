@@ -32,7 +32,7 @@ export const FreshDeskButton: React.FC<Props> = ({ isFullWidth }) => {
       borderRadius={22}
       w={isFullWidth ? "full" : undefined}>
       <FaQuestionCircle size={24} />
-      <Text fontWeight={500} textStyle="md" lineHeight="19px">
+      <Text fontWeight="semibold" textStyle="md">
         {t("Help")}
       </Text>
     </Button>

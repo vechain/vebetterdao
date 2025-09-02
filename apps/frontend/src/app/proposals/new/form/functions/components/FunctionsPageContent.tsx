@@ -108,7 +108,7 @@ export const FunctionsPageContent = () => {
             handleRemoveFunction={handleRemoveFunction}
           />
           <HStack w="full" justify={"space-between"}>
-            <Text color="red.500" textStyle="md" fontWeight={600}>
+            <Text color="red.500" textStyle="md" fontWeight="semibold">
               {submitError}
             </Text>
             <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>

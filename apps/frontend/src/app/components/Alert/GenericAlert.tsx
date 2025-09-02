@@ -47,12 +47,12 @@ export const GenericAlert = ({ isLoading = false, title, message, type }: Props)
           <HStack w={title ? "full" : "auto"}>
             <Icon as={colorScheme.icon} boxSize={7} color={colorScheme.secondaryColor} />
             {title && (
-              <Text fontWeight={600} color={colorScheme.secondaryColor} textStyle="md">
+              <Text fontWeight="semibold" color={colorScheme.secondaryColor} textStyle="md">
                 {title}
               </Text>
             )}
           </HStack>
-          <Alert.Description as="span" textStyle="sm" color="#6A6A6A" alignSelf={title ? "flex-start" : "center"}>
+          <Alert.Description as="span" textStyle="sm" color="text.subtle" alignSelf={title ? "flex-start" : "center"}>
             {message}
           </Alert.Description>
         </Stack>

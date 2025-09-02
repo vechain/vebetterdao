@@ -117,7 +117,7 @@ const DelegatedNodeDisplay = ({
             {showCopiedLink ? (
               <UilCheck size={"18px"} color="#6DCB09" />
             ) : (
-              <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyAddress} cursor="pointer" />
+              <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyAddress} cursor="pointer" />
             )}
           </HStack>
         </HStack>

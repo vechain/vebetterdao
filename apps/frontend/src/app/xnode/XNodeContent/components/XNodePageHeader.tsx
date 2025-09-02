@@ -41,11 +41,11 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
             rounded="8px"
           />
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-            <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="400" lineClamp={1} color="#FFFFFF80">
+            <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1} color="#FFFFFF80">
               {nodeType}
             </Text>
 
-            <Text fontWeight={700} lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
+            <Text fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
               {xNodeName}
             </Text>
 
@@ -56,7 +56,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
                 </HStack>
               )}
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
                   {xNodePoints}
                 </Text>
                 <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
