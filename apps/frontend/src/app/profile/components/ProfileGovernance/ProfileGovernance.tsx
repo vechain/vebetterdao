@@ -19,6 +19,7 @@ import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { useUserCreatedProposal } from "@/hooks/proposals/common"
+import { useWallet } from "@vechain/vechain-kit"
 
 enum ListView {
   ALL,
@@ -33,9 +34,11 @@ type Props = {
   address: string
 }
 export const ProfileGovernance = ({ address }: Props) => {
-  //TODO: REFACTOR TO USE USEPROPOSALENRICHED and filter by proposerAddress
-  const { data: createdProposals, isLoading: isCreatedProposalsLoading } = useUserCreatedProposal(address ?? "")
-  const { data: votedProposals, isLoading: isVotedProposalsLoading } = useUserProposalsVoteEvents(address ?? "")
+  const { account } = useWallet()
+  const profileWalletAddress = address ?? account?.address ?? ""
+
+  const { data: createdProposals, isLoading: isCreatedProposalsLoading } = useUserCreatedProposal(profileWalletAddress)
+  const { data: votedProposals, isLoading: isVotedProposalsLoading } = useUserProposalsVoteEvents(profileWalletAddress)
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
@@ -45,7 +48,7 @@ export const ProfileGovernance = ({ address }: Props) => {
 
   const { created: votedProposalsWithDescription } = useProposalsCreatedFromIds(votedProposalsIds)
 
-  const topVotedApps = useUserTopVotedApps(address ?? "")
+  const topVotedApps = useUserTopVotedApps(profileWalletAddress)
 
   const [listView, setListView] = useState<ListView>(ListView.ALL)
 
