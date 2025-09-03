@@ -24,27 +24,18 @@ export const TransactionsResponseSchema = z.object({
         proof: z
           .object({
             version: z.number(),
-            description: z.string().optional(),
-            proof: z.object({
-              description: z.string().optional(),
-              image: z.string().optional(),
-              link: z.string().optional(),
-              text: z.string().optional(),
-              video: z.string().optional(),
-            }),
+            proof: z
+              .object({
+                image: z.string().optional(),
+              })
+              .optional(),
             impact: z
               .object({
                 carbon: z.number().optional(),
                 water: z.number().optional(),
                 energy: z.number().optional(),
                 waste_mass: z.number().optional(),
-                waste_items: z.number().optional(),
-                waste_reduction: z.number().optional(),
-                biodiversity: z.number().optional(),
-                people: z.number().optional(),
-                timber: z.number().optional(),
                 plastic: z.number().optional(),
-                learning_time: z.number().optional(),
                 trees_planted: z.number().optional(),
                 calories_burned: z.number().optional(),
                 clean_energy_production_wh: z.number().optional(),
@@ -110,10 +101,11 @@ export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" |
  * @param data the request data @see TransactionsRequest
  * @returns the query object with the data @see TransactionsResponse
  */
-export const useTransactions = ({ user, direction = "desc", txType }: Omit<TransactionsRequest, "page" | "size">) => {
+export const useTransactions = ({ user, direction = "desc", txType, size }: Omit<TransactionsRequest, "page">) => {
   return useInfiniteQuery({
     queryKey: getTransactionsQueryKey({ user, direction, txType }),
-    queryFn: ({ pageParam = 0 }) => getTransactions({ page: pageParam, user, direction, txType }),
+    queryFn: ({ pageParam = 0 }) =>
+      getTransactions({ page: pageParam, user, direction, txType, ...(size && { size }) }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
