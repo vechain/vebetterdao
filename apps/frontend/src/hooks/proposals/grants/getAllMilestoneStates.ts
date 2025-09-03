@@ -1,8 +1,7 @@
-import { FormattedProposalDetailData } from "@/app/proposals/[proposalId]/hooks/useProposalDetail"
 import { useMilestoneState } from "./useMilestoneState"
 import { GrantProposalEnriched, Milestone, MilestoneState } from "./types"
 
-export const getAllMilestoneStates = (proposal: GrantProposalEnriched & FormattedProposalDetailData) => {
+export const getAllMilestoneStates = (proposal: GrantProposalEnriched) => {
   const milestones = proposal.milestones
 
   const milestoneStates = milestones.map((_milestone: Milestone, index: number) => {

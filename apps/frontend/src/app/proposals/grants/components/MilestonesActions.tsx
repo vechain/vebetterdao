@@ -2,16 +2,14 @@ import { VStack, Steps, Circle, HStack, Text } from "@chakra-ui/react"
 import { useMemo, useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { UilCheck } from "@iconscout/react-unicons"
-import { FormattedProposalDetailData, useProposalDetail } from "../../[proposalId]/hooks"
-import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
-
 import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
+import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
+import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { MilestonesActionsItem } from "./MilestonesActionsItem"
 
-export const MilestonesActions = () => {
+export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
   const { t } = useTranslation()
-  const { proposal: enrichedProposal } = useProposalDetail()
-  const proposal = enrichedProposal as GrantProposalEnriched & FormattedProposalDetailData
+  const proposal = useProposalEnrichedById(proposalId) as GrantProposalEnriched
 
   const states = getAllMilestoneStates(proposal)
   const steps = useMemo(

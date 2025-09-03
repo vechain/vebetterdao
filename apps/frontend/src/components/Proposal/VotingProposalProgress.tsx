@@ -157,7 +157,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({
 
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
 
-  const depositThreshold = Number(proposal.proposal?.depositThreshold)
+  const depositThreshold = Number(proposal?.depositThreshold)
   const communityDeposits = proposalDepositEvent.communityDeposits
   const communityDepositPercentage = compactFormatter.format((communityDeposits / depositThreshold) * 100)
 

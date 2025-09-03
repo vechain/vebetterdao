@@ -6,19 +6,19 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
 import { MilestonesActions } from "../../../grants/components"
-import { useProposalDetail } from "../../hooks"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
-  proposalId: string
+  proposal: ProposalEnriched | GrantProposalEnriched
+  isLoading: boolean
 }
 
-export const ProposalOverview = ({ isGrant, proposalId }: ProposalOverviewProps) => {
+export const ProposalOverview = ({ isGrant, proposal, isLoading }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { proposal } = useProposalDetail(proposalId)
   const { data: vnsData } = useVechainDomain(proposal?.proposerAddress)
   const proposerName = vnsData?.domain
 
@@ -26,14 +26,14 @@ export const ProposalOverview = ({ isGrant, proposalId }: ProposalOverviewProps)
   const HeaderContent = () => (
     <VStack gap={5} align="flex-start" w="full">
       <HStack justify={"space-between"} align={"flex-start"} w="full">
-        <Skeleton loading={!proposal || proposal.isStateLoading}>
+        <Skeleton loading={isLoading}>
           <ProposalStatusBadge
             proposalState={proposal?.state}
             isDepositReached={false} // TODO: Handle deposit reached from separate hook
             proposalType={proposal?.type}
           />
         </Skeleton>
-        <Skeleton loading={!proposal}>
+        <Skeleton loading={isLoading}>
           {proposal && (
             <HStack>
               <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
@@ -47,7 +47,7 @@ export const ProposalOverview = ({ isGrant, proposalId }: ProposalOverviewProps)
         </Skeleton>
       </HStack>
 
-      <Skeleton loading={!proposal}>
+      <Skeleton loading={isLoading}>
         <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
       </Skeleton>
     </VStack>
@@ -88,7 +88,7 @@ export const ProposalOverview = ({ isGrant, proposalId }: ProposalOverviewProps)
                 <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
               <Tabs.Content value="milestones" pt={6}>
-                <MilestonesActions />
+                <MilestonesActions proposalId={proposal.id} />
               </Tabs.Content>
             </Tabs.Root>
           ) : (

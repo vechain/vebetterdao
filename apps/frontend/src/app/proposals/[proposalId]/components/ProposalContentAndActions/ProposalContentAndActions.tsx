@@ -4,25 +4,20 @@
 import { VStack, Text, Heading, HStack, Icon, Link, Image } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
-import { FormattedProposalDetailData } from "../../hooks/useProposalDetail"
 import { FiMail } from "react-icons/fi"
 import { FaTelegram } from "react-icons/fa"
 import { UilGithub, UilTelegram, UilGlobe, UilTwitter } from "@iconscout/react-unicons"
 
-const isGrantProposal = (
-  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData),
-): proposal is GrantProposalEnriched & FormattedProposalDetailData => {
+const isGrantProposal = (proposal: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal.type === ProposalType.Grant
 }
 
-const isStandardProposal = (
-  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData),
-): proposal is ProposalEnriched & FormattedProposalDetailData => {
+const isStandardProposal = (proposal: ProposalEnriched | GrantProposalEnriched): proposal is ProposalEnriched => {
   return proposal.type === ProposalType.Standard
 }
 
 type Props = {
-  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData)
+  proposal: ProposalEnriched | GrantProposalEnriched
 }
 
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
