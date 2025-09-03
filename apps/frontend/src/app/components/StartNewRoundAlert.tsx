@@ -12,9 +12,9 @@ export const StartNewRoundAlert = () => {
       <VStack
         direction={["column-reverse", "column-reverse", "row"]}
         align={["stretch", "stretch", "flex-start"]}
-        gap={8}>
+        gap={4}>
         <Text fontWeight="700" fontSize="16px" color="#AF5F00" as="span">
-          {"Round hasn’t started yet. Please start a new round."}
+          {"Round hasn't started yet. Please start a new round."}
         </Text>
         <Alert.Description>
           <StartRoundButton redirectTo="/" />
