@@ -5,28 +5,17 @@ import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
-import { MilestonesActions } from "../"
-import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
-
-const GrantDetailsTab = ({ proposal }: { proposal: ProposalEnriched | GrantProposalEnriched }) => {
-  return (
-    <VStack align="stretch" gap={4} p={4}>
-      <Text fontSize="lg" fontWeight="600">
-        {"WIP"}
-      </Text>
-      <MilestonesActions proposal={proposal} />
-    </VStack>
-  )
-}
+import { MilestonesActions } from "../../../grants/components"
+import { ProposalContentAndActions } from "../ProposalContentAndActions"
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewProps = {
-  overviewContent?: React.ReactNode
   isGrant?: boolean
   proposal: ProposalEnriched | GrantProposalEnriched
   isLoading: boolean
 }
 
-export const ProposalOverview = ({ overviewContent, isGrant, proposal, isLoading }: ProposalOverviewProps) => {
+export const ProposalOverview = ({ isGrant, proposal, isLoading }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -64,13 +53,6 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposal, isLoading
     </VStack>
   )
 
-  // Overview Tab Content (just the overview content)
-  const OverviewTabContent = () => (
-    <VStack gap={4} align="flex-start" w="full">
-      {overviewContent}
-    </VStack>
-  )
-
   return (
     <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
       <Card.Body>
@@ -103,14 +85,14 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposal, isLoading
                 </Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="overview" pt={6}>
-                <OverviewTabContent />
+                <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
               <Tabs.Content value="milestones" pt={6}>
-                <GrantDetailsTab proposal={proposal} />
+                <MilestonesActions proposalId={proposal.id} />
               </Tabs.Content>
             </Tabs.Root>
           ) : (
-            <OverviewTabContent />
+            <ProposalContentAndActions proposal={proposal} />
           )}
         </VStack>
       </Card.Body>
