@@ -19,7 +19,13 @@ import {
 } from "@/api"
 import { ethers } from "ethers"
 import dayjs from "dayjs"
-import { ProposalState, GrantProposalEnriched, ProposalEnriched, GovernanceType } from "@/hooks/proposals/grants/types"
+import {
+  ProposalState,
+  GrantProposalEnriched,
+  ProposalEnriched,
+  GovernanceType,
+  ProposalType,
+} from "@/hooks/proposals/grants/types"
 import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
 import { UseQueryResult } from "@tanstack/react-query"
 import { getGrantProposalMetadataOrReturnDefault } from "@/hooks/proposals/grants/useStandardOrGrantProposalDetails"
@@ -94,6 +100,19 @@ export type FormattedProposalDetailData = {
 
 export type ProposalDetailData = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & FormattedProposalDetailData
+}
+
+// If it is a grant proposal, we narrow to Grant type
+export const isGrantProposal = (
+  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData),
+): proposal is GrantProposalEnriched & FormattedProposalDetailData => {
+  return proposal.type === ProposalType.Grant
+}
+
+export const isStandardProposal = (
+  proposal: ProposalEnriched | (GrantProposalEnriched & FormattedProposalDetailData),
+): proposal is ProposalEnriched & FormattedProposalDetailData => {
+  return proposal.type === ProposalType.Standard
 }
 
 export const useProposalDetailById = (proposalId: string): ProposalDetailData => {

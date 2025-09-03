@@ -5,27 +5,16 @@ import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
-import { MilestonesActions } from "../"
+import { MilestonesActions } from "../../../grants/components"
 import { useProposalDetail } from "../../hooks"
-
-const GrantDetailsTab = () => {
-  return (
-    <VStack align="stretch" gap={4} p={4}>
-      <Text fontSize="lg" fontWeight="600">
-        {"WIP"}
-      </Text>
-      <MilestonesActions />
-    </VStack>
-  )
-}
+import { ProposalContentAndActions } from "../ProposalContentAndActions"
 
 type ProposalOverviewProps = {
-  overviewContent?: React.ReactNode
   isGrant?: boolean
   proposalId: string
 }
 
-export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: ProposalOverviewProps) => {
+export const ProposalOverview = ({ isGrant, proposalId }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -64,13 +53,6 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
     </VStack>
   )
 
-  // Overview Tab Content (just the overview content)
-  const OverviewTabContent = () => (
-    <VStack gap={4} align="flex-start" w="full">
-      {overviewContent}
-    </VStack>
-  )
-
   return (
     <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
       <Card.Body>
@@ -103,14 +85,14 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
                 </Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="overview" pt={6}>
-                <OverviewTabContent />
+                <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
               <Tabs.Content value="milestones" pt={6}>
-                <GrantDetailsTab />
+                <MilestonesActions />
               </Tabs.Content>
             </Tabs.Root>
           ) : (
-            <OverviewTabContent />
+            <ProposalContentAndActions proposal={proposal} />
           )}
         </VStack>
       </Card.Body>

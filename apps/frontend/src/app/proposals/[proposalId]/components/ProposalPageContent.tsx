@@ -1,6 +1,5 @@
 import { Grid, GridItem, VStack, Stack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
-import { ProposalContentAndActions } from "./ProposalContentAndActions"
 import { useProposalTotalVotes, useVot3PastSupply } from "@/api"
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
@@ -71,8 +70,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     },
   ]
 
-  const overviewContent = <ProposalContentAndActions proposal={proposal} />
-
   const InfoProposal = () => (
     <Stack
       direction={["column", "column", "row"]}
@@ -109,7 +106,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]}>
-          <ProposalOverview overviewContent={overviewContent} isGrant={isGrant} proposalId={proposalId} />
+          <ProposalOverview isGrant={isGrant} proposalId={proposalId} />
           <ProposalVoteCommentList proposalId={proposalId} />
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>

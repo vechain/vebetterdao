@@ -108,3 +108,24 @@ export enum ProposalState {
   InDevelopment, // 8
   Completed, // 9
 }
+
+export enum MilestoneState {
+  Pending, // 0
+  Approved, // 1
+  Claimed, // 2
+  Rejected, // 3
+}
+
+export enum MilestoneStateReadable {
+  Pending = "Pending",
+  Approved = "Approved",
+  Claimed = "Claimed",
+  Rejected = "Rejected",
+}
+
+export type Milestone = {
+  description: string
+  fundingAmount: number
+  durationFrom: number
+  durationTo: number
+}

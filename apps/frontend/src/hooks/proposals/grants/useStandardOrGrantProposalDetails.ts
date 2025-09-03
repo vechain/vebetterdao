@@ -54,6 +54,7 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     grantType: ipfsMetadata?.grantType ?? "",
     problemDescription: ipfsMetadata?.problemDescription ?? "",
     solutionDescription: ipfsMetadata?.solutionDescription ?? "",
+    // TODO(Grant) : Add key points
     targetUsers: ipfsMetadata?.targetUsers ?? "",
     competitiveEdge: ipfsMetadata?.competitiveEdge ?? "",
     benefitsToUsers: ipfsMetadata?.benefitsToUsers ?? "",
