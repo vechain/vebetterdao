@@ -28,7 +28,6 @@ export const useProposalEnriched = () => {
       grantProposalsDetailsMap: {},
       standardProposalsDetailsMap: {},
     },
-    isLoading: isLoadingDetails,
   } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
 
   const {
@@ -36,7 +35,6 @@ export const useProposalEnriched = () => {
       grantsProposalStates: [],
       standardProposalStates: [],
     },
-    isLoading: isLoadingStates,
   } = useAllProposalsState({
     grantProposalsIds,
     standardProposalsIds,
@@ -44,13 +42,8 @@ export const useProposalEnriched = () => {
   // Step 4: Create enrichment function with useCallback for stability
   const enrichProposals = useCallback(() => {
     // Early return if no proposals
-    if (!grantProposals.length && !standardProposals.length) {
-      return {
-        enrichedGrantProposals: [],
-        enrichedStandardProposals: [],
-        proposals: [],
-        totalGrantAmount: BigNumber(0),
-      }
+    if (!grantProposals.length || !standardProposals.length) {
+      throw new Error("No proposals found")
     }
 
     // Enrich grant proposals
@@ -113,6 +106,6 @@ export const useProposalEnriched = () => {
   return useQuery({
     queryKey: getEnrichedProposalsQueryKey(),
     queryFn: enrichProposals,
-    enabled: !isLoadingDetails && !isLoadingStates,
+    retry: 3, //Since events could take longer, we retry 3 times
   })
 }
