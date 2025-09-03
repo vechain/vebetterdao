@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react"
 import { ProposalMetadata } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
-import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
+import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
@@ -25,7 +25,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
 
   const router = useRouter()
 
-  const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(id)
+  const { supportEndDate } = useProposalInteractionDates(proposal)
 
   const { t } = useTranslation()
 
@@ -37,9 +37,9 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     switch (proposalState) {
       case ProposalState.Pending:
         return (
-          <Skeleton loading={isVotingStartDateLoading}>
+          <Skeleton loading={!supportEndDate}>
             <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
-              {t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })}
+              {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
             </Text>
           </Skeleton>
         )
@@ -66,7 +66,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
       default:
         return ""
     }
-  }, [votingStartDate, proposalState, t, isVotingStartDateLoading, id])
+  }, [supportEndDate, proposalState, t, id])
 
   return (
     <Card.Root
