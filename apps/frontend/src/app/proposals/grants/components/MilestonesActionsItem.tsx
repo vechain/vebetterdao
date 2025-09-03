@@ -1,5 +1,4 @@
 import { Accordion, HStack, Text, VStack, Heading, Button } from "@chakra-ui/react"
-import dayjs from "dayjs"
 import { Milestone } from "@/hooks/proposals/grants/types"
 import { useTranslation } from "react-i18next"
 import { useBreakpoints } from "@/hooks"
@@ -10,6 +9,7 @@ import { useClaimGrants } from "@/hooks/useClaimGrants"
 import { useAccountPermissions } from "@/api/contracts/account/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import dayjs from "dayjs"
 
 type MilestonesActionsItemProps = {
   index: number
@@ -76,7 +76,6 @@ export const MilestonesActionsItem = ({ index, state, milestone, proposalId }: M
   const content = (
     <VStack py={2} align="flex-start">
       <VStack align="flex-start">
-        <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}</Heading>
         <HStack align="center">
           <VeBetterIcon color="#6A6A6A" size={16} />
           <Text>{t("Amount to Grant")}</Text>
@@ -104,20 +103,32 @@ export const MilestonesActionsItem = ({ index, state, milestone, proposalId }: M
   if (!isMobile) {
     return (
       <VStack w="full" align="flex-start" gap={2}>
+        <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}</Heading>
+
         {content}
       </VStack>
     )
   }
 
   return (
-    <Accordion.Root collapsible w="full" defaultValue={["first"]}>
-      <Accordion.Item value="first" border={"none"} w="full">
-        <Accordion.ItemTrigger w="full" rounded={"12px"} px={"8px"} py={0} _hover={{ textDecor: "underline" }}>
-          <HStack justify={"space-between"} w="full">
-            <Accordion.ItemIndicator />
-          </HStack>
+    <Accordion.Root
+      multiple // allow any item to be open
+      defaultValue={[`ms-${index}`]}
+      spaceY={10}
+      w="full">
+      <Accordion.Item value={`ms-${index}`} border="none" w="full" spaceY={10}>
+        <Accordion.ItemTrigger w="full" rounded="12px" px="10px" py="8px" _hover={{ bg: "blackAlpha.50" }}>
+          <VStack w="full" align="stretch" gap={1}>
+            <HStack w="full" justify="space-between">
+              <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}</Heading>
+              <Accordion.ItemIndicator />
+            </HStack>
+          </VStack>
         </Accordion.ItemTrigger>
-        <Accordion.ItemContent p={"8px"}>{content}</Accordion.ItemContent>
+
+        <Accordion.ItemContent px="10px" pb="10px">
+          {content}
+        </Accordion.ItemContent>
       </Accordion.Item>
     </Accordion.Root>
   )
