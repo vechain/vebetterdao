@@ -1,4 +1,10 @@
-import { useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
+import {
+  useUserSingleProposalVoteEvent,
+  useIsQuadraticVotingDisabled,
+  useProposalSnapshotUserQuadraticVotingPower,
+  useGetVotesOnBlock,
+  useAllocationRoundSnapshot,
+} from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import {
@@ -19,11 +25,11 @@ import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unic
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
+import { FormEvent, useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useProposalDetail } from "../../../hooks"
 import Link from "next/link"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useProposalEnrichedById } from "@/hooks"
 
 const QUADRATIC_DOCS_URL = "https://vechain-foundation-san-marino.gitbook.io/vebetter-dao/governance#quadratic-voting"
 
@@ -51,23 +57,34 @@ type Props = {
   proposalId: string
 }
 export const ProposalVote = ({ proposalId }: Props) => {
-  const { proposal } = useProposalDetail()
-  const { t } = useTranslation()
   const [selectedVote, setSelectedVote] = useState<string | null>(null)
   const [comment, setComment] = useState("")
+
+  const { t } = useTranslation()
+
   const router = useRouter()
   const { account } = useWallet()
-  const { data: isQuadraticVotingDisabled } = useIsQuadraticVotingDisabled()
 
+  const proposal = useProposalEnrichedById(proposalId)
+
+  //TODO: Ensure we have a proposalRoundId
+  const proposalRoundId = proposal?.votingRoundId ?? 0
+
+  const { data: isQuadraticVotingDisabled } = useIsQuadraticVotingDisabled()
   const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
 
-  const isPageNotAllowed = proposal.state !== ProposalState.Active || !!userVote || !account?.address
+  const { data: userQuadraticVotingPower } = useProposalSnapshotUserQuadraticVotingPower(Number(proposalRoundId))
+  const { data: roundSnapshot } = useAllocationRoundSnapshot(proposalRoundId.toString())
+  const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
 
-  useLayoutEffect(() => {
-    if (isPageNotAllowed) {
-      router.replace(`/proposals/${proposal.id}`)
-    }
-  }, [isPageNotAllowed, proposal.id, router])
+  const isPageNotAllowed = proposal?.state !== ProposalState.Active || !!userVote || !account?.address
+
+  //TODO: Handle this on layout instead, or check user before
+  // useLayoutEffect(() => {
+  //   if (isPageNotAllowed) {
+  //     router.replace(`/proposals/${proposal?.id}`)
+  //   }
+  // }, [isPageNotAllowed, proposal?.id, router])
 
   const handleSetSelectedVote = useCallback(
     (value: string) => () => {
@@ -81,10 +98,10 @@ export const ProposalVote = ({ proposalId }: Props) => {
   }, [])
 
   const onSuccess = useCallback(() => {
-    router.push(`/proposals/${proposal.id}`)
-  }, [proposal.id, router])
+    router.push(`/proposals/${proposal?.id}`)
+  }, [proposal?.id, router])
 
-  const castVoteMutation = useProposalCastVote({ proposalId: proposal.id, onSuccess })
+  const castVoteMutation = useProposalCastVote({ proposalId, onSuccess })
 
   const handleCastVote = useCallback(
     (e?: FormEvent) => {
@@ -92,12 +109,12 @@ export const ProposalVote = ({ proposalId }: Props) => {
       if (!selectedVote) {
         return
       }
-      castVoteMutation.sendTransaction({ proposalId: proposal.id, vote: selectedVote, comment })
+      castVoteMutation.sendTransaction({ proposalId, vote: selectedVote, comment })
     },
-    [castVoteMutation, comment, proposal.id, selectedVote],
+    [castVoteMutation, comment, proposalId, selectedVote],
   )
 
-  if (isPageNotAllowed) {
+  if (isPageNotAllowed || !proposal) {
     return null
   }
 
@@ -107,7 +124,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
         <Stack flexDir={["column", "column", "row"]} gap={12} as="form" onSubmit={handleCastVote}>
           <VStack alignItems={"stretch"} flex={1} gap={4}>
             <Text fontSize="14px" color="#6A6A6A" wordBreak={"break-word"}>
-              {proposal.title}
+              {proposal?.title ?? ""}
             </Text>
             <Heading>{t("Vote on this proposal")}</Heading>
             <Text color="#6A6A6A">
@@ -124,7 +141,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                   align={["flex-start", "flex-start", "center"]}>
                   <Image h="24px" w="24px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
                   <Text fontSize={"28px"} fontWeight={700}>
-                    {compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}
+                    {compactFormatter.format(Number(userVot3OnSnapshot || 0))}
                   </Text>
                   <Text fontSize={"14px"} fontWeight={600}>
                     {t("VOT3 BALANCE ON SNAPSHOT")}
@@ -148,7 +165,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                       align={["flex-start", "flex-start", "center"]}>
                       <VoteIcon boxSize={"36px"} color="#004CFC" />
                       <Text fontSize={"36px"} fontWeight={700} color="#004CFC">
-                        {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
+                        {compactFormatter.format(Number(userQuadraticVotingPower || 0))}
                       </Text>
                       <Text fontSize={"14px"} fontWeight={600}>
                         {t("VOTING POWER")}

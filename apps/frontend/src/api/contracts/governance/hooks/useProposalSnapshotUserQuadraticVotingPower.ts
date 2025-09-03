@@ -7,11 +7,11 @@ const abi = B3TRGovernor__factory.abi
 const method = "getQuadraticVotingPower" as const
 
 /**
- * Returns the query key for fetching the snapshot voting power of a proposal round.
+ * Returns the query key for fetching the snapshot user quadratic voting power of a proposal round.
  * @param roundId - The ID of the proposal round.
- * @returns The query key for fetching the snapshot voting power.
+ * @returns The query key for fetching the snapshot user quadratic voting power.
  */
-export const getProposalSnapshotVotingPowerQueryKey = (userAddress: string, roundId: number) => {
+export const getProposalSnapshotUserQuadraticVotingPowerQueryKey = (userAddress: string, roundId: number) => {
   return getCallClauseQueryKeyWithArgs({
     abi,
     address,
@@ -21,11 +21,11 @@ export const getProposalSnapshotVotingPowerQueryKey = (userAddress: string, roun
 }
 
 /**
- * Custom hook for fetching the snapshot voting power of a proposal round.
+ * Custom hook for fetching the snapshot user quadratic voting power of a proposal round.
  * @param roundId - The ID of the proposal round.
- * @returns The snapshot voting power of the proposal round.
+ * @returns The snapshot user quadratic voting power of the proposal round.
  */
-export const useProposalSnapshotVotingPower = (roundId?: number, enabled = true) => {
+export const useProposalSnapshotUserQuadraticVotingPower = (roundId?: number, enabled = true) => {
   const { account } = useWallet()
   return useCallClause({
     abi,

@@ -1,25 +1,24 @@
 import { useProposalEnriched } from "@/hooks/proposals/common"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useQuery } from "@tanstack/react-query"
-import { useWallet } from "@vechain/vechain-kit"
 
-export const getUserProposalsCreatedEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "CREATED", user]
+export const getUserProposalsCreatedEventsQueryKey = (walletAddress: string) => [
+  "PROPOSALS",
+  "ALL",
+  "CREATED",
+  walletAddress,
+]
 
-export const useUserCreatedProposal = (user?: string) => {
-  const proposal = useProposalEnriched()
-  const { account } = useWallet()
+export const useUserCreatedProposal = (walletAddress: string) => {
+  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
 
   return useQuery({
-    queryKey: getUserProposalsCreatedEventsQueryKey(user ?? undefined),
+    queryKey: getUserProposalsCreatedEventsQueryKey(walletAddress),
     queryFn: () => {
-      const lowerCaseUser = user?.toLowerCase()
-      const lowerCaseAccount = account?.address?.toLowerCase()
       const filteredProposals =
-        proposal.proposals?.filter(
-          p =>
-            p.proposerAddress.toLowerCase() === lowerCaseUser || p.proposerAddress.toLowerCase() === lowerCaseAccount,
-        ) ?? []
+        proposals?.filter(proposal => compareAddresses(proposal.proposerAddress, walletAddress)) ?? []
       return filteredProposals
     },
-    enabled: !!user || (!!account?.address && !!proposal.proposals),
+    enabled: !!walletAddress || (!!walletAddress && !!proposals),
   })
 }

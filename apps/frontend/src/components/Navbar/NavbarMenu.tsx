@@ -1,3 +1,4 @@
+"use client"
 import { Button, Heading, Icon, Popover, Portal, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"

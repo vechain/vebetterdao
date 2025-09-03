@@ -27,8 +27,8 @@ export const useProposalDepositEvent = (proposalId: string) => {
 
   // Get the deposit threshold
   const proposalDepositThresholdBN = useMemo(
-    () => BigInt(proposal.proposal?.depositThreshold || 0),
-    [proposal.proposal?.depositThreshold],
+    () => BigInt(proposal?.depositThreshold || 0),
+    [proposal?.depositThreshold],
   )
 
   // Get the community deposits
