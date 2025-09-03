@@ -24,31 +24,31 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       title: t("Endorsed and active"),
       description:
         "This app has enough score and will participate in upcoming allocation rounds, if not already included.",
-      backgroundColor: "#E9FDF1",
-      color: "#3DBA67",
+      backgroundColor: "success.subtle",
+      color: "success.primary",
       icon: UilCheckCircle,
     },
     [XAppStatus.UNENDORSED_AND_ELIGIBLE]: {
       title: t("In grace period"),
       description:
         "This app lost its score and is in a 2-week grace period until {{gracePeriodEndDate}}. It will participate in allocation rounds during this time, but must be re-endorsed ahead of the round starting after that date to continue participating.",
-      backgroundColor: "#FFF3E5",
-      color: "#F29B32",
+      backgroundColor: "warning.subtle",
+      color: "warning.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.UNENDORSED_NOT_ELIGIBLE]: {
       title: t("Endorsement lost"),
       description: "This app lost its score and will not participate in allocation rounds until it is endorsed again.",
-      backgroundColor: "#FCEEF1",
-      color: "#C84968",
+      backgroundColor: "error.subtle",
+      color: "error.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.BLACKLISTED]: {
       title: t("Blacklisted"),
       description:
         "This app was blacklisted by the community and will not join future allocation rounds while blacklisted.",
-      backgroundColor: "#F8F8F8",
-      color: "#6A6A6A",
+      backgroundColor: "bg.tertiary",
+      color: "text.subtle",
       icon: UilExclamationCircle,
     },
   }

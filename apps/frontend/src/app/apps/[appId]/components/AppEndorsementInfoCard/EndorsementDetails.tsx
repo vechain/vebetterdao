@@ -66,7 +66,7 @@ export const EndorsementDetails = ({
         <Skeleton loading={isAppEndorsersLoading}>
           <HStack>
             {endorsers && endorsers.length > 0 && <EndorsersIcon endorsers={endorsers} />}
-            <Text textStyle={"2xl"} fontWeight="bold" color="#004CFC">
+            <Text textStyle={"xl"} fontWeight="bold" color="actions.secondary.text-lighter">
               {endorsers?.length}
             </Text>
           </HStack>

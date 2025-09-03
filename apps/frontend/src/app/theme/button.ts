@@ -25,7 +25,7 @@ export const buttonRecipe = defineRecipe({
 
       secondary: {
         rounded: "full",
-        fontSize: "16px",
+        fontSize: "1rem",
         fontWeight: 500,
         px: 6,
         py: 3,

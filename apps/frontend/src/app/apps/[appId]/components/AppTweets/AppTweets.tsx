@@ -127,7 +127,7 @@ export const AppTweets = () => {
       />
       <VStack align="stretch" gap={4}>
         <HStack justify={"space-between"} flexWrap={"wrap"}>
-          <Heading size="4xl">{t("App updates")}</Heading>
+          <Heading size="2xl">{t("App updates")}</Heading>
           {isAdminOrModerator && (
             <>
               {editMode ? (
