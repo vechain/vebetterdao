@@ -1,4 +1,4 @@
-import { VStack, Steps, Circle, HStack, Text } from "@chakra-ui/react"
+import { VStack, Steps, Circle, HStack, Text, Heading } from "@chakra-ui/react"
 import { useMemo, useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { UilCheck } from "@iconscout/react-unicons"
@@ -17,7 +17,6 @@ export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
       states.map((state, i) => {
         const milestone = proposal.milestones[i]
         return {
-          state,
           body: milestone ? (
             <MilestonesActionsItem key={i} index={i} state={state} milestone={milestone} proposalId={proposal.id} />
           ) : (
@@ -30,64 +29,73 @@ export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
     [states, proposal.id, proposal.milestones],
   )
 
+  const isAllMilestoneCompleted = states.every(s => s === "Claimed")
+  const displaySteps = useMemo(() => {
+    const base = steps
+    if (!isAllMilestoneCompleted) return base
+
+    return [
+      ...base,
+      {
+        body: (
+          <HStack>
+            <Heading size="md" fontWeight="semibold">
+              {t("Grant Completed")}
+            </Heading>
+          </HStack>
+        ),
+        _isCompletion: true as const,
+      },
+    ] as ((typeof steps)[number] & { _isCompletion?: true })[]
+  }, [steps, isAllMilestoneCompleted, t])
+
   const [step, setStep] = useState(0)
+
   useEffect(() => {
     const pendingIndex = states.findIndex(s => s === "Pending")
-    const allClaimedOrApproved = states.every(s => s === "Claimed")
-
-    if (pendingIndex === -1 && !allClaimedOrApproved) {
-      setStep(steps.length - 1)
+    if (isAllMilestoneCompleted) {
+      setStep(displaySteps.length)
     } else {
-      setStep(allClaimedOrApproved ? steps.length : pendingIndex)
+      setStep(pendingIndex >= 0 ? pendingIndex : Math.max(0, steps.length - 1))
     }
-  }, [states])
+  }, [states, isAllMilestoneCompleted, displaySteps.length, steps.length])
 
   return (
-    <VStack gap={4} align="flex-start" w="full" p={4}>
-      <Steps.Root
-        orientation="vertical"
-        defaultStep={0}
-        count={steps.length}
-        size="sm"
-        step={step}
-        onStepChange={e => setStep(e.step)}
-        variant="primaryVertical">
-        <VStack>
-          <Steps.List>
-            {steps.map((step, index) => (
-              <Steps.Item key={index} index={index}>
-                <Steps.Indicator>
-                  <Steps.Status
-                    incomplete={<Circle bg="#004CFC" size="0%" />}
-                    complete={
-                      <Circle bg="#004CFC" size="50%">
-                        <UilCheck color="white" />
-                      </Circle>
-                    }
-                    current={<Circle bg="#004CFC" size="50%" />}
-                  />
-                </Steps.Indicator>
-                <VStack align="flex-start" gap={4}>
-                  {step.body}
-                </VStack>
-                <Steps.Separator />
-              </Steps.Item>
-            ))}
-          </Steps.List>
+    <Steps.Root
+      orientation="vertical"
+      defaultStep={0}
+      count={displaySteps.length}
+      size="sm"
+      w="full"
+      step={step}
+      onStepChange={e => setStep(e.step)}
+      variant="primaryVertical">
+      <VStack w="full">
+        <Steps.List w="full">
+          {displaySteps.map((item, index) => (
+            <Steps.Item key={index} index={index} w="full">
+              <Steps.Indicator>
+                <Steps.Status
+                  incomplete={<Circle bg="#E2E8F0" boxSize="10px" />}
+                  complete={
+                    <Circle bg="#004CFC" boxSize="16px" color="white">
+                      <UilCheck size="10" />
+                    </Circle>
+                  }
+                  current={<Circle bg="#004CFC" boxSize="16px" />}
+                />
+              </Steps.Indicator>
 
-          <Steps.CompletedContent>
-            <VStack align="flex-start" gap={3} pt={2}>
-              <HStack>
-                <Circle bg="#004CFC" size="28px">
-                  <UilCheck color="white" />
-                </Circle>
-                <Text fontWeight="semibold">{t("All milestones completed")}</Text>
-              </HStack>
-            </VStack>
-          </Steps.CompletedContent>
-        </VStack>
-      </Steps.Root>
-    </VStack>
+              <VStack align="flex-start" gap={4} w="full">
+                {item.body}
+              </VStack>
+
+              <Steps.Separator />
+            </Steps.Item>
+          ))}
+        </Steps.List>
+      </VStack>
+    </Steps.Root>
   )
 }
 // TODO: Reject will be on the right side as cancel proposal

@@ -11,19 +11,22 @@ import {
   Progress,
   Text,
   Box,
+  Tabs,
 } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { useMemo } from "react"
 import { ProposalType, ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useTranslation } from "react-i18next"
-import { useProposalEnriched } from "@/hooks"
 import { CountdownBoxes } from "@/components"
 import { TbClockHour8 } from "react-icons/tb"
 import { FiBarChart2 } from "react-icons/fi"
 import { FaRegHeart, FaHeart } from "react-icons/fa"
 import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
 import dayjs from "dayjs"
+import { useProposalEnriched, useBreakpoints } from "@/hooks"
+// import { ProposalTimeline } from "./ProposalTimeline"
+
 type Props = {
   proposalId: string
 }
@@ -44,6 +47,7 @@ const ProposalInteractionCard = ({ proposal }: { proposal: ProposalEnriched }) =
   const daysLeft = isVotingPhase ? daysLeftToVoting : daysLeftToSupport
   const hoursLeft = isVotingPhase ? hoursLeftToVoting : hoursLeftToSupport
   const minutesLeft = isVotingPhase ? minutesLeftToVoting : minutesLeftToSupport
+
   return (
     <Card.Root variant="baseWithBorder">
       <Card.Header as={HStack}>
@@ -87,6 +91,7 @@ const ProposalInteractionCard = ({ proposal }: { proposal: ProposalEnriched }) =
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { data: { proposals } = { proposals: [] }, isLoading } = useProposalEnriched()
+  const { isMobile } = useBreakpoints()
 
   const proposal = useMemo(() => {
     return proposals.find(p => p.id === proposalId)
@@ -115,11 +120,53 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       <PageBreadcrumb items={BreadcrumItems} />
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
-        <GridItem colSpan={[3, 3, 2]}>
+        <GridItem colSpan={[3, 3, 2]} order={[2, 2, 1]}>
           <ProposalOverview isGrant={isGrant} proposal={proposal} isLoading={isLoading} />
         </GridItem>
-        <GridItem colSpan={[3, 3, 1]}>
-          <ProposalInteractionCard proposal={proposal} />
+        <GridItem colSpan={[3, 3, 1]} order={[1, 1, 2]}>
+          <VStack align="stretch" gap={8}>
+            {isMobile ? (
+              <Tabs.Root defaultValue="session" w="full" colorPalette="blue" fitted>
+                <Tabs.List>
+                  <Tabs.Trigger
+                    value="session"
+                    color="text"
+                    fontWeight="400"
+                    _selected={{
+                      color: "#004CFC",
+                      fontWeight: "800",
+                    }}>
+                    {"Session"}
+                  </Tabs.Trigger>
+                  <Tabs.Trigger
+                    value="timeline"
+                    color="text.subtle"
+                    fontWeight="600"
+                    _selected={{
+                      color: "#004CFC",
+                      fontWeight: "800",
+                    }}>
+                    {"Timeline"}
+                  </Tabs.Trigger>
+                </Tabs.List>
+                <Tabs.Content value="session" pt={6}>
+                  <ProposalInteractionCard proposal={proposal} />
+                </Tabs.Content>
+                <Tabs.Content value="timeline" pt={6}>
+                  <Text>{"Timeline"}</Text>
+                  {/* <ProposalTimeline proposal={proposal} /> */}
+                </Tabs.Content>
+              </Tabs.Root>
+            ) : (
+              <>
+                <ProposalInteractionCard proposal={proposal} />
+                <Text>{"Timeline"}</Text>
+
+                {/* <Session Information component/> */}
+                {/* <ProposalTimeline proposal={proposal} /> */}
+              </>
+            )}
+          </VStack>
         </GridItem>
       </Grid>
     </VStack>
