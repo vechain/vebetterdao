@@ -23,15 +23,26 @@ export interface B3trTransaction {
   appId?: string
   proof?: {
     version: number
-    proof?: {
+    description?: string
+    proof: {
+      description?: string
       image?: string
+      link?: string
+      text?: string
+      video?: string
     }
     impact?: {
       carbon?: number
       water?: number
       energy?: number
       waste_mass?: number
+      waste_items?: number
+      waste_reduction?: number
+      biodiversity?: number
+      people?: number
+      timber?: number
       plastic?: number
+      learning_time?: number
       trees_planted?: number
       calories_burned?: number
       clean_energy_production_wh?: number
