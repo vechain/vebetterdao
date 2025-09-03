@@ -1,37 +1,34 @@
-import { ProposalMetadata } from "@/api"
 import { ProposalStatusBadge } from "@/components"
 import { Box, HStack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
-import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  proposalId: string
-  metadata?: ProposalMetadata
+  proposal: ProposalEnriched | GrantProposalEnriched
+  isLoading: boolean
 }
 
-export const ProposalBox = ({ proposalId, metadata }: Props) => {
+export const ProposalBox = ({ proposal, isLoading }: Props) => {
   const router = useRouter()
-
-  const { proposal } = useProposalDetail(proposalId)
 
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
 
   const title = useMemo(() => {
-    if (!metadata?.title) return "Proposal title temporarily unavailable"
+    if (!proposal?.title) return "Proposal title temporarily unavailable"
 
-    if (isDesktop && metadata.title.length > 95) return metadata.title.slice(0, 95) + "..."
-    if (!isDesktop && metadata.title.length > 38) return metadata.title.slice(0, 38) + "..."
+    if (isDesktop && proposal.title.length > 95) return proposal.title.slice(0, 95) + "..."
+    if (!isDesktop && proposal.title.length > 38) return proposal.title.slice(0, 38) + "..."
 
-    return metadata.title
-  }, [metadata?.title, isDesktop])
+    return proposal.title
+  }, [proposal?.title, isDesktop])
 
   const goToProposal = useCallback(() => {
-    router.push(`/proposals/${proposalId}`)
-  }, [router, proposalId])
+    router.push(`/proposals/${proposal.id}`)
+  }, [router, proposal.id])
 
-  if (proposal.isStateLoading || proposal.state === undefined) {
+  if (isLoading || proposal.state === undefined) {
     return null
   }
 

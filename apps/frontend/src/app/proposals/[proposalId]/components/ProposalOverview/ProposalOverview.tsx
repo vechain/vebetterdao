@@ -5,31 +5,20 @@ import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
-import { MilestonesActions } from "../"
-import { useProposalDetail } from "../../hooks"
-
-const GrantDetailsTab = () => {
-  return (
-    <VStack align="stretch" gap={4} p={4}>
-      <Text fontSize="lg" fontWeight="600">
-        {"WIP"}
-      </Text>
-      <MilestonesActions />
-    </VStack>
-  )
-}
+import { MilestonesActions } from "../../../grants/components"
+import { ProposalContentAndActions } from "../ProposalContentAndActions"
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewProps = {
-  overviewContent?: React.ReactNode
   isGrant?: boolean
-  proposalId: string
+  proposal: ProposalEnriched | GrantProposalEnriched
+  isLoading: boolean
 }
 
-export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: ProposalOverviewProps) => {
+export const ProposalOverview = ({ isGrant, proposal, isLoading }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { proposal } = useProposalDetail(proposalId)
   const { data: vnsData } = useVechainDomain(proposal?.proposerAddress)
   const proposerName = vnsData?.domain
 
@@ -37,14 +26,14 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
   const HeaderContent = () => (
     <VStack gap={5} align="flex-start" w="full">
       <HStack justify={"space-between"} align={"flex-start"} w="full">
-        <Skeleton loading={!proposal || proposal.isStateLoading}>
+        <Skeleton loading={isLoading}>
           <ProposalStatusBadge
             proposalState={proposal?.state}
             isDepositReached={false} // TODO: Handle deposit reached from separate hook
             proposalType={proposal?.type}
           />
         </Skeleton>
-        <Skeleton loading={!proposal}>
+        <Skeleton loading={isLoading}>
           {proposal && (
             <HStack>
               <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
@@ -58,16 +47,9 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
         </Skeleton>
       </HStack>
 
-      <Skeleton loading={!proposal}>
+      <Skeleton loading={isLoading}>
         <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
       </Skeleton>
-    </VStack>
-  )
-
-  // Overview Tab Content (just the overview content)
-  const OverviewTabContent = () => (
-    <VStack gap={4} align="flex-start" w="full">
-      {overviewContent}
     </VStack>
   )
 
@@ -103,14 +85,14 @@ export const ProposalOverview = ({ overviewContent, isGrant, proposalId }: Propo
                 </Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="overview" pt={6}>
-                <OverviewTabContent />
+                <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
               <Tabs.Content value="milestones" pt={6}>
-                <GrantDetailsTab />
+                <MilestonesActions proposalId={proposal.id} />
               </Tabs.Content>
             </Tabs.Root>
           ) : (
-            <OverviewTabContent />
+            <ProposalContentAndActions proposal={proposal} />
           )}
         </VStack>
       </Card.Body>

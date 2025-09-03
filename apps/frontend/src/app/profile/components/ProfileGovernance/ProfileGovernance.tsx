@@ -1,4 +1,4 @@
-import { useProposalsCreatedFromIds, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
+import { useUserVotedProposals, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
 import { useCallback, useMemo, useState } from "react"
 import {
   EmptyStateGovernance,
@@ -19,6 +19,7 @@ import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { useUserCreatedProposal } from "@/hooks/proposals/common"
+import { useWallet } from "@vechain/vechain-kit"
 
 enum ListView {
   ALL,
@@ -33,8 +34,11 @@ type Props = {
   address: string
 }
 export const ProfileGovernance = ({ address }: Props) => {
-  const { data: createdProposals } = useUserCreatedProposal(address ?? "")
-  const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
+  const { account } = useWallet()
+  const profileWalletAddress = address ?? account?.address ?? ""
+
+  const { data: createdProposals, isLoading: isCreatedProposalsLoading } = useUserCreatedProposal(profileWalletAddress)
+  const { data: votedProposals, isLoading: isVotedProposalsLoading } = useUserProposalsVoteEvents(profileWalletAddress)
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
@@ -42,9 +46,9 @@ export const ProfileGovernance = ({ address }: Props) => {
 
   const votedProposalsIds = useMemo(() => votedProposals?.map(proposal => proposal.proposalId), [votedProposals])
 
-  const { created: votedProposalsWithDescription } = useProposalsCreatedFromIds(votedProposalsIds)
+  const votedProposalsWithDescription = useUserVotedProposals(votedProposalsIds)
 
-  const topVotedApps = useUserTopVotedApps(address ?? "")
+  const topVotedApps = useUserTopVotedApps(profileWalletAddress)
 
   const [listView, setListView] = useState<ListView>(ListView.ALL)
 
@@ -95,6 +99,10 @@ export const ProfileGovernance = ({ address }: Props) => {
   const isFirstVotedProposalsAvailable = firstVotedProposals && firstVotedProposals.length > 0
   const isFirstTopVotedAppsAvailable = firstTopVotedApps && firstTopVotedApps.length > 0
 
+  const isLoading = useMemo(() => {
+    return isCreatedProposalsLoading || isVotedProposalsLoading
+  }, [isCreatedProposalsLoading, isVotedProposalsLoading])
+
   switch (listView) {
     case ListView.ALL:
       return (
@@ -107,6 +115,7 @@ export const ProfileGovernance = ({ address }: Props) => {
               firstProposals={firstCreatedProposals}
               isMoreProposals={isMoreCreatedProposals}
               isCreatedProposals
+              isLoading={isLoading}
               onSeeAllProposals={onSeeAllCreatedProposals}
             />
           )}
@@ -114,6 +123,7 @@ export const ProfileGovernance = ({ address }: Props) => {
             <PreviewCreatedProposals
               firstProposals={firstVotedProposals}
               isMoreProposals={isMoreVotedProposals}
+              isLoading={isLoading}
               onSeeAllProposals={onSeeAllVotedProposals}
             />
           ) : (
@@ -149,9 +159,11 @@ export const ProfileGovernance = ({ address }: Props) => {
         </>
       )
     case ListView.CREATED:
-      return <PaginatedProposals proposals={createdProposals ?? []} goBack={onGoBack} />
+      return <PaginatedProposals proposals={createdProposals ?? []} isLoading={isLoading} goBack={onGoBack} />
     case ListView.VOTED:
-      return <PaginatedProposals proposals={votedProposalsWithDescription ?? []} goBack={onGoBack} />
+      return (
+        <PaginatedProposals proposals={votedProposalsWithDescription ?? []} isLoading={isLoading} goBack={onGoBack} />
+      )
     case ListView.APPS_VOTED:
       return <PaginatedTopVotedApps topVotedApps={topVotedApps ?? []} goBack={onGoBack} />
   }

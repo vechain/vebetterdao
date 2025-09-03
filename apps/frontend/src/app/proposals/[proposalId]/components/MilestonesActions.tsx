@@ -1,13 +1,12 @@
 import { Card, Button, VStack, HStack, Heading } from "@chakra-ui/react"
-import { useProposalDetail } from "../hooks"
 import { queryClient } from "@/api"
 import { getProposalStateQueryKey } from "@/api/contracts/governance"
 import { useApproveMilestone, useClaimGrants, useRejectGrant, useIsMilestoneClaimable } from "@/hooks"
 import { useAccountPermissions } from "@/api/contracts/account/hooks"
 import { useWallet } from "@vechain/vechain-kit"
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
-export const MilestonesActions = () => {
-  const { proposal } = useProposalDetail()
+export const MilestonesActions = ({ proposal }: { proposal: ProposalEnriched | GrantProposalEnriched }) => {
   const { account } = useWallet()
 
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
