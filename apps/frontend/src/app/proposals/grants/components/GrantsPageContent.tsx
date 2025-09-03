@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem, Skeleton } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
@@ -21,7 +21,7 @@ enum GrantsStep {
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
-  const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] }, isLoading } = useProposalEnriched()
+  const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] } } = useProposalEnriched()
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const approvedStates = useMemo(
@@ -114,13 +114,11 @@ export const GrantsPageContent = () => {
         )}
       </HStack>
       <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
-      <Skeleton loading={isLoading}>
-        <GrantsStatsCards
-          totalApplications={enrichedGrantProposals?.length || 0}
-          totalApproved={totalGrantsApproved}
-          totalFunds={totalDistributedAmount.toNumber()}
-        />
-      </Skeleton>
+      <GrantsStatsCards
+        totalApplications={enrichedGrantProposals?.length || 0}
+        totalApproved={totalGrantsApproved}
+        totalFunds={totalDistributedAmount.toNumber()}
+      />
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
