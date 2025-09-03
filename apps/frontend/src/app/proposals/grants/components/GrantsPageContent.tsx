@@ -8,6 +8,8 @@ import { GrantsProposalCard } from "./GrantsProposalCard"
 import { useProposalEnriched } from "@/hooks/proposals/common"
 import { HowToSupportCard } from "../../components/components"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useMilestoneClaimedEvents } from "@/hooks/proposals/grants/useMilestoneClaimedEvents"
+import BigNumber from "bignumber.js"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -20,20 +22,24 @@ export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] }, isLoading } = useProposalEnriched()
+  const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
-  //Reduce all the enrichedGrantProposals [[ProposalState.Succeeded, ProposalState.InDevelopment]]
-  // grantAnalytics.grantsByState[ProposalState.Succeeded] +
-  // grantAnalytics.grantsByState[ProposalState.InDevelopment] +
-  // grantAnalytics.grantsByState[ProposalState.Completed] +
-  // grantAnalytics.grantsByState[ProposalState.Executed]
+  const approvedStates = useMemo(
+    () => [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed],
+    [],
+  )
 
+  //Total grants approved
   const totalGrantsApproved = useMemo(() => {
-    return enrichedGrantProposals.filter(proposal =>
-      [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed].includes(
-        proposal.state,
-      ),
-    ).length
-  }, [enrichedGrantProposals])
+    return enrichedGrantProposals.filter(proposal => approvedStates.includes(proposal.state)).length
+  }, [enrichedGrantProposals, approvedStates])
+
+  //Total distributed amount
+  const totalDistributedAmount = useMemo(() => {
+    return (
+      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(BigNumber(event.amount)), BigNumber(0)) ?? BigNumber(0)
+    )
+  }, [milestoneClaimedEvents])
 
   const stepsArray = useMemo(
     () => [
@@ -83,10 +89,6 @@ export const GrantsPageContent = () => {
     [t],
   )
 
-  const totalDistributedAmount = useMemo(() => {
-    return 0
-  }, [])
-
   return (
     <VStack w="full" gap={8} pb={8}>
       <HStack
@@ -116,7 +118,7 @@ export const GrantsPageContent = () => {
         <GrantsStatsCards
           totalApplications={enrichedGrantProposals?.length || 0}
           totalApproved={totalGrantsApproved}
-          totalFunds={totalDistributedAmount}
+          totalFunds={totalDistributedAmount.toNumber()}
         />
       </Skeleton>
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
