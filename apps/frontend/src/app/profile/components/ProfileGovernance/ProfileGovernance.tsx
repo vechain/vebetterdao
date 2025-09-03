@@ -1,4 +1,4 @@
-import { useProposalsCreatedFromIds, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
+import { useUserVotedProposals, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
 import { useCallback, useMemo, useState } from "react"
 import {
   EmptyStateGovernance,
@@ -46,7 +46,7 @@ export const ProfileGovernance = ({ address }: Props) => {
 
   const votedProposalsIds = useMemo(() => votedProposals?.map(proposal => proposal.proposalId), [votedProposals])
 
-  const { created: votedProposalsWithDescription } = useProposalsCreatedFromIds(votedProposalsIds)
+  const votedProposalsWithDescription = useUserVotedProposals(votedProposalsIds)
 
   const topVotedApps = useUserTopVotedApps(profileWalletAddress)
 

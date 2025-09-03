@@ -1,4 +1,3 @@
-import { ProposalMetadata } from "@/api"
 import { ProposalStatusBadge } from "@/components"
 import { Box, HStack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -8,23 +7,22 @@ import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grant
 
 type Props = {
   proposal: ProposalEnriched | GrantProposalEnriched
-  metadata?: ProposalMetadata
   isLoading: boolean
 }
 
-export const ProposalBox = ({ proposal, metadata, isLoading }: Props) => {
+export const ProposalBox = ({ proposal, isLoading }: Props) => {
   const router = useRouter()
 
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
 
   const title = useMemo(() => {
-    if (!metadata?.title) return "Proposal title temporarily unavailable"
+    if (!proposal?.title) return "Proposal title temporarily unavailable"
 
-    if (isDesktop && metadata.title.length > 95) return metadata.title.slice(0, 95) + "..."
-    if (!isDesktop && metadata.title.length > 38) return metadata.title.slice(0, 38) + "..."
+    if (isDesktop && proposal.title.length > 95) return proposal.title.slice(0, 95) + "..."
+    if (!isDesktop && proposal.title.length > 38) return proposal.title.slice(0, 38) + "..."
 
-    return metadata.title
-  }, [metadata?.title, isDesktop])
+    return proposal.title
+  }, [proposal?.title, isDesktop])
 
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposal.id}`)
