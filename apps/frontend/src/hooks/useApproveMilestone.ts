@@ -5,6 +5,7 @@ import { buildClause } from "@/utils/buildClause"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getIsMilestoneClaimableQueryKey } from "./proposals/grants/useIsMilestoneClaimable"
+import { getMilestoneStateQueryKey } from "./proposals/grants/useMilestoneState"
 
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const GrantsManagerInterface = GrantsManager__factory.createInterface()
@@ -31,9 +32,12 @@ export const useApproveMilestone = ({ proposalId, milestoneIndex, onSuccess }: P
     ]
   }, [proposalId, milestoneIndex])
 
-  // TODO : Are they more keys to refetch ? ( state of the grant ? )
+  // TODO(Grant) : Are they more refetch query ?
   const refetchQueryKeys = useMemo(
-    () => [getIsMilestoneClaimableQueryKey(proposalId, milestoneIndex)],
+    () => [
+      getIsMilestoneClaimableQueryKey(proposalId, milestoneIndex),
+      getMilestoneStateQueryKey(proposalId, milestoneIndex),
+    ],
     [proposalId, milestoneIndex],
   )
 
