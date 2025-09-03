@@ -22,7 +22,7 @@ export const UserTransactions = ({ address }: Props) => {
   }, [data])
 
   const hasNextPage = useMemo(() => {
-    return data?.pages[0]?.pagination.hasNext ?? false
+    return data?.pages[0]?.pagination?.hasNext ?? false
   }, [data])
 
   return (

@@ -2,54 +2,42 @@ import { buildQueryString } from "@/api/utils"
 import { TransactionType } from "@/constants"
 import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { z } from "zod"
 
 const indexerUrl = getConfig().indexerUrl
 
-export const TransactionsResponseSchema = z.object({
-  pagination: z.object({
-    hasNext: z.boolean(),
-  }),
-  data: z
-    .array(
-      z.object({
-        blockNumber: z.number(),
-        blockTimestamp: z.number(),
-        user: z.string(),
-        txId: z.string(),
-        amountB3TR: z.number().optional(),
-        amountVOT3: z.number().optional(),
-        txType: z.enum(["SWAP", "CLAIM_REWARD", "PROPOSAL_SUPPORT", "UPGRADE_GM", "B3TR_ACTION"]),
-        appId: z.string().optional(),
-        proof: z
-          .object({
-            version: z.number(),
-            proof: z
-              .object({
-                image: z.string().optional(),
-              })
-              .optional(),
-            impact: z
-              .object({
-                carbon: z.number().optional(),
-                water: z.number().optional(),
-                energy: z.number().optional(),
-                waste_mass: z.number().optional(),
-                plastic: z.number().optional(),
-                trees_planted: z.number().optional(),
-                calories_burned: z.number().optional(),
-                clean_energy_production_wh: z.number().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
-      }),
-    )
-    .default([]),
-})
+export interface TransactionsResponse {
+  pagination: {
+    hasNext: boolean
+  }
+  data: B3trTransaction[]
+}
 
-export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>
-export type B3trTransaction = z.infer<typeof TransactionsResponseSchema>["data"][number]
+export interface B3trTransaction {
+  blockNumber: number
+  blockTimestamp: number
+  user: string
+  txId: string
+  amountB3TR?: number
+  amountVOT3?: number
+  txType: "SWAP" | "CLAIM_REWARD" | "PROPOSAL_SUPPORT" | "UPGRADE_GM" | "B3TR_ACTION"
+  appId?: string
+  proof?: {
+    version: number
+    proof?: {
+      image?: string
+    }
+    impact?: {
+      carbon?: number
+      water?: number
+      energy?: number
+      waste_mass?: number
+      plastic?: number
+      trees_planted?: number
+      calories_burned?: number
+      clean_energy_production_wh?: number
+    }
+  }
+}
 
 type TransactionsRequest = {
   user: string
@@ -79,14 +67,9 @@ export const getTransactions = async (data: TransactionsRequest): Promise<Transa
   if (!response.ok) {
     throw new Error(`Failed to fetch transactions: ${response.statusText}`)
   }
-  try {
-    const result = await response.json()
 
-    return TransactionsResponseSchema.parse(result)
-  } catch (e) {
-    console.error(e)
-    throw new Error("Failed to parse response")
-  }
+  const res = await response.json()
+  return res
 }
 
 export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" | "size">) => [
