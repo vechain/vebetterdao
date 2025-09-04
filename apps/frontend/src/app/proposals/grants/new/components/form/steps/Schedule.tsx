@@ -1,33 +1,13 @@
-import { Grid, GridItem, HStack, Text, Skeleton, VStack, Card } from "@chakra-ui/react"
+import { useCanProposalStartInNextRound, useCurrentAllocationsRoundDeadline, useCurrentAllocationsRoundId } from "@/api"
+import { FormDateSelect } from "@/components/CustomFormFields"
+import { useEstimateBlockTimestamp } from "@/hooks"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+import { Grid, GridItem, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import dayjs from "dayjs"
+import { useMemo } from "react"
 import { Control, FieldErrors, UseFormRegister, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import { useCanProposalStartInNextRound, useCurrentAllocationsRoundDeadline, useCurrentAllocationsRoundId } from "@/api"
-import { useMemo } from "react"
-import dayjs from "dayjs"
-import { useEstimateBlockTimestamp } from "@/hooks"
-import { FormDateSelect } from "@/components/CustomFormFields"
-
-//TODO: Move to shared component
-type CountdownUnitProps = {
-  value: number
-  label: string
-}
-
-const CountdownUnit = ({ value, label }: CountdownUnitProps) => {
-  return (
-    <Card.Root variant="filledSmall" w="full">
-      <Card.Body textAlign="center">
-        <Text fontSize="lg" fontWeight="bold">
-          {Math.max(0, value)}
-        </Text>
-        <Text fontSize="xs" color="text.subtle" textAlign="center">
-          {label}
-        </Text>
-      </Card.Body>
-    </Card.Root>
-  )
-}
+import { CountdownBoxes } from "@/components"
 
 interface ScheduleProps {
   register: UseFormRegister<GrantFormData>
@@ -78,7 +58,9 @@ export const Schedule = ({ register, errors, control, watch }: ScheduleProps) =>
 
   // Calculate countdown based on selected option
   const countdownDate = selectedOption?.endDate || currentRoundDeadlineDate
-
+  const daysLeft = dayjs(countdownDate).diff(dayjs(), "days")
+  const hoursLeft = dayjs(countdownDate).diff(dayjs(), "hours") % 24
+  const minutesLeft = dayjs(countdownDate).diff(dayjs(), "minutes") % 60
   return (
     <Grid templateColumns={{ base: 5, md: 5 }} w="full" gap={6}>
       <GridItem colSpan={5}>
@@ -108,8 +90,7 @@ export const Schedule = ({ register, errors, control, watch }: ScheduleProps) =>
             {t("Support ends in")}
           </Text>
           <HStack gap={2} w="full">
-            <CountdownUnit value={dayjs(countdownDate).diff(dayjs(), "days")} label="Days" />
-            <CountdownUnit value={dayjs(countdownDate).diff(dayjs(), "hours") % 24} label="Hours" />
+            <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
           </HStack>
         </VStack>
       </GridItem>

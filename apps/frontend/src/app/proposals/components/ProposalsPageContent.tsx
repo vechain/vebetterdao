@@ -24,7 +24,6 @@ export const ProposalsPageContent = () => {
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
   const hasMetProposalCriteria = useMetProposalCriteria()
-
   const onNewClick = useCallback(() => {
     if (!account?.address) {
       open()
@@ -91,13 +90,8 @@ export const ProposalsPageContent = () => {
           {sortedProposals.map(proposal => (
             <ProposalInfoCard
               key={proposal.id}
-              id={proposal.id}
-              description={proposal.description ?? ""}
-              votingRoundId={proposal.votingRoundId}
-              title={proposal.title ?? ""}
-              state={proposal.state}
+              proposal={proposal}
               isDepositReached={proposal.isDepositReached ?? false}
-              type={proposal.type}
             />
           ))}
           {sortedProposals.length === 0 && !isLoading && (

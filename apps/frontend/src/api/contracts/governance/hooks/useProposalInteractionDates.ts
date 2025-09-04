@@ -4,15 +4,16 @@ import dayjs from "dayjs"
 import { useProposalSnapshot } from "./useProposalSnapshot"
 import { useProposalDeadline } from "./useProposalDeadline"
 import { useCurrentBlock } from "@vechain/vechain-kit"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 const blockTime = getConfig().network.blockTime
 
-export const useProposalVoteDates = (proposalId: string) => {
+export const useProposalInteractionDates = (proposal: ProposalEnriched) => {
   const { data: currentBlock } = useCurrentBlock()
-  const proposalSnapshot = useProposalSnapshot(proposalId)
-  const proposalDeadline = useProposalDeadline(proposalId)
+  const proposalSnapshot = useProposalSnapshot(proposal.id) //This is the end of support phase / start of voting phase
+  const proposalDeadline = useProposalDeadline(proposal.id) //This is the end of voting phase / start of execution phase
 
-  const votingStartDate = useMemo(() => {
+  const supportEndDate = useMemo(() => {
     if (!currentBlock?.number || !proposalSnapshot.data) return 0
     const endBlockFromNow = Number(proposalSnapshot.data) - currentBlock.number
 
@@ -29,11 +30,7 @@ export const useProposalVoteDates = (proposalId: string) => {
   }, [currentBlock?.number, proposalDeadline.data, proposalSnapshot.data])
 
   return {
-    votingStartBlock: proposalSnapshot.data,
-    votingStartDate,
-    isVotingStartDateLoading: proposalSnapshot.isLoading,
-    votingEndBlock: proposalDeadline.data,
+    supportEndDate,
     votingEndDate,
-    isVotingEndDateLoading: proposalDeadline.isLoading,
   }
 }

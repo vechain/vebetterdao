@@ -1991,6 +1991,12 @@
   "Amount to Grant": "Amount to Grant",
   "Approve Milestone": "Approve Milestone",
   "Milestones are unavailable yet": "Milestones are unavailable yet",
+  "All milestones completed": "All milestones completed",
+  "Ends in": "Ends in",
+  "Results": "Results",
+  "Details": "Details",
+  "You supported with": "You supported with",
+  "{{votingPower}} VOT3": "{{votingPower}} VOT3",
   "Grant Completed": "Grant Completed",
   "Session": "Session"
 }
