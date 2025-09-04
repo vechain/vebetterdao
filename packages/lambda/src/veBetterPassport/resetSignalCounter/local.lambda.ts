@@ -4,7 +4,7 @@ import dotenv from "dotenv"
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, Transaction, HDKey, TransactionClause } from "@vechain/sdk-core"
 
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import localConfig from "@repo/config/local"
 import { getConfig } from "@repo/config"
 import { buildTxBody } from "../../helpers"
