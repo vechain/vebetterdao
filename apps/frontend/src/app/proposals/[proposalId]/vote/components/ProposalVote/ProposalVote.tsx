@@ -65,7 +65,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
   const router = useRouter()
   const { account } = useWallet()
 
-  const proposal = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalEnrichedById(proposalId)
 
   //TODO: Ensure we have a proposalRoundId
   const proposalRoundId = proposal?.votingRoundId ?? 0

@@ -1,4 +1,3 @@
-import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
 import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
 import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { Circle, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
@@ -8,33 +7,31 @@ import { useTranslation } from "react-i18next"
 
 import { MilestonesActionsItem } from "./MilestonesActionsItem"
 
-export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
+export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   const { t } = useTranslation()
-  const proposal = useProposalEnrichedById(proposalId)
-  const grantProposal = proposal as GrantProposalEnriched
 
-  const states = getAllMilestoneStates(grantProposal)
+  const states = getAllMilestoneStates(proposal)
   const steps = useMemo(
     () =>
       states.map((state, i) => {
-        const milestone = grantProposal?.milestones?.[i]
+        const milestone = proposal?.milestones?.[i]
         return {
           body: milestone ? (
             <MilestonesActionsItem
-              key={`milestones-actions-step-${key}`}
+              key={`milestones-actions-step-${i}`}
               index={i}
               state={state}
               milestone={milestone}
-              proposalId={grantProposal?.id}
+              proposalId={proposal?.id ?? ""}
             />
           ) : (
-            <HStack key={`milestones-actions-step-${key}`}>
+            <HStack key={`milestones-actions-step-${i}`}>
               <Text>{t("Milestones are unavailable yet")}</Text>
             </HStack>
           ),
         }
       }),
-    [states, grantProposal?.milestones, grantProposal?.id, t],
+    [proposal?.id, proposal?.milestones, states, t],
   )
 
   const isAllMilestoneCompleted = states.every(s => s === "Claimed")

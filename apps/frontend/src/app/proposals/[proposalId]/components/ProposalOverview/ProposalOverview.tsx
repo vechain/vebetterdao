@@ -1,21 +1,21 @@
-import { Card, HStack, Heading, Skeleton, Text, VStack, Tabs } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { AddressIcon } from "@/components/AddressIcon"
-import { useTranslation } from "react-i18next"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "@/components"
+import { AddressIcon } from "@/components/AddressIcon"
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { Card, Heading, HStack, Tabs, Text, VStack } from "@chakra-ui/react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
 import { MilestonesActions } from "../../../grants/components"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
-  proposal: ProposalEnriched | GrantProposalEnriched
-  isLoading: boolean
+  proposal?: ProposalEnriched | GrantProposalEnriched
 }
 
-export const ProposalOverview = ({ isGrant, proposal, isLoading }: ProposalOverviewProps) => {
+export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
@@ -26,30 +26,24 @@ export const ProposalOverview = ({ isGrant, proposal, isLoading }: ProposalOverv
   const HeaderContent = () => (
     <VStack gap={5} align="flex-start" w="full">
       <HStack justify={"space-between"} align={"flex-start"} w="full">
-        <Skeleton loading={isLoading}>
-          <ProposalStatusBadge
-            proposalState={proposal?.state}
-            isDepositReached={false} // TODO: Handle deposit reached from separate hook
-            proposalType={proposal?.type}
-          />
-        </Skeleton>
-        <Skeleton loading={isLoading}>
-          {proposal && (
-            <HStack>
-              <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
-              {compareAddresses(proposal.proposerAddress, account?.address || "") ? (
-                <Text>{t("You")}</Text>
-              ) : (
-                <Text>{proposerName || humanAddress(proposal.proposerAddress, 4, 6)}</Text>
-              )}
-            </HStack>
-          )}
-        </Skeleton>
+        <ProposalStatusBadge
+          proposalState={proposal?.state}
+          isDepositReached={false} // TODO: Handle deposit reached from separate hook
+          proposalType={proposal?.type}
+        />
+        {proposal && (
+          <HStack>
+            <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
+            {compareAddresses(proposal.proposerAddress, account?.address || "") ? (
+              <Text>{t("You")}</Text>
+            ) : (
+              <Text>{proposerName || humanAddress(proposal.proposerAddress, 4, 6)}</Text>
+            )}
+          </HStack>
+        )}
       </HStack>
 
-      <Skeleton loading={isLoading}>
-        <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
-      </Skeleton>
+      <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
     </VStack>
   )
 
@@ -88,7 +82,7 @@ export const ProposalOverview = ({ isGrant, proposal, isLoading }: ProposalOverv
                 <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
               <Tabs.Content value="milestones" pt={6}>
-                <MilestonesActions proposalId={proposal.id} />
+                <MilestonesActions proposal={proposal as GrantProposalEnriched} />
               </Tabs.Content>
             </Tabs.Root>
           ) : (

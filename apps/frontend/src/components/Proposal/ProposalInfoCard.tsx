@@ -1,13 +1,14 @@
-import { Text, Card, VStack, HStack, Box, Stack } from "@chakra-ui/react"
-import React, { useCallback, useMemo } from "react"
-import { parseDate } from "@/utils"
 import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
 import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress"
-import { useTranslation } from "react-i18next"
-import { useRouter } from "next/navigation"
-import { MdArrowOutward } from "react-icons/md"
-import { ProposalStatusBadge } from "./ProposalStatusBadge"
 import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { parseDate } from "@/utils"
+import { Box, Card, HStack, Stack, Text, VStack } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
+import React, { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { MdArrowOutward } from "react-icons/md"
+
+import { ProposalStatusBadge } from "./ProposalStatusBadge"
 
 //TODO: This is a temporary type, we need to fix the type expected
 export const ProposalInfoCard: React.FC<{
@@ -17,7 +18,7 @@ export const ProposalInfoCard: React.FC<{
   const { id, description, title, state, type } = proposal
   const router = useRouter()
 
-  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal)
+  const { supportEndDate, votingEndDate } = useProposalInteractionDates(id)
 
   const { t } = useTranslation()
 

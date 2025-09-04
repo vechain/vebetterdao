@@ -1,17 +1,18 @@
-import { Text, Card, VStack, HStack, Skeleton, IconButton } from "@chakra-ui/react"
-import React, { useCallback, useMemo } from "react"
 import { ProposalMetadata } from "@/api"
-import { useIpfsMetadata } from "@/api/ipfs"
-import { toIPFSURL } from "@/utils"
 import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
-import { useTranslation } from "react-i18next"
-import { useRouter } from "next/navigation"
-import { FaAngleRight } from "react-icons/fa6"
-import dayjs from "dayjs"
+import { useIpfsMetadata } from "@/api/ipfs"
+import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import { toIPFSURL } from "@/utils"
+import { Card, HStack, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import { useRouter } from "next/navigation"
+import React, { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { FaAngleRight } from "react-icons/fa6"
+
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
-import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposal: ProposalEnriched
@@ -25,7 +26,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
 
   const router = useRouter()
 
-  const { supportEndDate } = useProposalInteractionDates(proposal)
+  const { supportEndDate } = useProposalInteractionDates(id)
 
   const { t } = useTranslation()
 

@@ -1,15 +1,15 @@
-import { Accordion, HStack, Text, VStack, Heading, Button } from "@chakra-ui/react"
-import { Milestone } from "@/hooks/proposals/grants/types"
-import { useTranslation } from "react-i18next"
-import { useBreakpoints } from "@/hooks"
+import { useAccountPermissions } from "@/api/contracts/account/hooks"
 import { VeBetterIcon } from "@/components/Icons"
-import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useBreakpoints } from "@/hooks"
+import { Milestone } from "@/hooks/proposals/grants/types"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimGrants } from "@/hooks/useClaimGrants"
-import { useAccountPermissions } from "@/api/contracts/account/hooks"
+import { Accordion, Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
-import { useMemo, useCallback } from "react"
 import dayjs from "dayjs"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 type MilestonesActionsItemProps = {
   index: number

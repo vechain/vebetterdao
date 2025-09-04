@@ -1,24 +1,24 @@
-// import { GovernanceFeaturedContractsWithFunctions, getActionsFromTargetsAndCalldatas } from "@/constants"
+import { CollapsibleSection } from "@/app/components/CollapsibleSection"
+import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
+// import { Heading, HStack, Icon, Image, Link, Text, VStack } from "@/constants"
 // import { ProposalFormAction } from "@/store"
 // import { useMemo, useState } from "react"
 import { VStack, Text, Heading, HStack, Icon, Link, Image } from "@chakra-ui/react"
+import { UilGithub, UilGlobe, UilTelegram, UilTwitter } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
-import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
-import { FiMail } from "react-icons/fi"
 import { FaTelegram } from "react-icons/fa"
-import { UilGithub, UilTelegram, UilGlobe, UilTwitter } from "@iconscout/react-unicons"
-import { CollapsibleSection } from "@/app/components/CollapsibleSection"
+import { FiMail } from "react-icons/fi"
 
-const isGrantProposal = (proposal: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
-  return proposal.type === ProposalType.Grant
+const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
+  return proposal?.type === ProposalType.Grant
 }
 
-const isStandardProposal = (proposal: ProposalEnriched | GrantProposalEnriched): proposal is ProposalEnriched => {
-  return proposal.type === ProposalType.Standard
+const isStandardProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is ProposalEnriched => {
+  return proposal?.type === ProposalType.Standard
 }
 
 type Props = {
-  proposal: ProposalEnriched | GrantProposalEnriched
+  proposal?: ProposalEnriched | GrantProposalEnriched
 }
 
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
@@ -30,8 +30,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   //   try {
   //     setProposalDecodeError(null)
   //     return getActionsFromTargetsAndCalldatas(
-  //       proposal.targets as string[],
-  //       proposal.calldatas as string[],
+  //       proposal?.targets as string[],
+  //       proposal?.calldatas as string[],
   //       GovernanceFeaturedContractsWithFunctions,
   //     )
   //   } catch (e: unknown) {
@@ -50,20 +50,20 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           <Heading size="xl">{t("Company details")}</Heading>
           <VStack gap={1} align="flex-start" w="full" pb={4} borderBottom="1px solid #D5D5D5">
             <VStack gap={2} align="flex-start" w="full">
-              <Text fontWeight="semibold">{proposal.companyName}</Text>
-              <Text>{proposal.companyRegisteredNumber}</Text>
+              <Text fontWeight="semibold">{proposal?.companyName}</Text>
+              <Text>{proposal?.companyRegisteredNumber}</Text>
             </VStack>
             <HStack>
               <Icon color="#2D3748" as={FiMail} />
-              <Text> {proposal.companyEmail || t("unknown")}</Text>
+              <Text> {proposal?.companyEmail || t("unknown")}</Text>
             </HStack>
             <HStack>
               <Icon color="#2D3748" as={FaTelegram} />
-              <Text>{proposal.companyTelegram || t("unknown")}</Text>
+              <Text>{proposal?.companyTelegram || t("unknown")}</Text>
             </HStack>
             <Text>
               <Text fontWeight="semibold">{t("Intro")}</Text>
-              {proposal.companyIntro}
+              {proposal?.companyIntro}
             </Text>
           </VStack>
 
@@ -71,11 +71,11 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             <VStack gap={3} align="flex-start" w="full" pb={4}>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Problem")}</Text>
-                <Text>{proposal.problemDescription}</Text>
+                <Text>{proposal?.problemDescription}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Solution")}</Text>
-                <Text>{proposal.solutionDescription}</Text>
+                <Text>{proposal?.solutionDescription}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Key points")}</Text>
@@ -83,15 +83,15 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Execution plan")}</Text>
-                <Text>{proposal.highLevelRoadmap}</Text>
+                <Text>{proposal?.highLevelRoadmap}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Target user")}</Text>
-                <Text>{proposal.targetUsers}</Text>
+                <Text>{proposal?.targetUsers}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Competitive edge / Differentiation factor")}</Text>
-                <Text>{proposal.competitiveEdge}</Text>
+                <Text>{proposal?.competitiveEdge}</Text>
               </VStack>
             </VStack>
           </CollapsibleSection>
@@ -100,19 +100,19 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             <VStack gap={1} align="flex-start" w="full" pb={4}>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Benefits to users")}</Text>
-                <Text>{proposal.benefitsToUsers}</Text>
+                <Text>{proposal?.benefitsToUsers}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Benefits to dApps")}</Text>
-                <Text>{proposal.benefitsToDApps}</Text>
+                <Text>{proposal?.benefitsToDApps}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("Benefits to VeChain ecosystem")}</Text>
-                <Text>{proposal.benefitsToVeChainEcosystem}</Text>
+                <Text>{proposal?.benefitsToVeChainEcosystem}</Text>
               </VStack>
               <VStack align="flex-start" gap={0}>
                 <Text fontWeight="semibold">{t("X2E model")}</Text>
-                <Text>{proposal.x2EModel}</Text>
+                <Text>{proposal?.x2EModel}</Text>
               </VStack>
             </VStack>
           </CollapsibleSection>
@@ -123,7 +123,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               <HStack>
                 <Image alt="Discourse thread" boxSize="24px" src="/assets/icons/discourse.svg" />
                 {/* // TODO(Proposal): Add discourse thread in the new inputs form */}
-                {/* <Link color="#004CFC" href={proposal.discourseThread} target="_blank" rel="noopener noreferrer">
+                {/* <Link color="#004CFC" href={proposal?.discourseThread} target="_blank" rel="noopener noreferrer">
                 {"Discourse thread"}
               </Link> */}
               </HStack>
@@ -132,7 +132,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 <Icon color="#2D3748" as={UilGithub} />
                 <Link
                   color="#004CFC"
-                  href={`https://github.com/${proposal.githubUsername}`}
+                  href={`https://github.com/${proposal?.githubUsername}`}
                   target="_blank"
                   rel="noopener noreferrer">
                   {"Github"}
@@ -141,14 +141,14 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
 
               <HStack>
                 <Icon color="#2D3748" as={UilTelegram} />
-                <Link color="#004CFC" href={proposal.companyTelegram} target="_blank" rel="noopener noreferrer">
+                <Link color="#004CFC" href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
                   {"Telegram"}
                 </Link>
               </HStack>
 
               <HStack>
                 <Icon color="#2D3748" as={UilGlobe} />
-                <Link color="#004CFC" href={proposal.projectWebsite} target="_blank" rel="noopener noreferrer">
+                <Link color="#004CFC" href={proposal?.projectWebsite} target="_blank" rel="noopener noreferrer">
                   {"Project website"}
                 </Link>
               </HStack>
@@ -157,7 +157,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 <Icon color="#2D3748" as={UilTwitter} />
                 <Link
                   color="#004CFC"
-                  href={`https://twitter.com/${proposal.twitterUsername}`}
+                  href={`https://twitter.com/${proposal?.twitterUsername}`}
                   target="_blank"
                   rel="noopener noreferrer">
                   {"Twitter"}
@@ -173,7 +173,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
         // TODO : Finish the standard proposal
         //   <VStack gap={4} align="flex-start" w="full">
         //     <Heading size="lg">{t("Summary")}</Heading>
-        //     <Text>{proposal.title}</Text>
+        //     <Text>{proposal?.title}</Text>
         // {/* ============================== STANDARD PROPOSAL ============================== */}
         // {/* Summary (Description) */}
         // {/* ABout apllicant */}

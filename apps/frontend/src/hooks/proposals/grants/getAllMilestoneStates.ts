@@ -1,7 +1,8 @@
-import { useMilestoneState } from "./useMilestoneState"
 import { GrantProposalEnriched, Milestone, MilestoneState } from "./types"
+import { useMilestoneState } from "./useMilestoneState"
 
-export const getAllMilestoneStates = (proposal: GrantProposalEnriched) => {
+export const getAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
+  if (!proposal) return []
   const milestones = proposal.milestones
 
   const milestoneStates = milestones.map((_milestone: Milestone, index: number) => {
