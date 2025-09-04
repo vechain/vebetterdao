@@ -1,12 +1,13 @@
-import { useCallback, useMemo } from "react"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
 import { getAllProposalsStateQueryKey, getProposalClaimableUserDepositsQueryKey, getProposalStateQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
-import { ethers } from "ethers"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
 import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -15,7 +16,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
 
-  const proposal = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalEnrichedById(proposalId)
   const proposalValues = proposal?.values
 
   const grantValues = useMemo(() => {

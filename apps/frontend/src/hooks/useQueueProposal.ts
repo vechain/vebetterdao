@@ -19,7 +19,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns the queue transaction
  */
 export const useQueueProposal = ({ proposalId, onSuccess }: Props) => {
-  const proposal = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalEnrichedById(proposalId)
   const proposalValues = proposal?.values
 
   const grantValues = useMemo(() => {

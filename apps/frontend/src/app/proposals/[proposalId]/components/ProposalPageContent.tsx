@@ -2,7 +2,7 @@ import { useProposalInteractionDates } from "@/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
-import { Grid, GridItem, Tabs, Text, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 
@@ -16,9 +16,9 @@ type Props = {
 }
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
-  const proposal = useProposalEnrichedById(proposalId)
+  const { data: proposal, isLoading } = useProposalEnrichedById(proposalId)
 
-  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal!)
+  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
   const { isMobile } = useBreakpoints()
 
   const isGrant = useMemo(() => {
@@ -27,8 +27,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   const BreadcrumItems = [
     {
-      label: "Proposals", //TODO: This should be dynamic based on the proposal type like "Grants" or "Proposals"
-      href: "/proposals",
+      label: isGrant ? "Grants" : "Proposals", //TODO: This should be dynamic based on the proposal type like "Grants" or "Proposals"
+      href: isGrant ? "/proposals/grants" : "/proposals",
     },
     {
       label: "Overview",
@@ -51,8 +51,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       minutesLeft,
     }
   }, [targetDate])
-  //TODO: Ensure we have a proposal
-  if (!proposal) return null
+
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
       <PageBreadcrumb items={BreadcrumItems} />
@@ -60,7 +59,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]} order={[2, 2, 1]}>
           {/*TODO: CHECK IF WE NEED LOADING STATE */}
-          <ProposalOverview isGrant={isGrant} proposal={proposal} isLoading={false} />
+          <Skeleton loading={isLoading}>
+            <ProposalOverview isGrant={isGrant} proposal={proposal} />
+          </Skeleton>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} order={[1, 1, 2]}>
           <VStack align="stretch" gap={8}>
@@ -95,6 +96,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                     daysLeft={daysLeft}
                     hoursLeft={hoursLeft}
                     minutesLeft={minutesLeft}
+                    isLoading={isLoading}
                   />
                 </Tabs.Content>
                 <Tabs.Content value="timeline" pt={6}>
@@ -110,6 +112,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                   hoursLeft={hoursLeft}
                   minutesLeft={minutesLeft}
                   isVotingPhase={isVotingPhase}
+                  isLoading={isLoading}
                 />
                 <Text>{"Timeline"}</Text>
 
