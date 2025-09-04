@@ -1,1 +1,5 @@
 export * from "./ProposalPageContent"
+export * from "./ProposalInteractionCard"
+export * from "./ProposalCastVoteModal"
+export * from "./ProposalResultsDetailsModal"
+export * from "./ProposalContentAndActions"
