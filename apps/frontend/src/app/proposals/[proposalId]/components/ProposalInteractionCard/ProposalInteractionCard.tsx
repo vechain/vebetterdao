@@ -244,7 +244,7 @@ export const ProposalInteractionCard = ({
                 <Box border="2px solid" borderColor="success.primary" color="success.primary" borderRadius="lg">
                   <HStack gap={2} px="12px" py="8px">
                     <Icon as={FaHeart} boxSize={5} color="success.primary" />
-                    <Text>{t("{{amount}} VOT3", { amount: ethers.formatEther(userDeposits) })}</Text>
+                    <Text>{t("{{amount}} VOT3", { amount: Number(ethers.formatEther(userDeposits)).toFixed(1) })}</Text>
                   </HStack>
                 </Box>
               </HStack>
