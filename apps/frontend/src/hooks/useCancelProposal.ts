@@ -15,7 +15,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const { account } = useWallet()
 
-  const proposal = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalEnrichedById(proposalId)
   const proposalValues = proposal?.values
 
   const grantValues = useMemo(() => {

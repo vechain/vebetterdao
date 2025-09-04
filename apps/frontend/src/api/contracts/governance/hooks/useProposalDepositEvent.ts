@@ -1,9 +1,11 @@
-import { useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { ethers } from "ethers"
 import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useMemo } from "react"
+
 import { useProposalsEvents } from "./useProposalsEvents"
+
 /**
  * Hook to get the proposal deposit event
  * @param proposalId  the proposal id to get the deposit event for
@@ -11,7 +13,7 @@ import { useProposalsEvents } from "./useProposalsEvents"
  */
 export const useProposalDepositEvent = (proposalId: string) => {
   const { account } = useWallet()
-  const proposal = useProposalEnrichedById(proposalId)
+  const { data: proposal } = useProposalEnrichedById(proposalId)
   const events = useProposalsEvents()
 
   const proposalDeposits = useMemo(

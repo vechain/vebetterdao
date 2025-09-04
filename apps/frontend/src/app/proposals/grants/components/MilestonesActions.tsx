@@ -1,24 +1,32 @@
-import { VStack, Steps, Circle, HStack, Text, Heading } from "@chakra-ui/react"
-import { useMemo, useState, useEffect } from "react"
-import { useTranslation } from "react-i18next"
-import { UilCheck } from "@iconscout/react-unicons"
-import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
 import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
+import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
 import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { Circle, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
+import { UilCheck } from "@iconscout/react-unicons"
+import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
 import { MilestonesActionsItem } from "./MilestonesActionsItem"
 
 export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
   const { t } = useTranslation()
-  const proposal = useProposalEnrichedById(proposalId) as GrantProposalEnriched
+  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const grantProposal = proposal as GrantProposalEnriched
 
-  const states = getAllMilestoneStates(proposal)
+  const states = getAllMilestoneStates(grantProposal)
   const steps = useMemo(
     () =>
       states.map((state, i) => {
-        const milestone = proposal.milestones[i]
+        const milestone = grantProposal?.milestones?.[i]
         return {
           body: milestone ? (
-            <MilestonesActionsItem key={i} index={i} state={state} milestone={milestone} proposalId={proposal.id} />
+            <MilestonesActionsItem
+              key={i}
+              index={i}
+              state={state}
+              milestone={milestone}
+              proposalId={grantProposal?.id}
+            />
           ) : (
             <HStack key={i}>
               <Text>{t("Milestones are unavailable yet")}</Text>
@@ -26,7 +34,7 @@ export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
           ),
         }
       }),
-    [states, proposal.id, proposal.milestones],
+    [states, grantProposal?.milestones, grantProposal?.id, t],
   )
 
   const isAllMilestoneCompleted = states.every(s => s === "Claimed")
