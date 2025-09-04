@@ -18,6 +18,12 @@ type Props = {
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   // read route params
   const id = params.proposalId
+
+  // Skip metadata generation for non-numeric proposal IDs (like "grants")
+  if (isNaN(Number(id))) {
+    return {}
+  }
+
   const thor = await getNodeJsThorClient()
 
   // optionally access and extend (rather than replace) parent metadata
