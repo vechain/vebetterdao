@@ -26,7 +26,7 @@ export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
           ),
         }
       }),
-    [states, proposal.id, proposal.milestones],
+    [states, proposal.id, proposal.milestones, t],
   )
 
   const isAllMilestoneCompleted = states.every(s => s === "Claimed")
@@ -73,7 +73,7 @@ export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
       <VStack w="full">
         <Steps.List w="full">
           {displaySteps.map((item, index) => (
-            <Steps.Item key={index} index={index} w="full">
+            <Steps.Item key={`milestones-actions-step-${item.body}`} index={index} w="full">
               <Steps.Indicator>
                 <Steps.Status
                   incomplete={<Circle bg="#E2E8F0" boxSize="10px" />}

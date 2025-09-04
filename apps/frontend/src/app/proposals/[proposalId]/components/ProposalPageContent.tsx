@@ -4,7 +4,8 @@ import { useMemo } from "react"
 import { ProposalType } from "@/hooks/proposals/grants/types"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useProposalEnriched, useBreakpoints } from "@/hooks"
-// import { ProposalTimeline } from "./ProposalTimeline"
+import { ProposalTimeline } from "./ProposalTimeline"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   proposalId: string
@@ -13,6 +14,7 @@ type Props = {
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { data: { proposals } = { proposals: [] }, isLoading } = useProposalEnriched()
   const { isMobile } = useBreakpoints()
+  const { t } = useTranslation()
 
   const proposal = useMemo(() => {
     return proposals.find(p => p.id === proposalId)
@@ -57,7 +59,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                       color: "#004CFC",
                       fontWeight: "800",
                     }}>
-                    {"Session"}
+                    {t("Session")}
                   </Tabs.Trigger>
                   <Tabs.Trigger
                     value="timeline"
@@ -67,25 +69,21 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                       color: "#004CFC",
                       fontWeight: "800",
                     }}>
-                    {"Timeline"}
+                    {t("Timeline")}
                   </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="session" pt={6}>
-                  <Text>{"Session"}</Text>
+                  <Text>{t("Session")}</Text>
                 </Tabs.Content>
                 <Tabs.Content value="timeline" pt={6}>
-                  <Text>{"Timeline"}</Text>
-                  {/* <ProposalTimeline proposal={proposal} /> */}
+                  <ProposalTimeline proposal={proposal} />
                 </Tabs.Content>
               </Tabs.Root>
             ) : (
               <>
-                <Text>{"Session"}</Text>
-
-                <Text>{"Timeline"}</Text>
-
+                <Text>{t("Session")}</Text>
                 {/* <Session Information component/> */}
-                {/* <ProposalTimeline proposal={proposal} /> */}
+                <ProposalTimeline proposal={proposal} />
               </>
             )}
           </VStack>

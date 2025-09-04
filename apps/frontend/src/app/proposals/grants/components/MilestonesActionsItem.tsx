@@ -8,7 +8,7 @@ import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimGrants } from "@/hooks/useClaimGrants"
 import { useAccountPermissions } from "@/api/contracts/account/hooks"
 import { useWallet } from "@vechain/vechain-kit"
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import dayjs from "dayjs"
 
 type MilestonesActionsItemProps = {
@@ -38,13 +38,13 @@ export const MilestonesActionsItem = ({ index, state, milestone, proposalId }: M
     milestoneIndex: index,
   })
 
-  const handleClaimMilestone = () => {
+  const handleClaimMilestone = useCallback(() => {
     claimMilestone()
-  }
+  }, [claimMilestone])
 
-  const handleApproveGrant = () => {
+  const handleApproveGrant = useCallback(() => {
     approveGrant()
-  }
+  }, [approveGrant])
 
   const renderButtons = useMemo(() => {
     switch (state) {
@@ -104,7 +104,6 @@ export const MilestonesActionsItem = ({ index, state, milestone, proposalId }: M
     return (
       <VStack w="full" align="flex-start" gap={2}>
         <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}</Heading>
-
         {content}
       </VStack>
     )
