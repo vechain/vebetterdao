@@ -43,16 +43,22 @@ export const RegularModal = ({
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content rounded={"2xl"} {...modalContentProps}>
+          <Dialog.Content {...modalContentProps}>
             {(ariaTitle || ariaDescription) && (
-              <Dialog.Header>
-                {ariaTitle && <Dialog.Title>{ariaTitle}</Dialog.Title>}
-                {ariaDescription && <Dialog.Description>{ariaDescription}</Dialog.Description>}
-                {isCloseable && showCloseButton ? (
-                  <Dialog.CloseTrigger asChild>
+              <Dialog.Header display="flex" alignItems="center" px={8} py={10} position="relative">
+                {ariaTitle && (
+                  <Dialog.Title fontSize="2xl" textAlign="start">
+                    {ariaTitle}
+                  </Dialog.Title>
+                )}
+                {ariaDescription && <Dialog.Description textAlign="center">{ariaDescription}</Dialog.Description>}
+
+                {/* Close button positioned absolutely to the right */}
+                {isCloseable && showCloseButton && (
+                  <Dialog.CloseTrigger asChild position="absolute" right={6} top="50%" transform="translateY(-50%)">
                     <CloseButton size="md" />
                   </Dialog.CloseTrigger>
-                ) : null}
+                )}
               </Dialog.Header>
             )}
             {!ariaTitle && !ariaDescription && isCloseable && showCloseButton ? (
@@ -60,7 +66,7 @@ export const RegularModal = ({
                 <CloseButton size="md" />
               </Dialog.CloseTrigger>
             ) : null}
-            <Dialog.Body p={10} rounded={"2xl"} {...modalBodyProps}>
+            <Dialog.Body px={8} rounded={"2xl"} {...modalBodyProps}>
               {children}
             </Dialog.Body>
           </Dialog.Content>
