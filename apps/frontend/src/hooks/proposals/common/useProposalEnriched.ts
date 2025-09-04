@@ -1,10 +1,11 @@
-import { useMemo, useCallback } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 import { useAllProposalsState } from "@/api"
+import { useQuery } from "@tanstack/react-query"
 import BigNumber from "bignumber.js"
-import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
+import { useCallback, useMemo } from "react"
+
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
+import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
+import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 
 // Utility type to ensure required fields stay required after spreading
 type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
@@ -42,7 +43,7 @@ export const useProposalEnriched = () => {
   // Step 4: Create enrichment function with useCallback for stability
   const enrichProposals = useCallback(() => {
     // Early return if no proposals
-    if (!grantProposals.length || !standardProposals.length) {
+    if (!grantProposals.length && !standardProposals.length) {
       throw new Error("No proposals found")
     }
 
