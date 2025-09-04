@@ -10,7 +10,7 @@ import { MilestonesActionsItem } from "./MilestonesActionsItem"
 
 export const MilestonesActions = ({ proposalId }: { proposalId: string }) => {
   const { t } = useTranslation()
-  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const proposal = useProposalEnrichedById(proposalId)
   const grantProposal = proposal as GrantProposalEnriched
 
   const states = getAllMilestoneStates(grantProposal)

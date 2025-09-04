@@ -153,7 +153,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({
   isDepositReached,
 }) => {
   const { t } = useTranslation()
-  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const proposal = useProposalEnrichedById(proposalId)
 
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
 

@@ -13,7 +13,7 @@ import { useProposalsEvents } from "./useProposalsEvents"
  */
 export const useProposalDepositEvent = (proposalId: string) => {
   const { account } = useWallet()
-  const { data: proposal } = useProposalEnrichedById(proposalId)
+  const proposal = useProposalEnrichedById(proposalId)
   const events = useProposalsEvents()
 
   const proposalDeposits = useMemo(
