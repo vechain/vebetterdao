@@ -1775,5 +1775,21 @@
   "Apply": "신청하기",
   "Get NFT": "NFT 받기",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "지원 제안에서 <bold>{{depositsVotes}} VOT3</bold> 포함",
-  "More info about your votes at snapshot": "스냅샷에서 귀하의 투표에 대한 추가 정보"
+  "More info about your votes at snapshot": "스냅샷에서 귀하의 투표에 대한 추가 정보",
+  "Assign App Categories": "앱 카테고리 할당",
+  "Loading apps without categories...": "카테고리가 없는 앱 로드 중...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "카테고리가 없는 앱에 카테고리를 할당하세요. 앱당 최대 {{max}}개의 카테고리.",
+  "All apps have categories assigned! 🎉": "모든 앱에 카테고리가 할당되었습니다! 🎉",
+  "Apps without categories: {{count}}": "카테고리가 없는 앱: {{count}}",
+  "Category Assignments ({{count}})": "카테고리 할당 ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "선택된 카테고리 ({{count}}/{{max}})",
+  "Uploading metadata...": "메타데이터 업로드 중...",
+  "Maximum {{max}} categories per app.": "앱당 최대 {{max}}개의 카테고리.",
+  "Previous app": "이전 앱",
+  "Next app": "다음 앱",
+  "Assign Categories to {{count}} Apps": "{{count}}개의 앱에 카테고리를 할당",
+  "Round hasn’t started yet. Please start a new round.": "라운드가 아직 시작되지 않았습니다. 새 라운드를 시작하세요.",
+  "Start new round & claim allocations": "새 라운드 시작 및 할당량 청구",
+  "Transaction completed!": "거래 완료!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "아래 버튼을 클릭하면 {{count}}개의 앱에 대한 할당도 청구됩니다."
 }

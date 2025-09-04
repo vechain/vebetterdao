@@ -1774,5 +1774,21 @@
   "Apply": "Toepassen",
   "Get NFT": "Verkrijg NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Inclusief <bold>{{depositsVotes}} VOT3</bold> van ondersteunende voorstellen",
-  "More info about your votes at snapshot": "Meer informatie over uw stemmen bij snapshot"
+  "More info about your votes at snapshot": "Meer informatie over uw stemmen bij snapshot",
+  "Assign App Categories": "App-categorieën toewijzen",
+  "Loading apps without categories...": "Apps zonder categorieën laden...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Wijs categorieën toe aan apps die er geen hebben. Maximaal {{max}} categorieën per app.",
+  "All apps have categories assigned! 🎉": "Alle apps hebben categorieën toegewezen gekregen! 🎉",
+  "Apps without categories: {{count}}": "Apps zonder categorieën: {{count}}",
+  "Category Assignments ({{count}})": "Categorie-toewijzingen ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Geselecteerde categorieën ({{count}}/{{max}})",
+  "Uploading metadata...": "Metadata uploaden...",
+  "Maximum {{max}} categories per app.": "Maximaal {{max}} categorieën per app.",
+  "Previous app": "Vorige app",
+  "Next app": "Volgende app",
+  "Assign Categories to {{count}} Apps": "Categorieën toewijzen aan {{count}} apps",
+  "Round hasn’t started yet. Please start a new round.": "De ronde is nog niet begonnen. Begin alstublieft een nieuwe ronde.",
+  "Start new round & claim allocations": "Begin nieuwe ronde & claim toewijzingen",
+  "Transaction completed!": "Transactie voltooid!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Door op de knop hieronder te klikken, claim je ook toewijzingen voor {{count}} apps."
 }

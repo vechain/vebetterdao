@@ -1774,5 +1774,21 @@
   "Apply": "申请",
   "Get NFT": "获取NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "包括来自支持提案的<bold>{{depositsVotes}} VOT3</bold>",
-  "More info about your votes at snapshot": "有关您投票的更多信息，请查看快照"
+  "More info about your votes at snapshot": "有关您投票的更多信息，请查看快照",
+  "Assign App Categories": "分配應用程式類別",
+  "Loading apps without categories...": "載入沒有類別的應用程式中...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "將類別分配給沒有類別的應用程式。每個應用程式最多 {{max}} 個類別。",
+  "All apps have categories assigned! 🎉": "所有應用程式已分配類別！🎉",
+  "Apps without categories: {{count}}": "沒有類別的應用程式：{{count}}",
+  "Category Assignments ({{count}})": "類別分配（{{count}}）",
+  "Selected Categories ({{count}}/{{max}})": "已選類別（{{count}}/{{max}}）",
+  "Uploading metadata...": "上傳中繼資料...",
+  "Maximum {{max}} categories per app.": "每個應用程式最多 {{max}} 個類別。",
+  "Previous app": "上一個應用程式",
+  "Next app": "下一個應用程式",
+  "Assign Categories to {{count}} Apps": "將類別分配給 {{count}} 個應用程式",
+  "Round hasn’t started yet. Please start a new round.": "回合尚未開始。請開始新的一回合。",
+  "Start new round & claim allocations": "開始新回合並聲明分配",
+  "Transaction completed!": "交易完成！",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "按下方按鈕，您也會領取{{count}}個應用程式的配額。"
 }

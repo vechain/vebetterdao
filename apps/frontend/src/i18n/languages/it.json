@@ -1774,5 +1774,21 @@
   "Apply": "Applica",
   "Get NFT": "Ottieni NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Include <bold>{{depositsVotes}} VOT3</bold> dalle proposte di supporto",
-  "More info about your votes at snapshot": "Maggiori informazioni sui tuoi voti allo snapshot"
+  "More info about your votes at snapshot": "Maggiori informazioni sui tuoi voti allo snapshot",
+  "Assign App Categories": "Assegna Categorie App",
+  "Loading apps without categories...": "Caricamento app senza categorie...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Assegna categorie alle app che non ne hanno. Massimo {{max}} categorie per app.",
+  "All apps have categories assigned! 🎉": "Tutte le app hanno categorie assegnate! 🎉",
+  "Apps without categories: {{count}}": "App senza categorie: {{count}}",
+  "Category Assignments ({{count}})": "Assegnazioni di Categorie ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Categorie Selezionate ({{count}}/{{max}})",
+  "Uploading metadata...": "Caricamento metadati...",
+  "Maximum {{max}} categories per app.": "Massimo {{max}} categorie per app.",
+  "Previous app": "App precedente",
+  "Next app": "Prossima app",
+  "Assign Categories to {{count}} Apps": "Assegna Categorie a {{count}} App",
+  "Round hasn’t started yet. Please start a new round.": "Il turno non è ancora iniziato. Si prega di avviare un nuovo turno.",
+  "Start new round & claim allocations": "Avvia un nuovo turno e richiedi allocazioni",
+  "Transaction completed!": "Transazione completata!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Cliccando sul pulsante qui sotto, rivendicherai anche le allocazioni per {{count}} app."
 }
