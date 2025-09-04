@@ -8,6 +8,7 @@ import {
   useProposalQuorumByType,
   useProposalSnapshot,
   useProposalUserDeposit,
+  useProposalVotesIndexer,
 } from "@/api"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
 import { useGetVot3Balance } from "@/hooks"
@@ -24,6 +25,7 @@ import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVote
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 import { UilCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
+import { useProposalTotalVotes } from "@/api/contracts/governance/hooks/useProposalTotalVotes"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -64,7 +66,10 @@ export const ProposalInteractionCard = ({
     proposal?.type ?? GrantsProposalType.Standard,
   )
   const { data: proposalVotesQueryData } = useProposalVotes(proposal?.id ?? "")
-
+  const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposal?.id ?? "")
+  const { data: proposalVotes } = useProposalVotesIndexer({
+    proposalId: proposal?.id ?? "",
+  })
   // ===== COMPUTED VALUES =====
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
@@ -96,7 +101,7 @@ export const ProposalInteractionCard = ({
     }
 
     return false
-  }, [proposal?.state, isLoading, proposalDepositReached, hasUserAlreadyVoted, userVot3Balance, userVotingPower])
+  }, [proposal?.state, proposalDepositReached, hasUserAlreadyVoted, userVot3Balance, userVotingPower])
 
   const isActionButtonDisabled = useMemo(() => {
     const disabledStates = [ProposalState.Canceled, ProposalState.Defeated, ProposalState.DepositNotMet]
@@ -147,7 +152,7 @@ export const ProposalInteractionCard = ({
         icon: UilThumbsDown,
       },
     ]
-  }, [percentageSupported, proposalVotesQueryData])
+  }, [percentageSupported, proposalVotesQueryData, proposalVotes, userDeposits])
 
   const handleButtonClick = useCallback(() => {
     if (isVotingPhase) {
@@ -158,8 +163,8 @@ export const ProposalInteractionCard = ({
   }, [isVotingPhase, setIsVoteModalOpen, setIsSupportModalOpen])
 
   // ===== MODAL DATA =====
-  const proposalTotalVotes = proposalVotesQueryData?.totalVotes
-    ? ethers.parseEther(proposalVotesQueryData.totalVotes.toString())
+  const proposalTotalVotes = proposalTotalVotesQueryData
+    ? ethers.parseEther(proposalTotalVotesQueryData.toString())
     : 0n
 
   // Utility function to format BigInt to string with max 1 decimal and no negatives
@@ -180,7 +185,6 @@ export const ProposalInteractionCard = ({
   const totalAmountNeeded = isVotingPhase
     ? formatTokenAmount(proposalQuorumBigInt)
     : formatTokenAmount(proposalDepositThreshold)
-
   const amountLeftToReach = isVotingPhase
     ? calculateAmountLeft(proposalQuorumBigInt, proposalTotalVotes)
     : calculateAmountLeft(proposalDepositThreshold, currentDepositAmount)
@@ -197,9 +201,15 @@ export const ProposalInteractionCard = ({
       label: t("Amount left to reach"),
       value: t("{{amount}} VOT3", { amount: amountLeftToReach }),
     })
+    if (isVotingPhase) {
+      detailsArray.push({
+        label: t("Wallets voted"),
+        value: String(proposalVotes?.totalVoters ?? 0),
+      })
+    }
 
     return detailsArray
-  }, [t, totalAmountNeeded, amountLeftToReach])
+  }, [t, totalAmountNeeded, amountLeftToReach, isVotingPhase, proposalVotes])
 
   const handleCloseSupportModal = useCallback(() => {
     setIsSupportModalOpen(false)

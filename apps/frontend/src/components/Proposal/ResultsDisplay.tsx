@@ -1,13 +1,14 @@
 import { HStack, Icon, Separator, Text } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type ResultsDisplayProps = {
   segments: { percentage: number; color: string; icon: React.ElementType }[]
   tokenAmount: bigint
   showTokenAmount?: boolean
 }
-
+const compactFormatter = getCompactFormatter(2)
 export const ResultsDisplay = ({ segments, tokenAmount, showTokenAmount = false }: ResultsDisplayProps) => {
   const { t } = useTranslation()
 
@@ -38,7 +39,7 @@ export const ResultsDisplay = ({ segments, tokenAmount, showTokenAmount = false 
           <HStack key={segment.color} {...segmentProps}>
             <Icon as={segment.icon} boxSize={5} color={segment.color} />
             <Text fontSize="md" color="text.subtle">
-              {`${segment.percentage}%`}
+              {`${compactFormatter.format(segment.percentage)}%`}
             </Text>
           </HStack>
           {shouldShowSeparator(index) && <Separator orientation="vertical" height="4" />}
