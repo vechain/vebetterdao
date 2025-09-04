@@ -61,18 +61,20 @@ const ProposalInteractionCard = ({ proposal }: { proposal: ProposalEnriched }) =
 
   const { sendTransaction } = useProposalVot3Deposit({ proposalId: proposal.id })
 
-  const daysLeftToSupport = dayjs(supportEndDate).diff(dayjs(), "days")
-  const hoursLeftToSupport = dayjs(supportEndDate).diff(dayjs(), "hours") % 24
-  const minutesLeftToSupport = dayjs(supportEndDate).diff(dayjs(), "minutes") % 60
-
-  const daysLeftToVoting = dayjs(votingEndDate).diff(dayjs(), "days")
-  const hoursLeftToVoting = dayjs(votingEndDate).diff(dayjs(), "hours") % 24
-  const minutesLeftToVoting = dayjs(votingEndDate).diff(dayjs(), "minutes") % 60
-
   const isVotingPhase = proposal.state === ProposalState.Active
-  const daysLeft = isVotingPhase ? daysLeftToVoting : daysLeftToSupport
-  const hoursLeft = isVotingPhase ? hoursLeftToVoting : hoursLeftToSupport
-  const minutesLeft = isVotingPhase ? minutesLeftToVoting : minutesLeftToSupport
+  const targetDate = isVotingPhase ? votingEndDate : supportEndDate
+
+  const { daysLeft, hoursLeft, minutesLeft } = useMemo(() => {
+    const now = dayjs()
+    const daysLeft = dayjs(targetDate).diff(now, "days")
+    const hoursLeft = dayjs(targetDate).diff(now, "hours") % 24
+    const minutesLeft = dayjs(targetDate).diff(now, "minutes") % 60
+    return {
+      daysLeft,
+      hoursLeft,
+      minutesLeft,
+    }
+  }, [targetDate])
 
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? 0)
   const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? 0)
@@ -114,7 +116,7 @@ const ProposalInteractionCard = ({ proposal }: { proposal: ProposalEnriched }) =
     return false
   }, [proposal.state, isVotingPhase, hasUserAlreadyVoted, userVotingPower, userVot3Balance, proposalDepositReached])
   const supportWith100Vot3 = useCallback(() => {
-    sendTransaction({ amount: ethers.parseEther("1000").toString(), proposalId: proposal.id })
+    sendTransaction({ amount: ethers.parseEther("3000").toString(), proposalId: proposal.id })
   }, [sendTransaction, proposal.id])
 
   return (
