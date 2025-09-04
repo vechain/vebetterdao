@@ -10,7 +10,7 @@ import {
   useProposalUserDeposit,
 } from "@/api"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
-import { useGetVot3Balance, useProposalVot3Deposit } from "@/hooks"
+import { useGetVot3Balance } from "@/hooks"
 import { ProposalEnriched, ProposalState, ProposalType as GrantsProposalType } from "@/hooks/proposals/grants/types"
 import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
@@ -23,6 +23,7 @@ import { TbClockHour8 } from "react-icons/tb"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 import { UilCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -44,10 +45,9 @@ export const ProposalInteractionCard = ({
   // ===== STATE =====
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
-
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
   // ===== HOOKS =====
   const { t } = useTranslation()
-  const { sendTransaction } = useProposalVot3Deposit({ proposalId: proposal?.id ?? "" })
   const { account } = useWallet()
 
   // ===== CONTRACT QUERIES =====
@@ -149,9 +149,13 @@ export const ProposalInteractionCard = ({
     ]
   }, [percentageSupported, proposalVotesQueryData])
 
-  const supportWith100Vot3 = useCallback(() => {
-    sendTransaction({ amount: ethers.parseEther("3000").toString(), proposalId: proposal?.id ?? "" })
-  }, [sendTransaction, proposal?.id])
+  const handleButtonClick = useCallback(() => {
+    if (isVotingPhase) {
+      setIsVoteModalOpen(true)
+    } else {
+      setIsSupportModalOpen(true)
+    }
+  }, [isVotingPhase, setIsVoteModalOpen, setIsSupportModalOpen])
 
   // ===== MODAL DATA =====
   const proposalTotalVotes = proposalVotesQueryData?.totalVotes
@@ -196,6 +200,10 @@ export const ProposalInteractionCard = ({
 
     return detailsArray
   }, [t, totalAmountNeeded, amountLeftToReach])
+
+  const handleCloseSupportModal = useCallback(() => {
+    setIsSupportModalOpen(false)
+  }, [])
 
   return (
     <>
@@ -252,10 +260,7 @@ export const ProposalInteractionCard = ({
 
             {/* Action Button */}
             {shouldShowActionButton && (
-              <Button
-                variant="primaryAction"
-                onClick={isVotingPhase ? () => setIsVoteModalOpen(true) : supportWith100Vot3}
-                disabled={isActionButtonDisabled}>
+              <Button variant="primaryAction" onClick={handleButtonClick} disabled={isActionButtonDisabled}>
                 {isVotingPhase ? t("Vote") : t("Support")}
               </Button>
             )}
@@ -279,6 +284,16 @@ export const ProposalInteractionCard = ({
         isVoteModalOpen={isVoteModalOpen}
         onClose={() => setIsVoteModalOpen(false)}
         proposalId={proposal?.id ?? ""}
+      />
+
+      {/* ===== SUPPORT MODAL ===== */}
+      <ProposalSupportModal
+        isSupportModalOpen={isSupportModalOpen}
+        onClose={handleCloseSupportModal}
+        proposalId={proposal?.id ?? ""}
+        votingRoundId={Number(roundSnapshot ?? 0)}
+        proposalThreshold={proposalDepositThreshold}
+        proposalDeposits={currentDepositAmount}
       />
     </>
   )

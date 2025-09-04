@@ -2001,5 +2001,6 @@
   "Total amount needed": "Total amount needed",
   "Amount left to reach": "Amount left to reach",
   "Wallets supported": "Wallets supported",
-  "Result details": "Result details"
+  "Result details": "Result details",
+  "Claim your VOT3 tokens back {{round}} when voting starts.": "Claim your VOT3 tokens back {{round}} when voting starts."
 }
