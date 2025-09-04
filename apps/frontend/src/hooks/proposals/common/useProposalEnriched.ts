@@ -1,10 +1,11 @@
-import { useMemo, useCallback } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 import { useAllProposalsState } from "@/api"
+import { useQuery } from "@tanstack/react-query"
 import BigNumber from "bignumber.js"
-import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
+import { useCallback, useMemo } from "react"
+
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
+import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
+import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 
 // Utility type to ensure required fields stay required after spreading
 type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
@@ -28,7 +29,6 @@ export const useProposalEnriched = () => {
       grantProposalsDetailsMap: {},
       standardProposalsDetailsMap: {},
     },
-    isLoading: isLoadingDetails,
   } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
 
   const {
@@ -36,7 +36,6 @@ export const useProposalEnriched = () => {
       grantsProposalStates: [],
       standardProposalStates: [],
     },
-    isLoading: isLoadingStates,
   } = useAllProposalsState({
     grantProposalsIds,
     standardProposalsIds,
@@ -45,12 +44,7 @@ export const useProposalEnriched = () => {
   const enrichProposals = useCallback(() => {
     // Early return if no proposals
     if (!grantProposals.length && !standardProposals.length) {
-      return {
-        enrichedGrantProposals: [],
-        enrichedStandardProposals: [],
-        proposals: [],
-        totalGrantAmount: BigNumber(0),
-      }
+      throw new Error("No proposals found")
     }
 
     // Enrich grant proposals
@@ -113,6 +107,6 @@ export const useProposalEnriched = () => {
   return useQuery({
     queryKey: getEnrichedProposalsQueryKey(),
     queryFn: enrichProposals,
-    enabled: !isLoadingDetails && !isLoadingStates,
+    retry: 3, //Since events could take longer, we retry 3 times
   })
 }

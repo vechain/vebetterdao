@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from "react-i18next"
-import { VStack, HStack, Text, Button, Box, Steps, Flex, Heading, Image, List, Card } from "@chakra-ui/react"
+import { VStack, HStack, Text, Button, Box, Steps, Flex, Heading, List, Card } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
@@ -10,6 +10,7 @@ import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { RequirementModal } from "@/app/proposals/components/components"
 import { useCallback, useState } from "react"
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
+import Image from "next/image"
 
 export type Step = {
   key: string
@@ -87,8 +88,8 @@ export const GrantsStepsCard = ({
                 src={currentStep.image}
                 alt={`Step ${currentStepIndex + 1}`}
                 objectFit="contain"
-                maxW="150px"
-                maxH="150px"
+                width={150}
+                height={150}
               />
               <Heading size="sm" textStyle="heading">
                 {currentStep.heading}
@@ -176,8 +177,8 @@ export const GrantsStepsCard = ({
                 src={currentStep.image}
                 alt={`Step ${currentStepIndex + 1}`}
                 objectFit="contain"
-                maxW="220px"
-                maxH="320px"
+                width={220}
+                height={320}
               />
             </motion.div>
           </Box>

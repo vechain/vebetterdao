@@ -1,4 +1,5 @@
-import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
+
 import { useProposalEnriched } from "./useProposalEnriched"
 
 /**
@@ -10,5 +11,8 @@ import { useProposalEnriched } from "./useProposalEnriched"
 export const useProposalEnrichedById = (proposalId: string) => {
   const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
 
-  return useMemo(() => proposals.find(p => p.id === proposalId), [proposalId, proposals])
+  return useQuery({
+    queryKey: ["proposal-enriched-by-id", proposalId],
+    queryFn: () => proposals.find(p => p.id === proposalId),
+  })
 }

@@ -1,6 +1,7 @@
 import { useProposalEnriched } from "@/hooks/proposals/common"
 import { useMemo } from "react"
 
+//TODO: Double check this hook
 /**
  * Hook to get proposals voted by a user from a list of proposal ids.
  * @param proposalIds - The list of proposal ids to get the proposals for.

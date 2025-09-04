@@ -1,9 +1,14 @@
-import { Grid, GridItem, VStack, Text, Tabs } from "@chakra-ui/react"
-import { ProposalOverview } from "./ProposalOverview"
-import { useMemo } from "react"
-import { ProposalType } from "@/hooks/proposals/grants/types"
+import { useProposalInteractionDates } from "@/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
-import { useProposalEnriched, useBreakpoints } from "@/hooks"
+import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { Grid, GridItem, Tabs, Text, VStack } from "@chakra-ui/react"
+import dayjs from "dayjs"
+import { useMemo } from "react"
+
+import { ProposalInteractionCard } from "./ProposalInteractionCard"
+import { ProposalOverview } from "./ProposalOverview"
+
 // import { ProposalTimeline } from "./ProposalTimeline"
 
 type Props = {
@@ -11,19 +16,14 @@ type Props = {
 }
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
-  const { data: { proposals } = { proposals: [] }, isLoading } = useProposalEnriched()
-  const { isMobile } = useBreakpoints()
+  const { data: proposal, isLoading } = useProposalEnrichedById(proposalId)
 
-  const proposal = useMemo(() => {
-    return proposals.find(p => p.id === proposalId)
-  }, [proposals, proposalId])
+  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal!)
+  const { isMobile } = useBreakpoints()
 
   const isGrant = useMemo(() => {
     return proposal?.type === ProposalType.Grant
   }, [proposal])
-
-  //TODO: Ensure we have a proposal
-  if (!proposal) return null
 
   const BreadcrumItems = [
     {
@@ -36,6 +36,23 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     },
   ]
 
+  //TODO: Cleanup this shared info
+  const isVotingPhase = proposal?.state === ProposalState.Active
+  const targetDate = isVotingPhase ? votingEndDate : supportEndDate
+
+  const { daysLeft, hoursLeft, minutesLeft } = useMemo(() => {
+    const now = dayjs()
+    const daysLeft = dayjs(targetDate).diff(now, "days")
+    const hoursLeft = dayjs(targetDate).diff(now, "hours") % 24
+    const minutesLeft = dayjs(targetDate).diff(now, "minutes") % 60
+    return {
+      daysLeft,
+      hoursLeft,
+      minutesLeft,
+    }
+  }, [targetDate])
+  //TODO: Ensure we have a proposal
+  if (!proposal) return null
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
       <PageBreadcrumb items={BreadcrumItems} />
@@ -71,7 +88,13 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                   </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="session" pt={6}>
-                  <Text>{"Session"}</Text>
+                  <ProposalInteractionCard
+                    proposal={proposal}
+                    isVotingPhase={isVotingPhase}
+                    daysLeft={daysLeft}
+                    hoursLeft={hoursLeft}
+                    minutesLeft={minutesLeft}
+                  />
                 </Tabs.Content>
                 <Tabs.Content value="timeline" pt={6}>
                   <Text>{"Timeline"}</Text>
@@ -80,8 +103,13 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               </Tabs.Root>
             ) : (
               <>
-                <Text>{"Session"}</Text>
-
+                <ProposalInteractionCard
+                  proposal={proposal}
+                  daysLeft={daysLeft}
+                  hoursLeft={hoursLeft}
+                  minutesLeft={minutesLeft}
+                  isVotingPhase={isVotingPhase}
+                />
                 <Text>{"Timeline"}</Text>
 
                 {/* <Session Information component/> */}

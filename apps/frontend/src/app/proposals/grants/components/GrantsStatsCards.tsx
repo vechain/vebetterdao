@@ -16,20 +16,20 @@ const StatsCard = ({ icon, value, label, alt }: StatsCardProps) => (
     gap={4}
     w="full"
     h="full"
-    py={{ base: 2, lg: 6 }}
-    pl={{ base: 4, lg: 6 }}>
+    py={{ base: 3, lg: 6 }}
+    pl={{ base: 5, lg: 6 }}>
     <Box
       bg="light-contrast-on-card-bg"
       borderRadius="full"
-      minW={{ base: "64px", lg: "72px" }}
-      h={{ base: "64px", lg: "72px" }}
+      minW={{ base: "40px", lg: "72px" }}
+      h={{ base: "40px", lg: "72px" }}
       display="flex"
       alignItems="center"
       justifyContent="center">
-      <Image src={icon} alt={alt} boxSize={{ base: "40px", lg: "50px" }} />
+      <Image src={icon} alt={alt} boxSize={{ base: "30px", lg: "50px" }} />
     </Box>
-    <VStack alignItems="flex-start" gap={1}>
-      <Heading size="2xl">{value}</Heading>
+    <VStack alignItems="flex-start" gap={{ base: 0, lg: 2 }}>
+      <Heading size={{ base: "lg", lg: "2xl" }}>{value}</Heading>
       <Text fontSize={{ base: "xs", lg: "sm" }} color="text.subtle">
         {label}
       </Text>
@@ -69,7 +69,7 @@ export const GrantsStatsCards = ({
       }}>
       <Grid
         w={{ base: "max-content", lg: "full" }}
-        templateColumns={{ base: "repeat(3, 300px)", lg: "repeat(3, 1fr)" }}
+        templateColumns={{ base: "repeat(3, 55vw)", lg: "repeat(3, 1fr)" }}
         gap={8}>
         {statsUI.map(stat => (
           <GridItem key={`${stat.label}`}>
