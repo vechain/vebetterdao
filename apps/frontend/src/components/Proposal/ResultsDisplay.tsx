@@ -1,42 +1,54 @@
-import { HStack, Icon, Text } from "@chakra-ui/react"
+import { HStack, Icon, Separator, Text } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { FaHeart, FaRegHeart } from "react-icons/fa"
 
-interface ResultsDisplayProps {
-  percentage: string
-  hasVoted: boolean
+type ResultsDisplayProps = {
+  segments: { percentage: number; color: string; icon: React.ElementType }[]
   tokenAmount: bigint
   showTokenAmount?: boolean
-  layout?: "horizontal" | "vertical"
 }
 
-export const ResultsDisplay = ({
-  percentage,
-  hasVoted,
-  tokenAmount,
-  showTokenAmount = false,
-  layout = "horizontal",
-}: ResultsDisplayProps) => {
+export const ResultsDisplay = ({ segments, tokenAmount, showTokenAmount = false }: ResultsDisplayProps) => {
   const { t } = useTranslation()
 
-  const content = (
-    <>
-      <HStack color="success.primary">
-        <Icon as={hasVoted ? FaHeart : FaRegHeart} boxSize={5} />
-        <Text>{`${percentage}%`}</Text>
-      </HStack>
-      {showTokenAmount && (
+  const isSingleSegment = segments.length === 1
+  const hasMultipleSegments = segments.length > 1
+  const shouldShowTokenAmount = showTokenAmount && isSingleSegment
+
+  const containerProps = {
+    justify: "space-between",
+    w: "full",
+    gap: isSingleSegment ? 2 : 0,
+  } as const
+
+  const segmentProps = {
+    gap: 2,
+    flex: isSingleSegment ? "none" : "1",
+    justify: isSingleSegment ? "flex-start" : "center",
+  } as const
+
+  const shouldShowSeparator = (index: number) => {
+    return hasMultipleSegments && index !== segments.length - 1
+  }
+
+  return (
+    <HStack {...containerProps}>
+      {segments.map((segment, index) => (
+        <>
+          <HStack key={segment.color} {...segmentProps}>
+            <Icon as={segment.icon} boxSize={5} color={segment.color} />
+            <Text fontSize="md" color="text.subtle">
+              {`${segment.percentage.toFixed(1)}%`}
+            </Text>
+          </HStack>
+          {shouldShowSeparator(index) && <Separator orientation="vertical" height="4" />}
+        </>
+      ))}
+      {shouldShowTokenAmount && (
         <Text fontSize="md" color="text.subtle">
           {t("{{amount}} VOT3", { amount: ethers.formatEther(tokenAmount) })}
         </Text>
       )}
-    </>
+    </HStack>
   )
-
-  if (layout === "vertical") {
-    return <div>{content}</div>
-  }
-
-  return <HStack justify={showTokenAmount ? "space-between" : "flex-start"}>{content}</HStack>
 }

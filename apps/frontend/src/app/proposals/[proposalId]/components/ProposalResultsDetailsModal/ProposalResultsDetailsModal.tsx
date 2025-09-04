@@ -6,11 +6,9 @@ import { t } from "i18next"
 type Props = {
   isResultsModalOpen: boolean
   onClose: () => void
-  progressBarSegments: { percentage: number; color: string }[]
-  percentageSupported: number
-  hasUserAlreadyVoted: boolean
+  progressBarSegments: { percentage: number; color: string; icon: React.ElementType }[]
   userDeposits: bigint
-  proposalDepositThreshold: number
+  proposalDepositThreshold: bigint
   resultsDetails: { label: string; value: string }[]
   isVotingPhase: boolean
 }
@@ -19,8 +17,6 @@ export const ProposalResultsDetailsModal = ({
   isResultsModalOpen,
   onClose,
   progressBarSegments,
-  percentageSupported,
-  hasUserAlreadyVoted,
   userDeposits,
   proposalDepositThreshold,
   resultsDetails,
@@ -46,9 +42,8 @@ export const ProposalResultsDetailsModal = ({
 
         {/* Results Display with Token Amount */}
         <ResultsDisplay
-          percentage={String(percentageSupported)}
-          hasVoted={isVotingPhase ? hasUserAlreadyVoted : !!userDeposits}
-          tokenAmount={isVotingPhase ? (userDeposits ?? BigInt(0)) : BigInt(proposalDepositThreshold.toString())}
+          segments={progressBarSegments}
+          tokenAmount={isVotingPhase ? (userDeposits ?? BigInt(0)) : proposalDepositThreshold}
           showTokenAmount
         />
 

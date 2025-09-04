@@ -14,15 +14,15 @@ import { useGetVot3Balance, useProposalVot3Deposit } from "@/hooks"
 import { ProposalEnriched, ProposalState, ProposalType as GrantsProposalType } from "@/hooks/proposals/grants/types"
 import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FaHeart } from "react-icons/fa"
+import { FaHeart, FaRegHeart } from "react-icons/fa"
 import { FiBarChart2 } from "react-icons/fi"
 import { TbClockHour8 } from "react-icons/tb"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
+import { UilCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -59,24 +59,30 @@ export const ProposalInteractionCard = ({
   const { data: roundSnapshot } = useProposalSnapshot(proposal?.id ?? "")
   const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
-  const { data: proposalQuorumQueryData } = useProposalQuorumByType(
+  const { data: proposalQuorum } = useProposalQuorumByType(
     Number(roundSnapshot ?? 0),
     proposal?.type ?? GrantsProposalType.Standard,
   )
   const { data: proposalVotesQueryData } = useProposalVotes(proposal?.id ?? "")
 
   // ===== COMPUTED VALUES =====
-  const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? 0)
-  const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? 0)
+  const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? "0")
+  const proposalDepositThreshold = BigInt(proposalDepositThresholdQueryData ?? "0")
+  const proposalQuorumBigInt = BigInt(proposalQuorum ?? "0")
   const userVotingPower = Number(userVot3OnSnapshot ?? 0)
   const hasUserAlreadyVoted = userHasAlreadyVotedInProposal?.[proposal?.id ?? ""] ?? false
   const userVot3Balance = Number(userVot3BalanceQueryData?.original ?? 0)
   const proposalDepositReached = isDepositReached ?? false
 
   const percentageSupported = useMemo(() => {
-    if (currentDepositAmount === BigInt(0)) return currentDepositAmount
-    if (proposalDepositThreshold === BigInt(0)) return proposalDepositThreshold
-    return BigNumber(currentDepositAmount).div(proposalDepositThreshold).times(100).toNumber().toFixed(0)
+    if (currentDepositAmount === 0n) return "0"
+    if (proposalDepositThreshold === 0n) return "0"
+
+    // Convert to numbers for percentage calculation (safe since we're dividing)
+    const current = Number(ethers.formatEther(currentDepositAmount))
+    const threshold = Number(ethers.formatEther(proposalDepositThreshold))
+
+    return ((current / threshold) * 100).toFixed(0)
   }, [currentDepositAmount, proposalDepositThreshold])
 
   // ===== BUSINESS LOGIC =====
@@ -114,66 +120,82 @@ export const ProposalInteractionCard = ({
   }, [proposal?.state, isVotingPhase, hasUserAlreadyVoted, userVotingPower, userVot3Balance, proposalDepositReached])
 
   const progressBarSegments = useMemo(() => {
-    return [{ percentage: Number(percentageSupported ?? 0), color: "success.primary" }]
-  }, [percentageSupported])
+    if (proposal?.state === ProposalState.Pending) {
+      return [
+        {
+          percentage: Number(percentageSupported ?? 0),
+          color: "success.primary",
+          icon: userDeposits ? FaHeart : FaRegHeart,
+        },
+      ]
+    }
+
+    return [
+      {
+        percentage: Number(proposalVotesQueryData?.forPercentage ?? 0),
+        color: "success.primary",
+        icon: UilThumbsUp,
+      },
+      {
+        percentage: Number(proposalVotesQueryData?.abstainPercentage ?? 0),
+        color: "warning.primary",
+        icon: UilCircle,
+      },
+      {
+        percentage: Number(proposalVotesQueryData?.againstPercentage ?? 0),
+        color: "error.primary",
+        icon: UilThumbsDown,
+      },
+    ]
+  }, [percentageSupported, proposalVotesQueryData])
 
   const supportWith100Vot3 = useCallback(() => {
     sendTransaction({ amount: ethers.parseEther("3000").toString(), proposalId: proposal?.id ?? "" })
   }, [sendTransaction, proposal?.id])
 
   // ===== MODAL DATA =====
-  const proposalQuorum = BigNumber(proposalQuorumQueryData ?? 0)
-  const proposalTotalVotes = BigNumber(proposalVotesQueryData?.totalVotes ?? 0)
-  const proposalWalletsVoted = 0 //TODO: This comes from indexer
-  const proposalWalletsSupported = 0 //TODO: This comes from indexer
+  const proposalTotalVotes = proposalVotesQueryData?.totalVotes
+    ? ethers.parseEther(proposalVotesQueryData.totalVotes.toString())
+    : 0n
+
+  // Utility function to format BigInt to string with max 1 decimal and no negatives
+  const formatTokenAmount = (amount: bigint): string => {
+    if (amount <= 0n) return "0"
+    const formatted = ethers.formatEther(amount)
+    const num = parseFloat(formatted)
+    return num.toFixed(1)
+  }
+
+  // Utility function to calculate difference between two BigInt values, capped at 0
+  const calculateAmountLeft = (target: bigint, current: bigint): string => {
+    if (current >= target) return "0"
+    return formatTokenAmount(target - current)
+  }
+
+  // Calculate values based on current phase
+  const totalAmountNeeded = isVotingPhase
+    ? formatTokenAmount(proposalQuorumBigInt)
+    : formatTokenAmount(proposalDepositThreshold)
+
+  const amountLeftToReach = isVotingPhase
+    ? calculateAmountLeft(proposalQuorumBigInt, proposalTotalVotes)
+    : calculateAmountLeft(proposalDepositThreshold, currentDepositAmount)
   const resultsDetails = useMemo(() => {
     const detailsArray = []
 
-    if (isVotingPhase) {
-      detailsArray.push({
-        label: t("Total amount needed"),
-        value: t("{{amount}} VOT3", { amount: proposalQuorum }),
-      })
+    // Both phases show total amount needed and amount left to reach
+    detailsArray.push({
+      label: t("Total amount needed"),
+      value: t("{{amount}} VOT3", { amount: totalAmountNeeded }),
+    })
 
-      detailsArray.push({
-        label: t("Amount left to reach"),
-        value: t("{{amount}} VOT3", { amount: proposalTotalVotes.minus(proposalQuorum).toString() }),
-      })
-
-      detailsArray.push({
-        label: t("Wallets voted"),
-        value: t("{{amount}} VOT3", { amount: proposalWalletsVoted }),
-      })
-    } else {
-      detailsArray.push({
-        label: t("Total amount needed"),
-        value: t("{{amount}} VOT3", { amount: ethers.formatEther(proposalDepositThreshold.toString()) }),
-      })
-
-      detailsArray.push({
-        label: t("Amount left to reach"),
-        value: t("{{amount}} VOT3", {
-          amount: BigNumber(proposalDepositThreshold).minus(currentDepositAmount).toString(),
-        }),
-      })
-
-      detailsArray.push({
-        label: t("Wallets supported"),
-        value: t("{{amount}} VOT3", { amount: proposalWalletsSupported }),
-      })
-    }
+    detailsArray.push({
+      label: t("Amount left to reach"),
+      value: t("{{amount}} VOT3", { amount: amountLeftToReach }),
+    })
 
     return detailsArray
-  }, [
-    isVotingPhase,
-    t,
-    proposalQuorum,
-    proposalTotalVotes,
-    proposalWalletsVoted,
-    proposalDepositThreshold,
-    currentDepositAmount,
-    proposalWalletsSupported,
-  ])
+  }, [t, totalAmountNeeded, amountLeftToReach])
 
   return (
     <>
@@ -210,8 +232,7 @@ export const ProposalInteractionCard = ({
 
             {/* Results Display */}
             <ResultsDisplay
-              percentage={String(percentageSupported)}
-              hasVoted={isVotingPhase ? hasUserAlreadyVoted : !!userDeposits}
+              segments={progressBarSegments}
               tokenAmount={BigInt(0)} // Not shown in main card
               showTokenAmount={false}
             />
@@ -247,10 +268,8 @@ export const ProposalInteractionCard = ({
         isResultsModalOpen={isResultsModalOpen}
         onClose={() => setIsResultsModalOpen(false)}
         progressBarSegments={progressBarSegments}
-        percentageSupported={Number(percentageSupported)}
-        hasUserAlreadyVoted={hasUserAlreadyVoted}
         userDeposits={userDeposits ?? BigInt(0)}
-        proposalDepositThreshold={Number(proposalDepositThreshold)}
+        proposalDepositThreshold={proposalDepositThreshold}
         resultsDetails={resultsDetails}
         isVotingPhase={isVotingPhase}
       />
