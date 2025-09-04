@@ -1,17 +1,19 @@
 import {
+  getGetProposalDepositsQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
   getProposalsEventsQueryKey,
   getProposalUserDepositQueryKey,
-  getProposalClaimableUserDepositsQueryKey,
 } from "@/api"
-import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@vechain/vebetterdao-contracts"
-import { buildClause } from "@/utils/buildClause"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { useCallback, useMemo } from "react"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 
 const config = getConfig()
@@ -65,6 +67,7 @@ export const useProposalVot3Deposit = ({
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),
       getVot3BalanceQueryKey(account?.address ?? ""),
+      getGetProposalDepositsQueryKey(proposalId),
     ],
     [account, proposalId],
   )
