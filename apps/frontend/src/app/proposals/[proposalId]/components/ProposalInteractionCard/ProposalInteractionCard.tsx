@@ -1,16 +1,18 @@
 import {
   useGetProposalDeposits,
   useGetVotesOnBlock,
+  useProposalVotes,
   useHasVotedInProposals,
   useIsDepositReached,
   useProposalDepositThreshold,
+  useProposalQuorumByType,
   useProposalSnapshot,
   useProposalUserDeposit,
 } from "@/api"
-import { CountdownBoxes, MulticolorBar, RegularModal, ResultsDisplay, ResultsDetailsList } from "@/components"
+import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
 import { useGetVot3Balance, useProposalVot3Deposit } from "@/hooks"
-import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
-import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { ProposalEnriched, ProposalState, ProposalType as GrantsProposalType } from "@/hooks/proposals/grants/types"
+import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
@@ -19,6 +21,8 @@ import { useTranslation } from "react-i18next"
 import { FaHeart } from "react-icons/fa"
 import { FiBarChart2 } from "react-icons/fi"
 import { TbClockHour8 } from "react-icons/tb"
+import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
+import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -39,13 +43,14 @@ export const ProposalInteractionCard = ({
 }: Props) => {
   // ===== STATE =====
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
+  const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
 
   // ===== HOOKS =====
   const { t } = useTranslation()
   const { sendTransaction } = useProposalVot3Deposit({ proposalId: proposal?.id ?? "" })
   const { account } = useWallet()
 
-  // ===== API QUERIES =====
+  // ===== CONTRACT QUERIES =====
   const { data: isDepositReached } = useIsDepositReached(proposal?.id ?? "")
   const { data: userHasAlreadyVotedInProposal } = useHasVotedInProposals([proposal?.id ?? ""])
   const { data: userVot3BalanceQueryData } = useGetVot3Balance(account?.address)
@@ -54,6 +59,11 @@ export const ProposalInteractionCard = ({
   const { data: roundSnapshot } = useProposalSnapshot(proposal?.id ?? "")
   const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
+  const { data: proposalQuorumQueryData } = useProposalQuorumByType(
+    Number(roundSnapshot ?? 0),
+    proposal?.type ?? GrantsProposalType.Standard,
+  )
+  const { data: proposalVotesQueryData } = useProposalVotes(proposal?.id ?? "")
 
   // ===== COMPUTED VALUES =====
   const currentDepositAmount = BigInt(currentDepositAmountQueryData ?? 0)
@@ -71,10 +81,16 @@ export const ProposalInteractionCard = ({
 
   // ===== BUSINESS LOGIC =====
   const shouldShowActionButton = useMemo(() => {
-    const isVotingOrSupportPhase =
-      [ProposalState.Pending, ProposalState.Active].includes(proposal?.state ?? ProposalState.Pending) || isLoading
-    return isVotingOrSupportPhase && !proposalDepositReached && !hasUserAlreadyVoted
-  }, [proposal?.state, isLoading, proposalDepositReached, hasUserAlreadyVoted])
+    if (proposal?.state === ProposalState.Active) {
+      return !hasUserAlreadyVoted && userVotingPower > 0
+    }
+
+    if (proposal?.state === ProposalState.Pending) {
+      return !proposalDepositReached && userVot3Balance > 0
+    }
+
+    return false
+  }, [proposal?.state, isLoading, proposalDepositReached, hasUserAlreadyVoted, userVot3Balance, userVotingPower])
 
   const isActionButtonDisabled = useMemo(() => {
     const disabledStates = [ProposalState.Canceled, ProposalState.Defeated, ProposalState.DepositNotMet]
@@ -106,12 +122,10 @@ export const ProposalInteractionCard = ({
   }, [sendTransaction, proposal?.id])
 
   // ===== MODAL DATA =====
-  // TODO: Move these hardcoded values to the API or component props
-  const proposalQuorum = 5000000
-  const proposalTotalVotes = 2000000
-  const proposalWalletsVoted = 122
-  const proposalWalletsSupported = 100
-
+  const proposalQuorum = BigNumber(proposalQuorumQueryData ?? 0)
+  const proposalTotalVotes = BigNumber(proposalVotesQueryData?.totalVotes ?? 0)
+  const proposalWalletsVoted = 0 //TODO: This comes from indexer
+  const proposalWalletsSupported = 0 //TODO: This comes from indexer
   const resultsDetails = useMemo(() => {
     const detailsArray = []
 
@@ -123,7 +137,7 @@ export const ProposalInteractionCard = ({
 
       detailsArray.push({
         label: t("Amount left to reach"),
-        value: t("{{amount}} VOT3", { amount: proposalTotalVotes - proposalQuorum }),
+        value: t("{{amount}} VOT3", { amount: proposalTotalVotes.minus(proposalQuorum).toString() }),
       })
 
       detailsArray.push({
@@ -217,7 +231,10 @@ export const ProposalInteractionCard = ({
 
             {/* Action Button */}
             {shouldShowActionButton && (
-              <Button variant="primaryAction" onClick={supportWith100Vot3} disabled={isActionButtonDisabled}>
+              <Button
+                variant="primaryAction"
+                onClick={isVotingPhase ? () => setIsVoteModalOpen(true) : supportWith100Vot3}
+                disabled={isActionButtonDisabled}>
                 {isVotingPhase ? t("Vote") : t("Support")}
               </Button>
             )}
@@ -226,37 +243,24 @@ export const ProposalInteractionCard = ({
       </Skeleton>
 
       {/* ===== RESULTS MODAL ===== */}
-      <RegularModal
-        size="md"
-        showCloseButton
-        isCloseable
-        ariaTitle={t("Result details")}
-        isOpen={isResultsModalOpen}
-        onClose={() => setIsResultsModalOpen(false)}>
-        <VStack w="full" align="stretch" gap={4}>
-          {/* Modal Header */}
-          <HStack>
-            <Icon as={FiBarChart2} boxSize={5} />
-            <Heading>{t("Results")}</Heading>
-          </HStack>
+      <ProposalResultsDetailsModal
+        isResultsModalOpen={isResultsModalOpen}
+        onClose={() => setIsResultsModalOpen(false)}
+        progressBarSegments={progressBarSegments}
+        percentageSupported={Number(percentageSupported)}
+        hasUserAlreadyVoted={hasUserAlreadyVoted}
+        userDeposits={userDeposits ?? BigInt(0)}
+        proposalDepositThreshold={Number(proposalDepositThreshold)}
+        resultsDetails={resultsDetails}
+        isVotingPhase={isVotingPhase}
+      />
 
-          {/* Progress Bar */}
-          <MulticolorBar segments={progressBarSegments} />
-
-          {/* Results Display with Token Amount */}
-          <ResultsDisplay
-            percentage={String(percentageSupported)}
-            hasVoted={isVotingPhase ? hasUserAlreadyVoted : !!userDeposits}
-            tokenAmount={isVotingPhase ? (userDeposits ?? BigInt(0)) : BigInt(proposalDepositThreshold.toString())}
-            showTokenAmount
-          />
-
-          <Separator />
-
-          {/* Results Details List */}
-          <ResultsDetailsList details={resultsDetails} />
-        </VStack>
-      </RegularModal>
+      {/* ===== VOTE MODAL ===== */}
+      <ProposalCastVoteModal
+        isVoteModalOpen={isVoteModalOpen}
+        onClose={() => setIsVoteModalOpen(false)}
+        proposalId={proposal?.id ?? ""}
+      />
     </>
   )
 }
