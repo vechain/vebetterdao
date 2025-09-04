@@ -1996,6 +1996,11 @@
   "Results": "Results",
   "Details": "Details",
   "You supported with": "You supported with",
-  "{{votingPower}} VOT3": "{{votingPower}} VOT3",
-  "Grant Completed": "Grant Completed"
+  "{{amount}} VOT3": "{{amount}} VOT3",
+  "Grant Completed": "Grant Completed",
+  "Total amount needed": "Total amount needed",
+  "Amount left to reach": "Amount left to reach",
+  "Wallets supported": "Wallets supported",
+  "Result details": "Result details",
+  "Claim your VOT3 tokens back {{round}} when voting starts.": "Claim your VOT3 tokens back {{round}} when voting starts."
 }

@@ -1,4 +1,3 @@
-import { ProposalStatusBadge } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { Card, Heading, HStack, Tabs, Text, VStack } from "@chakra-ui/react"
@@ -9,6 +8,7 @@ import { useTranslation } from "react-i18next"
 
 import { MilestonesActions } from "../../../grants/components"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
+import { ProposalStatusBadge } from "@/components/Proposal/ProposalStatusBadge"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
