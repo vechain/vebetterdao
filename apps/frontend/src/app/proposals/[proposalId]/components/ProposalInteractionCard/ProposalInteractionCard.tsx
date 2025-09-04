@@ -133,7 +133,7 @@ export const ProposalInteractionCard = ({
     } else {
       detailsArray.push({
         label: t("Total amount needed"),
-        value: t("{{amount}} VOT3", { amount: ethers.formatEther(proposalDepositThreshold ?? 0) }),
+        value: t("{{amount}} VOT3", { amount: ethers.formatEther(proposalDepositThreshold.toString()) }),
       })
 
       detailsArray.push({
@@ -247,8 +247,8 @@ export const ProposalInteractionCard = ({
           <ResultsDisplay
             percentage={String(percentageSupported)}
             hasVoted={isVotingPhase ? hasUserAlreadyVoted : !!userDeposits}
-            tokenAmount={isVotingPhase ? (userDeposits ?? BigInt(0)) : ethers.parseEther(userVot3OnSnapshot ?? "0")}
-            showTokenAmount={true}
+            tokenAmount={isVotingPhase ? (userDeposits ?? BigInt(0)) : BigInt(proposalDepositThreshold.toString())}
+            showTokenAmount
           />
 
           <Separator />
