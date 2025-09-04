@@ -1784,5 +1784,9 @@
   "Maximum {{max}} categories per app.": "Maximum {{max}} categories per app.",
   "Previous app": "Previous app",
   "Next app": "Next app",
-  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps"
+  "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps",
+  "Round hasn’t started yet. Please start a new round.": "Round hasn’t started yet. Please start a new round.",
+  "Start new round & claim allocations": "Start new round & claim allocations",
+  "Transaction completed!": "Transaction completed!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps."
 }
