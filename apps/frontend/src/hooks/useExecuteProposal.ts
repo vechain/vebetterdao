@@ -1,11 +1,12 @@
-import { useCallback, useMemo } from "react"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalStateQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
 import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -18,8 +19,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns the execute transaction
  */
 export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
-  const enrichedProposal = useProposalEnrichedById(proposalId)
-  const proposal = enrichedProposal
+  const proposal = useProposalEnrichedById(proposalId)
   const proposalValues = proposal?.values
 
   const grantValues = useMemo(() => {

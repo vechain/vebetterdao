@@ -15,7 +15,7 @@ type Props = {
 }
 
 export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
-  const { data: proposal, isLoading } = useProposalEnrichedById(proposalId)
+  const proposal = useProposalEnrichedById(proposalId)
 
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal!)
   const { isMobile } = useBreakpoints()
@@ -59,7 +59,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]} order={[2, 2, 1]}>
-          <ProposalOverview isGrant={isGrant} proposal={proposal} isLoading={isLoading} />
+          {/*TODO: CHECK IF WE NEED LOADING STATE */}
+          <ProposalOverview isGrant={isGrant} proposal={proposal} isLoading={false} />
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} order={[1, 1, 2]}>
           <VStack align="stretch" gap={8}>
