@@ -29,7 +29,7 @@ export const useProposalQuorumByType = (blockNumber: number, proposalType: Propo
     method,
     args: [BigInt(blockNumber), proposalType],
     queryOptions: {
-      enabled: !!blockNumber && !!proposalType,
+      enabled: !!blockNumber,
       select: data => data[0],
     },
   })
