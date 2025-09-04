@@ -10,7 +10,7 @@ import { FiBarChart2 } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
 import { GenericAlert } from "@/app/components/Alert"
-import { useCurrentAllocationsRoundId, useProposalUserDeposit } from "@/api"
+import { useCurrentAllocationsRoundId } from "@/api"
 import { filterAmountInput } from "@/utils/filterAmountInput"
 import { BigNumber } from "bignumber.js"
 
@@ -38,7 +38,6 @@ export const ProposalSupportModal = ({
 
   // Get user's VOT3 balance and current deposits using hooks
   const { data: vot3Balance } = useGetVot3Balance(account?.address)
-  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
 
   const canClaimNextRound = useMemo(() => {
     return votingRoundId === Number(currentRoundId ?? 0) + 1
@@ -53,7 +52,7 @@ export const ProposalSupportModal = ({
 
     // For percentages less than 100%, use bigint math to maintain precision
     // Calculate (deposits * 10000) / threshold for 2 decimal precision, then divide by 100
-    const basisPoints = (deposits * 10000n) / threshold
+    const basisPoints = deposits / threshold
     return Number(basisPoints) / 100
   }, [])
 
@@ -84,15 +83,6 @@ export const ProposalSupportModal = ({
       return "0"
     }
   }, [amount])
-
-  // User support (current + forecasted)
-  const userSupport = useMemo(() => {
-    return Number(ethers.formatEther(userDeposits ?? 0n))
-  }, [userDeposits])
-
-  const userDepositsForecasted = useMemo(() => {
-    return Number(amount || "0") + userSupport
-  }, [amount, userSupport])
 
   // Input handling (exactly like old interface)
   const handleChange = useCallback(
@@ -132,15 +122,15 @@ export const ProposalSupportModal = ({
 
   const predictedPercent = useMemo(() => {
     // Calculate forecasted total deposits including user's contribution
-    const currentTotal = Number(ethers.formatEther(proposalDeposits))
-    const forecastedTotal = currentTotal - userSupport + userDepositsForecasted
-    const thresholdNumber = Number(ethers.formatEther(proposalThreshold))
+    const currentTotal = proposalDeposits
+    const forecastedTotal = currentTotal + inputAmount
+    const thresholdNumber = proposalThreshold
 
-    if (thresholdNumber === 0) return 0
     if (forecastedTotal >= thresholdNumber) return 100
 
-    return Math.floor((forecastedTotal / thresholdNumber) * 10000) / 100
-  }, [proposalDeposits, proposalThreshold, userSupport, userDepositsForecasted])
+    const expectedPercentage = BigNumber(forecastedTotal).div(thresholdNumber)
+    return expectedPercentage.times(100).toNumber()
+  }, [proposalDeposits, proposalThreshold, inputAmount])
 
   // Display data for progress and results
   const displayPercent = Number(amount || "0") > 0 ? predictedPercent : currentPercent
@@ -190,7 +180,7 @@ export const ProposalSupportModal = ({
                 <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
               </HStack>
             }>
-            <Input placeholder="0" value={amount} onChange={handleChange} />
+            <Input placeholder="0" size={"lg"} value={amount} onChange={handleChange} />
           </InputGroup>
           {/* Deposit Max Button */}
           <Button

@@ -38,7 +38,7 @@ export const ResultsDisplay = ({ segments, tokenAmount, showTokenAmount = false 
           <HStack key={segment.color} {...segmentProps}>
             <Icon as={segment.icon} boxSize={5} color={segment.color} />
             <Text fontSize="md" color="text.subtle">
-              {`${segment.percentage.toFixed(1)}%`}
+              {`${segment.percentage}%`}
             </Text>
           </HStack>
           {shouldShowSeparator(index) && <Separator orientation="vertical" height="4" />}

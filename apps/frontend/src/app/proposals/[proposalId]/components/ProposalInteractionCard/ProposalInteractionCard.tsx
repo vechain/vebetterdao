@@ -291,7 +291,7 @@ export const ProposalInteractionCard = ({
         isSupportModalOpen={isSupportModalOpen}
         onClose={handleCloseSupportModal}
         proposalId={proposal?.id ?? ""}
-        votingRoundId={Number(roundSnapshot ?? 0)}
+        votingRoundId={Number(proposal?.votingRoundId ?? 0)}
         proposalThreshold={proposalDepositThreshold}
         proposalDeposits={currentDepositAmount}
       />
