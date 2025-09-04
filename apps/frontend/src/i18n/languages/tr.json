@@ -1774,5 +1774,21 @@
   "Apply": "Başvur",
   "Get NFT": "NFT Alın",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Destekleyen tekliflerden <bold>{{depositsVotes}} VOT3</bold> içerir",
-  "More info about your votes at snapshot": "Snapshot üzerinde oylarınızla ilgili daha fazla bilgi"
+  "More info about your votes at snapshot": "Snapshot üzerinde oylarınızla ilgili daha fazla bilgi",
+  "Assign App Categories": "Uygulama Kategorilerini Ata",
+  "Loading apps without categories...": "Kategorisiz uygulamalar yükleniyor...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Kategorisi olmayan uygulamalara kategoriler atayın. Uygulama başına maksimum {{max}} kategori.",
+  "All apps have categories assigned! 🎉": "Tüm uygulamalara kategoriler atandı! 🎉",
+  "Apps without categories: {{count}}": "Kategorisiz uygulamalar: {{count}}",
+  "Category Assignments ({{count}})": "Kategori Atamaları ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Seçilen Kategoriler ({{count}}/{{max}})",
+  "Uploading metadata...": "Meta veriler yükleniyor...",
+  "Maximum {{max}} categories per app.": "Uygulama başına maksimum {{max}} kategori.",
+  "Previous app": "Önceki uygulama",
+  "Next app": "Sonraki uygulama",
+  "Assign Categories to {{count}} Apps": "{{count}} Uygulamaya Kategoriler Ata",
+  "Round hasn’t started yet. Please start a new round.": "Tur henüz başlamadı. Lütfen yeni bir tur başlatın.",
+  "Start new round & claim allocations": "Yeni tur başlat ve tahsisleri talep et",
+  "Transaction completed!": "İşlem tamamlandı!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Aşağıdaki butona tıklayarak, {{count}} uygulama için de tahsisleri talep edeceksiniz."
 }

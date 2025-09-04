@@ -1774,5 +1774,21 @@
   "Apply": "आवेदन करें",
   "Get NFT": "NFT प्राप्त करें",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "समर्थित प्रस्तावों से <bold>{{depositsVotes}} VOT3</bold> शामिल हैं",
-  "More info about your votes at snapshot": "आपके वोटों के बारे में अधिक जानकारी स्नैपशॉट में"
+  "More info about your votes at snapshot": "आपके वोटों के बारे में अधिक जानकारी स्नैपशॉट में",
+  "Assign App Categories": "ऐप श्रेणियाँ असाइन करें",
+  "Loading apps without categories...": "श्रेणियों के बिना ऐप लोड हो रहे हैं...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "ऐप्स को श्रेणियाँ असाइन करें जिनके पास कोई नहीं है। अधिकतम {{max}} श्रेणियाँ प्रति ऐप।",
+  "All apps have categories assigned! 🎉": "सभी ऐप्स को श्रेणियाँ असाइन कर दी गई हैं! 🎉",
+  "Apps without categories: {{count}}": "श्रेणियों के बिना ऐप्स: {{count}}",
+  "Category Assignments ({{count}})": "श्रेणी असाइनमेंट ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "चयनित श्रेणियाँ ({{count}}/{{max}})",
+  "Uploading metadata...": "मेटाडेटा अपलोड हो रहा है...",
+  "Maximum {{max}} categories per app.": "प्रति ऐप अधिकतम {{max}} श्रेणियाँ।",
+  "Previous app": "पिछला ऐप",
+  "Next app": "अगला ऐप",
+  "Assign Categories to {{count}} Apps": "{{count}} ऐप्स को श्रेणियाँ असाइन करें",
+  "Round hasn’t started yet. Please start a new round.": "राउंड अभी तक शुरू नहीं हुआ है। कृपया एक नया राउंड शुरू करें।",
+  "Start new round & claim allocations": "नया राउंड शुरू करें और आवंटन का दावा करें",
+  "Transaction completed!": "लेन-देन पूरा हुआ!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "{{count}} ऐप्स के लिए आवंटन का दावा करने के लिए नीचे दिए गए बटन पर क्लिक करें।"
 }
