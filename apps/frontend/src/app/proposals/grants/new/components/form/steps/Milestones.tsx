@@ -11,6 +11,7 @@ import {
   HStack,
   useMediaQuery,
   VStack,
+  Link,
 } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch, Control } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
@@ -24,6 +25,7 @@ import dayjs from "dayjs"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
+import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
 
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
@@ -297,7 +299,22 @@ export const Milestones = ({
             name="termsOfService"
             key="termsOfService"
             control={control}
-            label={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
+            label={
+              <Trans
+                color="text.default"
+                i18nKey="I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate."
+                components={{
+                  Link: (
+                    <Link
+                      textDecoration="underline"
+                      color="text.default"
+                      target="_blank"
+                      href={GRANT_TERMS_AND_CONDITIONS_LINK}
+                    />
+                  ),
+                }}
+              />
+            }
             rules={{ required: "Please accept the terms of service" }}
             error={errors.termsOfService?.message}
           />
