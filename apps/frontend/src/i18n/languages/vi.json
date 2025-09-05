@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "Vòng chưa bắt đầu. Vui lòng bắt đầu một vòng mới.",
   "Start new round & claim allocations": "Bắt đầu vòng mới & nhận phân bổ",
   "Transaction completed!": "Giao dịch hoàn tất!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Bằng cách nhấp vào nút bên dưới, bạn cũng sẽ yêu cầu phân bổ cho {{count}} ứng dụng."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Bằng cách nhấp vào nút bên dưới, bạn cũng sẽ yêu cầu phân bổ cho {{count}} ứng dụng.",
+  "The previous round has ended. Start a new round to continue voting.": "Vòng trước đã kết thúc. Bắt đầu một vòng mới để tiếp tục bỏ phiếu."
 }

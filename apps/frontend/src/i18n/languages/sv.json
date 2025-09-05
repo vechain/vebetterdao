@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "Rundan har inte börjat än. Var vänlig starta en ny runda.",
   "Start new round & claim allocations": "Starta ny runda & gör anspråk på tilldelningar",
   "Transaction completed!": "Transaktion slutförd!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Genom att klicka på knappen nedan kommer du också att skaffa allokeringar för {{count}} appar."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Genom att klicka på knappen nedan kommer du också att skaffa allokeringar för {{count}} appar.",
+  "The previous round has ended. Start a new round to continue voting.": "Den tidigare omgången har avslutats. Starta en ny omgång för att fortsätta rösta."
 }

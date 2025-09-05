@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "De ronde is nog niet begonnen. Begin alstublieft een nieuwe ronde.",
   "Start new round & claim allocations": "Begin nieuwe ronde & claim toewijzingen",
   "Transaction completed!": "Transactie voltooid!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Door op de knop hieronder te klikken, claim je ook toewijzingen voor {{count}} apps."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Door op de knop hieronder te klikken, claim je ook toewijzingen voor {{count}} apps.",
+  "The previous round has ended. Start a new round to continue voting.": "De vorige ronde is geëindigd. Start een nieuwe ronde om door te gaan met stemmen."
 }

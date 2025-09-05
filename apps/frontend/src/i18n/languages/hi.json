@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "राउंड अभी तक शुरू नहीं हुआ है। कृपया एक नया राउंड शुरू करें।",
   "Start new round & claim allocations": "नया राउंड शुरू करें और आवंटन का दावा करें",
   "Transaction completed!": "लेन-देन पूरा हुआ!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "{{count}} ऐप्स के लिए आवंटन का दावा करने के लिए नीचे दिए गए बटन पर क्लिक करें।"
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "{{count}} ऐप्स के लिए आवंटन का दावा करने के लिए नीचे दिए गए बटन पर क्लिक करें।",
+  "The previous round has ended. Start a new round to continue voting.": "पिछला दौर समाप्त हो गया है। मतदान जारी रखने के लिए एक नया दौर शुरू करें।"
 }
