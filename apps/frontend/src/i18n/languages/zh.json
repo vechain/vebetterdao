@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "回合尚未开始。请开始新一轮。",
   "Start new round & claim allocations": "开始新一轮并领取分配",
   "Transaction completed!": "交易完成！",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "点击下面的按钮，您还将为 {{count}} 个应用程序认领分配。"
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "点击下面的按钮，您还将为 {{count}} 个应用程序认领分配。",
+  "The previous round has ended. Start a new round to continue voting.": "上一轮已结束。开始新一轮以继续投票。"
 }

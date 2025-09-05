@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "Tur henüz başlamadı. Lütfen yeni bir tur başlatın.",
   "Start new round & claim allocations": "Yeni tur başlat ve tahsisleri talep et",
   "Transaction completed!": "İşlem tamamlandı!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Aşağıdaki butona tıklayarak, {{count}} uygulama için de tahsisleri talep edeceksiniz."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Aşağıdaki butona tıklayarak, {{count}} uygulama için de tahsisleri talep edeceksiniz.",
+  "The previous round has ended. Start a new round to continue voting.": "Önceki tur sona erdi. Oylamaya devam etmek için yeni bir tur başlatın."
 }

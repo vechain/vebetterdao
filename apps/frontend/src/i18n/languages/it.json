@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "Il turno non è ancora iniziato. Si prega di avviare un nuovo turno.",
   "Start new round & claim allocations": "Avvia un nuovo turno e richiedi allocazioni",
   "Transaction completed!": "Transazione completata!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Cliccando sul pulsante qui sotto, rivendicherai anche le allocazioni per {{count}} app."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Cliccando sul pulsante qui sotto, rivendicherai anche le allocazioni per {{count}} app.",
+  "The previous round has ended. Start a new round to continue voting.": "Il turno precedente è terminato. Inizia un nuovo turno per continuare a votare."
 }

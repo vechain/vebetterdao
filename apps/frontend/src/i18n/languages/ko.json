@@ -1791,5 +1791,6 @@
   "Round hasn’t started yet. Please start a new round.": "라운드가 아직 시작되지 않았습니다. 새 라운드를 시작하세요.",
   "Start new round & claim allocations": "새 라운드 시작 및 할당량 청구",
   "Transaction completed!": "거래 완료!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "아래 버튼을 클릭하면 {{count}}개의 앱에 대한 할당도 청구됩니다."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "아래 버튼을 클릭하면 {{count}}개의 앱에 대한 할당도 청구됩니다.",
+  "The previous round has ended. Start a new round to continue voting.": "이전 라운드가 종료되었습니다. 투표를 계속하려면 새로운 라운드를 시작하십시오."
 }

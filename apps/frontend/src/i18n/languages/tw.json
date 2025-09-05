@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "回合尚未開始。請開始新的一回合。",
   "Start new round & claim allocations": "開始新回合並聲明分配",
   "Transaction completed!": "交易完成！",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "按下方按鈕，您也會領取{{count}}個應用程式的配額。"
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "按下方按鈕，您也會領取{{count}}個應用程式的配額。",
+  "The previous round has ended. Start a new round to continue voting.": "上回合已結束。開始新回合以繼續投票。"
 }

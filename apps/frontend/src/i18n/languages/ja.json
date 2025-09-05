@@ -1790,5 +1790,6 @@
   "Round hasn’t started yet. Please start a new round.": "ラウンドがまだ開始されていません。新しいラウンドを開始してください。",
   "Start new round & claim allocations": "新しいラウンドを開始して割り当てを請求する",
   "Transaction completed!": "トランザクションが完了しました！",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "下のボタンをクリックすることで、{{count}}個のアプリの割り当ても取得することになります。"
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "下のボタンをクリックすることで、{{count}}個のアプリの割り当ても取得することになります。",
+  "The previous round has ended. Start a new round to continue voting.": "前のラウンドが終了しました。投票を続けるには新しいラウンドを開始してください。"
 }
