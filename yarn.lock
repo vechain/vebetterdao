@@ -7336,10 +7336,10 @@
     fast-json-stable-stringify "^2.1.0"
     viem "^2.21.45"
 
-"@vechain/sdk-core@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-core/-/sdk-core-2.0.0.tgz#e588471060860296586192c4bc963167462d3404"
-  integrity sha512-y0dBXEKWdYGsokJwUVnAGWnsBMGu8veFPpHmUlBltnKadX0flpBvoSlScEHXkeNv+FemXSfPPTeOqQOOXLIivg==
+"@vechain/sdk-core@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-core/-/sdk-core-2.0.4.tgz#a2281cd2db56543c32a34b525e94ff5720e19150"
+  integrity sha512-NzJim2X3ir2q4OmMIpFe++ssYLfOzSs7470yx591FW2N8NKOaluD08AvXwl8QnMQVoR9GfiGNLjGt0Om1IsW+w==
   dependencies:
     "@ethereumjs/rlp" "^5.0.2"
     "@noble/ciphers" "^1.1.1"
@@ -7348,10 +7348,10 @@
     "@scure/base" "^1.2.4"
     "@scure/bip32" "^1.4.0"
     "@scure/bip39" "^1.5.1"
-    "@vechain/sdk-errors" "2.0.0"
-    "@vechain/sdk-logging" "2.0.0"
+    "@vechain/sdk-errors" "2.0.4"
+    "@vechain/sdk-logging" "2.0.4"
     abitype "^1.0.6"
-    ethers "6.13.4"
+    ethers "^6.14.0"
     fast-json-stable-stringify "^2.1.0"
     viem "^2.21.45"
 
@@ -7365,10 +7365,10 @@
   resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-1.2.0-rc.2.tgz#cf546886f027dace6746f3fbca9e209bb48d5500"
   integrity sha512-B1j9Mwh0qetcHZ3NBZfZV6SV2zlYsSJ3czG+Hl1mv2CrIZUX8Lg3GffcFuXH0Y6q2RYJVe6779bMkQDp0pJPWw==
 
-"@vechain/sdk-errors@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-2.0.0.tgz#762eeea8604d2ce8f6e5e497074a30b05aff1752"
-  integrity sha512-gGblcZ1/U197QEIACfSfbgADqnMEXRp4sPvzPMiSJAib7Kg2VA+bCzS5okqVJKyqHwTKQhcbkZQoQT4G7K0z8w==
+"@vechain/sdk-errors@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-errors/-/sdk-errors-2.0.4.tgz#20d84b454382fd05650e2eafdf4587ab339696e4"
+  integrity sha512-pdaf1B2TF9Z4QfLU8+sLoyDVAz2f3JsggTf+AxTNSX/WutKQTzi3z069xHYi/DEwSd0YUJR75rx8zBaCy5v++w==
 
 "@vechain/sdk-ethers-adapter@1.2.0-rc.2":
   version "1.2.0-rc.2"
@@ -7408,12 +7408,12 @@
   dependencies:
     "@vechain/sdk-errors" "1.2.0-rc.2"
 
-"@vechain/sdk-logging@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-logging/-/sdk-logging-2.0.0.tgz#c9b2519efcfc713aacf2546ac8f1856cf19fec3d"
-  integrity sha512-Miow1nfmnZTy5DeGpnGIe31mIxiPf5uZSuqym80nVTf1064YJZxkMHK6xqS0+YNpvWbJFjR3I70EWFkjovG+WQ==
+"@vechain/sdk-logging@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-logging/-/sdk-logging-2.0.4.tgz#4a8a8e5bd3cfc876630b3b8f1e88de926ab7b688"
+  integrity sha512-MhZ8iOhxl/JEmxOYFfBq4tZz/c4rJZRy5GtOBYvmCydeCfA+uJvJ4A4xjs1ttFGkGBggN82nuHR3dNV2mjZqfA==
   dependencies:
-    "@vechain/sdk-errors" "2.0.0"
+    "@vechain/sdk-errors" "2.0.4"
 
 "@vechain/sdk-network@1.2.0", "@vechain/sdk-network@^1.1.0":
   version "1.2.0"
@@ -7441,17 +7441,17 @@
     ethers "6.13.4"
     viem "^2.21.45"
 
-"@vechain/sdk-network@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-2.0.0.tgz#d06193b45aa569f9a61f344b8fc3416fe0cb7112"
-  integrity sha512-oxl5pZiaa2EJL4ZmraphPsjfc3lDe9/Bg8ltF6y562BGgQicF3pZ8TcvK1HjsWLKdH3KSLxu/SiCuPmie2c5KQ==
+"@vechain/sdk-network@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@vechain/sdk-network/-/sdk-network-2.0.4.tgz#a945b51ccea18413e385eaa23c70715cd6a87fde"
+  integrity sha512-U6QvxWSXg2KQesyRagsaqpmr2InfUSVLTkp5p18Te0UKzFkggcDKYBBXV5tsvSmHk1Hah/wTqhfLLpeZKF4zgQ==
   dependencies:
     "@noble/curves" "^1.6.0"
-    "@vechain/sdk-core" "2.0.0"
-    "@vechain/sdk-errors" "2.0.0"
-    "@vechain/sdk-logging" "2.0.0"
+    "@vechain/sdk-core" "2.0.4"
+    "@vechain/sdk-errors" "2.0.4"
+    "@vechain/sdk-logging" "2.0.4"
     abitype "1.0.8"
-    ethers "6.13.4"
+    ethers "^6.14.0"
     viem "^2.21.54"
 
 "@vechain/vebetterdao-contracts@^4.1.0":
@@ -13223,7 +13223,7 @@ ethers@^5.0.13, ethers@^5.7.1, ethers@^5.7.2:
     "@ethersproject/web" "5.8.0"
     "@ethersproject/wordlists" "5.8.0"
 
-ethers@^6.11.1, ethers@^6.13.5, ethers@^6.9.0:
+ethers@^6.11.1, ethers@^6.13.5, ethers@^6.14.0, ethers@^6.9.0:
   version "6.15.0"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-6.15.0.tgz#2980f2a3baf0509749b7e21f8692fa8a8349c0e3"
   integrity sha512-Kf/3ZW54L4UT0pZtsY/rf+EkBU7Qi5nnhonjUb8yTXcxH3cdcWrV2cRyk0Xk/4jK6OoHhxxZHriyhje20If2hQ==

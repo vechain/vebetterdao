@@ -1774,5 +1774,22 @@
   "Apply": "申し込み",
   "Get NFT": "NFTを入手",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "サポートしている提案からの<bold>{{depositsVotes}} VOT3</bold>を含む",
-  "More info about your votes at snapshot": "スナップショットでの投票に関する詳細情報"
+  "More info about your votes at snapshot": "スナップショットでの投票に関する詳細情報",
+  "Assign App Categories": "アプリカテゴリーを割り当てる",
+  "Loading apps without categories...": "カテゴリーなしのアプリを読み込み中...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "カテゴリーがないアプリにカテゴリーを割り当てます。アプリごとに最大{{max}}カテゴリー。",
+  "All apps have categories assigned! 🎉": "すべてのアプリにカテゴリーが割り当てられました！🎉",
+  "Apps without categories: {{count}}": "カテゴリーなしのアプリ: {{count}}",
+  "Category Assignments ({{count}})": "カテゴリー割り当て ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "選択されたカテゴリー ({{count}}/{{max}})",
+  "Uploading metadata...": "メタデータをアップロード中...",
+  "Maximum {{max}} categories per app.": "アプリごとに最大{{max}}カテゴリー。",
+  "Previous app": "前のアプリ",
+  "Next app": "次のアプリ",
+  "Assign Categories to {{count}} Apps": "{{count}}のアプリにカテゴリーを割り当てる",
+  "Round hasn’t started yet. Please start a new round.": "ラウンドがまだ開始されていません。新しいラウンドを開始してください。",
+  "Start new round & claim allocations": "新しいラウンドを開始して割り当てを請求する",
+  "Transaction completed!": "トランザクションが完了しました！",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "下のボタンをクリックすることで、{{count}}個のアプリの割り当ても取得することになります。",
+  "The previous round has ended. Start a new round to continue voting.": "前のラウンドが終了しました。投票を続けるには新しいラウンドを開始してください。"
 }
