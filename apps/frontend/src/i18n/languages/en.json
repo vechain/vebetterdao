@@ -2008,5 +2008,7 @@
   "Transaction completed!": "Transaction completed!",
   "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps.",
   "Heads up: There will be not much time left to reach 3.5M VOT3 in support phase. You can either push the deadline or come back to publish your Grant on Monday.": "Heads up: There will be not much time left to reach 3.5M VOT3 in support phase. You can either push the deadline or come back to publish your Grant on Monday.",
-  "To complete your grant application, you must create at least {{threshold}} milestones.": "To complete your grant application, you must create at least {{threshold}} milestones."
+  "To complete your grant application, you must create at least {{threshold}} milestones.": "To complete your grant application, you must create at least {{threshold}} milestones.",
+  "By :": "By :",
+  "Voting Power: {{votingPower}}": "Voting Power: {{votingPower}}"
 }

@@ -8,6 +8,7 @@ import { useMemo } from "react"
 
 import { ProposalInteractionCard } from "./ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview"
+import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
 
 // import { ProposalTimeline } from "./ProposalTimeline"
 
@@ -121,6 +122,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               </>
             )}
           </VStack>
+        </GridItem>
+        <GridItem colSpan={[3, 3, 2]} order={[2, 2, 3]}>
+          <ProposalVoteCommentList proposalId={proposalId} />
         </GridItem>
       </Grid>
     </VStack>
