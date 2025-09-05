@@ -1,10 +1,13 @@
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
+import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
+import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 // import { Heading, HStack, Icon, Image, Link, Text, VStack } from "@/constants"
-// import { ProposalFormAction } from "@/store"
-// import { useMemo, useState } from "react"
-import { VStack, Text, Heading, HStack, Icon, Link, Image } from "@chakra-ui/react"
+import { ProposalFormAction } from "@/store"
+import { useMemo, useState } from "react"
+import { VStack, Text, Heading, HStack, Icon, Link, Image, Box, Alert } from "@chakra-ui/react"
 import { UilGithub, UilGlobe, UilTelegram, UilTwitter } from "@iconscout/react-unicons"
+import MDEditor from "@uiw/react-md-editor"
 import { useTranslation } from "react-i18next"
 import { FaTelegram } from "react-icons/fa"
 import { FiMail } from "react-icons/fi"
@@ -23,25 +26,23 @@ type Props = {
 
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
-
-  // const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
-
-  // const actions: ProposalFormAction[] = useMemo(() => {
-  //   try {
-  //     setProposalDecodeError(null)
-  //     return getActionsFromTargetsAndCalldatas(
-  //       proposal?.targets as string[],
-  //       proposal?.calldatas as string[],
-  //       GovernanceFeaturedContractsWithFunctions,
-  //     )
-  //   } catch (e: unknown) {
-  //     if (e instanceof Error) setProposalDecodeError(e.message)
-  //     else {
-  //       setProposalDecodeError("Error decoding proposal")
-  //     }
-  //     return []
-  //   }
-  // }, [proposal])
+  const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
+  const actions: ProposalFormAction[] = useMemo(() => {
+    try {
+      setProposalDecodeError(null)
+      return getActionsFromTargetsAndCalldatas(
+        proposal?.targets as string[],
+        proposal?.calldatas as string[],
+        GovernanceFeaturedContractsWithFunctions,
+      )
+    } catch (e: unknown) {
+      if (e instanceof Error) setProposalDecodeError(e.message)
+      else {
+        setProposalDecodeError("Error decoding proposal")
+      }
+      return []
+    }
+  }, [proposal])
 
   return (
     <VStack gap={4} align="flex-start" w="full">
@@ -169,7 +170,30 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       )}
 
       {isStandardProposal(proposal) && (
-        <Text>{"WIP"}</Text>
+        <VStack gap={8} align="flex-start" w="full">
+          <MDEditor.Markdown
+            source={proposal?.markdownDescription}
+            style={{
+              width: "100%",
+              wordBreak: "break-word",
+              borderRadius: "12px",
+              backgroundColor: "contrast-on-dark-bg",
+              color: "contrast-bg-strong-hover",
+              padding: "20px",
+              border: "1px solid #D5D5D5",
+            }}
+          />
+          {proposalDecodeError && (
+            <Alert.Root status="error" borderRadius={"lg"}>
+              <Alert.Indicator />
+              <Box>
+                <Alert.Title>{t("Error decoding the proposal calldatas")}</Alert.Title>
+                <Alert.Description>{proposalDecodeError}</Alert.Description>
+              </Box>
+            </Alert.Root>
+          )}
+          {!!actions.length && <ProposalExecutableActions actions={actions} />}
+        </VStack>
         // TODO : Finish the standard proposal
         //   <VStack gap={4} align="flex-start" w="full">
         //     <Heading size="lg">{t("Summary")}</Heading>

@@ -1,5 +1,6 @@
 import React from "react"
 import { Breadcrumb, Text } from "@chakra-ui/react"
+import Link from "next/link"
 import { BsChevronRight } from "react-icons/bs"
 
 type PageBreadcrumbProps = {
@@ -23,11 +24,13 @@ export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
           return (
             <React.Fragment key={item.label}>
               <Breadcrumb.Item fontSize="lg">
-                <Breadcrumb.CurrentLink>
-                  <Text fontWeight={fontWeight} color={color}>
-                    {item.label}
-                  </Text>
-                </Breadcrumb.CurrentLink>
+                <Breadcrumb.Link asChild aria-current={isCurrentPage ? "page" : undefined}>
+                  <Link href={item.href}>
+                    <Text fontWeight={fontWeight} color={color}>
+                      {item.label}
+                    </Text>
+                  </Link>
+                </Breadcrumb.Link>
               </Breadcrumb.Item>
               {!isLast && (
                 <Breadcrumb.Separator>
