@@ -26,6 +26,7 @@ import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
 import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
+import { GenericAlert } from "@/app/components/Alert"
 
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
@@ -221,7 +222,7 @@ export const Milestones = ({
 
   const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
 
-  const milestones = getValues("milestones")
+  const milestones = watch("milestones")
   const now = dayjs().unix()
   const grantType = getValues("grantType")
 
@@ -255,6 +256,8 @@ export const Milestones = ({
     //Persist the new milestone in the form data
     setData({ ...formData, milestones })
   }
+
+  const hasFewMilestones = milestones.length < Number(milestoneMinimumAmount ?? 0n)
 
   return (
     <VStack align="stretch" w="full">
@@ -318,6 +321,15 @@ export const Milestones = ({
             rules={{ required: "Please accept the terms of service" }}
             error={errors.termsOfService?.message}
           />
+          {hasFewMilestones && (
+            <GenericAlert
+              isLoading={false}
+              message={t("To complete your grant application, you must create at least {{threshold}} milestones.", {
+                threshold: Number(milestoneMinimumAmount ?? 0n),
+              })}
+              type="error"
+            />
+          )}
         </GridItem>
       </Grid>
     </VStack>

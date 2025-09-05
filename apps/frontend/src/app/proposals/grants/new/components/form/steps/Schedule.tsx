@@ -8,7 +8,8 @@ import { useMemo } from "react"
 import { Control, FieldErrors, UseFormRegister, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { CountdownBoxes } from "@/components"
-
+import { GenericAlert } from "@/app/components/Alert"
+const FEW_DAYS_LEFT_THRESHOLD = 4
 interface ScheduleProps {
   register: UseFormRegister<GrantFormData>
   errors: FieldErrors<GrantFormData>
@@ -61,8 +62,24 @@ export const Schedule = ({ register, errors, control, watch }: ScheduleProps) =>
   const daysLeft = dayjs(countdownDate).diff(dayjs(), "days")
   const hoursLeft = dayjs(countdownDate).diff(dayjs(), "hours") % 24
   const minutesLeft = dayjs(countdownDate).diff(dayjs(), "minutes") % 60
+
+  const hasFewDaysLeft = useMemo(() => {
+    return countdownDate && daysLeft <= FEW_DAYS_LEFT_THRESHOLD
+  }, [countdownDate, daysLeft])
+
   return (
     <Grid templateColumns={{ base: 5, md: 5 }} w="full" gap={6}>
+      {hasFewDaysLeft && (
+        <GridItem colSpan={5}>
+          <GenericAlert
+            isLoading={false}
+            message={t(
+              "Heads up: There will be not much time left to reach 3.5M VOT3 in support phase. You can either push the deadline or come back to publish your Grant on Monday.",
+            )}
+            type="warning"
+          />
+        </GridItem>
+      )}
       <GridItem colSpan={5}>
         <Text fontSize="lg" fontWeight="semibold">
           {t("Support deadline")}
