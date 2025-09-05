@@ -14,7 +14,7 @@ export const StartNewRoundAlert = () => {
         align={["stretch", "stretch", "flex-start"]}
         gap={4}>
         <Text fontWeight="700" fontSize="16px" color="#AF5F00" as="span">
-          {"Round hasn't started yet. Please start a new round."}
+          {"The previous round has ended. Start a new round to continue voting."}
         </Text>
         <Alert.Description>
           <StartRoundButton redirectTo="/" />
