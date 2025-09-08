@@ -1,7 +1,8 @@
-import { HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
+import { Flex, HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { BalancePill } from "./BalancePill"
 
 const compactFormatter = getCompactFormatter(1)
 
@@ -16,32 +17,29 @@ export const NavbarBalance = () => {
     return null
   }
 
-  const cardHeight = isDesktop ? "37px" : "26px"
-  const iconHeight = isDesktop ? "20px" : "15px"
+  const cardHeight = isDesktop ? "33px" : "26px"
   const fontSize = isDesktop ? "14px" : "12px"
-  const padding = isDesktop ? "8px 20px" : "4px 10px"
 
   return (
     <Skeleton loading={b3trBalanceLoading || vot3BalanceLoading}>
       <HStack flexBasis="250px" gap={0} h={cardHeight} pl={5}>
-        <HStack gap={0} align="flex-start">
-          <HStack gap={1} bg="#004CFC" borderLeftRadius="full" p={padding} pr="0">
-            <Image h={iconHeight} w={iconHeight} src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text color="#FFFFFF" fontSize={fontSize} fontWeight={600}>
+        <BalancePill variant="b3tr">
+          <Flex align="center" justify="center" px={1} gap="0.25rem">
+            <Image aspectRatio={1} h="20px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
+            <Text color="#FFFFFF" textStyle={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
-          </HStack>
-          <Image h={cardHeight} src="/assets/images/balance-ending-right.webp" alt="balance-ending-right" ml="-1px" />
-        </HStack>
-        <HStack gap={0} align="flex-start" h={cardHeight}>
-          <Image h={cardHeight} src="/assets/images/balance-ending-left.webp" alt="balance-ending-left" />
-          <HStack gap={1} bg="#B1F16C" borderRightRadius="full" p={padding} pl="0">
-            <Image h={iconHeight} w={iconHeight} src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color="#000000" fontSize={fontSize} fontWeight={600}>
+          </Flex>
+        </BalancePill>
+
+        <BalancePill variant="vot3">
+          <Flex align="center" justify="center" px={1} gap="0.25rem">
+            <Image aspectRatio={1} h="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
+            <Text color="#000000" textStyle={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
-          </HStack>
-        </HStack>
+          </Flex>
+        </BalancePill>
       </HStack>
     </Skeleton>
   )
