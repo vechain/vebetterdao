@@ -132,15 +132,12 @@ export const GrantsPageContent = () => {
         textAlign="center"
         w="full"
         justifyContent={{ base: "space-between", lg: "flex-start" }}>
-        <Heading as="h1" size="xl">
-          {t("Grants")}
-        </Heading>
+        <Heading size="xl">{t("Grants")}</Heading>
         {!open && (
           <Link
             display="inline-flex"
             alignItems="center"
             fontWeight={500}
-            gap={1}
             color="primary.500"
             fontSize="md"
             onClick={onOpen}>
