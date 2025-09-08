@@ -11,6 +11,7 @@ import {
   HStack,
   useMediaQuery,
   VStack,
+  Link,
 } from "@chakra-ui/react"
 import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch, Control } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
@@ -24,6 +25,8 @@ import dayjs from "dayjs"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
+import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
+import { GenericAlert } from "@/app/components/Alert"
 
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
@@ -219,7 +222,7 @@ export const Milestones = ({
 
   const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
 
-  const milestones = getValues("milestones")
+  const milestones = watch("milestones")
   const now = dayjs().unix()
   const grantType = getValues("grantType")
 
@@ -253,6 +256,8 @@ export const Milestones = ({
     //Persist the new milestone in the form data
     setData({ ...formData, milestones })
   }
+
+  const hasFewMilestones = milestones.length < Number(milestoneMinimumAmount ?? 0n)
 
   return (
     <VStack align="stretch" w="full">
@@ -297,10 +302,34 @@ export const Milestones = ({
             name="termsOfService"
             key="termsOfService"
             control={control}
-            label={t("I agree to the Terms of Service and acknowledge the information provided is accurate.")}
+            label={
+              <Trans
+                color="text.default"
+                i18nKey="I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate."
+                components={{
+                  Link: (
+                    <Link
+                      textDecoration="underline"
+                      color="text.default"
+                      target="_blank"
+                      href={GRANT_TERMS_AND_CONDITIONS_LINK}
+                    />
+                  ),
+                }}
+              />
+            }
             rules={{ required: "Please accept the terms of service" }}
             error={errors.termsOfService?.message}
           />
+          {hasFewMilestones && (
+            <GenericAlert
+              isLoading={false}
+              message={t("To complete your grant application, you must create at least {{threshold}} milestones.", {
+                threshold: Number(milestoneMinimumAmount ?? 0n),
+              })}
+              type="error"
+            />
+          )}
         </GridItem>
       </Grid>
     </VStack>

@@ -1,8 +1,9 @@
 import { Checkbox, Field, Text } from "@chakra-ui/react"
+import React from "react"
 import { Control, Controller, FieldPath, FieldValues, RegisterOptions } from "react-hook-form"
 
 type FormCheckboxProps<T extends FieldValues> = {
-  label: string
+  label: React.ReactNode
   name: FieldPath<T>
   description?: string
   control: Control<T>
@@ -38,9 +39,13 @@ export const FormCheckbox = <T extends FieldValues>({
               <Checkbox.Indicator />
             </Checkbox.Control>
             <Checkbox.Label>
-              <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>
-                {label}
-              </Text>
+              {typeof label === "string" ? (
+                <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>
+                  {label}
+                </Text>
+              ) : (
+                label
+              )}
               <Text fontSize={{ base: "xs", sm: "xs", md: "sm" }}>{description}</Text>
             </Checkbox.Label>
           </Checkbox.Root>

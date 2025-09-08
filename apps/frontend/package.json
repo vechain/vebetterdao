@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.26.0",
+  "version": "1.26.3",
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -33,7 +33,6 @@
     "@iconscout/react-unicons": "^2.0.2",
     "@repo/config": "*",
     "@repo/constants": "*",
-    "@vechain/vebetterdao-contracts": "*",
     "@repo/utils": "*",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/query-sync-storage-persister": "^5.28.12",
@@ -45,6 +44,7 @@
     "@vechain/connex-driver": "^2.1.0",
     "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
+    "@vechain/vebetterdao-contracts": "*",
     "@vechain/vechain-kit": "2.0.0-rc.14",
     "@vercel/analytics": "^1.5.0",
     "axios": "^1.11.0",

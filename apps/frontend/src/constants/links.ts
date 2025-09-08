@@ -10,3 +10,5 @@ export const LINKEDIN_URL = "https://www.linkedin.com/company/vechain-foundation
 
 export const PRIVACY_POLICY_LINK = "https://www.vechain.org/privacy-policy/"
 export const TERMS_AND_CONDITIONS_LINK = "https://www.vebetterdao.org/terms-of-service"
+export const GRANT_TERMS_AND_CONDITIONS_LINK =
+  "https://files.vebetterdao.org/vebetterdaocontainer/VeBetterDAO_Grant_Terms_And_Conditions.pdf"

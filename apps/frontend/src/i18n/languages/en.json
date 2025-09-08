@@ -1884,7 +1884,7 @@
   "Add milestone": "Add milestone",
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly",
   "Please agree to the Terms of Service": "Please agree to the Terms of Service",
-  "I agree to the Terms of Service and acknowledge the information provided is accurate.": "I agree to the Terms of Service and acknowledge the information provided is accurate.",
+  "I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate.": "I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate.",
   "End: {{endDate}}": "End: {{endDate}}",
   "Not enough balance to upgrade your GM NFT to the next level.": "Not enough balance to upgrade your GM NFT to the next level.",
   "Upgrade NFT": "Upgrade NFT",
@@ -2005,5 +2005,16 @@
   "Claim your VOT3 tokens back {{round}} when voting starts.": "Claim your VOT3 tokens back {{round}} when voting starts.",
   "{{votingPower}} VOT3": "{{votingPower}} VOT3",
   "Grant Completed": "Grant Completed",
-  "Session": "Session"
+  "Session": "Session",
+  "The previous round has ended. Start a new round to continue voting.": "The previous round has ended. Start a new round to continue voting.",
+  "Start new round & claim allocations": "Start new round & claim allocations",
+  "Transaction completed!": "Transaction completed!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps.",
+  "Heads up: There will be not much time left to reach 3.5M VOT3 in support phase. You can either push the deadline or come back to publish your Grant on Monday.": "Heads up: There will be not much time left to reach 3.5M VOT3 in support phase. You can either push the deadline or come back to publish your Grant on Monday.",
+  "To complete your grant application, you must create at least {{threshold}} milestones.": "To complete your grant application, you must create at least {{threshold}} milestones.",
+  "By :": "By :",
+  "Voting Power: {{votingPower}}": "Voting Power: {{votingPower}}",
+  "Comments ({{amount}})": "Comments ({{amount}})",
+  "Sort By": "Sort By",
+  "Filter": "Filter"
 }

@@ -13,6 +13,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { useBreakpoints } from "@/hooks"
+import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
 
 type Props = {
   roundId: string
@@ -52,6 +53,7 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
     <VStack w="full" gap={8} data-testid={`allocation-${roundId}-page`}>
       <AllocationRoundNavbar roundId={roundId} />
       <CantVoteCard />
+      <StartNewRoundAlert />
       <AllocationRoundHeaderCard roundId={roundId} />
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
