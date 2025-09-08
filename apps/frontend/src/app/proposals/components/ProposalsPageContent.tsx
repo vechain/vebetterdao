@@ -11,6 +11,7 @@ import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/cons
 import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useProposalEnriched } from "@/hooks/proposals/common"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -18,7 +19,8 @@ export const ProposalsPageContent = () => {
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
   const { selectedFilter } = useProposalFilters()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
+  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter, proposals)
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)

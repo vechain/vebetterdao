@@ -4,6 +4,7 @@ import { getConfig } from "@repo/config"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter } from "@/store"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useProposalEnriched } from "@/hooks/proposals/common"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
@@ -34,7 +35,8 @@ export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) =>
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES)
+  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES, proposals)
 
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),

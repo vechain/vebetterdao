@@ -1,36 +1,36 @@
 import { useAllProposalsDepositReached } from "@/api"
 import { useMemo } from "react"
 import { ProposalFilter, StateFilter } from "@/store"
-import { useProposalEnriched } from "@/hooks/proposals/common"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { ProposalState, GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
  */
-export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFilter)[]) => {
-  // Step 1: Get the standard proposals
-  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] } } = useProposalEnriched()
-
+export const useFilteredProposals = (
+  selectedFilter?: (ProposalFilter | StateFilter)[],
+  proposals?: ProposalEnriched[] | GrantProposalEnriched[],
+) => {
   const proposalsIds = useMemo(() => {
-    return enrichedStandardProposals.map(proposal => proposal.id)
-  }, [enrichedStandardProposals])
+    return proposals?.map(proposal => proposal.id) || []
+  }, [proposals])
 
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
     useAllProposalsDepositReached(proposalsIds)
 
   const proposalsWithStateAndDeposit = useMemo(() => {
-    if (!enrichedStandardProposals) return []
+    if (!proposals?.length) return []
 
-    return enrichedStandardProposals.map(proposal => ({
+    return proposals.map(proposal => ({
       ...proposal,
       isDepositReached: allProposalsDepositReached?.find(
         proposalDepositReached => proposalDepositReached.proposalId === proposal.id,
       )?.depositReached,
     }))
-  }, [enrichedStandardProposals, allProposalsDepositReached])
+  }, [proposals, allProposalsDepositReached])
 
   const filteredProposals = useMemo(() => {
-    if (!proposalsWithStateAndDeposit) return []
+    if (!proposalsWithStateAndDeposit?.length) return []
     if (!selectedFilter || selectedFilter.length === 0) return proposalsWithStateAndDeposit
 
     const proposals: typeof proposalsWithStateAndDeposit = []
@@ -68,7 +68,7 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
   }, [selectedFilter, proposalsWithStateAndDeposit])
 
   const sortedFilteredProposals = useMemo(() => {
-    if (!filteredProposals) return []
+    if (!filteredProposals?.length) return []
 
     const sortedProposals = [...filteredProposals].sort((a, b) => {
       // sort first by roundId, then by timestamp

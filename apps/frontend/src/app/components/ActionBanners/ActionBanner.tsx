@@ -42,7 +42,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
+import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated, useProposalEnriched } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -78,9 +78,11 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
-    ProposalFilter.InThisRound,
-  ])
+  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
+    [ProposalFilter.InThisRound],
+    proposals,
+  )
   const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
     activeProposals?.map(proposal => proposal?.id),
     account?.address ?? undefined,
