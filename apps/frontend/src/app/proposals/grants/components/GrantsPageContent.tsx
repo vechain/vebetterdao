@@ -1,15 +1,28 @@
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem } from "@chakra-ui/react"
+import {
+  VStack,
+  HStack,
+  Heading,
+  Link,
+  Icon,
+  useDisclosure,
+  Grid,
+  GridItem,
+  createListCollection,
+} from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { useProposalEnriched } from "@/hooks/proposals/common"
 import { HowToSupportCard } from "../../components/components"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalState, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { useMilestoneClaimedEvents } from "@/hooks/proposals/grants/useMilestoneClaimedEvents"
 import BigNumber from "bignumber.js"
+import { SelectField, SearchField } from "@/components"
+import { useFilteredProposals } from "../../hooks/useFilteredProposals"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -20,8 +33,31 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
+  //CONSTANTS
+  const filterOptions = useMemo(() => {
+    return createListCollection({
+      items: [
+        { label: t("Approval phase"), value: "approval_phase" },
+        { label: t("Support phase"), value: "support_phase" },
+        { label: t("Supported"), value: "supported" },
+        { label: t("Approved"), value: "approved" },
+        { label: t("In development"), value: "in_development" },
+        { label: t("Completed"), value: "completed" },
+        { label: t("Cancelled"), value: "cancelled" },
+      ],
+    })
+  }, [t])
+  //Get all the values of the filterOptions as an array
+  const defaultValue = filterOptions.items.map(item => item.value)
+
+  //UI HOOKS
+
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
+
+  //STATES
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] } } = useProposalEnriched()
+  const { filteredProposals } = useFilteredProposals(selectedFilter, enrichedGrantProposals)
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const approvedStates = useMemo(
@@ -119,16 +155,32 @@ export const GrantsPageContent = () => {
         totalApproved={totalGrantsApproved}
         totalFunds={totalDistributedAmount.toNumber()}
       />
+
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
-          <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
-            {enrichedGrantProposals &&
-              enrichedGrantProposals?.map(proposal => (
-                <GridItem key={proposal.id}>
-                  <GrantsProposalCard key={proposal.id} proposal={proposal} />
-                </GridItem>
-              ))}
-          </Grid>
+          <VStack gap={6} alignItems="stretch">
+            <HStack justifyContent="space-between" w="full" gap={4}>
+              <SearchField /> {/*TODO: Implement search */}
+              <SelectField
+                placeholder={t("Status")}
+                options={filterOptions}
+                defaultValue={defaultValue}
+                onChange={value => setSelectedFilter(value.map(item => item as ProposalFilter | StateFilter))}
+                isMultiOption
+              />
+            </HStack>
+            <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
+              {filteredProposals &&
+                filteredProposals?.map(proposal => (
+                  <GridItem key={proposal.id}>
+                    <GrantsProposalCard
+                      key={proposal.id}
+                      proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
+                    />
+                  </GridItem>
+                ))}
+            </Grid>
+          </VStack>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
           <HowToSupportCard />
