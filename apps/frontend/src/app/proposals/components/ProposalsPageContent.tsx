@@ -19,8 +19,8 @@ export const ProposalsPageContent = () => {
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
   const { selectedFilter } = useProposalFilters()
-  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter, proposals)
+  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] } } = useProposalEnriched()
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter, enrichedStandardProposals)
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
