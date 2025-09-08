@@ -83,7 +83,9 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
         </HStack>
         <HStack align={"center"}>
           <AddressIcon address={vote.voter} boxSize={4} minW={4} minH={4} rounded={"full"} />
-          <Text color={textColor}>{accountName || humanAddress(vote.voter, 4, 6)}</Text>
+          <Text lineClamp={1} color={textColor}>
+            {accountName || humanAddress(vote.voter, 4, 6)}
+          </Text>
         </HStack>
       </VStack>
     </Card.Root>
