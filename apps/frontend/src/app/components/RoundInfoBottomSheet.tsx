@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } from "@chakra-ui/react"
+import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton, SimpleGrid } from "@chakra-ui/react"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
@@ -176,24 +176,22 @@ export const RoundInfoBottomSheet = () => {
                   </Text>
                 </VStack>
               </HStack>
-              <HStack w="full" justify="space-between">
+              <SimpleGrid w="full" columns={canVote ? 2 : 1} gap={4}>
                 <Button
                   onClick={() => router.push(`/rounds/${allocationRound.roundId}`)}
                   variant="primarySubtle"
-                  w="full"
                   rounded={"full"}>
                   {t("See More")}
                 </Button>
                 {canVote && (
                   <Button
+                    variant="primaryAction"
                     onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
-                    colorPalette="primary"
-                    w="full"
                     rounded={"full"}>
                     {t("Vote now")}
                   </Button>
                 )}
-              </HStack>
+              </SimpleGrid>
             </VStack>
           </VStack>
           <VStack gap={4} w="full" align="flex-start">
