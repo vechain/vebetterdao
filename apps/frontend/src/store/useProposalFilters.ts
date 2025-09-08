@@ -18,6 +18,8 @@ export enum StateFilter {
   DepositNotMet = "Support not reached",
   InDevelopment = "In development",
   Completed = "Completed",
+  Pending = "Pending",
+  Active = "Active",
 }
 
 export const initialProposalsFilterValues = [

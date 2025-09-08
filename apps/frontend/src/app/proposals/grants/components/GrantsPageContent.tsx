@@ -37,13 +37,13 @@ export const GrantsPageContent = () => {
   const filterOptions = useMemo(() => {
     return createListCollection({
       items: [
-        { label: t("Approval phase"), value: "approval_phase" },
-        { label: t("Support phase"), value: "support_phase" },
-        { label: t("Supported"), value: "supported" },
-        { label: t("Approved"), value: "approved" },
-        { label: t("In development"), value: "in_development" },
-        { label: t("Completed"), value: "completed" },
-        { label: t("Cancelled"), value: "cancelled" },
+        { label: t("Approval phase"), value: StateFilter.Active },
+        { label: t("Support phase"), value: ProposalFilter.LookingForSupport },
+        { label: t("Supported"), value: ProposalFilter.UpcomingVoting },
+        { label: t("Approved"), value: StateFilter.Succeeded },
+        { label: t("In development"), value: StateFilter.Executed },
+        { label: t("Completed"), value: StateFilter.Completed },
+        { label: t("Cancelled"), value: StateFilter.Canceled },
       ],
     })
   }, [t])
@@ -124,7 +124,6 @@ export const GrantsPageContent = () => {
     ],
     [t],
   )
-
   return (
     <VStack w="full" gap={8} pb={8}>
       <HStack
@@ -162,7 +161,7 @@ export const GrantsPageContent = () => {
                 placeholder={t("Status")}
                 options={filterOptions}
                 defaultValue={defaultValue}
-                onChange={value => setSelectedFilter(value.map(item => item as ProposalFilter | StateFilter))}
+                onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
                 isMultiOption
               />
             </HStack>

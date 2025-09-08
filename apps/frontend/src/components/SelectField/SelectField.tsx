@@ -9,7 +9,7 @@ export const SelectField = ({
   placeholder,
   isMultiOption = false,
 }: {
-  options: ListCollection<{ label: string; value: string }>
+  options: ListCollection<{ label: string; value: any }>
   onChange: (value: string[]) => void
   defaultValue?: string | string[]
   leftIcon?: ElementType
