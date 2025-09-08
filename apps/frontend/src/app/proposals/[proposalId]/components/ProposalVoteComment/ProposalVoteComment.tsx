@@ -1,11 +1,11 @@
 import { ProposalComment } from "@/api"
-import { Card, Separator, HStack, Text, VStack, Icon } from "@chakra-ui/react"
-import { UilThumbsUp, UilCircle, UilThumbsDown } from "@iconscout/react-unicons"
+import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
+import { Card, HStack, Icon, Separator, Text, VStack } from "@chakra-ui/react"
+import { UilCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
-import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
-import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
+import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
 

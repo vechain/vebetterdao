@@ -2011,5 +2011,7 @@
   "To complete your grant application, you must create at least {{threshold}} milestones.": "To complete your grant application, you must create at least {{threshold}} milestones.",
   "By :": "By :",
   "Voting Power: {{votingPower}}": "Voting Power: {{votingPower}}",
-  "Comments ({{amount}})": "Comments ({{amount}})"
+  "Comments ({{amount}})": "Comments ({{amount}})",
+  "Sort By": "Sort By",
+  "Filter": "Filter"
 }
