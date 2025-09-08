@@ -37,10 +37,9 @@ export const AppDetailPageContent = () => {
 
   return (
     <Grid
-      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
+      templateColumns={["repeat(1, minmax(0, 1fr))", "repeat(1, minmax(0, 1fr))", "repeat(3, minmax(0, 1fr))"]}
       gap={"32px"}
       w="full"
-      maxW="full"
       alignItems={"flex-start"}
       data-testid="app-detail-grid">
       <GridItem w="full" colSpan={[1, 1, 3]}>
