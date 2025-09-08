@@ -26,7 +26,7 @@ export const ProposalCommentsResponseSchema = z.object({
 export type ProposalCommentsResponse = z.infer<typeof ProposalCommentsResponseSchema>
 export type ProposalComment = z.infer<typeof ProposalCommentSchema>
 
-type ProposalCommentsRequest = {
+export type ProposalCommentsRequest = {
   proposalId?: string
   voter?: string
   support?: "FOR" | "AGAINST" | "ABSTAIN"
