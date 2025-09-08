@@ -3,23 +3,26 @@ import { ElementType } from "react"
 
 export const SelectField = ({
   options,
-  defaultSortOption,
+  defaultValue,
   onChange,
   leftIcon,
   placeholder,
+  isMultiOption = false,
 }: {
   options: ListCollection<{ label: string; value: string }>
   onChange: (value: string[]) => void
-  defaultSortOption?: string
+  defaultValue?: string | string[]
   leftIcon?: ElementType
   placeholder?: string
+  isMultiOption?: boolean
 }) => {
   return (
     <Select.Root
       collection={options}
       variant="filled"
       maxW={"220px"}
-      {...(defaultSortOption && { defaultValue: [defaultSortOption] })}
+      {...(isMultiOption && { multiple: true })}
+      {...(defaultValue && { defaultValue: Array.isArray(defaultValue) ? defaultValue : [defaultValue] })}
       onValueChange={e => onChange(e.value)}>
       <Select.HiddenSelect />
       <Select.Control>
