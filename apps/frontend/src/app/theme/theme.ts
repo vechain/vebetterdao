@@ -1,15 +1,15 @@
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 
+import { badgeRecipe } from "./badge"
+import { buttonRecipe } from "./button"
 import { cardSlotRecipe } from "./card"
 import { dialogSlotRecipe } from "./dialog"
-import { stepsSlotRecipe } from "./steps"
-import { popoverSlotRecipe } from "./popover"
-
-import { buttonRecipe } from "./button"
+import { headingRecipe } from "./heading"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
-import { headingRecipe } from "./heading"
-import { badgeRecipe } from "./badge"
+import { popoverSlotRecipe } from "./popover"
+import { selectSlotRecipe } from "./select"
+import { stepsSlotRecipe } from "./steps"
 
 const config = defineConfig({
   preflight: true,
@@ -34,6 +34,7 @@ const config = defineConfig({
       dialog: dialogSlotRecipe,
       steps: stepsSlotRecipe,
       nativeSelect: nativeSelectSlotRecipe,
+      select: selectSlotRecipe,
       numberInput: numberInputSlotRecipe,
       popover: popoverSlotRecipe,
     },
