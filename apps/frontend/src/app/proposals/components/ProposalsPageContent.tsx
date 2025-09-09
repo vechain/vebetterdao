@@ -1,5 +1,5 @@
 import { useProposalClaimableUserDeposits } from "@/api"
-import { ProposalInfoCard, JoinCommunity } from "@/components"
+import { JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Spinner, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,8 +10,9 @@ import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { useProposalEnriched } from "@/hooks/proposals/common"
+import { GrantsProposalCard } from "../grants/components"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -90,10 +91,9 @@ export const ProposalsPageContent = () => {
           gap={4}
           w={{ base: "full", md: undefined }}>
           {sortedProposals.map(proposal => (
-            <ProposalInfoCard
+            <GrantsProposalCard
               key={proposal.id}
-              proposal={proposal}
-              isDepositReached={proposal.isDepositReached ?? false}
+              proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
             />
           ))}
           {sortedProposals.length === 0 && !isLoading && (
