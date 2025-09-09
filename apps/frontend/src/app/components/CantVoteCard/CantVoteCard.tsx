@@ -106,7 +106,7 @@ export const CantVoteCard = () => {
   if (!cantVoteReasonText) return null
 
   return (
-    <Alert.Root status="warning" size="lg">
+    <Alert.Root status="warning" size="lg" rounded="xl">
       <Alert.Indicator />
 
       <Alert.Content>
@@ -132,35 +132,4 @@ export const CantVoteCard = () => {
       </Alert.Content>
     </Alert.Root>
   )
-
-  // return (
-  //   <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"}>
-  //     <Card.Body position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
-  //       <VStack gap={0} w="full" align="flex-start">
-  //         <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
-  //           <UilInfoCircle size={36} color="#AF5F00" />
-  //           <VStack gap={0} w="full" align="flex-start">
-  //             <Text fontWeight="700" color="#AF5F00" as="span">
-  //               {cantVoteReasonText?.title}
-  //             </Text>
-  //             <Text color="#AF5F00" as="span">
-  //               {" "}
-  //               {cantVoteReasonText?.description}{" "}
-  //             </Text>
-  //           </VStack>
-  //         </HStack>
-  //         {!!cantVoteReasonText?.onLearnMoreClick && (
-  //           <Button
-  //             variant="plain"
-  //             alignSelf={"flex-end"}
-  //             textDecoration="underline"
-  //             color="#AF5F00"
-  //             onClick={cantVoteReasonText.onLearnMoreClick}>
-  //             {t("Learn more")}
-  //           </Button>
-  //         )}
-  //       </VStack>
-  //     </Card.Body>
-  //   </Card.Root>
-  // )
 }
