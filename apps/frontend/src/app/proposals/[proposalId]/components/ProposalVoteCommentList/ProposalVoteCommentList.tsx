@@ -85,7 +85,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
         </Menu.Trigger>
         <Portal>
           <Menu.Positioner>
-            <Menu.Content maxW="300px" bg="gray.800" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
+            <Menu.Content maxW="300px" bg="bg.emphasized" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
               <Text fontWeight="bold" mb={2}>
                 {t("Vote Type")}
               </Text>
