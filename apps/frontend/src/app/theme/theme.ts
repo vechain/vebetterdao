@@ -506,6 +506,12 @@ const config = defineConfig({
 
         // Status Colors - Error/Negative
         error: {
+          strong: {
+            value: {
+              _dark: "#FC6D90",
+              base: "#B62A4C",
+            },
+          },
           primary: {
             value: {
               _dark: "#D23F63",
