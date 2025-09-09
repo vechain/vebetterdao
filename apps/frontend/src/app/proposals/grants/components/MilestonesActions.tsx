@@ -18,14 +18,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         return {
           body: milestone ? (
             <MilestonesActionsItem
-              key={i}
+              key={`milestones-actions-step-${i}`}
               index={i}
               state={state}
               milestone={milestone}
               proposalId={proposal?.id ?? ""}
             />
           ) : (
-            <HStack key={i}>
+            <HStack key={`milestones-actions-step-${i}`}>
               <Text>{t("Milestones are unavailable yet")}</Text>
             </HStack>
           ),
@@ -78,7 +78,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       <VStack w="full">
         <Steps.List w="full">
           {displaySteps.map((item, index) => (
-            <Steps.Item key={index} index={index} w="full">
+            <Steps.Item key={`milestones-actions-step-${item.body}`} index={index} w="full">
               <Steps.Indicator>
                 <Steps.Status
                   incomplete={<Circle bg="#E2E8F0" boxSize="10px" />}

@@ -8,7 +8,7 @@ export const JoinB3TRAppsBanner = () => {
   const { isMobile } = useBreakpoints()
 
   const openGrantPage = () => {
-    window.open("https://vebetterdao.org/grants", "_blank", "noopener noreferrer")
+    window.open("https://vebetter.com/grants", "_blank", "noopener noreferrer")
   }
 
   return (

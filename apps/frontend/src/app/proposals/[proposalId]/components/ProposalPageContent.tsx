@@ -1,16 +1,15 @@
 import { useProposalInteractionDates } from "@/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
+import { ProposalTimeline } from "./ProposalTimeline"
+import { useTranslation } from "react-i18next"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
-import { Grid, GridItem, Skeleton, Tabs, Text, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Skeleton, Tabs, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useMemo } from "react"
-
 import { ProposalInteractionCard } from "./ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
-
-// import { ProposalTimeline } from "./ProposalTimeline"
 
 type Props = {
   proposalId: string
@@ -21,6 +20,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
   const { isMobile } = useBreakpoints()
+  const { t } = useTranslation()
 
   const isGrant = useMemo(() => {
     return proposal?.type === ProposalType.Grant
@@ -77,7 +77,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                       color: "#004CFC",
                       fontWeight: "800",
                     }}>
-                    {"Session"}
+                    {t("Session")}
                   </Tabs.Trigger>
                   <Tabs.Trigger
                     value="timeline"
@@ -87,7 +87,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                       color: "#004CFC",
                       fontWeight: "800",
                     }}>
-                    {"Timeline"}
+                    {t("Timeline")}
                   </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="session" pt={6}>
@@ -101,8 +101,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                   />
                 </Tabs.Content>
                 <Tabs.Content value="timeline" pt={6}>
-                  <Text>{"Timeline"}</Text>
-                  {/* <ProposalTimeline proposal={proposal} /> */}
+                  <ProposalTimeline proposal={proposal} />
                 </Tabs.Content>
               </Tabs.Root>
             ) : (
@@ -115,10 +114,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                   isVotingPhase={isVotingPhase}
                   isLoading={isLoading}
                 />
-                <Text>{"Timeline"}</Text>
-
-                {/* <Session Information component/> */}
-                {/* <ProposalTimeline proposal={proposal} /> */}
+                <ProposalTimeline proposal={proposal} />
               </>
             )}
           </VStack>

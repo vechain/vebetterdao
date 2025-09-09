@@ -104,7 +104,6 @@ export const MilestonesActionsItem = ({ index, state, milestone, proposalId }: M
     return (
       <VStack w="full" align="flex-start" gap={2}>
         <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}</Heading>
-
         {content}
       </VStack>
     )
