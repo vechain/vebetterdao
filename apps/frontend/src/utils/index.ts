@@ -9,5 +9,6 @@ export * from "./filterAmountInput"
 export * from "./getNodeJsThorClient"
 export * from "./dayjsConfig"
 export * from "./ImageValidation"
+export * from "./MarkdownUtils"
 
 export { AddressUtils, AnalyticsUtils, HexUtils }

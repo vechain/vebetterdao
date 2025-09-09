@@ -2,15 +2,16 @@ import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
 import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
-// import { Heading, HStack, Icon, Image, Link, Text, VStack } from "@/constants"
 import { ProposalFormAction } from "@/store"
 import { useMemo, useState } from "react"
+import { removeTitleHeading } from "@/utils"
 import { VStack, Text, Heading, HStack, Icon, Link, Image, Box, Alert } from "@chakra-ui/react"
 import { UilGithub, UilGlobe, UilTelegram, UilTwitter } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
 import { useTranslation } from "react-i18next"
 import { FaTelegram } from "react-icons/fa"
 import { FiMail } from "react-icons/fi"
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -27,6 +28,7 @@ type Props = {
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
+  const markdownPreviewTextColor = useColorModeValue("#2D3748", "#E4E4E4")
   const actions: ProposalFormAction[] = useMemo(() => {
     try {
       setProposalDecodeError(null)
@@ -172,15 +174,13 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       {isStandardProposal(proposal) && (
         <VStack gap={8} align="flex-start" w="full">
           <MDEditor.Markdown
-            source={proposal?.markdownDescription}
+            source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
             style={{
               width: "100%",
               wordBreak: "break-word",
-              borderRadius: "12px",
-              backgroundColor: "contrast-on-dark-bg",
-              color: "contrast-bg-strong-hover",
+              backgroundColor: "transparent",
+              color: markdownPreviewTextColor,
               padding: "20px",
-              border: "1px solid #D5D5D5",
             }}
           />
           {proposalDecodeError && (
