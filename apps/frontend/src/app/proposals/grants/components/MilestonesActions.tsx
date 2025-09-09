@@ -1,7 +1,6 @@
 import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
 import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { Circle, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
-import { UilCheck } from "@iconscout/react-unicons"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -81,13 +80,9 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
             <Steps.Item key={`milestones-actions-step-${item.body}`} index={index} w="full">
               <Steps.Indicator>
                 <Steps.Status
-                  incomplete={<Circle bg="#E2E8F0" boxSize="10px" />}
-                  complete={
-                    <Circle bg="#004CFC" boxSize="16px" color="white">
-                      <UilCheck size="10" />
-                    </Circle>
-                  }
-                  current={<Circle bg="#004CFC" boxSize="16px" />}
+                  incomplete={<Circle bg="actions.primary.default" size="0" />}
+                  complete={<Circle bg="actions.primary.default" size="50%" />}
+                  current={<Circle bg="actions.primary.default" size="50%" />}
                 />
               </Steps.Indicator>
 
