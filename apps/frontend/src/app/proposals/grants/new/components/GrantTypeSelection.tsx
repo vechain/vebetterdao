@@ -15,7 +15,7 @@ export const GrantTypeSelection = ({ control }: GrantTypeSelectionProps) => {
 
   const grantTypes = {
     dapp: {
-      title: t("dApp grant"),
+      title: t("App grant"),
       amount: "30K USD",
       duration: "For 12 months execution",
       description: "Who it's for",

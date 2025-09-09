@@ -30,7 +30,7 @@ export const validateMilestoneAmount = (value: number, grantType: string) => {
 
   if (grantType === "dapp") {
     return value > MAX_DAPP_GRANT_AMOUNT
-      ? t("Dapp grant amount must be less than or equal to {{value}} USD", {
+      ? t("App grant amount must be less than or equal to {{value}} USD", {
           value: MAX_DAPP_GRANT_AMOUNT,
         })
       : true

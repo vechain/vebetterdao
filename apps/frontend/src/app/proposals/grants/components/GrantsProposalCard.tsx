@@ -50,7 +50,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
         {/* Title */}
         <Heading size="md">{proposal.title}</Heading>
 
-        {/* B3TR and dApp Grant */}
+        {/* B3TR and App Grant */}
         <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
           <HStack>
             {/* Amount and grant type */}
@@ -60,7 +60,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             </Text>
             <Box hideBelow="md">
               <Text>
-                {"•"} {proposal?.grantType} {"Grant"}
+                {"•"} {proposal?.grantType === "dapp" ? "App" : "Tooling"} {"Grant"}
               </Text>
             </Box>
             {/* Separator */}
