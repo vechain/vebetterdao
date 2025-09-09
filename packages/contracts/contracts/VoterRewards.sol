@@ -411,8 +411,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     require($.emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
 
-    // Only registered relayers can claim for auto-voting users
-    _checkRelayerEarlyAccessEligibility(cycle);
+    if ($.xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(voter)) {
+      _checkRelayerEarlyAccessEligibility(cycle);
+    }
 
     (uint256 netReward, uint256 netGmReward, uint256 fee) = _getRewardsAndFees(cycle, voter);
     uint256 totalNetReward = netReward + netGmReward;
@@ -801,7 +802,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
    */
   function _checkRelayerEarlyAccessEligibility(uint256 roundId) internal view {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    $.relayerRewardsPool.canRelayerVoteInEarlyAccess(msg.sender, roundId);
+    $.relayerRewardsPool.validateEarlyAccessRelayer(msg.sender, roundId);
   }
 
   /// @notice Scales the vote power based on the quadratic rewarding status.

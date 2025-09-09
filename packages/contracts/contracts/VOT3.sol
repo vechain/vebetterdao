@@ -221,7 +221,9 @@ contract VOT3 is
 
       if (balanceAfterTransfer < 1 ether) {
         VOT3Storage storage $ = _getVOT3Storage();
-        if (address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabled(from)) {
+        if (
+          address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(from)
+        ) {
           $.xAllocationVoting.toggleAutoVotingForUser(from);
         }
       }

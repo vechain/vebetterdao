@@ -85,7 +85,7 @@ contract RelayerRewardsPool is
     uint256 claimWeight;
     // registered relayers set
     mapping(address => bool) registeredRelayers;
-    // array to track all registered relayers for enumeration
+    // array to track all registered relayers
     address[] relayerAddresses;
     // number of blocks for exclusive early access
     uint256 earlyAccessBlocks;
@@ -374,14 +374,14 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Check if a relayer can perform a vote action during early access
+   * @notice Check if a relayer can perform an action during early access
    * @param relayer The relayer address
    * @param roundId The round ID
    */
-  function canRelayerVoteInEarlyAccess(address relayer, uint256 roundId) external view {
+  function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // if early access period ended, anyone can vote
+    // if early access period ended, anyone can call vote/claim on auto-voting user's behalf
     if (!isEarlyAccessActive(roundId)) {
       return;
     }
@@ -555,6 +555,41 @@ contract RelayerRewardsPool is
       $.totalWeightedActions[roundId],
       $.relayerAddresses.length
     );
+  }
+
+  /**
+   * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
+   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
+   * @param roundId The round ID
+   * @param userCount The number of users to remove from expected actions (typically 1)
+   */
+  function reduceExpectedActionsForRound(
+    uint256 roundId,
+    uint256 userCount
+  ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    if (userCount == 0) revert InvalidParameter("userCount");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    // Calculate reduction amounts
+    uint256 actionsToReduce = userCount * 2; // Each user requires 2 actions (vote + claim)
+    uint256 weightedActionsToReduce = userCount * ($.voteWeight + $.claimWeight);
+
+    // Ensure we don't reduce below zero
+    require(
+      $.totalActions[roundId] >= actionsToReduce,
+      "RelayerRewardsPool: cannot reduce more actions than available"
+    );
+    require(
+      $.totalWeightedActions[roundId] >= weightedActionsToReduce,
+      "RelayerRewardsPool: cannot reduce more weighted actions than available"
+    );
+
+    // Reduce the totals
+    $.totalActions[roundId] -= actionsToReduce;
+    $.totalWeightedActions[roundId] -= weightedActionsToReduce;
+
+    emit ExpectedActionsReduced(roundId, userCount, $.totalActions[roundId], $.totalWeightedActions[roundId]);
   }
 
   /**

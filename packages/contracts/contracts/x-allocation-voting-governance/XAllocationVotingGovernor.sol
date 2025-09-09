@@ -131,7 +131,10 @@ abstract contract XAllocationVotingGovernor is
    * @notice Only addresses with a valid passport can vote.
    */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
-    require(_isAutoVotingEnabled(voter), "XAllocationVotingGovernor: auto voting is not enabled");
+    require(
+      this.isUserAutoVotingEnabledForCurrentCycle(voter),
+      "XAllocationVotingGovernor: auto voting is not enabled"
+    );
 
     _checkRelayerEarlyAccessEligibility(roundId);
 
@@ -139,6 +142,12 @@ abstract contract XAllocationVotingGovernor is
 
     // Get voter's available votes and create equal distribution
     (bytes32[] memory finalAppIds, uint256[] memory voteWeights) = _prepareAutoVoteArrays(voter, roundId, appIds);
+
+    if (finalAppIds.length == 0) {
+      _toggleAutovoting(voter);
+      relayerRewardsPool().reduceExpectedActionsForRound(roundId, 1); // TODO autovoting: this needs a unit test
+      revert NoEligibleAppsForAutoVote(voter, roundId);
+    }
 
     _castVoteInternal(voter, roundId, finalAppIds, voteWeights, true);
   }
@@ -166,49 +175,6 @@ abstract contract XAllocationVotingGovernor is
     if (isAutoVote) {
       relayerRewardsPool().registerRelayerAction(msg.sender, roundId, RelayerAction.VOTE);
       emit AllocationAutoVoteCast(voter, roundId, appIds, voteWeights);
-    }
-  }
-
-  /**
-   * @dev Prepare arrays for auto voting by filtering eligible apps and calculating equal weights
-   * @param voter The voter address
-   * @param roundId The round ID
-   * @param preferredApps The user's preferred app IDs
-   * @return finalAppIds Array of eligible app IDs
-   * @return voteWeights Array of equal vote weights
-   */
-  function _prepareAutoVoteArrays(
-    address voter,
-    uint256 roundId,
-    bytes32[] memory preferredApps
-  ) internal view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
-    // Get voter's available votes
-    uint256 voterAvailableVotes = getAndValidateVotingPower(voter, roundSnapshot(roundId));
-
-    // Count and collect eligible apps
-    uint256 len = preferredApps.length;
-    bytes32[] memory tempAppIds = new bytes32[](len);
-    uint256 count;
-
-    for (uint256 i; i < len; ++i) {
-      if (isEligibleForVote(preferredApps[i], roundId)) {
-        tempAppIds[count++] = preferredApps[i];
-      }
-    }
-
-    require(count > 0, "XAllocationVotingGovernor: no eligible apps to vote for");
-
-    // TODO autovoting: if autovoting is enabled and there are no eligible apps to vote for, toggle off autovoting
-    // Then, update this test 'should revert when the users have no eligible apps to vote for'
-
-    // Create final arrays with exact size
-    finalAppIds = new bytes32[](count);
-    voteWeights = new uint256[](count);
-    uint256 votePerApp = voterAvailableVotes / count;
-
-    for (uint256 i; i < count; ++i) {
-      finalAppIds[i] = tempAppIds[i];
-      voteWeights[i] = votePerApp;
     }
   }
 
@@ -242,7 +208,7 @@ abstract contract XAllocationVotingGovernor is
    * @param roundId The current round ID
    */
   function _checkRelayerEarlyAccessEligibility(uint256 roundId) internal view {
-    relayerRewardsPool().canRelayerVoteInEarlyAccess(msg.sender, roundId);
+    relayerRewardsPool().validateEarlyAccessRelayer(msg.sender, roundId);
   }
 
   /**
@@ -455,6 +421,11 @@ abstract contract XAllocationVotingGovernor is
   function relayerRewardsPool() public view virtual returns (IRelayerRewardsPool);
 
   /**
+   * @dev Toggles autovoting for an account
+   */
+  function _toggleAutovoting(address account) internal virtual;
+
+  /**
    * @dev Checks if autovoting is enabled for an account
    */
   function _isAutoVotingEnabled(address account) internal view virtual returns (bool);
@@ -473,4 +444,13 @@ abstract contract XAllocationVotingGovernor is
    * @dev Gets the total number of users who enabled autovoting at a specific timepoint
    */
   function _getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) internal view virtual returns (uint208);
+
+  /**
+   * @dev Prepares arrays for auto-voting by filtering eligible apps and calculating vote weights
+   */
+  function _prepareAutoVoteArrays(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory preferredApps
+  ) internal virtual returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights);
 }

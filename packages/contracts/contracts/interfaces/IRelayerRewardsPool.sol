@@ -77,6 +77,14 @@ interface IRelayerRewardsPool {
   function setTotalActionsForRound(uint256 roundId, uint256 totalAutoVotingUsers) external;
 
   /**
+   * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
+   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
+   * @param roundId The round ID
+   * @param userCount The number of users to remove from expected actions (typically 1)
+   */
+  function reduceExpectedActionsForRound(uint256 roundId, uint256 userCount) external;
+
+  /**
    * @notice Returns the claimable reward amount for a relayer in a specific round
    * @param relayer The relayer address
    * @param roundId The round ID
@@ -168,11 +176,11 @@ interface IRelayerRewardsPool {
   function isEarlyAccessActive(uint256 roundId) external view returns (bool);
 
   /**
-   * @notice Check if a relayer can perform a vote action during early access
+   * @notice Check if a relayer can perform an action during early access
    * @param relayer The relayer address
    * @param roundId The round ID
    */
-  function canRelayerVoteInEarlyAccess(address relayer, uint256 roundId) external view;
+  function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view;
 
   /**
    * @notice Emitted when early access vote allocations are set for a round
@@ -188,6 +196,20 @@ interface IRelayerRewardsPool {
     uint256 totalActions,
     uint256 totalWeightedActions,
     uint256 numRelayers
+  );
+
+  /**
+   * @notice Emitted when expected actions are reduced for a round
+   * @param roundId The round ID
+   * @param userCount The number of users removed from expected actions
+   * @param newTotalActions The new total actions required
+   * @param newTotalWeightedActions The new total weighted actions required
+   */
+  event ExpectedActionsReduced(
+    uint256 indexed roundId,
+    uint256 userCount,
+    uint256 newTotalActions,
+    uint256 newTotalWeightedActions
   );
 
   /**
