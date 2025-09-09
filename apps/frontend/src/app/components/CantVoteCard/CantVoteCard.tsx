@@ -1,7 +1,7 @@
 import { useAccountLinking, useCanUserVote, useUserDelegation } from "@/api"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { Card, HStack, Text, VStack, Button } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
+import { VStack, Button, Alert, useDisclosure } from "@chakra-ui/react"
+import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
@@ -21,6 +21,7 @@ export const CantVoteCard = () => {
   const router = useRouter()
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
+  const doActionModal = useDisclosure()
 
   const { hasVotesAtSnapshot, snapshotBlock, isLoading: canVoteLoading, isPerson } = useCanUserVote()
   const snapshotTimestamp = useEstimateBlockTimestamp({ blockNumber: snapshotBlock })
@@ -40,6 +41,10 @@ export const CantVoteCard = () => {
   const handleGoToGovernance = useCallback(() => {
     router.push("/profile?tab=governance")
   }, [router])
+
+  const handleOpenDoActionModal = useCallback(() => {
+    doActionModal.onOpen()
+  }, [doActionModal])
 
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
     if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
@@ -84,48 +89,78 @@ export const CantVoteCard = () => {
               snapshotDate: snapshotDateText,
             },
           ),
+          onLearnMoreClick: handleOpenDoActionModal,
         }
 
       case "no-actions":
         return {
           title: t("You can't vote because you haven't accumulated enough actions."),
           description: t("You can earn actions by using the dApps."),
+          onLearnMoreClick: handleOpenDoActionModal,
         }
       default:
         return null
     }
-  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking, snapshotDateText])
+  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking, snapshotDateText, handleOpenDoActionModal])
 
   if (!cantVoteReasonText) return null
 
   return (
-    <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"}>
-      <Card.Body position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
-        <VStack gap={0} w="full" align="flex-start">
-          <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
-            <UilInfoCircle size={36} color="#AF5F00" />
-            <VStack gap={0} w="full" align="flex-start">
-              <Text fontWeight="700" color="#AF5F00" as="span">
-                {cantVoteReasonText?.title}
-              </Text>
-              <Text color="#AF5F00" as="span">
-                {" "}
-                {cantVoteReasonText?.description}{" "}
-              </Text>
-            </VStack>
-          </HStack>
-          {!!cantVoteReasonText?.onLearnMoreClick && (
-            <Button
-              variant="plain"
-              alignSelf={"flex-end"}
-              textDecoration="underline"
-              color="#AF5F00"
-              onClick={cantVoteReasonText.onLearnMoreClick}>
-              {t("Learn more")}
-            </Button>
-          )}
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+    <Alert.Root status="warning" size="lg">
+      <Alert.Indicator />
+
+      <Alert.Content>
+        <Alert.Title>{cantVoteReasonText?.title}</Alert.Title>
+        <Alert.Description>
+          <VStack alignItems="stretch" gap={2}>
+            {cantVoteReasonText?.description}
+
+            {!!cantVoteReasonText?.onLearnMoreClick && (
+              <Button
+                variant="plain"
+                alignSelf={"flex-end"}
+                textDecoration="underline"
+                color="#AF5F00"
+                onClick={cantVoteReasonText.onLearnMoreClick}>
+                {t("Learn more")}
+              </Button>
+            )}
+          </VStack>
+
+          <DoActionModal doActionModal={doActionModal} />
+        </Alert.Description>
+      </Alert.Content>
+    </Alert.Root>
   )
+
+  // return (
+  //   <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"}>
+  //     <Card.Body position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
+  //       <VStack gap={0} w="full" align="flex-start">
+  //         <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
+  //           <UilInfoCircle size={36} color="#AF5F00" />
+  //           <VStack gap={0} w="full" align="flex-start">
+  //             <Text fontWeight="700" color="#AF5F00" as="span">
+  //               {cantVoteReasonText?.title}
+  //             </Text>
+  //             <Text color="#AF5F00" as="span">
+  //               {" "}
+  //               {cantVoteReasonText?.description}{" "}
+  //             </Text>
+  //           </VStack>
+  //         </HStack>
+  //         {!!cantVoteReasonText?.onLearnMoreClick && (
+  //           <Button
+  //             variant="plain"
+  //             alignSelf={"flex-end"}
+  //             textDecoration="underline"
+  //             color="#AF5F00"
+  //             onClick={cantVoteReasonText.onLearnMoreClick}>
+  //             {t("Learn more")}
+  //           </Button>
+  //         )}
+  //       </VStack>
+  //     </Card.Body>
+  //   </Card.Root>
+  // )
 }
