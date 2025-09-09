@@ -84,7 +84,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
         </Menu.Trigger>
         <Portal>
           <Menu.Positioner>
-            <Menu.Content maxW="300px" bg="gray.800" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
+            <Menu.Content maxW="300px" bg="bg.emphasized" minW="200px" shadow="lg" borderRadius={"24px"} p={3}>
               <Text mb={2}>{t("Vote Type")}</Text>
               <Flex flexWrap="wrap" gap={2} mb={4} flexDir="column">
                 {["All", "For", "Against", "Abstain"].map(status => (

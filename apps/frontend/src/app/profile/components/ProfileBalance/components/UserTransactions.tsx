@@ -1,9 +1,9 @@
 import { useTransactions } from "@/api"
 import { TransactionCard } from "@/components"
-import { Button, Card, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import { Card, Heading, Text, VStack, Link } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import NextLink from "next/link"
 
 type Props = {
   address: string
@@ -14,20 +14,16 @@ export const UserTransactions = ({ address }: Props) => {
 
   const { data } = useTransactions({
     user: address ?? "",
+    size: 5,
   })
 
   const transactions = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? []
   }, [data])
 
-  const last5Transactions = useMemo(() => {
-    return transactions.slice(0, 5)
-  }, [transactions])
-
-  const router = useRouter()
-  const handleSeeAll = useCallback(() => {
-    router.push(`/transactions/${address}`)
-  }, [router, address])
+  const hasNextPage = useMemo(() => {
+    return data?.pages[0]?.pagination?.hasNext ?? false
+  }, [data])
 
   return (
     <Card.Root w={"full"} variant={"baseWithBorder"}>
@@ -40,15 +36,15 @@ export const UserTransactions = ({ address }: Props) => {
           {transactions.length > 0 ? (
             <>
               <VStack gap={4} align="stretch">
-                {last5Transactions.map(transaction => (
+                {transactions.map(transaction => (
                   <TransactionCard key={transaction.txId} transaction={transaction} />
                 ))}
               </VStack>
-              <Flex justify="center">
-                <Button variant={"primaryGhost"} onClick={handleSeeAll}>
-                  {t("See all")}
-                </Button>
-              </Flex>
+              {hasNextPage && (
+                <Link asChild mx="auto" color="actions.secondary.text-lighter">
+                  <NextLink href={`/transactions/${address}`}>{t("See all")}</NextLink>
+                </Link>
+              )}
             </>
           ) : (
             <Text>{t("No transactions found")}</Text>

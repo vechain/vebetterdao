@@ -1774,5 +1774,22 @@
   "Apply": "Aplicar",
   "Get NFT": "Obter NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Inclui <bold>{{depositsVotes}} VOT3</bold> de propostas de apoio",
-  "More info about your votes at snapshot": "Mais informações sobre seus votos no snapshot"
+  "More info about your votes at snapshot": "Mais informações sobre seus votos no snapshot",
+  "Assign App Categories": "Atribuir Categorias de Aplicativos",
+  "Loading apps without categories...": "Carregando aplicativos sem categorias...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Atribua categorias a aplicativos que não têm nenhuma. Máximo de {{max}} categorias por aplicativo.",
+  "All apps have categories assigned! 🎉": "Todos os aplicativos têm categorias atribuídas! 🎉",
+  "Apps without categories: {{count}}": "Aplicativos sem categorias: {{count}}",
+  "Category Assignments ({{count}})": "Atribuições de Categorias ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Categorias Selecionadas ({{count}}/{{max}})",
+  "Uploading metadata...": "Carregando metadados...",
+  "Maximum {{max}} categories per app.": "Máximo de {{max}} categorias por aplicativo.",
+  "Previous app": "Aplicativo anterior",
+  "Next app": "Próximo aplicativo",
+  "Assign Categories to {{count}} Apps": "Atribuir Categorias a {{count}} Aplicativos",
+  "Round hasn’t started yet. Please start a new round.": "A rodada ainda não começou. Por favor, inicie uma nova rodada.",
+  "Start new round & claim allocations": "Iniciar nova rodada e reivindicar alocações",
+  "Transaction completed!": "Transação concluída!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Ao clicar no botão abaixo, você também reivindicará alocações para {{count}} aplicativos.",
+  "The previous round has ended. Start a new round to continue voting.": "A rodada anterior terminou. Inicie uma nova rodada para continuar a votação."
 }

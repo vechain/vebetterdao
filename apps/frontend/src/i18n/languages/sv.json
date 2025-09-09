@@ -1774,5 +1774,22 @@
   "Apply": "Ansök",
   "Get NFT": "Skaffa NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Inkluderar <bold>{{depositsVotes}} VOT3</bold> från stödjande förslag",
-  "More info about your votes at snapshot": "Mer information om dina röster vid snapshot"
+  "More info about your votes at snapshot": "Mer information om dina röster vid snapshot",
+  "Assign App Categories": "Tilldela Appkategorier",
+  "Loading apps without categories...": "Laddar appar utan kategorier...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Tilldela kategorier till appar som inte har några. Max {{max}} kategorier per app.",
+  "All apps have categories assigned! 🎉": "Alla appar har kategorier tilldelade! 🎉",
+  "Apps without categories: {{count}}": "Appar utan kategorier: {{count}}",
+  "Category Assignments ({{count}})": "Kategoritilldelningar ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Valda kategorier ({{count}}/{{max}})",
+  "Uploading metadata...": "Laddar upp metadata...",
+  "Maximum {{max}} categories per app.": "Max {{max}} kategorier per app.",
+  "Previous app": "Föregående app",
+  "Next app": "Nästa app",
+  "Assign Categories to {{count}} Apps": "Tilldela kategorier till {{count}} appar",
+  "Round hasn’t started yet. Please start a new round.": "Rundan har inte börjat än. Var vänlig starta en ny runda.",
+  "Start new round & claim allocations": "Starta ny runda & gör anspråk på tilldelningar",
+  "Transaction completed!": "Transaktion slutförd!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Genom att klicka på knappen nedan kommer du också att skaffa allokeringar för {{count}} appar.",
+  "The previous round has ended. Start a new round to continue voting.": "Den tidigare omgången har avslutats. Starta en ny omgång för att fortsätta rösta."
 }

@@ -1774,5 +1774,22 @@
   "Apply": "Áp dụng",
   "Get NFT": "Nhận NFT",
   "Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals": "Bao gồm <bold>{{depositsVotes}} VOT3</bold> từ các đề xuất hỗ trợ",
-  "More info about your votes at snapshot": "Thêm thông tin về phiếu bầu của bạn tại snapshot"
+  "More info about your votes at snapshot": "Thêm thông tin về phiếu bầu của bạn tại snapshot",
+  "Assign App Categories": "Gán Danh Mục Ứng Dụng",
+  "Loading apps without categories...": "Đang tải ứng dụng không có danh mục...",
+  "Assign categories to apps that don't have any. Maximum {{max}} categories per app.": "Gán danh mục cho ứng dụng chưa có. Tối đa {{max}} danh mục cho mỗi ứng dụng.",
+  "All apps have categories assigned! 🎉": "Tất cả ứng dụng đã được gán danh mục! 🎉",
+  "Apps without categories: {{count}}": "Ứng dụng chưa có danh mục: {{count}}",
+  "Category Assignments ({{count}})": "Gán Danh Mục ({{count}})",
+  "Selected Categories ({{count}}/{{max}})": "Danh Mục Đã Chọn ({{count}}/{{max}})",
+  "Uploading metadata...": "Đang tải lên siêu dữ liệu...",
+  "Maximum {{max}} categories per app.": "Tối đa {{max}} danh mục cho mỗi ứng dụng.",
+  "Previous app": "Ứng dụng trước",
+  "Next app": "Ứng dụng tiếp theo",
+  "Assign Categories to {{count}} Apps": "Gán Danh Mục cho {{count}} Ứng Dụng",
+  "Round hasn’t started yet. Please start a new round.": "Vòng chưa bắt đầu. Vui lòng bắt đầu một vòng mới.",
+  "Start new round & claim allocations": "Bắt đầu vòng mới & nhận phân bổ",
+  "Transaction completed!": "Giao dịch hoàn tất!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "Bằng cách nhấp vào nút bên dưới, bạn cũng sẽ yêu cầu phân bổ cho {{count}} ứng dụng.",
+  "The previous round has ended. Start a new round to continue voting.": "Vòng trước đã kết thúc. Bắt đầu một vòng mới để tiếp tục bỏ phiếu."
 }

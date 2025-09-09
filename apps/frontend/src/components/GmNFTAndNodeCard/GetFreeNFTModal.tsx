@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next"
-import { Dialog, Button, Image, Text, VStack, Stack, Heading, Box, Portal, CloseButton } from "@chakra-ui/react"
+import { Dialog, Button, Text, VStack, Heading, Box, Portal, CloseButton, SimpleGrid, Icon } from "@chakra-ui/react"
+
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 interface GetFreeNFTModalProps {
   isOpen: boolean
@@ -25,8 +27,10 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
           <Dialog.Content>
             <Dialog.Header>
               <VStack gap={4} align="flex-start">
-                <Image src="/assets/icons/nft-earth.svg" alt="NFT Earth Illustration" boxSize="80px" />
-                <Heading textStyle="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
+                <Icon boxSize="80px" color="bg.inverted">
+                  <NFTEarthIcon />
+                </Icon>
+                <Heading size="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>
@@ -49,14 +53,14 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
             </Dialog.Body>
 
             <Dialog.Footer w="full" px={4} pt={1}>
-              <Stack direction={["column", "row"]} align="stretch" w="full">
+              <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} w="full">
                 <Button variant={"whiteAction"} color={"#004CFC"} w={"full"} onClick={onClose}>
                   {t("Maybe later")}
                 </Button>
                 <Button variant={"primaryAction"} w={"full"} onClick={onCtaClick}>
                   {t("Get free NFT")}
                 </Button>
-              </Stack>
+              </SimpleGrid>
             </Dialog.Footer>
 
             <Dialog.CloseTrigger asChild>

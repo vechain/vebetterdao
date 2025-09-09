@@ -105,6 +105,22 @@
   "engines": {
     "node": "20.x.x"
   },
+  "resolutions": {
+    "ansi-styles": "4.3.0",
+    "debug": "4.4.1",
+    "chalk": "5.6.0",
+    "supports-color": "8.1.1",
+    "strip-ansi": "6.0.1",
+    "ansi-regex": "5.0.1",
+    "wrap-ansi": "7.0.0",
+    "color-convert": "1.9.3",
+    "color-name": "1.1.4",
+    "is-arrayish": "0.2.1",
+    "slice-ansi": "4.0.0",
+    "color": "3.2.1",
+    "color-string": "1.9.1",
+    "simple-swizzle": "0.2.2"
+  },
   "packageManager": "yarn@1.22.22",
   "workspaces": [
     "apps/*",

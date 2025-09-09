@@ -1785,5 +1785,9 @@
   "Previous app": "Previous app",
   "Next app": "Next app",
   "Assign Categories to {{count}} Apps": "Assign Categories to {{count}} Apps",
-  "You have reached the maximum GM NFT level.": "You have reached the maximum GM NFT level."
+  "You have reached the maximum GM NFT level.": "You have reached the maximum GM NFT level.",
+  "The previous round has ended. Start a new round to continue voting.": "The previous round has ended. Start a new round to continue voting.",
+  "Start new round & claim allocations": "Start new round & claim allocations",
+  "Transaction completed!": "Transaction completed!",
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps."
 }

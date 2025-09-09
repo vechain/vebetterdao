@@ -24,18 +24,18 @@ export const NavbarBalance = () => {
     <Skeleton loading={b3trBalanceLoading || vot3BalanceLoading}>
       <HStack flexBasis="250px" gap={0} h={cardHeight} pl={5}>
         <BalancePill variant="b3tr">
-          <Flex align="center" justify="center" gap="0.25rem">
+          <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text color="#FFFFFF" fontSize={fontSize} fontWeight="semibold">
+            <Text color="#FFFFFF" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
           </Flex>
         </BalancePill>
 
         <BalancePill variant="vot3">
-          <Flex align="center" justify="center" gap="0.25rem">
+          <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color="#000000" fontSize={fontSize} fontWeight="semibold">
+            <Text color="#000000" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
           </Flex>
