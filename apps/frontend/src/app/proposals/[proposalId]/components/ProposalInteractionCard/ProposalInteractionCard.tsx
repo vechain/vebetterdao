@@ -125,7 +125,7 @@ export const ProposalInteractionCard = ({
   }, [proposal?.state, isVotingPhase, hasUserAlreadyVoted, userVotingPower, userVot3Balance, proposalDepositReached])
 
   const progressBarSegments = useMemo(() => {
-    if (proposal?.state === ProposalState.Pending) {
+    if (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.DepositNotMet) {
       return [
         {
           percentage: Number(percentageSupported ?? 0),
