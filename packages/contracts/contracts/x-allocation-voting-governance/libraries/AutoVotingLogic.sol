@@ -43,7 +43,7 @@ library AutoVotingLogic {
   /**
    * @dev Toggles autovoting for an account
    * @param $ The storage struct for AutoVoting preferences
-   * @param caller The calling contract that provides access to governance functions
+   * @param xAllocationVotingGovernorAddress The address of the XAllocationVotingGovernor contract
    * @param account The address to toggle autovoting for
    * @param clock The current timepoint
    * @notice
@@ -57,17 +57,19 @@ library AutoVotingLogic {
    */
   function toggleAutovoting(
     AutoVotingStorage storage $,
-    IXAllocationVotingGovernor caller,
+    address xAllocationVotingGovernorAddress,
     address account,
     uint48 clock
   ) external {
     bool currentStatus = $._autoVotingEnabled[account].upperLookupRecent(clock) == 1;
     bool newStatus = !currentStatus;
 
+    IXAllocationVotingGovernor xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernorAddress);
+
     // If user is enabling autovoting (was disabled, now enabling), check eligibility
     if (!currentStatus) {
-      caller.validatePersonhood(account);
-      caller.getAndValidateVotingPower(account, caller.currentRoundSnapshot());
+      xAllocationVotingGovernor.validatePersonhood(account);
+      xAllocationVotingGovernor.getAndValidateVotingPower(account, xAllocationVotingGovernor.currentRoundSnapshot());
     }
 
     // If user is disabling autovoting (was enabled, now disabling), clear preferences
@@ -88,18 +90,20 @@ library AutoVotingLogic {
   /**
    * @dev Sets the voting preferences for an account
    * @param $ The storage struct for AutoVoting preferences
-   * @param x2EarnAppsContract The X2EarnApps contract interface
+   * @param x2EarnAppsAddress The address of the X2EarnApps contract
    * @param account The address to set preferences for
    * @param apps The list of app IDs to vote for
    */
   function setUserVotingPreferences(
     AutoVotingStorage storage $,
-    IX2EarnApps x2EarnAppsContract,
+    address x2EarnAppsAddress,
     address account,
     bytes32[] memory apps
   ) external {
     require(apps.length > 0, "AutoVotingLogic: no apps to vote for");
     require(apps.length <= 15, "AutoVotingLogic: must vote for less than 15 apps");
+
+    IX2EarnApps x2EarnAppsContract = IX2EarnApps(x2EarnAppsAddress);
 
     // Iterate through the apps and percentages to calculate the total weight of votes cast by the voter
     for (uint256 i; i < apps.length; i++) {
@@ -183,5 +187,56 @@ library AutoVotingLogic {
    */
   function getTotalAutoVotingUsers(AutoVotingStorage storage $, uint48 clock) external view returns (uint208) {
     return $._totalAutoVotingUsers.upperLookupRecent(clock);
+  }
+
+  /**
+   * @dev Prepares arrays for auto-voting by filtering eligible apps and calculating vote weights
+   *
+   * @param xAllocationVotingGovernorAddress The address of the XAllocationVotingGovernor contract
+   * @param voter The address of the voter
+   * @param roundId The round ID to vote in
+   * @param preferredApps Array of preferred app IDs
+   *
+   * @return finalAppIds Array of eligible app IDs
+   * @return voteWeights Array of equal vote weights
+   */
+  function prepareAutoVoteArrays(
+    address xAllocationVotingGovernorAddress,
+    address voter,
+    uint256 roundId,
+    bytes32[] memory preferredApps
+  ) external view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
+    IXAllocationVotingGovernor xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernorAddress);
+
+    uint256 voterAvailableVotes = xAllocationVotingGovernor.getAndValidateVotingPower(
+      voter,
+      xAllocationVotingGovernor.roundSnapshot(roundId)
+    );
+
+    // Count and collect eligible apps
+    uint256 len = preferredApps.length;
+    bytes32[] memory tempAppIds = new bytes32[](len);
+    uint256 count;
+
+    for (uint256 i; i < len; ++i) {
+      if (xAllocationVotingGovernor.isEligibleForVote(preferredApps[i], roundId)) {
+        tempAppIds[count++] = preferredApps[i];
+      }
+    }
+
+    // If no eligible apps found, return empty arrays
+    if (count == 0) {
+      return (new bytes32[](0), new uint256[](0));
+    }
+
+    // Create final arrays with exact size
+    finalAppIds = new bytes32[](count);
+    voteWeights = new uint256[](count);
+    uint256 votePerApp = voterAvailableVotes / count;
+
+    for (uint256 i; i < count; ++i) {
+      finalAppIds[i] = tempAppIds[i];
+      voteWeights[i] = votePerApp;
+    }
   }
 }

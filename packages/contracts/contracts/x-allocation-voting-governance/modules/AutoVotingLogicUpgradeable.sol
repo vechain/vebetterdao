@@ -35,9 +35,9 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   /**
    * @dev Toggles autovoting for an account
    */
-  function _toggleAutovoting(address account) internal virtual {
+  function _toggleAutovoting(address account) internal virtual override {
     AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
-    AutoVotingLogic.toggleAutovoting($, this, account, clock());
+    AutoVotingLogic.toggleAutovoting($, address(this), account, clock());
   }
 
   /**
@@ -45,7 +45,18 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    */
   function _setUserVotingPreferences(address account, bytes32[] memory apps) internal virtual {
     AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
-    AutoVotingLogic.setUserVotingPreferences($, x2EarnApps(), account, apps);
+    AutoVotingLogic.setUserVotingPreferences($, address(x2EarnApps()), account, apps);
+  }
+
+  /**
+   * @dev Prepares arrays for auto-voting by filtering eligible apps and calculating vote weights
+   */
+  function _prepareAutoVoteArrays(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory preferredApps
+  ) internal virtual override returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
+    return AutoVotingLogic.prepareAutoVoteArrays(address(this), voter, roundId, preferredApps);
   }
 
   // ---------- Getters ---------- //
