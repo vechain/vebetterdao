@@ -46,6 +46,9 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   })
   const visibleComments = data?.pages.flatMap(page => page.data)
   const commentsCount = visibleComments?.length ?? 0
+
+  if (!commentsCount || !proposalId) return null
+
   return (
     <VStack alignItems="stretch" gap={4}>
       <HStack justifyContent="space-between" w="full">
