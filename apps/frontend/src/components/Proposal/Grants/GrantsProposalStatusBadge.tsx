@@ -1,15 +1,25 @@
-import { Icon, HStack, Text, Badge } from "@chakra-ui/react"
+import { Icon, HStack, Text, Badge, type BadgeProps } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconscout/react-unicons"
+import { FaHeart, FaThumbsUp } from "react-icons/fa6"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useMemo } from "react"
 
 type Props = {
   state?: ProposalState
+  hasUserSupported?: boolean
+  hasUserVoted?: boolean
 }
 
+/**
+ * Extract the variant type from Chakra UI's Badge component props
+ * This ensures type safety with the theme's badge variants
+ */
+type BadgeVariant = NonNullable<BadgeProps["variant"]>
 type BadgeConfig = {
   text: string
-  variant: "support-phase" | "approval-phase" | "declined" | "completed" | "approved"
+  variant: BadgeVariant
   icon: React.ElementType
+  filledIcon?: React.ElementType
 }
 
 // Define the badge configuration for each proposal state
@@ -17,11 +27,13 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   [ProposalState.Pending]: {
     text: "Support phase",
     icon: UilHeart,
+    filledIcon: FaHeart,
     variant: "support-phase",
   },
   [ProposalState.Active]: {
     text: "Approval phase",
     icon: UilThumbsUp,
+    filledIcon: FaThumbsUp,
     variant: "approval-phase",
   },
   [ProposalState.Canceled]: {
@@ -70,14 +82,32 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
 }
 
-export const GrantsProposalStatusBadge = ({ state = ProposalState.Pending }: Props) => {
+/**
+ * Grants proposal status badge component that shows proposal state with appropriate styling
+ * Uses Chakra UI theme badge variants for consistent styling across the app
+ *
+ * @param state - The current proposal state
+ * @param hasUserSupported - Whether the user has supported the proposal (for support phase)
+ * @param hasUserVoted - Whether the user has voted on the proposal (for approval phase)
+ */
+export const GrantsProposalStatusBadge = ({ state = ProposalState.Pending, hasUserSupported, hasUserVoted }: Props) => {
   const config = BADGE_CONFIG[state]
 
+  const selectedIcon = useMemo(() => {
+    // Show filled icon if user has interacted in the current phase
+    if (state === ProposalState.Pending && hasUserSupported) {
+      return config.filledIcon || config.icon
+    } else if (state === ProposalState.Active && hasUserVoted) {
+      return config.filledIcon || config.icon
+    }
+
+    return config.icon
+  }, [state, hasUserSupported, hasUserVoted, config])
+
   return (
-    //TODO: Propel this to the theme
-    <Badge variant={config.variant as any}>
+    <Badge variant={config.variant}>
       <HStack textAlign="center" justifyContent="center" alignItems="center">
-        <Icon as={config.icon} boxSize={5} />
+        <Icon as={selectedIcon} boxSize={4} />
         <Text fontWeight="bold"> {config.text}</Text>
       </HStack>
     </Badge>
