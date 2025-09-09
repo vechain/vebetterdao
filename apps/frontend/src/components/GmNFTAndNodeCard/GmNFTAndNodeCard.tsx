@@ -10,6 +10,7 @@ import {
   Skeleton,
   useDisclosure,
   Box,
+  Icon,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
@@ -24,6 +25,8 @@ import { GmActionButton } from "../GmActionButton"
 import { GmCard } from "./GmCard"
 import { useRouter } from "next/navigation"
 import { GetNodeModal } from "./GetNodeModal"
+
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
@@ -87,7 +90,11 @@ export const GmNFTAndNodeCard = () => {
 
             {userHasNoNodeOrGm ? (
               <GmEmptyStateCard
-                icon={<Image src="/assets/icons/nft-earth-dark.png" alt="NFT Earth Illustration" boxSize="60px" />}
+                icon={
+                  <Icon boxSize="60px" color="bg.inverted">
+                    <NFTEarthIcon />
+                  </Icon>
+                }
                 text={t(
                   "Get NFT and start receiving rewards. After you vote first time you will receive free Galaxy Member - Earth NFT.",
                 )}
@@ -108,7 +115,11 @@ export const GmNFTAndNodeCard = () => {
                   />
                 ) : (
                   <GmEmptyStateCard
-                    icon={<Image src="/assets/icons/nft-earth-dark.png" alt="NFT Earth Illustration" boxSize="60px" />}
+                    icon={
+                      <Icon boxSize="60px" color="bg.inverted">
+                        <NFTEarthIcon />
+                      </Icon>
+                    }
                     text={t("Get NFT and start receiving rewards.")}
                   />
                 )}
