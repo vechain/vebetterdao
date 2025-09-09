@@ -21,6 +21,13 @@ export const inputRecipe = defineRecipe({
         },
         bg: "transparent",
       },
+      filled: {
+        color: "text.subtle",
+        borderRadius: "12px",
+        border: "1px solid",
+        borderColor: "gray.200",
+        bg: "bg.primary",
+      },
     },
   },
 })

@@ -1,74 +1,73 @@
 import { useAllProposalsDepositReached } from "@/api"
 import { useMemo } from "react"
 import { ProposalFilter, StateFilter } from "@/store"
-import { useProposalEnriched } from "@/hooks/proposals/common"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { ProposalState, GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
  */
-export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFilter)[]) => {
-  // Step 1: Get the standard proposals
-  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] } } = useProposalEnriched()
-
+export const useFilteredProposals = (
+  selectedFilter?: (ProposalFilter | StateFilter)[],
+  proposals?: ProposalEnriched[] | GrantProposalEnriched[],
+) => {
   const proposalsIds = useMemo(() => {
-    return enrichedStandardProposals.map(proposal => proposal.id)
-  }, [enrichedStandardProposals])
+    return proposals?.map(proposal => proposal.id) || []
+  }, [proposals])
 
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
     useAllProposalsDepositReached(proposalsIds)
 
   const proposalsWithStateAndDeposit = useMemo(() => {
-    if (!enrichedStandardProposals) return []
+    if (!proposals?.length) return []
 
-    return enrichedStandardProposals.map(proposal => ({
+    return proposals.map(proposal => ({
       ...proposal,
       isDepositReached: allProposalsDepositReached?.find(
         proposalDepositReached => proposalDepositReached.proposalId === proposal.id,
       )?.depositReached,
     }))
-  }, [enrichedStandardProposals, allProposalsDepositReached])
+  }, [proposals, allProposalsDepositReached])
 
   const filteredProposals = useMemo(() => {
-    if (!proposalsWithStateAndDeposit) return []
+    if (!proposalsWithStateAndDeposit?.length) return []
     if (!selectedFilter || selectedFilter.length === 0) return proposalsWithStateAndDeposit
 
-    const proposals: typeof proposalsWithStateAndDeposit = []
+    // Create filter condition mapping
+    const getFilterCondition = (
+      proposal: (typeof proposalsWithStateAndDeposit)[0],
+    ): Record<ProposalFilter | StateFilter, boolean> => ({
+      // ProposalFilter values
+      [ProposalFilter.State]: false, // Meta filter, not used for direct matching
+      [ProposalFilter.InThisRound]: proposal.state === ProposalState.Active,
+      [ProposalFilter.LookingForSupport]: proposal.state === ProposalState.Pending && !proposal.isDepositReached,
+      [ProposalFilter.UpcomingVoting]: proposal.state === ProposalState.Pending && !!proposal.isDepositReached,
+      // StateFilter values
+      [StateFilter.Canceled]: proposal.state === ProposalState.Canceled,
+      [StateFilter.Defeated]: proposal.state === ProposalState.Defeated,
+      [StateFilter.Succeeded]: proposal.state === ProposalState.Succeeded,
+      [StateFilter.Queued]: proposal.state === ProposalState.Queued,
+      [StateFilter.Executed]: proposal.state === ProposalState.Executed,
+      [StateFilter.DepositNotMet]: proposal.state === ProposalState.DepositNotMet,
+      //Same as executed, otherwise it would go to either cancel of completed depending on the milestones
+      [StateFilter.InDevelopment]: proposal.state === ProposalState.Executed,
+      [StateFilter.Completed]: proposal.state === ProposalState.Completed,
+      [StateFilter.Pending]: proposal.state === ProposalState.Pending,
+      [StateFilter.Active]: proposal.state === ProposalState.Active,
+    })
 
-    for (const filter of selectedFilter) {
-      proposals.push(
-        ...proposalsWithStateAndDeposit.filter(proposal => {
-          switch (filter) {
-            case ProposalFilter.InThisRound:
-              return proposal.state === ProposalState.Active
-            case StateFilter.Canceled:
-              return proposal.state === ProposalState.Canceled
-            case StateFilter.Succeeded:
-              return proposal.state === ProposalState.Succeeded
-            case StateFilter.Defeated:
-              return proposal.state === ProposalState.Defeated
-            case StateFilter.DepositNotMet:
-              return proposal.state === ProposalState.DepositNotMet
-            case StateFilter.Queued:
-              return proposal.state === ProposalState.Queued
-            case StateFilter.Executed:
-              return proposal.state === ProposalState.Executed
-            case ProposalFilter.LookingForSupport:
-              return proposal.state === ProposalState.Pending && !proposal.isDepositReached
-            case ProposalFilter.UpcomingVoting:
-              return proposal.state === ProposalState.Pending && proposal.isDepositReached
-
-            default:
-              return false
-          }
-        }),
-      )
+    // Check if proposal matches any active filter
+    const matchesAnyFilter = (proposal: (typeof proposalsWithStateAndDeposit)[0]): boolean => {
+      const conditions = getFilterCondition(proposal)
+      return selectedFilter.some(filter => conditions[filter])
     }
-    return proposals
+
+    // Single pass filter - O(n) instead of O(n*m) where m is number of filters
+    return proposalsWithStateAndDeposit.filter(matchesAnyFilter)
   }, [selectedFilter, proposalsWithStateAndDeposit])
 
   const sortedFilteredProposals = useMemo(() => {
-    if (!filteredProposals) return []
+    if (!filteredProposals?.length) return []
 
     const sortedProposals = [...filteredProposals].sort((a, b) => {
       // sort first by roundId, then by timestamp
@@ -81,13 +80,9 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
     return sortedProposals
   }, [filteredProposals])
 
-  const isLoading = useMemo(() => {
-    return allProposalsDepositReachedLoading
-  }, [allProposalsDepositReachedLoading])
-
   return {
     filteredProposals: sortedFilteredProposals,
-    isLoading,
+    isLoading: allProposalsDepositReachedLoading,
     allProposals: proposalsWithStateAndDeposit ?? [],
   }
 }

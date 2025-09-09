@@ -11,13 +11,9 @@ export const selectSlotRecipe = defineSlotRecipe({
           borderRadius: "12px",
           border: "1px solid",
           borderColor: "gray.200",
-          bg: "white",
-          _focusVisible: {
-            bg: "white",
-          },
+          bg: "bg.primary",
           _dark: {
             borderColor: "gray.600",
-            bg: "white",
           },
         },
         indicatorGroup: {

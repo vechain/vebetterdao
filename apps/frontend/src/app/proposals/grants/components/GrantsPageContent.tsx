@@ -1,15 +1,28 @@
 import { useTranslation } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Heading, Link, Icon, useDisclosure, Grid, GridItem } from "@chakra-ui/react"
+import {
+  VStack,
+  HStack,
+  Heading,
+  Link,
+  Icon,
+  useDisclosure,
+  Grid,
+  GridItem,
+  createListCollection,
+} from "@chakra-ui/react"
 import { useMemo } from "react"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { useProposalEnriched } from "@/hooks/proposals/common"
 import { HowToSupportCard } from "../../components/components"
-import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalState, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { useMilestoneClaimedEvents } from "@/hooks/proposals/grants/useMilestoneClaimedEvents"
 import BigNumber from "bignumber.js"
+import { SelectField, SearchField } from "@/components"
+import { useFilteredProposals } from "../../hooks/useFilteredProposals"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -20,8 +33,31 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
+  //CONSTANTS
+  const filterOptions = useMemo(() => {
+    return createListCollection({
+      items: [
+        { label: t("Approval phase"), value: StateFilter.Active },
+        { label: t("Support phase"), value: ProposalFilter.LookingForSupport },
+        { label: t("Supported"), value: ProposalFilter.UpcomingVoting },
+        { label: t("Approved"), value: StateFilter.Succeeded },
+        { label: t("In development"), value: StateFilter.Executed },
+        { label: t("Completed"), value: StateFilter.Completed },
+        { label: t("Cancelled"), value: StateFilter.Canceled },
+      ],
+    })
+  }, [t])
+  //Get all the values of the filterOptions as an array
+  const defaultValue = filterOptions.items.map(item => item.value)
+
+  //UI HOOKS
+
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
+
+  //STATES
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] } } = useProposalEnriched()
+  const { filteredProposals } = useFilteredProposals(selectedFilter, enrichedGrantProposals)
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const approvedStates = useMemo(
@@ -88,7 +124,6 @@ export const GrantsPageContent = () => {
     ],
     [t],
   )
-
   return (
     <VStack w="full" gap={8} pb={8}>
       <HStack
@@ -96,15 +131,12 @@ export const GrantsPageContent = () => {
         textAlign="center"
         w="full"
         justifyContent={{ base: "space-between", lg: "flex-start" }}>
-        <Heading as="h1" size="xl">
-          {t("Grants")}
-        </Heading>
+        <Heading size="xl">{t("Grants")}</Heading>
         {!open && (
           <Link
             display="inline-flex"
             alignItems="center"
             fontWeight={500}
-            gap={1}
             color="primary.500"
             fontSize="md"
             onClick={onOpen}>
@@ -119,16 +151,32 @@ export const GrantsPageContent = () => {
         totalApproved={totalGrantsApproved}
         totalFunds={totalDistributedAmount.toNumber()}
       />
+
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
-          <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
-            {enrichedGrantProposals &&
-              enrichedGrantProposals?.map(proposal => (
-                <GridItem key={proposal.id}>
-                  <GrantsProposalCard key={proposal.id} proposal={proposal} />
-                </GridItem>
-              ))}
-          </Grid>
+          <VStack gap={6} alignItems="stretch">
+            <HStack justifyContent="space-between" w="full" gap={4}>
+              <SearchField /> {/*TODO: Implement search */}
+              <SelectField
+                placeholder={t("Status")}
+                options={filterOptions}
+                defaultValue={defaultValue}
+                onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                isMultiOption
+              />
+            </HStack>
+            <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
+              {filteredProposals &&
+                filteredProposals?.map(proposal => (
+                  <GridItem key={proposal.id}>
+                    <GrantsProposalCard
+                      key={proposal.id}
+                      proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
+                    />
+                  </GridItem>
+                ))}
+            </Grid>
+          </VStack>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
           <HowToSupportCard />

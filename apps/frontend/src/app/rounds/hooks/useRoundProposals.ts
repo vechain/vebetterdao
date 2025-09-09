@@ -3,11 +3,15 @@ import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals
 import { ProposalFilter } from "@/store"
 import { useMemo } from "react"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { useProposalEnriched } from "@/hooks/proposals/common"
 
 export const useRoundProposals = (roundId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
-  const currentRoundIdProposals = useFilteredProposals([ProposalFilter.InThisRound, ProposalFilter.LookingForSupport])
+  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const currentRoundIdProposals = useFilteredProposals(
+    [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport],
+    proposals,
+  )
 
   const otherProposals = useMemo(() => {
     if (roundId === currentRoundId) return []

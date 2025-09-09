@@ -13,7 +13,7 @@ import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePi
 import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 
 type GrantsProposalCardProps = {
-  proposal: GrantProposalEnriched
+  proposal: GrantProposalEnriched & { isDepositReached: boolean }
 }
 
 export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
