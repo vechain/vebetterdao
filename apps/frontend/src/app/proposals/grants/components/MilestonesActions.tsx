@@ -72,7 +72,6 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       size="sm"
       w="full"
       step={step}
-      onStepChange={e => setStep(e.step)}
       variant="primaryVertical">
       <VStack w="full">
         <Steps.List w="full">
@@ -81,8 +80,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
               <Steps.Indicator>
                 <Steps.Status
                   incomplete={<Circle bg="actions.primary.default" size="0" />}
-                  complete={<Circle bg="actions.primary.default" size="50%" />}
-                  current={<Circle bg="actions.primary.default" size="50%" />}
+                  complete={<Circle bg="actions.primary.default" size="40%" />}
+                  current={<Circle bg="actions.primary.default" size="55%" />}
                 />
               </Steps.Indicator>
 

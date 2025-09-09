@@ -2004,7 +2004,6 @@
   "Result details": "Result details",
   "Claim your VOT3 tokens back {{round}} when voting starts.": "Claim your VOT3 tokens back {{round}} when voting starts.",
   "{{votingPower}} VOT3": "{{votingPower}} VOT3",
-  "Grant Completed": "Grant Completed",
   "Session": "Session",
   "The previous round has ended. Start a new round to continue voting.": "The previous round has ended. Start a new round to continue voting.",
   "Start new round & claim allocations": "Start new round & claim allocations",
@@ -2016,5 +2015,6 @@
   "Voting Power: {{votingPower}}": "Voting Power: {{votingPower}}",
   "Comments ({{amount}})": "Comments ({{amount}})",
   "Sort By": "Sort By",
-  "Filter": "Filter"
+  "Filter": "Filter",
+  "Round #{{roundId}}: {{dateString}}": "Round #{{roundId}}: {{dateString}}"
 }

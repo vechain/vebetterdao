@@ -1,90 +1,73 @@
-import { ProposalEnriched, GrantProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
-import { Button, Heading, Steps, Circle, Card } from "@chakra-ui/react"
+import { ProposalEnriched, GrantProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { Button, Heading, Steps, Card, VStack, Text, Circle } from "@chakra-ui/react"
 import { t } from "i18next"
-import { useMemo, useState, useEffect } from "react"
-// import { useWallet } from "@vechain/vechain-kit"
-// import { useAccountPermissions } from "@/api/contracts/account"
-import { TimelineElements } from "./TimelineElements"
+import { useMemo } from "react"
+import { useProposalInteractionDates } from "@/api"
+import dayjs from "dayjs"
 
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
 
 export const ProposalTimeline = ({ proposal }: Props) => {
-  // const { account } = useWallet()
-  // const { data: permissions } = useAccountPermissions(account?.address || "")
+  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal?.id ?? "")
 
-  //   const height = useMemo(() => {
-  //     return steps.length * 80
-  //   }, [steps])
+  const proposalCreatedAt = proposal?.createdAt ?? 0
+  const proposalVotingRoundId = proposal?.votingRoundId ?? 1
+  const isGrant = proposal?.type === ProposalType.Grant
+  const hasActions = Array.isArray(proposal?.values) && proposal?.values.length > 0
+
+  const timelineSteps = useMemo(
+    () => [
+      {
+        label: t("Support phase"),
+        state: [ProposalState.Pending],
+        description: t("Round #{{roundId}}: {{dateString}}", {
+          roundId: Number(proposalVotingRoundId) - 1,
+          dateString: dayjs(proposalCreatedAt * 1000).format("MMM D, YYYY"),
+        }),
+      },
+      {
+        label: t("Approval phase"),
+        state: [ProposalState.Active, ProposalState.Succeeded],
+        description: t("Round #{{roundId}}: {{dateString}}", {
+          roundId: Number(proposalVotingRoundId),
+          dateString: `${dayjs(supportEndDate).format("MMM D, YYYY")} - ${dayjs(votingEndDate).format("MMM D, YYYY")}`,
+        }),
+      },
+      ...(hasActions
+        ? [
+            {
+              label: isGrant ? t("In development") : t("Executed"),
+              state: [ProposalState.InDevelopment, ProposalState.Executed, ProposalState.Queued],
+              description: dayjs(votingEndDate).format("MMM D, YYYY"),
+            },
+          ]
+        : []),
+      {
+        label: t("Completed"),
+        state: [ProposalState.Completed],
+        description: "Project completed successfully",
+      },
+    ],
+    [proposal?.votingRoundId, proposal?.createdAt],
+  )
 
   const invalidState = useMemo(() => {
     return (
       proposal?.state === ProposalState.Defeated ||
       proposal?.state === ProposalState.Canceled ||
       proposal?.state === ProposalState.DepositNotMet
-      // If it is a grant, proposa.State == GrantState
-      // proposal?.state === ProposalState.Rejected
     )
   }, [proposal?.state])
 
-  const steps = useMemo(() => {
-    return [
-      {
-        key: 0,
-        state: ProposalState.Pending,
-        round: proposal?.votingRoundId,
-        startDate: proposal?.createdAt,
-        endDate: proposal?.createdAt, // round ID to date ( to get beggining and end of the round)
-      },
-      {
-        key: 1,
-        state: ProposalState.Active,
-        round: proposal?.votingRoundId,
-        startDate: proposal?.createdAt,
-        endDate: proposal?.createdAt,
-      },
-      {
-        key: 2,
-        state:
-          proposal?.state === ProposalState.Defeated
-            ? ProposalState.Defeated
-            : proposal?.state === ProposalState.Canceled
-              ? ProposalState.Canceled
-              : ProposalState.Succeeded,
-        round: proposal?.votingRoundId,
-        startDate: proposal?.createdAt,
-        endDate: proposal?.createdAt,
-      },
-      ...(proposal?.state !== ProposalState.Defeated && proposal?.state !== ProposalState.Canceled
-        ? [
-            // If the grant got rejected, the proposal is rejected ( GrantState.Rejected )
-            {
-              key: 3,
-              state: ProposalState.InDevelopment,
-              round: proposal?.votingRoundId,
-              startDate: proposal?.createdAt,
-              endDate: proposal?.createdAt,
-            },
-            {
-              key: 4,
-              state: ProposalState.Completed,
-              round: proposal?.votingRoundId,
-              startDate: proposal?.createdAt,
-              endDate: proposal?.createdAt,
-            },
-          ]
-        : []),
-    ]
-  }, [proposal])
-
-  const [activeStep, setActiveStep] = useState(1) // the active step by default is the support phase ( once created, it's directly in support phase)
-  useEffect(() => {
-    setActiveStep(1)
-  }, [proposal?.state])
+  const currentStep = useMemo(() => {
+    if (!proposal) return 0
+    const stepIndex = timelineSteps.findIndex(step => step.state.includes(proposal.state))
+    return stepIndex >= 0 ? stepIndex : 0
+  }, [proposal, timelineSteps])
 
   // Check if the proposal is queuable and executable
-  // only if the targets > 0
   const isQueuable = useMemo(() => {
     return proposal?.state === ProposalState.Succeeded
   }, [proposal?.state])
@@ -92,6 +75,12 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   const isExecutable = useMemo(() => {
     return proposal?.state === ProposalState.Active
   }, [proposal?.state])
+
+  const stepIndicatorBg = useMemo(() => {
+    return "actions.primary.default"
+    //TODO: Change it to dynamic color based on the state
+    // return invalidState ? "error.primary" : "actions.primary.default"
+  }, [invalidState])
 
   return (
     <>
@@ -103,31 +92,33 @@ export const ProposalTimeline = ({ proposal }: Props) => {
         </Card.Header>
         <Card.Body>
           <Steps.Root
-            size="sm"
-            count={steps.length}
             orientation="vertical"
+            defaultStep={0}
+            count={timelineSteps.length}
+            size="sm"
             w="full"
-            gap="0"
-            step={activeStep}
-            onStepChange={e => setActiveStep(e.step)}
+            step={currentStep}
             colorPalette={invalidState ? "red" : "blue"}
             variant="primaryVertical">
             <Steps.List>
-              {steps.map((step, index) => (
-                <Steps.Item key={`proposal-timeline-step-${step.key}`} index={index}>
+              {timelineSteps.map((step, index) => (
+                <Steps.Item key={`timeline-step-${step.state}`} index={index} minH={20}>
                   <Steps.Indicator>
                     <Steps.Status
-                      incomplete={<Circle bg={invalidState ? "#DC2626" : "actions.primary.default"} boxSize="0" />}
-                      complete={<Circle bg={invalidState ? "#DC2626" : "actions.primary.default"} boxSize="50%" />}
-                      current={<Circle bg={invalidState ? "#DC2626" : "actions.primary.default"} boxSize="50%" />}
+                      incomplete={<Circle bg={stepIndicatorBg} size="0" />}
+                      complete={<Circle bg={stepIndicatorBg} size="40%" />}
+                      current={<Circle bg={stepIndicatorBg} size="55%" />}
                     />
                   </Steps.Indicator>
-                  <TimelineElements
-                    state={step.state}
-                    round={step.round}
-                    startDate={step?.startDate ?? 0} //TODO: Fix this fallback
-                    endDate={step?.endDate ?? 0}
-                  />
+                  <Steps.Separator />
+                  <VStack align="start" flex={1}>
+                    <Text fontSize="sm" color={currentStep === index ? "text.strong" : "text.subtle"}>
+                      {step.label}
+                    </Text>
+                    <Text fontSize="xs" color="text.subtle">
+                      {step.description}
+                    </Text>
+                  </VStack>
                 </Steps.Item>
               ))}
             </Steps.List>
