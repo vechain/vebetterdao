@@ -1,18 +1,18 @@
-import { MulticolorBar, RegularModal, ResultsDisplay } from "@/components"
-import { VStack, Heading, HStack, Button, Text, Input, Icon, InputGroup, Image } from "@chakra-ui/react"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useCallback, useMemo, useState } from "react"
-import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
-import { useWallet } from "@vechain/vechain-kit"
-import { UilHeart } from "@iconscout/react-unicons"
-import { FiBarChart2 } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
-import { ethers } from "ethers"
-import { GenericAlert } from "@/app/components/Alert"
 import { useCurrentAllocationsRoundId } from "@/api"
+import { GenericAlert } from "@/app/components/Alert"
+import { MulticolorBar, RegularModal, ResultsDisplay } from "@/components"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { filterAmountInput } from "@/utils/filterAmountInput"
+import { Button, Heading, HStack, Icon, Image, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { UilHeart } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
+import { ethers } from "ethers"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FiBarChart2 } from "react-icons/fi"
 
 type Props = {
   isSupportModalOpen: boolean
@@ -203,6 +203,7 @@ export const ProposalSupportModal = ({
         <MulticolorBar segments={[progressData]} />
         {/* Results Section */}
         <ResultsDisplay
+          proposalId={proposalId}
           segments={[{ ...progressData, icon: UilHeart }]}
           tokenAmount={proposalDeposits + inputAmount}
           showTokenAmount={true}
