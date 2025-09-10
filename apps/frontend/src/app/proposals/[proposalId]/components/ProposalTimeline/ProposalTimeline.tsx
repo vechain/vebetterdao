@@ -1,16 +1,9 @@
 import { useProposalInteractionDates } from "@/api"
-import {
-  GrantProposalEnriched,
-  ProposalEnriched,
-  ProposalState,
-  ProposalType,
-  useExecuteProposal,
-  useQueueProposal,
-} from "@/hooks"
-import { Button, Card, Circle, Heading, Steps, Text, VStack } from "@chakra-ui/react"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks"
+import { Card, Circle, Heading, Steps, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { t } from "i18next"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
@@ -18,14 +11,6 @@ type Props = {
 
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal?.id ?? "")
-  const { sendTransaction: queueProposal } = useQueueProposal({ proposalId: proposal?.id ?? "" })
-  const { sendTransaction: executeProposal } = useExecuteProposal({ proposalId: proposal?.id ?? "" })
-  const handleQueueProposal = useCallback(() => {
-    queueProposal()
-  }, [queueProposal])
-  const handleExecuteProposal = useCallback(() => {
-    executeProposal()
-  }, [executeProposal])
 
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
@@ -82,21 +67,6 @@ export const ProposalTimeline = ({ proposal }: Props) => {
     return stepIndex >= 0 ? stepIndex : 0
   }, [proposal, timelineSteps])
 
-  // Check if the proposal is queuable and executable
-  const isQueuable = useMemo(() => {
-    return proposal?.state === ProposalState.Succeeded
-  }, [proposal?.state])
-
-  const isExecutable = useMemo(() => {
-    return proposal?.state === ProposalState.Queued
-  }, [proposal?.state])
-
-  const stepIndicatorBg = useMemo(() => {
-    return "actions.primary.default"
-    //TODO: Change it to dynamic color based on the state
-    // return invalidState ? "error.primary" : "actions.primary.default"
-  }, [])
-
   return (
     <>
       <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
@@ -120,9 +90,9 @@ export const ProposalTimeline = ({ proposal }: Props) => {
                 <Steps.Item key={`timeline-step-${step.state}`} index={index} minH={20}>
                   <Steps.Indicator>
                     <Steps.Status
-                      incomplete={<Circle bg={stepIndicatorBg} size="0" />}
-                      complete={<Circle bg={stepIndicatorBg} size="40%" />}
-                      current={<Circle bg={stepIndicatorBg} size="55%" />}
+                      incomplete={<Circle bg={"actions.primary.default"} size="0" />}
+                      complete={<Circle bg={"actions.primary.default"} size="40%" />}
+                      current={<Circle bg={"actions.primary.default"} size="55%" />}
                     />
                   </Steps.Indicator>
                   <Steps.Separator />
@@ -138,21 +108,6 @@ export const ProposalTimeline = ({ proposal }: Props) => {
               ))}
             </Steps.List>
           </Steps.Root>
-        </Card.Body>
-      </Card.Root>
-
-      {/*  Temporary Card to show the admin actions ( Queue, Execute, Cancel) */}
-      <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
-        <Card.Body>
-          <Heading fontSize={"20px"} fontWeight={700}>
-            {"ADMIN ACTIONS"}
-          </Heading>
-          <Button size="sm" variant="primaryAction" disabled={!isQueuable} onClick={handleQueueProposal}>
-            {"Queue"}
-          </Button>
-          <Button size="sm" variant="primaryAction" disabled={!isExecutable} onClick={handleExecuteProposal}>
-            {"Execute"}
-          </Button>
         </Card.Body>
       </Card.Root>
     </>
