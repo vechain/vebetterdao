@@ -2,7 +2,7 @@
 import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
 import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { Circle, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { MilestonesActionsItem } from "./MilestonesActionsItem"
@@ -57,15 +57,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     ] as ((typeof steps)[number] & { _isCompletion?: true })[]
   }, [steps, isAllMilestoneCompleted, t])
 
-  const [step, setStep] = useState(0)
-
-  useEffect(() => {
+  const currentStep = useMemo(() => {
+    //Get the index of the first pending milestone
     const pendingIndex = states.findIndex(milestoneState => milestoneState === MilestoneState.Pending)
-    if (isAllMilestoneCompleted) {
-      setStep(displaySteps.length)
-    } else {
-      setStep(pendingIndex >= 0 ? pendingIndex : Math.max(0, steps.length - 1))
-    }
+    //If all milestones are completed, return the last step
+    if (isAllMilestoneCompleted) return displaySteps.length
+    //If there is a pending milestone, return the index of the first pending milestone
+    //If there is no pending milestone, return the index of the last step
+    return pendingIndex >= 0 ? pendingIndex : Math.max(0, steps.length - 1)
   }, [states, isAllMilestoneCompleted, displaySteps.length, steps.length])
 
   return (
@@ -75,7 +74,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       count={displaySteps.length}
       size="sm"
       w="full"
-      step={step}
+      step={currentStep}
       variant="primaryVertical">
       <VStack w="full">
         <Steps.List w="full">
