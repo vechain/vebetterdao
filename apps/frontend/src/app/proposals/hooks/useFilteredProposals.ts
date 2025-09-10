@@ -1,8 +1,7 @@
 import { useAllProposalsDepositReached } from "@/api"
-import { useMemo } from "react"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { ProposalFilter, StateFilter } from "@/store"
-
-import { ProposalState, GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { useCallback, useMemo } from "react"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
@@ -11,6 +10,8 @@ export const useFilteredProposals = (
   selectedFilter?: (ProposalFilter | StateFilter)[],
   proposals?: ProposalEnriched[] | GrantProposalEnriched[],
 ) => {
+  type ProposalWithStateAndDeposit = (ProposalEnriched | GrantProposalEnriched) & { isDepositReached?: boolean }
+
   const proposalsIds = useMemo(() => {
     return proposals?.map(proposal => proposal.id) || []
   }, [proposals])
@@ -29,7 +30,7 @@ export const useFilteredProposals = (
     }))
   }, [proposals, allProposalsDepositReached])
 
-  const filteredProposals = useMemo(() => {
+  const filteredProposals: ProposalWithStateAndDeposit[] = useMemo(() => {
     if (!proposalsWithStateAndDeposit?.length) return []
     if (!selectedFilter || selectedFilter.length === 0) return proposalsWithStateAndDeposit
 
@@ -66,19 +67,33 @@ export const useFilteredProposals = (
     return proposalsWithStateAndDeposit.filter(matchesAnyFilter)
   }, [selectedFilter, proposalsWithStateAndDeposit])
 
-  const sortedFilteredProposals = useMemo(() => {
-    if (!filteredProposals?.length) return []
-
-    const sortedProposals = [...filteredProposals].sort((a, b) => {
-      // sort first by roundId, then by timestamp
-      const aRoundID = Number(a.votingRoundId)
-      const bRoundID = Number(b.votingRoundId)
-      if (aRoundID !== bRoundID) return bRoundID - aRoundID
-      return b.createdAt - a.createdAt
+  const sortByPhase = useCallback((proposals: ProposalWithStateAndDeposit[]) => {
+    const stateOrder = [
+      //1 - Approval Phase
+      ProposalState.Succeeded,
+      ProposalState.Active,
+      //2 - Support Phase
+      ProposalState.Pending,
+      //3 - In Development
+      ProposalState.InDevelopment,
+      ProposalState.Queued,
+      //4 - Completed/executed
+      ProposalState.Completed,
+      ProposalState.Executed,
+      //5 - Canceled/Defeated/Deposit Not Met
+      ProposalState.Canceled,
+      ProposalState.Defeated,
+      ProposalState.DepositNotMet,
+    ]
+    return proposals.sort((a: ProposalWithStateAndDeposit, b: ProposalWithStateAndDeposit) => {
+      return stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state)
     })
+  }, [])
 
-    return sortedProposals
-  }, [filteredProposals])
+  const sortedFilteredProposals: ProposalWithStateAndDeposit[] = useMemo(() => {
+    if (!filteredProposals?.length) return []
+    return sortByPhase(filteredProposals)
+  }, [filteredProposals, sortByPhase])
 
   return {
     filteredProposals: sortedFilteredProposals,
