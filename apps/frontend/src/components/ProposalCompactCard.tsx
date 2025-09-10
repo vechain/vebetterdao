@@ -67,24 +67,29 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   return (
     <LinkBox asChild>
       <Card.Root
-        bg={isActive ? "success.subtle" : "bg.primary"}
-        boxShadow={isActive ? "0 0 5px 0 rgba(56, 191, 102, 0.40)" : "none"}
-        borderWidth={"1px"}
-        borderColor={isActive ? "success.secondary" : "border.primary"}
+        bg="card.subtle"
+        _hover={{ bg: "card.hover" }}
+        focusRing="outside"
+        // border={isActive ? "1px solid" : undefined}
+        // borderColor={isActive ? "card.active-border" : undefined}
+        transition="all 0.2s ease-in-out"
+        rounded="3xl"
+        data-testid={`proposal-compact-card-#${proposalId}`}
         alignSelf={"flex-start"}
-        w={"full"}>
-        <Card.Body p={4}>
+        w={"full"}
+        p="4">
+        <Card.Body p="0">
           <HStack justifyContent={"space-between"} w="full">
-            <VStack w="full" justifyContent={"space-between"} gap={3} align={"flex-start"}>
+            <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
               <ProposalStatusBadge
                 proposalId={proposal.proposalId}
                 proposalState={proposalState}
                 containerProps={{
-                  py: 1,
-                  px: 2,
+                  py: "1",
+                  px: "2",
                 }}
               />
-              <VStack w="full" gap={1} align={"flex-start"}>
+              <VStack w="full" gap="1" align={"flex-start"}>
                 <Skeleton
                   loading={proposalMetadata.isLoading}
                   lineClamp={3}
@@ -100,7 +105,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                 {!!account?.address && hasVotedText}
               </VStack>
             </VStack>
-            <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
+            <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost">
               <FaAngleRight />
             </IconButton>
           </HStack>

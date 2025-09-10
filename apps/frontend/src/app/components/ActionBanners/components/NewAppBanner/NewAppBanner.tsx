@@ -1,9 +1,12 @@
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { GenericBanner2 } from "@/app/components/Banners/GenericBanner2"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { t } from "i18next"
 import { useXApps } from "@/api"
 import { UilArrowRight } from "@iconscout/react-unicons"
+import { Button } from "@chakra-ui/react"
+
 interface NewApp {
   name: string
   id: string
@@ -44,6 +47,20 @@ export const NewAppBanner = () => {
       router.push(`/apps/${newAppsList?.[0]?.id}`)
     }
   }
+
+  return (
+    <GenericBanner2
+      variant="info"
+      title={t("NEW APP AVAILABLE")}
+      description={description}
+      logoSrc="/assets/icons/new-app-gold.svg"
+      cta={
+        <Button onClick={GOTOAPPS} visual="primary">
+          {t("Explore")}
+        </Button>
+      }
+    />
+  )
 
   return (
     <GenericBanner

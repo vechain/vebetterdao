@@ -1,5 +1,5 @@
 import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
-import { Text, HStack, useMediaQuery, Skeleton, Icon, Button } from "@chakra-ui/react"
+import { Text, HStack, useMediaQuery, Skeleton, Icon, Button, Flex } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import Countdown from "react-countdown"
@@ -41,11 +41,11 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
       <Skeleton
         as={HStack}
         justifyContent={"space-between"}
-        px={3}
-        py={1}
+        px="3"
+        py="1"
         rounded={"full"}
         textStyle={isAbove500 ? "xs" : "xxs"}
-        height="24px"
+        height="6"
       />
     )
   }
@@ -57,18 +57,9 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
       now={() => Date.now()}
       renderer={({ days, hours, minutes, seconds }) => {
         return (
-          <Button
-            variant="secondary"
-            onClick={onOpen}
-            display={"flex"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            px={3}
-            py={1}
-            rounded={"full"}
-            gap={1}>
-            <Icon boxSize={4} as={FaRegClock} color="actions.secondary.text" />
-            <Text textStyle={isAbove500 ? "xs" : "xxs"} color="inherit" fontWeight="semibold">
+          <Flex as="button" onClick={onOpen} alignItems={"center"} color="actions.primary.text" gap="1">
+            <Icon boxSize={4} as={FaRegClock} />
+            <Text textStyle={isAbove500 ? "xs" : "xxs"} color="current" fontWeight="semibold">
               {t("Next snapshot")} {days}
               {"d"} {hours}
               {"h"} {minutes}
@@ -76,13 +67,13 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
             </Text>
             <Text
               textStyle={isAbove500 ? "xs" : "xxs"}
-              color="inherit"
+              color="current"
               fontWeight="semibold"
               minW={seconds >= 10 ? "1.4em" : "0.8em"}>
               {seconds}
               {"s"}
             </Text>
-          </Button>
+          </Flex>
         )
       }}
     />

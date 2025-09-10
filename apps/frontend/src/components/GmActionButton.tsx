@@ -103,7 +103,7 @@ export const GmActionButton = ({
     if (!hasUserVoted && !isGMOwned) {
       return (
         <Button {...buttonProps} onClick={goToVote}>
-          {t("Vote")}
+          {t("Vote now")}
         </Button>
       )
     }

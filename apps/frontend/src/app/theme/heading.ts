@@ -1,7 +1,11 @@
 import { defineRecipe } from "@chakra-ui/react"
 
 export const headingRecipe = defineRecipe({
-  base: { fontFamily: "heading", fontWeight: "bold" },
+  base: {
+    fontFamily: "heading",
+    fontWeight: "bold",
+    // color: "actions.primary.text"
+  },
   variants: {
     size: {
       md: { textStyle: "md" },

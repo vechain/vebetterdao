@@ -74,11 +74,11 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
       borderRadius="xl"
       w="full"
       h="full"
-      minH={{
-        base: "30vh",
-        sm: "30vh",
-        md: "auto",
-      }}
+      // minH={{
+      //   base: "30vh",
+      //   sm: "30vh",
+      //   md: "auto",
+      // }}
       position="relative"
       overflow="hidden">
       {/* Background Layer */}

@@ -28,8 +28,8 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
           gap={4}
           justifyContent={"center"}
           borderRadius={"full"}
-          borderWidth={1}
-          borderColor={"border.secondary"}
+          // borderWidth={1}
+          // borderColor={"border.secondary"}
           bg={"bg.tertiary"}
           py={2}
           px={4}>

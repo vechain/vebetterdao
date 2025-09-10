@@ -29,7 +29,7 @@ export const ThemeSwitcher: React.FC<Props> = ({ withText, ...otherProps }) => {
     <Button
       data-cy="theme-switcher-with-text"
       aria-label={isDark ? "dark" : "light"}
-      fontSize="18px"
+      fontSize="4.5"
       variant="ghost"
       borderRadius="full"
       onClick={toggleColorMode}

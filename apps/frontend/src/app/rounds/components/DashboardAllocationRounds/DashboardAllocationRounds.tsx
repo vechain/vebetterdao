@@ -1,7 +1,7 @@
 import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
-import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
+import { DotSymbol, ProposalCompactCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
-import { Button, Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Link, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -42,16 +42,16 @@ export const DashboardAllocationRounds = () => {
   }, [proposalsToRender])
 
   return (
-    <ResponsiveCard>
-      <VStack gap={8} w="full">
-        <HStack gap={4} justifyContent="space-between" w="full">
+    <Card.Root variant="primary">
+      <Card.Body gap="8">
+        <HStack gap="4" justifyContent="space-between" w="full">
           <Button
-            px={0}
+            px="0"
             size="sm"
             textStyle={"md"}
             variant="plain"
             _hover={{ textDecoration: "underline" }}
-            color="actions.secondary.text-lighter"
+            color="actions.tertiary.default"
             disabled={allocationRound.isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
             fontWeight="semibold">
@@ -59,11 +59,11 @@ export const DashboardAllocationRounds = () => {
             {t("Previous round")}
           </Button>
 
-          <VStack gap={2}>
+          <VStack gap="2">
             <Heading size="2xl" fontWeight="normal">
               <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: selectedRoundId }} t={t} />
             </Heading>
-            <HStack gap={2}>
+            <HStack gap="2">
               <Skeleton loading={roundInfoLoading}>
                 <Text textStyle="sm" color="text.subtle">
                   {t("{{from}} to {{to}}", {
@@ -74,7 +74,7 @@ export const DashboardAllocationRounds = () => {
               </Skeleton>
               <DotSymbol color="text.subtle" size="2px" />
               <Skeleton loading={roundInfoLoading}>
-                <Text textStyle="sm" color="actions.secondary.text-lighter" fontWeight="semibold">
+                <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
                   {roundInfo.voteEndTimestamp?.fromNow()}
                 </Text>
               </Skeleton>
@@ -82,12 +82,12 @@ export const DashboardAllocationRounds = () => {
           </VStack>
 
           <Button
-            px={0}
+            px="0"
             fontWeight="semibold"
             _hover={{ textDecoration: "underline" }}
             variant="plain"
             textStyle={"md"}
-            color="actions.secondary.text-lighter"
+            color="actions.tertiary.default"
             disabled={allocationRound.isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
             {t("Next round")}
@@ -95,13 +95,13 @@ export const DashboardAllocationRounds = () => {
           </Button>
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
-        <VStack alignItems="flex-start" gap={4} w="full">
+        <VStack alignItems="flex-start" gap="4" w="full">
           <Heading size="md" fontWeight="semibold">
             {t("Proposals")} {sortedProposals.length ? `(${sortedProposals.length})` : "(0)"}
           </Heading>
 
           {!!sortedProposals.length ? (
-            <VStack gap={4} w="full">
+            <VStack gap="4" w="full">
               {sortedProposals.map(proposal => (
                 <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
               ))}
@@ -110,10 +110,10 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Link href="/proposals" color="actions.secondary.text-lighter" fontWeight="semibold">
+        <Link href="/proposals" alignSelf="center" color="actions.tertiary.default" fontWeight="semibold">
           {t("View all proposals")}
         </Link>
-      </VStack>
-    </ResponsiveCard>
+      </Card.Body>
+    </Card.Root>
   )
 }

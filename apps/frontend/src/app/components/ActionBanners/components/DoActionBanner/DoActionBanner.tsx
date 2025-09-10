@@ -1,10 +1,11 @@
-import { useDisclosure } from "@chakra-ui/react"
+import { Button, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { DoActionModal } from "./components/DoActionModal"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
 import { useMemo } from "react"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { GenericBanner2 } from "@/app/components/Banners/GenericBanner2"
 
 export const DoActionBanner = () => {
   const { t } = useTranslation()
@@ -18,6 +19,24 @@ export const DoActionBanner = () => {
   }, [t, isUserDelegatee])
 
   if (isLoadingUserScore) return null
+
+  return (
+    <>
+      <GenericBanner2
+        variant="warning"
+        title={t("TIME TO STEP UP! 🏃🏼‍♂️")}
+        description={description}
+        logoSrc="/assets/icons/info-bell.webp"
+        cta={
+          <Button variant="primary" onClick={doActionModal.onOpen}>
+            <UilInfoCircle />
+            {t("Know more")}
+          </Button>
+        }
+      />
+      <DoActionModal doActionModal={doActionModal} />
+    </>
+  )
 
   return (
     <>

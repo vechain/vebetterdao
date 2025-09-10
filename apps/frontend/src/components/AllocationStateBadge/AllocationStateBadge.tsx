@@ -28,11 +28,11 @@ export const AllocationStateBadge = ({ roundId, renderIcon = true, textProps = {
     return (
       <Badge
         textProps={{
-          color: "error.primary",
+          color: "status.negative.primary",
           ...textProps,
         }}
         text={t("Error getting state")}
-        icon={renderIcon ? <DotSymbol size={4} color="error.primary" /> : undefined}
+        icon={renderIcon ? <DotSymbol size={4} color="status.negative.primary" /> : undefined}
       />
     )
 
@@ -40,22 +40,22 @@ export const AllocationStateBadge = ({ roundId, renderIcon = true, textProps = {
     return (
       <Badge
         textProps={{
-          color: "success.strong",
+          color: "status.positive.strong",
           ...textProps,
         }}
         text={t("Active now")}
-        icon={renderIcon ? <DotSymbol pulse size={2} color={"success.strong"} /> : undefined}
+        icon={renderIcon ? <DotSymbol pulse size={2} color={"success.positive.strong"} /> : undefined}
       />
     )
   if (!isActive)
     return (
       <Badge
         textProps={{
-          color: "success.primary",
+          color: "status.positive.primary",
           ...textProps,
         }}
         text={t("Concluded")}
-        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} color={"success.primary"} /> : undefined}
+        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} color="success.positive.primary" /> : undefined}
       />
     )
 }
@@ -68,7 +68,7 @@ type BadgeProps = {
 
 export const Badge = ({ icon, text, textProps }: BadgeProps) => {
   return (
-    <HStack gap={1} align="center" rounded="full" p={0}>
+    <HStack gap="1" align="center" rounded="full" p="0">
       {icon}
       <Text textStyle="xs" fontWeight="semibold" {...textProps} data-testid={`round-status`}>
         {text}

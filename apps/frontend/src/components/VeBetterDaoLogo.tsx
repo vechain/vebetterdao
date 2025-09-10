@@ -9,5 +9,5 @@ export const VeBetterDaoLogo: React.FC = () => {
   const logoUrl = useColorModeValue(lightModeUrl, darkModeUrl)
 
   //Priority is set to true to prevent the logo from being lazy loaded and FOC
-  return <Image width={["120px"]} src={logoUrl} alt="VeBetter Logo" />
+  return <Image width="32" src={logoUrl} alt="VeBetter Logo" />
 }

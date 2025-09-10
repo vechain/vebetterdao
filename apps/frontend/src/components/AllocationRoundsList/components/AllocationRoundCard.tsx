@@ -49,15 +49,17 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
     <LinkBox asChild>
       <Card.Root
         w="full"
-        bg={isActive ? "success.subtle" : "bg.primary"}
+        bg="card.subtle"
+        _hover={{ bg: "card.hover" }}
         fill="icon.default"
-        boxShadow={isActive ? "0 0 5px 0 rgba(56, 191, 102, 0.40)" : "none"}
-        borderWidth={"1px"}
-        borderColor={isActive ? "success.secondary" : "border.primary"}
-        rounded="3xl"
+        focusRing="outside"
+        // border={isActive ? "1px solid" : undefined}
+        // borderColor={isActive ? "card.active-border" : undefined}
         transition="all 0.2s ease-in-out"
-        data-testid={`round-card-#${roundId}`}>
-        <Card.Body p={4}>
+        rounded="3xl"
+        data-testid={`round-card-#${roundId}`}
+        p="4">
+        <Card.Body p="0">
           <HStack justify={"space-between"} w="full">
             <Stack w="full" gap={1} flex={2}>
               <HStack gap={2} w="fit-content" justify="space-between">
@@ -80,7 +82,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
               <HStack mt={0.5} w="full" justify="space-between">
                 <LinkOverlay w="full" flex={1}>
                   <Link href={`rounds/${roundId}`}>
-                    <Heading as="h3" size="xl" fontWeight="semibold">
+                    <Heading as="h3" size="md" fontWeight="semibold">
                       {t("Round #{{round}}", {
                         round: roundId,
                       })}

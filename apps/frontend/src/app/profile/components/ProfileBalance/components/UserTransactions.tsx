@@ -1,9 +1,11 @@
 import { useTransactions } from "@/api"
 import { TransactionCard } from "@/components"
-import { Card, Heading, Text, VStack, Link } from "@chakra-ui/react"
+import { Card, Heading, VStack, Link, Skeleton } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import NextLink from "next/link"
+import { EmptyState } from "@/components/ui/empty-state"
+import { FiAlertCircle } from "react-icons/fi"
 
 type Props = {
   address: string
@@ -12,7 +14,7 @@ type Props = {
 export const UserTransactions = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { data } = useTransactions({
+  const { data, isLoading } = useTransactions({
     user: address ?? "",
     size: 5,
   })
@@ -26,31 +28,33 @@ export const UserTransactions = ({ address }: Props) => {
   }, [data])
 
   return (
-    <Card.Root w={"full"} variant={"baseWithBorder"}>
-      <Card.Body>
-        <VStack gap={4} align="stretch">
-          <VStack gap={2} align="stretch">
-            <Heading size="xl">{t("Last Transactions")}</Heading>
-          </VStack>
+    <Skeleton rounded="xl" loading={isLoading}>
+      <Card.Root w={"full"} variant="outline" borderColor="border.primary">
+        <Card.Body>
+          <VStack gap="4" align="stretch">
+            <VStack gap="2" align="stretch">
+              <Heading size="xl">{t("Last Transactions")}</Heading>
+            </VStack>
 
-          {transactions.length > 0 ? (
-            <>
-              <VStack gap={4} align="stretch">
-                {transactions.map(transaction => (
-                  <TransactionCard key={transaction.txId} transaction={transaction} />
-                ))}
-              </VStack>
-              {hasNextPage && (
-                <Link asChild mx="auto" color="actions.secondary.text-lighter">
-                  <NextLink href={`/transactions/${address}`}>{t("See all")}</NextLink>
-                </Link>
-              )}
-            </>
-          ) : (
-            <Text>{t("No transactions found")}</Text>
-          )}
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+            {transactions.length > 0 ? (
+              <>
+                <VStack gap="4" align="stretch">
+                  {transactions.map(transaction => (
+                    <TransactionCard key={transaction.txId} transaction={transaction} />
+                  ))}
+                </VStack>
+                {hasNextPage && (
+                  <Link asChild mx="auto" color="actions.tertiary.default">
+                    <NextLink href={`/transactions/${address}`}>{t("See all")}</NextLink>
+                  </Link>
+                )}
+              </>
+            ) : (
+              <EmptyState size="sm" title={t("No transactions found")} icon={<FiAlertCircle />} />
+            )}
+          </VStack>
+        </Card.Body>
+      </Card.Root>
+    </Skeleton>
   )
 }

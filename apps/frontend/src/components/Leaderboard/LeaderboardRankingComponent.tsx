@@ -64,7 +64,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
         pos="relative"
         overflow={"hidden"}
         borderColor={positionStyles.borderColor}>
-        <Card.Body color={whiteColor} p="12px">
+        <Card.Body color={whiteColor}>
           {isYourRanking && (
             <Image
               src="/assets/backgrounds/your-ranking-bg.svg"
