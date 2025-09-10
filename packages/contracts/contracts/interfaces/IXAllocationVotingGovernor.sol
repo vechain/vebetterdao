@@ -88,7 +88,22 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   /**
    * @dev Emitted when no eligible apps are found for auto-voting.
    */
-  error NoEligibleAppsForAutoVote(address voter, uint256 roundId);
+  error AutoVotingDisabled(address voter, uint256 roundId);
+
+  /**
+   * @dev Emitted when auto-voting is disabled due to personhood verification failure.
+   */
+  error AutoVotingDisabledPersonhood(address voter, uint256 roundId);
+
+  /**
+   * @dev Emitted when auto-voting is disabled due to no eligible apps.
+   */
+  error AutoVotingDisabledNoApps(address voter, uint256 roundId);
+
+  /**
+   * @dev Emitted when auto-voting is enabled.
+   */
+  error AutoVotingEnabled(address voter);
 
   /**
    * @dev Emitted when a round is created.

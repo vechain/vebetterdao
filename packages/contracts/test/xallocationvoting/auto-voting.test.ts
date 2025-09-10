@@ -634,7 +634,7 @@ describe("AutoVoting - @shard14a", function () {
       const roundId = await xAllocationVoting.currentRoundId()
       await expect(
         xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId),
-      ).to.be.revertedWithCustomError(xAllocationVoting, "NoEligibleAppsForAutoVote")
+      ).to.be.revertedWithCustomError(xAllocationVoting, "AutoVotingDisabledNoApps")
     })
 
     it("should revert when the users have no eligible apps to vote for", async function () {
@@ -685,7 +685,7 @@ describe("AutoVoting - @shard14a", function () {
       // Autovoting should fail because no eligible apps
       await expect(
         xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4),
-      ).to.be.revertedWithCustomError(xAllocationVoting, "NoEligibleAppsForAutoVote")
+      ).to.be.revertedWithCustomError(xAllocationVoting, "AutoVotingDisabledNoApps")
     })
 
     it("should filter out apps that become unendorsed during autovoting", async function () {
