@@ -416,7 +416,7 @@ describe.only("VoterRewards V6 - @shard10a", function () {
       )
     })
 
-    it.only("should handle when one user becomes non-person during auto-voting round", async function () {
+    it("[Edge Case] should handle when one user becomes non-person during auto-voting round", async function () {
       // This test verifies that when a user loses their personhood status (gets blacklisted, etc)
       // during an auto-voting round, the system properly handles the dynamic reduction of
       // expected actions. It ensures that:

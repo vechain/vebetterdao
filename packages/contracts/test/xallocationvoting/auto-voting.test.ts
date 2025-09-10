@@ -637,7 +637,7 @@ describe("AutoVoting - @shard14a", function () {
         .withArgs(user.address, roundId)
     })
 
-    it("should revert when the users have no eligible apps to vote for", async function () {
+    it("[Edge Case] should revert when the users have no eligible apps to vote for", async function () {
       await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
@@ -661,24 +661,24 @@ describe("AutoVoting - @shard14a", function () {
       await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.not.be.reverted
 
       // Fast forward through grace period...
-      await waitForRoundToEnd(roundId)
+      await waitForNextCycle(emissions)
 
       // Round 2 - still eligible (grace period)
-      await startNewAllocationRound()
+      await emissions.connect(minterAccount).distribute()
       await x2EarnApps.checkEndorsement(app1Id)
       const roundId2 = await xAllocationVoting.currentRoundId()
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId2)).to.be.true
 
       // Round 3 - still eligible (grace period)
-      await waitForRoundToEnd(roundId2)
-      await startNewAllocationRound()
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
       await x2EarnApps.checkEndorsement(app1Id)
       const roundId3 = await xAllocationVoting.currentRoundId()
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId3)).to.be.true
 
       // Round 4 - NOW app becomes ineligible
-      await waitForRoundToEnd(roundId3)
-      await startNewAllocationRound()
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
       const roundId4 = await xAllocationVoting.currentRoundId()
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId4)).to.be.false
 
@@ -686,6 +686,13 @@ describe("AutoVoting - @shard14a", function () {
       await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4))
         .to.emit(xAllocationVoting, "AutoVotingDisabled")
         .withArgs(user.address, roundId4)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Verify user preferences were cleared and auto-voting is disabled
+      expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([])
+      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
     })
 
     it("should filter out apps that become unendorsed during autovoting", async function () {
