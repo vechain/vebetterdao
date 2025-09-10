@@ -1,9 +1,16 @@
-import { ProposalEnriched, GrantProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
-import { Button, Heading, Steps, Card, VStack, Text, Circle } from "@chakra-ui/react"
-import { t } from "i18next"
-import { useMemo } from "react"
 import { useProposalInteractionDates } from "@/api"
+import {
+  GrantProposalEnriched,
+  ProposalEnriched,
+  ProposalState,
+  ProposalType,
+  useExecuteProposal,
+  useQueueProposal,
+} from "@/hooks"
+import { Button, Card, Circle, Heading, Steps, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
+import { t } from "i18next"
+import { useCallback, useMemo } from "react"
 
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
@@ -11,6 +18,14 @@ type Props = {
 
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal?.id ?? "")
+  const { sendTransaction: queueProposal } = useQueueProposal({ proposalId: proposal?.id ?? "" })
+  const { sendTransaction: executeProposal } = useExecuteProposal({ proposalId: proposal?.id ?? "" })
+  const handleQueueProposal = useCallback(() => {
+    queueProposal()
+  }, [queueProposal])
+  const handleExecuteProposal = useCallback(() => {
+    executeProposal()
+  }, [executeProposal])
 
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
@@ -50,7 +65,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
         description: "Project completed successfully",
       },
     ],
-    [proposal?.votingRoundId, proposal?.createdAt],
+    [proposalVotingRoundId, proposalCreatedAt, supportEndDate, votingEndDate, hasActions, isGrant],
   )
 
   const invalidState = useMemo(() => {
@@ -73,14 +88,14 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   }, [proposal?.state])
 
   const isExecutable = useMemo(() => {
-    return proposal?.state === ProposalState.Active
+    return proposal?.state === ProposalState.Queued
   }, [proposal?.state])
 
   const stepIndicatorBg = useMemo(() => {
     return "actions.primary.default"
     //TODO: Change it to dynamic color based on the state
     // return invalidState ? "error.primary" : "actions.primary.default"
-  }, [invalidState])
+  }, [])
 
   return (
     <>
@@ -132,10 +147,10 @@ export const ProposalTimeline = ({ proposal }: Props) => {
           <Heading fontSize={"20px"} fontWeight={700}>
             {"ADMIN ACTIONS"}
           </Heading>
-          <Button size="sm" variant="primaryAction" disabled={!isQueuable}>
+          <Button size="sm" variant="primaryAction" disabled={!isQueuable} onClick={handleQueueProposal}>
             {"Queue"}
           </Button>
-          <Button size="sm" variant="primaryAction" disabled={!isExecutable}>
+          <Button size="sm" variant="primaryAction" disabled={!isExecutable} onClick={handleExecuteProposal}>
             {"Execute"}
           </Button>
         </Card.Body>

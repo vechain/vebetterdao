@@ -20,12 +20,6 @@ type Props = { proposalId: string; onSuccess?: () => void }
  */
 export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
   const { data: proposal } = useProposalEnrichedById(proposalId)
-  const proposalValues = proposal?.values
-
-  const grantValues = useMemo(() => {
-    return Array(proposal?.targets.length).fill("0")
-  }, [proposal?.targets])
-  const values = Array.isArray(proposalValues) ? proposalValues : grantValues
 
   const clauseBuilder = useCallback(() => {
     return [
@@ -35,14 +29,14 @@ export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
         method: "execute",
         args: [
           proposal?.targets,
-          values,
+          proposal?.values,
           proposal?.calldatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposal?.description || "")),
+          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
         ],
         comment: "execute proposal",
       }),
     ]
-  }, [proposal?.calldatas, proposal?.description, proposal?.targets, values])
+  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, proposal?.values])
 
   const refetchQueryKeys = useMemo(() => [getProposalStateQueryKey(proposalId)], [proposalId])
 

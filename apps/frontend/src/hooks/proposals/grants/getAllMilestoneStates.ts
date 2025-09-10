@@ -7,16 +7,7 @@ export const getAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
 
   const milestoneStates = milestones.map((_milestone: Milestone, index: number) => {
     const states = useMilestoneState({ proposalId: proposal.id, milestoneIndex: index }).data?.state
-
-    switch (states) {
-      case MilestoneState.Claimed:
-        return "Claimed"
-      case MilestoneState.Rejected:
-        return "Rejected"
-      case MilestoneState.Approved:
-        return "Approved"
-    }
-    return "Pending"
+    return states ?? MilestoneState.Pending
   })
 
   return milestoneStates

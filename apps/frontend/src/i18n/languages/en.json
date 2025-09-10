@@ -2016,5 +2016,6 @@
   "Comments ({{amount}})": "Comments ({{amount}})",
   "Sort By": "Sort By",
   "Filter": "Filter",
-  "Round #{{roundId}}: {{dateString}}": "Round #{{roundId}}: {{dateString}}"
+  "Round #{{roundId}}: {{dateString}}": "Round #{{roundId}}: {{dateString}}",
+  "Claim Milestone": "Claim Milestone"
 }

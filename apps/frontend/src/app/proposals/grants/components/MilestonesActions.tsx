@@ -1,5 +1,6 @@
+/* eslint-disable react/no-array-index-key */
 import { getAllMilestoneStates } from "@/hooks/proposals/grants/getAllMilestoneStates"
-import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { Circle, Heading, HStack, Steps, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -12,28 +13,31 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const states = getAllMilestoneStates(proposal)
   const steps = useMemo(
     () =>
-      states.map((state, i) => {
-        const milestone = proposal?.milestones?.[i]
+      states.map((state, index) => {
+        const milestone = proposal?.milestones?.[index]
+        const stepKey = `proposal-${proposal?.id}-milestones-actions-step-${index}`
         return {
+          key: stepKey,
           body: milestone ? (
             <MilestonesActionsItem
-              key={`milestones-actions-step-${i}`}
-              index={i}
+              key={stepKey}
+              index={index}
               state={state}
               milestone={milestone}
               proposalId={proposal?.id ?? ""}
+              grantsReceiver={proposal?.grantsReceiverAddress ?? ""}
             />
           ) : (
-            <HStack key={`milestones-actions-step-${i}`}>
+            <HStack key={`${stepKey}-unavailable`}>
               <Text>{t("Milestones are unavailable yet")}</Text>
             </HStack>
           ),
         }
       }),
-    [proposal?.id, proposal?.milestones, states, t],
+    [proposal?.grantsReceiverAddress, proposal?.id, proposal?.milestones, states, t],
   )
 
-  const isAllMilestoneCompleted = states.every(s => s === "Claimed")
+  const isAllMilestoneCompleted = states.every(milestoneState => milestoneState === MilestoneState.Claimed)
   const displaySteps = useMemo(() => {
     const base = steps
     if (!isAllMilestoneCompleted) return base
@@ -56,7 +60,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const [step, setStep] = useState(0)
 
   useEffect(() => {
-    const pendingIndex = states.findIndex(s => s === "Pending")
+    const pendingIndex = states.findIndex(milestoneState => milestoneState === MilestoneState.Pending)
     if (isAllMilestoneCompleted) {
       setStep(displaySteps.length)
     } else {
@@ -76,7 +80,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       <VStack w="full">
         <Steps.List w="full">
           {displaySteps.map((item, index) => (
-            <Steps.Item key={`milestones-actions-step-${item.body}`} index={index} w="full">
+            <Steps.Item key={`step-${item.key}`} index={index} w="full">
               <Steps.Indicator>
                 <Steps.Status
                   incomplete={<Circle bg="actions.primary.default" size="0" />}
