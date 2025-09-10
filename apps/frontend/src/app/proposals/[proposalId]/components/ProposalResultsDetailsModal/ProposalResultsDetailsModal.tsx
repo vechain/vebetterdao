@@ -1,7 +1,7 @@
-import { MulticolorBar, RegularModal, ResultsDisplay, ResultsDetailsList } from "@/components"
-import { VStack, Heading, HStack, Icon, Separator } from "@chakra-ui/react"
-import { FiBarChart2 } from "react-icons/fi"
+import { MulticolorBar, RegularModal, ResultsDetailsList, ResultsDisplay } from "@/components"
+import { Heading, HStack, Icon, Separator, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
+import { FiBarChart2 } from "react-icons/fi"
 
 type Props = {
   isResultsModalOpen: boolean
@@ -11,6 +11,7 @@ type Props = {
   proposalDepositThreshold: bigint
   resultsDetails: { label: string; value: string }[]
   isVotingPhase: boolean
+  proposalId: string
 }
 
 export const ProposalResultsDetailsModal = ({
@@ -21,6 +22,7 @@ export const ProposalResultsDetailsModal = ({
   proposalDepositThreshold,
   resultsDetails,
   isVotingPhase,
+  proposalId,
 }: Props) => {
   return (
     <RegularModal
@@ -42,6 +44,7 @@ export const ProposalResultsDetailsModal = ({
 
         {/* Results Display with Token Amount */}
         <ResultsDisplay
+          proposalId={proposalId}
           segments={progressBarSegments}
           tokenAmount={isVotingPhase ? (userDeposits ?? BigInt(0)) : proposalDepositThreshold}
           showTokenAmount
