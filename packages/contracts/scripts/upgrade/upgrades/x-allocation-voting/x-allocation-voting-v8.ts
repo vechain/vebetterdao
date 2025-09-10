@@ -14,24 +14,24 @@ async function main() {
     `Upgrading XAllocationVoting contract at address: ${config.xAllocationVotingContractAddress} on network: ${config.network.name}`,
   )
 
-  const xAllocationVotingV7 = (await upgradeProxy(
-    "XAllocationVotingV6",
+  const xAllocationVotingV8 = (await upgradeProxy(
+    "XAllocationVotingV7",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
     [],
     {
-      version: 7,
+      version: 8,
     },
   )) as XAllocationVoting
 
   console.log(`XAllocationVoting upgraded`)
 
   // check that upgrade was successful
-  const version = await xAllocationVotingV7.version()
+  const version = await xAllocationVotingV8.version()
   console.log(`New XAllocationVoting version: ${version}`)
 
-  if (parseInt(version) !== 7) {
-    throw new Error(`XAllocationVoting version is not 7: ${version}`)
+  if (parseInt(version) !== 8) {
+    throw new Error(`XAllocationVoting version is not 8: ${version}`)
   }
 
   console.log("Execution completed")
