@@ -632,9 +632,9 @@ describe("AutoVoting - @shard14a", function () {
       await emissions.connect(minterAccount).distribute()
 
       const roundId = await xAllocationVoting.currentRoundId()
-      await expect(
-        xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId),
-      ).to.be.revertedWithCustomError(xAllocationVoting, "AutoVotingDisabledNoApps")
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId))
+        .to.emit(xAllocationVoting, "AutoVotingDisabled")
+        .withArgs(user.address, roundId)
     })
 
     it("should revert when the users have no eligible apps to vote for", async function () {
@@ -683,9 +683,9 @@ describe("AutoVoting - @shard14a", function () {
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId4)).to.be.false
 
       // Autovoting should fail because no eligible apps
-      await expect(
-        xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4),
-      ).to.be.revertedWithCustomError(xAllocationVoting, "AutoVotingDisabledNoApps")
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4))
+        .to.emit(xAllocationVoting, "AutoVotingDisabled")
+        .withArgs(user.address, roundId4)
     })
 
     it("should filter out apps that become unendorsed during autovoting", async function () {

@@ -149,11 +149,8 @@ abstract contract XAllocationVotingGovernor is
     if (!isPerson || finalAppIds.length == 0) {
       _toggleAutovoting(voter);
       relayerRewardsPool().reduceExpectedActionsForRound(roundId, 1);
-      if (!isPerson) {
-        revert AutoVotingDisabledPersonhood(voter, roundId);
-      } else {
-        revert AutoVotingDisabledNoApps(voter, roundId);
-      }
+      emit AutoVotingDisabled(voter, roundId);
+      return;
     }
 
     _castVoteInternal(voter, roundId, finalAppIds, voteWeights, true);
