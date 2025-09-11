@@ -91,6 +91,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error AutoVotingEnabled(address voter);
 
   /**
+   * @dev Thrown when a zero address is provided for a contract address parameter
+   * @param contractName The name/type of the contract that cannot be zero address
+   */
+  error InvalidContractAddress(string contractName);
+
+  /**
    * @dev Emitted when auto-voting is disabled.
    */
   event AutoVotingDisabled(address voter, uint256 roundId);

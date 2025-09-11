@@ -156,22 +156,6 @@ contract XAllocationVoting is
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
   }
 
-  function initializeV2(IVeBetterPassport _veBetterPassport) public reinitializer(2) {
-    __ExternalContracts_init_v2(_veBetterPassport);
-  }
-
-  /**
-   * @dev Initializes the contract with the B3TRGovernor contract.
-   * @param _b3trGovernor The address of the B3TRGovernor contract.
-   */
-  function initializeV7(IB3TRGovernor _b3trGovernor) public onlyRole(UPGRADER_ROLE) reinitializer(7) {
-    __ExternalContracts_init_v3(_b3trGovernor);
-  }
-
-  function initializeV8(IRelayerRewardsPool _relayerRewardsPool) public reinitializer(8) {
-    __ExternalContracts_init_v8(_relayerRewardsPool);
-  }
-
   // ---------- Setters ---------- //
 
   /**
@@ -217,6 +201,20 @@ contract XAllocationVoting is
    */
   function setVoterRewardsAddress(IVoterRewards newVoterRewards) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVoterRewards(newVoterRewards);
+  }
+
+  /**
+   * @dev Set the VeBetterPassport contract
+   */
+  function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external onlyRole(GOVERNANCE_ROLE) {
+    _setVeBetterPassport(newVeBetterPassport);
+  }
+
+  /**
+   * @dev Set the B3TRGovernor contract
+   */
+  function setB3TRGovernor(IB3TRGovernor newB3TRGovernor) external onlyRole(GOVERNANCE_ROLE) {
+    _setB3TRGovernor(newB3TRGovernor);
   }
 
   /**
@@ -272,20 +270,6 @@ contract XAllocationVoting is
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual override onlyRole(GOVERNANCE_ROLE) {
     super.updateQuorumNumerator(newQuorumNumerator);
-  }
-
-  /**
-   * @dev Set the VeBetterPassport contract
-   */
-  function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external onlyRole(GOVERNANCE_ROLE) {
-    _setVeBetterPassport(newVeBetterPassport);
-  }
-
-  /**
-   * @dev Set the B3TRGovernor contract
-   */
-  function setB3TRGovernor(IB3TRGovernor newB3TRGovernor) external onlyRole(GOVERNANCE_ROLE) {
-    _setB3TRGovernor(newB3TRGovernor);
   }
 
   // ---------- Getters ---------- //

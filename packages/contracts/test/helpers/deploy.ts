@@ -872,18 +872,16 @@ export const getOrDeployContractInstances = async ({
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
         },
       ],
-      [veBetterPassportContractAddress],
       [],
       [],
       [],
       [],
-      [tempB3trGovernorAddress], // b3tr address
+      [],
       [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
       libraries: [
-        undefined,
         undefined,
         undefined,
         undefined,
@@ -1216,9 +1214,11 @@ export const getOrDeployContractInstances = async ({
   await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
 
   // Grant admin role to voter rewards for registering x allocation voting
+  // Set governor and veBetterPassport addresses in XAllocationVoting
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
   await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
   await xAllocationVoting.connect(owner).setB3TRGovernor(await governor.getAddress())
+  await xAllocationVoting.connect(owner).setVeBetterPassport(await veBetterPassport.getAddress())
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
