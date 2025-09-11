@@ -23,6 +23,7 @@ const config: AppConfig = {
   b3trMultiSigAddress: "0x15bDc96B5C490A7948dA856B4Db32408DDD89a4B",
   stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
   grantsManagerContractAddress: "0x0000000000000000000000000000000000000001",
+  relayerRewardsPoolContractAddress: "0x0000000000000000000000000000000000000000",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
