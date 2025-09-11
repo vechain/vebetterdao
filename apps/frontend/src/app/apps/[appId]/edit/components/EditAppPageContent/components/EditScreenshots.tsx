@@ -1,4 +1,4 @@
-import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ChangeEvent, useCallback, useRef, useState } from "react"
@@ -7,6 +7,9 @@ import { EditAppForm } from ".."
 import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { Reorder, useDragControls } from "framer-motion"
+import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "@/constants"
+import { validateImage } from "@/utils"
+import { toaster } from "@/components/ui/toaster"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -15,35 +18,52 @@ type Props = {
 export const EditScreenshots = ({ form }: Props) => {
   const { t } = useTranslation()
   const inputFile = useRef<HTMLInputElement>(null)
+  const screenshots = form.watch("screenshots")
+  const [loadingScreenshot, setLoadingScreenshot] = useState(false)
+  const [invalidFormat, setInvalidFormat] = useState(false)
+  const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
+  const accept = IMAGE_REQUIREMENTS.screenshot.mimeType
+
   const handleUpload = useCallback(() => {
     inputFile.current?.click()
   }, [])
-  const screenshots = form.watch("screenshots")
-  const toast = useToast()
-  const [loadingScreenshot, setLoadingScreenshot] = useState(false)
 
   const handleImageUpload = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       try {
         setLoadingScreenshot(true)
         const files = Array.from(e.target.files || [])
+
+        // Validate each file
+        for (const file of files) {
+          const validation = await validateImage(file, "screenshot")
+          setInvalidFormat(!validation.isValid)
+          if (!validation.isValid) {
+            setInvalidMessage(validation.error ?? "Invalid image format")
+            setLoadingScreenshot(false)
+            return
+          }
+        }
+
         const compressedFiles = await imageListCompression(files)
         const base64Files = await Promise.all(compressedFiles.map(blobToBase64))
         form.setValue("screenshots", [...screenshots, ...base64Files])
+        setInvalidFormat(false)
       } catch (error) {
-        toast({
+        toaster.error({
           title: "Error",
           description: "An error occurred while uploading the images",
-          status: "error",
           duration: 5000,
-          isClosable: true,
+          closable: true,
         })
         console.error(error)
+        setInvalidFormat(true)
+        setInvalidMessage("Error uploading images")
       } finally {
         setLoadingScreenshot(false)
       }
     },
-    [form, screenshots, toast],
+    [form, screenshots],
   )
 
   const reorderScreenshots = useCallback(
@@ -56,20 +76,22 @@ export const EditScreenshots = ({ form }: Props) => {
   return (
     <VStack align="stretch" gap={6}>
       <HStack justify={"space-between"} flexWrap={"wrap"}>
-        <Heading fontSize="24px" fontWeight="700">
-          {t("Edit screenshots")}
-        </Heading>
-        <Button
-          variant="primaryAction"
-          onClick={handleUpload}
-          leftIcon={<UilUpload size="16px" />}
-          isLoading={loadingScreenshot}>
+        <VStack align="flex-start" gap={1}>
+          <Heading fontSize="24px" fontWeight="700">
+            {t("Edit screenshots")}
+          </Heading>
+          <Text fontSize={14} color={invalidFormat ? "red" : "gray"}>
+            {invalidFormat ? invalidMessage : t(SCREENSHOT_UPLOAD_GUIDELINES)}
+          </Text>
+        </VStack>
+        <Button variant="primaryAction" onClick={handleUpload} loading={loadingScreenshot}>
+          <UilUpload size="16px" />
           {t("Upload")}
         </Button>
         <Controller
           name="screenshots"
           render={() => (
-            <Input type="file" ref={inputFile} display="none" multiple accept="image/*" onChange={handleImageUpload} />
+            <Input type="file" ref={inputFile} display="none" multiple accept={accept} onChange={handleImageUpload} />
           )}
           control={form.control}
         />
@@ -145,23 +167,23 @@ const DraggableScreenshot = ({
           bgColor="transparent"
           _hover={{ bgColor: "gray.600" }}
           aria-label="Drag screenshot"
-          icon={<UilDraggabledots size="24px" />}
-          onPointerDown={event => dragControls.start(event)}
-        />
+          onPointerDown={event => dragControls.start(event)}>
+          <UilDraggabledots size="24px" />
+        </IconButton>
         <IconButton
           rounded="full"
           color="#D23F63"
           bgColor="#FCEEF1"
           _hover={{ bgColor: "#FCEEF1DD" }}
           aria-label="Delete screenshot"
-          icon={<UilTrash size="24px" />}
           onClick={() => {
             form.setValue(
               "screenshots",
               screenshots.filter((_, i) => i !== index),
             )
-          }}
-        />
+          }}>
+          <UilTrash size="24px" />
+        </IconButton>
       </HStack>
       <Image src={screenshot} alt={`Screenshot ${index + 1}`} h="full" objectFit="contain" draggable="false" />
     </Reorder.Item>

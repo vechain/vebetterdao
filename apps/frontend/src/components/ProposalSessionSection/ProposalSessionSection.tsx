@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, Card, CardBody, Divider, Heading, VStack } from "@chakra-ui/react"
+import { Alert, Card, Separator, Heading, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { ProposalQuorumStatus } from "./components/ProposalQuorumStatus"
 import { ProposalSessionVot3 } from "./components/ProposalSessionVot3"
@@ -9,7 +9,14 @@ type Props = {
   quorumQuery: UseQueryResult<string, unknown>
   currentVotesQuery: UseQueryResult<string, unknown>
   votesAtSnapshotQuery: UseQueryResult<string, unknown>
-  userVotesAtSnapshotQuery: UseQueryResult<string, unknown>
+  userVotesAtSnapshotQuery: UseQueryResult<
+    | {
+        totalVotesWithDeposits: string // total votes
+        depositsVotes: string // deposit votes if any
+      }
+    | string,
+    unknown
+  >
   renderQuroum?: "none" | "upcoming" | "active"
   isEnded?: boolean
   renderTimeline?: React.ReactNode
@@ -29,19 +36,21 @@ export const ProposalSessionSection = ({
   const { t } = useTranslation()
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={6}>
           <Heading fontSize={"24px"} fontWeight={700}>
             {t("Session information")}
           </Heading>
           {renderQuroum === "upcoming" ? (
-            <Alert status="error" borderRadius="16px" bg="#FFF3E5">
-              <UilClock size={"36px"} color="#F29B32" />
-              <AlertTitle color="#F29B32" ml={2} fontSize="14px">
+            <Alert.Root status="error" borderRadius="16px" bg="#FFF3E5">
+              <Alert.Indicator>
+                <UilClock size={"36px"} color="#F29B32" />
+              </Alert.Indicator>
+              <Alert.Title color="#F29B32" ml={2} fontSize="14px">
                 {t("Quorum information will be available once the round starts.")}
-              </AlertTitle>
-            </Alert>
+              </Alert.Title>
+            </Alert.Root>
           ) : (
             renderQuroum === "active" && (
               <>
@@ -51,7 +60,7 @@ export const ProposalSessionSection = ({
                   isEnded={isEnded}
                   showQuorumNeeded={showQuorumNeeded}
                 />
-                <Divider />
+                <Separator />
                 <ProposalSessionVot3
                   userVotesAtSnapshotQuery={userVotesAtSnapshotQuery}
                   votesAtSnapshotQuery={votesAtSnapshotQuery}
@@ -62,7 +71,7 @@ export const ProposalSessionSection = ({
 
           {renderTimeline}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

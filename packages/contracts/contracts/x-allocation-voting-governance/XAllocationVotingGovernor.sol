@@ -35,6 +35,7 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IRelayerRewardsPool, RelayerAction } from "../interfaces/IRelayerRewardsPool.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
 
 /**
  * @title XAllocationVotingGovernor
@@ -44,7 +45,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
  * - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded}, and {_countVote}
  * - A voting module must implement {_getVotes}, {clock}, and {CLOCK_MODE}
  * - A settings module must implement {votingPeriod}
- * - An external contracts module must implement {x2EarnApps}, {emissions} and {voterRewards}
+ * - An external contracts module must implement {x2EarnApps}, {emissions}, {voterRewards} and {b3trGovernor}
  * - A rounds storage module must implement {_startNewRound}, {roundSnapshot}, {roundDeadline}, and {currentRoundId}
  * - A rounds finalization module must implement {finalize}
  * - A earnings settings module must implement {_snapshotRoundEarningsCap}
@@ -56,7 +57,11 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
  * - Fixed duplicate app voting in same transaction in {RoundVotesCountingUpgradeable._countVote}
  *
  * ----- Version 7 -----
+ * - Added B3TRGovernor contract to the contract
+ *
+ * ----- Version 8 -----
  * - Added castVoteOnBehalfOf function
+ * - Added refactoring to code for voting
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
@@ -246,7 +251,7 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the version of the governor.
    */
   function version() public view virtual returns (string memory) {
-    return "7";
+    return "8";
   }
 
   /**
@@ -415,6 +420,18 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the VoterRewards contract.
    */
   function voterRewards() public view virtual returns (IVoterRewards);
+
+  /**
+   * @dev Returns the B3TRGovernor contract.
+   */
+  function b3trGovernor() public view virtual returns (IB3TRGovernor);
+
+  /**
+   * @dev Returns the deposit voting power for a given account at a given timepoint.
+   */
+  function getDepositVotingPower(address account, uint256 timepoint) public view virtual returns (uint256) {
+    return b3trGovernor().getDepositVotingPower(account, timepoint);
+  }
 
   /**
    * @dev Returns the RelayerRewardsPool contract.

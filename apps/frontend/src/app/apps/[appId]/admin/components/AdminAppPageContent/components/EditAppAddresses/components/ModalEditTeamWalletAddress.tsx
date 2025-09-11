@@ -1,30 +1,19 @@
 import { CustomModalContent, ExclamationTriangle } from "@/components"
-import {
-  Box,
-  Button,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalOverlay,
-  Text,
-  VStack,
-  useBreakpointValue,
-} from "@chakra-ui/react"
+import { Box, Button, Heading, Dialog, Text, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
   handleEditTeamWalletAddress: () => void
   onClose: () => void
-  isOpen: boolean
+  open: boolean
 }
 
-export const ModalEditTeamWalletAddress = ({ handleEditTeamWalletAddress, onClose, isOpen }: Props) => {
+export const ModalEditTeamWalletAddress = ({ handleEditTeamWalletAddress, onClose, open }: Props) => {
   const { t } = useTranslation()
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
-      <ModalOverlay />
+    <Dialog.Root open={open} onOpenChange={details => !details.open && onClose()} size={"md"}>
       <CustomModalContent>
-        <ModalBody p={"40px"}>
+        <Dialog.Body p={"40px"}>
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
             <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
@@ -47,8 +36,8 @@ export const ModalEditTeamWalletAddress = ({ handleEditTeamWalletAddress, onClos
               </Button>
             </VStack>
           </VStack>
-        </ModalBody>
+        </Dialog.Body>
       </CustomModalContent>
-    </Modal>
+    </Dialog.Root>
   )
 }

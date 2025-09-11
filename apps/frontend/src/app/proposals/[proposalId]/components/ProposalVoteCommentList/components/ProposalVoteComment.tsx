@@ -1,6 +1,6 @@
 import { ProposalComment, VoteType } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
-import { Card, Divider, HStack, Text, VStack } from "@chakra-ui/react"
+import { Card, Separator, HStack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -59,7 +59,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const votePower = ethers.formatEther(BigInt(vote.power || 0))
 
   return (
-    <Card key={vote.voter} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>
+    <Card.Root key={vote.voter} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"baseline"}>
           <Text color={textColor} fontSize={"20px"} fontWeight={600}>
@@ -70,7 +70,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
           </Text>
         </HStack>
         {vote.reason && <Text color={textColor}>{vote.reason}</Text>}
-        <Divider color={textColor} />
+        <Separator color={textColor} />
         <HStack justify={"space-between"}>
           <VStack alignItems={"flex-start"}>
             <Text color={textColor}>{t("Voting power")}</Text>
@@ -83,9 +83,11 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
         </HStack>
         <HStack align={"center"}>
           <AddressIcon address={vote.voter} boxSize={4} minW={4} minH={4} rounded={"full"} />
-          <Text fontWeight={"400"}>{accountName || humanAddress(vote.voter, 4, 6)}</Text>
+          <Text lineClamp={1} color={textColor}>
+            {accountName || humanAddress(vote.voter, 4, 6)}
+          </Text>
         </HStack>
       </VStack>
-    </Card>
+    </Card.Root>
   )
 }

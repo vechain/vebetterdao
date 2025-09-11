@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { AccessControl__factory } from "@repo/contracts/typechain-types"
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { getBytes32Role } from "./useHasRole"
 
 const abi = AccessControl__factory.abi
@@ -34,7 +34,7 @@ export const useHasRoles = (roles: string[], contractAddress: string, address: s
               abi,
               functionName: method,
               address: contractAddress as `0x${string}`,
-              args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
+              args: [getBytes32Role(role) as `0x${string}`, address as `0x${string}`],
             }) as const,
         ),
       })

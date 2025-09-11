@@ -1,6 +1,6 @@
 import React from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
-import { useToast } from "@chakra-ui/react"
+import { toaster } from "@/components/ui/toaster"
 
 interface Props {
   data: {
@@ -10,8 +10,6 @@ interface Props {
 }
 
 export const TopUsersByRewardsChart: React.FC<Props> = ({ data }) => {
-  const toast = useToast()
-
   // Sort data by total rewards in descending order
   const sortedData = [...data].sort((a, b) => b.totalRewardAmount - a.totalRewardAmount)
 
@@ -30,20 +28,18 @@ export const TopUsersByRewardsChart: React.FC<Props> = ({ data }) => {
       navigator.clipboard
         .writeText(address)
         .then(() => {
-          toast({
+          toaster.success({
             title: "Address copied",
             description: address,
-            status: "success",
             duration: 2000,
-            isClosable: true,
+            closable: true,
           })
         })
         .catch(_ => {
-          toast({
+          toaster.error({
             title: "Failed to copy address",
-            status: "error",
             duration: 2000,
-            isClosable: true,
+            closable: true,
           })
         })
     }

@@ -1,33 +1,23 @@
-import { Button, FormControl, InputGroup, InputRightElement, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../AdminAppPageContent"
 import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
 import { UilPen } from "@iconscout/react-unicons"
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
 import { WalletAddressInput } from "@/app/components/Input"
 
-type Props = {
-  form: UseFormReturn<AdminAppForm>
-  editAdminAddress: boolean
-  setEditAdminAddress: (value: boolean) => void
-  editTeamWalletAddress: boolean
-  setEditTeamWalletAddress: (value: boolean) => void
-}
+type Props = { form: UseFormReturn<AdminAppForm> }
 
-export const EditAppAddresses = ({
-  form,
-  editAdminAddress,
-  setEditAdminAddress,
-  editTeamWalletAddress,
-  setEditTeamWalletAddress,
-}: Props) => {
+export const EditAppAddresses = ({ form }: Props) => {
   const { t } = useTranslation()
   const { admin } = useCurrentAppAdmin()
   const { app } = useCurrentAppInfo()
+  const [editAdminAddress, setEditAdminAddress] = useState(false)
+  const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
 
   const modalEditAdminAddress = useDisclosure()
   const handleEditAdminAddress = useCallback(() => {
@@ -41,6 +31,20 @@ export const EditAppAddresses = ({
     setEditTeamWalletAddress(true)
   }, [modalEditTeamWalletAddress, setEditTeamWalletAddress])
 
+  const handleTeamWalletAddressResolved = useCallback(
+    (address?: string) => {
+      form.setValue("teamWalletAddress", address ?? "")
+    },
+    [form],
+  )
+
+  const handleAdminAddressResolved = useCallback(
+    (address?: string) => {
+      form.setValue("adminAddress", address ?? "")
+    },
+    [form],
+  )
+
   return (
     <VStack align="stretch" gap="32px">
       <Text color="#D23F63" fontSize={"24px"} fontWeight={700}>
@@ -51,32 +55,31 @@ export const EditAppAddresses = ({
           {t("Treasury address")}
         </Text>
         <Text fontSize="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
-        <FormControl>
-          <InputGroup>
-            <WalletAddressInput
-              onAddressResolved={address => form.setValue("teamWalletAddress", address ?? "")}
-              isDisabled={!editTeamWalletAddress}
-              isRequired={true}
-              defaultValue={app?.teamWalletAddress}
-            />
-            {!editTeamWalletAddress && (
-              <InputRightElement width="auto">
-                <Button
-                  variant="primaryGhost"
-                  bg="#FFFFFF"
-                  borderY="1px solid #f4f6f9"
-                  borderRight="1px solid #f4f6f9"
-                  borderLeftRadius={0}
-                  onClick={modalEditTeamWalletAddress.onOpen}
-                  leftIcon={<UilPen size="16px" />}
-                  rounded="8px"
-                  fontWeight={500}>
-                  {t("Edit")}
-                </Button>
-              </InputRightElement>
-            )}
-          </InputGroup>
-        </FormControl>
+        <WalletAddressInput
+          onAddressResolved={handleTeamWalletAddressResolved}
+          disabled={!editTeamWalletAddress}
+          required={true}
+          defaultValue={app?.teamWalletAddress}
+          inputGroupProps={{
+            endElementProps: {
+              pr: 0,
+            },
+            endElement: editTeamWalletAddress ? null : (
+              <Button
+                variant="primaryGhost"
+                bg="#FFFFFF"
+                borderY="1px solid #f4f6f9"
+                borderRight="1px solid #f4f6f9"
+                onClick={modalEditTeamWalletAddress.onOpen}
+                rounded="8px"
+                roundedLeft={0}
+                fontWeight={500}>
+                <UilPen size="16px" />
+                {t("Edit")}
+              </Button>
+            ),
+          }}
+        />
       </VStack>
       <VStack align="stretch">
         <Text fontSize="md" fontWeight={"800"}>
@@ -87,32 +90,31 @@ export const EditAppAddresses = ({
             "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
           )}
         </Text>
-        <FormControl>
-          <InputGroup>
-            <WalletAddressInput
-              onAddressResolved={address => form.setValue("adminAddress", address ?? "")}
-              isDisabled={!editAdminAddress}
-              isRequired={true}
-              defaultValue={admin}
-            />
-            {!editAdminAddress && (
-              <InputRightElement width="auto">
-                <Button
-                  variant="primaryGhost"
-                  bg="#FFFFFF"
-                  borderY="1px solid #f4f6f9"
-                  borderRight="1px solid #f4f6f9"
-                  borderLeftRadius={0}
-                  onClick={modalEditAdminAddress.onOpen}
-                  leftIcon={<UilPen size="16px" />}
-                  rounded="8px"
-                  fontWeight={500}>
-                  {t("Edit")}
-                </Button>
-              </InputRightElement>
-            )}
-          </InputGroup>
-        </FormControl>
+        <WalletAddressInput
+          onAddressResolved={handleAdminAddressResolved}
+          disabled={!editAdminAddress}
+          required={true}
+          defaultValue={admin}
+          inputGroupProps={{
+            endElementProps: {
+              pr: 0,
+            },
+            endElement: editAdminAddress ? null : (
+              <Button
+                variant="primaryGhost"
+                bg="#FFFFFF"
+                borderY="1px solid #f4f6f9"
+                borderRight="1px solid #f4f6f9"
+                onClick={modalEditAdminAddress.onOpen}
+                rounded="8px"
+                roundedLeft={0}
+                fontWeight={500}>
+                <UilPen size="16px" />
+                {t("Edit")}
+              </Button>
+            ),
+          }}
+        />
       </VStack>
       <ModalEditTeamWalletAddress
         handleEditTeamWalletAddress={handleEditTeamWalletAddress}

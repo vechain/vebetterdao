@@ -1,4 +1,4 @@
-import { Card, CardBody, Flex, HStack, Text, VStack } from "@chakra-ui/react"
+import { Card, Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { ExclamationTriangle } from "@/components"
 
 type Props = {
@@ -7,14 +7,14 @@ type Props = {
 }
 export const SignalCard = ({ appName, reason }: Props) => {
   return (
-    <Card variant={"filledSmall"} w="full">
-      <CardBody>
-        <HStack spacing={3} w="full" justify="space-between">
-          <HStack spacing={4}>
+    <Card.Root variant={"filledSmall"} w="full">
+      <Card.Body>
+        <HStack gap={3} w="full" justify="space-between">
+          <HStack gap={4}>
             <Flex w="fit-content" h="fit-content" p={2} align="center" justify="center" borderRadius={"full"}>
               <ExclamationTriangle size={"2rem"} />
             </Flex>
-            <VStack spacing={0} align="stretch">
+            <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {appName}
@@ -28,7 +28,7 @@ export const SignalCard = ({ appName, reason }: Props) => {
             </VStack>
           </HStack>
         </HStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

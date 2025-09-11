@@ -1,4 +1,4 @@
-import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { getConfig } from "@repo/config"
 import { useCallClause } from "@vechain/vechain-kit"
 import { useXAppsMetadataBaseUri } from ".."

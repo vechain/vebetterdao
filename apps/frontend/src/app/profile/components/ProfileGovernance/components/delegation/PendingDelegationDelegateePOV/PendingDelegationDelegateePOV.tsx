@@ -1,4 +1,4 @@
-import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingDelegationItemDelegateePOV } from "./components/PendingDelegationItemDelegateePOV"
 import { useGetPendingDelegationsDelegateePOV } from "@/api"
@@ -15,8 +15,8 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
   if (isPendingDelegationsLoading || !pendingDelegations?.length) return null
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody borderRadius="xl">
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
@@ -39,7 +39,7 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
             ))}
           </VStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

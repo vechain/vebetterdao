@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { X2EarnApps__factory, VeBetterPassport__factory } from "@repo/contracts"
+import { X2EarnApps__factory, VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"

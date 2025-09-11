@@ -19,8 +19,9 @@ const config: AppConfig = {
   nodeManagementContractAddress: "0x8bcbfc20ee39c94f4e60afc5d78c402f70b4f3b2",
   veBetterPassportContractAddress: "0x592c756df7a5d39de1735030e8b9c18b7417e6c4",
   x2EarnCreatorContractAddress: "0xb89f0ecdaf9987f87912d6c77756435fe4085b05",
-  tokenAuctionContractAddress: "0x47049ccfce2f4ee866b37abccea276ebaca570db",
+  tokenAuctionContractAddress: "0x0747b39abc0de3d11c8ddfe2e7eed00aaa8d475c",
   stargateNFTContractAddress: "0x1ec1d168574603ec35b9d229843b7c2b44bcb770",
+  grantsManagerContractAddress: "0x005af71e9b2d629c0c6e2f9d39fdfd1bb967c0ea",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
@@ -56,14 +57,14 @@ const config: AppConfig = {
     },
   },
   b3trGovernorLibraries: {
-    governorClockLogicAddress: "0xa1032abb3460773bb1e8ad7d4def52a1d3070b38",
-    governorConfiguratorAddress: "0x4597bd06c84e1725cdd81c04188d0a709448e81a",
-    governorDepositLogicAddress: "0x83e5df5b42e5c1906e79c0575a370a573b935afb",
-    governorFunctionRestrictionsLogicAddress: "0xd35dcf0a3a2fe7fa834db49c7e6431655d0aebf4",
-    governorProposalLogicAddressAddress: "0xde7dc7f341987b676da302eff79cff39a7fb053b",
-    governorQuorumLogicAddress: "0xaadc1a4781f0e55330e5a73cb8f5185b15a9edcf",
-    governorStateLogicAddress: "0x30da4636e9baf5d4f6a39ff20710658ba889a91f",
-    governorVotesLogicAddress: "0x7e5f75a8a71624794fddc53562fa26010a8a7659",
+    governorClockLogicAddress: "0xb978b87556693eeea60da8d90bfb801d668263ec",
+    governorConfiguratorAddress: "0xbefcb743c4f409480d432ae3a486acf40a4dcc1c",
+    governorDepositLogicAddress: "0xc1408c89148bc110aa81d34d01149c28db2f7abc",
+    governorFunctionRestrictionsLogicAddress: "0x01f5dbdd3f61e7e103f9156ef01988ee91e9e425",
+    governorProposalLogicAddressAddress: "0xb3537e115a8b655afebfa85d19251188a2e0932e",
+    governorQuorumLogicAddress: "0x8181840d77eab52fbb31a0815fc027a351b425bc",
+    governorStateLogicAddress: "0xd784a819f163251785c3380ed35b49a884e86afa",
+    governorVotesLogicAddress: "0x7d77c504715cc18ee051d12918ddebad5dc84e5d",
   },
   passportLibraries: {
     passportChecksLogicAddress: "0x252c2ea0e7cae88b8b7c73861b07c2b97b12aa76",
@@ -76,7 +77,6 @@ const config: AppConfig = {
     passportWhitelistAndBlacklistLogicAddress: "0x45feba7af9219ad26967b2db82d6ef9297219881",
   },
   externalContractIntegrations: {
-    // This is a MOCK VetDomains contract
     vetDomainsContractAddress: "0xE27C72E252D5C3B2daf871aB7628F29370438589",
   },
 }

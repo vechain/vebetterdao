@@ -1,8 +1,7 @@
-import { Circle, Heading, Step, StepIndicator, StepSeparator, StepStatus, Stepper, VStack } from "@chakra-ui/react"
+import { Heading, Steps, Circle, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { TimelineItem } from "./components/TimelineItem"
-import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
 import { ProposalState } from "@/api"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
@@ -10,6 +9,7 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimeLineItem"
 
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()
@@ -105,20 +105,30 @@ export const ProposalTimeline = () => {
       <Heading fontSize={"20px"} fontWeight={700}>
         {t("Timeline")}
       </Heading>
-      <Stepper index={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
-        {steps.map(step => (
-          <Step key={`proposal-timeline-step-${step.key}`} style={{ width: "100%" }}>
-            <StepIndicator>
-              <StepStatus
-                complete={<Circle bg="#004CFC" size={"30%"} />}
-                active={<Circle bg="#004CFC" size={"60%"} />}
-              />
-            </StepIndicator>
-            {step}
-            <StepSeparator />
-          </Step>
-        ))}
-      </Stepper>
+      <Steps.Root
+        size="sm"
+        step={activeStep}
+        orientation="vertical"
+        w="full"
+        height={height}
+        gap="0"
+        variant="primaryVertical">
+        <Steps.List flex={1}>
+          {steps.map((step, index) => (
+            <Steps.Item key={`proposal-timeline-step-${step.key}`} index={index} style={{ width: "100%" }}>
+              <Steps.Indicator>
+                <Steps.Status
+                  incomplete={<Circle bg="#004CFC" size="0" />}
+                  complete={<Circle bg="#004CFC" size="30%" />}
+                  current={<Circle bg="#004CFC" size="50%" />}
+                />
+              </Steps.Indicator>
+              {step}
+              <Steps.Separator />
+            </Steps.Item>
+          ))}
+        </Steps.List>
+      </Steps.Root>
     </VStack>
   )
 }

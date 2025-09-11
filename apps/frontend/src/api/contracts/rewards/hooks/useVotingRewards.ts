@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getRoundRewardQueryKey } from "./useVotingRoundReward"
-import { VoterRewards__factory } from "@repo/contracts"
+import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import { BigNumber } from "bignumber.js"
@@ -67,10 +67,7 @@ export const useVotingRewards = (currentRoundId: number, voter?: string) => {
 
         total = total.plus(rewards)
 
-        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter || ""), {
-          roundId,
-          rewards: formattedRewards,
-        })
+        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter || ""), [rewards])
 
         return {
           roundId,

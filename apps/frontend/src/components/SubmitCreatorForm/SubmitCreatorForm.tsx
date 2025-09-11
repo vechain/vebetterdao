@@ -1,17 +1,5 @@
 import { useEffect } from "react"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Heading,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
 import {
   Control,
   FieldErrors,
@@ -30,6 +18,7 @@ import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
 import AppUtils from "@/utils/AppUtils"
 import { FormCheckbox, FormItem } from "../CustomFormFields"
+
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string
@@ -59,9 +48,40 @@ type Props = {
   setValue: UseFormSetValue<SubmitCreatorFormData>
 }
 
-export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) => {
+export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }: Props) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
+
+  const checkboxList = [
+    {
+      label: t("API Security Measures (Optional)"),
+      description: t("Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting."),
+      name: "securityApiSecurityMeasures",
+      required: false,
+    },
+    {
+      label: t("Action Verification"),
+      description: t("Uses AI validation or unique identifiers to verify sustainable actions."),
+      name: "securityActionVerification",
+    },
+    {
+      label: t("Device Fingerprinting (Optional)"),
+      description: t("Implements device identification to prevent multiple installations."),
+      name: "securityDeviceFingerprint",
+      required: false,
+    },
+    {
+      label: t("Secure Key Management (Optional)"),
+      description: t("Ensures secure storage and handling of private keys and sensitive data."),
+      name: "securitySecureKeyManagement",
+      required: false,
+    },
+    {
+      label: t("Anti-Farming Measures (Optional)"),
+      description: t("Implements progressive unlocking, reward scaling, or other anti-farming strategies."),
+      name: "securityAntiFarming",
+    },
+  ] as const
 
   const {
     setData,
@@ -186,14 +206,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
   }
 
   return (
-    <Card w="full" borderRadius="xl">
-      <CardBody w="full" p={{ base: 2, md: 6 }}>
-        <VStack spacing={4} w="full">
-          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={6}>
+    <Card.Root w="full" borderRadius="xl">
+      <Card.Body w="full" p={{ base: 2, md: 6 }}>
+        <VStack gap={4} w="full">
+          <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="xl" fontWeight="bold" pb={6}>
               {t("App Information")}
             </Heading>
-            <VStack w="full" spacing={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch">
               <FormItem
                 label={t("App Name")}
                 placeholder={t("App Name")}
@@ -270,8 +290,8 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 error={errors.projectUrl?.message}
                 onBlur={() => onBlur("projectUrl")}
               />
-              <FormControl isInvalid={!!errors.adminWalletAddress}>
-                <FormLabel>{t("Creator NFT Wallet Address")}</FormLabel>
+              <Field.Root invalid={!!errors.adminWalletAddress}>
+                <Field.Label>{t("Creator NFT Wallet Address")}</Field.Label>
                 <Text fontSize="xs" color="gray.500" mb={2}>
                   {t("The wallet address where you will receive your Creator NFT")}
                 </Text>
@@ -283,45 +303,43 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                   rounded={"xl"}
                   onBlur={() => onBlur("adminWalletAddress")}
                 />
-              </FormControl>
+              </Field.Root>
             </VStack>
-          </Card>
-          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={6}>
+          </Card.Root>
+          <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="xl" fontWeight="bold" pb={6}>
               {t("Your Information")}
             </Heading>
-            <VStack w="full" spacing={4} align="stretch">
-              <FormControl isInvalid={!!errors.githubUsername}>
-                <FormLabel>{t("GitHub Username")}</FormLabel>
+            <VStack w="full" gap={4} align="stretch">
+              <Field.Root invalid={!!errors.githubUsername}>
+                <Field.Label fontSize="md">{t("GitHub Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
                   onClick={() => handleAuth("github")}
-                  size="lg"
-                  alignSelf="flex-end"
-                  borderRadius="full"
-                  leftIcon={<UilGithub size={30} />}>
+                  size="xl"
+                  borderRadius="full">
+                  <UilGithub size={30} />
                   {watch("githubUsername") || t("Connect GitHub")}
                 </Button>
                 <Input type="hidden" {...register("githubUsername", { required: "GitHub Username is required" })} />
-                <FormErrorMessage>{errors.githubUsername?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors.githubUsername?.message}</Field.ErrorText>
+              </Field.Root>
 
-              <FormControl isInvalid={!!errors.twitterUsername}>
-                <FormLabel>{t("X Username")}</FormLabel>
+              <Field.Root invalid={!!errors.twitterUsername}>
+                <Field.Label fontSize="md">{t("X Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
                   onClick={() => handleAuth("twitter")}
-                  size="lg"
-                  alignSelf="flex-end"
-                  borderRadius="full"
-                  leftIcon={<FaXTwitter />}>
+                  size="xl"
+                  borderRadius="full">
+                  <FaXTwitter size={30} />
                   {watch("twitterUsername") || t("Connect X")}
                 </Button>
                 <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
-                <FormErrorMessage>{errors.twitterUsername?.message}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors.twitterUsername?.message}</Field.ErrorText>
+              </Field.Root>
               <FormItem
                 label={t("Email")}
                 placeholder={"Eg. admin@myapp.vet"}
@@ -352,13 +370,13 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 onBlur={() => onBlur("adminName")}
               />
             </VStack>
-          </Card>
+          </Card.Root>
 
-          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={4}>
+          <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="xl" fontWeight="bold" pb={4}>
               {t("Testing Requirements")}
             </Heading>
-            <VStack w="full" spacing={4} align="stretch">
+            <VStack w="full" gap={4} align="stretch">
               <FormItem
                 label={t("Testnet Project URL")}
                 placeholder={"Eg. https://www.testnet.myapp.vet"}
@@ -395,58 +413,30 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 onBlur={() => onBlur("testnetAppId")}
               />
             </VStack>
-          </Card>
-          <Card w="full" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="md" pb={4}>
+          </Card.Root>
+          <Card.Root w="full" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="xl" fontWeight="bold" pb={4}>
               {t("Security Requirements")}
             </Heading>
-            <VStack align="start" spacing={3}>
-              <FormCheckbox
-                register={{ ...register("securityApiSecurityMeasures") }}
-                label={t("API Security Measures (Optional)")}
-                description={t("Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.")}
-                error={errors.securityApiSecurityMeasures?.message}
-              />
-
-              <FormCheckbox
-                register={{
-                  ...register("securityActionVerification", {
-                    required: "Action Verification is required",
-                  }),
-                }}
-                label={t("Action Verification")}
-                description={t("Uses AI validation or unique identifiers to verify sustainable actions.")}
-                error={errors.securityActionVerification?.message}
-              />
-
-              <FormCheckbox
-                register={{ ...register("securityDeviceFingerprint") }}
-                label={t("Device Fingerprinting (Optional)")}
-                description={t("Implements device identification to prevent multiple installations.")}
-                error={errors.securityDeviceFingerprint?.message}
-              />
-
-              <FormCheckbox
-                register={{ ...register("securitySecureKeyManagement") }}
-                label={t("Secure Key Management (Optional)")}
-                description={t("Ensures secure storage and handling of private keys and sensitive data.")}
-                error={errors.securitySecureKeyManagement?.message}
-              />
-
-              <FormCheckbox
-                register={{ ...register("securityAntiFarming") }}
-                label={t("Anti-Farming Measures (Optional)")}
-                description={t("Implements progressive unlocking, reward scaling, or other anti-farming strategies.")}
-                error={errors.securityAntiFarming?.message}
-              />
+            <VStack align="start" gap={3}>
+              {checkboxList.map(checkbox => (
+                <FormCheckbox
+                  key={checkbox.name}
+                  name={checkbox.name}
+                  label={checkbox.label}
+                  description={checkbox.description}
+                  control={control}
+                  error={errors[checkbox.name]?.message}
+                />
+              ))}
             </VStack>
-          </Card>
+          </Card.Root>
         </VStack>
-      </CardBody>
-      <CardFooter display={"flex"} flexDir={"column"} w="full" alignItems="center" justify="center">
+      </Card.Body>
+      <Card.Footer display={"flex"} flexDir={"column"} w="full" alignItems="center" justifyContent="center">
         <Button
           variant="primaryAction"
-          disabled={!!errors}
+          disabled={Object.keys(errors).length > 0}
           type="submit"
           w="full"
           px={10}
@@ -459,7 +449,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
           borderRadius={"full"}>
           {t("Send Application")}
         </Button>
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   )
 }

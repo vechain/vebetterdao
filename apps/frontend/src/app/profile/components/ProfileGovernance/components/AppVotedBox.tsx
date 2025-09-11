@@ -1,6 +1,6 @@
 import { AppVotesGiven, useIpfsImage, useXAppMetadata } from "@/api"
 import { notFoundImage } from "@/constants"
-import { HStack, Skeleton, Text, VStack, Image } from "@chakra-ui/react"
+import { Button, HStack, Skeleton, Text, VStack, Image, Card } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -25,36 +25,38 @@ export const AppVotedBox = ({ appVoted }: Props) => {
   }, [router, appVoted.appId])
 
   return (
-    <HStack
-      onClick={goToApp}
-      w={"full"}
-      borderRadius={12}
-      cursor={"pointer"}
-      bg={"profile-bg"}
-      justifyContent={"space-between"}
-      _hover={{
-        bg: "hover-contrast-bg",
-      }}
-      p={{ base: 3, md: 4 }}>
-      <HStack spacing={2}>
-        <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
-          <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
-        </Skeleton>
-        <Text fontSize={14} fontWeight={"600"}>
-          {appVoted.appName}
-        </Text>
-      </HStack>
-      <VStack justifyContent={"center"} alignContent={"center"} spacing={0}>
-        <HStack>
-          <Image src="/assets/logos/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
-          <Text fontSize={20} fontWeight={"700"}>
-            {compactFormatter.format(appVoted.votes)}
-          </Text>
-        </HStack>
-        <Text color="#6A6A6A" fontSize={12} fontWeight={400}>
-          {t("Total assigned")}
-        </Text>
-      </VStack>
-    </HStack>
+    <Button
+      h="auto"
+      p="12px"
+      display={"flex"}
+      alignItems={"stretch"}
+      variant="outline"
+      border="none"
+      asChild
+      onClick={goToApp}>
+      <Card.Root variant="base" w={"full"} borderRadius={12} justifyContent={"space-between"} p={{ base: 3, md: 4 }}>
+        <Card.Body p={0} flexDirection={"row"} alignItems={"stretch"} justifyContent={"space-between"}>
+          <HStack gap={2}>
+            <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
+              <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
+            </Skeleton>
+            <Text fontSize={14} fontWeight={"600"}>
+              {appVoted.appName}
+            </Text>
+          </HStack>
+          <VStack justifyContent={"center"} alignContent={"center"} gap={0}>
+            <HStack>
+              <Image src="/assets/logos/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
+              <Text fontSize={20} fontWeight={"700"}>
+                {compactFormatter.format(appVoted.votes)}
+              </Text>
+            </HStack>
+            <Text color="#6A6A6A" fontSize={12} fontWeight={400}>
+              {t("Total assigned")}
+            </Text>
+          </VStack>
+        </Card.Body>
+      </Card.Root>
+    </Button>
   )
 }

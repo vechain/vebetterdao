@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
@@ -9,11 +9,12 @@ import {
   getIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
-  getXNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
   getXAppsQueryKey,
+  getUserNodesQueryKey,
 } from "@/api"
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useWallet } from "@vechain/vechain-kit"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
@@ -27,6 +28,7 @@ type Props = { appId?: string; nodeId?: string; onSuccess?: () => void }
  * @returns the remove endorsement transaction
  */
 export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) => {
+  const { account } = useWallet()
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -49,9 +51,9 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
       getIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
       getAppEndorsedEventsQueryKey({ appId }),
-      getXNodeCheckCooldownQueryKey(nodeId ?? ""),
+      getUserNodesQueryKey(account?.address ?? ""),
     ],
-    [appId, nodeId],
+    [appId, nodeId, account?.address],
   )
 
   return useBuildTransaction({

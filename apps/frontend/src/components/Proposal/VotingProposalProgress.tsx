@@ -2,7 +2,7 @@ import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { ProposalState, useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
-import { Box, Card, CardBody, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
@@ -47,7 +47,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const getProposalData = () => {
     if (proposalState === ProposalState.Canceled)
       return (
-        <VStack w={"full"} spacing={1} align={"center"}>
+        <VStack w={"full"} gap={1} align={"center"}>
           <Icon as={UilBan} boxSize={["28px", "28px", "24px"]} color={againstColor} />
           <Text fontSize={["16px", "16px", "12px"]} fontWeight={400} color={"#6A6A6A"} textAlign={"center"}>
             {t("Proposal canceled by creator or VeBetter")}
@@ -59,7 +59,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
       return <VotingSupportProgress proposalId={proposalId} proposalState={proposalState} />
 
     return (
-      <VStack w={"full"} spacing={3}>
+      <VStack w={"full"} gap={3}>
         <HStack w={"full"} justifyContent={"space-between"}>
           {Object.keys(votes).map(key => {
             const vote = votes[key as keyof typeof votes]
@@ -118,9 +118,9 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   }
 
   return (
-    <Card variant="filledWithBorder" w="full">
-      <CardBody>{getProposalData()}</CardBody>
-    </Card>
+    <Card.Root variant="filledWithBorder" w="full">
+      <Card.Body>{getProposalData()}</Card.Body>
+    </Card.Root>
   )
 }
 
@@ -163,7 +163,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
   }, [isDepositReached, proposalState])
 
   return (
-    <VStack w={"full"} spacing={1}>
+    <VStack w={"full"} gap={1}>
       <HStack w="full">
         <Icon as={FaRegHeart} boxSize={["20px", "20px", "16px"]} color={stateColor} />
 

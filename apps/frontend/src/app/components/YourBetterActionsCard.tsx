@@ -1,6 +1,6 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
-import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
+import { Card, Heading, VStack, Text, Button } from "@chakra-ui/react"
 
 import { useTranslation } from "react-i18next"
 import { NoActionsCard } from "./NoActionsCard"
@@ -32,12 +32,14 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const lastActionsData = lastActions.slice(0, maxActions)
 
   return (
-    <Card w={"full"} variant={"baseWithBorder"}>
-      <CardBody>
-        <VStack spacing={4} align="stretch">
-          <VStack spacing={2} align="stretch">
+    <Card.Root w={"full"} variant={"baseWithBorder"}>
+      <Card.Body>
+        <VStack gap={4} align="stretch">
+          <VStack gap={2} align="stretch">
             <VStack w="full" align={"flex-start"}>
-              <Heading size="md">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
+              <Heading size="xl" fontWeight="bold">
+                {isConnectedUser ? t("Your better actions") : t("Better actions")}
+              </Heading>
             </VStack>
             {isConnectedUser && (
               <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
@@ -45,14 +47,14 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
               </Text>
             )}
           </VStack>
-          <VStack spacing={6} align="stretch">
+          <VStack gap={6} align="stretch">
             {address && <UserSustainabilityOverviewStats address={address} />}
 
             {renderActions && (
-              <VStack spacing={4} align="stretch">
+              <VStack gap={4} align="stretch">
                 {address ? (
                   <>
-                    <Heading size="sm" fontWeight={600}>
+                    <Heading size="md" fontWeight={600}>
                       {t("Last actions")}
                     </Heading>
                     {lastActionsData.length > 0 ? (
@@ -83,7 +85,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
             )}
           </VStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

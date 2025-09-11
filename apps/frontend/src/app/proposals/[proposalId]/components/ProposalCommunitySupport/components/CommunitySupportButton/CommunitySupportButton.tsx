@@ -8,7 +8,7 @@ import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 export const CommunitySupportButton = () => {
   const { account } = useWallet()
   const { open: openConnectModal } = useWalletModal()
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 

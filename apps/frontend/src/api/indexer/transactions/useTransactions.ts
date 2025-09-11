@@ -2,59 +2,53 @@ import { buildQueryString } from "@/api/utils"
 import { TransactionType } from "@/constants"
 import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { z } from "zod"
 
 const indexerUrl = getConfig().indexerUrl
 
-export const TransactionsResponseSchema = z.object({
-  pagination: z.object({
-    hasNext: z.boolean(),
-  }),
-  data: z
-    .array(
-      z.object({
-        blockNumber: z.number(),
-        blockTimestamp: z.number(),
-        user: z.string(),
-        txId: z.string(),
-        amountB3TR: z.number().optional(),
-        amountVOT3: z.number().optional(),
-        txType: z.enum(["SWAP", "CLAIM_REWARD", "PROPOSAL_SUPPORT", "UPGRADE_GM", "B3TR_ACTION"]),
-        appId: z.string().optional(),
-        proof: z
-          .object({
-            version: z.number(),
-            description: z.string(),
-            proof: z.object({
-              image: z.string().optional(),
-              link: z.string().optional(),
-              text: z.string().optional(),
-              video: z.string().optional(),
-            }),
-            impact: z
-              .object({
-                carbon: z.number().optional(),
-                water: z.number().optional(),
-                energy: z.number().optional(),
-                waste_mass: z.number().optional(),
-                waste_items: z.number().optional(),
-                waste_reduction: z.number().optional(),
-                biodiversity: z.number().optional(),
-                people: z.number().optional(),
-                timber: z.number().optional(),
-                plastic: z.number().optional(),
-                learning_time: z.number().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
-      }),
-    )
-    .default([]),
-})
+export interface TransactionsResponse {
+  pagination: {
+    hasNext: boolean
+  }
+  data: B3trTransaction[]
+}
 
-export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>
-export type B3trTransaction = z.infer<typeof TransactionsResponseSchema>["data"][number]
+export interface B3trTransaction {
+  blockNumber: number
+  blockTimestamp: number
+  user: string
+  txId: string
+  amountB3TR?: number
+  amountVOT3?: number
+  txType: "SWAP" | "CLAIM_REWARD" | "PROPOSAL_SUPPORT" | "UPGRADE_GM" | "B3TR_ACTION"
+  appId?: string
+  proof?: {
+    version: number
+    description?: string
+    proof: {
+      description?: string
+      image?: string
+      link?: string
+      text?: string
+      video?: string
+    }
+    impact?: {
+      carbon?: number
+      water?: number
+      energy?: number
+      waste_mass?: number
+      waste_items?: number
+      waste_reduction?: number
+      biodiversity?: number
+      people?: number
+      timber?: number
+      plastic?: number
+      learning_time?: number
+      trees_planted?: number
+      calories_burned?: number
+      clean_energy_production_wh?: number
+    }
+  }
+}
 
 type TransactionsRequest = {
   user: string
@@ -84,14 +78,9 @@ export const getTransactions = async (data: TransactionsRequest): Promise<Transa
   if (!response.ok) {
     throw new Error(`Failed to fetch transactions: ${response.statusText}`)
   }
-  try {
-    const result = await response.json()
 
-    return TransactionsResponseSchema.parse(result)
-  } catch (e) {
-    console.error(e)
-    throw new Error("Failed to parse response")
-  }
+  const res = await response.json()
+  return res
 }
 
 export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" | "size">) => [
@@ -106,10 +95,11 @@ export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" |
  * @param data the request data @see TransactionsRequest
  * @returns the query object with the data @see TransactionsResponse
  */
-export const useTransactions = ({ user, direction = "desc", txType }: Omit<TransactionsRequest, "page" | "size">) => {
+export const useTransactions = ({ user, direction = "desc", txType, size }: Omit<TransactionsRequest, "page">) => {
   return useInfiniteQuery({
     queryKey: getTransactionsQueryKey({ user, direction, txType }),
-    queryFn: ({ pageParam = 0 }) => getTransactions({ page: pageParam, user, direction, txType }),
+    queryFn: ({ pageParam = 0 }) =>
+      getTransactions({ page: pageParam, user, direction, txType, ...(size && { size }) }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,

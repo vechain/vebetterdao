@@ -1,6 +1,6 @@
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { AccessControl__factory } from "@repo/contracts/typechain-types"
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const abi = AccessControl__factory.abi
 const method = "hasRole" as const
@@ -39,7 +39,7 @@ export const hasRoleQueryKey = (role: string, contractAddress: string, address?:
     abi,
     address: contractAddress,
     method,
-    args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
+    args: [getBytes32Role(role) as `0x${string}`, address as `0x${string}`],
   })
 
 /**
@@ -54,7 +54,7 @@ export const useHasRole = (role: string, contractAddress: string, address?: stri
     abi,
     address: contractAddress,
     method,
-    args: [address as `0x${string}`, getBytes32Role(role) as `0x${string}`],
+    args: [getBytes32Role(role) as `0x${string}`, address as `0x${string}`],
     queryOptions: {
       enabled: !!address,
       select: data => data[0],

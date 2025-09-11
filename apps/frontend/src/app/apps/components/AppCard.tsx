@@ -1,18 +1,6 @@
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import {
-  Card,
-  CardBody,
-  VStack,
-  HStack,
-  Skeleton,
-  IconButton,
-  Image,
-  Text,
-  Box,
-  useDisclosure,
-  CardFooter,
-} from "@chakra-ui/react"
+import { Card, VStack, HStack, Skeleton, IconButton, Image, Text, Box, useDisclosure } from "@chakra-ui/react"
 import { FaEllipsisVertical } from "react-icons/fa6"
 import { AppCardInnerDetails } from "./AppCardInnerDetails"
 import { useBreakpoints } from "@/hooks"
@@ -30,7 +18,7 @@ export const AppCard = ({ xApp }: Props) => {
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
   const { data: banner, isLoading: isBannerLoading } = useIpfsImage(appMetadata?.banner)
 
-  const { isOpen: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
+  const { open: isMobileOptionsOpen, onClose: closeMobileOptions, onOpen: openMobileOptions } = useDisclosure()
 
   const router = useRouter()
 
@@ -39,7 +27,7 @@ export const AppCard = ({ xApp }: Props) => {
   }
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       w="full"
       onClick={navigateToAppDetail}
@@ -48,7 +36,7 @@ export const AppCard = ({ xApp }: Props) => {
         backgroundColor: "gray.50",
       }}>
       <Box w="full" position={"relative"} h={200}>
-        <Skeleton w="full" h="full" isLoaded={!isBannerLoading}>
+        <Skeleton w="full" h="full" loading={isBannerLoading}>
           <Image
             alt={`Banner for ${appMetadata?.name}`}
             w="full"
@@ -58,30 +46,30 @@ export const AppCard = ({ xApp }: Props) => {
             borderTopRadius={"md"}
           />
         </Skeleton>
-        <Skeleton isLoaded={!isLogoLoading} alignContent={"start"} pos={"absolute"} bottom={-7} left={5}>
+        <Skeleton loading={isLogoLoading} alignContent={"start"} pos={"absolute"} bottom={-7} left={5}>
           <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
         </Skeleton>
       </Box>
-      <CardBody mt={5}>
+      <Card.Body mt={5}>
         <VStack alignItems={"start"} justify={"flex-start"}>
-          <VStack spacing={1} align="flex-start" w="full">
-            <HStack spacing={1} justifyContent={"space-between"} align="center" w={"full"}>
-              <Skeleton isLoaded={!appMetadataLoading}>
-                <Text fontWeight={"600"} size={"xs"}>
+          <VStack gap={1} align="flex-start" w="full">
+            <HStack gap={1} justifyContent={"space-between"} align="center" w={"full"}>
+              <Skeleton loading={appMetadataLoading}>
+                <Text fontWeight={"600"} textStyle={"xs"}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
               {isMobile ? (
                 <>
                   <IconButton
-                    isRound={true}
-                    icon={<FaEllipsisVertical />}
+                    rounded="full"
                     aria-label="Open app options"
                     onClick={e => {
                       e.stopPropagation()
                       openMobileOptions()
-                    }}
-                  />
+                    }}>
+                    <FaEllipsisVertical />
+                  </IconButton>
                   <AppCardOptionsMobileModal
                     teamWalletAddress={xApp.teamWalletAddress}
                     externalUrl={appMetadata?.external_url}
@@ -102,17 +90,17 @@ export const AppCard = ({ xApp }: Props) => {
                 />
               )}
             </HStack>
-            <Skeleton isLoaded={!appMetadataLoading}>
+            <Skeleton loading={appMetadataLoading}>
               <Text fontSize={"sm"} color={"gray.500"}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>
           </VStack>
         </VStack>
-      </CardBody>
-      <CardFooter>
+      </Card.Body>
+      <Card.Footer>
         <AppCardInnerDetails xApp={xApp} />
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   )
 }

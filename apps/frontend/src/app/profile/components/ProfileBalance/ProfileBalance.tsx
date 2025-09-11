@@ -22,7 +22,7 @@ export const ProfileBalance = ({ address }: Props) => {
           overflow: "hidden",
           bgImage: "url('/assets/backgrounds/cloud-background.webp')",
           bgSize: "cover",
-          bgPosition: "center",
+          backgroundPosition: "center",
           bgRepeat: "no-repeat",
         }}
       />

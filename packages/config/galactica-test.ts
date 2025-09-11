@@ -21,6 +21,7 @@ const config: AppConfig = {
   x2EarnCreatorContractAddress: "0xe88d4b189b58ee90751498b6033f63b497cfa97d",
   tokenAuctionContractAddress: "0x0000000000000000000000000000000000000000",
   stargateNFTContractAddress: "0xe88d4b189b58ee90751498b6033f63b497cfa97d",
+  grantsManagerContractAddress: "0x0000000000000000000000000000000000000001",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://galactica.live.dev.node.vechain.org",
   network: {

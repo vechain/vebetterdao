@@ -94,8 +94,8 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
 
   if (isLoading) return <Spinner />
   return (
-    <VStack w="full" h={24} spacing={0}>
-      <HStack w="full" borderRadius={"50px"} bg="#D5D5D5" h={"16px"} spacing={0}>
+    <VStack w="full" h={24} gap={0}>
+      <HStack w="full" borderRadius={"50px"} bg="#D5D5D5" h={"16px"} gap={0}>
         {parsedVotes.map((vote, index) => (
           <Box
             transition={"all 0.5s linear"}
@@ -125,10 +125,10 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
               key={`${vote.appId}-line`}
               w={`${getLineWidth(Number(vote.value))}%`}
               h={"full"}
-              spacing={0}
+              gap={0}
               align="center">
               <Box w="3px" h={"full"} bg={getLinesColor(index)} />
-              <Skeleton isLoaded={vote.isRest ? true : !logoLoading}>
+              <Skeleton loading={vote.isRest ? false : logoLoading}>
                 {vote.isRest ? (
                   <Flex boxSize={"32px"} borderRadius="9px" bg="gray.100" justify={"center"} align={"center"}>
                     <Text fontSize="16px" fontWeight={600} data-testid="app-rest-vote">

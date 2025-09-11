@@ -14,7 +14,7 @@ export const UserSignaledBanner = () => {
   } = useUserSignalEvents(account?.address ?? "")
   const { data: apps } = useXApps()
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
 
   const allApps = apps?.allApps ?? []
   const signals = activeSignalEvents || []
@@ -81,7 +81,7 @@ export const UserSignaledBanner = () => {
         buttonVariant="outline"
         buttonIcon={<UilInfoCircle />}
       />
-      <SignalModal isOpen={isOpen} onClose={onClose} signals={enrichedSignals} />
+      <SignalModal open={isOpen} onClose={onClose} signals={enrichedSignals} />
     </>
   )
 }

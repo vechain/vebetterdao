@@ -3,13 +3,14 @@ import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { getSecret } from "../helpers/secret"
-import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
+import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import mainnetConfig from "@repo/config/mainnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildResponse } from "../helpers/api/response"
 import { StandardApiError, CustomApiError, SuccessResponseType } from "../helpers/api.types"
+import { buildGasEstimate, buildTxBody } from "../helpers"
 
 interface NetworkConfig {
   nodeUrl: string
@@ -91,15 +92,15 @@ const mintCreatorNFT = async (thor: ThorClient, creatorWalletAddress: string) =>
     [creatorWalletAddress],
   )
 
-  const gasResult = await thor.gas.estimateGas(
+  const gasResult = await buildGasEstimate(
+    thor,
     [clause],
     Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
   )
   if (gasResult.reverted) {
-    console.error("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
     throw new Error(`Transaction reverted: ${JSON.stringify(gasResult?.revertReasons)}`)
   }
-  const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
+  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas)
 
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
 

@@ -1,20 +1,4 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  HStack,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Skeleton,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, HStack, Heading, Input, InputGroup, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useProposalFormStore } from "@/store"
@@ -69,12 +53,14 @@ export const NewProposalSupportPageContent = () => {
   )
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody py={8}>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <VStack spacing={[6, 8]} align="flex-start">
-            <VStack spacing={[4, 6]} align="flex-start">
-              <Heading size={["md", "lg"]}>{t("Community support")}</Heading>
+          <VStack gap={[6, 8]} alignItems="flex-start">
+            <VStack gap={[4, 6]} alignItems="flex-start">
+              <Heading size={["xl", "2xl"]} fontWeight="bold">
+                {t("Community support")}
+              </Heading>
               <Text fontSize={["sm", "md"]} color="gray.500">
                 {t(
                   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",
@@ -83,17 +69,28 @@ export const NewProposalSupportPageContent = () => {
                 {t("VOT3 to become active. You can also contribute with your own VOT3.")}
               </Text>
             </VStack>
-            <VStack spacing={2} align="flex-start" w="full">
+            <VStack gap={2} align="flex-start" w="full">
               <Heading size={["sm", "md"]}>{t("How much VOT3 do you want to lock to fund this proposal?")}</Heading>
               <Text fontSize="sm" color="gray.500">
                 {t("Your VOT3 will be unlocked when the voting session ends.")}
               </Text>
 
-              <FormControl isInvalid={!!errors.amount}>
-                <InputGroup w="full" mt={4}>
-                  <InputLeftElement pointerEvents="none">
-                    <VOT3Icon colorVariant="dark" />
-                  </InputLeftElement>
+              <Field.Root invalid={!!errors.amount}>
+                <InputGroup
+                  w="full"
+                  mt={4}
+                  startElement={<VOT3Icon boxSize={8} colorVariant="dark" />}
+                  startElementProps={{
+                    p: 1,
+                    pointerEvents: "none",
+                  }}
+                  endElement={
+                    <Skeleton loading={thresholdLoading}>
+                      <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500" fontWeight={400}>
+                        {`/ ${compactFormatter.format(Number(threshold))}`}
+                      </Heading>
+                    </Skeleton>
+                  }>
                   <Input
                     data-testid="vot3-amount-input"
                     {...register("amount", {
@@ -109,36 +106,26 @@ export const NewProposalSupportPageContent = () => {
                         }
                       },
                     })}
-                    ml={2}
                     w="full"
-                    variant="flushed"
                     placeholder={t("Enter the amount of VOT3")}
                     fontSize={["xl", "xl", "3xl"]}
-                    fontFamily={"Instrument Sans Variable"}
                   />
-                  <Skeleton isLoaded={!thresholdLoading}>
-                    <InputRightElement w="auto">
-                      <Heading size={["sm", "sm", "lg"]} color="gray.500" fontWeight={400}>
-                        {`/ ${compactFormatter.format(Number(threshold))}`}
-                      </Heading>
-                    </InputRightElement>
-                  </Skeleton>
                 </InputGroup>
-                <Skeleton isLoaded={!balanceLoading}>
+                <Skeleton loading={balanceLoading}>
                   {errors.amount ? (
-                    <FormErrorMessage color="red.500" data-testid="amount-input-error-message">
+                    <Field.ErrorText fontStyle="sm" color="red.500" data-testid="amount-input-error-message">
                       {errors.amount.message}
-                    </FormErrorMessage>
+                    </Field.ErrorText>
                   ) : (
-                    <FormHelperText>
+                    <Field.HelperText fontStyle="sm">
                       {t("Your current VOT3 balance is")} {balance?.formatted}
-                    </FormHelperText>
+                    </Field.HelperText>
                   )}
                 </Skeleton>
-              </FormControl>
+              </Field.Root>
             </VStack>
 
-            <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
+            <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
               <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
@@ -148,7 +135,7 @@ export const NewProposalSupportPageContent = () => {
             </HStack>
           </VStack>
         </form>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -60,17 +60,17 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       alignItems={"flex-start"}
       px={5}
       py={{ base: 3, md: 5 }}
-      spacing={{ base: 2, md: 5 }}
+      gap={{ base: 2, md: 5 }}
       maxW={"360px"}
       h={"full"}
-      textColor={color}
+      color={color}
       borderRadius={"8px"}>
       {isB3TRToVOT3 ? (
         <Image src="/assets/tokens/b3tr-to-vot3.webp" alt="B3TR to VOT3" h={{ base: "50px", md: "87px" }} w="auto" />
       ) : (
         <Image src="/assets/tokens/vot3-to-b3tr.webp" alt="VOT3 to B3TR" h={{ base: "50px", md: "87px" }} w="auto" />
       )}
-      <Text fontSize={{ base: 16, md: 20 }} fontWeight={700} fontFamily={"Instrument Sans, sans-serif"}>
+      <Text fontSize={{ base: 16, md: 20 }} fontWeight={700}>
         {title}
       </Text>
       {description}

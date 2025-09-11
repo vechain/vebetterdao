@@ -1,7 +1,7 @@
 import { BaseModal } from "../BaseModal"
 import { motion } from "framer-motion"
 import { ReactNode } from "react"
-import { Text, useMediaQuery, Flex, Button } from "@chakra-ui/react"
+import { Text, useMediaQuery, Flex, Button, Icon } from "@chakra-ui/react"
 import { IoArrowBackOutline, IoClose } from "react-icons/io5"
 
 export type Step<T extends string> = {
@@ -34,12 +34,10 @@ export const StepModal = <T extends string>({
   disableCloseButton,
 }: StepModalProps<T>) => {
   const handleClose = () => {
-    // reset the active step to 0
     setActiveStep(0)
-    // close the modal
     onClose()
   }
-  const [isDesktop] = useMediaQuery("(min-width: 1060px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
 
   const currentStepContent = steps[activeStep]
 
@@ -56,7 +54,7 @@ export const StepModal = <T extends string>({
       ariaTitle={currentStepContent.title}
       ariaDescription={currentStepContent.description}
       modalContentProps={{
-        maxW: "container.md",
+        maxW: "breakpoint-md",
         w: "auto",
         p: 6,
         pt: 2,
@@ -69,7 +67,7 @@ export const StepModal = <T extends string>({
       <Flex position="relative" h="60px" alignItems="center">
         {!isFirstStep && !disableBackButton ? (
           <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
-            <IoArrowBackOutline size={30} />
+            <Icon as={IoArrowBackOutline} boxSize="30px" />
           </Button>
         ) : null}
 
@@ -84,7 +82,7 @@ export const StepModal = <T extends string>({
 
         {isDesktop && !disableCloseButton ? (
           <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
-            <IoClose size={30} />
+            <Icon as={IoClose} boxSize="30px" />
           </Button>
         ) : null}
       </Flex>

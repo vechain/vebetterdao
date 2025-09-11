@@ -2,10 +2,10 @@
 import {
   useAllocationsRound,
   useAllocationsRoundState,
-  useGetVotesOnBlock,
   useHasVotedInRound,
   useVotingThreshold,
   useRoundXApps,
+  useTotalVotesOnBlock,
 } from "@/api"
 import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
@@ -55,10 +55,12 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { data: state } = useAllocationsRoundState(roundId)
 
   const { data: roundInfo, isLoading: stateLoading } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
+  const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
-    account?.address ?? undefined,
+    account?.address ?? "",
   )
+  const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
+  const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
 
   const { data: threshold } = useVotingThreshold()
 
@@ -129,10 +131,10 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   return (
     <>
-      <SeeVoteDetailsModal roundId={roundId} votes={votes} isOpen={seeAllModal.isOpen} onClose={seeAllModal.onClose} />
+      <SeeVoteDetailsModal roundId={roundId} votes={votes} isOpen={seeAllModal.open} onClose={seeAllModal.onClose} />
 
       <ResponsiveCard>
-        <VStack w="full" spacing={8} align={"flex-start"}>
+        <VStack w="full" gap={8} align={"flex-start"}>
           <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
@@ -142,21 +144,18 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
             )}
           </Text>
           <ResponsiveCard cardProps={{ variant: "filled" }}>
-            <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
-              <VStack spacing={2} align="flex-start" w="full">
+            <VStack flex={1} w="full" gap={8} align={"flex-start"}>
+              <VStack gap={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">
                   <Heading fontSize={["20px", "20px", "24px"]} fontWeight={700}>
                     {t("Your vote")}
                   </Heading>
-                  <Button
-                    variant="link"
-                    colorScheme="primary"
-                    onClick={seeAllModal.onOpen}
-                    rightIcon={<FiArrowUpRight />}>
+                  <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
                     {t("See details")}
+                    <FiArrowUpRight />
                   </Button>
                 </HStack>
-                <Skeleton isLoaded={!votesAtSnapshotLoading}>
+                <Skeleton loading={votesAtSnapshotLoading}>
                   <Text fontSize="16px" fontWeight="400">
                     <Trans
                       i18nKey={"{{amount}} distributed among {{apps}} apps"}

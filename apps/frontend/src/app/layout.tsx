@@ -3,6 +3,18 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
+// import { Inter, Instrument_Sans } from "next/font/google"
+// const inter = Inter({
+//   variable: "--font-inter",
+//   subsets: ["latin"],
+//   display: "swap",
+// })
+// const instrumentSans = Instrument_Sans({
+//   variable: "--font-instrument-sans",
+//   subsets: ["latin"],
+//   display: "swap",
+// })
+
 import { Footer, TransactionModal } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
@@ -61,10 +73,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html
+      suppressHydrationWarning
       lang="en"
       style={{
         scrollBehavior: "smooth",
-      }}>
+      }}
+      // className={`${inter.variable} ${instrumentSans.variable}`}
+    >
       <head>
         <title>{t("VeBetterDAO")}</title>
         <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO's governance." />
@@ -101,13 +116,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <Providers>
           {isProduction && <FreshDeskWidget widgetId={103000007852} />}
-          <VStack minH="100vh" gap={0} align="stretch">
+          <VStack minH="100vh" gap={0} align="stretch" bg="layout-bg">
             <Navbar />
             <Flex flex={1}>
               <Container
                 mt={{ base: 2, md: 10 }}
                 mb={[20, 20, 20]}
-                maxW={"container.xl"}
+                px={[4, 4, 4]}
+                maxW="breakpoint-xl"
                 display={"flex"}
                 flex={1}
                 alignItems={"center"}

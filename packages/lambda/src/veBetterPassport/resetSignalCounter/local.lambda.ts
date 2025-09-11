@@ -2,11 +2,12 @@ import path from "path"
 import dotenv from "dotenv"
 
 import { ThorClient } from "@vechain/sdk-network"
-import { ABIContract, Address, Clause, Mnemonic, Transaction } from "@vechain/sdk-core"
+import { ABIContract, Address, Clause, Transaction, HDKey, TransactionClause } from "@vechain/sdk-core"
 
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import localConfig from "@repo/config/local"
 import { getConfig } from "@repo/config"
+import { buildTxBody } from "../../helpers"
 
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env") })
 
@@ -39,14 +40,18 @@ const VET_DOMAINS_CONTRACT_ABI_FRAGMENT_MOCK = [
  * Retrieves the caller wallet information.
  * @returns An object containing the wallet address and private key.
  */
-const getCallerWalletInfo = (): { walletAddress: string; privateKey: string } => {
+const getCallerWalletInfo = (): { walletAddress: string; privateKey: Uint8Array } => {
   const PHRASE = process.env.MNEMONIC?.split(" ")
   if (!PHRASE) {
     throw new Error("Mnemonic not found")
   }
 
-  const privateKey = Buffer.from(Mnemonic.toPrivateKey(PHRASE, "m/0")).toString("hex")
-  const walletAddress = Address.ofPrivateKey(Mnemonic.toPrivateKey(PHRASE)).toString()
+  const child = HDKey.fromMnemonic(PHRASE).deriveChild(0)
+  const privateKey = child.privateKey
+  if (!privateKey) {
+    throw new Error("Private key not found")
+  }
+  const walletAddress = Address.ofPublicKey(child.publicKey as Uint8Array).toString()
 
   return { walletAddress, privateKey }
 }
@@ -64,20 +69,25 @@ const resetSignalCounterLocal = async (
 ): Promise<{ receipt: any; gasResult: any }> => {
   const { walletAddress, privateKey } = getCallerWalletInfo()
 
+  const clauses: TransactionClause[] = []
   const clause = Clause.callFunction(
     Address.of(localConfig.veBetterPassportContractAddress),
     ABIContract.ofAbi(VeBetterPassport__factory.abi).getFunction("resetUserSignalsWithReason"),
     [bannedWallet, reason],
   )
 
-  const gasResult = await thor.gas.estimateGas([clause], walletAddress)
+  for (let i = 0; i < 100; i++) {
+    clauses.push(clause)
+  }
+
+  const gasResult = await thor.gas.estimateGas(clauses, walletAddress)
   if (gasResult.reverted) {
     console.error("Txn (Gas) reverted:", gasResult.revertReasons, gasResult.vmErrors)
     throw new Error(`Txn (Gas) reverted: ${JSON.stringify(gasResult?.revertReasons)}`)
   }
 
-  const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
-  const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
+  const txBody = await buildTxBody(thor, clauses, 4_000_000)
+  const signedTx = Transaction.of(txBody).sign(privateKey)
   const tx = await thor.transactions.sendTransaction(signedTx)
   const receipt = await thor.transactions.waitForTransaction(tx.id)
 
@@ -102,15 +112,16 @@ export const getVerifiedVetDomain = async (thor: ThorClient, walletAddress: stri
 const main = async () => {
   try {
     const thor = ThorClient.at(NODE_URL, { isPollingEnabled: false })
+    console.log("thor", (await thor.gas.getMaxPriorityFeePerGas()).toString())
 
     const bannedWallet = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 
-    const isVerified = await getVerifiedVetDomain(thor, bannedWallet)
-    console.log("isVerified", isVerified)
+    // const isVerified = await getVerifiedVetDomain(thor, bannedWallet)
+    // console.log("isVerified", isVerified)
 
     const reason = "Reseting user signal counter for KYC'ed wallet"
-    const result = await resetSignalCounterLocal(thor, bannedWallet, reason)
-    console.log("Signal counter reset successfully:", result)
+    // const result = await resetSignalCounterLocal(thor, bannedWallet, reason)
+    // console.log("Signal counter reset successfully:", result)
   } catch (error) {
     console.error("Error executing reset signal counter:", error)
     throw error

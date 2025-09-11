@@ -1,6 +1,6 @@
 import { BaseModal } from "../BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { ReactNode, useMemo, useRef, useCallback } from "react"
+import { ReactNode, useMemo, useCallback } from "react"
 import { TransactionStatus } from "@vechain/vechain-kit"
 import { SuccessModalContent } from "./SuccessModalContent"
 import { ErrorModalContent } from "./ErrorModalContent"
@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next"
 
 export const TransactionModal = () => {
   const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()
-  const portalRef = useRef(document.body)
   const { t } = useTranslation()
 
   const canShowCloseButton = useMemo(() => {
@@ -88,15 +87,10 @@ export const TransactionModal = () => {
     <BaseModal
       isOpen={isTxModalOpen}
       onClose={onClose}
-      modalProps={{
-        portalProps: {
-          containerRef: portalRef,
-        },
-      }}
       showCloseButton={canShowCloseButton}
       isCloseable={canShowCloseButton}
       modalContentProps={{
-        zIndex: 9999,
+        zIndex: 10,
       }}
       modalBodyProps={{
         p: 10,

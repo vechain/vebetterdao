@@ -5,18 +5,14 @@ import {
   VStack,
   HStack,
   Tag,
-  TagLabel,
-  TagCloseButton,
   Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverBody,
   Button,
   Input,
   InputGroup,
-  InputLeftElement,
   Flex,
   useDisclosure,
+  Portal,
+  CloseButton,
 } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { FaSearch, FaPlus } from "react-icons/fa"
@@ -30,16 +26,17 @@ type EditAppCategoriesProps = {
 
 export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose, setOpen } = useDisclosure()
   const [searchQuery, setSearchQuery] = useState<string>("")
 
   const { setValue, watch, register } = form
   const selectedCategories = watch("categories") ?? []
 
-  // Filter categories based on search query
   const filteredCategories = APP_CATEGORIES.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  const maxAllowedCategories = MAX_CATEGORIES
 
   const handleSelectCategory = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
@@ -48,10 +45,10 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
         selectedCategories.filter(id => id !== categoryId),
         { shouldDirty: true },
       )
-    } else if (selectedCategories.length < MAX_CATEGORIES) {
+    } else if (selectedCategories.length < maxAllowedCategories) {
       setValue("categories", [...selectedCategories, categoryId], { shouldDirty: true })
     }
-    if (selectedCategories.length + 1 >= MAX_CATEGORIES && !selectedCategories.includes(categoryId)) {
+    if (selectedCategories.length + 1 >= maxAllowedCategories && !selectedCategories.includes(categoryId)) {
       onClose()
     }
   }
@@ -78,18 +75,18 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
   }, [isOpen, register, t])
 
   return (
-    <VStack align="flex-start" spacing={4} width="full">
+    <VStack align="flex-start" gap={4} width="full">
       <Text fontSize={16} fontWeight={500}>
         {t("App Categories")}
       </Text>
 
-      <HStack spacing={3} flexWrap="wrap" alignItems="flex-start">
+      <HStack gap={3} flexWrap="wrap" alignItems="flex-start">
         {selectedCategories.map(categoryId => {
           const category = getCategoryById(categoryId)
           if (!category) return null
 
           return (
-            <Tag
+            <Tag.Root
               key={categoryId}
               size="lg"
               fontSize="14px"
@@ -98,58 +95,74 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
               backgroundColor={category.color}
               color="black"
               mb={2}>
-              <TagLabel>{category.name}</TagLabel>
-              <TagCloseButton onClick={() => handleRemoveCategory(categoryId)} />
-            </Tag>
+              <Tag.Label>{category.name}</Tag.Label>
+              <Tag.CloseTrigger asChild>
+                <CloseButton size="sm" color="gray" onClick={() => handleRemoveCategory(categoryId)} />
+              </Tag.CloseTrigger>
+            </Tag.Root>
           )
         })}
 
-        {selectedCategories.length < MAX_CATEGORIES && (
-          <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose} placement="bottom-start" closeOnBlur={true}>
-            <PopoverTrigger>
-              <Button leftIcon={<FaPlus />} variant="outline" fontSize="14px" borderRadius="full" size="sm">
+        {selectedCategories.length < maxAllowedCategories && (
+          <Popover.Root
+            open={isOpen}
+            onOpenChange={details => {
+              if (!details.open) onClose()
+              else onOpen()
+            }}
+            positioning={{ placement: "bottom-start" }}
+            closeOnInteractOutside={true}>
+            <Popover.Trigger asChild>
+              <Button onClick={() => setOpen(true)} variant="outline" fontSize="14px" borderRadius="full" size="sm">
+                <FaPlus />
                 {t("Add Category")}
               </Button>
-            </PopoverTrigger>
-            <PopoverContent width="300px" maxH="400px" overflowY="auto">
-              <PopoverBody p={3}>
-                <VStack spacing={3} align="stretch">
-                  <InputGroup size="md">
-                    <InputLeftElement pointerEvents="none">
-                      <FaSearch color="#6A6A6A" />
-                    </InputLeftElement>
-                    <Input
-                      placeholder={t("Find a category")}
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      borderRadius="md"
-                    />
-                  </InputGroup>
+            </Popover.Trigger>
+            <Portal>
+              <Popover.Positioner>
+                <Popover.Content width="300px" maxH="400px" overflowY="auto">
+                  <Popover.Body p={3}>
+                    <VStack gap={3} align="stretch">
+                      <InputGroup startElement={<FaSearch color="#6A6A6A" />}>
+                        <Input
+                          size="md"
+                          placeholder={t("Find a category")}
+                          value={searchQuery}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          borderRadius="md"
+                        />
+                      </InputGroup>
 
-                  {filteredCategories.length === 0 ? (
-                    <Text textAlign="center" py={2} color="#6A6A6A">
-                      {t("No categories found")}
-                    </Text>
-                  ) : (
-                    filteredCategories.map(category => (
-                      <Flex
-                        key={category.id}
-                        p={2}
-                        borderRadius="md"
-                        alignItems="center"
-                        cursor="pointer"
-                        bg={selectedCategories.includes(category.id) ? "blue.50" : "transparent"}
-                        _hover={{ bg: "#F5F5F5" }}
-                        onClick={() => handleSelectCategory(category.id)}>
-                        <Box width="12px" height="12px" borderRadius="full" bg={category.color} mr={3} />
-                        <Text>{category.name}</Text>
-                      </Flex>
-                    ))
-                  )}
-                </VStack>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
+                      {filteredCategories.length === 0 ? (
+                        <Text textAlign="center" py={2} color="#6A6A6A">
+                          {t("No categories found")}
+                        </Text>
+                      ) : (
+                        filteredCategories.map(category => (
+                          <Flex
+                            key={category.id}
+                            p={2}
+                            borderRadius="md"
+                            alignItems="center"
+                            cursor="pointer"
+                            bg={selectedCategories.includes(category.id) ? "primary.50" : "transparent"}
+                            _hover={{ bg: "gray.100" }}
+                            _dark={{
+                              bg: selectedCategories.includes(category.id) ? "primary.900" : "transparent",
+                              _hover: { bg: "gray.900" },
+                            }}
+                            onClick={() => handleSelectCategory(category.id)}>
+                            <Box width="12px" height="12px" borderRadius="full" bg={category.color} mr={3} />
+                            <Text>{category.name}</Text>
+                          </Flex>
+                        ))
+                      )}
+                    </VStack>
+                  </Popover.Body>
+                </Popover.Content>
+              </Popover.Positioner>
+            </Portal>
+          </Popover.Root>
         )}
       </HStack>
 

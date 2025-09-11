@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { XAllocationPool__factory } from "@repo/contracts"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
 import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
@@ -80,10 +80,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
           const numAmount = Number(parsedAmount)
 
           // Update the cache
-          queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
-            amount: parsedAmount,
-            appId,
-          })
+          queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), result)
 
           results[appId]!.amount += numAmount
         })

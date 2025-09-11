@@ -1,6 +1,6 @@
 import { SustainabilityActionsResponse, useSustainabilityActions } from "@/api"
 import InfiniteScroll from "react-infinite-scroll-component"
-import { VStack, Spinner, HStack, Heading, Button, Card, CardBody, Text, Center } from "@chakra-ui/react"
+import { VStack, Spinner, HStack, Heading, Button, Card, Text, Center } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { Dispatch, SetStateAction } from "react"
 import dayjs from "dayjs"
@@ -45,8 +45,8 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
   const groupedActions = groupActionsByDay(actions)
 
   return (
-    <Card w="full" variant="baseWithBorder">
-      <CardBody>
+    <Card.Root w="full" variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between" align="baseline" mb={4}>
             <Heading size="md">{t("Actions history")}</Heading>
@@ -69,7 +69,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
               }>
               <VStack gap={6} align="stretch">
                 {Object.entries(groupedActions).map(([day, dayActions]) => (
-                  <VStack key={day} spacing={3} align="stretch">
+                  <VStack key={day} gap={3} align="stretch">
                     <Text fontWeight="600" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
@@ -89,7 +89,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
             </InfiniteScroll>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

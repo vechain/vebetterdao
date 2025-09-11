@@ -8,12 +8,12 @@ import {
   useCurrentAllocationsRoundId,
   useAllocationAmount,
   useParticipatedInGovernance,
-  useSelectedGmNft,
   useGMLevelsOverview,
   usePotentialRewardsFromIndexer,
+  useGetUserGMs,
 } from "@/api"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
-import { BaseTooltip } from "@/components"
+import { Tooltip } from "@/components/ui/tooltip"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 const DECIMAL_PLACES = 2
@@ -22,8 +22,8 @@ const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 export const GalaxyRewardsCalculator = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { gmLevel, gmId, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-  const usersGM = { gmLevel, gmId, b3trToUpgradeGMToNextLevel: Number(b3trToUpgradeGMToNextLevel) }
+  const { data: userGms } = useGetUserGMs()
+  const usersGM = userGms?.find(gm => gm.isSelected)
   const router = useRouter()
 
   const { data: gmLevelOverview } = useGMLevelsOverview()
@@ -48,7 +48,7 @@ export const GalaxyRewardsCalculator = () => {
     gmLevelOverview || [],
     emissionAmount_gmRewards,
     selectedGMLevel ?? "",
-    usersGM.gmLevel,
+    usersGM?.tokenLevel,
   )
 
   const estimatedRewards = useMemo(() => {
@@ -56,7 +56,7 @@ export const GalaxyRewardsCalculator = () => {
       return { potentialRewards, currentRewards }
     }
     return null
-  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards])
+  }, [account, selectedGMLevel, emissionAmount_gmRewards, potentialRewards, currentRewards])
 
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
@@ -69,7 +69,7 @@ export const GalaxyRewardsCalculator = () => {
   if (!account || !hasVoted) return <></>
 
   return (
-    <Card
+    <Card.Root
       p={7}
       variant="baseWithBorder"
       alignItems="center"
@@ -92,20 +92,24 @@ export const GalaxyRewardsCalculator = () => {
         alignItems={"center"}>
         <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} usersGM={usersGM} />
 
-        <Stack spacing={4} p={4} alignItems="center" justifyContent="flex-end" w="full">
+        <Stack gap={4} p={4} alignItems="center" justifyContent="flex-end" w="full">
           {/* ESTIMATE CARD */}
-          <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
+          <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
               <Heading fontSize="x-large">{t("Potential Rewards")}</Heading>
-              <BaseTooltip
-                text={t(
-                  "Rewards are estimated based on round {{round}} and the current GM distribution (levels, multipliers, and number of NFTs). Final rewards will be determined when the round ends and all votes are cast.",
-                  { round: round },
-                )}>
+              <Tooltip
+                content={
+                  <Text>
+                    {t(
+                      "Rewards are estimated based on round {{round}} and the current GM distribution (levels, multipliers, and number of NFTs). Final rewards will be determined when the round ends and all votes are cast.",
+                      { round: round },
+                    )}
+                  </Text>
+                }>
                 <span>
                   <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
                 </span>
-              </BaseTooltip>
+              </Tooltip>
             </HStack>
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
@@ -114,22 +118,26 @@ export const GalaxyRewardsCalculator = () => {
                 {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
               </Text>
             </HStack>
-          </Card>
+          </Card.Root>
           {/* END ESTIMATED CARD */}
 
           {/* ACTUAL CARD */}
-          <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
+          <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
               <Heading fontSize="x-large">{t("Estimated Expected Rewards")}</Heading>
-              <BaseTooltip
-                text={t(
-                  "The current estimated rewards for round {{round}}. Note: these are based on the current GM supply and may change as more users vote or upgrade their NFTs.",
-                  { round: round },
-                )}>
+              <Tooltip
+                content={
+                  <Text>
+                    {t(
+                      "The current estimated rewards for round {{round}}. Note: these are based on the current GM supply and may change as more users vote or upgrade their NFTs.",
+                      { round: round },
+                    )}
+                  </Text>
+                }>
                 <span>
                   <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
                 </span>
-              </BaseTooltip>
+              </Tooltip>
             </HStack>
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
@@ -139,11 +147,11 @@ export const GalaxyRewardsCalculator = () => {
                 {compactFormatter.format(Number(estimatedRewards?.currentRewards ?? 0))}
               </Text>
             </HStack>
-          </Card>
+          </Card.Root>
           {/* END ACTUAL CARD */}
         </Stack>
       </Stack>
       <Text fontSize="xs" color="white" textAlign="center"></Text>
-    </Card>
+    </Card.Root>
   )
 }

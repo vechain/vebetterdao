@@ -1,18 +1,5 @@
 import { useXAppMetadata } from "@/api"
-import {
-  Box,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  HStack,
-  Heading,
-  Image,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Skeleton,
-  Stack,
-} from "@chakra-ui/react"
+import { Box, Field, HStack, Heading, Image, Input, InputGroup, Skeleton, Stack, Text } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { scaledDivision } from "@/utils/MathUtils"
@@ -39,7 +26,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
   return (
     <Stack
       direction={["column", "column", "row"]}
-      spacing={4}
+      gap={4}
       justify={"space-between"}
       align={["flex-start", "flex-start", "center"]}
       py={[4, 4, "16px"]}
@@ -47,17 +34,22 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
       borderRadius={"16px"}
       w="full"
       bg="light-contrast-on-card-bg">
-      <HStack spacing={[2, 2, 3]} align="center" flex={1}>
-        <Skeleton isLoaded={!isLogoLoading}>
+      <HStack gap={[2, 2, 3]} align="center" flex={1}>
+        <Skeleton loading={isLogoLoading}>
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"64px"} borderRadius="9px" />
         </Skeleton>
-        <Heading size={["16px"]} fontWeight={500}>
+        <Heading size="md" fontWeight={500}>
           {appMetadata?.name}
         </Heading>
       </HStack>
       <Box flex={[1, 1, 0.5]} w="full">
-        <FormControl isInvalid={!!error} isDisabled={isDisabled}>
-          <InputGroup>
+        <Field.Root invalid={!!error} disabled={isDisabled}>
+          <InputGroup
+            endElement={
+              <Text fontWeight={400} color="#6A6A6A" fontSize={"16px"}>
+                {t("%")}
+              </Text>
+            }>
             <Input
               borderRadius={"12px"}
               borderWidth={1}
@@ -91,14 +83,11 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
                 }
                 onChange(valueToChange)
               }}
-              isDisabled={isDisabled}
+              disabled={isDisabled}
             />
-            <InputRightElement fontWeight={400} color="#6A6A6A" fontSize={"16px"}>
-              {t("%")}
-            </InputRightElement>
           </InputGroup>
           {totalVotesAvailable && !error ? (
-            <FormHelperText
+            <Field.HelperText
               data-testid={`${appMetadata?.name}-vote-estimated-votes`}
               fontWeight={400}
               fontSize={"16px"}
@@ -109,13 +98,13 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
                   BigNumber.ROUND_DOWN,
                 ),
               })}
-            </FormHelperText>
+            </Field.HelperText>
           ) : (
-            <FormErrorMessage data-testid={`${appMetadata?.name}-vote-error`} fontWeight={400} fontSize={"16px"}>
+            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} fontWeight={400} fontSize={"16px"}>
               {error}
-            </FormErrorMessage>
+            </Field.ErrorText>
           )}
-        </FormControl>
+        </Field.Root>
       </Box>
     </Stack>
   )

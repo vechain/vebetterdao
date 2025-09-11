@@ -7,25 +7,14 @@ import {
 } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  HStack,
-  Heading,
-  Image,
-  Skeleton,
-  Text,
-  VStack,
-  Grid,
-  useColorModeValue,
-  Button,
-} from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
+import { Card, HStack, Heading, Image, Skeleton, Text, VStack, Grid, Link } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { v4 as uuid } from "uuid"
+import { useTheme } from "next-themes"
+import NextLink from "next/link"
+import { useRouter } from "next/navigation"
 
 type Props = {
   maxApps?: number
@@ -33,8 +22,6 @@ type Props = {
 
 export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
-  const router = useRouter()
-
   // Apps are listed based on the votes they received in the previous round and are eligible in the next round
   const { data: previousRoundId } = usePreviousAllocationRoundId()
   const { data: allMostVotedXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
@@ -49,19 +36,18 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   if (!slicedXApps?.length) return null
 
   return (
-    <Card variant="baseWithBorder">
-      <CardHeader>
+    <Card.Root variant="baseWithBorder">
+      <Card.Header>
         <VStack w="full" justify={"flex-start"} align={"start"}>
           <HStack w="full" justify={"space-between"}>
-            <Heading size="md">{t("Explore Apps")}</Heading>
+            <Heading size="xl">{t("Explore Apps")}</Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Button
-                variant="link"
-                colorScheme="primary"
-                rightIcon={<FiArrowUpRight />}
-                onClick={() => router.push("/apps")}>
-                {t("See all")}
-              </Button>
+              <Link asChild variant="plain" color="primary" fontWeight="semibold">
+                <NextLink href="/apps">
+                  {t("See all")}
+                  <FiArrowUpRight />
+                </NextLink>
+              </Link>
             )}
           </HStack>
 
@@ -69,13 +55,15 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
             {t("Use our apps to complete sustainable actions and earn token rewards.")}
           </Text>
         </VStack>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <DashboardXAppCard key={`xApp-${xApp?.id ?? uuid()}`} xApp={xApp.app} />)}
+          {slicedXApps?.map(xApp => (
+            <DashboardXAppCard key={`xApp-${xApp?.id ?? uuid()}`} xApp={xApp.app} />
+          ))}
         </Grid>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }
 
@@ -83,14 +71,15 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
   const router = useRouter()
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+  const { resolvedTheme } = useTheme()
 
-  const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
-  const cardBackgroundColor = useColorModeValue("#F7F7F7", "#131313")
+  const nonActiveBackgroundColor = resolvedTheme === "light" ? "rgba(166, 217, 110, 0.12)" : "rgba(166, 217, 110, 0.12)"
+  const cardBackgroundColor = resolvedTheme === "light" ? "#F7F7F7" : "#131313"
   const navigateToAppDetail = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
   }, [router, xApp.id])
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       backgroundColor={cardBackgroundColor}
       onClick={navigateToAppDetail}
@@ -99,22 +88,22 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}>
-      <CardBody>
-        <VStack alignItems={"start"} justify={"flex-start"} spacing={6}>
-          <HStack spacing={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
-            <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+      <Card.Body>
+        <VStack alignItems={"start"} justify={"flex-start"} gap={6}>
+          <HStack gap={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
+            <Skeleton loading={isLogoLoading} alignContent={"start"}>
               <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
             </Skeleton>
 
-            <VStack spacing={1} align="flex-start" w={"fit-content"}>
-              <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
-                <Heading size={"sm"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
+            <VStack gap={1} align="flex-start" w={"fit-content"}>
+              <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
+                <Heading size={"md"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
               </Skeleton>
             </VStack>
           </HStack>
 
-          <HStack spacing={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
-            <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
+          <HStack gap={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
+            <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
               <Text fontSize={"sm"} color={"gray.500"}>
                 {appMetadata?.description
                   ? appMetadata.description.slice(0, 150) + "..."
@@ -125,7 +114,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
             </Skeleton>
           </HStack>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

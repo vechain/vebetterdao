@@ -5,7 +5,7 @@ import { MAINNET_URL, TESTNET_URL, ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 
 import { isValid } from "@repo/utils/AddressUtils"
-import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 import stagingConfig from "@repo/config/testnet-staging"
 import mainnetConfig from "@repo/config/mainnet"
@@ -14,6 +14,7 @@ import { getSecret } from "../../helpers/secret"
 import { CustomApiError, StandardApiError, SuccessResponseType } from "../../helpers/api.types"
 import { buildResponse } from "../../helpers/api/response"
 import { AppEnv } from "@repo/config/contracts"
+import { buildGasEstimate, buildTxBody } from "../../helpers"
 
 const VET_DOMAINS_CONTRACT_ABI_FRAGMENT = [
   {
@@ -158,13 +159,8 @@ const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason
     [bannedWallet, reason],
   )
 
-  const gasResult = await thor.gas.estimateGas([clause], walletAddress)
-  if (gasResult.reverted) {
-    console.error("Txn (Gas) reverted:", gasResult.revertReasons, gasResult.vmErrors)
-    throw new Error(`Txn (Gas) reverted: ${JSON.stringify(gasResult?.revertReasons)}`)
-  }
-
-  const txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
+  const gasResult = await buildGasEstimate(thor, [clause], walletAddress)
+  const txBody = await buildTxBody(thor, [clause], gasResult.totalGas)
   const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
   const tx = await thor.transactions.sendTransaction(signedTx)
   const receipt = await thor.transactions.waitForTransaction(tx.id)

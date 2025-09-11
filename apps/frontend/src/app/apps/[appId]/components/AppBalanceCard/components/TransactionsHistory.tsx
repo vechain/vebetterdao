@@ -89,7 +89,7 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
 
   return (
     <HStack p={4} justify="space-between" borderRadius="md" bg={bgColor}>
-      <VStack spacing={0} alignItems={"flex-start"}>
+      <VStack gap={0} alignItems={"flex-start"}>
         <Text
           _hover={{
             color: "blue.500",

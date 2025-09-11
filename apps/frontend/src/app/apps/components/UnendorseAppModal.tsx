@@ -1,5 +1,4 @@
-import { useXNode } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
+import { useGetUserNodes, useNodesEndorsedApps } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
@@ -9,7 +8,9 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 type Props = {
+  xNodeId: string
   isOpen: boolean
   onClose: () => void
 }
@@ -22,12 +23,15 @@ export type PropsEndorsement = {
   xNodeLevel?: number
 }
 
-export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
+export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { endorsedApp, xNodeId, xNodePoints } = useXNode()
-  const { data: logo } = useIpfsImage(endorsedApp?.logo)
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
+
+  const { data: nodes } = useGetUserNodes()
+  const node = nodes?.allNodes?.find(node => node.nodeId === xNodeId)
+  const { data: endorsedApps = [] } = useNodesEndorsedApps([xNodeId])
+  const endorsedApp = endorsedApps[0]?.endorsedApp
 
   const handleSuccess = useCallback(() => {
     onClose()
@@ -53,12 +57,23 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   //   xNodeLevel,
   // }
   return (
-    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
-      <VStack spacing={6} align="flex-start" w="full">
+    <BaseModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={onClose}
+      modalProps={{
+        size: "lg",
+      }}>
+      <VStack gap={6} align="flex-start" w="full">
         <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
 
         <Flex position="relative" alignSelf={"center"}>
-          <Image src={logo?.image ?? ""} alt="app-logo" w="28" h="28" rounded="md" />
+          <Image
+            src={endorsedApp?.metadata?.logo ?? ""}
+            alt={endorsedApp?.metadata?.name ?? ""}
+            w="28"
+            h="28"
+            rounded="md"
+          />
           <Text
             position="absolute"
             top={"-4"}
@@ -71,10 +86,10 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
             color="#D23F63"
             fontWeight="700">
             {"-"}
-            {xNodePoints}
+            {node?.xNodePoints}
           </Text>
         </Flex>
-        <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} spacing={4}>
+        <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} gap={4}>
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
             <Text fontSize={"16px"} as="span">

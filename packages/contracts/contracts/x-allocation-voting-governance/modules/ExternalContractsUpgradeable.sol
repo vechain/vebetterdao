@@ -29,6 +29,7 @@ import { IEmissions } from "../../interfaces/IEmissions.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
 import { IRelayerRewardsPool } from "../../interfaces/IRelayerRewardsPool.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
@@ -43,6 +44,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     IEmissions _emissions;
     IVoterRewards _voterRewards;
     IVeBetterPassport _veBetterPassport;
+    IB3TRGovernor _b3trGovernor;
     IRelayerRewardsPool _relayerRewardsPool;
   }
 
@@ -97,7 +99,12 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     $._veBetterPassport = _veBetterPassport;
   }
 
-  function __ExternalContracts_init_v7(IRelayerRewardsPool _relayerRewardsPool) internal onlyInitializing {
+  function __ExternalContracts_init_v3(IB3TRGovernor _b3trGovernor) internal onlyInitializing {
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    $._b3trGovernor = _b3trGovernor;
+  }
+
+  function __ExternalContracts_init_v8(IRelayerRewardsPool _relayerRewardsPool) internal onlyInitializing {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._relayerRewardsPool = _relayerRewardsPool;
   }
@@ -130,6 +137,14 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   function veBetterPassport() public view override returns (IVeBetterPassport) {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     return $._veBetterPassport;
+  }
+
+  /**
+   * @dev Get the B3TRGovernor contract
+   */
+  function b3trGovernor() public view override returns (IB3TRGovernor) {
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    return $._b3trGovernor;
   }
 
   /**
@@ -195,6 +210,16 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
 
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     $._veBetterPassport = newVeBetterPassport;
+  }
+
+  /**
+   * @dev Sets the B3TRGovernor contract
+   * @param newB3TRGovernor The new B3TRGovernor contract address
+   */
+  function _setB3TRGovernor(IB3TRGovernor newB3TRGovernor) internal virtual {
+    require(address(newB3TRGovernor) != address(0), "XAllocationVotingGovernor: new B3TRGovernor is the zero address");
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    $._b3trGovernor = newB3TRGovernor;
   }
 
   /**

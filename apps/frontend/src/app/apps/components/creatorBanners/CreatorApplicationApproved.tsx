@@ -1,4 +1,4 @@
-import { Button, Card, CardBody, Heading, Image, Stack, Text, Box, HStack } from "@chakra-ui/react"
+import { Button, Card, Heading, Image, Stack, Text, Box, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
@@ -11,7 +11,7 @@ export const CreatorApplicationApproved = () => {
   }
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       w="full"
       h="full"
@@ -20,7 +20,7 @@ export const CreatorApplicationApproved = () => {
         backgroundColor: "#CEDCFD",
         borderRadius: "20px",
       }}>
-      <CardBody p={0}>
+      <Card.Body p={0}>
         <HStack w="full" h="full">
           {/* Left Section: Image full height when mobile */}
           <Box w={"150px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
@@ -51,7 +51,7 @@ export const CreatorApplicationApproved = () => {
             </Button>
           </Stack>
         </HStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

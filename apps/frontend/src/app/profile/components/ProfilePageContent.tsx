@@ -1,4 +1,4 @@
-import { VStack, HStack, Button, Box } from "@chakra-ui/react"
+import { VStack, HStack, Button, Box, Icon, Text, Link } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { useMemo, useCallback, memo, useState, useEffect } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
@@ -13,6 +13,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { FaAngleLeft } from "react-icons/fa6"
 import { ProfileGMLevel } from "./ProfileGMLevel"
+import { ProfileNodes } from "./ProfileNodes"
 
 enum Tab {
   Balance = "balance",
@@ -20,6 +21,7 @@ enum Tab {
   Governance = "governance",
   LinkedAccounts = "linked-accounts",
   GM = "gm",
+  Nodes = "nodes",
 }
 
 interface ProfilePageContentProps {
@@ -42,7 +44,9 @@ const TabContent = memo(function TabContent({ tab, address }: TabContentProps) {
     case Tab.LinkedAccounts:
       return <ProfileLinkedAcounts address={address} />
     case Tab.GM:
-      return <ProfileGMLevel />
+      return <ProfileGMLevel address={address} />
+    case Tab.Nodes:
+      return <ProfileNodes address={address} />
     default:
       return null
   }
@@ -79,6 +83,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
       { tab: Tab.Balance, label: t("Balance") },
       { tab: Tab.BetterActions, label: t("Better Actions") },
       { tab: Tab.GM, label: t("GM Level") },
+      { tab: Tab.Nodes, label: t("Nodes") },
       { tab: Tab.Governance, label: t("Governance") },
       { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
     ],
@@ -106,46 +111,44 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   }
 
   // Update the URL with the new tab
-  const updateURLWithTab = (tab: Tab): void => {
-    // Guard against SSR
-    if (typeof window === "undefined") {
-      console.warn("Cannot update URL during server-side rendering")
-      return
-    }
+  const updateURLWithTab = useCallback(
+    (tab: Tab): void => {
+      // Guard against SSR
+      if (typeof window === "undefined") {
+        console.warn("Cannot update URL during server-side rendering")
+        return
+      }
 
-    try {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set("tab", tab)
-      // Update URL without triggering a navigation that causes the page to flicker
-      window.history.replaceState(null, "", `?${params.toString()}`)
-    } catch (error) {
-      console.error("Error updating URL with tab:", error)
-    }
-  }
+      try {
+        const params = new URLSearchParams(searchParams.toString())
+        params.set("tab", tab)
+        // Update URL without triggering a navigation that causes the page to flicker
+        window.history.replaceState(null, "", `?${params.toString()}`)
+      } catch (error) {
+        console.error("Error updating URL with tab:", error)
+      }
+    },
+    [searchParams],
+  )
 
-  const handleTabChange = useCallback((tab: Tab) => {
-    updateURLWithTab(tab)
-    setActiveTab(tab)
-    trackTabChange(tab)
-  }, [])
-
-  // Go back to the home page
-  const onGoBack = useCallback(() => {
-    router.push("/")
-  }, [router])
+  const handleTabChange = useCallback(
+    (tab: Tab) => {
+      updateURLWithTab(tab)
+      setActiveTab(tab)
+      trackTabChange(tab)
+    },
+    [updateURLWithTab],
+  )
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
+    <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Button
-          variant={"link"}
-          colorScheme="primary"
-          onClick={onGoBack}
-          leftIcon={<FaAngleLeft />}
-          size="sm"
-          alignSelf={"flex-start"}>
-          {t("Go back")}
-        </Button>
+        <Link href="/" color="primary.500">
+          <Icon as={FaAngleLeft} boxSize={3} />
+          <Text fontSize="sm" fontWeight="semibold" lineHeight="1.2">
+            {t("Go back")}
+          </Text>
+        </Link>
       )}
       <ProfileHeader address={parsedAddress} />
       <Box
@@ -157,7 +160,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}>
-        <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
+        <HStack gap={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
           {tabs.map(({ tab, label }) => (
             <Button
               key={tab}

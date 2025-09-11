@@ -1,15 +1,4 @@
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  Heading,
-  HStack,
-  Image,
-  Stack,
-  useDisclosure,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { Box, Button, Card, Heading, HStack, Image, Stack, useDisclosure, useMediaQuery } from "@chakra-ui/react"
 import { UilPlus } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -21,12 +10,12 @@ export const CreatorApplyNow = () => {
   const goToCreatorForm = () => {
     router.push("/apps/creator/new")
   }
-  const { onOpen, isOpen, onClose } = useDisclosure()
-  const [isMobile] = useMediaQuery("(max-width: 767px)")
+  const { onOpen, open: isOpen, onClose } = useDisclosure()
+  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   return (
     <>
-      <Card
+      <Card.Root
         variant={"baseWithBorder"}
         w="full"
         maxW="100%"
@@ -35,7 +24,7 @@ export const CreatorApplyNow = () => {
           borderRadius: "20px",
           borderColor: "white",
         }}>
-        <CardBody p={0}>
+        <Card.Body p={0}>
           <HStack w="full" h="full">
             {/* Left Section: Image full height when mobile */}
             {isMobile && (
@@ -87,21 +76,21 @@ export const CreatorApplyNow = () => {
                 px={2}
                 py={isMobile ? 4 : 2}>
                 <Button
+                  variant="primarySubtle"
                   alignSelf="center"
                   fontSize={{ base: "14px" }}
-                  variant="secondary"
+                  fontWeight={600}
                   borderRadius="full"
-                  leftIcon={<UilPlus />}
                   onClick={onOpen}
-                  _hover={{ opacity: "0.6", transition: "all 0.3s" }}
                   w={{ base: "80%", md: "auto" }}>
+                  <UilPlus />
                   {t("Apply now")}
                 </Button>
               </Stack>
             </Stack>
           </HStack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
       <SubmitCreatorFormModal isOpen={isOpen} onClose={onClose} buttonAction={goToCreatorForm} />
     </>
   )

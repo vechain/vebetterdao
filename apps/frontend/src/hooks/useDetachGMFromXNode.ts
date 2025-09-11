@@ -1,24 +1,24 @@
 import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@repo/contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getLevelOfTokenQueryKey,
   getNFTMetadataUriQueryKey,
-  getTokensInfoByOwnerQueryKey,
-  useXNode,
-  useGetNodeIdAttached,
+  getUserGMsQueryKey,
+  getUserNodesQueryKey,
+  useGetUserGMs,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { useWallet } from "@vechain/vechain-kit"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
-import { useIsXNodeAttachedWhileTransferred } from "@/hooks"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 type Props = {
+  xNodeId: string
   onSuccess?: () => void
 }
 
@@ -34,34 +34,29 @@ type Props = {
  * @note Detach the GM either from the connected account xNode,
  * or from the xNode receiver account that have an attached GM
  */
-export const useDetachGMFromXNode = ({ onSuccess }: Props) => {
-  const { xNodeId, attachedGMTokenId } = useXNode()
-  const { attachedGMTokenId: attachedGMTokenIdToExternalNode } = useIsXNodeAttachedWhileTransferred()
-
-  const { data: xNodeHolder } = useGetNodeIdAttached(attachedGMTokenIdToExternalNode ?? "0")
-  let xNodeHolderId: string | undefined = xNodeHolder?.toString()
+export const useDetachGMFromXNode = ({ xNodeId, onSuccess }: Props) => {
+  const { data: userGms } = useGetUserGMs()
+  const attachedGMTokenId = userGms?.find(gm => gm.nodeIdAttached === xNodeId)?.tokenId
 
   const clauseBuilder = useCallback(() => {
-    if (!xNodeId && !xNodeHolderId) {
+    if (!xNodeId) {
       throw new Error("XNode ID is not available")
     }
 
-    if (!attachedGMTokenId && !attachedGMTokenIdToExternalNode) {
+    if (!attachedGMTokenId) {
       throw new Error("GM NFT ID is not available")
     }
 
-    const nodeIdToUse = xNodeId || xNodeHolderId
-    const tokenIdToUse = attachedGMTokenId || attachedGMTokenIdToExternalNode
     return [
       buildClause({
         to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
         method: "detachNode",
-        args: [nodeIdToUse, tokenIdToUse],
-        comment: `Detach XNode ${nodeIdToUse} from GM NFT id ${tokenIdToUse}`,
+        args: [xNodeId, attachedGMTokenId],
+        comment: `Detach XNode ${xNodeId} from GM NFT id ${attachedGMTokenId}`,
       }),
     ]
-  }, [xNodeId, attachedGMTokenId, xNodeHolderId, attachedGMTokenIdToExternalNode])
+  }, [xNodeId, attachedGMTokenId])
 
   const { account } = useWallet()
 
@@ -71,8 +66,9 @@ export const useDetachGMFromXNode = ({ onSuccess }: Props) => {
       getLevelOfTokenQueryKey(attachedGMTokenId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(attachedGMTokenId),
-      getTokensInfoByOwnerQueryKey(account?.address),
       getNFTMetadataUriQueryKey(attachedGMTokenId ?? ""),
+      getUserNodesQueryKey(account?.address ?? ""),
+      getUserGMsQueryKey(account?.address ?? ""),
     ],
     [account, attachedGMTokenId, xNodeId],
   )

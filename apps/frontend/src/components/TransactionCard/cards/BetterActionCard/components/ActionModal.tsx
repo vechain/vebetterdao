@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-no-literals */
 import { SustainabilityProof, useXApps } from "@/api"
-import { VStack, HStack, Text, Card, CardBody, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
+import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
@@ -79,32 +79,26 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
     if (proof?.proof?.text) return <Text fontSize="sm">{proof?.proof?.text}</Text>
 
     return (
-      <Link href={proof?.proof?.link} isExternal>
+      <Link href={proof?.proof?.link} target="_blank" rel="noopener noreferrer">
         <Text fontSize="sm">{proof?.proof?.link}</Text>
       </Link>
     )
   }, [proof, isTweet, tweet])
 
-  const onTransactionDetailClick = useCallback(() => {
-    if (!txId) return
-
-    window.open(getExplorerTxLink(txId), "_blank")
-  }, [txId])
-
   return (
     <BaseModal
-      isOpen={actionModal.isOpen ?? false}
+      isOpen={actionModal.open ?? false}
       onClose={actionModal.onClose ?? (() => {})}
       ariaTitle="ActionModal"
       ariaDescription="ActionModal">
-      <VStack align="stretch" spacing={4}>
+      <VStack align="stretch" gap={4}>
         <Text fontSize="sm" color="black" bg="#F8F8F8" py={1} px={3} borderRadius="full" alignSelf="flex-start">
           {dayjs.unix(blockTimestamp ?? 0).fromNow()}
         </Text>
         {b3trAmount && (
-          <Card variant="filled">
-            <CardBody p={4}>
-              <VStack align="stretch" spacing={1}>
+          <Card.Root variant="filled">
+            <Card.Body p={4}>
+              <VStack align="stretch" gap={1}>
                 <HStack>
                   <Heading fontSize="3xl" fontWeight="bold">
                     {compactFormatter.format(Number(b3trAmount ?? 0))}
@@ -118,19 +112,19 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
                   </Heading>
                 </HStack>
               </VStack>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         )}
         {isProof && (
-          <VStack align="stretch" spacing={2}>
+          <VStack align="stretch" gap={2}>
             <Heading fontSize="lg">{t("Sustainability proof")}</Heading>
-            <VStack align="stretch" spacing={2}>
+            <VStack align="stretch" gap={2}>
               <Text fontSize="sm">{proof?.description}</Text>
               {renderProof}
             </VStack>
           </VStack>
         )}
-        <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" gap={4}>
           <Heading fontSize="lg">{t("Transaction information")}</Heading>
           <HStack justify="space-between">
             <Text fontWeight="600">{t("Block")}</Text>
@@ -138,22 +132,24 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
           </HStack>
         </VStack>
         {txId && (
-          <VStack
-            align="stretch"
-            spacing={4}
+          <Link
+            display="flex"
+            justifyContent={"center"}
+            variant="plain"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={getExplorerTxLink(txId)}
+            gap={4}
             w={"full"}
             alignItems={"center"}
             mt={4}
             color={"rgba(0, 76, 252, 1)"}
-            cursor={"pointer"}
-            onClick={onTransactionDetailClick}>
-            <HStack align="stretch" spacing={4} alignItems={"center"}>
-              <Text fontSize={16} fontWeight={500}>
-                {t("See more details on")} Vechain Stats
-              </Text>
-              <UilArrowUpRight size={16} />
-            </HStack>
-          </VStack>
+            cursor={"pointer"}>
+            <Text fontSize={16} fontWeight={500}>
+              {t("See more details on")} Vechain Stats
+            </Text>
+            <UilArrowUpRight size={16} />
+          </Link>
         )}
       </VStack>
     </BaseModal>

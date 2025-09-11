@@ -9,14 +9,15 @@ import {
 } from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { XAllocationVoting__factory } from "@repo/contracts"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-// const buffer = 1.01
-// Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-// const suggestedMaxGas = 565580 * buffer
+
+//Extra 15% to mitigate low gas estimation when voting on a large number of apps
+//Check https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1752523695772269
+const GAS_PADDING = 0.15
 
 /**
  * CastAllocationVotesProps is the type of the data to send to the castAllocationVotes hook
@@ -89,5 +90,6 @@ export const useCastAllocationVotes = ({
     refetchQueryKeys,
     onSuccess,
     transactionModalCustomUI,
+    gasPadding: GAS_PADDING,
   })
 }

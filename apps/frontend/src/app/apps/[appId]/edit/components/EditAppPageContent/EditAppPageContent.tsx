@@ -1,8 +1,7 @@
 import {
   Button,
-  Divider,
-  FormControl,
-  FormErrorMessage,
+  Separator,
+  Field,
   HStack,
   Input,
   Stack,
@@ -10,6 +9,7 @@ import {
   Textarea,
   VStack,
   useDisclosure,
+  Heading,
 } from "@chakra-ui/react"
 import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
@@ -26,6 +26,7 @@ import {
   useCurrentAppMetadata,
   useCurrentAppRole,
   useCurrentAppVeWorldBanner,
+  useCurrentAppVeWorldFeaturedImage,
 } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
@@ -35,12 +36,14 @@ import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
+import { EditVeWorldFeatureImage } from "./components/EditVeWorldFeatureImage"
 import { EditAppCategories } from "./components/EditAppCategories"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { StepModal } from "@/components/StepModal/StepModal"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import Lottie from "react-lottie"
+import { DEPRECATED_IDS } from "@/types/appDetails"
 
 export type EditAppForm = {
   name: string
@@ -56,6 +59,7 @@ export type EditAppForm = {
   logoImage: string
   bannerImage: string
   ve_world_bannerImage: string
+  ve_world_featured_image: string
   categories: string[]
 }
 
@@ -74,8 +78,9 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
+  const { veWorldFeaturedImage } = useCurrentAppVeWorldFeaturedImage()
   const router = useRouter()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { isTxModalOpen, onClose: onTxModalClose } = useTransactionModal()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
@@ -97,7 +102,8 @@ export const EditAppPageContent = () => {
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
       ve_world_bannerImage: veWorldBanner,
-      categories: appMetadata?.categories ?? [],
+      ve_world_featured_image: veWorldFeaturedImage,
+      categories: (appMetadata?.categories ?? []).filter(id => !DEPRECATED_IDS.includes(id)), // remove the deprecated categories
     },
   })
   const {
@@ -150,6 +156,7 @@ export const EditAppPageContent = () => {
         categories: data.categories ?? [],
         ve_world: {
           banner: data.ve_world_bannerImage,
+          featured_image: data.ve_world_featured_image,
         },
       })
       return metadataUri
@@ -177,7 +184,10 @@ export const EditAppPageContent = () => {
     if (veWorldBanner) {
       form.setValue("ve_world_bannerImage", veWorldBanner)
     }
-  }, [veWorldBanner, form])
+    if (veWorldFeaturedImage) {
+      form.setValue("ve_world_featured_image", veWorldFeaturedImage)
+    }
+  }, [veWorldBanner, veWorldFeaturedImage, form])
 
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null
@@ -225,7 +235,7 @@ export const EditAppPageContent = () => {
           justify={["flex-start", "space-between"]}
           align={["flex-start", "center"]}>
           <HStack gap={4}>
-            <FormControl isInvalid={!!errors.name}>
+            <Field.Root invalid={!!errors.name}>
               <Input
                 {...register("name", {
                   required: { value: true, message: t("Name required") },
@@ -235,18 +245,15 @@ export const EditAppPageContent = () => {
                 fontSize={"28px"}
                 fontWeight={700}
               />
-              <FormErrorMessage fontSize={"12px"}>{errors?.name?.message ?? ""}</FormErrorMessage>
-            </FormControl>
+              <Field.ErrorText fontSize={"12px"}>{errors?.name?.message ?? ""}</Field.ErrorText>
+            </Field.Root>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
             <Button variant="primaryGhost" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
-            <Button
-              variant="primaryAction"
-              type="submit"
-              leftIcon={<UilCheck size="16px" />}
-              isDisabled={!isFormChanged}>
+            <Button variant="primaryAction" type="submit" disabled={!isFormChanged}>
+              <UilCheck size="16px" />
               {t("Save changes")}
             </Button>
           </HStack>
@@ -262,7 +269,7 @@ export const EditAppPageContent = () => {
               <Text fontSize={16} fontWeight={500}>
                 {t("Project URL")}
               </Text>
-              <FormControl isInvalid={!!errors.external_url}>
+              <Field.Root invalid={!!errors.external_url}>
                 <Input
                   defaultValue={appMetadata?.external_url ?? ""}
                   {...register("external_url", {
@@ -273,15 +280,15 @@ export const EditAppPageContent = () => {
                     },
                   })}
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message ?? ""}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText fontSize={"12px"}>{errors?.external_url?.message ?? ""}</Field.ErrorText>
+              </Field.Root>
             </VStack>
 
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={16} fontWeight={500}>
                 {t("Description")}
               </Text>
-              <FormControl isInvalid={!!errors.description}>
+              <Field.Root invalid={!!errors.description}>
                 <Textarea
                   {...register("description", {
                     required: { value: true, message: t("Description required") },
@@ -291,14 +298,14 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message ?? ""}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText fontSize={"12px"}>{errors?.description?.message ?? ""}</Field.ErrorText>
+              </Field.Root>
             </VStack>
             <VStack align={"stretch"} gap={4}>
               <Text fontSize={16} fontWeight={500}>
                 {t("Distribution Strategy")}
               </Text>
-              <FormControl isInvalid={!!errors.distribution_strategy}>
+              <Field.Root invalid={!!errors.distribution_strategy}>
                 <Textarea
                   {...register("distribution_strategy", {
                     minLength: {
@@ -311,16 +318,31 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</Field.ErrorText>
+              </Field.Root>
             </VStack>
             <EditAppCategories form={form} />
           </VStack>
           <EditAppSocialUrls form={form} />
         </Stack>
-        <Divider />
+        <Separator />
         <EditScreenshots form={form} />
-        <EditVeWorldBanner form={form} />
+        <Separator />
+
+        <VStack align={"flex-start"} gap={4}>
+          <Heading fontSize="24px" fontWeight="700">
+            {t("VeWorld assets")}
+          </Heading>
+          <Text fontSize={14} color={"gray"} pt={0}>
+            {t(
+              "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨",
+            )}
+          </Text>
+          <HStack gap={4} w="full" align={"stretch"}>
+            <EditVeWorldBanner form={form} />
+            <EditVeWorldFeatureImage form={form} />
+          </HStack>
+        </VStack>
       </VStack>
     </>
   )

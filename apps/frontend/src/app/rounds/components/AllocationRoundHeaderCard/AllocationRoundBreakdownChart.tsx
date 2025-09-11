@@ -1,20 +1,10 @@
 import { useAllocationAmount } from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
-import {
-  VStack,
-  HStack,
-  Heading,
-  useColorModeValue,
-  Text,
-  Box,
-  CardBody,
-  Card,
-  Skeleton,
-  useMediaQuery,
-} from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, Box, Card, Skeleton, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useColorMode } from "@/components/ui/color-mode"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -24,7 +14,8 @@ type Props = {
 
 export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   const { t } = useTranslation()
-  const [isDesktop] = useMediaQuery("(min-width: 800px)")
+  const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
+  const { colorMode } = useColorMode()
 
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
 
@@ -47,10 +38,10 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     }
   }, [totalDistributed, roundAmount])
 
-  const treasuryColor = useColorModeValue("#203A87", "#203A87")
-  const votingRewardsColor = useColorModeValue("#225EED", "#225EED")
-  const appsColor = useColorModeValue("#5FA5F9", "#5FA5F9")
-  const gmColor = useColorModeValue("#4A6FA5", "#4A6FA5")
+  const treasuryColor = colorMode === "light" ? "#203A87" : "#203A87"
+  const votingRewardsColor = colorMode === "light" ? "#225EED" : "#225EED"
+  const appsColor = colorMode === "light" ? "#5FA5F9" : "#5FA5F9"
+  const gmColor = colorMode === "light" ? "#4A6FA5" : "#4A6FA5"
 
   const baseAmountsInfo = useMemo(() => {
     return [
@@ -85,14 +76,14 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     ({ children }: { children: React.ReactNode }) => {
       if (isDesktop)
         return (
-          <Card variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
-            <CardBody as={VStack} justify={"space-between"}>
+          <Card.Root variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
+            <Card.Body as={VStack} justifyContent={"space-between"}>
               {children}
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         )
       return (
-        <VStack w="full" flex={1} data-testid="allocation-round-breakdown-chart" spacing={6}>
+        <VStack w="full" flex={1} data-testid="allocation-round-breakdown-chart" gap={6}>
           {children}
         </VStack>
       )
@@ -103,9 +94,9 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   return (
     <Wrapper>
       <Box w="full">
-        <HStack spacing={3} align="center">
+        <HStack gap={3} align="center">
           <B3TRIcon boxSize="36px" colorVariant="dark" />
-          <Skeleton isLoaded={!roundAmountLoading}>
+          <Skeleton loading={roundAmountLoading}>
             <Heading fontSize="36px" fontWeight={700}>
               {compactFormatter.format(totalDistributed)}
             </Heading>
@@ -141,13 +132,10 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
           })}
       </Box>
 
-      <VStack w="full" spacing={4}>
+      <VStack w="full" gap={4}>
         {baseAmountsInfo.map(info => (
-          <Skeleton
-            isLoaded={!roundAmountLoading}
-            key={`allocation-chart-amount-${info.amount}-${info.color}`}
-            w="full">
-            <HStack w="full" spacing={1}>
+          <Skeleton loading={roundAmountLoading} key={`allocation-chart-amount-${info.amount}-${info.color}`} w="full">
+            <HStack w="full" gap={1}>
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>
                 {compactFormatter.format(Number(info.amount))}

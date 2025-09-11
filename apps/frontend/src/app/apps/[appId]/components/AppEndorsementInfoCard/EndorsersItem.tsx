@@ -1,29 +1,20 @@
 import { useRouter } from "next/navigation"
-import {
-  Text,
-  HStack,
-  VStack,
-  Box,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  PopoverBody,
-  Skeleton,
-} from "@chakra-ui/react"
+import { Text, HStack, VStack, Box, Popover, Skeleton, Portal } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
-import { useXNode } from "@/api"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useState } from "react"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 
 type Props = {
+  appId: string
   isAppAdmin: boolean
   endorserAddress: string
   endorsementEvents: AppEndorsedEvent[]
@@ -34,6 +25,7 @@ type Props = {
 }
 
 export const EndorsersItem = ({
+  appId,
   isAppAdmin,
   endorserAddress,
   endorsementEvents,
@@ -45,10 +37,8 @@ export const EndorsersItem = ({
   const { t } = useTranslation()
   const router = useRouter()
 
-  // Get the endorser's first node and the node endorsement score
-  const { xNodeId, isXNodeLoading: endorserNodesLoading } = useXNode(endorserAddress)
-  // TODO support multiple nodes
-  const endorserNodeId = xNodeId
+  const { data: userNodes, isLoading: endorserNodesLoading } = useGetUserNodes(endorserAddress)
+  const endorserNodeId = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.nodeId
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
 
   // Find the first element in events (ie most recent) where the endorser endorsed the app
@@ -74,19 +64,12 @@ export const EndorsersItem = ({
   const domain = vnsData?.domain
 
   return (
-    <HStack
-      bg="light-contrast-on-card-bg"
-      p={"12px"}
-      borderRadius={"16px"}
-      boxShadow="sm"
-      w={"full"}
-      alignItems={"center"}
-      justify={"space-between"}>
+    <HStack p={"12px"} borderRadius={"16px"} boxShadow="sm" w={"full"} alignItems={"center"} justify={"space-between"}>
       <HStack alignItems={"center"} gap={4}>
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
-        <VStack align="start" justify={"center"} spacing={0}>
+        <VStack align="start" justify={"center"} gap={0}>
           <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress, 6, 3)}</Text>
-          <Skeleton isLoaded={!endorserNodesLoading}>
+          <Skeleton loading={endorserNodesLoading}>
             <Text fontSize="12" fontWeight={400} color="#6A6A6A">
               {t("Endorsing since {{date}}", { date: endorsingSince })}
             </Text>
@@ -94,7 +77,7 @@ export const EndorsersItem = ({
         </VStack>
       </HStack>
       <HStack alignItems={"center"} gap={4}>
-        <Skeleton isLoaded={!endorserNodesLoading && !nodePointsLoading}>
+        <Skeleton loading={endorserNodesLoading || nodePointsLoading}>
           <Text fontSize={"16px"} fontWeight={600}>
             <Trans
               i18nKey="{{value}} pts."
@@ -106,31 +89,40 @@ export const EndorsersItem = ({
           </Text>
         </Skeleton>
 
-        <Popover placement="bottom-end" isOpen={isPopoverOpen} onClose={() => setIsPopoverOpen(false)}>
-          <PopoverTrigger>
+        <Popover.Root
+          positioning={{
+            placement: "bottom-end",
+          }}
+          open={isPopoverOpen}
+          onOpenChange={details => setIsPopoverOpen(details.open)}>
+          <Popover.Trigger>
             <Box as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
               <HiDotsVertical />
             </Box>
-          </PopoverTrigger>
-          <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
-            <PopoverBody p={2}>
-              <VStack alignItems="stretch" spacing={3}>
-                {isAppAdmin && (
-                  <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
-                    <UilTrash />
-                    <Text whiteSpace="nowrap" fontSize={["sm", "md"]}>
-                      {t("Remove this endorsement")}
-                    </Text>
-                  </HStack>
-                )}
-                <HStack onClick={goToEndorserUserProfilePage} cursor="pointer">
-                  <UilCheck color={"#004CFC"} />
-                  <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
-                </HStack>
-              </VStack>
-            </PopoverBody>
-          </PopoverContent>
-        </Popover>
+          </Popover.Trigger>
+          <Portal>
+            <Popover.Positioner>
+              <Popover.Content width="auto" boxShadow="md" border="1px solid #EFEFEF">
+                <Popover.Body p={2}>
+                  <VStack alignItems="stretch" gap={3}>
+                    {isAppAdmin && (
+                      <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
+                        <UilTrash />
+                        <Text whiteSpace="nowrap" fontSize={["sm", "md"]}>
+                          {t("Remove this endorsement")}
+                        </Text>
+                      </HStack>
+                    )}
+                    <HStack onClick={goToEndorserUserProfilePage} cursor="pointer">
+                      <UilCheck color={"#004CFC"} />
+                      <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
+                    </HStack>
+                  </VStack>
+                </Popover.Body>
+              </Popover.Content>
+            </Popover.Positioner>
+          </Portal>
+        </Popover.Root>
       </HStack>
     </HStack>
   )

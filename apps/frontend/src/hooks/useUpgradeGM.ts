@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@repo/contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
-import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getTokensInfoByOwnerQueryKey } from "@/api"
+import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey } from "@/api"
 import { getB3trDonatedQueryKey } from "./useB3trDonated"
 import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
 
-import { B3TR__factory } from "@repo/contracts/typechain-types"
+import { B3TR__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { ethers } from "ethers"
 import { useWallet } from "@vechain/vechain-kit"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
@@ -51,9 +51,9 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
       getLevelOfTokenQueryKey(tokenId),
       getB3trToUpgradeQueryKey(tokenId),
       getB3trBalanceQueryKey(account?.address ?? ""),
-      getTokensInfoByOwnerQueryKey(account?.address),
       getB3trDonatedQueryKey(tokenId),
       getNFTMetadataUriQueryKey(tokenId),
+      getUserGMsQueryKey(account?.address ?? ""),
     ],
     [account, tokenId],
   )

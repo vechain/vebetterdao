@@ -32,7 +32,7 @@ export const EditAppRewardDistributors = ({ form }: Props) => {
           "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.",
         )}
       </Text>
-      <VStack align="stretch" spacing={4} my={4} gap={4}>
+      <VStack align="stretch" gap={4} my={4}>
         {distributors?.map((distributor, index) => (
           <DistributorItem
             key={distributor}
@@ -41,7 +41,7 @@ export const EditAppRewardDistributors = ({ form }: Props) => {
           />
         ))}
       </VStack>
-      <AddRewardDistributorButton editAdminForm={form} />
+      <AddRewardDistributorButton getValues={form.getValues} setValue={form.setValue} />
     </VStack>
   )
 }

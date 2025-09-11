@@ -1,14 +1,5 @@
 import { ReactNode, useEffect, useMemo } from "react"
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Button,
-  ModalBody,
-  ModalHeader,
-  VStack,
-} from "@chakra-ui/react"
+import { Alert, Button, Dialog, VStack } from "@chakra-ui/react"
 import { TransactionStatus } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
@@ -34,45 +25,45 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
     switch (status) {
       case "pending":
         return (
-          <Alert
+          <Alert.Root
             borderRadius={"xl"}
-            status="loading"
+            status="info"
             variant="subtle"
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
             textAlign="center"
             height="150px">
-            <AlertIcon boxSize="40px" mr={0} />
-            <AlertTitle mt={4} mb={1} fontSize="lg">
+            <Alert.Indicator boxSize="40px" mr={0} />
+            <Alert.Title mt={4} mb={1} fontSize="lg">
               {t("Waiting for confirmation")}
-            </AlertTitle>
-            <AlertDescription maxWidth="sm">{t("Please confirm the transaction in your wallet.")}</AlertDescription>
-          </Alert>
+            </Alert.Title>
+            <Alert.Description maxWidth="sm">{t("Please confirm the transaction in your wallet.")}</Alert.Description>
+          </Alert.Root>
         )
       case "waitingConfirmation":
         return (
-          <Alert
+          <Alert.Root
             borderRadius={"xl"}
-            status="loading"
+            status="info"
             variant="subtle"
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
             textAlign="center"
             height="150px">
-            <AlertIcon boxSize="40px" mr={0} />
-            <AlertTitle mt={4} mb={1} fontSize="lg">
+            <Alert.Indicator boxSize="40px" mr={0} />
+            <Alert.Title mt={4} mb={1} fontSize="lg">
               {t("Waiting for confirmation")}
-            </AlertTitle>
-            <AlertDescription maxWidth="sm">
+            </Alert.Title>
+            <Alert.Description maxWidth="sm">
               {t("We are waiting for your transaction to be confirmed. This may take a few seconds.")}
-            </AlertDescription>
-          </Alert>
+            </Alert.Description>
+          </Alert.Root>
         )
       case "success":
         return (
-          <Alert
+          <Alert.Root
             borderRadius={"xl"}
             status="success"
             variant="subtle"
@@ -81,19 +72,19 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
             justifyContent="center"
             textAlign="center"
             height="150px">
-            <AlertIcon boxSize="40px" mr={0} />
-            <AlertTitle mt={4} mb={1} fontSize="lg">
+            <Alert.Indicator boxSize="40px" mr={0} />
+            <Alert.Title mt={4} mb={1} fontSize="lg">
               {t("Transaction successful!")}
-            </AlertTitle>
-            <AlertDescription maxWidth="sm">
+            </Alert.Title>
+            <Alert.Description maxWidth="sm">
               {t("The transaction has been confirmed. This window will close in a few seconds.")}
-            </AlertDescription>
-          </Alert>
+            </Alert.Description>
+          </Alert.Root>
         )
       case "error":
         return (
           <>
-            <Alert
+            <Alert.Root
               borderRadius={"xl"}
               status="error"
               variant="subtle"
@@ -102,16 +93,16 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
               justifyContent="center"
               textAlign="center"
               height="150px">
-              <AlertIcon boxSize="40px" mr={0} />
-              <AlertTitle mt={4} mb={1} fontSize="lg">
+              <Alert.Indicator boxSize="40px" mr={0} />
+              <Alert.Title mt={4} mb={1} fontSize="lg">
                 {t("Something went wrong!")}
-              </AlertTitle>
-              <AlertDescription maxWidth="sm">
+              </Alert.Title>
+              <Alert.Description maxWidth="sm">
                 {error ?? "There was an error with your transaction. Please try again."}
-              </AlertDescription>
-            </Alert>
+              </Alert.Description>
+            </Alert.Root>
             {onTryAgain && (
-              <Button onClick={onTryAgain} variant="link">
+              <Button onClick={onTryAgain} variant="ghost">
                 {t("Try again")}
               </Button>
             )}
@@ -135,12 +126,12 @@ export const ConfirmTransactionModalContent: React.FC<Props> = ({
 
   return (
     <>
-      <ModalHeader>{description}</ModalHeader>
-      <ModalBody>
-        <VStack alignSelf={"center"} h="full" justify={"center"} spacing={4}>
+      <Dialog.Header>{description}</Dialog.Header>
+      <Dialog.Body>
+        <VStack alignSelf={"center"} h="full" justify={"center"} gap={4}>
           {statusComponent}
         </VStack>
-      </ModalBody>
+      </Dialog.Body>
     </>
   )
 }

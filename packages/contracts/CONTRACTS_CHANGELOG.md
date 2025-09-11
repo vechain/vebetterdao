@@ -4,60 +4,81 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ## Version History
 
-| Date                | Contract(s)                                                                                                                   | Summary                                                                                                  |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| 7 July 2025         | `XAllocationVoting` version `7`                                                                                               | Added autovoting functionality allowing users to enable automatic voting with predefined app preferences |
-| 1 July 2025         | `GalaxyMember` version `5`, `NodeManagement` version `3`                                                                      | Use NodeManagementV3, avoid calls to legacy VeChain Nodes contract                                       |
-| 9 May 2025          | `Emissions` version `3`, `GalaxyMember` version `4`, `VoterRewards` version `5`                                               | Restoring the GM NFT System - Proposal Execution                                                         |
-| 2 May 2025          | `X2EarnApps` version `5`                                                                                                      | Restricting to submit one app for each creator NFT received>                                             |
-| 02 May 2025         | `VeBetterPassport` version `4`                                                                                                | Added RESET_SIGNALER_ROLE and fixed arithmetic underflow when resetting signals.                         |
-| 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                           |
-| 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                                    |
-| 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                           |
-| 4th December 2024   | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts.                                                  |
-| 29th November 2024  | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4                                      | Added GM level as personhood check in VeBetter passport.                                                 |
-| 28th November 2024  | `NodeManagement` version `2`                                                                                                  | Added new functions to check node delegation status and improved node management capabilities.           |
-| 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5`                                            | Added Vechain Node Binding with Galaxy Member feature                                                    |
-| 15th November 2024  | `X2EarnApps` version `2`                                                                                                      | Added X2Earn Apps Vechain Node Endorsement feature                                                       |
-| 21th October 2024   | `VeBetterPassport` version `2`                                                                                                | Check if the entity is a delegatee when request is created                                               |
-| 11th October 2024   | `XAllocationVoting` version `2`                                                                                               | Check isPerson when casting vote & fixed weight during vote                                              |
-| 11th October 2024   | `B3TRGovernor` version `4`                                                                                                    | Check isPerson when casting vote                                                                         |
-| 11th October 2024   | `X2EarnRewardsPool` version `3`                                                                                               | Register action in VeBetter Passport contract                                                            |
-| 27th September 2024 | `Emissions` version `2`                                                                                                       | Aligned emissions with the expected schedule                                                             |
-| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2`                                                                     | - Added toggling of quadratic voting and funding                                                         |
-| 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                                         |
-| 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                                     |
-| 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                                         |
+| Date                | Contract(s)                                                                                                                   | Summary                                                                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 6 August 2025       | `B3TRGovernor` version `7`, `XAllocationVoting` version `7`                                                                   | Added grant proposal type with separate thresholds, added deposit threshold cap, and enabled deposit-based voting power in allocation voting |
+| 1 July 2025         | `GalaxyMember` version `5`, `NodeManagement` version `3`                                                                      | Use NodeManagementV3, avoid calls to legacy VeChain Nodes contract                                                                           |
+| 9 May 2025          | `Emissions` version `3`, `GalaxyMember` version `4`, `VoterRewards` version `5`                                               | Restoring the GM NFT System - Proposal Execution                                                                                             |
+| 2 May 2025          | `X2EarnApps` version `5`                                                                                                      | Restricting to submit one app for each creator NFT received>                                                                                 |
+| 02 May 2025         | `VeBetterPassport` version `4`                                                                                                | Added RESET_SIGNALER_ROLE and fixed arithmetic underflow when resetting signals.                                                             |
+| 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                                                               |
+| 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                                                                        |
+| 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                                                               |
+| 4th December 2024   | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts.                                                                                      |
+| 29th November 2024  | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4                                      | Added GM level as personhood check in VeBetter passport.                                                                                     |
+| 28th November 2024  | `NodeManagement` version `2`                                                                                                  | Added new functions to check node delegation status and improved node management capabilities.                                               |
+| 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5`                                            | Added Vechain Node Binding with Galaxy Member feature                                                                                        |
+| 15th November 2024  | `X2EarnApps` version `2`                                                                                                      | Added X2Earn Apps Vechain Node Endorsement feature                                                                                           |
+| 21th October 2024   | `VeBetterPassport` version `2`                                                                                                | Check if the entity is a delegatee when request is created                                                                                   |
+| 11th October 2024   | `XAllocationVoting` version `2`                                                                                               | Check isPerson when casting vote & fixed weight during vote                                                                                  |
+| 11th October 2024   | `B3TRGovernor` version `4`                                                                                                    | Check isPerson when casting vote                                                                                                             |
+| 11th October 2024   | `X2EarnRewardsPool` version `3`                                                                                               | Register action in VeBetter Passport contract                                                                                                |
+| 27th September 2024 | `Emissions` version `2`                                                                                                       | Aligned emissions with the expected schedule                                                                                                 |
+| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2`                                                                     | - Added toggling of quadratic voting and funding                                                                                             |
+| 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                                                                             |
+| 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                                                                         |
+| 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                                                                             |
 
 ---
 
-## Upgrade `XAllocationVoting` to Version 7
+## Upgrade `B3TRGovernor` to Version `7` and `XAllocationVoting` to Version `7`
 
-Added autovoting functionality allowing users to enable automatic voting with predefined app preferences, enabling users to participate in allocation rounds without manual intervention.
+Introduces grant proposal support with dedicated governance parameters, deposit-based voting power, and capped deposit thresholds.
+
+Proposed changes for the following proposal:
+["Change the rules to create and support governance proposals"](https://governance.vebetterdao.org/proposals/16456558618029822768724567372248444488437431846368752919370485354508180864756)
 
 ### Changes 🚀
 
 - **Upgraded Contract(s):**
+  - `B3TRGovernor.sol` to version `7`
   - `XAllocationVoting.sol` to version `7`
 
 ### Storage Changes 📦
 
-- **`AutoVotingLogicUpgradeable`**:
-  - Added `_autoVotingEnabled` checkpoints to track user autovoting status over time using ERC-7201 namespaced storage
-  - Added `_userVotingPreferences` mapping to store user's preferred app IDs for autovoting
+- **`B3TRGovernor`**:
+
+  **➕ Added (V7)**
+  - `proposalType` → Stores the proposal type for each proposal.
+  - `proposalTypeDepositThresholdPercentage` → Deposit threshold % per proposal type.
+  - `proposalTypeVotingThreshold` → Voting threshold per proposal type.
+  - `proposalTypeQuorum` → Quorum history checkpoints per proposal type.
+  - `proposalTypeDepositThresholdCap` → Maximum deposit threshold per proposal type.
+  - `requiredGMLevelByProposalType` → GM level requirement per proposal type.
+  - `depositsVotingPower` → Checkpoints to track deposit-based voting power per user.
+
+  **➖ Deprecated**
+  - `depositThresholdPercentage` → Replaced by `proposalTypeDepositThresholdPercentage`.
+  - `votingThreshold` → Replaced by `proposalTypeVotingThreshold`.
+  - `deposits` → Updated to include proposal ID as first key (`proposalId => user => amount`) for deposit tracking per proposal.
+
+  **📌 Reason for Deprecation**
+  - Previous mappings were **global** and did not support proposal-type-specific governance.
+  - V7 introduces **type-based governance** (Standard vs Grant), requiring **separate thresholds, quorums, and deposit tracking**.
 
 ### New Features 🚀
 
-- **`XAllocationVoting`**:
-  - Added `castVoteOnBehalfOf()` function to cast votes automatically on behalf of users who have enabled autovoting
-  - Added `toggleAutoVoting()` function to enable/disable autovoting for the caller
-  - Added `setUserVotingPreferences()` function to set preferred app IDs for autovoting (up to 10 apps)
-  - Added `isUserAutoVotingEnabled()` function to check if autovoting is enabled for an account
-  - Added `isUserAutoVotingEnabledAtTimepoint()` function to check autovoting status at a specific timepoint
-  - Added `getUserVotingPreferences()` function to retrieve user's preferred app IDs
+- **`B3TRGovernor`**:
+  - Added `ProposalType.Grant` with dedicated governance parameters.
+  - Added deposit-based voting power with checkpoint tracking (`depositsVotingPower`).
+  - Implemented deposit threshold caps for standard and grant proposals.
+  - Added proposal creation with type specification (`proposeGrant()`).
+  - Added GM-level requirements per proposal type (`requiredGMLevelByProposalType`).
+  - Integrated `GrantsManager` contract for grant proposals.
 
-- **`XAllocationVotingGovernor`**:
-  - Added `_castVoteOnBehalfOf()` internal function with personhood verification and automatic vote distribution
+- **`XAllocationVoting`**:
+  - Updated `_getVotingPower()` to include deposit-based voting power.
+  - Added `getDepositVotingPower()` to query deposit-based voting power per user.
 
 ### Bug Fixes 🐛
 

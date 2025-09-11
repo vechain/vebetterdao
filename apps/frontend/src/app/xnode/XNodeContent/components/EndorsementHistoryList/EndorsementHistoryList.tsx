@@ -1,14 +1,13 @@
-import { useXNode } from "@/api"
+import { UserNode } from "@/api"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { Text, Card, CardBody, Heading, VStack, Button } from "@chakra-ui/react"
+import { Text, Card, Heading, VStack, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { useCallback, useState } from "react"
 
-export const EndorsementHistoryList = () => {
+export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
-  const { xNodeId } = useXNode()
-  const { data: appEndorsedEvents } = useAppEndorsedEvents({ nodeId: xNodeId ?? undefined })
+  const { data: appEndorsedEvents } = useAppEndorsedEvents({ nodeId: xNode.nodeId ?? undefined })
   const [displayCount, setDisplayCount] = useState(5)
 
   const handleLoadMore = useCallback(() => {
@@ -18,8 +17,8 @@ export const EndorsementHistoryList = () => {
   const events = appEndorsedEvents?.slice(0, displayCount)
 
   return (
-    <Card variant="baseWithBorder">
-      <CardBody>
+    <Card.Root variant="baseWithBorder">
+      <Card.Body>
         <VStack align="stretch" gap={6}>
           <Heading fontSize="xl" fontWeight="700">
             {t("Endorsement history")}
@@ -41,7 +40,7 @@ export const EndorsementHistoryList = () => {
             </Button>
           )}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

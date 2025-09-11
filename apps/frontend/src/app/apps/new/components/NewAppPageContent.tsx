@@ -1,6 +1,6 @@
 import { JoinCommunity } from "@/components"
 import { StepCardProps, StepCard } from "@/components/StepCard"
-import { Button, Card, CardBody, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
@@ -49,31 +49,31 @@ export const NewAppPageContent = () => {
       w="full"
       data-testid="new-app">
       <GridItem colSpan={3}>
-        <Card>
-          <CardBody>
-            <VStack spacing={8} align="flex-start">
-              <Heading size="lg">{t("Create a new app")}</Heading>
+        <Card.Root>
+          <Card.Body>
+            <VStack gap={8} align="flex-start">
+              <Heading size="3xl">{t("Create a new app")}</Heading>
               <Text>
                 {t(
                   "Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go live, it will undergo a thorough review process by our moderators. Here's how it works:",
                 )}
               </Text>
-              <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
+              <Stack direction={["column", "column", "row"]} w="full" gap={4}>
                 {Steps.map(step => (
                   <StepCard {...step} key={step.stepNumber} />
                 ))}
               </Stack>
-              <HStack alignSelf={"flex-end"} spacing={4}>
-                <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorScheme="primary" size="lg">
+              <HStack alignSelf={"flex-end"} gap={4}>
+                <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorPalette="primary" size="lg">
                   {t("More info")}
                 </Button>
-                <Button rounded="full" colorScheme="primary" size="lg" onClick={onContinueClick}>
+                <Button variant="primaryAction" rounded="full" size="lg" onClick={onContinueClick}>
                   {t("Continue")}
                 </Button>
               </HStack>
             </VStack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </GridItem>
       <GridItem colSpan={1}>
         <JoinCommunity />

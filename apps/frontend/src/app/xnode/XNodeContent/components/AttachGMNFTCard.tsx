@@ -1,16 +1,14 @@
-import { useXNode } from "@/api"
+import { useGetUserGMs, UserNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
-import { useGMNFTData } from "@/hooks/useGMNFTData"
 import { AnalyticsUtils } from "@/utils"
 import {
   Box,
   Button,
   Card,
-  CardBody,
   Flex,
   Heading,
   HStack,
@@ -20,17 +18,17 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { UilLink, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { FaChevronRight } from "react-icons/fa6"
 
-export const AttachGMNFTCard = () => {
+export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
-  const { isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenId } = useXNode()
+  const { data: userGms, isLoading: isUserGmsLoading } = useGetUserGMs()
 
-  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isLoading: isGMLoading } = useGMNFTData(attachedGMTokenId)
+  const isXNodeDelegator = xNode.isXNodeDelegator
+  const isXNodeAttachedToGM = !!xNode.gmTokenIdAttachedToNode
+  const attachedGMNFT = userGms?.find(gm => gm.tokenId === xNode.gmTokenIdAttachedToNode)
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -38,13 +36,14 @@ export const AttachGMNFTCard = () => {
     // because we do not have a page that displays GM NFT info based on the tokenId
     if (isXNodeDelegator) return
 
-    router.push("/galaxy-member")
-  }, [router, isXNodeDelegator])
+    router.push(`/galaxy-member/${attachedGMNFT?.tokenId}`)
+  }, [router, isXNodeDelegator, attachedGMNFT?.tokenId])
 
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
 
-  const handleDetachOnClick = () => {
+  const handleDetachOnClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
     detachGmToXNodeModal.onOpen()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
   }
@@ -53,17 +52,17 @@ export const AttachGMNFTCard = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
   }
 
-  if (!Number(attachedGMTokenId)) {
-    return null
-  }
+  if (!attachedGMNFT) return null
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached GM" : "Attach to upgrade")}</Heading>
+              <Heading fontSize="lg">
+                {t(isXNodeAttachedToGM ? "Attached Galaxy Member NFTs" : "Attach to upgrade")}
+              </Heading>
             </HStack>
             <Text fontSize="sm">
               {t(
@@ -88,67 +87,64 @@ export const AttachGMNFTCard = () => {
               zIndex={0}
             />
             <HStack p="9px 12px" justify="space-between" gap={6} flex={1} zIndex={1} color="#FFFFFF">
-              <Skeleton isLoaded={!isGMLoading} w={"68px"} h={"68px"} rounded="8px">
+              <Skeleton loading={isUserGmsLoading} w={"68px"} h={"68px"} rounded="8px">
                 <Box
                   w={"68px"}
                   h={"68px"}
                   rounded="8px"
-                  bgGradient={getLevelGradient(Number(gmLevel))}
+                  bgGradient={getLevelGradient(Number(attachedGMNFT?.tokenLevel))}
                   display="flex"
                   alignItems="center"
                   justifyContent="center">
-                  <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
+                  <Image src={attachedGMNFT?.metadata?.image} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
                 </Box>
               </Skeleton>
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} noOfLines={1}>
-                  {gmName}
+                <Text fontWeight={700} lineClamp={1}>
+                  {attachedGMNFT?.metadata?.name}
                 </Text>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
                     <Text fontSize="sm" fontWeight={600}>
-                      {gmRewardMultiplier}
+                      {attachedGMNFT?.multiplier}
                       {"x"}
                     </Text>
-                    <Text fontSize="sm" fontWeight={400} noOfLines={1}>
+                    <Text fontSize="sm" fontWeight={400} lineClamp={1}>
                       {t("GM reward weight")}
                     </Text>
                   </HStack>
                 </FeatureFlagWrapper>
               </VStack>
-              <FaChevronRight size={"24px"} />
+              {isXNodeAttachedToGM ? (
+                <Button
+                  color="#C84968"
+                  variant="dangerFilledTonal"
+                  disabled={isXNodeDelegator}
+                  onClick={handleDetachOnClick}>
+                  {t("Detach")}
+                </Button>
+              ) : (
+                <Button variant={"primarySubtle"} onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
+                  {t("Attach")}
+                </Button>
+              )}
             </HStack>
           </Flex>
-          {isXNodeAttachedToGM ? (
-            <Button
-              leftIcon={<UilLinkBroken color="#C84968" />}
-              color="#C84968"
-              variant={"link"}
-              isDisabled={isXNodeDelegator}
-              onClick={() => handleDetachOnClick()}>
-              {t("Detach")}
-            </Button>
-          ) : (
-            <FeatureFlagWrapper
-              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
-              fallback={
-                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
-                  {t("Coming soon!")}
-                </Button>
-              }>
-              <Button
-                leftIcon={<UilLink color="#004CFC" />}
-                variant={"primarySubtle"}
-                onClick={() => handleAttachOnClick()}
-                isDisabled={isXNodeDelegator}>
-                {t("Attach now!")}
-              </Button>
-            </FeatureFlagWrapper>
-          )}
         </VStack>
-      </CardBody>
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
-      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
-    </Card>
+      </Card.Body>
+      <AttachGMToXNodeModal
+        gmId={xNode.gmTokenIdAttachedToNode || ""}
+        node={xNode}
+        isOpen={attachGmToXNodeModal.open}
+        onClose={attachGmToXNodeModal.onClose}
+      />
+      <DetachGMToXNodeModal
+        gmId={xNode.gmTokenIdAttachedToNode || ""}
+        gmLevel={attachedGMNFT?.tokenLevel || ""}
+        xNodeId={xNode.nodeId}
+        isOpen={detachGmToXNodeModal.open}
+        onClose={detachGmToXNodeModal.onClose}
+      />
+    </Card.Root>
   )
 }

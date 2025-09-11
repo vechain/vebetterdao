@@ -3,8 +3,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory, GalaxyMember__factory } from "@repo/contracts"
-import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, useXNode } from "@/api"
+import { NodeManagement__factory, GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
+import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, UserNode } from "@/api"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
@@ -15,6 +15,7 @@ const method = "removeNodeDelegation"
 const detachMethod = "detachNode"
 
 type UseRevokeXNodeDelegationProps = {
+  xNode: UserNode
   onSuccess?: () => void
 }
 
@@ -29,18 +30,17 @@ type ClausesParams = {
  * @param onSuccess - Optional callback to be executed after successful revocation
  * @returns Transaction builder and status information
  */
-export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegationProps = {}) => {
+export const useRevokeXNodeDelegation = ({ xNode, onSuccess }: UseRevokeXNodeDelegationProps) => {
   const { account } = useWallet()
-  const { xNodeId, attachedGMTokenId } = useXNode()
 
   // Memoize the node data to prevent changes during transaction
   const nodeData = useMemo(
     () => ({
-      xNodeId,
-      attachedGMTokenId,
+      xNodeId: xNode.nodeId,
+      attachedGMTokenId: xNode.gmTokenIdAttachedToNode,
       accountAddress: account?.address,
     }),
-    [account?.address],
+    [account?.address, xNode.gmTokenIdAttachedToNode, xNode.nodeId],
   )
 
   const clauseBuilder = useCallback(

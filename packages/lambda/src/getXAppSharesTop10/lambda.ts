@@ -5,7 +5,7 @@ import { Clause, Address, ABIContract } from "@vechain/sdk-core"
 import mainnetConfig from "@repo/config/mainnet"
 import testnetStagingConfig from "@repo/config/testnet-staging"
 import { AppEnv } from "@repo/config/contracts"
-import { X2EarnApps__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 
 import { findBlacklistedApps, getCurrentRoundId, getData, getRoundXApps, getRoundXAppShares } from "../helpers"
 import { buildResponse } from "../helpers/api/response"
@@ -68,7 +68,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   console.log("Retrieve allocation shares data for round:", lastRoundId)
 
   // Get the round app ids
-  const roundAppIds = await getRoundXApps(thor, lastRoundId.toString(), CONFIG)
+  const roundAppIds = await getRoundXApps(thor, CONFIG, lastRoundId.toString())
 
   // Find blacklisted apps and get the round app shares in parallel
   const [blacklistedAppIds, roundAppShares] = await Promise.all([

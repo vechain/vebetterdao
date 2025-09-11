@@ -1,10 +1,9 @@
-import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey } from "@/api"
+import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey, getUserGMsQueryKey } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory } from "@repo/contracts"
-import { getTokensInfoByOwnerQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
@@ -43,7 +42,7 @@ export const useMintNFT = ({ onFailure, onSuccess, transactionModalCustomUI }: u
       getSelectedTokenIdQueryKey(account?.address),
       getTokenIdByAccountQueryKey(account?.address ?? "", 0),
       getGMbalanceQueryKey(account?.address ?? ""),
-      getTokensInfoByOwnerQueryKey(account?.address),
+      getUserGMsQueryKey(account?.address ?? ""),
     ],
     [account?.address],
   )

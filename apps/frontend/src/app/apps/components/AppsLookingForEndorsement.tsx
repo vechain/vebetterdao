@@ -1,5 +1,5 @@
 import React, { useRef } from "react"
-import { VStack, HStack, Heading, Text, IconButton, Hide, useBreakpointValue } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -39,7 +39,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   return (
     <VStack
       alignItems="flex-start"
-      spacing={4}
+      gap={4}
       p={"20px"}
       width={"full"}
       border={"1px solid #EFEFEF"}
@@ -53,7 +53,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
       }}>
       <HStack justifyContent={"space-between"} alignItems={"center"} w={"full"}>
         <VStack alignItems={"flex-start"}>
-          <Heading size="lg" color="gray.900" _dark={{ color: "#E4E4E4" }}>
+          <Heading size="3xl" color="gray.900" _dark={{ color: "#E4E4E4" }}>
             {t("New apps looking for endorsement")}
           </Heading>
           <Text color="gray.600" _dark={{ color: "#A1A1A1" }}>
@@ -84,34 +84,34 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
               position: "relative",
               opacity: 1,
             }}>
-            <UnendorsedAppCard xApp={xApp} />
+            <UnendorsedAppCard appId={xApp.id} isNewApp={xApp.isNew} />
           </SwiperSlide>
         ))}
 
-        <Hide below="md">
-          <IconButton
-            pos={"absolute"}
-            zIndex={2}
-            variant={"primarySubtle"}
-            left={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            icon={<FaChevronLeft />}
-            onClick={() => swiperRef.current?.slidePrev()}
-            aria-label="Previous app"
-          />
-          <IconButton
-            pos={"absolute"}
-            zIndex={2}
-            variant={"primarySubtle"}
-            right={5}
-            top={"50%"}
-            transform={"translateY(-50%)"}
-            icon={<FaChevronRight />}
-            onClick={() => swiperRef.current?.slideNext()}
-            aria-label="Next app"
-          />
-        </Hide>
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2}
+          variant={"primarySubtle"}
+          left={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slidePrev()}
+          aria-label="Previous app">
+          <FaChevronLeft />
+        </IconButton>
+        <IconButton
+          hideBelow="md"
+          pos={"absolute"}
+          zIndex={2}
+          variant={"primarySubtle"}
+          right={5}
+          top={"50%"}
+          transform={"translateY(-50%)"}
+          onClick={() => swiperRef.current?.slideNext()}
+          aria-label="Next app">
+          <FaChevronRight />
+        </IconButton>
       </Swiper>
     </VStack>
   )

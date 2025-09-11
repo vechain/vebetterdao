@@ -1,6 +1,6 @@
 "use client"
 
-import { Grid, GridItem, Show, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
+import { Grid, GridItem, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
@@ -12,12 +12,15 @@ import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard
 import { useWallet } from "@vechain/vechain-kit"
 import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
+import { useBreakpoints } from "@/hooks"
+import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
 
 type Props = {
   roundId: string
 }
 export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
 
   const userVoteMinPercentageToNotMerge = useBreakpointValue(
     {
@@ -40,23 +43,22 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
 
   if (currentAllocationState.isLoading)
     return (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
+      <VStack w="full" gap={12} h="80vh" justify="center">
         <Spinner size={"lg"} />
       </VStack>
     )
   if (currentAllocationState.error) return null
 
   return (
-    <VStack w="full" spacing={8} data-testid={`allocation-${roundId}-page`}>
+    <VStack w="full" gap={8} data-testid={`allocation-${roundId}-page`}>
       <AllocationRoundNavbar roundId={roundId} />
       <CantVoteCard />
+      <StartNewRoundAlert />
       <AllocationRoundHeaderCard roundId={roundId} />
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
-          <VStack spacing={8} w="full">
-            <Show below="sm">
-              <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
-            </Show>
+          <VStack gap={8} w="full">
+            {isMobile && <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />}
             {hasVoted && (
               <AllocationRoundUserVotes roundId={roundId} minPercentageToNotMerge={userVoteMinPercentageToNotMerge} />
             )}
@@ -65,9 +67,8 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} w="full" alignSelf={"start"}>
           <AllocationRoundSessionInfoCard roundId={roundId} />
-          <Show above="sm">
-            <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
-          </Show>
+
+          {!isMobile && <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />}
         </GridItem>
       </Grid>
     </VStack>

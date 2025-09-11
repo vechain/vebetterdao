@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import dayjs from "@/utils/dayjsConfig"
-import { ThorClient, executeMultipleClausesCall } from "@vechain/vechain-kit"
-import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
+import { ThorClient, XAppMetadata, executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
@@ -27,6 +27,10 @@ export type XApp = {
   isNew: boolean
 }
 
+export type XAppWithMetadata = XApp & {
+  metadata: XAppMetadata
+}
+
 /**
  * UnendorsedApp type
  * @property appAvailableForAllocationVoting - whether the app is available for allocation voting
@@ -49,8 +53,14 @@ export type GetAllApps = {
   endorsementLost: UnendorsedApp[]
 }
 
-export const isNewApp = (xApp?: Omit<AllApps, "isNew">) =>
-  xApp ? dayjs().unix() - Number(xApp.createdAtTimestamp) <= NEW_APP_PERIOD_SECONDS : false
+export const isNewApp = (xApp?: Omit<AllApps, "isNew">) => {
+  if (!xApp) return false
+  const createdAtTimestamp = Number(xApp.createdAtTimestamp)
+  const notSubmitted = createdAtTimestamp === 0
+  const submittedInPast7Days = dayjs().unix() - createdAtTimestamp <= NEW_APP_PERIOD_SECONDS
+
+  return notSubmitted || submittedInPast7Days
+}
 const isNewLookingForEndorsement = (xApp: UnendorsedApp) => xApp.createdAtTimestamp === "0"
 const isInGracePeriod = (xApp: UnendorsedApp) => xApp.appAvailableForAllocationVoting
 const hasLostEndorsement = (xApp: UnendorsedApp) => !xApp.appAvailableForAllocationVoting
@@ -106,8 +116,12 @@ export const getXApps = async (thor: ThorClient, filterBlacklisted = false): Pro
           }) as const,
       ),
     })
+
     activeApps = activeApps.filter((_app, index) => isAppsBlacklisted[index] === false)
-    unendorsedApps = unendorsedApps.filter((_app, index) => isAppsBlacklisted[index] === false)
+
+    //We need to add the active apps length to the index because we are slicing the active apps, which is concatenated with the unendorsed apps
+    //So index 0 of unendorsed apps is actually index (0) + active.length (n) of the concatenated array -> index (n)
+    unendorsedApps = unendorsedApps.filter((_app, index) => isAppsBlacklisted[index + active.length] === false)
   }
 
   const unendorsedIds = new Set(unendorsedApps.map(app => app.id))

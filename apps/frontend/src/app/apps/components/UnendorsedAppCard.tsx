@@ -1,64 +1,47 @@
-import {
-  Card,
-  CardBody,
-  Divider,
-  Heading,
-  HStack,
-  Image,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-  Show,
-  Icon,
-} from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, Image, Skeleton, Stack, Text, VStack, Icon, Avatar } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
-import { useAppEndorsementStatus, useIpfsImage, useXNode, UnendorsedApp, XApp, useXAppMetadata } from "@/api"
+import { useAppEndorsementStatus, useGetUserNodes, useIpfsImage, useXAppMetadata } from "@/api"
 import { notFoundImage } from "@/constants"
 import { useXAppStatusConfig } from "../[appId]/hooks"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
-  xApp: XApp | UnendorsedApp
+  appId: string
+  isNewApp: boolean
   layout?: "endorser" | "default"
 }
 
-export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
+export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
-  const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
+  const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes(appId)
+  const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(appId)
+  const { data: logo } = useIpfsImage(appMetadata?.logo)
+  const nodeEndorsingApp = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)
 
   const {
     score: endorsementScore,
     threshold: endorsementThreshold,
     status: endorsementStatus,
     isLoading: isEndorsementStatusLoading,
-  } = useAppEndorsementStatus(xApp.id)
+  } = useAppEndorsementStatus(appId)
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus as keyof typeof STATUS_CONFIG] ?? { color: "#6A6A6A" }
 
-  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
   const isUserAppEndorser = useMemo(() => {
-    if (!xApp || isXNodeLoading) return false
-    return isXNodeHolder && isEndorsingApp && compareAddresses(xApp.id, endorsedApp?.id)
-  }, [xApp, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
+    if (!appId) return false
+    return nodeEndorsingApp?.isXNodeHolder
+  }, [appId, nodeEndorsingApp])
 
   const onCardClick = useCallback(() => {
-    router.push(`/apps/${xApp.id}`)
-  }, [router, xApp.id])
-
-  const isNewApp = useMemo(() => {
-    if (!xApp) return false
-    return xApp.isNew
-  }, [xApp])
+    router.push(`/apps/${appId}`)
+  }, [router, appId])
 
   return (
-    <Card
+    <Card.Root
       variant={"baseWithBorder"}
       w="full"
       onClick={onCardClick}
@@ -68,32 +51,31 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
         backgroundColor: "hover-contrast-bg",
         transition: "all 0.3s",
       }}>
-      <CardBody py="16px" px="24px">
+      <Card.Body py="16px" px="24px">
         <Stack
           direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
           align="stretch"
           w="full"
           h="full">
-          <Stack direction="row" spacing={4} align="center" flex="1">
-            <Skeleton isLoaded={!isLogoLoading}>
-              <Image
+          <Stack direction="row" gap={4} align="center" flex="1">
+            <Avatar.Root shape="rounded" h="72px" w="72px">
+              <Avatar.Image
                 src={logo?.image ?? notFoundImage}
                 alt="logo"
-                h="72px"
-                w="72px"
                 minW="72px"
                 borderRadius="9px"
                 objectFit="contain"
               />
-            </Skeleton>
+              <Avatar.Fallback name={appMetadata?.name} />
+            </Avatar.Root>
 
-            <Stack flex="1" align="stretch" justify="center">
-              <Skeleton isLoaded={!appMetadataLoading}>
-                <HStack spacing={4} align="center">
+            <Stack flex="1" align="stretch" justify="center" overflow="hidden">
+              <Skeleton loading={appMetadataLoading}>
+                <HStack gap={4} align="center">
                   <Heading
                     fontWeight={700}
                     fontSize="20px"
-                    noOfLines={1}
+                    lineClamp={1}
                     maxW={{ base: "full", md: "150px", lg: "200px" }}
                     overflow="hidden"
                     textOverflow="ellipsis">
@@ -108,7 +90,7 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                       py={1}
                       borderRadius={"16px"}
                       fontSize="12px"
-                      spacing={1}
+                      gap={1}
                       flexShrink={0}>
                       <Image src="/assets/icons/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
                       <Text>{t("New!")}</Text>
@@ -116,32 +98,28 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                   )}
                 </HStack>
               </Skeleton>
-              <Skeleton isLoaded={!appMetadataLoading}>
-                <Text fontSize="14px" color="#6A6A6A" fontWeight={400} noOfLines={2}>
+              <Skeleton loading={appMetadataLoading}>
+                <Text fontSize="14px" color="#6A6A6A" fontWeight={400} lineClamp={2}>
                   {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                 </Text>
               </Skeleton>
             </Stack>
           </Stack>
 
-          <Show above="md">
-            <Divider orientation="vertical" h="100%" />
-          </Show>
-          <Show below="md">
-            <Divider orientation="horizontal" h="100%" />
-          </Show>
+          <Separator hideBelow="md" orientation="vertical" h="100%" />
+          <Separator hideFrom="md" orientation="horizontal" h="100%" />
 
           {/* Right Section: Score */}
           <Stack direction="row" align="center" justify="center">
             <Stack
               direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
-              spacing={3}
+              gap={3}
               align={{ base: "center", lg: "stretch", md: "stretch" }}
               justify={{ base: "space-between", md: "stretch" }}
               w="full">
               <VStack gap={0} alignItems="flex-start">
-                <Skeleton isLoaded={!isEndorsementStatusLoading}>
-                  <HStack spacing={1}>
+                <Skeleton loading={isEndorsementStatusLoading}>
+                  <HStack gap={1}>
                     <Text fontSize="24px" fontWeight="700" color={color}>
                       {endorsementScore}
                     </Text>
@@ -155,9 +133,9 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
 
               {isUserAppEndorser && (
                 <VStack gap={0} alignItems="flex-start">
-                  <Skeleton isLoaded={!isXNodeLoading}>
+                  <Skeleton loading={isUserNodesLoading}>
                     <Text fontSize="24px" fontWeight="700" color="#004CFC">
-                      {xNodePoints}
+                      {nodeEndorsingApp?.xNodePoints}
                     </Text>
                   </Skeleton>
                   <Text fontSize="12px" color="#6A6A6A">
@@ -166,12 +144,10 @@ export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
                 </VStack>
               )}
             </Stack>
-            <Show above="md">
-              <Icon as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
-            </Show>
+            <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
           </Stack>
         </Stack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

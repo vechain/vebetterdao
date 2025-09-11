@@ -1,4 +1,4 @@
-import { Card, CardHeader, Heading, CardBody, VStack } from "@chakra-ui/react"
+import { Card, Heading, VStack } from "@chakra-ui/react"
 import { StartEmissionsButton } from "./components/StartEmissionsButton"
 import { StartRoundButton } from "./components/StartRoundButton"
 import { useWallet } from "@vechain/vechain-kit"
@@ -11,16 +11,16 @@ export const StartRoundCard = () => {
   const { t } = useTranslation()
 
   return (
-    <Card w={"full"}>
-      <CardHeader>
-        <Heading size="lg">{t("Emissions and Rounds")}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack w={"full"} spacing={4} alignItems={"start"}>
+    <Card.Root w={"full"}>
+      <Card.Header>
+        <Heading size="3xl">{t("Emissions and Rounds")}</Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack w={"full"} gap={4} alignItems={"start"}>
           {permissions?.isAdminOfEmissions && <StartEmissionsButton />}
           <StartRoundButton />
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

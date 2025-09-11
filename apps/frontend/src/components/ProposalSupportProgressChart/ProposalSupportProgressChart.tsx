@@ -76,7 +76,7 @@ export const ProposalSupportProgressChart = ({
   )
 
   return (
-    <VStack alignItems={"stretch"} spacing={3} w="full" data-testid="proposal-support-progress-chart">
+    <VStack alignItems={"stretch"} gap={3} w="full" data-testid="proposal-support-progress-chart">
       <HStack alignItems={"baseline"} justify={"space-between"}>
         <HStack alignItems={"baseline"}>
           <Flex position="relative" top="7px" display={"inline-flex"}>

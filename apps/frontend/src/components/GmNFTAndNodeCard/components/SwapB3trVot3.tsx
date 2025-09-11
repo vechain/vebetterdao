@@ -31,13 +31,13 @@ type Props = {
 
 export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
-  const [isAbove600] = useMediaQuery("(min-width: 600px)")
+  const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
+  const [isAbove600] = useMediaQuery(["(min-width: 600px)"])
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useGetB3trBalance(address)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useGetVot3Balance(address)
 
-  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { open: isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
@@ -46,7 +46,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
   const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
 
-  const { isOpen: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
+  const { open: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
 
   return (
     <>
@@ -78,7 +78,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             </Text>
             <HStack>
               <B3TRIcon boxSize={"30px"} />
-              <Skeleton isLoaded={!isB3trBalanceLoading}>
+              <Skeleton loading={isB3trBalanceLoading}>
                 <Heading fontSize="1.75rem">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
@@ -96,7 +96,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             </Text>
             <HStack>
               <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
-              <Skeleton isLoaded={!isVot3BalanceLoading}>
+              <Skeleton loading={isVot3BalanceLoading}>
                 <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
@@ -104,20 +104,19 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
         </Stack>
         {(isConnectedUser || !isOnProfilePage) && (
           <Button
-            isDisabled={isSwapDisabled}
+            disabled={isSwapDisabled}
             onClick={onOpen}
-            leftIcon={
-              <UilExchangeAlt
-                size={"16px"}
-                style={{
-                  transform: "rotate(90deg)",
-                }}
-              />
-            }
+            mt="auto"
             variant={"whiteAction"}
             rounded={"full"}
             fontWeight={500}
             px="24px">
+            <UilExchangeAlt
+              size={"16px"}
+              style={{
+                transform: "rotate(90deg)",
+              }}
+            />
             {t("Convert tokens")}
           </Button>
         )}

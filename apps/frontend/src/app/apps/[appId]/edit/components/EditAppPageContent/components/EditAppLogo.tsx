@@ -1,12 +1,14 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Box, Circle, Flex, Image, Input, useToast, Text, VStack } from "@chakra-ui/react"
-import { LOGO_UPLOAD_GUIDELINES, notFoundImage } from "@/constants"
-import { useCallback, useRef } from "react"
+import { Box, Circle, Flex, Image, Input, Text, VStack } from "@chakra-ui/react"
+import { LOGO_UPLOAD_GUIDELINES, IMAGE_REQUIREMENTS, notFoundImage } from "@/constants"
+import { useCallback, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
 import { useTranslation } from "react-i18next"
+import { validateImage } from "@/utils"
+import { toaster } from "@/components/ui/toaster"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -15,32 +17,41 @@ type Props = {
 export const EditAppLogo = ({ form }: Props) => {
   const logo = form.watch("logoImage")
   const inputRef = useRef<HTMLInputElement>(null)
-  const toast = useToast()
   const { t } = useTranslation()
+  const [invalidFormat, setInvalidFormat] = useState(false)
+  const [invalidMessage, setInvalidMessage] = useState("Invalid image format")
 
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
+  const accept = IMAGE_REQUIREMENTS.logo.mimeType
 
   const handleUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       try {
         const file = e.target.files?.[0]
-        if (file) {
-          const compressedFile = await handleImageCompression(file)
-          const base64File = await blobToBase64(compressedFile)
-          form.setValue("logoImage", base64File)
+        if (!file) return
+
+        // Validate image dimensions and ratio
+        const validation = await validateImage(file, "logo")
+        setInvalidFormat(!validation.isValid)
+        if (!validation.isValid) {
+          setInvalidMessage(validation.error ?? "Invalid image format")
+          return
         }
+
+        const compressedFile = await handleImageCompression(file)
+        const base64File = await blobToBase64(compressedFile)
+        form.setValue("logoImage", base64File)
       } catch (error) {
-        toast({
+        toaster.error({
           title: "Error",
           description: "An error occurred while uploading the logo",
-          status: "error",
           duration: 5000,
-          isClosable: true,
+          closable: true,
         })
         console.error(error)
       }
     },
-    [form, toast],
+    [form],
   )
 
   return (
@@ -59,7 +70,7 @@ export const EditAppLogo = ({ form }: Props) => {
           objectFit={"cover"}
           objectPosition={"center"}
         />
-        <Input type="file" accept="image/*" display={"none"} ref={inputRef} onChange={handleUpload} />
+        <Input type="file" accept={accept} display={"none"} ref={inputRef} onChange={handleUpload} />
         <Box>
           <Flex
             rounded="16px"
@@ -81,8 +92,8 @@ export const EditAppLogo = ({ form }: Props) => {
           </Flex>
         </Box>
       </Flex>
-      <Text fontSize={14} color={"gray"} pt={0}>
-        {t(LOGO_UPLOAD_GUIDELINES)}
+      <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>
+        {invalidFormat ? invalidMessage : t(LOGO_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>
   )

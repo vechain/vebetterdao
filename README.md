@@ -209,6 +209,16 @@ yarn contracts:compile
 
 ```
 
+### Publish
+
+To publish contracts package to the npm `@vechain/vebetterdao-contracts`, run from the root folder:
+
+```bash
+yarn contracts:publish
+```
+
+After publishing make sure to push your commit with latest version of contracts package and sync changes with the public repo `@vechain/vebetterdao-contracts`
+
 ### Test
 
 Since we are using a monorepo structure, we can run the tests only from the root folder.
@@ -314,10 +324,10 @@ Optionally verify your smart contracts on Sourcify. This allows 3rd to view and 
 After deploying `SimpleStorage`, the console will print the address of the deployed contract. You can verify the contract on [sourcify.eth](https://repo.sourcify.dev/select-contract/):
 
 ```bash
-yarn contracts:verify:mainnet 0x98307db87474fc30d6e022e2b31f384b134c2c2a
+yarn contracts:verify:mainnet <contract-address> <contract-name>
 ```
 
-**Note:** Hardhat throws an error when verifying contracts on VeChain networks. This error can be ignored as the contract is still verified on Sourcify. See an [example here](https://repo.sourcify.dev/contracts/full_match/100010/0x98307db87474fC30D6E022E2b31f384B134C2c2A/sources/contracts/)
+Read more about the verification process in the [packages/contracts/scripts/verify/README.md](packages/contracts/scripts/verify/README.md) file.
 
 ## Simulating rounds
 

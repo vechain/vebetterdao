@@ -1,23 +1,12 @@
 import { BaseModal } from "@/components/BaseModal"
-import {
-  Heading,
-  Text,
-  UseDisclosureProps,
-  VStack,
-  Button,
-  Box,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  useBreakpointValue,
-} from "@chakra-ui/react"
+import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useAcceptDelegation } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
@@ -38,7 +27,7 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
   }, [modal, acceptDelegation])
 
   return (
-    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle size={triangleSize} />
@@ -51,13 +40,13 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           <Text fontSize="sm">{delegatorName}</Text>
           <Text fontSize="sm">{delegator}</Text>
         </VStack>
-        <Alert status="warning" borderRadius="2xl">
-          <AlertIcon w={9} h={9} />
+        <Alert.Root status="warning" borderRadius="2xl">
+          <Alert.Indicator w={9} h={9} />
           <Box lineHeight={"1.20rem"} fontSize="sm">
-            <AlertTitle as="span">{t("You will be able to vote using delegator's Voting Qualification")}</AlertTitle>
-            <AlertDescription as="span">{t("once you have accepted the delegation.")}</AlertDescription>
+            <Alert.Title as="span">{t("You will be able to vote using delegator's Voting Qualification")}</Alert.Title>
+            <Alert.Description as="span">{t("once you have accepted the delegation.")}</Alert.Description>
           </Box>
-        </Alert>
+        </Alert.Root>
         <VStack>
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}

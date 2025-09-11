@@ -36,6 +36,7 @@ export const NewAppPageFormContent = () => {
         projectUrl: latestSubmission?.projectUrl ?? "",
         treasuryWalletAddress: "",
         adminWalletAddress: "",
+        categories: [],
       },
     })
 
@@ -75,9 +76,10 @@ export const NewAppPageFormContent = () => {
         app_urls: [],
         social_urls: [],
         tweets: [],
-        categories: [],
+        categories: data.categories,
         ve_world: {
           banner: data.ve_world_banner,
+          featured_image: data.ve_world_featured_image,
         },
       })
       if (!metadataUri) return
@@ -111,8 +113,10 @@ export const NewAppPageFormContent = () => {
           </form>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} minH={0} minW={0}>
-          <VStack spacing={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
-            <Heading size="md">{t("App preview")}</Heading>
+          <VStack gap={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
+            <Heading size="xl" fontWeight="bold">
+              {t("App preview")}
+            </Heading>
             <AppPreviewDetailCard app={watch()} />
           </VStack>
         </GridItem>

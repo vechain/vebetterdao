@@ -4,19 +4,7 @@ import {
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
 
-import {
-  Button,
-  Card,
-  CardBody,
-  Divider,
-  Heading,
-  HStack,
-  Icon,
-  IconButton,
-  Skeleton,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 
 import { useWallet } from "@vechain/vechain-kit"
@@ -24,7 +12,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
-import { useRouter } from "next/navigation"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
 export const MockLeaderboard = [
@@ -38,7 +25,6 @@ export const MockLeaderboard = [
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const router = useRouter()
   const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
@@ -61,7 +47,7 @@ export const Leaderboard = () => {
     setSelectedRoundId(roundId)
   }
 
-  const yourRaking = useMemo(() => {
+  const yourRanking = useMemo(() => {
     if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined
     if (userRoundOverview.isError) {
@@ -91,10 +77,6 @@ export const Leaderboard = () => {
     score: entry?.actionsRewarded as number,
   }))
 
-  const onSeeAllClick = () => {
-    router.push(`/leaderboard/${selectedRoundId}`)
-  }
-
   const renderRankings = useMemo(() => {
     if (leaderboardQuery.isLoading)
       return MockLeaderboard.map(ranking => (
@@ -108,7 +90,7 @@ export const Leaderboard = () => {
 
     if (leaderboardQuery.isError || !rankings.length)
       return (
-        <VStack spacing={4} align="stretch" w="full" h="full" pos="relative">
+        <VStack gap={4} align="stretch" w="full" h="full" pos="relative">
           <VStack
             pos={"absolute"}
             backdropFilter="blur(10px)"
@@ -117,12 +99,12 @@ export const Leaderboard = () => {
             left={0}
             w={"full"}
             justify={"center"}
-            spacing={1}
+            gap={1}
             p={4}
             h="full"
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
-            <Heading size="sm">{t("Not enough data for the week")}</Heading>
+            <Heading size="md">{t("Not enough data for the week")}</Heading>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
               {t("Leaderboard is available since the integration of sustainability proofs 🥇")}
             </Text>
@@ -149,23 +131,23 @@ export const Leaderboard = () => {
     AddressUtils.compareAddresses(ranking.address, account?.address ?? ""),
   )
   return (
-    <Card w="full" variant={"baseWithBorder"}>
-      <CardBody>
-        <VStack spacing={6} align="stretch" h="full">
-          <VStack spacing={2} align="stretch">
+    <Card.Root w="full" variant={"baseWithBorder"}>
+      <Card.Body>
+        <VStack gap={6} align="stretch" h="full">
+          <VStack gap={2} align="stretch">
             <HStack justify={"space-between"} w="full">
               <IconButton
                 minW={0}
-                size={"lg"}
+                boxSize={6}
                 aria-label="Next round"
-                variant="link"
-                colorScheme="primary"
-                icon={<Icon as={FaAngleLeft} boxSize={5} />}
-                isDisabled={isFirstRound}
-                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
-              />
-              <Skeleton isLoaded={!roundIdLoading}>
-                <Heading size={["sm", "sm", "md"]}>
+                variant="ghost"
+                color="primary"
+                disabled={isFirstRound}
+                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
+                <Icon as={FaAngleLeft} boxSize={5} />
+              </IconButton>
+              <Skeleton loading={roundIdLoading}>
+                <Heading size={{ base: "md", lg: "xl" }}>
                   {t("Round {{id}} leaderboard", {
                     id: selectedRoundId ?? "",
                   })}
@@ -173,14 +155,14 @@ export const Leaderboard = () => {
               </Skeleton>
               <IconButton
                 minW={0}
-                size={"lg"}
+                boxSize={6}
                 aria-label="Next round"
-                variant="link"
-                colorScheme="primary"
-                icon={<Icon as={FaAngleRight} boxSize={5} />}
-                isDisabled={isLastRound}
-                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
-              />
+                variant="ghost"
+                color="primary"
+                disabled={isLastRound}
+                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
+                <Icon as={FaAngleRight} boxSize={5} />
+              </IconButton>
             </HStack>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
               {t(
@@ -188,21 +170,27 @@ export const Leaderboard = () => {
               )}
             </Text>
           </VStack>
-          <VStack spacing={4} align="stretch" w="full" h="full">
+          <VStack gap={4} align="stretch" w="full" h="full">
             {renderRankings}
-            {!isRankingInTop5 && (
+            {!isRankingInTop5 && yourRanking && (
               <>
-                <Divider w="full" h={1} />
-                {yourRaking && <LeaderboardRankingComponent ranking={yourRaking} isYourRanking />}
+                <Separator w="full" h={1} />
+                {yourRanking && <LeaderboardRankingComponent ranking={yourRanking} isYourRanking />}
               </>
             )}
           </VStack>
-          <Divider w="full" h={1} />
-          <Button size="md" variant={"link"} colorScheme="primary" w="full" onClick={onSeeAllClick}>
+          <Separator w="full" h={1} />
+          <Link
+            href={`/leaderboard/${selectedRoundId}`}
+            variant={"plain"}
+            color="primary"
+            _hover={{ textDecoration: "underline" }}
+            fontWeight="semibold"
+            mx="auto">
             {t("See full leaderboard")}
-          </Button>
+          </Link>
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -1,4 +1,3 @@
-export * from "./selectedTheme"
 export * from "./useProposalFormStore"
 export * from "./useProposalFilters"
 export * from "./useCastAllocationFormStore"

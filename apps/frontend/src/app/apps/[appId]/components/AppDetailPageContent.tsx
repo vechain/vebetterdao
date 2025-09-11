@@ -7,9 +7,9 @@ import { AppCreationSteps } from "./AppCreationSteps/AppCreationSteps"
 import { AppDetailOverview } from "./AppDetailOverview"
 import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets"
-import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppBalanceCard } from "./AppBalanceCard"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
@@ -22,6 +22,7 @@ export const AppDetailPageContent = () => {
     threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(app?.id ?? "")
+
   const isTeamWalletAddress = compareAddresses(app?.teamWalletAddress, account?.address)
 
   const appHasBeenIntoAllocationRounds = app?.createdAtTimestamp !== "0"
@@ -36,10 +37,9 @@ export const AppDetailPageContent = () => {
 
   return (
     <Grid
-      templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
+      templateColumns={["repeat(1, minmax(0, 1fr))", "repeat(1, minmax(0, 1fr))", "repeat(3, minmax(0, 1fr))"]}
       gap={"32px"}
       w="full"
-      maxW="full"
       alignItems={"flex-start"}
       data-testid="app-detail-grid">
       <GridItem w="full" colSpan={[1, 1, 3]}>
@@ -49,7 +49,7 @@ export const AppDetailPageContent = () => {
         />
       </GridItem>
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>
-        <Stack direction="column" spacing={8}>
+        <Stack direction="column" gap={8}>
           {shouldRenderCreationSteps ? <AppCreationSteps /> : null}
           <AppScreenshots />
           <AppTweets />
@@ -57,7 +57,7 @@ export const AppDetailPageContent = () => {
       </GridItem>
 
       <GridItem w="full" colSpan={1} order={[1, 1, 2]}>
-        <Stack direction="column" spacing={8}>
+        <Stack direction="column" gap={8}>
           {shouldRenderBalance && <AppBalanceCard />}
           <AppEndorsementInfoCard
             endorsementScore={endorsementScore}

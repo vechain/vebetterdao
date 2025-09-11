@@ -4,8 +4,8 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
-import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
-import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, useXNode } from "@/api"
+import { GalaxyMember__factory, NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, UserNode } from "@/api"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
@@ -16,6 +16,7 @@ const delegateMethod = "delegateNode"
 const detachMethod = "detachNode"
 
 type UseDelegateXNodeProps = {
+  xNode: UserNode
   onSuccess?: () => void
 }
 
@@ -31,18 +32,18 @@ type ClausesParams = {
  * @param onSuccess - Optional callback to be executed after successful delegation
  * @returns Transaction builder and status information
  */
-export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
+export const useDelegateXNode = ({ xNode, onSuccess }: UseDelegateXNodeProps) => {
   const { account } = useWallet()
-  const { xNodeId, attachedGMTokenId } = useXNode()
+  const attachedGMTokenId = xNode?.gmTokenIdAttachedToNode
 
   // Memoize the node data to prevent changes during transaction
   const nodeData = useMemo(
     () => ({
-      xNodeId,
-      attachedGMTokenId,
+      xNodeId: xNode.nodeId,
+      attachedGMTokenId: xNode.gmTokenIdAttachedToNode,
       accountAddress: account?.address,
     }),
-    [account?.address],
+    [account?.address, xNode.gmTokenIdAttachedToNode, xNode.nodeId],
   )
 
   const clauseBuilder = useCallback(
@@ -84,10 +85,10 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
     () => [
       getUserNodesQueryKey(nodeData.accountAddress || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId || ""),
-      getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
+      getGetTokenIdAttachedToNodeQueryKey(xNode.nodeId || ""),
       getIsNodeHolderQueryKey(account?.address || ""),
     ],
-    [nodeData],
+    [nodeData, account?.address, attachedGMTokenId, xNode.nodeId],
   )
 
   return useBuildTransaction<ClausesParams>({

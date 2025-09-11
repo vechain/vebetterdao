@@ -1,22 +1,5 @@
 import { XApp } from "@/api"
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
-  Heading,
-  Image,
-  Text,
-  InputGroup,
-  InputLeftElement,
-  Stack,
-  VStack,
-} from "@chakra-ui/react"
+import { Button, Card, Field, Heading, Image, Text, InputGroup, Stack, VStack } from "@chakra-ui/react"
 import {
   Control,
   Controller,
@@ -29,16 +12,16 @@ import {
 } from "react-hook-form"
 import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
-import { useCallback } from "react"
+import { ChangeEvent, useCallback, useRef } from "react"
 import {
   BANNER_UPLOAD_GUIDELINES,
   LOGO_UPLOAD_GUIDELINES,
   VEWORLD_BANNER_UPLOAD_GUIDELINES,
+  VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES,
   AVG_PHONE_WIDTH,
   notFoundImage,
   VE_WOLRD_SCALING_FACTOR,
 } from "@/constants"
-import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
@@ -81,6 +64,7 @@ export type CreateEditAppFormData = {
   treasuryWalletAddress: string
   adminWalletAddress: string
   ve_world_banner: string
+  ve_world_featured_image: string
 }
 
 type Props = {
@@ -109,43 +93,49 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
+  const uploadLogoRef = useRef<HTMLButtonElement>(null)
+  const uploadBannerRef = useRef<HTMLButtonElement>(null)
+  const uploadVeWorldBannerRef = useRef<HTMLButtonElement>(null)
+  const uploadVeWorldFeaturedImageRef = useRef<HTMLButtonElement>(null)
   const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner" | "ve_world_banner") => async (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0]
-      if (!file) return
+    (image: "logo" | "banner" | "ve_world_banner" | "ve_world_featured_image") =>
+      async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
 
-      if (image === "logo") {
-        clearErrors("logo")
-        const base64Logo = await validateImageUpload(file, setError, "logo")
-        if (!base64Logo) return
-        setValue("logo", base64Logo)
-      }
+        if (image === "logo") {
+          clearErrors("logo")
+          const base64Logo = await validateImageUpload(file, setError, "logo")
+          if (!base64Logo) return
+          setValue("logo", base64Logo)
+        }
 
-      if (image === "banner") {
-        clearErrors("banner")
-        const base64Banner = await validateImageUpload(file, setError, "banner")
-        if (!base64Banner) return
-        setValue("banner", base64Banner)
-      }
+        if (image === "banner") {
+          clearErrors("banner")
+          const base64Banner = await validateImageUpload(file, setError, "banner")
+          if (!base64Banner) return
+          setValue("banner", base64Banner)
+        }
 
-      if (image === "ve_world_banner") {
-        clearErrors("ve_world_banner")
-        const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world_banner")
-        if (!base64VeWorldBanner) return
-        setValue("ve_world_banner", base64VeWorldBanner)
-      }
-    },
+        if (image === "ve_world_banner") {
+          clearErrors("ve_world_banner")
+          const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world_banner")
+          if (!base64VeWorldBanner) return
+          setValue("ve_world_banner", base64VeWorldBanner)
+        }
+
+        if (image === "ve_world_featured_image") {
+          clearErrors("ve_world_featured_image")
+          const base64VeWorldFeaturedImage = await validateImageUpload(file, setError, "ve_world_featured_image")
+          if (!base64VeWorldFeaturedImage) return
+          setValue("ve_world_featured_image", base64VeWorldFeaturedImage)
+        }
+      },
     [setError, setValue, clearErrors],
   )
-
-  const { open: openUploadLogo } = useDropzone({ onDrop: onDrop("logo") })
-
-  const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
-
-  const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world_banner") })
 
   const treasuryWalletAddress = watch("treasuryWalletAddress")
   const adminWalletAddress = watch("adminWalletAddress")
@@ -162,12 +152,14 @@ export const CreateEditAppForm = ({
     return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
   }
   return (
-    <Card>
-      <CardHeader>
-        <Heading size="lg">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
-      </CardHeader>
-      <CardBody>
-        <VStack spacing={8} w="full">
+    <Card.Root>
+      <Card.Header>
+        <Heading size="3xl" fontWeight="bold">
+          {isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}
+        </Heading>
+      </Card.Header>
+      <Card.Body>
+        <VStack gap={8} w="full">
           <FormItem
             label={t("Name")}
             placeholder={t("Name")}
@@ -252,34 +244,41 @@ export const CreateEditAppForm = ({
             error={errors.categories?.message}
           />
 
-          <FormControl isInvalid={!treasuryWalletAddress}>
-            <FormLabel>{t("Treasury address")}</FormLabel>
+          <Field.Root invalid={!treasuryWalletAddress}>
+            <Field.Label>{t("Treasury address")}</Field.Label>
             <Text fontSize="xs" color="gray.500" mb={2}>
-              {t("The wallet address where you will receive your app's B3TR")}
+              {t(`The wallet address where you will receive your app's B3TR`)}
             </Text>
             <InputGroup>
               <WalletAddressInput
-                inputLeftElement={
-                  <InputLeftElement pointerEvents="none">
-                    <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={treasuryWalletAddress} />
-                  </InputLeftElement>
-                }
-                isDisabled={isReceiverAddressDisabled}
+                inputGroupProps={{
+                  startElement: (
+                    <AddressIcon
+                      pointerEvents="none"
+                      borderRadius={"full"}
+                      boxSize={6}
+                      minW={6}
+                      minH={6}
+                      address={treasuryWalletAddress}
+                    />
+                  ),
+                }}
+                disabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("treasuryWalletAddress", address ?? "")}
               />
             </InputGroup>
-          </FormControl>
+          </Field.Root>
 
-          <FormControl isInvalid={!adminWalletAddress}>
-            <FormLabel>{t("Admin address")}</FormLabel>
+          <Field.Root invalid={!adminWalletAddress}>
+            <Field.Label>{t("Admin address")}</Field.Label>
             <Text fontSize="xs" color="gray.500" mb={2}>
               {t("The wallet address which will be used to manage your app")}
             </Text>
             <InputGroup>
               <WalletAddressInput
-                inputLeftElement={
-                  <InputLeftElement pointerEvents="none">
+                inputGroupProps={{
+                  startElement: (
                     <AddressIcon
                       borderRadius={"full"}
                       boxSize={6}
@@ -287,16 +286,16 @@ export const CreateEditAppForm = ({
                       minH={6}
                       address={adminWalletAddress ?? ""}
                     />
-                  </InputLeftElement>
-                }
-                isDisabled={isReceiverAddressDisabled}
+                  ),
+                }}
+                disabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("adminWalletAddress", address ?? "")}
               />
             </InputGroup>
-          </FormControl>
+          </Field.Root>
 
-          <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
+          <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} gap={4}>
             <Controller
               name="logo"
               control={control}
@@ -310,12 +309,12 @@ export const CreateEditAppForm = ({
                 },
               }}
               render={({ field: { value } }) => (
-                <FormControl isInvalid={!!errors.logo}>
-                  <FormLabel>{t("Logo")}</FormLabel>
+                <Field.Root invalid={!!errors.logo}>
+                  <Field.Label>{t("Logo")}</Field.Label>
                   <VStack w="full" align="flex-start">
                     <Image
                       alignSelf={"center"}
-                      onClick={openUploadLogo}
+                      onClick={() => uploadLogoRef.current?.click()}
                       _hover={{ cursor: "pointer" }}
                       src={value ?? notFoundImage}
                       alt="logo"
@@ -325,13 +324,13 @@ export const CreateEditAppForm = ({
                     />
 
                     {errors.logo ? (
-                      <FormErrorMessage>{errors.logo.message}</FormErrorMessage>
+                      <Field.ErrorText>{errors.logo.message}</Field.ErrorText>
                     ) : (
-                      <FormHelperText>{t(LOGO_UPLOAD_GUIDELINES)}</FormHelperText>
+                      <Field.HelperText>{t(LOGO_UPLOAD_GUIDELINES)}</Field.HelperText>
                     )}
-                    <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
+                    <UploadFileButton mt={4} alignSelf={"flex-end"} onChange={onDrop("logo")} ref={uploadLogoRef} />
                   </VStack>
-                </FormControl>
+                </Field.Root>
               )}
             />
 
@@ -348,12 +347,12 @@ export const CreateEditAppForm = ({
                 },
               }}
               render={({ field: { value } }) => (
-                <FormControl isInvalid={!!errors.banner}>
-                  <FormLabel>{t("Banner")}</FormLabel>
+                <Field.Root invalid={!!errors.banner}>
+                  <Field.Label>{t("Banner")}</Field.Label>
                   <VStack w="full" align={"flex-start"}>
                     <Image
                       alignSelf={"center"}
-                      onClick={openUploadBanner}
+                      onClick={() => uploadBannerRef.current?.click()}
                       _hover={{ cursor: "pointer" }}
                       src={value ?? notFoundImage}
                       alt="banner"
@@ -363,13 +362,13 @@ export const CreateEditAppForm = ({
                       objectFit="cover"
                     />
                     {errors.banner ? (
-                      <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
+                      <Field.ErrorText>{errors.banner.message}</Field.ErrorText>
                     ) : (
-                      <FormHelperText>{t(BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
+                      <Field.HelperText>{t(BANNER_UPLOAD_GUIDELINES)}</Field.HelperText>
                     )}
-                    <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
+                    <UploadFileButton mt={4} alignSelf={"flex-end"} onChange={onDrop("banner")} ref={uploadBannerRef} />
                   </VStack>
-                </FormControl>
+                </Field.Root>
               )}
             />
           </Stack>
@@ -386,11 +385,11 @@ export const CreateEditAppForm = ({
               },
             }}
             render={({ field: { value } }) => (
-              <FormControl isInvalid={!!errors.ve_world_banner}>
-                <FormLabel>{t("VeWorld Banner")}</FormLabel>
+              <Field.Root invalid={!!errors.ve_world_banner}>
+                <Field.Label>{t("VeWorld Banner")}</Field.Label>
                 <VStack w="full" align="center">
                   <Image
-                    onClick={openUploadVeWorldBanner}
+                    onClick={() => uploadVeWorldBannerRef.current?.click()}
                     _hover={{ cursor: "pointer" }}
                     src={value ?? notFoundImage}
                     alt="ve_world_banner"
@@ -398,22 +397,60 @@ export const CreateEditAppForm = ({
                     objectFit="cover"
                   />
                   {errors.ve_world_banner ? (
-                    <FormErrorMessage>{errors.ve_world_banner.message}</FormErrorMessage>
+                    <Field.ErrorText>{errors.ve_world_banner.message}</Field.ErrorText>
                   ) : (
-                    <FormHelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
+                    <Field.HelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</Field.HelperText>
                   )}
-                  <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
+                  <UploadFileButton
+                    mt={4}
+                    alignSelf={"flex-end"}
+                    onChange={onDrop("ve_world_banner")}
+                    ref={uploadVeWorldBannerRef}
+                  />
                 </VStack>
-              </FormControl>
+              </Field.Root>
+            )}
+          />
+          <Controller
+            name="ve_world_featured_image"
+            control={control}
+            rules={{
+              required: "VeWorld featured image is required",
+            }}
+            render={({ field: { value } }) => (
+              <Field.Root invalid={!!errors.ve_world_featured_image}>
+                <Field.Label>{t("VeWorld Featured Image")}</Field.Label>
+                <VStack w="full" align="center">
+                  <Image
+                    onClick={() => uploadVeWorldFeaturedImageRef.current?.click()}
+                    _hover={{ cursor: "pointer" }}
+                    src={value ?? notFoundImage}
+                    alt="ve_world_featured_image"
+                    style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
+                    objectFit="cover"
+                  />
+                  {errors.ve_world_featured_image ? (
+                    <Field.ErrorText>{errors.ve_world_featured_image.message}</Field.ErrorText>
+                  ) : (
+                    <Field.HelperText>{t(VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES)}</Field.HelperText>
+                  )}
+                  <UploadFileButton
+                    mt={4}
+                    alignSelf={"flex-end"}
+                    onChange={onDrop("ve_world_featured_image")}
+                    ref={uploadVeWorldFeaturedImageRef}
+                  />
+                </VStack>
+              </Field.Root>
             )}
           />
         </VStack>
-      </CardBody>
-      <CardFooter display={"flex"} flexDir={"column"} w="full">
-        <Button colorScheme="blue" type="submit" size="lg" alignSelf={"flex-end"} borderRadius={"full"}>
+      </Card.Body>
+      <Card.Footer display={"flex"} flexDir={"column"} w="full">
+        <Button colorPalette="blue" type="submit" size="lg" alignSelf={"flex-end"} borderRadius={"full"}>
           {isEdit ? "Save" : "Submit"}
         </Button>
-      </CardFooter>
-    </Card>
+      </Card.Footer>
+    </Card.Root>
   )
 }

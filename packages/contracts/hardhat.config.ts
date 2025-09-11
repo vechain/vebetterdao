@@ -39,6 +39,7 @@ const config: HardhatUserConfig = {
     disambiguatePaths: false,
     runOnCompile: true,
     strict: true,
+    except: ["mocks", "deprecated", "interfaces", "test", "templates", "openzeppelin"],
   },
   mocha: {
     timeout: 1800000,
@@ -46,6 +47,7 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: false,
+    excludeContracts: ["mocks", "deprecated", "interfaces", "test", "templates"],
   },
   defaultNetwork: process.env.IS_TEST_COVERAGE ? "hardhat" : "vechain_solo",
   networks: {
@@ -93,11 +95,6 @@ const config: HardhatUserConfig = {
   },
   docgen: {
     pages: "files",
-  },
-  sourcify: {
-    enabled: true,
-    apiUrl: "https://sourcify.dev/server",
-    browserUrl: "https://repo.sourcify.dev",
   },
 }
 

@@ -1,5 +1,4 @@
-import { useXNode } from "@/api"
-import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
@@ -10,11 +9,13 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 import { DelegationAlert } from "./DelegationAlert"
 import { useState, useCallback } from "react"
+import { UserNode } from "@/api"
 
-export const DelegateXNodeCard = () => {
+export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { isXNodeDelegator, isXNodeDelegated, delegatee, xNodeOwner } = useXNode()
+
+  const { delegatee, xNodeOwner, isXNodeDelegated, isXNodeDelegator } = xNode
 
   const delegateModal = useDisclosure()
   const revokeModal = useDisclosure()
@@ -29,8 +30,8 @@ export const DelegateXNodeCard = () => {
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
-    <Card variant="baseWithBorder" w="full">
-      <CardBody>
+    <Card.Root variant="baseWithBorder" w="full">
+      <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <Heading fontSize="lg">{t("Node Management")}</Heading>
@@ -53,40 +54,40 @@ export const DelegateXNodeCard = () => {
 
           {isXNodeDelegated ? (
             <DelegatedNodeDisplay
+              isXNodeDelegator={isXNodeDelegator}
               displayAddress={displayAddress ?? ""}
               isDomain={isDomain}
               onRevoke={revokeModal.onOpen}
             />
           ) : (
-            <Button
-              leftIcon={<UilArrowUpRight color="#004CFC" />}
-              variant="primarySubtle"
-              onClick={delegateModal.onOpen}>
+            <Button variant="primarySubtle" onClick={delegateModal.onOpen}>
+              <UilArrowUpRight color="#004CFC" />
               {t("Add node manager")}
             </Button>
           )}
 
-          <DelegationAlert />
+          <DelegationAlert isXNodeDelegator={isXNodeDelegator} isXNodeDelegated={isXNodeDelegated} />
         </VStack>
-      </CardBody>
+      </Card.Body>
 
-      <DelegateXNodeModal modal={delegateModal} />
-      <RevokeXNodeDelegationModal modal={revokeModal} />
-    </Card>
+      <DelegateXNodeModal xNode={xNode} modal={delegateModal} />
+      <RevokeXNodeDelegationModal xNode={xNode} modal={revokeModal} />
+    </Card.Root>
   )
 }
 
 const DelegatedNodeDisplay = ({
+  isXNodeDelegator,
   displayAddress,
   isDomain,
   onRevoke,
 }: {
+  isXNodeDelegator: boolean
   displayAddress: string
   isDomain: boolean
   onRevoke: () => void
 }) => {
   const { t } = useTranslation()
-  const { isXNodeDelegator } = useXNode()
 
   // Allow users to copy delegation addresses to clipboard
   const [showCopiedLink, setShowCopiedLink] = useState(false)
@@ -121,7 +122,7 @@ const DelegatedNodeDisplay = ({
           </HStack>
         </HStack>
         {isXNodeDelegator && (
-          <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
+          <Button variant="dangerGhost" colorPalette="red" onClick={onRevoke} w={"fit-content"}>
             {t("Cancel delegation")}
           </Button>
         )}

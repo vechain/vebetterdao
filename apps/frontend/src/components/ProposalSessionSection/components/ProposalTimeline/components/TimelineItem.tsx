@@ -12,7 +12,9 @@ export const TimelineItem = ({
 }) => {
   return (
     <Box flexShrink="0" px={"8px"}>
-      <Text>{title}</Text>
+      <Text textStyle="md" fontWeight="500">
+        {title}
+      </Text>
       {description && (
         <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
           {description}

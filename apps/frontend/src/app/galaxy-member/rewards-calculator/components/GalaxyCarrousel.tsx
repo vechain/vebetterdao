@@ -3,27 +3,27 @@ import { Box, Flex, IconButton, useBreakpointValue, Image, Text } from "@chakra-
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { gmNfts } from "@/constants/gmNfts"
 import { useTranslation } from "react-i18next"
-import { useSelectedGmNft } from "@/api"
+import { useGMMaxLevel, UserGM } from "@/api"
 
 type Props = {
   setSelectedGMLevel: (GMLevel: string) => void
-  usersGM: { gmLevel?: string; gmId?: string; b3trToUpgradeGMToNextLevel?: number }
+  usersGM?: UserGM
 }
 
 export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
   const { t } = useTranslation()
-  const { maxGmLevel } = useSelectedGmNft()
+  const { data: maxGmLevel } = useGMMaxLevel()
 
   const upgradableNfts = useMemo(() => {
     return gmNfts.filter(
-      nft => parseInt(nft.level, 10) >= Number(usersGM.gmLevel) && parseInt(nft.level, 10) <= Number(maxGmLevel),
+      nft => parseInt(nft.level, 10) >= Number(usersGM?.tokenLevel) && parseInt(nft.level, 10) <= Number(maxGmLevel),
     )
-  }, [usersGM.gmLevel, maxGmLevel])
+  }, [usersGM?.tokenLevel, maxGmLevel])
 
   const visibleCards = useBreakpointValue({ base: 3, md: 3, lg: 3 }) || 1
-  const initialIndex = upgradableNfts.findIndex(nft => nft.level === usersGM.gmLevel)
+  const initialIndex = upgradableNfts.findIndex(nft => nft.level === usersGM?.tokenLevel)
   const [currentIndex, setCurrentIndex] = useState(initialIndex !== -1 ? initialIndex - 1 : 0)
-  const [centeredNFT, setCenteredNFT] = useState<string | undefined>(usersGM.gmLevel)
+  const [centeredNFT, setCenteredNFT] = useState<string | undefined>(usersGM?.tokenLevel)
 
   const getVisibleNFTs = useCallback(() => {
     const visibleNFTs = []
@@ -119,15 +119,15 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
       <Flex justify="center" align="center" mt={12} gap={4}>
         <IconButton
           aria-label="Previous card"
-          icon={<FaChevronLeft size={16} />}
           onClick={prevCard}
           variant="solid"
           bg="white"
           color="black"
           size="sm"
           _hover={{ bg: "whiteAlpha.400" }}
-          borderRadius="full"
-        />
+          borderRadius="full">
+          <FaChevronLeft size={16} />
+        </IconButton>
 
         <Flex gap={2}>
           {upgradableNfts.map((nft, index) => {
@@ -150,15 +150,15 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
 
         <IconButton
           aria-label="Next card"
-          icon={<FaChevronRight size={16} />}
           onClick={nextCard}
           variant="solid"
           bg="white"
           color="black"
           size="sm"
           _hover={{ bg: "whiteAlpha.400" }}
-          borderRadius="full"
-        />
+          borderRadius="full">
+          <FaChevronRight size={16} />
+        </IconButton>
       </Flex>
     </Box>
   )
