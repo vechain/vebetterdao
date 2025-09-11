@@ -1,9 +1,9 @@
-import { VStack, Text, Grid, Card, CardBody, List } from "@chakra-ui/react"
-import { UilCheck } from "@iconscout/react-unicons"
-import { Control, Controller } from "react-hook-form"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import { useTranslation } from "react-i18next"
 import { useColorModeValue } from "@/components/ui/color-mode"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
+import { Card, CardBody, Grid, Icon, List, Text, VStack } from "@chakra-ui/react"
+import { Control, Controller } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { BsCheck } from "react-icons/bs"
 
 interface GrantTypeSelectionProps {
   control: Control<GrantFormData>
@@ -80,7 +80,7 @@ export const GrantTypeSelection = ({ control }: GrantTypeSelectionProps) => {
                       {info.requirements.map((req, index) => (
                         <List.Item key={`${req}-${index}`} display="flex" alignItems="center">
                           <List.Indicator asChild color="#004CFC">
-                            <UilCheck />
+                            <Icon as={BsCheck} />
                           </List.Indicator>
                           <Text color="gray.600">{req}</Text>
                         </List.Item>

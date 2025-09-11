@@ -1,6 +1,6 @@
-import { Button, Field, Input, Text } from "@chakra-ui/react"
+import { Button, Field, Icon, Input, Text } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
-import { UilCheck } from "@iconscout/react-unicons"
+import { BsCheck } from "react-icons/bs"
 
 type FormSocialConnectButtonProps = {
   label: string
@@ -40,7 +40,7 @@ export const FormSocialConnectButton = ({
         gap={2}>
         {leftIcon}
         <Text truncate>{label}</Text>
-        {isConnected && <UilCheck />}
+        {isConnected && <Icon as={BsCheck} />}
       </Button>
       <Input type="hidden" {...register} />
       <Field.ErrorText>{error}</Field.ErrorText>

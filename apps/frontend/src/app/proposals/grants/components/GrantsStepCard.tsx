@@ -1,16 +1,18 @@
 /* eslint-disable react/no-array-index-key */
-import { useTranslation } from "react-i18next"
-import { VStack, HStack, Text, Button, Box, Steps, Flex, Heading, List, Card } from "@chakra-ui/react"
-import { motion } from "framer-motion"
-import { BaseBottomSheet } from "@/components/BaseBottomSheet"
-import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { UilArrowLeft, UilCheck, UilTimes } from "@iconscout/react-unicons"
-import { useRouter } from "next/navigation"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { RequirementModal } from "@/app/proposals/components/components"
-import { useCallback, useState } from "react"
-import { GrantsStepIndicator } from "./GrantsStepIndicator"
+import { BaseBottomSheet } from "@/components/BaseBottomSheet"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
+import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
+import { motion } from "framer-motion"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { BsCheck } from "react-icons/bs"
+
+import { GrantsStepIndicator } from "./GrantsStepIndicator"
 
 export type Step = {
   key: string
@@ -97,8 +99,8 @@ export const GrantsStepsCard = ({
               <List.Root pl={5} fontSize="sm" gap={2} color="gray.600" textAlign="left">
                 {currentStep.listItems.map((item, index) => (
                   <List.Item key={`${item}-${index}`}>
-                    <List.Indicator asChild color="#004CFC">
-                      <UilCheck />
+                    <List.Indicator color="#004CFC">
+                      <Icon as={BsCheck} />
                     </List.Indicator>
                     {item}
                   </List.Item>
