@@ -91,7 +91,7 @@ export const GmNFTAndNodeCard = () => {
             {userHasNoNodeOrGm ? (
               <GmEmptyStateCard
                 icon={
-                  <Icon boxSize="60px" color="bg.inverted">
+                  <Icon boxSize="60px" color="white">
                     <NFTEarthIcon />
                   </Icon>
                 }
@@ -116,7 +116,7 @@ export const GmNFTAndNodeCard = () => {
                 ) : (
                   <GmEmptyStateCard
                     icon={
-                      <Icon boxSize="60px" color="bg.inverted">
+                      <Icon boxSize="60px" color="white">
                         <NFTEarthIcon />
                       </Icon>
                     }
