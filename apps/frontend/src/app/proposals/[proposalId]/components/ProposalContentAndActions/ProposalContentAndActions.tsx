@@ -1,17 +1,21 @@
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
+import { useColorModeValue } from "@/components/ui/color-mode"
 import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 import { ProposalFormAction } from "@/store"
-import { useMemo, useState } from "react"
 import { removeTitleHeading } from "@/utils"
-import { VStack, Text, Heading, HStack, Icon, Link, Image, Box, Alert } from "@chakra-ui/react"
-import { UilGithub, UilGlobe, UilTelegram, UilTwitter } from "@iconscout/react-unicons"
+import { Alert, Box, HStack, Icon, Link, VStack } from "@chakra-ui/react"
+import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FaTelegram } from "react-icons/fa"
-import { FiMail } from "react-icons/fi"
-import { useColorModeValue } from "@/components/ui/color-mode"
+import { AiOutlineDiscord } from "react-icons/ai"
+import { RiTelegram2Line } from "react-icons/ri"
+import { FaXTwitter } from "react-icons/fa6"
+import { LiaDiscourse } from "react-icons/lia"
+import { LuMail } from "react-icons/lu"
+import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -50,119 +54,106 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     <VStack gap={4} align="flex-start" w="full">
       {isGrantProposal(proposal) && (
         <VStack gap={4} align="flex-start" w="full">
-          <Heading size="xl">{t("Company details")}</Heading>
-          <VStack gap={1} align="flex-start" w="full" pb={4} borderBottom="1px solid #D5D5D5">
-            <VStack gap={2} align="flex-start" w="full">
-              <Text fontWeight="semibold">{proposal?.companyName}</Text>
-              <Text>{proposal?.companyRegisteredNumber}</Text>
+          <CollapsibleSection title={t("Company details")} defaultOpen={true}>
+            <CollapsibleSectionItem
+              title={proposal?.companyName}
+              value={proposal?.companyRegisteredNumber ?? " --- "}
+            />
+            <VStack py={2} align="flex-start" w="full">
+              {proposal?.companyEmail ? (
+                <HStack>
+                  <Icon as={LuMail} size="lg" />
+                  <Link href={`mailto:${proposal?.companyEmail}`} target="_blank" rel="noopener noreferrer">
+                    {proposal?.companyEmail}
+                  </Link>
+                </HStack>
+              ) : null}
+
+              {proposal?.companyTelegram ? (
+                <HStack>
+                  <Icon as={RiTelegram2Line} size="lg" />
+                  <Link href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
+                    {proposal?.companyTelegram}
+                  </Link>
+                </HStack>
+              ) : null}
             </VStack>
-            <HStack>
-              <Icon color="#2D3748" as={FiMail} />
-              <Text> {proposal?.companyEmail || t("unknown")}</Text>
-            </HStack>
-            <HStack>
-              <Icon color="#2D3748" as={FaTelegram} />
-              <Text>{proposal?.companyTelegram || t("unknown")}</Text>
-            </HStack>
-            <Text>
-              <Text fontWeight="semibold">{t("Intro")}</Text>
-              {proposal?.companyIntro}
-            </Text>
-          </VStack>
+
+            <CollapsibleSectionItem title={t("Intro")} value={proposal?.companyIntro} />
+          </CollapsibleSection>
 
           <CollapsibleSection title={t("Grant details")} defaultOpen={true}>
-            <VStack gap={3} align="flex-start" w="full" pb={4}>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Problem")}</Text>
-                <Text>{proposal?.problemDescription}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Solution")}</Text>
-                <Text>{proposal?.solutionDescription}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Key points")}</Text>
-                <Text>{t("TBD")}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Execution plan")}</Text>
-                <Text>{proposal?.highLevelRoadmap}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Target user")}</Text>
-                <Text>{proposal?.targetUsers}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Competitive edge / Differentiation factor")}</Text>
-                <Text>{proposal?.competitiveEdge}</Text>
-              </VStack>
+            <VStack align="flex-start" textAlign="flex-start" w="full">
+              <CollapsibleSectionItem title={t("Problem")} value={proposal?.problemDescription} />
+              <CollapsibleSectionItem title={t("Solution")} value={proposal?.solutionDescription} />
+              <CollapsibleSectionItem title={t("Execution plan")} value={proposal?.highLevelRoadmap} />
+              <CollapsibleSectionItem title={t("Target user")} value={proposal?.targetUsers} />
+              <CollapsibleSectionItem
+                title={t("Competitive edge / Differentiation factor")}
+                value={proposal?.competitiveEdge}
+              />
             </VStack>
           </CollapsibleSection>
 
           <CollapsibleSection title={t("Outcomes")}>
-            <VStack gap={1} align="flex-start" w="full" pb={4}>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Benefits to users")}</Text>
-                <Text>{proposal?.benefitsToUsers}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Benefits to dApps")}</Text>
-                <Text>{proposal?.benefitsToDApps}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("Benefits to VeChain ecosystem")}</Text>
-                <Text>{proposal?.benefitsToVeChainEcosystem}</Text>
-              </VStack>
-              <VStack align="flex-start" gap={0}>
-                <Text fontWeight="semibold">{t("X2E model")}</Text>
-                <Text>{proposal?.x2EModel}</Text>
-              </VStack>
+            <VStack align="flex-start" w="full">
+              <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.benefitsToUsers} />
+
+              <CollapsibleSectionItem title={t("Benefits to dApps")} value={proposal?.benefitsToDApps} />
+
+              <CollapsibleSectionItem
+                title={t("Benefits to VeChain ecosystem")}
+                value={proposal?.benefitsToVeChainEcosystem}
+              />
+
+              <CollapsibleSectionItem title={t("X2E model")} value={proposal?.x2EModel} />
             </VStack>
           </CollapsibleSection>
 
           <CollapsibleSection title={t("Sources and additional")}>
-            <VStack gap={1} align="flex-start" w="full" pb={4}>
+            <VStack gap={2} align="flex-start" w="full">
               {/* Discourse thread (only standard proposal) */}
               <HStack>
-                <Image alt="Discourse thread" boxSize="24px" src="/assets/icons/discourse.svg" />
-                {/* // TODO(Proposal): Add discourse thread in the new inputs form */}
-                {/* <Link color="#004CFC" href={proposal?.discourseThread} target="_blank" rel="noopener noreferrer">
-                {"Discourse thread"}
-              </Link> */}
+                <Icon as={LiaDiscourse} size="lg" />
+                <Link href={proposal?.discourseUrl} target="_blank" rel="noopener noreferrer">
+                  {"Discourse thread"}
+                </Link>
               </HStack>
 
               <HStack>
-                <Icon color="#2D3748" as={UilGithub} />
+                <Icon as={AiOutlineDiscord} size="lg" />
                 <Link
-                  color="#004CFC"
-                  href={`https://github.com/${proposal?.githubUsername}`}
+                  href={`https://discord.com/users/${proposal.discordUsername}`}
                   target="_blank"
                   rel="noopener noreferrer">
+                  {"Discord"}
+                </Link>
+              </HStack>
+
+              <HStack>
+                <Icon as={UilGithub} />
+                <Link href={`https://github.com/${proposal?.githubUsername}`} target="_blank" rel="noopener noreferrer">
                   {"Github"}
                 </Link>
               </HStack>
 
               <HStack>
-                <Icon color="#2D3748" as={UilTelegram} />
-                <Link color="#004CFC" href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
+                <Icon as={RiTelegram2Line} size="lg" />
+                <Link href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
                   {"Telegram"}
                 </Link>
               </HStack>
 
               <HStack>
-                <Icon color="#2D3748" as={UilGlobe} />
-                <Link color="#004CFC" href={proposal?.projectWebsite} target="_blank" rel="noopener noreferrer">
+                <Icon as={UilGlobe} />
+                <Link href={proposal?.projectWebsite} target="_blank" rel="noopener noreferrer">
                   {"Project website"}
                 </Link>
               </HStack>
 
               <HStack>
-                <Icon color="#2D3748" as={UilTwitter} />
-                <Link
-                  color="#004CFC"
-                  href={`https://twitter.com/${proposal?.twitterUsername}`}
-                  target="_blank"
-                  rel="noopener noreferrer">
+                <Icon as={FaXTwitter} size="lg" />
+                <Link href={`https://x.com/${proposal?.twitterUsername}`} target="_blank" rel="noopener noreferrer">
                   {"Twitter"}
                 </Link>
               </HStack>
