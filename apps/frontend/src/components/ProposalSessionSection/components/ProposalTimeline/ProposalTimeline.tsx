@@ -9,7 +9,7 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimeLineItem"
+import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
 
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()
