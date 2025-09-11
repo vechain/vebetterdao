@@ -194,11 +194,12 @@ jobs:
       - name: Set Shard Environment Variable
         run: echo "SHARD=${{ matrix.shard }}" >> $GITHUB_ENV
 
-      # Disabled coverage for now due recent version resolution for chalk package
-      # - name: Run Unit Tests and Check Coverage for ${{ matrix.label }}
-      #   run: yarn test:coverage:solidity
+      - name: Run Unit Tests and Check Coverage for ${{ matrix.label }}
+        if: false # Disabled coverage for now due recent version resolution for chalk package https://github.com/vechain/b3tr/pull/2514
+        run: yarn test:coverage:solidity
 
       - name: Upload Coverage for ${{ matrix.label }}
+        if: false # Disabled coverage for now due recent version resolution for chalk package https://github.com/vechain/b3tr/pull/2514
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.shard }}
@@ -206,6 +207,7 @@ jobs:
 
   combine-coverage:
     name: Combine Coverage Reports
+    if: false # Disabled coverage for now due recent version resolution for chalk package https://github.com/vechain/b3tr/pull/2514
     runs-on: ubuntu-latest
     needs: run-contract-tests
     steps:
