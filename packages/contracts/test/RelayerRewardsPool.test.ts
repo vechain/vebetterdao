@@ -6,7 +6,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances, waitForNextCycle } from "./helpers"
 import { RelayerRewardsPool, B3TR, Emissions, XAllocationVoting } from "../typechain-types"
 
-describe("RelayerRewardsPool", function () {
+describe("RelayerRewardsPool - @shard18", function () {
   let relayerRewardsPool: RelayerRewardsPool
   let b3tr: B3TR
   let emissions: Emissions
