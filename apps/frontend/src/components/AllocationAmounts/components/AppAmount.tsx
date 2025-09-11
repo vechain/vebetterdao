@@ -20,8 +20,8 @@ export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
   return (
     <LinkBox flex={1}>
       <LinkOverlay>
-        <Card.Root variant="outline" bg="bg.primary" borderColor="border.secondary">
-          <Card.Body px={4} py={3}>
+        <Card.Root variant="outline" bg="bg.tertiary" borderColor="border.secondary">
+          <Card.Body>
             <Flex gap={3} alignItems="center">
               <Skeleton loading={isLogoLoading || isLoading}>
                 <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"32px"} borderRadius="9px" />

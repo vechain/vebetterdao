@@ -32,7 +32,7 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
-          <Text fontWeight="600">{t("You’re removing it from")}</Text>
+          <Text fontWeight="semibold">{t("You’re removing it from")}</Text>
           <Text textStyle="sm">{passport}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">

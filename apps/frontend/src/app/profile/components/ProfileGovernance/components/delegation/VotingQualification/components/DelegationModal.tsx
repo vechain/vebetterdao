@@ -76,7 +76,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
               "By delegating your qualification, another person will be able to vote on next round's allocation and proposals.",
             )}
           </Text>
-          <Text color="text.subtle" as="span" fontWeight="600">
+          <Text color="text.subtle" as="span" fontWeight="semibold">
             {t("You won't lose any of your VOT3 or B3TR tokens with this operation.")}
           </Text>
         </Box>
@@ -121,7 +121,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You're delegating it to")}</Text>
+          <Text fontWeight="semibold">{t("You're delegating it to")}</Text>
           <Text textStyle="sm">{delegatee}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">

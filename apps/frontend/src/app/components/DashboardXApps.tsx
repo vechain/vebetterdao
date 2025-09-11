@@ -48,12 +48,14 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
 
   return (
     <Card.Root variant="primary">
-      <Card.Header>
+      <Card.Header pb={4}>
         <VStack w="full" justify={"flex-start"} align={"start"}>
           <HStack w="full" justify={"space-between"}>
-            <Heading size="xl">{t("Explore Apps")}</Heading>
+            <Heading size="xl" color="text.default">
+              {t("Explore Apps")}
+            </Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Link asChild variant="plain" color="actions.secondary.text-lighter" textStyle="sm" fontWeight="semibold">
+              <Link asChild variant="plain" color="actions.tertiary.default" textStyle="sm" fontWeight="semibold">
                 <NextLink href="/apps">
                   {t("See all")}
                   <Icon size="sm" as={MdKeyboardArrowRight} />
@@ -68,7 +70,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
         </VStack>
       </Card.Header>
       <Card.Body>
-        <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+        <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
           {slicedXApps?.map(xApp => (
             <DashboardXAppCard key={`xApp-${xApp?.id ?? uuid()}`} xApp={xApp.app} />
           ))}

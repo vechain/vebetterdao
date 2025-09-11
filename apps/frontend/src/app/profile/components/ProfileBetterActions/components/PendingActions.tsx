@@ -34,7 +34,7 @@ export const PendingActions = ({ address }: Props) => {
           <VStack align="stretch" flex={1} gap={4}>
             <HStack align="flex-start" justify={"space-between"}>
               <VStack align="stretch" gap={0.5}>
-                <Text textStyle="xs" color="#8D6602" fontWeight="600">
+                <Text textStyle="xs" color="#8D6602" fontWeight="semibold">
                   {t("PENDING ACTIONS")}
                 </Text>
                 <Heading textStyle="lg" color="#5F4400">
@@ -74,7 +74,7 @@ export const PendingActions = ({ address }: Props) => {
         <VStack hideFrom="md" align="stretch" zIndex={1} position="relative">
           <HStack align="flex-start" justify={"space-between"}>
             <VStack align="stretch" gap={0.5}>
-              <Text textStyle="xs" color="#8D6602" fontWeight="600">
+              <Text textStyle="xs" color="#8D6602" fontWeight="semibold">
                 {t("PENDING ACTIONS")}
               </Text>
               <Heading textStyle="lg" color="#5F4400">

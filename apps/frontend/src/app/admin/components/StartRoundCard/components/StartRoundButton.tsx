@@ -41,7 +41,7 @@ export const StartRoundButton = ({ redirectTo, onSuccess }: StartRoundButtonProp
   return (
     <VStack w="full" gap={4}>
       {xAppsLeftCount > 0 && (
-        <Text>
+        <Text color="text.subtle">
           {t("By clicking the button below, you will also claim allocations for {{count}} apps.", {
             count: xAppsLeftCount,
           })}
@@ -49,7 +49,7 @@ export const StartRoundButton = ({ redirectTo, onSuccess }: StartRoundButtonProp
       )}
       <VStack w="full" gap={4} alignItems="start">
         <VStack>
-          <Text>
+          <Text color="text.subtle">
             {currentRound.voteEndTimestamp?.isBefore()
               ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
                   currentRoundId: currentRoundId,

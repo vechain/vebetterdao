@@ -42,7 +42,7 @@ export const TotalAllocations = () => {
   }, [sortedTotalEarnings, displayLimit])
 
   return (
-    <Card.Root flex={1} h="full" w="full" bg="bg.primary" borderColor="borders.secondary">
+    <Card.Root flex={1} h="full" w="full" bg="bg.primary" borderColor="border.secondary">
       <Card.Header>
         <Heading size="xl">{t("Most voted apps")}</Heading>
         <Text textStyle="sm" color="text.subtle">
@@ -67,10 +67,10 @@ export const TotalAllocations = () => {
           {hasMoreApps && (
             <Button
               mx="auto"
-              maxW="fit-content"
+              maxW="fit"
               size="md"
               variant="ghost"
-              color="actions.secondary.text-lighter"
+              color="actions.tertiary.default"
               onClick={handleLoadMore}>
               {t("Load more")}
             </Button>

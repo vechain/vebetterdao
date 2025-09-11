@@ -59,7 +59,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
           <HStack gap={4}>
             <AddressIcon address={delegateeAddress} w={12} h={12} rounded="full" />
             <VStack align="start" gap={0}>
-              <Text fontWeight="600" textStyle={["sm", "sm", "lg"]}>
+              <Text fontWeight="semibold" textStyle={["sm", "sm", "lg"]}>
                 {delegateeDomain ? humanDomain(delegateeDomain, 4, 26) : humanAddress(delegateeAddress, 4, 4)}
               </Text>
             </VStack>

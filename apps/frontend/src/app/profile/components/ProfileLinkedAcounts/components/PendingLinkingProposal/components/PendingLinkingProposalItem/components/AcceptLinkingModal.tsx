@@ -42,7 +42,7 @@ export const AcceptLinkingModal = ({
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
-          <Text fontWeight="600">{t("You’re accepting it from")}</Text>
+          <Text fontWeight="semibold">{t("You’re accepting it from")}</Text>
           <Text textStyle="sm">{domain}</Text>
           <Text textStyle="sm">{secondaryAccount}</Text>
         </VStack>

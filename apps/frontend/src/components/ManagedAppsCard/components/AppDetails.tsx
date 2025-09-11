@@ -39,16 +39,16 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
   }, [router, appId])
 
   return (
-    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap={4}>
-      <HStack gap={1} justifyContent={"space-between"} w={"full"}>
+    <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap="4">
+      <HStack gap="1" justifyContent={"space-between"} w={"full"}>
         <HStack>
           <Skeleton loading={isLogoLoading} alignContent={"start"}>
-            <Image src={logo?.image ?? notFoundImage} alt={"logo"} maxW={"40px"} borderRadius="9px" />
+            <Image aspectRatio="square" src={logo?.image ?? notFoundImage} alt={"logo"} boxSize="40px" rounded="lg" />
           </Skeleton>
 
           <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
             <Heading size={"md"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
-            <Text textStyle={"sm"} fontWeight={"300"} color={"#6A6A6A"}>
+            <Text textStyle={"sm"} color="text.subtle">
               {role}
             </Text>
           </Skeleton>
@@ -57,12 +57,11 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
         <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
           <IconButton
             rounded={"full"}
-            variant="subtle"
+            variant="surface"
             aria-label="Go to App"
-            fontSize="22px"
+            width="6"
             disabled={isAppMetadataError}
-            onClick={navigateToAppDetail}
-            colorPalette={"blue"}>
+            onClick={navigateToAppDetail}>
             <FiArrowUpRight />
           </IconButton>
         </Skeleton>

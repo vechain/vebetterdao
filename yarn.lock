@@ -19128,9 +19128,9 @@ openai@^4.52.4:
     node-fetch "^2.6.7"
 
 openai@^5.15.0:
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/openai/-/openai-5.20.0.tgz#7b2a323f3d1505792b548f721cfe7672f0bd0e39"
-  integrity sha512-Bmc2zLM/YWgFrDpXr9hwXqGGDdMmMpE9+qoZPsaHpn0Y/Qk1Vu26hNqXo7+nHdli+sLsXINvS1f8kR3NKhGKmA==
+  version "5.20.1"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-5.20.1.tgz#ec9fae4c249de3b15bd908b9df0afff69981ba0a"
+  integrity sha512-UndCB0R5V3iB9I98NyF69zNP6YfwU4+Fjk0eW4HhooTm+Awlpm/MGjJTwJsyNV/qkH1NJi0GG+9odwukGTqExQ==
 
 openid-client@^5.4.0:
   version "5.7.1"

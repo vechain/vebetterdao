@@ -12,6 +12,7 @@ export const cardSlotRecipe = defineSlotRecipe({
       border: "0",
     },
     body: { p: "0" },
+    header: { p: "0", pb: "4" },
     footer: { p: "0" },
   },
 
@@ -20,7 +21,7 @@ export const cardSlotRecipe = defineSlotRecipe({
       primary: {
         root: {
           bg: "bg.primary",
-          borderWidth: "1px",
+          border: "sm", // 1px
           borderColor: "border.secondary",
         },
       },
@@ -35,35 +36,6 @@ export const cardSlotRecipe = defineSlotRecipe({
   //         borderWidth: "1px",
   //         borderColor: "border.secondary",
   //       },
-  //     },
-
-  //     info: {
-  //       root: {
-  //         w: "full",
-  //         h: "full",
-  //         borderRadius: "xl",
-  //         flexDirection: "row",
-  //         alignItems: "center",
-  //         gap: "1",
-  //         overflow: "hidden",
-  //         bg: "banner.blue",
-  //         minH: { base: "30vh", md: "auto" },
-  //         px: "6",
-  //         py: "4",
-  //       },
-  //       title: {
-  //         textStyle: "sm",
-  //         color: "status.info.strong",
-  //       },
-  //       description: {
-  //         textStyle: "2xl",
-  //         color: "text.default",
-  //       },
-  //       body: {
-  //         p: 0,
-  //         justifyContent: "center",
-  //       },
-  //       footer: { p: 0 },
   //     },
 
   //     base: {
@@ -155,10 +127,6 @@ export const cardSlotRecipe = defineSlotRecipe({
   //     },
   //   },
   // },
-  // compoundVariants: [
-  //   {
-  //     visual: "banner-blue",
-  //   },
   // ],
 })
 

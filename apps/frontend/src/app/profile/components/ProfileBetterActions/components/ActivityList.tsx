@@ -70,7 +70,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
               <VStack gap={6} align="stretch">
                 {Object.entries(groupedActions).map(([day, dayActions]) => (
                   <VStack key={day} gap={3} align="stretch">
-                    <Text fontWeight="600" color="#848484">
+                    <Text fontWeight="semibold" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {dayActions.map(action => (

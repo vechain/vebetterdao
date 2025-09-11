@@ -35,7 +35,7 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
-          <Text fontWeight="600">{t("You're removing it to")}</Text>
+          <Text fontWeight="semibold">{t("You're removing it to")}</Text>
           <Text textStyle="sm">{delegatee}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">

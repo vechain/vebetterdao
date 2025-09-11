@@ -4,7 +4,7 @@ export const headingRecipe = defineRecipe({
   base: {
     fontFamily: "heading",
     fontWeight: "bold",
-    // color: "actions.primary.text"
+    color: "text.default",
   },
   variants: {
     size: {

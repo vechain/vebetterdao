@@ -181,11 +181,9 @@ export const Leaderboard = () => {
           </VStack>
           <Link
             href={`/leaderboard/${selectedRoundId}`}
-            variant={"plain"}
-            color="actions.secondary.text-lighter"
-            _hover={{ textDecoration: "underline" }}
+            color="actions.tertiary.default"
             fontWeight="semibold"
-            mx="auto">
+            alignSelf="center">
             {t("See full leaderboard")}
           </Link>
         </VStack>

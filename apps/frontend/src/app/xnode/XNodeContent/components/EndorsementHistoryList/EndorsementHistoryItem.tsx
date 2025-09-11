@@ -28,7 +28,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
       <VStack align="stretch" gap={0}>
         <HStack gap={1} textStyle={["sm", "sm", "md"]}>
           <Text>{t(event.endorsed ? "You endorsed" : "You unendorsed")} </Text>
-          <Text fontWeight="600">{appMetadata?.name}</Text>
+          <Text fontWeight="semibold">{appMetadata?.name}</Text>
         </HStack>
         <Text textStyle={["2xs", "2xs", "sm"]} color="text.subtle">
           {dayjs(eventTimestamp).fromNow()}

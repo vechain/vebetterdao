@@ -37,16 +37,10 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
   }, [proposalMetadata.data])
 
   return (
-    <Card.Root
-      variant={"baseWithBorder"}
-      onClick={goToProposal}
-      _hover={{ bg: "hover-contrast-bg" }}
-      cursor={"pointer"}
-      alignSelf={"flex-start"}
-      w={"full"}>
+    <Card.Root variant={"primary"} onClick={goToProposal} cursor={"pointer"} alignSelf={"flex-start"} w={"full"}>
       <Card.Header>
         <HStack hideFrom="md" w={"full"} justifyContent={"space-between"} mb={2}>
-          <Text textStyle="md" fontWeight="600" color="text.subtle">
+          <Text textStyle="md" fontWeight="semibold" color="text.subtle">
             {t("Round #{{round}}", {
               round: roundIdVoteStart,
             })}
@@ -67,7 +61,7 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
           </Skeleton>
 
           <VStack hideBelow="md" alignItems="flex-end" gap={0} flex={1}>
-            <Text textStyle="md" fontWeight="600" color="text.subtle">
+            <Text textStyle="md" fontWeight="semibold" color="text.subtle">
               {t("Round #{{round}}", {
                 round: roundIdVoteStart,
               })}
@@ -105,10 +99,10 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
             }}
           />
           <HStack cursor={"pointer"}>
-            <Text fontWeight="semibold" color="brand.primary" textStyle="md">
+            <Text fontWeight="semibold" color="brand.primary" textStyle="sm">
               {t("See proposal")}
             </Text>
-            <Icon color="brand.primary" boxSize={16}>
+            <Icon color="brand.primary" boxSize="5">
               <MdArrowOutward />
             </Icon>
           </HStack>

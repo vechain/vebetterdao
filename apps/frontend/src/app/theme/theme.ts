@@ -151,7 +151,7 @@ const config = defineConfig({
             default: { value: { base: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
             hover: { value: { base: "{colors.blue.700}", _dark: "{colors.blue.500}" } },
             pressed: { value: { base: "{colors.blue.800}", _dark: "{colors.blue.600}" } },
-            disabled: { value: { base: "{colors.transparency.100}", _dark: "{colors.gray.300}" } },
+            disabled: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.700}" } },
             text: { value: { base: "white", _dark: "white" } },
             "text-disabled": { value: { base: "{colors.gray.500}", _dark: "{colors.gray.500}" } },
           },

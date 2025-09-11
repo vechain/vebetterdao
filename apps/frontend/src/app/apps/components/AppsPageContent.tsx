@@ -82,7 +82,7 @@ export const AppsPageContent = () => {
 
       {!isAbove800 ? (
         <VStack alignItems={"flex-start"} gap={4} w="full">
-          <Heading size={{ base: "2xl", md: "3xl" }}>{t("Sustainability apps")}</Heading>
+          <Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>
           <AllApps
             newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
@@ -94,7 +94,7 @@ export const AppsPageContent = () => {
       ) : (
         <HStack w="full" alignItems={"flex-start"} gap={0}>
           <AllApps
-            headingComponent={<Heading size={{ base: "2xl", md: "3xl" }}>{t("Sustainability apps")}</Heading>}
+            headingComponent={<Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>}
             newApps={newApps}
             currentActiveApps={activeAppsWithoutGracePeriod}
             gracePeriodApps={gracePeriodApps}

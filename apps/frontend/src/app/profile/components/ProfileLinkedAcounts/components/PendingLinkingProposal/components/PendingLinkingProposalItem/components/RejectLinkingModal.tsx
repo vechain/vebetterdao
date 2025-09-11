@@ -38,7 +38,7 @@ export const RejectLinkingModal = ({
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
-          <Text fontWeight="600">{t("You’re rejecting it from")}</Text>
+          <Text fontWeight="semibold">{t("You’re rejecting it from")}</Text>
           <Text textStyle="sm">{secondaryAccount}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">

@@ -1,8 +1,7 @@
 import React from "react"
 import type { Preview } from "@storybook/nextjs-vite"
-import { ChakraProvider } from "@chakra-ui/react"
 import { withThemeByClassName } from "@storybook/addon-themes"
-import theme from "../src/app/theme/theme"
+import { Provider } from "../src/components/ui/provider"
 
 const preview: Preview = {
   parameters: {
@@ -26,9 +25,9 @@ const preview: Preview = {
       themes: { light: "", dark: "dark" },
     }),
     Story => (
-      <ChakraProvider value={theme}>
+      <Provider>
         <Story />
-      </ChakraProvider>
+      </Provider>
     ),
   ],
 }

@@ -129,7 +129,7 @@ export const TransactionsContent = ({ address }: Props) => {
               {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (
                   <VStack key={day} gap={3} align="stretch">
-                    <Text fontWeight="600" color="#848484">
+                    <Text fontWeight="semibold" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {transactions.map((transaction: any) => (

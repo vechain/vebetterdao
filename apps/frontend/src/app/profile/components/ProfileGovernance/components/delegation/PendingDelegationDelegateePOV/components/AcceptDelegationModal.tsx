@@ -36,7 +36,7 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You’re accepting it from")}</Text>
+          <Text fontWeight="semibold">{t("You’re accepting it from")}</Text>
           <Text textStyle="sm">{delegatorName}</Text>
           <Text textStyle="sm">{delegator}</Text>
         </VStack>

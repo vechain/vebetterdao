@@ -106,7 +106,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
                 </HStack>
                 <HStack gap={1}>
                   <Heading textStyle="md">{t("Better action on")}</Heading>
-                  <Heading textStyle="md" fontWeight="600">
+                  <Heading textStyle="md" fontWeight="semibold">
                     {app?.name}
                   </Heading>
                 </HStack>
@@ -126,7 +126,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
         <VStack align="stretch" gap={4}>
           <Heading textStyle="lg">{t("Transaction information")}</Heading>
           <HStack justify="space-between">
-            <Text fontWeight="600">{t("Block")}</Text>
+            <Text fontWeight="semibold">{t("Block")}</Text>
             <Text color="text.subtle">{blockNumber}</Text>
           </HStack>
         </VStack>

@@ -53,8 +53,8 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   return (
     <LinkBox asChild>
-      <Card.Root bg="bg.tertiary" border="1px solid" borderColor="border.primary" w="full" maxW="100%">
-        <Card.Body px={6} py={4}>
+      <Card.Root bg="bg.tertiary" border="sm" borderColor="border.primary" w="full" maxW="full">
+        <Card.Body>
           <Stack
             direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
             align="stretch"
@@ -101,7 +101,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
                   </HStack>
                 </Skeleton>
                 <Skeleton loading={appMetadataLoading}>
-                  <Text textStyle="sm" color="text.subtle" lineClamp={2}>
+                  <Text textStyle="sm" color="text.subtle" overflow="hidden" textOverflow="ellipsis" lineClamp={2}>
                     {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                   </Text>
                 </Skeleton>

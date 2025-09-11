@@ -32,7 +32,7 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You’re rejecting it from")}</Text>
+          <Text fontWeight="semibold">{t("You’re rejecting it from")}</Text>
           <Text textStyle="sm">{delegator}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">

@@ -38,7 +38,7 @@ export const RevokeDelegationDelegateePOVModal = ({
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You're removing the delegation from")}</Text>
+          <Text fontWeight="semibold">{t("You're removing the delegation from")}</Text>
           <Text textStyle="sm">{delegator}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">

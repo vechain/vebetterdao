@@ -59,21 +59,15 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Header>
         <HStack w="full" justify={"space-between"}>
           <Heading size="xl">{t("Supply breakdown")}</Heading>
           <Tooltip
-            content={
-              <Text>
-                {t(
-                  `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
-                )}
-              </Text>
-            }>
-            <span>
-              <Icon as={FiInfo} color="actions.secondary.text-lighter" position={"relative"} />
-            </span>
+            content={t(
+              `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
+            )}>
+            <Icon as={FiInfo} color="actions.tertiary.default" position={"relative"} />
           </Tooltip>
         </HStack>
       </Card.Header>

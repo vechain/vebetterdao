@@ -10,13 +10,11 @@ type Props = {
   maxRoundsToShow?: number
   showLoadMore?: boolean
   showViewAll?: boolean
-  renderInsideCard?: boolean
 }
 export const AllocationRoundsList: React.FC<Props> = ({
   maxRoundsToShow = 3,
   showLoadMore = false,
   showViewAll = true,
-  renderInsideCard = false,
 }) => {
   const { t } = useTranslation()
 
@@ -38,19 +36,6 @@ export const AllocationRoundsList: React.FC<Props> = ({
   const renderList = useMemo(() => {
     return (
       <VStack gap={8} w="full" align={"flex-start"}>
-        {!renderInsideCard && (
-          <HStack w="full" justify="space-between" alignItems={"baseline"}>
-            <Heading size={["2xl", "3xl"]}>{t("Allocations")}</Heading>
-            {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-              <Link asChild variant="plain" colorPalette="primary">
-                <NextLink href="/rounds">
-                  {t("See all rounds")}
-                  <FiArrowUpRight />
-                </NextLink>
-              </Link>
-            )}
-          </HStack>
-        )}
         <VStack gap={4} w="full">
           {allocationRoundEventsError && (
             <Alert.Root status="error">
@@ -63,7 +48,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
           )}
           {renderRounds}
           {invertedCreatedRounds && invertedCreatedRounds.length > totalRoundsToShow && showLoadMore && (
-            <Button size="md" variant="ghost" color="actions.secondary.text-lighter" onClick={loadMore}>
+            <Button size="md" variant="ghost" color="actions.tertiary.default" onClick={loadMore}>
               {t("Load more")}
             </Button>
           )}
@@ -75,7 +60,6 @@ export const AllocationRoundsList: React.FC<Props> = ({
     allocationRoundEventsError,
     totalRoundsToShow,
     invertedCreatedRounds,
-    renderInsideCard,
     loadMore,
     showViewAll,
     showLoadMore,
@@ -84,27 +68,21 @@ export const AllocationRoundsList: React.FC<Props> = ({
   ])
 
   return (
-    <>
-      {renderInsideCard ? (
-        <Card.Root w="full" variant="baseWithBorder">
-          <Card.Header>
-            <HStack w="full" justify="space-between" alignItems={"baseline"}>
-              <Heading size={["3xl", "4xl"]}>{t("Allocations")}</Heading>
-              {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-                <Link asChild variant="plain" colorPalette="primary">
-                  <NextLink href="/rounds">
-                    {t("See all rounds")}
-                    <FiArrowUpRight />
-                  </NextLink>
-                </Link>
-              )}
-            </HStack>
-          </Card.Header>
-          <Card.Body>{renderList}</Card.Body>
-        </Card.Root>
-      ) : (
-        renderList
-      )}
-    </>
+    <Card.Root w="full" variant="primary">
+      <Card.Header>
+        <HStack w="full" justify="space-between" alignItems={"baseline"}>
+          <Heading size={["2xl", "3xl"]}>{t("Allocations")}</Heading>
+          {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
+            <Link asChild variant="plain">
+              <NextLink href="/rounds">
+                {t("See all rounds")}
+                <FiArrowUpRight />
+              </NextLink>
+            </Link>
+          )}
+        </HStack>
+      </Card.Header>
+      <Card.Body>{renderList}</Card.Body>
+    </Card.Root>
   )
 }

@@ -5,6 +5,8 @@ import { useIpfsMetadata, ProposalMetadata } from "@/api"
 import { toIPFSURL } from "@/utils"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
+import { GenericBanner2 } from "@/app/components/Banners/GenericBanner2"
+import { Button } from "@chakra-ui/react"
 
 type Props = {
   key: string
@@ -21,6 +23,21 @@ export const CastProposalVoteBanners = ({ key, id, description }: Props) => {
     if (!id) return router.push("/proposals")
     router.push(`/proposals/${id}`)
   }, [router, id])
+
+  return (
+    <GenericBanner2
+      variant="warning"
+      title={t("ACTIVE PROPOSAL")}
+      description={proposalMetadata?.data?.title ? `"${proposalMetadata.data.title}"` : `---`}
+      logoSrc="/assets/icons/vote-icon.webp"
+      cta={
+        <Button variant="primary" onClick={goToProposalPage}>
+          <UilArrowRight color="white" />
+          {t("Vote now")}
+        </Button>
+      }
+    />
+  )
 
   return (
     <GenericBanner

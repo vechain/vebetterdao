@@ -94,7 +94,7 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
             <Text textStyle={"md"} as="span">
               {t("Removing your endorsement from an app may result in it")}
             </Text>{" "}
-            <Text textStyle={"md"} as="span" fontWeight="600">
+            <Text textStyle={"md"} as="span" fontWeight="semibold">
               {t("no longer being selected for allocations.")}
             </Text>
           </Box>

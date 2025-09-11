@@ -120,7 +120,7 @@ export const AllApps = ({
   return (
     <VStack gap={8} w="full" data-testid="apps-page">
       <HStack w="full" mt={0}>
-        {headingComponent && <Box>{headingComponent}</Box>}
+        {headingComponent && <Box flexShrink={0}>{headingComponent}</Box>}
         <HStack w="full" flexDir="row-reverse" gap={4} ml={headingComponent ? "auto" : 0}>
           <HStack gap={2}>
             <FilteringMenu

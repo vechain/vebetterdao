@@ -20,7 +20,9 @@ export const AppsBanner = () => {
       bgRepeat="no-repeat"
       w="full">
       <Stack alignItems="stretch">
-        <Heading size="2xl">{t("Explore apps")}</Heading>
+        <Heading size="2xl" color="text.default">
+          {t("Explore apps")}
+        </Heading>
         <Text textStyle="md" color="info.secondary">
           {t("Browse and discover dApps where you can earn tokens for sustainable actions.")}
         </Text>

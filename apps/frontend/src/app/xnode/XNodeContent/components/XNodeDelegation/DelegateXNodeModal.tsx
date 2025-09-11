@@ -97,7 +97,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
                   "By adding a manager to your Node, another address will be able to endorse apps and upgrade GM NFTs using your Node.",
                 )}
               </Text>
-              <Text color="text.subtle" as="span" fontWeight="600">
+              <Text color="text.subtle" as="span" fontWeight="semibold">
                 {t("The manager won't be able to transfer or sell your Node.")}
               </Text>
             </Box>
@@ -145,7 +145,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               </Heading>
             </VStack>
             <VStack align="stretch">
-              <Text fontWeight="600">{t("You're adding the following manager to your Node")}</Text>
+              <Text fontWeight="semibold">{t("You're adding the following manager to your Node")}</Text>
               <Text textStyle="sm">{finalAddress}</Text>
             </VStack>
             <Alert.Root status="warning" borderRadius="2xl">

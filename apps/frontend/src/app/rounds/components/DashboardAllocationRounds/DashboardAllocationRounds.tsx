@@ -48,7 +48,7 @@ export const DashboardAllocationRounds = () => {
           <Button
             px="0"
             size="sm"
-            textStyle={"md"}
+            textStyle="sm"
             variant="plain"
             _hover={{ textDecoration: "underline" }}
             color="actions.tertiary.default"
@@ -86,7 +86,7 @@ export const DashboardAllocationRounds = () => {
             fontWeight="semibold"
             _hover={{ textDecoration: "underline" }}
             variant="plain"
-            textStyle={"md"}
+            textStyle="sm"
             color="actions.tertiary.default"
             disabled={allocationRound.isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
@@ -110,7 +110,12 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Link href="/proposals" alignSelf="center" color="actions.tertiary.default" fontWeight="semibold">
+        <Link
+          href="/proposals"
+          alignSelf="center"
+          color="actions.tertiary.default"
+          fontWeight="semibold"
+          textStyle="sm">
           {t("View all proposals")}
         </Link>
       </Card.Body>

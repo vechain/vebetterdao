@@ -41,9 +41,7 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
       <Card.Body gap={4}>
         <HStack justifyContent={"space-between"} alignItems={"center"} w={"full"}>
           <VStack alignItems={"flex-start"} gap={0}>
-            <Heading size="xl" color="text.strong">
-              {t("New apps looking for endorsement")}
-            </Heading>
+            <Heading size="xl">{t("New apps looking for endorsement")}</Heading>
             <Text textStyle={{ base: "sm", md: "md" }} color="text.subtle">
               {t("These apps need to get enough endorsement score to become active")}
             </Text>

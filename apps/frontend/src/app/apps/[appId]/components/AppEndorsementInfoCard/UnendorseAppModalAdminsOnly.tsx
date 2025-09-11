@@ -63,7 +63,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
             <Text textStyle={"md"} as="span">
               {t("Removing this endorsement from your app may result in it")}
             </Text>{" "}
-            <Text textStyle={"md"} as="span" fontWeight="600">
+            <Text textStyle={"md"} as="span" fontWeight="semibold">
               {t("no longer being selected for allocations.")}
             </Text>
           </Box>

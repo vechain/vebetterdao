@@ -11,6 +11,7 @@ import {
   Stat,
   Icon,
   GridItem,
+  Grid,
 } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import React from "react"
@@ -42,8 +43,12 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
 
   return (
     <>
-      <SimpleGrid columns={{ base: 1, md: 2 }} alignItems="center" justifyItems="space-between" gap="4">
-        <Heading textStyle="xl" color="actions.primary.text" fontWeight="bold">
+      <Grid
+        flex={1}
+        templateColumns={{ base: "1fr", md: "1fr 1fr" }}
+        templateRows={{ base: "auto", md: "auto 1fr auto" }}
+        gap="4">
+        <Heading size="xl" color="actions.primary.text" fontWeight="bold">
           {t("{{value}} tokens", {
             value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
           })}
@@ -51,13 +56,14 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
         <GridItem justifySelf={{ base: "flex-start", md: "flex-end" }}>
           <CountdownVoting onOpen={onOpenSnapshot} />
         </GridItem>
+
         <Card.Root bg="transparency.200">
           <Card.Body>
             <Stat.Root>
               <Stat.Label color="actions.primary.text" textStyle="sm">
                 {t("Total B3TR Balance")}
               </Stat.Label>
-              <Stat.ValueText alignItems="center">
+              <Stat.ValueText flex={1} alignItems="center">
                 <Icon as={B3TRIcon} boxSize={"30px"} />
                 <Skeleton loading={isB3trBalanceLoading}>
                   <Heading size="3xl" color="actions.primary.text">
@@ -75,7 +81,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
               <Stat.Label color="actions.primary.text" textStyle="sm">
                 {t("Total VOT3 Balance")}
               </Stat.Label>
-              <Stat.ValueText alignItems="center">
+              <Stat.ValueText flex={1} alignItems="center">
                 <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
                 <Skeleton loading={isB3trBalanceLoading}>
                   <Heading size="3xl" color="actions.primary.text">
@@ -93,7 +99,6 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
               w="full"
               disabled={isSwapDisabled}
               onClick={onOpen}
-              mt="auto"
               variant="secondary"
               rounded={"full"}
               fontWeight="semibold"
@@ -108,7 +113,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
             </Button>
           )}
         </GridItem>
-      </SimpleGrid>
+      </Grid>
       <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
       <ConvertModal isOpen={isOpen} onClose={onClose} />
     </>

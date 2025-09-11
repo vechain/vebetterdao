@@ -10,8 +10,9 @@ export const NoAccountActionCard = () => {
   return (
     <EmptyState
       size="sm"
+      bg="transparent"
       icon={
-        <Icon boxSize={20} color="actions.secondary.text-lighter">
+        <Icon boxSize={20} color="actions.tertiary.default">
           <HandPlantIcon />
         </Icon>
       }
@@ -20,7 +21,7 @@ export const NoAccountActionCard = () => {
         connectionVariant="modal"
         buttonStyleProps={{
           bg: "#E0E9FE",
-          textColor: "var(--vbd-colors-brand-primary)",
+          textColor: "var(--vbd-colors-actions-primary-default)",
           px: 10,
           leftIcon: <FaWallet />,
         }}
