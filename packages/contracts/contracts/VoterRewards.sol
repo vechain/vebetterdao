@@ -287,8 +287,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     IRelayerRewardsPool _relayerRewardsPool
   ) external reinitializer(6) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    // Set default relayer fee to 5%
-    $.relayerFeePercentage = 5;
+    // Set default relayer fee to 10%
+    $.relayerFeePercentage = 10;
 
     $.xAllocationVoting = _xAllocationVoting;
     $.relayerRewardsPool = _relayerRewardsPool;

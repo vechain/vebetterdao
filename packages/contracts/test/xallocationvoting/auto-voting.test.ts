@@ -486,7 +486,7 @@ describe("AutoVoting - @shard14a", function () {
     })
 
     it("should successfully cast vote on behalf of user with 10 apps and distribute votes equally", async function () {
-      const appIds = []
+      const appIds: string[] = []
       const getAllSigners = await ethers.getSigners()
       const getAllAppOwners = getAllSigners.slice(5, 20)
 
@@ -536,7 +536,7 @@ describe("AutoVoting - @shard14a", function () {
       /**
        * This test is for gas cost analysis.
        */
-      const appIds = []
+      const appIds: string[] = []
       const getAllSigners = await ethers.getSigners()
       const getAllAppOwners = getAllSigners.slice(5, 20)
 
