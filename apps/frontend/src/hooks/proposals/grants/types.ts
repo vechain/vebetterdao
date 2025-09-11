@@ -19,6 +19,7 @@ export type ProposalEnriched = ProposalCreatedEvent & {
   description: string
   proposerAddress: string
   state: ProposalState
+  discourseUrl?: string
 }
 
 export type GrantProposalEnriched = ProposalEnriched &
@@ -43,16 +44,6 @@ export type ProposalCreatedEvent = {
 
 export type GrantFormData = {
   grantType: string // dapp or infra grant
-  // About applicant
-  applicantName: string
-  applicantSurname: string
-  applicantRole: string
-  applicantProfileUrl: string
-  applicantCountry?: string
-  applicantCity?: string
-  applicantStreet?: string
-  applicantPostalCode?: string
-  applicantBackground?: string
   proposerAddress: string
   // About company
   companyName: string

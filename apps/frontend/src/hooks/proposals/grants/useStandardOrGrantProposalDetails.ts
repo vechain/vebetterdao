@@ -1,9 +1,10 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { getIpfsMetadata } from "@/api/ipfs"
-import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
-import { formatEther } from "ethers"
-import BigNumber from "bignumber.js"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { Treasury__factory } from "@vechain/vebetterdao-contracts"
+import BigNumber from "bignumber.js"
+import { formatEther } from "ethers"
+
+import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
 
 const treasuryInterface = Treasury__factory.createInterface()
 
@@ -42,6 +43,7 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     description: ipfsMetadata?.projectName || ipfsMetadata?.shortDescription || "",
     shortDescription: ipfsMetadata?.shortDescription || "",
     markdownDescription: ipfsMetadata?.markdownDescription || "",
+    discourseUrl: ipfsMetadata?.discourseUrl ?? "",
 
     //Grant-specific fields filled from GrantFormData
     projectName: ipfsMetadata?.projectName ?? "",
@@ -64,12 +66,6 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     highLevelRoadmap: ipfsMetadata?.highLevelRoadmap ?? "",
     milestones: ipfsMetadata?.milestones ?? [],
     benefitsToVeChainEcosystem: ipfsMetadata?.benefitsToVeChainEcosystem ?? "",
-    applicantName: ipfsMetadata?.applicantName ?? "",
-    applicantSurname: ipfsMetadata?.applicantSurname ?? "",
-    applicantRole: ipfsMetadata?.applicantRole ?? "",
-    applicantProfileUrl: ipfsMetadata?.applicantProfileUrl ?? "",
-    applicantCountry: ipfsMetadata?.applicantCountry ?? "",
-    applicantCity: ipfsMetadata?.applicantCity ?? "",
     companyRegisteredNumber: ipfsMetadata?.companyRegisteredNumber ?? "",
     companyIntro: ipfsMetadata?.companyIntro ?? "",
     companyEmail: ipfsMetadata?.companyEmail ?? "",
@@ -85,6 +81,7 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
     ipfsDescription: ipfsMetadata?.ipfsDescription ?? "",
     markdownDescription: ipfsMetadata?.markdownDescription ?? "",
     description: ipfsMetadata?.shortDescription ?? "",
+    discourseUrl: ipfsMetadata?.discourseUrl ?? "",
   }
 }
 
