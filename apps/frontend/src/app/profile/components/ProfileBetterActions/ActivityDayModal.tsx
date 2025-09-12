@@ -1,4 +1,4 @@
-import { useSustainabilityActions } from "@/api"
+import { useB3trActions } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 import { Text, VStack } from "@chakra-ui/react"
@@ -17,7 +17,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   const startOfDay = dayjs(date).startOf("day").unix()
   const endOfDay = dayjs(date).endOf("day").unix()
 
-  const actionsOfDayQuery = useSustainabilityActions({
+  const actionsOfDayQuery = useB3trActions({
     wallet: address,
     after: startOfDay,
     before: endOfDay,

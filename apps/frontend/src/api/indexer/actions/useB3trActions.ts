@@ -5,7 +5,7 @@ import { z } from "zod"
 
 const indexerUrl = getConfig().indexerUrl
 
-export const SustainabilityActionsResponseSchema = z.object({
+export const B3trActionsResponseSchema = z.object({
   pagination: z.object({
     hasNext: z.boolean(),
   }),
@@ -53,10 +53,10 @@ export const SustainabilityActionsResponseSchema = z.object({
     .default([]),
 })
 
-export type SustainabilityActionsResponse = z.infer<typeof SustainabilityActionsResponseSchema>
-export type SustainabilityProof = z.infer<typeof SustainabilityActionsResponseSchema>["data"][number]["proof"]
+export type B3trActionsResponse = z.infer<typeof B3trActionsResponseSchema>
+export type B3trProof = z.infer<typeof B3trActionsResponseSchema>["data"][number]["proof"]
 
-type SustainabilityActionsRequest = {
+type B3trActionsRequest = {
   appId?: string
   wallet: string
   before?: number
@@ -67,23 +67,22 @@ type SustainabilityActionsRequest = {
 }
 
 /**
- * Get the sustainability actions overview for a user or app, with the given request data
- * @param data  the request data @see SustainabilityActionsRequest
- * @returns the response data @see SustainabilityActionsResponse
+ * Get the B3TR actions overview for a user or app, with the given request data
+ * @param data  the request data @see B3trActionsRequest
+ * @returns the response data @see B3trActionsResponse
  */
-export const getSustainabilityActions = async (
-  data: SustainabilityActionsRequest,
-): Promise<SustainabilityActionsResponse> => {
+export const getB3trActions = async (data: B3trActionsRequest): Promise<B3trActionsResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
 
-  const queryString = buildQueryString(data)
+  const { wallet, ...queryParams } = data
+  const queryString = buildQueryString(queryParams)
 
-  const response = await fetch(`${indexerUrl}/b3tr/actions/users/${data.wallet}?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr/actions/users/${wallet}?${queryString}`, {
     method: "GET",
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch sustainability actions: ${response.statusText}`)
+    throw new Error(`Failed to fetch B3TR actions: ${response.statusText}`)
   }
 
   let result
@@ -91,14 +90,14 @@ export const getSustainabilityActions = async (
   try {
     result = await response.json()
 
-    return SustainabilityActionsResponseSchema.parse(result)
+    return B3trActionsResponseSchema.parse(result)
   } catch (e) {
-    throw new Error(`Failed to parse sustainability actions: ${e}`)
+    throw new Error(`Failed to parse B3TR actions: ${e}`)
   }
 }
 
-export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => [
-  "SUSTAINABILITY",
+export const getB3trActionsQueryKey = (data: Omit<B3trActionsRequest, "page" | "size">) => [
+  "B3TR",
   "ACTIONS",
   data.appId,
   data.wallet,
@@ -108,14 +107,14 @@ export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActions
 ]
 
 /**
- * Get the sustainability actions overview for a user or app, with the given request data
- * @param data the request data @see SustainabilityUserOverviewRequest
- * @returns the query object with the data @see SustainabilityActionsResponse
+ * Get the B3TR actions overview for a user or app, with the given request data
+ * @param data the request data @see B3trActionsRequest
+ * @returns the query object with the data @see B3trActionsResponse
  */
-export const useSustainabilityActions = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => {
+export const useB3trActions = (data: Omit<B3trActionsRequest, "page" | "size">) => {
   return useInfiniteQuery({
-    queryKey: getSustainabilitActionsQueryKey(data),
-    queryFn: ({ pageParam = 0 }) => getSustainabilityActions({ page: pageParam, ...data }),
+    queryKey: getB3trActionsQueryKey(data),
+    queryFn: ({ pageParam = 0 }) => getB3trActions({ page: pageParam, ...data }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,

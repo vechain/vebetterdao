@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-literals */
-import { SustainabilityProof, useXApps } from "@/api"
+import { B3trProof, useXApps } from "@/api"
 import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -15,7 +15,7 @@ const compactFormatter = getCompactFormatter(2)
 
 type Props = {
   actionModal: UseDisclosureProps
-  proof?: SustainabilityProof
+  proof?: B3trProof
   appId?: string
   blockTimestamp?: number
   blockNumber?: number
