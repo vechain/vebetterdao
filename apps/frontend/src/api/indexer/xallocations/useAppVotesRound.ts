@@ -32,7 +32,7 @@ export const getRoundAppVotes = async (data: RoundAppVotesRequest): Promise<Roun
   if (!indexerUrl) throw new Error("Indexer URL not found")
   if (!data.roundId) throw new Error("roundId is required")
 
-  const response = await fetch(`${indexerUrl}/voting/xallocations/${data.roundId}/results`, {
+  const response = await fetch(`${indexerUrl}/b3tr/xallocations/${data.roundId}/results`, {
     method: "GET",
   })
 
