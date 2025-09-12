@@ -47,7 +47,7 @@
     "@vechain/vebetterdao-contracts": "*",
     "@vechain/vechain-kit": "2.0.0-rc.15",
     "@vercel/analytics": "^1.5.0",
-    "axios": "^1.11.0",
+    "axios": "^1.12.0",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
     "form-data": "^4.0.0",
