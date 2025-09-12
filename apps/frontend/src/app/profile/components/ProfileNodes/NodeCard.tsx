@@ -13,7 +13,7 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
   return (
     <LinkBox flex={1}>
       <Card.Root
-        variant="outline"
+        variant="subtle"
         alignItems="center"
         flexDirection="row"
         gap="8px"

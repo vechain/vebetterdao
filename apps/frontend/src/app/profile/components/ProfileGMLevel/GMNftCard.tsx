@@ -25,7 +25,8 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
   return (
     <LinkBox flex={1}>
       <Card.Root
-        variant={gm?.isSelected ? "primaryBoxShadow" : "outline"}
+        variant="subtle"
+        //variant={gm?.isSelected ? "primaryBoxShadow" : "outline"}
         alignItems="center"
         flexDirection="row"
         gap="8px"

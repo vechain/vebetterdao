@@ -1,4 +1,4 @@
-import { VStack, Spinner, Box, Button } from "@chakra-ui/react"
+import { VStack, Spinner, Box, Button, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
 import { useMemo } from "react"
@@ -47,27 +47,33 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
   })
 
   return (
-    <VStack w="full" gap={4}>
-      {/* Back Button */}
+    <Card.Root w="full" variant="primary">
+      <Card.Body gap={4}>
+        <Button
+          variant={"plain"}
+          color="primary"
+          onClick={goBack}
+          size="sm"
+          alignItems="center"
+          alignSelf={"flex-start"}>
+          <FaAngleLeft />
+          {t("Go back")}
+        </Button>
 
-      <Button variant={"plain"} color="primary" onClick={goBack} size="sm" alignItems="center" alignSelf={"flex-start"}>
-        <FaAngleLeft />
-        {t("Go back")}
-      </Button>
+        {/* Proposals List */}
+        <VStack w="full" gap={4}>
+          {itemsWithMetadata?.map(proposal => (
+            <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
+          ))}
+        </VStack>
 
-      {/* Proposals List */}
-      <VStack w="full" gap={4}>
-        {itemsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
-        ))}
-      </VStack>
-
-      {/* Sentinel Element */}
-      {hasMore && (
-        <Box id="infinite-scroll-sentinel" w="full" display="flex" justifyContent="center" mt={4}>
-          {loading && <Spinner color="#004CFC" />}
-        </Box>
-      )}
-    </VStack>
+        {/* Sentinel Element */}
+        {hasMore && (
+          <Box id="infinite-scroll-sentinel" w="full" display="flex" justifyContent="center" mt={4}>
+            {loading && <Spinner color="#004CFC" />}
+          </Box>
+        )}
+      </Card.Body>
+    </Card.Root>
   )
 }

@@ -74,10 +74,10 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   )
 
   const getActivityColor = useCallback((level: number) => {
-    if (level > 5) return "#577E2E"
-    if (level >= 4) return "#93CB57"
-    if (level >= 2) return "#B1F16C"
-    if (level >= 1) return "#D0F7A7"
+    if (level > 5) return "calendar.1"
+    if (level >= 4) return "calendar.2"
+    if (level >= 2) return "calendar.3"
+    if (level >= 1) return "calendar.4"
     return "#F0F0F0" // Light gray for no activity
   }, [])
 
@@ -95,10 +95,10 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   // Define the legend items with minimal labels
   const legendItems = [
     { label: "0", color: "#F0F0F0" },
-    { label: "1", color: "#D0F7A7" },
-    { label: "2-3", color: "#B1F16C" },
-    { label: "4-5", color: "#93CB57" },
-    { label: "6+", color: "#577E2E" },
+    { label: "1", color: "calendar.4" },
+    { label: "2-3", color: "calendar.3" },
+    { label: "4-5", color: "calendar.2" },
+    { label: "6+", color: "calendar.1" },
   ]
 
   return (
@@ -114,7 +114,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
           <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">
               <Heading size="xl">{t("Actions History")}</Heading>
-              <Button variant="primaryLink" size="sm" onClick={handleSetListView}>
+              <Button variant="ghost" color="actions.tertiary.default" size="sm" onClick={handleSetListView}>
                 {t("List View")}
               </Button>
             </Flex>
@@ -163,7 +163,8 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                       bg={getActivityColor(activityNumber)}
                       color={getActivityFontColor(activityNumber)}
                       borderRadius="md"
-                      border={isToday ? "2px solid #000" : "1px solid #dfdfdf"}
+                      border="md"
+                      borderColor={isToday ? "border.inverted" : "transparent"}
                       _hover={{ opacity: isDisabled ? 1 : 0.8 }}>
                       {day}
                     </Button>

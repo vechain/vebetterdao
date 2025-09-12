@@ -28,13 +28,13 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
   return (
     <>
       <Button
+        variant="subtle"
         onClick={actionModal.onOpen}
         h="auto"
-        rounded="lg"
+        rounded="xl"
         display="flex"
         px={3}
         py={2}
-        variant="subtle"
         justifyContent="flex-start"
         alignItems="center">
         <Circle size={10} bg="brand.secondary-strong">
@@ -42,10 +42,8 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
         </Circle>
 
         <VStack gap={0} alignItems="flex-start" flex={1}>
-          <HStack gap={0} flexWrap={"wrap"}>
-            <Text textStyle={"sm"} mr="1">
-              {t("Better action on")}
-            </Text>
+          <HStack gap={1} flexWrap={"wrap"}>
+            <Text textStyle={"sm"}>{t("Better action on")}</Text>
             <Text textStyle={"sm"} fontWeight="semibold">
               {getAppName(appId ?? "")}
             </Text>

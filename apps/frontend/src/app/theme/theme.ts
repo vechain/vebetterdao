@@ -240,12 +240,11 @@ const config = defineConfig({
           5: { value: { base: "#BEDBFE", _dark: "#1145CD" } },
           6: { value: { base: "#DBE9FD", _dark: "#06308A" } },
         },
-        // TODO wrong colors
         calendar: {
-          1: { value: { base: "#739E45", _dark: "#739E45" } },
-          2: { value: { base: "#97CE58", _dark: "#97CE58" } },
-          3: { value: { base: "#B1F15C", _dark: "#B1F15C" } },
-          4: { value: { base: "#B1F15C", _dark: "#B1F15C" } },
+          1: { value: { base: "#739E45", _dark: "#B4EA82" } },
+          2: { value: { base: "#97CE5B", _dark: "#B4EA82B3" } },
+          3: { value: { base: "#B1F16C", _dark: "#B4EA8266" } },
+          4: { value: { base: "#B1F16C80", _dark: "#B4EA8233" } },
         },
       },
       animations: {

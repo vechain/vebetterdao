@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Heading, VStack, Card, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
+import { Heading, VStack, Card, HStack, Button, Text, Flex, useDisclosure, Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCanUserVote, useGetDelegatee, useGetPendingDelegationsDelegateePOV, useUserScore } from "@/api"
 import { UilArrowUpRight, UilCheck } from "@iconscout/react-unicons"
@@ -27,7 +27,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
-  const border = isPerson ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
+  const border = isPerson ? "1px solid #D5D5D5" : "1px solid #EC9BAF"
   const progressLabel = useMemo(() => {
     if (isPerson) return t("QUALIFIED TO VOTE")
     return missingActionsLabel.short
@@ -48,18 +48,18 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   }, [isPerson, t, isConnectedUser])
 
   const darkColor = useMemo(() => {
-    if (isPerson) return "#3DBA67"
+    if (isPerson) return "status.primary.default"
     return "#C84968"
   }, [isPerson])
 
-  const lightColor = "#FCEEF1"
+  const lightColor = "status.positive.primary"
 
   const delegationModal = useDisclosure()
 
   if (isScoreLoading || isPendingDelegationsLoading) return null
 
   return (
-    <Card.Root borderRadius="xl" w="full" border={border}>
+    <Card.Root variant="primary" rounded="xl" w="full" border={border}>
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={10}>
           <VStack align="stretch" gap={6}>
@@ -69,8 +69,8 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                   {t(isConnectedUser ? "Your Voting Qualification" : "Voting qualification")}
                 </Heading>
                 {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
-                  <Button variant={"primaryGhost"} onClick={delegationModal.onOpen} size="sm">
-                    <UilArrowUpRight />
+                  <Button variant="plain" color="actions.tertiary.default" onClick={delegationModal.onOpen} size="sm">
+                    <Icon as={UilArrowUpRight} boxSize={4} color="actions.tertiary.default" />
                     {t("Delegate")}
                   </Button>
                 )}
@@ -97,7 +97,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                 </Text>
               </Flex>
               <HStack gap={1}>
-                <UilCheck color={darkColor} />
+                <Icon as={UilCheck} boxSize={4} color={darkColor} />
                 <Text textStyle="xs" color={darkColor}>
                   {descriptionLabel}
                 </Text>

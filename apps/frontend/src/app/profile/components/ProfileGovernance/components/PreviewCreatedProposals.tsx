@@ -1,6 +1,6 @@
 import { ProposalCreatedEvent, ProposalMetadata, useIpfsMetadatas } from "@/api"
 import { toIPFSURL, validateIpfsUri } from "@/utils"
-import { HStack, VStack, Text } from "@chakra-ui/react"
+import { HStack, VStack, Text, Card, Icon } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -50,23 +50,27 @@ export const PreviewCreatedProposals = ({
   if (!firstProposals || firstProposals.length == 0) return null
 
   return (
-    <VStack w={"full"}>
-      <HStack w={"full"} justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
-        <Text textStyle={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
-          {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
-        </Text>
-        {isMoreProposals && (
-          <HStack color={"#004CFC"} cursor={"pointer"} onClick={onSeeAllProposals}>
-            <Text textStyle={{ base: "sm", md: "md" }}>{t("See All")}</Text>
-            <FiArrowUpRight size={16} />
-          </HStack>
-        )}
-      </HStack>
-      <VStack w={"full"} gap={4}>
-        {firstProposalsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
-        ))}
-      </VStack>
-    </VStack>
+    <Card.Root w={"full"} variant="primary">
+      <Card.Body>
+        <HStack w={"full"} justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
+          <Text textStyle={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
+            {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
+          </Text>
+          {isMoreProposals && (
+            <HStack onClick={onSeeAllProposals}>
+              <Text textStyle={{ base: "sm", md: "md" }} color="actions.tertiary.default" fontWeight="semibold">
+                {t("See All")}
+              </Text>
+              <Icon as={FiArrowUpRight} boxSize={4} color="actions.tertiary.default" />
+            </HStack>
+          )}
+        </HStack>
+        <VStack w={"full"} gap={4}>
+          {firstProposalsWithMetadata?.map(proposal => (
+            <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
+          ))}
+        </VStack>
+      </Card.Body>
+    </Card.Root>
   )
 }

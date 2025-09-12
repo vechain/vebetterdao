@@ -61,7 +61,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
         }}
         lazyMount>
         <Menu.Trigger asChild position="relative">
-          <IconButton variant="subtle" rounded="full" aria-label={t("Filters")} border="1px solid #D5D5D5" gap={2}>
+          <IconButton variant="subtle" rounded="full" aria-label={t("Filters")} gap={2}>
             <UilFilter />
             {activeFiltersCount > 0 && (
               <Flex
@@ -124,7 +124,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
       <Card.Body>
         <VStack alignItems="stretch" gap={4}>
           <HStack justifyContent="space-between" w="full">
-            <Heading size="2xl">{t("Proposal Comments")}</Heading>
+            <Heading size="xl">{t("Proposal Comments")}</Heading>
             {filterMenu()}
           </HStack>
 
@@ -142,7 +142,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
                 {t("You reached the end!")}
               </Heading>
             }>
-            <VStack alignItems="stretch">
+            <VStack alignItems="stretch" gap="4">
               {visibleComments?.map(vote => (
                 <ProposalVoteComment key={vote.voter} vote={vote} />
               ))}

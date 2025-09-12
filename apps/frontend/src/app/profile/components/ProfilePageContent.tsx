@@ -160,13 +160,13 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}>
-        <HStack gap={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
+        <HStack gap="0" minWidth="max-content" justifyContent="space-between" flexWrap="nowrap">
           {tabs.map(({ tab, label }) => (
             <Button
               key={tab}
-              variant="primaryGhost"
-              borderBottom={activeTab === tab ? "2px solid #004CFC" : "none"}
+              variant="ghost"
               rounded="none"
+              borderBottom={activeTab === tab ? "2px solid var(--vbd-colors-brand-primary)" : "none"}
               textStyle={["xs", "xs", "md"]}
               onClick={() => handleTabChange(tab)}>
               {label}

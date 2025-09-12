@@ -30,12 +30,12 @@ export const AppVotedBox = ({ appVoted }: Props) => {
       p="12px"
       display={"flex"}
       alignItems={"stretch"}
-      variant="outline"
+      variant="subtle"
       border="none"
       asChild
       onClick={goToApp}>
-      <Card.Root variant="base" w={"full"} borderRadius={12} justifyContent={"space-between"} p={{ base: 3, md: 4 }}>
-        <Card.Body p={0} flexDirection={"row"} alignItems={"stretch"} justifyContent={"space-between"}>
+      <Card.Root variant="subtle" w={"full"} borderRadius="xl" justifyContent={"space-between"} p={{ base: 3, md: 4 }}>
+        <Card.Body flexDirection={"row"} alignItems={"stretch"} justifyContent={"space-between"}>
           <HStack gap={2}>
             <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
               <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />

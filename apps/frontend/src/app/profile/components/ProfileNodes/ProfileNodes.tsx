@@ -12,7 +12,7 @@ export const ProfileNodes = ({ address }: { address: string }) => {
   return (
     <VStack gap="4" align="stretch">
       <Card.Root variant="primary">
-        <Card.Header p="1.25rem" pb="0">
+        <Card.Header>
           <Heading size="xl">{t("Nodes")}</Heading>
         </Card.Header>
 
