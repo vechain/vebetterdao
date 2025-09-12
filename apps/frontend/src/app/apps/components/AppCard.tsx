@@ -55,7 +55,7 @@ export const AppCard = ({ xApp }: Props) => {
           <VStack gap={1} align="flex-start" w="full">
             <HStack gap={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton loading={appMetadataLoading}>
-                <Text fontWeight={"600"} textStyle={"xs"}>
+                <Text fontWeight="semibold" textStyle={"xs"}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>

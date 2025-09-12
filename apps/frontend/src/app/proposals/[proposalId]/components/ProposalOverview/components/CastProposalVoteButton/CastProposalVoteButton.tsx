@@ -64,7 +64,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
 
   if (shouldSeeVoteButton)
     return (
-      <Button onClick={handleClick} variant="primaryAction" w={["full", "auto"]} size={["lg", "md"]}>
+      <Button onClick={handleClick} variant="primary" w={["full", "auto"]} size={["lg", "md"]}>
         <Icon as={MdHowToVote} boxSize={4} />
         {t("Cast your vote")}
       </Button>

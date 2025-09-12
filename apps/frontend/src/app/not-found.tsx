@@ -19,7 +19,7 @@ export default function Custom404() {
       <Heading textAlign={"center"} width={["100%", "50%"]}>
         {t("We can't find what you're looking for. Let's head back and try again!")}
       </Heading>
-      <Button variant={"primaryAction"} onClick={goToHomePage} my={"20px"}>
+      <Button variant={"primary"} onClick={goToHomePage} my={"20px"}>
         {t("Go back home")}
       </Button>
     </VStack>

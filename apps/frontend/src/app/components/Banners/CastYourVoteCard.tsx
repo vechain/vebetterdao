@@ -79,7 +79,7 @@ export const CastYourVoteCard: React.FC = () => {
                 )}
               </Text>
 
-              <Button zIndex={1} mt={2} variant={"primaryAction"} borderRadius={"full"} onClick={onClick}>
+              <Button zIndex={1} mt={2} variant={"primary"} borderRadius={"full"} onClick={onClick}>
                 {t("See round")}
                 <FiArrowUpRight color="#FFFFFF" />
               </Button>

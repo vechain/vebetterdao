@@ -113,7 +113,7 @@ export const UpdateConfirmationModal = ({
             )}
 
             <VStack alignItems="center" gap="20px" mt={"20px"}>
-              <Button variant="primaryAction" onClick={onClose}>
+              <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
               <Button variant="dangerGhost" onClick={handleSubmit}>

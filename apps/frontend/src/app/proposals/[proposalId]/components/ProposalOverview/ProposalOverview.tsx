@@ -22,7 +22,7 @@ export const ProposalOverview = () => {
   const proposerName = vnsData?.domain
 
   return (
-    <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
+    <Card.Root variant="primary" w="full" borderRadius={"3xl"}>
       <Card.Body>
         <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
           <VStack gap={4} align="flex-start" flex={2} justify={"space-between"} minW={0}>

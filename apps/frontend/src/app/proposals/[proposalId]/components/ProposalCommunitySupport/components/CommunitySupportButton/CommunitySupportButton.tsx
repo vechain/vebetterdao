@@ -23,7 +23,7 @@ export const CommunitySupportButton = () => {
   return (
     <>
       {!proposal.isDepositReached && (
-        <Button onClick={handleClick} variant="primaryAction" flex={{ base: 1, md: "unset" }}>
+        <Button onClick={handleClick} variant="primary" flex={{ base: 1, md: "unset" }}>
           {t("Support this proposal")}
         </Button>
       )}

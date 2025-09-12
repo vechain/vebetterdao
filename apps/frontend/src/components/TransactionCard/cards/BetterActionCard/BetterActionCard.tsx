@@ -30,13 +30,11 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
       <Button
         onClick={actionModal.onOpen}
         h="auto"
-        rounded={8}
+        rounded="lg"
         display="flex"
         px={3}
         py={2}
         variant="subtle"
-        color="gray"
-        bg={{ base: "bg.tertiary", _hover: "bg.muted" }}
         justifyContent="flex-start"
         alignItems="center">
         <Circle size={10} bg="brand.secondary-strong">

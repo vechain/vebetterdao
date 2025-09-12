@@ -256,7 +256,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           <Button
             mt={2}
             type="submit"
-            variant={"primaryAction"}
+            variant={"primary"}
             w={"full"}
             rounded={"full"}
             disabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}

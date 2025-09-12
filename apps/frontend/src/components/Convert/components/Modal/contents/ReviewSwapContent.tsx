@@ -47,7 +47,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
         )}
       </VStack>
       <Button
-        variant={"primaryAction"}
+        variant={"primary"}
         w={"full"}
         rounded={"full"}
         onClick={onSubmitTx}

@@ -25,6 +25,13 @@ export const cardSlotRecipe = defineSlotRecipe({
           borderColor: "border.secondary",
         },
       },
+      subtle: {
+        root: {
+          bg: "card.subtle",
+          _hover: { bg: "card.hover" },
+          transition: "all 0.2s ease-in-out",
+        },
+      },
     },
   },
 

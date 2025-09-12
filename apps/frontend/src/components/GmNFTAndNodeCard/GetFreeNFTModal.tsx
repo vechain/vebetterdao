@@ -57,7 +57,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
                 <Button variant={"whiteAction"} color={"#004CFC"} w={"full"} onClick={onClose}>
                   {t("Maybe later")}
                 </Button>
-                <Button variant={"primaryAction"} w={"full"} onClick={onCtaClick}>
+                <Button variant={"primary"} w={"full"} onClick={onCtaClick}>
                   {t("Get free NFT")}
                 </Button>
               </SimpleGrid>

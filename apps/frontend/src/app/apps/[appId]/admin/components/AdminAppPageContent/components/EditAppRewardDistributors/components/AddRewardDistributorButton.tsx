@@ -74,7 +74,7 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
               <HStack justify={"space-between"}>
                 <Text textStyle="sm">{t("Contract or wallet address")}</Text>
                 {distributorDomain && (
-                  <Text textStyle="sm" fontWeight={"600"}>
+                  <Text textStyle="sm" fontWeight="semibold">
                     {"@"}
                     {distributorDomain}
                   </Text>
@@ -96,7 +96,7 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
             </VStack>
             <VStack align="stretch">
               <Button
-                variant="primaryAction"
+                variant="primary"
                 disabled={!distributorAddress}
                 type="submit"
                 onClick={handleAddressFormSubmit(onSubmit)}>

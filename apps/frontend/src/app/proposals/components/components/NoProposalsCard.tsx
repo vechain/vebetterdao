@@ -1,6 +1,8 @@
 import { Box, VStack, Image, Text, Button } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { EmptyState } from "@/components/ui/empty-state"
+import { CreateProposalCard } from "./CreateProposalCard"
 
 type Props = {
   buttonText: string
@@ -12,8 +14,8 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
 
   return (
     <Box
-      bg={"contrast-on-dark-bg"}
-      borderRadius={12}
+      bg="card.subtle"
+      borderRadius="xl"
       py={{ base: 5, md: 16 }}
       px={{ base: 5, md: 14 }}
       w={"full"}
@@ -33,7 +35,7 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
           {t("No Proposals Found")}
         </Text>
         {description}
-        <Button onClick={onClick} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
+        <Button onClick={onClick} variant={"primary"} alignSelf={"flex-start"} mt={4} mb={2}>
           {buttonText}
         </Button>
       </VStack>

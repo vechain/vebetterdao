@@ -164,7 +164,7 @@ export const AppDetailOverview = ({
                           <AdminAppPageButton />
                         </>
                       )}
-                      <Button flex={1} variant={"primaryAction"} onClick={goToWebsite}>
+                      <Button flex={1} variant={"primary"} onClick={goToWebsite}>
                         {t("Go to Website")}
                         <UilArrowUpRight color="#FFFFFF" size={"16px"} />
                       </Button>

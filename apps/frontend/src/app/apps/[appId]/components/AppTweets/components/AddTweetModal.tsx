@@ -108,7 +108,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
         </VStack>
       )}
       <VStack align={"stretch"}>
-        <Button variant="primaryAction" type="submit">
+        <Button variant="primary" type="submit">
           {t("Save and show on feed")}
         </Button>
         <Button variant="primaryGhost" onClick={onClose}>

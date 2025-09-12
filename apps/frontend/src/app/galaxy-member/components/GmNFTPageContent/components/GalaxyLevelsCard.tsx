@@ -107,7 +107,7 @@ export const GalaxyLevelsCard = () => {
                     </Flex>
                   </Flex>
                   <VStack align="stretch" gap={0}>
-                    <Text textStyle="lg" fontWeight={"600"}>
+                    <Text textStyle="lg" fontWeight="semibold">
                       {gmNft.name}
                     </Text>
                     <Text textStyle="sm" color="text.subtle">

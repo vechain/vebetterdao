@@ -56,7 +56,7 @@ export const GmNFTAndNodeCard = () => {
       overflow={"hidden"}>
       <Flex direction={{ base: "column-reverse", md: "row" }} gap="8">
         <Stack flex={1} gap="4">
-          <Heading textStyle="xl" fontWeight="bold">
+          <Heading textStyle="xl" color="white" fontWeight="bold">
             {t("Your NFTs")}
           </Heading>
 

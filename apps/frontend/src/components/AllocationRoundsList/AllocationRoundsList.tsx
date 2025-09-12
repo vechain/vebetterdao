@@ -71,9 +71,9 @@ export const AllocationRoundsList: React.FC<Props> = ({
     <Card.Root w="full" variant="primary">
       <Card.Header>
         <HStack w="full" justify="space-between" alignItems={"baseline"}>
-          <Heading size={["2xl", "3xl"]}>{t("Allocations")}</Heading>
+          <Heading size={["xl", "2xl"]}>{t("Allocations")}</Heading>
           {invertedCreatedRounds && invertedCreatedRounds.length > maxRoundsToShow && showViewAll && (
-            <Link asChild variant="plain">
+            <Link asChild variant="plain" textStyle="sm">
               <NextLink href="/rounds">
                 {t("See all rounds")}
                 <FiArrowUpRight />

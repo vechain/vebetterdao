@@ -24,7 +24,7 @@ export const CreatorApplicationRejectedBanner = () => {
       backgroundColor="#FFD979"
       buttonLabel={doAction}
       onButtonClick={navigateToCreatorForm}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilArrowRight />}
     />
   )

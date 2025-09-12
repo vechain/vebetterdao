@@ -30,7 +30,7 @@ export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }:
               </Text>
             </Box>
             <VStack align="center" gap="20px">
-              <Button variant="primaryAction" onClick={onClose}>
+              <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
               <Button variant="dangerGhost" onClick={handleEditAdminAddress}>

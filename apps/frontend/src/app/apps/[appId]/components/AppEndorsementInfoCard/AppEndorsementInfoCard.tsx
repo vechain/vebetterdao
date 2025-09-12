@@ -120,7 +120,7 @@ export const AppEndorsementInfoCard = ({
       buttonComponents.push(
         <Button
           key="endorseButton"
-          variant="primaryAction"
+          variant="primary"
           onClick={onOpenEndorsementModal}
           disabled={shouldDisableEndorsementButton}
           w="full">

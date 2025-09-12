@@ -41,14 +41,8 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
       }}
       p={{ base: 3, md: 4 }}>
       <VStack w={"full"} alignItems={"start"} gap={2}>
-        <ProposalStatusBadge
-          proposalId={proposalId}
-          proposalState={proposalState}
-          textProps={{
-            fontSize: 12,
-          }}
-        />
-        <Text textStyle="sm" fontWeight={"600"}>
+        <ProposalStatusBadge proposalId={proposalId} proposalState={proposalState} badgeProps={{ textStyle: "xs" }} />
+        <Text textStyle="sm" fontWeight="semibold">
           {title}
         </Text>
       </VStack>

@@ -181,7 +181,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
         <Dialog.Footer w="full" px={4} pt={1}>
           <VStack align="stretch" w="full">
-            <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
+            <Button variant={"primary"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
             </Button>
             <Button variant={"primaryGhost"} color={"#004CFC"} w={"full"} onClick={handleClose}>

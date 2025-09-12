@@ -150,7 +150,7 @@ export const NewProposalPageDiscussionContent = () => {
             </Button>
             <Button
               data-testid="continue"
-              variant="primaryAction"
+              variant="primary"
               type="submit"
               disabled={isMetadataUploading}
               loading={isMetadataUploading}>

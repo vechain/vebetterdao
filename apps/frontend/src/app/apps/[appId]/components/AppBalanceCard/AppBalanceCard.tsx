@@ -105,7 +105,7 @@ export const AppBalanceCard = () => {
                 mt={1}
                 disabled={!isAppAdminOrTreasuryAddress}
                 onClick={onOpenDepositOrWithdraw}
-                variant={"primaryAction"}
+                variant={"primary"}
                 borderRadius={"full"}
                 w={"full"}>
                 {t("Transfer")}

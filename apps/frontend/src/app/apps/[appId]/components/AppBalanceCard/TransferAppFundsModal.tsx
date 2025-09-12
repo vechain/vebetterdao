@@ -83,7 +83,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                         onOpenWithdraw()
                         onClose()
                       }}
-                      variant={"primaryAction"}
+                      variant={"primary"}
                       borderRadius={"full"}
                       w={"200px"}>
                       {t("Withdraw")}
@@ -139,7 +139,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                         onOpenFundsManagement()
                         onClose()
                       }}
-                      variant={"primaryAction"}
+                      variant={"primary"}
                       borderRadius={"full"}
                       w={"200px"}>
                       {t("Refill Pools")}

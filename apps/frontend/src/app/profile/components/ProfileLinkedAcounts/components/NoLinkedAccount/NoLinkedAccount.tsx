@@ -31,7 +31,7 @@ export const NoLinkedAccount = ({ address }: Props) => {
             : t("Several secondary accounts can be merged with the user's account.")}
         </Text>
         {isConnectedUser && (
-          <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
+          <Button variant="primary" onClick={addLinkedAccountModal.onOpen}>
             {t("Link Accounts")}
           </Button>
         )}

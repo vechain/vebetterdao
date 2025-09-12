@@ -16,8 +16,8 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
     [XAppStatus.LOOKING_FOR_ENDORSEMENT]: {
       title: t("Looking for endorsement"),
       description: "This app needs to be endorsed by Node holders to qualify for allocation rounds.",
-      backgroundColor: "bg.tertiary",
-      color: "success.primary",
+      backgroundColor: "bg.primary",
+      color: "status.positive.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.ENDORSED_AND_ELIGIBLE]: {
@@ -25,7 +25,7 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       description:
         "This app has enough score and will participate in upcoming allocation rounds, if not already included.",
       backgroundColor: "success.subtle",
-      color: "success.primary",
+      color: "status.positive.primary",
       icon: UilCheckCircle,
     },
     [XAppStatus.UNENDORSED_AND_ELIGIBLE]: {
@@ -33,21 +33,21 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       description:
         "This app lost its score and is in a 2-week grace period until {{gracePeriodEndDate}}. It will participate in allocation rounds during this time, but must be re-endorsed ahead of the round starting after that date to continue participating.",
       backgroundColor: "warning.subtle",
-      color: "warning.primary",
+      color: "status.warning.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.UNENDORSED_NOT_ELIGIBLE]: {
       title: t("Endorsement lost"),
       description: "This app lost its score and will not participate in allocation rounds until it is endorsed again.",
       backgroundColor: "error.subtle",
-      color: "error.primary",
+      color: "status.negative.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.BLACKLISTED]: {
       title: t("Blacklisted"),
       description:
         "This app was blacklisted by the community and will not join future allocation rounds while blacklisted.",
-      backgroundColor: "bg.tertiary",
+      backgroundColor: "bg.primary",
       color: "text.subtle",
       icon: UilExclamationCircle,
     },

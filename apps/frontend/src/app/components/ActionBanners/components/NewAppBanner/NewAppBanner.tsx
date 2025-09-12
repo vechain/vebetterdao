@@ -74,7 +74,7 @@ export const NewAppBanner = () => {
       buttonIconPosition="right"
       buttonLabel={t("Explore")}
       onButtonClick={GOTOAPPS}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilArrowRight />}
     />
   )

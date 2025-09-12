@@ -316,7 +316,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                 mt={8}
                 disabled={isTransferDisabled || isLoading}
                 onClick={handleTransfer}
-                variant={"primaryAction"}
+                variant={"primary"}
                 borderRadius={"full"}
                 w={"full"}>
                 {t("Transfer token")}

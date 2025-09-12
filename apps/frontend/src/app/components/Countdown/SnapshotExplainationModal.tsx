@@ -82,7 +82,7 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                   ))}
                 </VStack>
 
-                <Button variant="primaryAction" w={"full"} onClick={LINK_TO_DOCS}>
+                <Button variant="primary" w={"full"} onClick={LINK_TO_DOCS}>
                   {t("Learn more")}
                 </Button>
               </VStack>

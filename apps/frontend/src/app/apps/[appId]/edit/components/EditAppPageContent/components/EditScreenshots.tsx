@@ -82,7 +82,7 @@ export const EditScreenshots = ({ form }: Props) => {
             {invalidFormat ? invalidMessage : t(SCREENSHOT_UPLOAD_GUIDELINES)}
           </Text>
         </VStack>
-        <Button variant="primaryAction" onClick={handleUpload} loading={loadingScreenshot}>
+        <Button variant="primary" onClick={handleUpload} loading={loadingScreenshot}>
           <UilUpload size="16px" />
           {t("Upload")}
         </Button>

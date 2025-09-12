@@ -26,7 +26,7 @@ export const CreatorApplicationApprovedBanner = () => {
       backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
       buttonLabel={doAction}
       onButtonClick={navigateToSubmitAppForm}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilArrowRight />}
     />
   )

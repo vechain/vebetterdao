@@ -211,7 +211,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
             </RadioGroup.Root>
             <Text textStyle={"xl"}>{t("Add comment")}</Text>
             <Textarea resize={"none"} onChange={handleChangeComment} />
-            <Button type="submit" variant="primaryAction" w="full" disabled={!selectedVote}>
+            <Button type="submit" variant="primary" w="full" disabled={!selectedVote}>
               <VoteIcon boxSize={"20px"} color="white" />
               {t("Cast your vote")}
             </Button>

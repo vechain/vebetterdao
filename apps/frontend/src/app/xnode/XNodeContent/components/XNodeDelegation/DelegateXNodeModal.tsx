@@ -123,7 +123,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               </Field.Root>
             </VStack>
             <VStack align="stretch">
-              <Button variant="primaryAction" type="submit">
+              <Button variant="primary" type="submit">
                 {t("Continue")}
               </Button>
               <Button variant={"primaryGhost"} onClick={handleClose}>
@@ -161,7 +161,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               </Box>
             </Alert.Root>
             <VStack>
-              <Button variant="primaryAction" onClick={handleDelegate}>
+              <Button variant="primary" onClick={handleDelegate}>
                 {t("Yes, I'm sure")}
               </Button>
               <Button variant={"primaryGhost"} onClick={goToPrevious}>

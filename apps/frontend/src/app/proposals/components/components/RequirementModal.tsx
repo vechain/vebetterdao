@@ -97,7 +97,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
             {t("Create Discourse")}
           </Button>
 
-          <Button size="lg" variant="primaryAction" py={6} onClick={handleGetNftOrApply}>
+          <Button size="lg" variant="primary" py={6} onClick={handleGetNftOrApply}>
             {getNftOrApplyButtonText}
           </Button>
         </SimpleGrid>

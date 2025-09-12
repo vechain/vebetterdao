@@ -92,7 +92,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Prop
         b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
       })}
       onButtonClick={handleClaim}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilGift color="white" />}
       buttonIconPosition="left"
     />

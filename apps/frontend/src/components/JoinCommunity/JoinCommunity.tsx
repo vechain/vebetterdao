@@ -35,7 +35,7 @@ export const JoinCommunity = () => {
           <Text textStyle="3xl" fontWeight="bold" color={"#1E1E1E"}>
             {t("Join Our Community!")}
           </Text>
-          <Button variant="primaryAction" onClick={onJoinClick} mt={4}>
+          <Button variant="primary" onClick={onJoinClick} mt={4}>
             {t("Join")}
           </Button>
         </VStack>

@@ -180,7 +180,7 @@ export const RoundInfoBottomSheet = () => {
                 </Button>
                 {canVote && (
                   <Button
-                    variant="primaryAction"
+                    variant="primary"
                     onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
                     rounded={"full"}>
                     {t("Vote now")}

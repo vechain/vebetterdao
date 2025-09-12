@@ -46,7 +46,7 @@ export const RemoveLinkModalPassportPOV = ({ modal, entity }: { modal: UseDisclo
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleRemoveLink}>
+          <Button variant="primary" onClick={handleRemoveLink}>
             {t("Yes, I'm sure")}
           </Button>
           <Button variant={"primaryGhost"} onClick={handleClose}>

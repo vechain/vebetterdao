@@ -28,7 +28,7 @@ export const SubmitCreatorFormModal = ({ isOpen, onClose, buttonAction }: Props)
           )}
         </Text>
 
-        <Button variant="primaryAction" w={"full"} onClick={buttonAction}>
+        <Button variant="primary" w={"full"} onClick={buttonAction}>
           {t("Submit Creator Form")}
         </Button>
       </VStack>

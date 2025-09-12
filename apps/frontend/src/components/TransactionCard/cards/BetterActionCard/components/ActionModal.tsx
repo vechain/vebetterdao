@@ -97,7 +97,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
           {dayjs.unix(blockTimestamp ?? 0).fromNow()}
         </Text>
         {b3trAmount && (
-          <Card.Root variant="filled">
+          <Card.Root variant="primary">
             <Card.Body p={4}>
               <VStack align="stretch" gap={1}>
                 <HStack>

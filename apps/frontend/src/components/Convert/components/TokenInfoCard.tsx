@@ -77,7 +77,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       <Button
         mt={2}
         type="submit"
-        variant={"primaryAction"}
+        variant={"primary"}
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}

@@ -25,7 +25,7 @@ export const CastVoteBanner = () => {
       backgroundImageSrc="/assets/backgrounds/community-green-blob.webp"
       buttonLabel={t("See round")}
       onButtonClick={handleVote}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilArrowRight color="white" />}
     />
   )

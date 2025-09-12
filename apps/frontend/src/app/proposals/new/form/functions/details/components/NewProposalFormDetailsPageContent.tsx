@@ -74,7 +74,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button data-testid="continue" variant="primaryAction" type="submit" form="new-proposal-form">
+            <Button data-testid="continue" variant="primary" type="submit" form="new-proposal-form">
               {t("Continue")}
             </Button>
           </HStack>

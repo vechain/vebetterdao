@@ -51,7 +51,7 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
         {(claimableDeposits.length ?? 0) > 1 ? "s" : ""}
         {t(".")}
       </Text>
-      <Button onClick={handleClaim} w={"full"} variant={"primaryAction"} mt={5}>
+      <Button onClick={handleClaim} w={"full"} variant={"primary"} mt={5}>
         {t("Claim tokens")}
       </Button>
     </Box>

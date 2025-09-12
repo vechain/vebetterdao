@@ -1,11 +1,12 @@
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { RequirementModal } from "./RequirementModal"
 import { AnalyticsUtils } from "@/utils"
-import { Box, Image, Text, Button, useDisclosure } from "@chakra-ui/react"
+import { Icon, Text, Button, useDisclosure, Card } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
+import ProposalIcon from "@/components/Icons/svg/proposal.svg"
 
 export const CreateProposalCard = () => {
   const { account } = useWallet()
@@ -28,14 +29,8 @@ export const CreateProposalCard = () => {
 
   return (
     <>
-      <Box
-        bg={"contrast-on-dark-bg"}
-        borderRadius={12}
-        p={6}
-        alignContent={"flex-start"}
-        borderWidth={1}
-        borderColor={"#D5D5D5"}>
-        <Image src="/assets/icons/proposal.svg" alt="Proposal icon" boxSize={24} />
+      <Card.Root variant="primary">
+        <Icon as={ProposalIcon} boxSize={24} color="actions.tertiary.default" />
         <Text textStyle="2xl" fontWeight="bold" mt={4}>
           {t("Create a proposal")}
         </Text>
@@ -44,10 +39,11 @@ export const CreateProposalCard = () => {
             "Have an idea for something that could improve the experience in VeBetterDAO? Create a proposal and let the community vote to make it happen!",
           )}
         </Text>
-        <Button onClick={onNewClick} w={"full"} variant={"primaryAction"} mt={5}>
+        <Button onClick={onNewClick} w={"full"} variant={"primary"} mt={5}>
           {t("Create proposal")}
         </Button>
-      </Box>
+      </Card.Root>
+
       <RequirementModal
         isOpen={isRequirementModalOpen}
         onClose={closeRequirementModal}

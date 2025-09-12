@@ -137,7 +137,7 @@ export const AppTweets = () => {
                     {t("Cancel")}
                   </Button>
                   <Button
-                    variant="primaryAction"
+                    variant="primary"
                     disabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
                     <UilCheckCircle color="#FFFFFF" fontSize="16px" />
@@ -152,7 +152,7 @@ export const AppTweets = () => {
                       {t("Edit feed")}
                     </Button>
                   )}
-                  <Button variant="primaryAction" onClick={onNewTweetModalOpen}>
+                  <Button variant="primary" onClick={onNewTweetModalOpen}>
                     <UilPlus color="#FFFFFF" fontSize="16px" />
                     {t("Add X post")}
                   </Button>

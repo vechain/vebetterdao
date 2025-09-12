@@ -49,14 +49,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
     <LinkBox asChild>
       <Card.Root
         w="full"
-        bg="card.subtle"
-        _hover={{ bg: "card.hover" }}
+        variant="subtle"
         fill="icon.default"
-        focusRing="outside"
-        // border={isActive ? "1px solid" : undefined}
-        // borderColor={isActive ? "card.active-border" : undefined}
-        transition="all 0.2s ease-in-out"
-        rounded="3xl"
+        rounded="lg"
         data-testid={`round-card-#${roundId}`}
         p="4">
         <Card.Body p="0">

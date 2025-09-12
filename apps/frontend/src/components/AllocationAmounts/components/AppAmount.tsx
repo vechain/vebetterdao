@@ -20,7 +20,7 @@ export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
   return (
     <LinkBox flex={1}>
       <LinkOverlay>
-        <Card.Root variant="outline" bg="bg.tertiary" borderColor="border.secondary">
+        <Card.Root variant="subtle" p="4">
           <Card.Body>
             <Flex gap={3} alignItems="center">
               <Skeleton loading={isLogoLoading || isLoading}>

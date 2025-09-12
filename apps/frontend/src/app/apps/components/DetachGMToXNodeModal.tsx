@@ -54,7 +54,7 @@ export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }
                 <Trans
                   i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
                   values={{ level: levelAfterDetach }}
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
             </HStack>
@@ -62,7 +62,7 @@ export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }
         )}
         <Dialog.Footer w="full">
           <VStack alignItems="stretch" w="full">
-            <Button variant={"primaryAction"} w={"full"} onClick={handleDetachment}>
+            <Button variant={"primary"} w={"full"} onClick={handleDetachment}>
               {t("Detach my Node")}
             </Button>
             <Button variant={"primaryGhost"} w={"full"} onClick={handleClose}>

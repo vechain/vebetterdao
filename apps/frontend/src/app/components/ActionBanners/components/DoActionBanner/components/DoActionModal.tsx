@@ -68,7 +68,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
             "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
           )}
         </Text>
-        <Button variant="primaryAction" onClick={goToApps}>
+        <Button variant="primary" onClick={goToApps}>
           <IoGridOutline />
           {t("Explore apps")}
         </Button>

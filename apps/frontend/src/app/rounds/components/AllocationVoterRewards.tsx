@@ -155,7 +155,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           disabled={!canClaim}
           loading={isRoundRewardLoading}
           onClick={handleClaim}
-          variant={"primaryAction"}
+          variant={"primary"}
           borderRadius={"full"}
           w={"full"}
           bg={canClaim ? "primary" : "#abb0b0"}

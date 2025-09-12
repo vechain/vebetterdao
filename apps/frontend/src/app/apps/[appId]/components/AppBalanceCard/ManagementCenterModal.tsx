@@ -157,11 +157,11 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 <Text textStyle="sm">
                   <Trans
                     i18nKey="The rewards pool holds B3TR used to reward user actions. When you enable it, <bold>the pool starts empty</bold>, remember to <bold>fill it with funds</bold> to distribute rewards."
-                    components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                   />
                 </Text>
                 <Button
-                  variant="primaryAction"
+                  variant="primary"
                   borderRadius="full"
                   w="200px"
                   onClick={() => handleShowConfirmation("enable")}>
@@ -173,11 +173,11 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                 <Text textStyle="sm">
                   <Trans
                     i18nKey="When you disabled rewards pool, <bold>the funds will move to app balance</bold>, you can enable it back at any time. The distributor will <bold>stop distributing rewards</bold> from the app balance pool."
-                    components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                   />
                 </Text>
                 <Button
-                  variant="primaryAction"
+                  variant="primary"
                   borderRadius="full"
                   w="200px"
                   onClick={() => handleShowConfirmation("disable")}>
@@ -209,7 +209,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
               <Text textStyle="sm">
                 <Trans
                   i18nKey="<bold>Resume the distribution</bold> to distribute rewards again and set a rewards pool."
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
               <Button
@@ -227,7 +227,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
               <Text textStyle="sm">
                 <Trans
                   i18nKey="You can pause your app distribution. This will <bold>stop your distributor from distributing rewards</bold>. You can resume the distribution at any time. This action won't affect your app's pools."
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
               <Button
@@ -264,7 +264,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
           <Button variant="primarySubtle" flex={1} onClick={goToPrevious}>
             {t("Cancel")}
           </Button>
-          <Button variant="primaryAction" flex={1} onClick={handleManagementAction}>
+          <Button variant="primary" flex={1} onClick={handleManagementAction}>
             {t("Confirm")}
           </Button>
         </HStack>

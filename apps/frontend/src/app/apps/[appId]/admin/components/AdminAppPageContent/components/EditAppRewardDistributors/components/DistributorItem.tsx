@@ -49,7 +49,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
                   {`Account: ${domain ?? humanAddress(distributor, 8, 6)}`}
                 </Text>
                 <VStack align="center" gap="20px" mt="20px">
-                  <Button variant="primaryAction" onClick={onClose}>
+                  <Button variant="primary" onClick={onClose}>
                     {t("Cancel")}
                   </Button>
                   <Button variant="dangerGhost" onClick={handleDeleteDistributor}>

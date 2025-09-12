@@ -20,7 +20,7 @@ const config = defineConfig({
     },
   },
 
-  strictTokens: true,
+  // strictTokens: true,
 
   theme: {
     textStyles: {

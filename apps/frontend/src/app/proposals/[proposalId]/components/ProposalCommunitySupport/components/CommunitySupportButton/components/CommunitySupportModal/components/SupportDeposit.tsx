@@ -127,7 +127,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
       <Text fontWeight="semibold" textStyle="sm">
         {t("You can claim your tokens back when the proposal voting round starts.")}
       </Text>
-      <Button disabled={!Number(amount)} w="full" variant="primaryAction" type="submit">
+      <Button disabled={!Number(amount)} w="full" variant="primary" type="submit">
         {t("Deposit VOT3")}
       </Button>
     </VStack>

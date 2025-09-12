@@ -62,7 +62,7 @@ export const CreatorApplicationRejected = () => {
               <Button
                 alignSelf="center"
                 fontSize="14px"
-                variant="primaryAction"
+                variant="primary"
                 borderRadius="full"
                 maxW="150px"
                 onClick={onOpen}

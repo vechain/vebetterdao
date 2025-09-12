@@ -161,7 +161,7 @@ export const PublishAndPreviewPageContent = () => {
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button data-testid="publish" variant="primaryAction" onClick={onSubmit}>
+            <Button data-testid="publish" variant="primary" onClick={onSubmit}>
               {t("Publish")}
             </Button>
           </HStack>

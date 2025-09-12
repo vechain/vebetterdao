@@ -44,7 +44,7 @@ export const CreatorApplicationApproved = () => {
                 {t("You can now submit your app to the VeBetterDAO ecosystem")}
               </Text>
             </Stack>
-            <Button textStyle="sm" variant="primaryAction" borderRadius="full" onClick={goToAppCreation}>
+            <Button textStyle="sm" variant="primary" borderRadius="full" onClick={goToAppCreation}>
               {t("Submit app")}
             </Button>
           </Stack>

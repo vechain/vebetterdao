@@ -183,7 +183,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
           <Button
             mt={2}
             type="submit"
-            variant={"primaryAction"}
+            variant={"primary"}
             w={"full"}
             rounded={"full"}
             disabled={invalidAmount}

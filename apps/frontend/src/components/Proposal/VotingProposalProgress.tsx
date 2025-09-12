@@ -10,9 +10,9 @@ import { FaRegHeart } from "react-icons/fa6"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ProposalYourVote } from "./ProposalYourVote"
 
-const forColor = "#3DBA67"
-const againstColor = "#C84968"
-const abstainColor = "#B59525"
+const forColor = "status.positive.secondary"
+const againstColor = "status.negative.secondary"
+const abstainColor = "status.warning.secondary"
 
 const compactFormatter = getCompactFormatter(1)
 
@@ -118,7 +118,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   }
 
   return (
-    <Card.Root variant="filledWithBorder" w="full">
+    <Card.Root bg="transparent" border="sm" borderColor="border.emphasized" w="full" p="4">
       <Card.Body>{getProposalData()}</Card.Body>
     </Card.Root>
   )

@@ -49,7 +49,7 @@ export const CastProposalVoteBanners = ({ key, id, description }: Props) => {
       backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
       buttonLabel={t("Vote now")}
       onButtonClick={goToProposalPage}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilArrowRight color="white" />}
     />
   )

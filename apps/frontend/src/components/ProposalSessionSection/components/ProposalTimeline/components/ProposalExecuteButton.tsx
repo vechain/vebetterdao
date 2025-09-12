@@ -39,7 +39,7 @@ export const ProposalExecuteButton = () => {
   }
   return (
     <Box>
-      <Button my="2" onClick={executeProposal} variant={"primaryAction"}>
+      <Button my="2" onClick={executeProposal} variant={"primary"}>
         {t("Execute Proposal")}
       </Button>
     </Box>

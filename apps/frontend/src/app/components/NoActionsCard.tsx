@@ -10,6 +10,7 @@ export const NoActionsCard = () => {
   const router = useRouter()
   return (
     <EmptyState
+      bg="transparent"
       size="sm"
       icon={
         <Icon boxSize={20} color="actions.secondary.text-lighter">

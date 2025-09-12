@@ -47,7 +47,7 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
                 </Text>
               )}
               <VStack align="center" gap="20px" mt="20px">
-                <Button variant="primaryAction" onClick={onClose}>
+                <Button variant="primary" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
                 <Button variant="dangerGhost" onClick={handleDeleteCreator}>

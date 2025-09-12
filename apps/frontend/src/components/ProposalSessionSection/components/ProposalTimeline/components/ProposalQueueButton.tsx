@@ -11,7 +11,7 @@ export const ProposalQueueButton = () => {
     queueMutation.sendTransaction()
   }, [queueMutation])
   return (
-    <Button my="2" onClick={queueProposal} variant={"primaryAction"}>
+    <Button my="2" onClick={queueProposal} variant={"primary"}>
       {t("Queue Proposal")}
     </Button>
   )

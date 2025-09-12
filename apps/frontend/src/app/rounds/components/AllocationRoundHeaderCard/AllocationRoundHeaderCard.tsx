@@ -163,7 +163,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
               {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && !isFinished && (
                 <Button
                   data-testid="cast-your-vote-button"
-                  variant={"primaryAction"}
+                  variant={"primary"}
                   onClick={navigateToVote}
                   size={"lg"}
                   colorPalette={"primary"}

@@ -25,7 +25,7 @@ export const SwapCard = ({ transaction }: Props) => {
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
-    <Card.Root variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+    <Card.Root size="sm" variant={"primary"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>

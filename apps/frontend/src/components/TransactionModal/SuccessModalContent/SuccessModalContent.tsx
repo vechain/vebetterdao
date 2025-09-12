@@ -103,7 +103,7 @@ export const SuccessModalContent = ({
         </Link>
       </Flex>
       <HStack w={"full"} alignItems={"center"} justifyContent={"center"} gap={2} mt={4}>
-        <Button variant={"primaryAction"} w={"50%"} py={6} onClick={onClose}>
+        <Button variant={"primary"} w={"50%"} py={6} onClick={onClose}>
           {t("Done")}
         </Button>
       </HStack>

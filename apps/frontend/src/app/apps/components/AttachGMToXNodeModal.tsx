@@ -145,7 +145,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                 <Button
                   loading={isLoadingUserGMs}
                   disabled={isNoAffectAttachment}
-                  variant={"primaryAction"}
+                  variant={"primary"}
                   w={"full"}
                   onClick={handleAttachment}>
                   <UilLink />

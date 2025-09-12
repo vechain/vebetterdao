@@ -42,7 +42,7 @@ export const TotalAllocations = () => {
   }, [sortedTotalEarnings, displayLimit])
 
   return (
-    <Card.Root flex={1} h="full" w="full" bg="bg.primary" borderColor="border.secondary">
+    <Card.Root variant="primary" flex={1} h="full" w="full">
       <Card.Header>
         <Heading size="xl">{t("Most voted apps")}</Heading>
         <Text textStyle="sm" color="text.subtle">

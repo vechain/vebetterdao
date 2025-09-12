@@ -67,7 +67,7 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
                 <HStack justify={"space-between"}>
                   <Text textStyle="sm">{t("User wallet address")}</Text>
                   {domain && (
-                    <Text textStyle="sm" fontWeight={"600"}>
+                    <Text textStyle="sm" fontWeight="semibold">
                       {"@"}
                       {domain}
                     </Text>
@@ -88,7 +88,7 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
               <VStack align="stretch">
                 <Button
                   disabled={!isValid || !creatorAddress}
-                  variant="primaryAction"
+                  variant="primary"
                   type="submit"
                   onClick={handleSubmit(onSubmit)}>
                   {t("Add creator")}

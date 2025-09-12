@@ -93,7 +93,7 @@ export const NewProposalTypePageContent = () => {
                 <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                   {t("Go back")}
                 </Button>
-                <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
+                <Button data-testid="continue" variant="primary" onClick={onContinue}>
                   {t("Continue")}
                 </Button>
               </HStack>

@@ -36,7 +36,7 @@ export const ProposalSessionSection = ({
   const { t } = useTranslation()
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={6}>
           <Heading size="2xl">{t("Session information")}</Heading>

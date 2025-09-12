@@ -73,8 +73,7 @@ export const FilteringMenu = ({
                   size="sm"
                   onClick={() => onStatusFilterChange(status)}
                   px={3}
-                  py={1}
-                  fontWeight="medium">
+                  py={1}>
                   {status}{" "}
                   {statusFilter === status && (
                     <Badge ml={1} borderRadius="full">

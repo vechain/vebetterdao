@@ -30,7 +30,7 @@ export const NoAppsCard = ({ onShowAllApps }: Props) => {
           {t("No Apps found")}
         </Heading>
 
-        <Button onClick={onShowAllApps} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
+        <Button onClick={onShowAllApps} variant={"primary"} alignSelf={"flex-start"} mt={4} mb={2}>
           {t("Show all apps")}
         </Button>
       </VStack>

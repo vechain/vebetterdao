@@ -18,7 +18,7 @@ export const LowVthoBanner = () => {
       backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
       buttonLabel={t("Get more VTHO")}
       onButtonClick={initTransak}
-      buttonVariant="primaryAction"
+      buttonvariant="primary"
       buttonIcon={<UilArrowRight />}
     />
   )

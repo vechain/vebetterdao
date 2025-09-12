@@ -149,7 +149,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                               endorsedAddress: humanAddress(normalize(selectedEndorserAddress), 6, 3),
                               value: selectedEndorserNodePoints,
                             }}
-                            components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                            components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                           />
                         </Text>
                         <HStack>

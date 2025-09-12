@@ -21,7 +21,7 @@ export const ResetingResult = ({
     <>
       {resetingStatus === RESET_STATUS.SUCCESS && (
         <VStack alignItems={"flex-start"} gap={2} mt={2}>
-          <Button variant="primaryAction" w="auto" onClick={() => router.push("/")}>
+          <Button variant="primary" w="auto" onClick={() => router.push("/")}>
             {t("Back to Dashboard")}
           </Button>
         </VStack>

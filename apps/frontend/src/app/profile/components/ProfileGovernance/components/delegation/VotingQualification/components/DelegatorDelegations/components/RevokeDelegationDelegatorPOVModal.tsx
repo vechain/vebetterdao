@@ -53,7 +53,7 @@ export const RevokeDelegationDelegatorPOVModal = ({
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleDelegate}>
+          <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
           <Button variant={"primaryGhost"} onClick={handleClose}>

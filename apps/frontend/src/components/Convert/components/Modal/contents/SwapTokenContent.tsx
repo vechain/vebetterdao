@@ -76,7 +76,7 @@ export const SwapTokenContent = ({
 
       <Button
         mt={2}
-        variant={"primaryAction"}
+        variant={"primary"}
         w={"full"}
         rounded={"full"}
         disabled={disableSubmitButton}

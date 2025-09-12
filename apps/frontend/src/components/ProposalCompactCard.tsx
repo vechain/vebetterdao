@@ -67,13 +67,8 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   return (
     <LinkBox asChild>
       <Card.Root
-        bg="card.subtle"
-        _hover={{ bg: "card.hover" }}
-        focusRing="outside"
-        // border={isActive ? "1px solid" : undefined}
-        // borderColor={isActive ? "card.active-border" : undefined}
-        transition="all 0.2s ease-in-out"
-        rounded="3xl"
+        variant="subtle"
+        rounded="lg"
         data-testid={`proposal-compact-card-#${proposalId}`}
         alignSelf={"flex-start"}
         w={"full"}
@@ -81,14 +76,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
         <Card.Body p="0">
           <HStack justifyContent={"space-between"} w="full">
             <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-              <ProposalStatusBadge
-                proposalId={proposal.proposalId}
-                proposalState={proposalState}
-                containerProps={{
-                  py: "1",
-                  px: "2",
-                }}
-              />
+              <ProposalStatusBadge proposalId={proposal.proposalId} proposalState={proposalState} />
               <VStack w="full" gap="1" align={"flex-start"}>
                 <Skeleton
                   loading={proposalMetadata.isLoading}

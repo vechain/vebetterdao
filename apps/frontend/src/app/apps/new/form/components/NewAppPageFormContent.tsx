@@ -132,7 +132,7 @@ export const NewAppPageFormContent = () => {
               "Now, to qualify for allocations and have founding from the community, you have to gain endorsements from X-node holders to reach 100 points.",
             )}
           </Text>
-          <Button variant="primaryAction" onClick={onVisitAppPage} mt={6} w={"full"}>
+          <Button variant="primary" onClick={onVisitAppPage} mt={6} w={"full"}>
             {t("Visit your app page")}
           </Button>
         </VStack>

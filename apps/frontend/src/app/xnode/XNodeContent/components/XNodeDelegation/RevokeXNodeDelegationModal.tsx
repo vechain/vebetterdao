@@ -48,7 +48,7 @@ export const RevokeXNodeDelegationModal = ({ xNode, modal }: { xNode: UserNode; 
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleRevoke}>
+          <Button variant="primary" onClick={handleRevoke}>
             {t("Yes, I'm sure")}
           </Button>
           <Button variant={"primaryGhost"} onClick={handleClose}>

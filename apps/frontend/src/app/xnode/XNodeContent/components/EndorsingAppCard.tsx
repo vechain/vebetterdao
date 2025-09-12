@@ -120,7 +120,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
                     <Image src={endorsedApp?.metadata.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
-                    <Heading textStyle="lg" fontWeight={"600"}>
+                    <Heading textStyle="lg" fontWeight="semibold">
                       {endorsedApp?.name}
                     </Heading>
                   </HStack>
@@ -202,7 +202,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                         "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
                       )}
                     </Text>
-                    <Button variant="primaryAction" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
+                    <Button variant="primary" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
                       {t("Browse apps")}
                     </Button>
                   </>

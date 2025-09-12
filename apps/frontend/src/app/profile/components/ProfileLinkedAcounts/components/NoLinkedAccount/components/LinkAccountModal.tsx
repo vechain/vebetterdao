@@ -52,7 +52,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
           </Field.Root>
         </VStack>
         <VStack align="stretch">
-          <Button variant="primaryAction" type="submit">
+          <Button variant="primary" type="submit">
             {t("Send link request")}
           </Button>
           <Button variant={"primaryGhost"} onClick={modal.onClose}>

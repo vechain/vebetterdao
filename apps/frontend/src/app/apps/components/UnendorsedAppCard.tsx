@@ -53,7 +53,7 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   return (
     <LinkBox asChild>
-      <Card.Root bg="bg.tertiary" border="sm" borderColor="border.primary" w="full" maxW="full">
+      <Card.Root variant="subtle" w="full" maxW="full">
         <Card.Body>
           <Stack
             direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}

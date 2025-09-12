@@ -98,7 +98,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           </Field.Root>
         </VStack>
         <VStack alignItems="stretch">
-          <Button variant="primaryAction" type="submit" disabled={isEntity || !delegatee}>
+          <Button variant="primary" type="submit" disabled={isEntity || !delegatee}>
             {t("Send request")}
           </Button>
 
@@ -132,7 +132,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleDelegate}>
+          <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
           <Button variant={"primaryGhost"} onClick={goToPrevious}>

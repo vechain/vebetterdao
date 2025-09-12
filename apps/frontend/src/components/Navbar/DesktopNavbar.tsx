@@ -24,15 +24,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       </HStack>
 
       {!!routesToRender.length && (
-        <HStack
-          gap={4}
-          justifyContent={"center"}
-          borderRadius={"full"}
-          // borderWidth={1}
-          // borderColor={"border.secondary"}
-          bg={"bg.tertiary"}
-          py={2}
-          px={4}>
+        <HStack gap={4} justifyContent={"center"} borderRadius={"full"} bg={"bg.primary"} py={2} px={4}>
           <NavbarMenu routesToRender={routesToRender} />
         </HStack>
       )}

@@ -67,7 +67,7 @@ export const NewAppPageContent = () => {
                 <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorPalette="primary" size="lg">
                   {t("More info")}
                 </Button>
-                <Button variant="primaryAction" rounded="full" size="lg" onClick={onContinueClick}>
+                <Button variant="primary" rounded="full" size="lg" onClick={onContinueClick}>
                   {t("Continue")}
                 </Button>
               </HStack>

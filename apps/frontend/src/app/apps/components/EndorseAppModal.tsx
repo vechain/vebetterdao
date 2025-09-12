@@ -152,7 +152,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         ) : null}
 
         <Skeleton w="full" loading={isUserNodesLoading}>
-          <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement} disabled={!selectedNodeId}>
+          <Button variant={"primary"} w={"full"} onClick={handleEndorsement} disabled={!selectedNodeId}>
             {t("Endorse now")}
           </Button>
         </Skeleton>

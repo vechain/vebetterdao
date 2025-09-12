@@ -63,7 +63,7 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                 <HStack justify={"space-between"}>
                   <Text textStyle="sm">{t("User wallet address")}</Text>
                   {domain && (
-                    <Text textStyle="sm" fontWeight={"600"}>
+                    <Text textStyle="sm" fontWeight="semibold">
                       {"@"}
                       {domain}
                     </Text>
@@ -86,7 +86,7 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
               <VStack align="stretch">
                 <Button
                   disabled={!moderatorAddress}
-                  variant="primaryAction"
+                  variant="primary"
                   type="submit"
                   onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add moderator")}

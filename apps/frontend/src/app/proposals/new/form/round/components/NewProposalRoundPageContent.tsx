@@ -128,7 +128,7 @@ export const NewProposalRoundPageContent = () => {
             </Button>
             <Button
               data-testid="continue"
-              variant="primaryAction"
+              variant="primary"
               onClick={onContinue}
               disabled={!votingStartRoundId}
               form="new-proposal-form">

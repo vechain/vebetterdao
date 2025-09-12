@@ -21,7 +21,7 @@ export default function CustomError({ error }: CustomErrorProps) {
       <Image boxSize={"190px"} src="/assets/icons/error-to-define.svg" alt="error" />
       <Text color="text.subtle">{t("{{value}}", { value: error })}</Text>
       <Heading textAlign={"center"}>{t("Something went wrong. Let’s try that again!")}</Heading>
-      <Button variant={"primaryAction"} onClick={goToHomePage} my={"20px"}>
+      <Button variant={"primary"} onClick={goToHomePage} my={"20px"}>
         {t("Go back home")}
       </Button>
     </VStack>

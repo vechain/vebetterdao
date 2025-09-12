@@ -19,7 +19,7 @@ export const ProposalWithdrawButton = () => {
     [withdrawMutation],
   )
   return (
-    <Button variant="primaryAction" onClick={withdraw}>
+    <Button variant="primary" onClick={withdraw}>
       {t("Claim your tokens back")}
     </Button>
   )

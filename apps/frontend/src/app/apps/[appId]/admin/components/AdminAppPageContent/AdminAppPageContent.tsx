@@ -206,7 +206,7 @@ export const AdminAppPageContent = () => {
             <Button variant="primaryGhost" onClick={goBack}>
               {t("Go back")}
             </Button>
-            <Button variant="primaryAction" type="submit" disabled={disableSaveButton}>
+            <Button variant="primary" type="submit" disabled={disableSaveButton}>
               {t("Save all changes")}
             </Button>
           </HStack>

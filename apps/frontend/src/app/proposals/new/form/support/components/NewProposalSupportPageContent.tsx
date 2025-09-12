@@ -127,7 +127,7 @@ export const NewProposalSupportPageContent = () => {
               <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
                 {t("Go back")}
               </Button>
-              <Button data-testid="continue" variant="primaryAction" type="submit">
+              <Button data-testid="continue" variant="primary" type="submit">
                 {t("Continue")}
               </Button>
             </HStack>

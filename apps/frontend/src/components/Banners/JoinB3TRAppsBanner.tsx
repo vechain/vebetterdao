@@ -30,15 +30,7 @@ export const JoinB3TRAppsBanner = () => {
             )}
           </Text>
           <Button variant="secondary" size="md" asChild>
-            <Link
-              href="https://vebetterdao.org/grants"
-              target="_blank"
-              rel="noopener noreferrer"
-              rounded="full"
-              bg="brand.secondary"
-              color="brand.secondary-stronger"
-              px={8}
-              py={4}>
+            <Link href="https://vebetterdao.org/grants" target="_blank" rel="noopener noreferrer" px={8} py={4}>
               <GoPlus />
               <Text textStyle="md" color="current">
                 {t("Apply now")}
