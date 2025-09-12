@@ -1,4 +1,4 @@
-import { useSustainabilitySingleUserOverview } from "@/api"
+import { useUserActionOverview } from "@/api"
 import { B3TRIcon } from "@/components/Icons"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
@@ -16,8 +16,8 @@ type Props = {
 export const UserSustainabilityOverviewStats = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { data, isLoading } = useSustainabilitySingleUserOverview({
-    wallet: address ?? undefined,
+  const { data, isLoading } = useUserActionOverview({
+    wallet: address ?? "",
   })
 
   //TOOD: Indexer should return aggregated data

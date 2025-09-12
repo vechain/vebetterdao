@@ -1,6 +1,4 @@
 export * from "./useSustainabilityUserOverviewPerRound"
 export * from "./useSustainabilityUserOverview"
-export * from "./useSustainabilitySingleUserOverview"
 export * from "../actions/useAppActionLeaderboard"
-export * from "./useSustainabilitySingleUserOverviewByDay"
 export * from "./useUserScore"

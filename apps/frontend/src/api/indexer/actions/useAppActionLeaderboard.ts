@@ -2,7 +2,7 @@ import { buildQueryString } from "@/api/utils"
 import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { z } from "zod"
-import { TotalImpactSchema } from "../sustainability/schemas"
+import { TotalImpactSchema } from "./schemas"
 
 const indexerUrl = getConfig().indexerUrl
 

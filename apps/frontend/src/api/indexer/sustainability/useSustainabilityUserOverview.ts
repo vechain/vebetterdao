@@ -3,7 +3,7 @@ import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
 
 import { z } from "zod"
-import { TotalImpactSchema } from "./schemas"
+import { TotalImpactSchema } from "../actions/schemas"
 
 const indexerUrl = getConfig().indexerUrl
 

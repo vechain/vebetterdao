@@ -1,4 +1,4 @@
-import { useSustainabilityAppOverview } from "@/api/indexer/sustainability/useSustainabilityAppOverview"
+import { useAppActionLeaderboard } from "@/api/indexer/actions/useAppActionLeaderboard"
 import { useMemo } from "react"
 
 /**
@@ -11,7 +11,7 @@ export function useAppsSustainabilityData() {
     sortBy: "totalRewardAmount",
   }
 
-  const { data, isLoading, error } = useSustainabilityAppOverview(querySearchData)
+  const { data, isLoading, error } = useAppActionLeaderboard(querySearchData)
 
   const allAppsSortedByRewards = useMemo(() => {
     if (!data?.pages[0]) return new Map()

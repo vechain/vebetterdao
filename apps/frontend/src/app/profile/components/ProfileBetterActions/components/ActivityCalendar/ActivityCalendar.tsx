@@ -5,7 +5,7 @@ import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { ActivityDayModal } from "../../ActivityDayModal"
-import { useSustainabilitySingleUserOverviewByDay } from "@/api"
+import { useUserActionSummaryForDateRange } from "@/api"
 import { v4 as uuid } from "uuid"
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)
@@ -31,7 +31,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   const startDate = currentDate.startOf("month").format("YYYY-MM-DD")
   const endDate = currentDate.endOf("month").format("YYYY-MM-DD")
 
-  const currentMonthOverviewQuery = useSustainabilitySingleUserOverviewByDay({
+  const currentMonthOverviewQuery = useUserActionSummaryForDateRange({
     wallet: address,
     startDate,
     endDate,

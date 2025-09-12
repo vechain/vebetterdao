@@ -1,6 +1,6 @@
 import {
   useCurrentAllocationsRoundId,
-  useSustainabilitySingleUserOverview,
+  useUserActionOverview,
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
 import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
@@ -35,7 +35,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     setSelectedRoundId(roundId)
   }
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({
+  const userRoundOverview = useUserActionOverview({
     wallet: account?.address ?? "",
     roundId: selectedRoundId,
   })

@@ -1,6 +1,6 @@
 import {
   useCurrentAllocationsRoundId,
-  useSustainabilitySingleUserOverview,
+  useUserActionOverview,
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
 
@@ -38,7 +38,7 @@ export const Leaderboard = () => {
     }
   }, [roundId, selectedRoundId])
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({
+  const userRoundOverview = useUserActionOverview({
     wallet: account?.address ?? "",
     roundId: selectedRoundId,
   })
