@@ -25,7 +25,7 @@ const TotalImpactSchema = z.object({
 })
 
 const UserActionOverviewObjectSchema = z.object({
-  entity: z.string(),
+  wallet: z.string(),
   actionsRewarded: z.number(),
   totalRewardAmount: z.number(),
   totalImpact: TotalImpactSchema.optional(),
@@ -63,7 +63,7 @@ export const getUserActionOverview = async (data: UserActionOverviewRequest): Pr
   if (!response.ok) {
     if (response.status === 404) {
       return {
-        entity: wallet,
+        wallet: wallet,
         actionsRewarded: 0,
         totalRewardAmount: 0,
         rankByReward: 0,
