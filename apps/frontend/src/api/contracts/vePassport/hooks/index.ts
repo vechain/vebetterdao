@@ -1,6 +1,5 @@
 export * from "./useAccountLinking"
 export * from "./useAppSecurityLevel"
-export * from "./useAppSustainabilityActions"
 export * from "./useGetCumulativeScoreWithDecay"
 export * from "./useGetDelegatee"
 export * from "./useGetDelegator"
