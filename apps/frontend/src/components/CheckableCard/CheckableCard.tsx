@@ -23,7 +23,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
   return (
     <Card.Root
       data-testid={`checkable-card__${title}`}
-      variant="baseWithBorder"
+      variant="primary"
       rounded={"3xl"}
       borderColor={checked ? "primary.500" : "inherit"}
       _hover={{

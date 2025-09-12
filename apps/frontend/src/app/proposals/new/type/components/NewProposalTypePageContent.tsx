@@ -72,7 +72,7 @@ export const NewProposalTypePageContent = () => {
       w="full"
       data-testid="new-proposal-type-page">
       <GridItem colSpan={2}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body py={8}>
             <VStack gap={8} align="flex-start">
               <Heading size={["xl", "2xl"]}>{t("Select proposal type")}</Heading>

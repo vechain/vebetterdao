@@ -1,6 +1,6 @@
 import { ProposalState, useProposalVotesIndexer } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, Icon, Image, Skeleton, Text, VStack, Stat } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
@@ -62,7 +62,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   switch (proposalState) {
     case ProposalState.DepositNotMet:
       return (
-        <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+        <ResponsiveCard cardProps={{ variant: "primary", w: "full", flex: 1 }}>
           <VStack>
             <ExclamationTriangle color="#757575" />
             <Text fontWeight={"500"} textAlign={"center"} textStyle="xl">
@@ -75,7 +75,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
     case ProposalState.Pending:
       if (proposal.isDepositReached) {
         return (
-          <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+          <ResponsiveCard cardProps={{ variant: "primary", w: "full", flex: 1 }}>
             <VStack>
               <Image w="88px" h="88px" color="#004CFC" src="/assets/icons/vote.svg" alt="vote-icon" />
               <Text fontWeight={"500"} textAlign={"center"} textStyle="xl">
@@ -89,7 +89,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
         )
       }
       return (
-        <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+        <ResponsiveCard cardProps={{ variant: "primary", w: "full", flex: 1 }}>
           <VStack>
             <ExclamationTriangle />
             <Text fontWeight={"500"} textAlign={"center"} textStyle="xl">
@@ -108,49 +108,36 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
     case ProposalState.Defeated:
     case ProposalState.Queued:
     case ProposalState.Executed:
-      const borderColorMap = {
-        [ProposalState.Active]: undefined,
-        [ProposalState.Canceled]: "#D23F63",
-        [ProposalState.Defeated]: "#D23F63",
-        [ProposalState.Succeeded]: "#38BF66",
-        [ProposalState.Queued]: "#38BF66",
-        [ProposalState.Executed]: "#38BF66",
-      }
       return (
-        <ResponsiveCard
-          cardProps={{
-            variant: "filled",
-            w: "full",
-            flex: 1,
-            borderColor: borderColorMap[proposalState],
-            borderWidth: 1,
-          }}>
-          <VStack alignItems={"stretch"} w="full" justify={"space-between"} gap={3}>
-            <Heading size="xl">{t("Real time votes")}</Heading>
-            <VStack w="full" justify={"space-between"} gap={0} align={"flex-start"}>
-              <Text fontWeight={"400"} color="text.subtle">
-                {t("Wallets voted")}
-              </Text>
-              <Skeleton loading={proposalVotesLoading}>
-                <Heading size="md">{getCompactFormatter(2).format(proposalVotes?.totalVoters ?? 0)}</Heading>
-              </Skeleton>
+        <Card.Root variant="primary" w="full" p="4" flex={1} border="sm" borderColor="border.tertiary">
+          <Card.Body asChild>
+            <VStack alignItems={"stretch"} w="full" justify={"space-between"} gap="4">
+              <Heading size="md">{t("Real time votes")}</Heading>
+              <Stat.Root>
+                <Stat.Label>{t("Wallets voted")}</Stat.Label>
+                <Stat.ValueText>
+                  <Skeleton loading={proposalVotesLoading}>
+                    {getCompactFormatter(2).format(proposalVotes?.totalVoters ?? 0)}
+                  </Skeleton>
+                </Stat.ValueText>
+              </Stat.Root>
+              <VStack alignItems={"stretch"} gap="4">
+                {Object.entries(votes).map(([key, value]) => (
+                  <ProposalVotesProgressBar
+                    isLoading={proposalVotesLoading}
+                    key={key}
+                    text={value.text}
+                    percentage={value.percentage}
+                    voters={value.voters}
+                    color={value.color}
+                    icon={value.icon}
+                  />
+                ))}
+              </VStack>
+              <ProposalVotesResults proposalId={proposalId} proposalState={proposalState} />
             </VStack>
-            <VStack alignItems={"stretch"} gap={6}>
-              {Object.entries(votes).map(([key, value]) => (
-                <ProposalVotesProgressBar
-                  isLoading={proposalVotesLoading}
-                  key={key}
-                  text={value.text}
-                  percentage={value.percentage}
-                  voters={value.voters}
-                  color={value.color}
-                  icon={value.icon}
-                />
-              ))}
-            </VStack>
-            <ProposalVotesResults proposalId={proposalId} proposalState={proposalState} />
-          </VStack>
-        </ResponsiveCard>
+          </Card.Body>
+        </Card.Root>
       )
   }
 }

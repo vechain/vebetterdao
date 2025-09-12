@@ -44,7 +44,7 @@ export const GalaxyLevelsCard = () => {
   }
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">

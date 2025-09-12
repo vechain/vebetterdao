@@ -39,20 +39,19 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   }, [proposal])
 
   return (
-    <Card.Root w="full" variant="baseWithBorder">
-      <Card.Body py={8}>
-        <VStack gap={8} align="flex-start">
-          <Heading size="2xl">{t("About the proposal")}</Heading>
+    <Card.Root w="full" variant="primary">
+      <Card.Body>
+        <VStack gap="4" align="flex-start">
+          <Heading size="xl">{t("About the proposal")}</Heading>
           <MDEditor.Markdown
             source={metadata?.data?.markdownDescription}
             style={{
               width: "100%",
               wordBreak: "break-word",
               borderRadius: "12px",
-              backgroundColor: "contrast-on-dark-bg",
-              color: "contrast-bg-strong-hover",
-              padding: "20px",
-              border: "1px solid #D5D5D5",
+              padding: "24px",
+              border: "1px solid var(--vbd-colors-border-tertiary)",
+              borderColor: "var(--vbd-colors-border-tertiary)",
             }}
           />
           {proposalDecodeError && (

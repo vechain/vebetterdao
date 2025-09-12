@@ -24,7 +24,12 @@ export const ProposalOverview = () => {
   return (
     <Card.Root variant="primary" w="full" borderRadius={"3xl"}>
       <Card.Body>
-        <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
+        <Stack
+          direction={["column", "row"]}
+          justify="space-between"
+          gap={{ base: 4, md: 12 }}
+          w="full"
+          alignItems={"stretch"}>
           <VStack gap={4} align="flex-start" flex={2} justify={"space-between"} minW={0}>
             <VStack gap={2} align="flex-start">
               <HStack justify={"space-between"} align={"center"} w="full">
@@ -93,9 +98,7 @@ export const ProposalOverview = () => {
               {account?.address && <CastProposalVoteButton proposalId={proposal.id} />}
             </Stack>
           </VStack>
-          <VStack flex={1} h="full">
-            <ProposalOverviewVotes proposalId={proposal.id} />
-          </VStack>
+          <ProposalOverviewVotes proposalId={proposal.id} />
         </Stack>
       </Card.Body>
     </Card.Root>

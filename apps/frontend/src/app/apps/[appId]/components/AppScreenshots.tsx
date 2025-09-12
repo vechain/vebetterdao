@@ -15,7 +15,7 @@ export const AppScreenshots = () => {
     return null
   }
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <Heading size="2xl">{t("Screenshots")}</Heading>

@@ -17,7 +17,7 @@ export const LinkedAccounts = ({ address }: Props) => {
 
   if (isLoading || (!isLinked && !outgoingPendingLink)) return null
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={8}>
           <HStack justify={"space-between"} align={"flex-start"}>

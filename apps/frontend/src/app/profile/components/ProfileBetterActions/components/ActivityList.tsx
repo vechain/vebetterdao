@@ -45,7 +45,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
   const groupedActions = groupActionsByDay(actions)
 
   return (
-    <Card.Root w="full" variant="baseWithBorder">
+    <Card.Root w="full" variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between" align="baseline" mb={4}>

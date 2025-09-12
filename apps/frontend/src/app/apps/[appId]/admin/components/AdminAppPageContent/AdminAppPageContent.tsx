@@ -190,7 +190,7 @@ export const AdminAppPageContent = () => {
   }
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
           <Heading size="4xl">{t("{{app}} settings", { app: appMetadata?.name })}</Heading>

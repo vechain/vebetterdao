@@ -64,7 +64,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
   )
 
   return (
-    <Card.Root w="full" data-testid="new-proposal-form" variant="baseWithBorder">
+    <Card.Root w="full" data-testid="new-proposal-form" variant="primary">
       <Card.Body py={8}>
         <VStack gap={[4, 8]} align="flex-start">
           <Heading size="3xl">{t("What is your proposal about?")}</Heading>

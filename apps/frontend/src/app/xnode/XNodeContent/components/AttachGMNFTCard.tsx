@@ -55,7 +55,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   if (!attachedGMNFT) return null
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">

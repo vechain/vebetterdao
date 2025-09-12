@@ -104,6 +104,7 @@ export const ProposalTimeline = () => {
     <VStack align="stretch" gap={6}>
       <Heading size="xl">{t("Timeline")}</Heading>
       <Steps.Root
+        count={steps.length}
         size="sm"
         step={activeStep}
         orientation="vertical"
@@ -116,9 +117,9 @@ export const ProposalTimeline = () => {
             <Steps.Item key={`proposal-timeline-step-${step.key}`} index={index} style={{ width: "100%" }}>
               <Steps.Indicator>
                 <Steps.Status
-                  incomplete={<Circle bg="#004CFC" size="0" />}
-                  complete={<Circle bg="#004CFC" size="30%" />}
-                  current={<Circle bg="#004CFC" size="50%" />}
+                  incomplete={<Circle bg="blue" size="0" />}
+                  complete={<Circle bg="blue" size="30%" />}
+                  current={<Circle bg="blue" size="50%" />}
                 />
               </Steps.Indicator>
               {step}

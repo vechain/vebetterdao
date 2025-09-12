@@ -104,7 +104,7 @@ export const NewProposalRoundPageContent = () => {
   }
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start">
           <VStack gap={[4, 6]} align="flex-start">

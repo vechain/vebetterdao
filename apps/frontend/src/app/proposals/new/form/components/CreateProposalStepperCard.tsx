@@ -64,7 +64,7 @@ export const CreateProposalStepperCard = () => {
   }, [steps])
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Header>
         <Heading size="xl">{t("Progress")}</Heading>
       </Card.Header>

@@ -17,7 +17,7 @@ export const PendingLinkingProposal = ({ address }: Props) => {
   const { incomingPendingLinkings, isLoading } = useAccountLinking(address)
   if (isLoading || !incomingPendingLinkings?.length) return null
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">

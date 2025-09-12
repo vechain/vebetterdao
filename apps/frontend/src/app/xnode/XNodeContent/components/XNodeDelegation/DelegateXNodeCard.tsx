@@ -30,7 +30,7 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">

@@ -120,7 +120,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   }
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack alignItems="stretch" gap={4}>
           <HStack justifyContent="space-between" w="full">

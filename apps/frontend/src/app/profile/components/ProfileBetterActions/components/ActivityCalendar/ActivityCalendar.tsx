@@ -109,7 +109,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
         onClose={() => setSelectedDate(undefined)}
         date={selectedDate}
       />
-      <Card.Root w="full" variant="baseWithBorder">
+      <Card.Root w="full" variant="primary">
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">

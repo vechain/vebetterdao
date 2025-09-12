@@ -15,7 +15,7 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
   if (isPendingDelegationsLoading || !pendingDelegations?.length) return null
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">

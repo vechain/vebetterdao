@@ -91,7 +91,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
               data-testid={`function-card__${contract.name}_${func.name}`}
               borderRadius={"xl"}
               w="full"
-              variant="baseWithBorder"
+              variant="primary"
               key={`${contract.name}-${func.name}`}
               _hover={{
                 borderColor: "primary.200",

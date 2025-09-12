@@ -28,7 +28,7 @@ export const ProfileHeader = ({ address }: Props) => {
   }, [copy])
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={6}>
           <HStack gap={4}>

@@ -68,7 +68,7 @@ export const NewProposalPageContent = () => {
       w="full"
       data-testid="new-proposal-page">
       <GridItem colSpan={2}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body>
             <VStack gap={[6, 8]} align="flex-start">
               <VStack gap={[4, 6]} align="flex-start">

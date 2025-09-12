@@ -53,7 +53,7 @@ export const NewProposalSupportPageContent = () => {
   )
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[6, 8]} alignItems="flex-start">

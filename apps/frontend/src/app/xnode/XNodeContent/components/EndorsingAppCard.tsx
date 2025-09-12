@@ -80,7 +80,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   }, [account?.address, xNode.isXNodeDelegated])
 
   return (
-    <Card.Root variant="baseWithBorder" w="full" h="min-content">
+    <Card.Root variant="primary" w="full" h="min-content">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">

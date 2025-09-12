@@ -82,7 +82,7 @@ export const NewProposalPageDiscussionContent = () => {
   }, [setData, setValue, account?.address, title, shortDescription, actions])
 
   return (
-    <Card.Root w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
+    <Card.Root w="full" variant="primary" data-testid="new-proposal-content-page">
       <Card.Body py={8}>
         <VStack gap={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[4, 6]} align="flex-start">

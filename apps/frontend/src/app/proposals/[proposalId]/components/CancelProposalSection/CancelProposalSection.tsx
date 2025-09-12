@@ -43,7 +43,7 @@ export const CancelProposalSection = () => {
   }
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack alignItems="stretch" gap={6}>
           <Heading size="2xl">{t("Cancel proposal")}</Heading>

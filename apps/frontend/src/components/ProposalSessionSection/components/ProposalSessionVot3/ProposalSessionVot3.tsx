@@ -1,4 +1,4 @@
-import { HStack, Skeleton, Text, VStack, Icon } from "@chakra-ui/react"
+import { HStack, Skeleton, Text, Icon, Stat } from "@chakra-ui/react"
 import { FaQuestionCircle } from "react-icons/fa"
 import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
@@ -40,43 +40,39 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
   }, [userVotesAtSnapshotQuery.data])
 
   return (
-    <HStack p="16px" rounded="12px" bg="light-contrast-on-card-bg" justify="space-between" align="start">
-      {/* Left: votes at snapshot */}
-      <VStack align="stretch" gap={1} flex={1}>
-        <Skeleton loading={votesAtSnapshotQuery.isLoading}>
-          <Text fontWeight="bold">{FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}</Text>
-        </Skeleton>
-        <Text color="text.subtle" textStyle="xs">
-          {t("Votes at snapshot")}
-        </Text>
-      </VStack>
+    <HStack justify="space-between" align="start">
+      <Stat.Root size="sm" gap="0">
+        <Stat.ValueText fontWeight="bold" textStyle="md">
+          <Skeleton loading={votesAtSnapshotQuery.isLoading}>
+            {FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}
+          </Skeleton>
+        </Stat.ValueText>
+        <Stat.Label textStyle="xs">{t("Votes at snapshot")}</Stat.Label>
+      </Stat.Root>
 
-      <VStack align="stretch" gap={1} flex={1}>
-        <Skeleton loading={userVotesAtSnapshotQuery.isLoading}>
-          <Text fontWeight="bold">{FormattingUtils.humanNumber(Number(totalVotesWithDeposits ?? 0))}</Text>
-        </Skeleton>
-
-        <HStack gap={1} alignItems="center">
-          <Text color="text.subtle" textStyle="xs">
-            {t("Your votes at snapshot")}
-          </Text>
+      <Stat.Root size="sm" gap="0">
+        <Stat.ValueText fontWeight="bold" textStyle="md">
+          <Skeleton loading={userVotesAtSnapshotQuery.isLoading}>
+            {FormattingUtils.humanNumber(Number(totalVotesWithDeposits ?? 0))}
+          </Skeleton>
+        </Stat.ValueText>
+        <Stat.Label textStyle="xs">
+          {t("Your votes at snapshot")}
 
           {hasDepositVotingPower && (
             <Tooltip
               content={
-                <Text>
-                  <Trans
-                    i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
-                    values={{ depositsVotes: FormattingUtils.humanNumber(Number(depositsVotes ?? 0)) }}
-                    components={{ bold: <Text as="span" fontWeight="semibold" /> }}
-                  />
-                </Text>
+                <Trans
+                  i18nKey="Includes <bold>{{depositsVotes}} VOT3</bold> from supporting proposals"
+                  values={{ depositsVotes: FormattingUtils.humanNumber(Number(depositsVotes ?? 0)) }}
+                  components={{ bold: <Text color="fg.inverted" as="span" fontWeight="semibold" /> }}
+                />
               }>
-              <Icon as={FaQuestionCircle} boxSize="3.5" color="#A0A0A0" />
+              <Icon as={FaQuestionCircle} boxSize="3.5" color="icon.default" />
             </Tooltip>
           )}
-        </HStack>
-      </VStack>
+        </Stat.Label>
+      </Stat.Root>
     </HStack>
   )
 }

@@ -40,7 +40,13 @@ export const ProposalShareButton = () => {
 
   return (
     <>
-      <IconButton aria-label="share" rounded="full" bgColor="#E0E9FE" color="#004CFC" boxSize={"40px"} onClick={onOpen}>
+      <IconButton
+        aria-label="share"
+        rounded="full"
+        bgColor="actions.primary.default"
+        color="actions.primary.text"
+        boxSize={"40px"}
+        onClick={onOpen}>
         <UilShareAlt />
       </IconButton>
       <Dialog.Root

@@ -71,7 +71,7 @@ export const GalaxyRewardsCalculator = () => {
   return (
     <Card.Root
       p={7}
-      variant="baseWithBorder"
+      variant="primary"
       alignItems="center"
       style={{
         backgroundImage: `url('/assets/backgrounds/stardust.webp')`,

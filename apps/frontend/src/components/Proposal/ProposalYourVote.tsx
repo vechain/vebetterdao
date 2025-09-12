@@ -5,7 +5,7 @@ import {
   useUserSingleProposalVoteEvent,
   useVotingThreshold,
 } from "@/api"
-import { Box, HStack, Icon, Image, Skeleton, Text, TextProps } from "@chakra-ui/react"
+import { Box, HStack, Icon, Image, Skeleton, Text, TextProps, Em } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
@@ -78,12 +78,14 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
 
     return (
       <HStack gap={1}>
-        <Text textStyle={["lg", "lg", "md"]} {...textProps}>
+        <Text textStyle={["sm", "sm", "xs"]} {...textProps}>
           {t("You voted")}
         </Text>
-        <Text textStyle={["lg", "lg", "md"]} {...textProps}>
-          {t(support.label as any)}
-        </Text>
+        <Em>
+          <Text textStyle={["sm", "sm", "xs"]} {...textProps}>
+            {t(support.label as any)}
+          </Text>
+        </Em>
       </HStack>
     )
   }, [userVote, account?.address, textProps, t])

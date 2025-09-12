@@ -69,7 +69,7 @@ export const FunctionsPageContent = () => {
   )
 
   return (
-    <Card.Root w="full" variant="baseWithBorder">
+    <Card.Root w="full" variant="primary">
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start">
           <Box>

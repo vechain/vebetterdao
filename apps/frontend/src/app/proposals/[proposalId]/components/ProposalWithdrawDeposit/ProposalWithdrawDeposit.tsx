@@ -1,5 +1,5 @@
 import { ProposalState } from "@/api"
-import { Box, Card, Circle, Flex, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Circle, Flex, HStack, Heading, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
@@ -15,15 +15,13 @@ export const ProposalWithdrawDeposit = () => {
   return (
     <>
       {proposal.state !== ProposalState.Pending && proposal.userSupport != 0 && (
-        <Card.Root
-          border={`1px solid ${proposal.isUserSupportLeft ? "#004CFC" : "#D5D5D5"}`}
-          rounded="16px"
-          p="24px"
-          boxShadow={proposal.isUserSupportLeft ? "0px 0px 16px 0px #004CFC59" : undefined}>
-          <VStack alignItems={"stretch"} gap={6}>
+        <Card.Root variant="primary">
+          <VStack alignItems={"stretch"} gap="4">
             <HStack justify="space-between">
-              <Heading size="2xl">{t("Community Support")}</Heading>
-              <UilInfoCircle size="24px" color={"#004CFC"} />
+              <Heading size="xl">{t("Community Support")}</Heading>
+              <Icon boxSize="24px" color={"actions.tertiary.default"}>
+                <UilInfoCircle />
+              </Icon>
             </HStack>
             <Text textStyle={"sm"}>
               {t(proposal.isUserSupportLeft ? "This round is ended, claim your tokens back." : "This round is ended.")}
@@ -32,21 +30,21 @@ export const ProposalWithdrawDeposit = () => {
               <HStack alignItems={"baseline"} justify={"space-between"}>
                 <HStack alignItems={"baseline"}>
                   <Flex position="relative" top="7px" display={"inline-flex"}>
-                    <FaRegHeart color={"#004CFC"} size={"36"} />
+                    <Icon as={FaRegHeart} boxSize={"36px"} color={"actions.tertiary.default"} />
                   </Flex>
-                  <Text textStyle={"3xl"} color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"3xl"} fontWeight="bold">
                     {compactFormatter.format(Number(proposal.communityDeposits))}
                   </Text>
-                  <Text textStyle={"xl"} fontWeight="semibold" color={"contrast-fg-on-dark-bg"}>
-                    {t("/")}
+                  <Text textStyle={"xl"} fontWeight="semibold">
+                    {"/"}
                   </Text>
-                  <Text textStyle={"xl"} fontWeight="semibold" color={"contrast-fg-on-dark-bg"}>
+                  <Text textStyle={"xl"} fontWeight="bold">
                     {compactFormatter.format(Number(proposal.depositThreshold))}
                   </Text>
                 </HStack>
-                <Text textStyle={"lg"} color={"#6A6A6A"}>
+                <Text textStyle={"lg"} color={"text.subtle"}>
                   {compactFormatter.format(proposal.communityDepositPercentage * 100)}
-                  {t("%")}
+                  {"%"}
                 </Text>
               </HStack>
               <Box position="relative">

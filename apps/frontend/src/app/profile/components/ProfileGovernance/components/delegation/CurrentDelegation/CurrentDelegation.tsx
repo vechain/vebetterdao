@@ -26,7 +26,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   if (isDelegatorLoading || isLoading || !isDelegated) return null
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">

@@ -38,14 +38,14 @@ export const ProposalSessionSection = ({
   return (
     <Card.Root variant="primary">
       <Card.Body>
-        <VStack align="stretch" gap={6}>
-          <Heading size="2xl">{t("Session information")}</Heading>
+        <VStack align="stretch" gap={4}>
+          <Heading size="xl">{t("Session information")}</Heading>
           {renderQuroum === "upcoming" ? (
             <Alert.Root status="error" borderRadius="16px" bg="#FFF3E5">
               <Alert.Indicator>
-                <UilClock size={"36px"} color="success.primary" />
+                <UilClock size={"36px"} color="status.positive.primary" />
               </Alert.Indicator>
-              <Alert.Title color="success.primary" ml={2} fontSize="14px">
+              <Alert.Title color="status.positive.primary" ml={2} textStyle="sm">
                 {t("Quorum information will be available once the round starts.")}
               </Alert.Title>
             </Alert.Root>
