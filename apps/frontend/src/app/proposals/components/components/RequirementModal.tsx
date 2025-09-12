@@ -1,11 +1,11 @@
 import { BaseModal } from "@/components/BaseModal"
-import { UseDisclosureProps, VStack, Text, Heading, Button, List, Image, SimpleGrid } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
+import { UseDisclosureProps, VStack, Text, Heading, Button, List, Icon, SimpleGrid } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
+import NftEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 type Props = {
   isOpen: UseDisclosureProps["open"]
@@ -15,7 +15,7 @@ type Props = {
 
 export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }: Props) => {
   const { t } = useTranslation()
-  const modalIcon = useColorModeValue("/assets/icons/nft-earth-light.png", "/assets/icons/nft-earth-dark.png")
+
   const { data: gmRequired } = useGMRequiredByProposalType()
   const { data: userGMs } = useGetUserGMs()
   const router = useRouter()
@@ -54,7 +54,9 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft }:
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={true} modalProps={{ size: "md" }}>
       <VStack align="stretch" gap={4} alignItems="center">
-        <Image src={modalIcon} alt="NFT Requirement icon" boxSize={180} />
+        <Icon boxSize={180} color="bg.inverted">
+          <NftEarthIcon />
+        </Icon>
         <VStack align="stretch" gap={6}>
           <Heading alignSelf="center" size="3xl">
             {t("To apply for a proposal, you must")}
