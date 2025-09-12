@@ -24,9 +24,7 @@ export const UserActionLeaderboardResponseSchema = z.object({
     .optional(),
 })
 
-export type UserActionLeaderboardResponse = z.infer<
-  typeof UserActionLeaderboardResponseSchema
->
+export type UserActionLeaderboardResponse = z.infer<typeof UserActionLeaderboardResponseSchema>
 
 type UserActionLeaderboardRequest = {
   page: number
@@ -60,9 +58,12 @@ export const getUserActionLeaderboard = async (
   return UserActionLeaderboardResponseSchema.parse(await response.json())
 }
 
-export const getUserActionLeaderboardQueryKey = (
-  data: Omit<UserActionLeaderboardRequest, "page" | "size">,
-) => ["USER_ACTION_LEADERBOARD", data.roundId, data.date, data.direction]
+export const getUserActionLeaderboardQueryKey = (data: Omit<UserActionLeaderboardRequest, "page" | "size">) => [
+  "USER_ACTION_LEADERBOARD",
+  data.roundId,
+  data.date,
+  data.direction,
+]
 
 /**
  * Get the user action leaderboard with the given request data
@@ -82,8 +83,7 @@ export const useUserActionLeaderboard = ({
       date,
       direction,
     }),
-    queryFn: ({ pageParam = 0 }) =>
-      getUserActionLeaderboard({ page: pageParam, size: 10, roundId, date, direction }),
+    queryFn: ({ pageParam = 0 }) => getUserActionLeaderboard({ page: pageParam, size: 10, roundId, date, direction }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,

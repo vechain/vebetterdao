@@ -1,8 +1,4 @@
-import {
-  useCurrentAllocationsRoundId,
-  useUserActionOverview,
-  useUserActionLeaderboard,
-} from "@/api"
+import { useCurrentAllocationsRoundId, useUserActionOverview, useUserActionLeaderboard } from "@/api"
 
 import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
