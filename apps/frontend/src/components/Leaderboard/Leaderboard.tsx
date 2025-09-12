@@ -1,7 +1,7 @@
 import {
   useCurrentAllocationsRoundId,
   useUserActionOverview,
-  useSustainabilityUserOverviewPerRound,
+  useUserActionLeaderboard,
 } from "@/api"
 
 import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
@@ -61,7 +61,7 @@ export const Leaderboard = () => {
     }
   }, [userRoundOverview, account?.address])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
+  const leaderboardQuery = useUserActionLeaderboard({ roundId: selectedRoundId, direction: "desc" })
 
   const flatLeaderboard = useMemo(
     () =>

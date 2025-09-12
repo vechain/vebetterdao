@@ -1,7 +1,7 @@
 import {
   useCurrentAllocationsRoundId,
   useUserActionOverview,
-  useSustainabilityUserOverviewPerRound,
+  useUserActionLeaderboard,
 } from "@/api"
 import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
@@ -51,7 +51,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     }
   }, [userRoundOverview, account?.address])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
+  const leaderboardQuery = useUserActionLeaderboard({ roundId: selectedRoundId, direction: "desc" })
 
   const visibleRankings = useMemo(
     () => leaderboardQuery.data?.pages.map(page => page.data).flat() ?? [],
