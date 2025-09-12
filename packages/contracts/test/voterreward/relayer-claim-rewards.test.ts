@@ -14,7 +14,7 @@ import {
   RelayerRewardsPool,
 } from "../../typechain-types"
 
-describe.only("VoterRewards V6 - @shard10a", function () {
+describe("VoterRewards V6 - @shard10a", function () {
   let xAllocationVoting: XAllocationVoting
   let x2EarnApps: X2EarnApps
   let veBetterPassport: VeBetterPassport
@@ -57,7 +57,7 @@ describe.only("VoterRewards V6 - @shard10a", function () {
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
     await emissions.connect(minterAccount).bootstrap()
-    await voterRewards.connect(owner).setRelayerFeePercentage(10)
+    await relayerRewardsPool.connect(owner).setRelayerFeePercentage(10)
     await voterRewards.connect(owner).setXAllocationVoting(await xAllocationVoting.getAddress())
 
     await veBetterPassport.toggleCheck(1)
@@ -413,6 +413,74 @@ describe.only("VoterRewards V6 - @shard10a", function () {
       await expect(relayerRewardsPool.claimRewards(roundId, relayer2.address)).to.be.revertedWithCustomError(
         relayerRewardsPool,
         "RewardsAlreadyClaimed",
+      )
+    })
+
+    it("should correctly apply fee cap when calculated fee exceeds cap", async function () {
+      // This test verifies that the fee cap (100 B3TR) is correctly applied
+      // when the calculated fee (10% of reward) would exceed the cap
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Wait for next cycle and start emissions
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Enable auto-voting for user
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+
+      // Start a new round
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Auto-vote for user
+      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+      await waitForRoundToEnd(roundId)
+
+      // Get net rewards and fee from contract
+      const netUserReward = await voterRewards.getReward(roundId, user.address)
+      const netUserGMReward = await voterRewards.getGMReward(roundId, user.address)
+      const actualFee = await voterRewards.getFee(roundId, user.address)
+
+      // Calculate raw total reward (before fees)
+      const rawTotalReward = netUserReward + netUserGMReward + actualFee
+
+      const feePercentage = await relayerRewardsPool.getRelayerFeePercentage()
+      const feeDenominator = await relayerRewardsPool.getRelayerFeeDenominator()
+      const feeCap = await relayerRewardsPool.getFeeCap()
+
+      // Calculate what the fee would be without cap applied to RAW total
+      const calculatedFeeWithoutCap = (rawTotalReward * feePercentage) / feeDenominator
+
+      // Verify fee cap logic
+      if (calculatedFeeWithoutCap > feeCap) {
+        expect(actualFee).to.equal(feeCap, "Fee should be capped at maximum fee cap")
+        expect(actualFee < calculatedFeeWithoutCap).to.be.true
+      } else {
+        expect(actualFee).to.equal(calculatedFeeWithoutCap, "Fee should equal calculated fee when under cap")
+        expect(actualFee).to.equal((rawTotalReward * 10n) / 100n, "Fee should be exactly 10% of raw total")
+      }
+
+      // Verify the mathematical relationship
+      expect(calculatedFeeWithoutCap).to.equal(
+        (rawTotalReward * 10n) / 100n,
+        "Calculated fee should be 10% of RAW total reward",
+      )
+
+      // Verify fee parameters are as expected
+      expect(feePercentage).to.equal(10n, "Fee percentage should be 10")
+      expect(feeDenominator).to.equal(100n, "Fee denominator should be 100")
+      expect(feeCap).to.equal(ethers.parseEther("100"), "Fee cap should be 100 B3TR")
+
+      // Verify that net + fee = raw (accounting for proportional distribution)
+      expect(netUserReward + netUserGMReward + actualFee).to.equal(
+        rawTotalReward,
+        "Net rewards plus fee should equal raw total",
       )
     })
 

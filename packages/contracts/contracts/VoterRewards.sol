@@ -129,8 +129,6 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     mapping(uint256 cycle => GMMultiplier[] incomingGMMultipliers) cycleToIncomingGMMultipliers;
     // --------------------------- V6 Additions --------------------------- //
     IXAllocationVotingGovernor xAllocationVoting;
-    // The percentage of the reward that will be taken as a fee by the relayer.
-    uint256 relayerFeePercentage;
     IRelayerRewardsPool relayerRewardsPool;
   }
 
@@ -213,11 +211,6 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param oldAddress - The address of the old RelayerRewardsPool contract.
   event RelayerRewardsPoolAddressUpdated(address indexed newAddress, address indexed oldAddress);
 
-  /// @notice Emitted when the relayer fee percentage is updated.
-  /// @param newFee - The new fee percentage.
-  /// @param oldFee - The old fee percentage.
-  event RelayerFeePercentageUpdated(uint256 indexed newFee, uint256 indexed oldFee);
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -287,23 +280,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     IRelayerRewardsPool _relayerRewardsPool
   ) external reinitializer(6) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    // Set default relayer fee to 10%
-    $.relayerFeePercentage = 10;
 
     $.xAllocationVoting = _xAllocationVoting;
     $.relayerRewardsPool = _relayerRewardsPool;
-  }
-
-  /// @notice Set the percentage of the reward that will be taken as a fee by the relayer.
-  /// @param newFee - The new percentage of the reward that will be taken as a fee by the relayer.
-  function setRelayerFeePercentage(uint256 newFee) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(newFee <= 100, "VoterRewards: Fee must be <= 100%");
-
-    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    uint256 oldFee = $.relayerFeePercentage;
-    $.relayerFeePercentage = newFee;
-
-    emit RelayerFeePercentageUpdated(newFee, oldFee);
   }
 
   /// @notice Set the XAllocationVoting contract.
@@ -599,7 +578,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Check if fee applies for auto-voting users
     uint48 emissionCycleStartBlock = SafeCast.toUint48($.xAllocationVoting.roundSnapshot(cycle));
     if ($.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock)) {
-      fee = (totalReward * $.relayerFeePercentage) / 100;
+      fee = $.relayerRewardsPool.calculateRelayerFee(totalReward);
 
       // Use the same proportional formula
       netReward = rawReward - ((fee * rawReward) / totalReward);

@@ -63,7 +63,10 @@ describe("RelayerRewardsPool - @shard18", function () {
       expect(await relayerRewardsPool.version()).to.equal("1")
       expect(await relayerRewardsPool.getVoteWeight()).to.equal(3)
       expect(await relayerRewardsPool.getClaimWeight()).to.equal(1)
-      expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(8640)
+      expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(432000)
+      expect(await relayerRewardsPool.getRelayerFeePercentage()).to.equal(10)
+      expect(await relayerRewardsPool.getRelayerFeeDenominator()).to.equal(100)
+      expect(await relayerRewardsPool.getFeeCap()).to.equal(ethers.parseEther("100"))
     })
 
     it("should have correct role assignments", async function () {
@@ -322,24 +325,9 @@ describe("RelayerRewardsPool - @shard18", function () {
 
       await expect(relayerRewardsPool.connect(owner).setEarlyAccessBlocks(newBlocks))
         .to.emit(relayerRewardsPool, "EarlyAccessBlocksUpdated")
-        .withArgs(newBlocks, 8640) // 8640 is the initial value
+        .withArgs(newBlocks, 432000) // 432000 is the initial value
 
       expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(newBlocks)
-    })
-
-    it("should correctly determine early access status", async function () {
-      const newBlocks = 200
-      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(newBlocks)
-      const currentBlock = await ethers.provider.getBlockNumber()
-      const earlyAccessBlocks = await relayerRewardsPool.getEarlyAccessBlocks()
-
-      // Should be active if current block is within early access period
-      expect(await relayerRewardsPool.isEarlyAccessActive(currentBlock)).to.be.true
-
-      // Should not be active if start block is far in the past
-      const pastBlock = currentBlock - Number(earlyAccessBlocks) - 10
-
-      expect(await relayerRewardsPool.isEarlyAccessActive(pastBlock)).to.be.false
     })
 
     it("should not allow non-admin to update early access blocks", async function () {
@@ -361,8 +349,8 @@ describe("RelayerRewardsPool - @shard18", function () {
       const totalAutoVotingUsers = 10
 
       await expect(relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers))
-        .to.emit(relayerRewardsPool, "EarlyAccessAllocationsSet")
-        .withArgs(roundId, totalAutoVotingUsers, 2) // 2 registered relayers
+        .to.emit(relayerRewardsPool, "TotalAutoVotingActionsSet")
+        .withArgs(roundId, totalAutoVotingUsers, totalAutoVotingUsers * 2, totalAutoVotingUsers * 2 * 2, 2) // 2 registered relayers
 
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalAutoVotingUsers * 2) // 2 actions per user
 
@@ -665,14 +653,13 @@ describe("RelayerRewardsPool - @shard18", function () {
   })
 
   describe("Edge Cases and Error Handling", function () {
-    it("should handle zero relayers in early access allocation", async function () {
+    it("should handle zero relayers in total actions for round", async function () {
       const roundId = 1
       const totalAutoVotingUsers = 10
 
-      // Don't register any relayers
-      await expect(
-        relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers),
-      ).to.not.emit(relayerRewardsPool, "EarlyAccessAllocationsSet")
+      await expect(relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers))
+        .to.emit(relayerRewardsPool, "TotalAutoVotingActionsSet")
+        .withArgs(roundId, totalAutoVotingUsers, totalAutoVotingUsers * 2, totalAutoVotingUsers * 2 * 2, 0)
 
       // Total actions should still be set correctly
       expect(await relayerRewardsPool.totalActions(roundId)).to.equal(totalAutoVotingUsers * 2)

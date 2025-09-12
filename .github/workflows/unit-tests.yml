@@ -146,6 +146,8 @@ jobs:
             label: VOT3
           - shard: shard10
             label: VoterRewards
+          - shard: shard10a
+            label: VoterRewards - Relayer Claim Rewards
           - shard: shard11
             label: X2EarnCreator
           - shard: shard12

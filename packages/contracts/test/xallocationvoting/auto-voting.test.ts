@@ -75,7 +75,7 @@ describe("AutoVoting - @shard14a", function () {
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
 
     await emissions.connect(minterAccount).bootstrap()
-    await voterRewards.connect(owner).setRelayerFeePercentage(10)
+    await relayerRewardsPool.connect(owner).setRelayerFeePercentage(10)
 
     await veBetterPassport.toggleCheck(1)
     await veBetterPassport.whitelist(user.address)
@@ -878,13 +878,13 @@ describe("AutoVoting - @shard14a", function () {
 
       /**
        * Since we only have 1 user participating, total rewards is 2M B3TR
-       * Fee is 10% of rewards = 200,000 B3TR
-       * Actual rewards should be 1.8M B3TR
+       * Fee is 10% of rewards = 200,000 B3TR but with fee cap, it will be 100 B3TR
+       * Actual rewards should be 1.9999M B3TR
        */
       const reward = await voterRewards.getReward(round3, user.address)
       const fee = await voterRewards.getFee(round3, user.address)
-      expect(reward).to.equal(ethers.parseEther("1800000"))
-      expect(fee).to.equal(ethers.parseEther("200000"))
+      expect(reward).to.equal(ethers.parseEther("1999900"))
+      expect(fee).to.equal(ethers.parseEther("100")) // Fee cap is 100 B3TR
 
       expect(await relayerRewardsPool.claimableRewards(relayer1.address, round3)).to.equal(ethers.parseEther("0"))
 

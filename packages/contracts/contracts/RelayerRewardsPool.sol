@@ -26,6 +26,7 @@ pragma solidity 0.8.20;
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./interfaces/IB3TR.sol";
 import "./interfaces/IRelayerRewardsPool.sol";
 import "./interfaces/IEmissions.sol";
@@ -89,6 +90,12 @@ contract RelayerRewardsPool is
     address[] relayerAddresses;
     // number of blocks for exclusive early access
     uint256 earlyAccessBlocks;
+    // relayer fee as whole percent (10 = 10%)
+    uint256 relayerFeePercentage;
+    // relayer fee denominator
+    uint256 relayerFeeDenominator;
+    // maximum fee in token wei (use `100 ether` for 100 tokens)
+    uint256 feeCap;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.RelayerRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -190,8 +197,16 @@ contract RelayerRewardsPool is
     $.voteWeight = 3; // Higher weight for vote actions (more gas intensive)
     $.claimWeight = 1; // Base weight for claim actions
 
+    // Set relayer fee to 10% using fraction representation
+    // Fee calculation: relayerFeePercentage / relayerFeeDenominator = 10/100 = 10%
+    $.relayerFeePercentage = 10;
+    $.relayerFeeDenominator = 100;
+
+    // Initialize default fee cap 100 B3TR
+    $.feeCap = 100 ether;
+
     // Initialize default early access period (e.g., 1 block ~= 10 seconds on VeChain)
-    $.earlyAccessBlocks = 8640; // 24 hours
+    $.earlyAccessBlocks = 432000; // 120 hours = 5 days
   }
 
   /**
@@ -201,6 +216,33 @@ contract RelayerRewardsPool is
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
   // ----------------------- Getters -----------------------
+
+  /**
+   * @notice Get the current relayer fee denominator
+   * @return The current relayer fee denominator
+   */
+  function getRelayerFeeDenominator() external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return $.relayerFeeDenominator;
+  }
+
+  /**
+   * @notice Get the current relayer fee percentage
+   * @return The current relayer fee percentage
+   */
+  function getRelayerFeePercentage() external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return $.relayerFeePercentage;
+  }
+
+  /**
+   * @notice Get the current fee cap
+   * @return The current fee cap
+   */
+  function getFeeCap() external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return $.feeCap;
+  }
 
   /**
    * @notice Get the current vote weight
@@ -438,6 +480,45 @@ contract RelayerRewardsPool is
   }
 
   /**
+   * @notice Set the relayer fee denominator
+   * @param newDenominator The new relayer fee denominator
+   */
+  function setRelayerFeeDenominator(uint256 newDenominator) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    require(newDenominator > 0, "RelayerRewardsPool: Denominator must be > 0");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 oldDenominator = $.relayerFeeDenominator;
+    $.relayerFeeDenominator = newDenominator;
+
+    emit RelayerFeeDenominatorUpdated(newDenominator, oldDenominator);
+  }
+
+  /// @notice Set the relayer fee percentage
+  /// @param newFeePercentage - The new relayer fee percentage
+  /// @dev Unit: whole percent where 1 == 1%
+  function setRelayerFeePercentage(uint256 newFeePercentage) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    require(newFeePercentage > 0 && newFeePercentage <= 50, "RelayerRewardsPool: Fee must be > 0 and <= 50%");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 oldFeePercentage = $.relayerFeePercentage;
+    $.relayerFeePercentage = newFeePercentage;
+
+    emit RelayerFeePercentageUpdated(newFeePercentage, oldFeePercentage);
+  }
+
+  /// @notice Set the fee cap for the relayer.
+  /// @param newFeeCap The new fee cap
+  function setFeeCap(uint256 newFeeCap) external onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
+    require(newFeeCap > 0, "RelayerRewardsPool: Fee must be > 0");
+
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    uint256 oldFeeCap = $.feeCap;
+    $.feeCap = newFeeCap;
+
+    emit FeeCapUpdated(newFeeCap, oldFeeCap);
+  }
+
+  /**
    * @notice Set the vote weight
    * @param newWeight The new vote weight
    */
@@ -665,6 +746,22 @@ contract RelayerRewardsPool is
     $.totalRewards[roundId] += amount;
 
     emit RewardsDeposited(roundId, amount, $.totalRewards[roundId]);
+  }
+
+  /**
+   * @notice Calculate relayer fee from total reward
+   * @param totalReward Total reward amount in wei
+   * @return Relayer fee in wei
+   */
+  function calculateRelayerFee(uint256 totalReward) external view returns (uint256) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+
+    uint256 feePercent = $.relayerFeePercentage;
+    uint256 denominator = $.relayerFeeDenominator;
+
+    uint256 fee = (totalReward * feePercent) / denominator;
+
+    return Math.min(fee, $.feeCap);
   }
 
   /**

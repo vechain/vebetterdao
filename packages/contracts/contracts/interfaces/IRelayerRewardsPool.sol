@@ -38,6 +38,8 @@ enum RelayerAction {
  * who perform auto-voting actions on behalf of users.
  */
 interface IRelayerRewardsPool {
+  // =========================== Getters ===========================
+
   /**
    * @notice Returns the total rewards available for distribution among relayers in a round
    * @param roundId The round ID to check
@@ -70,50 +72,22 @@ interface IRelayerRewardsPool {
   function totalActions(uint256 roundId) external view returns (uint256);
 
   /**
-   * @notice Sets the total number of actions required for a round
-   * @param roundId The round ID
-   * @param totalAutoVotingUsers The total number of auto-voting users
+   * @notice Get the current relayer fee denominator
+   * @return The current relayer fee denominator
    */
-  function setTotalActionsForRound(uint256 roundId, uint256 totalAutoVotingUsers) external;
+  function getRelayerFeeDenominator() external view returns (uint256);
 
   /**
-   * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
-   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
-   * @param roundId The round ID
-   * @param userCount The number of users to remove from expected actions (typically 1)
+   * @notice Get the current relayer fee percentage
+   * @return The current relayer fee percentage
    */
-  function reduceExpectedActionsForRound(uint256 roundId, uint256 userCount) external;
+  function getRelayerFeePercentage() external view returns (uint256);
 
   /**
-   * @notice Returns the claimable reward amount for a relayer in a specific round
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @return The claimable reward amount
+   * @notice Get the current fee cap
+   * @return The current fee cap
    */
-  function claimableRewards(address relayer, uint256 roundId) external view returns (uint256);
-
-  /**
-   * @notice Registers an action performed by a relayer in a specific round
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @param action The type of action performed (VOTE or CLAIM)
-   */
-  function registerRelayerAction(address relayer, uint256 roundId, RelayerAction action) external;
-
-  /**
-   * @notice Allows a relayer to claim their rewards for a specific round
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   */
-  function claimRewards(uint256 roundId, address relayer) external;
-
-  /**
-   * @notice Deposits B3TR tokens into the pool for a specific round
-   * @dev This function should be called by the VoterRewards contract
-   * @param amount The amount of B3TR tokens to deposit
-   * @param roundId The round ID to deposit for
-   */
-  function deposit(uint256 amount, uint256 roundId) external;
+  function getFeeCap() external view returns (uint256);
 
   /**
    * @notice Get the current vote weight
@@ -163,6 +137,14 @@ interface IRelayerRewardsPool {
   function getRegisteredRelayers() external view returns (address[] memory);
 
   /**
+   * @notice Returns the claimable reward amount for a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @return The claimable reward amount
+   */
+  function claimableRewards(address relayer, uint256 roundId) external view returns (uint256);
+
+  /**
    * @notice Get the number of early access blocks
    * @return The number of blocks for early access period
    */
@@ -176,11 +158,66 @@ interface IRelayerRewardsPool {
   function isEarlyAccessActive(uint256 roundId) external view returns (bool);
 
   /**
+   * @notice Calculate relayer fee from total reward
+   * @param totalReward Total reward amount in wei
+   * @return Relayer fee in wei
+   */
+  function calculateRelayerFee(uint256 totalReward) external view returns (uint256);
+
+  // =========================== Setters ===========================
+
+  /**
+   * @notice Sets the total number of actions required for a round
+   * @param roundId The round ID
+   * @param totalAutoVotingUsers The total number of auto-voting users
+   */
+  function setTotalActionsForRound(uint256 roundId, uint256 totalAutoVotingUsers) external;
+
+  /**
+   * @notice Set the fee cap for the relayer.
+   * @param newFeeCap The new fee cap
+   */
+  function setFeeCap(uint256 newFeeCap) external;
+
+  /**
+   * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
+   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
+   * @param roundId The round ID
+   * @param userCount The number of users to remove from expected actions (typically 1)
+   */
+  function reduceExpectedActionsForRound(uint256 roundId, uint256 userCount) external;
+
+  /**
+   * @notice Registers an action performed by a relayer in a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @param action The type of action performed (VOTE or CLAIM)
+   */
+  function registerRelayerAction(address relayer, uint256 roundId, RelayerAction action) external;
+
+  /**
+   * @notice Allows a relayer to claim their rewards for a specific round
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   */
+  function claimRewards(uint256 roundId, address relayer) external;
+
+  /**
+   * @notice Deposits B3TR tokens into the pool for a specific round
+   * @dev This function should be called by the VoterRewards contract
+   * @param amount The amount of B3TR tokens to deposit
+   * @param roundId The round ID to deposit for
+   */
+  function deposit(uint256 amount, uint256 roundId) external;
+
+  /**
    * @notice Check if a relayer can perform an action during early access
    * @param relayer The relayer address
    * @param roundId The round ID
    */
   function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view;
+
+  // =========================== Events ===========================
 
   /**
    * @notice Emitted when early access vote allocations are set for a round
@@ -250,6 +287,27 @@ interface IRelayerRewardsPool {
    * @param oldWeight The old claim weight
    */
   event ClaimWeightUpdated(uint256 newWeight, uint256 oldWeight);
+
+  /**
+   * @notice Emitted when relayer fee percentage is updated
+   * @param newFee The new relayer fee percentage
+   * @param oldFee The old relayer fee percentage
+   */
+  event RelayerFeePercentageUpdated(uint256 newFee, uint256 oldFee);
+
+  /**
+   * @notice Emitted when fee cap is updated
+   * @param newFee The new fee cap
+   * @param oldFee The old fee cap
+   */
+  event FeeCapUpdated(uint256 newFee, uint256 oldFee);
+
+  /**
+   * @notice Emitted when relayer fee denominator is updated
+   * @param newDenominator The new relayer fee denominator
+   * @param oldDenominator The old relayer fee denominator
+   */
+  event RelayerFeeDenominatorUpdated(uint256 newDenominator, uint256 oldDenominator);
 
   /**
    * @notice Emitted when a relayer is registered
