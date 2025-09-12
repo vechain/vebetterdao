@@ -73,7 +73,7 @@ export const Leaderboard = () => {
   )
   const rankings = flatLeaderboard.map((entry, index) => ({
     position: index + 1,
-    address: entry?.entity as string,
+    address: entry?.wallet as string,
     score: entry?.actionsRewarded as number,
   }))
 

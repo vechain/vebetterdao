@@ -58,7 +58,7 @@ export type SustainabilityProof = z.infer<typeof SustainabilityActionsResponseSc
 
 type SustainabilityActionsRequest = {
   appId?: string
-  wallet?: string
+  wallet: string
   before?: number
   after?: number
   page?: number
@@ -75,11 +75,10 @@ export const getSustainabilityActions = async (
   data: SustainabilityActionsRequest,
 ): Promise<SustainabilityActionsResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.appId && !data.wallet) throw new Error("appId or wallet is required")
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/sustainability/actions?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr/actions/users/${data.wallet}?${queryString}`, {
     method: "GET",
   })
 

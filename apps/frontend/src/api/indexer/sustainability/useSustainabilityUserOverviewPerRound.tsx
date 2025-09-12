@@ -14,7 +14,7 @@ export const SustainabilityUserOverviewPerRoundResponseSchema = z.object({
   data: z
     .array(
       z.object({
-        entity: z.string(),
+        wallet: z.string(),
         roundId: z.number(),
         actionsRewarded: z.number(),
         totalRewardAmount: z.number(),
@@ -29,12 +29,11 @@ export type SustainabilityUserOverviewPerRoundResponse = z.infer<
 >
 
 type SustainabilityUserOverviewPerRoundRequest = {
-  wallet?: string
   roundId?: number | string
   page?: number
   size?: number
   direction?: "asc" | "desc"
-  sortBy?: "totalRewardAmount" | "actionsRewarded" | "roundId"
+  sortBy?: "totalRewardAmount" | "actionsRewarded"
 }
 
 /**
@@ -46,11 +45,10 @@ export const getSustainabilityUserOverviewPerRound = async (
   data: SustainabilityUserOverviewPerRoundRequest,
 ): Promise<SustainabilityUserOverviewPerRoundResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.wallet && !data.roundId) throw new Error("Wallet or roundId is required")
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/sustainability/user/round/overviews?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr/actions/leaderboards/users?${queryString}`, {
     method: "GET",
   })
 
@@ -63,7 +61,7 @@ export const getSustainabilityUserOverviewPerRound = async (
 
 export const getSustainabilityUserOverviewPerRoundQueryKey = (
   data: Omit<SustainabilityUserOverviewPerRoundRequest, "page" | "size">,
-) => ["SUSTAINABILITY", "USER_OVERVIEW_PER_ROUND", data.wallet, data.roundId, data.direction]
+) => ["SUSTAINABILITY", "USER_OVERVIEW_PER_ROUND", data.roundId, data.direction]
 
 /**
  * Get the sustainability overview for a user, with the given request data
@@ -71,19 +69,16 @@ export const getSustainabilityUserOverviewPerRoundQueryKey = (
  * @returns the query object with the data @see SustainabilityUserOverviewResponse
  */
 export const useSustainabilityUserOverviewPerRound = ({
-  wallet,
   roundId,
   direction = "asc",
 }: Omit<SustainabilityUserOverviewPerRoundRequest, "page" | "size">) => {
   return useInfiniteQuery({
-    enabled: !!wallet || !!roundId,
     queryKey: getSustainabilityUserOverviewPerRoundQueryKey({
-      wallet,
       roundId,
       direction,
     }),
     queryFn: ({ pageParam = 0 }) =>
-      getSustainabilityUserOverviewPerRound({ page: pageParam, size: 10, wallet, roundId, direction }),
+      getSustainabilityUserOverviewPerRound({ page: pageParam, size: 10, roundId, direction }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,

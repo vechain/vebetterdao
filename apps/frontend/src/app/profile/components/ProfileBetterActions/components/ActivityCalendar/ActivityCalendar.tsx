@@ -32,7 +32,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   const endDate = currentDate.endOf("month").format("YYYY-MM-DD")
 
   const currentMonthOverviewQuery = useSustainabilitySingleUserOverviewByDay({
-    wallet: address ?? "",
+    wallet: address,
     startDate,
     endDate,
   })

@@ -33,7 +33,7 @@ export const getProposalVotesIndexer = async (data: ProposalVotesRequest): Promi
   if (!indexerUrl) throw new Error("Indexer URL not found")
   if (!data.proposalId) throw new Error("proposalId is required")
 
-  const response = await fetch(`${indexerUrl}/voting/proposals/${data.proposalId}/results`, {
+  const response = await fetch(`${indexerUrl}/b3tr/proposals/${data.proposalId}/results`, {
     method: "GET",
   })
 

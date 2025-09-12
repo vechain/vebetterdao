@@ -120,11 +120,11 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             <LeaderboardRankingComponent
               ranking={{
                 position: idx + 1,
-                address: ranking?.entity ?? "",
+                address: ranking?.wallet ?? "",
                 score: ranking?.actionsRewarded ?? 0,
               }}
-              key={`leaderboard-${ranking?.entity ?? idx}-${ranking?.roundId ?? idx}`}
-              isYourRanking={AddressUtils.compareAddresses(ranking?.entity ?? "", account?.address ?? "")}
+              key={`leaderboard-${ranking?.wallet ?? idx}-${ranking?.roundId ?? idx}`}
+              isYourRanking={AddressUtils.compareAddresses(ranking?.wallet ?? "", account?.address ?? "")}
             />
           ))}
         </VStack>

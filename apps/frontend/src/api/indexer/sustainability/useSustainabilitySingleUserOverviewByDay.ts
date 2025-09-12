@@ -45,7 +45,7 @@ export const getSustainabilitySingleUserOverviewByDay = async (
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/sustainability/user/day/overviews?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr/actions/users/${data.wallet}/daily-summaries?${queryString}`, {
     method: "GET",
   })
 

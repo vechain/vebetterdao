@@ -42,7 +42,7 @@ export const getSustainabilityUserOverview = async (
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/sustainability/user/overviews?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr/actions/leaderboards/users?${queryString}`, {
     method: "GET",
   })
 

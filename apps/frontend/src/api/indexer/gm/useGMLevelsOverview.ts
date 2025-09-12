@@ -23,11 +23,8 @@ export type GMLevelName = z.infer<typeof GMLevelNameSchema>
 
 // Single GM level overview shape
 export const GMLevelOverviewSchema = z.object({
-  id: GMLevelNameSchema,
-  nfts: z.number(),
-  b3trDonated: z.string(),
-  nodeHolders: z.number(),
-  level: z.number(),
+  level: GMLevelNameSchema,
+  totalNFTs: z.number(),
 })
 
 // Full API response (array)

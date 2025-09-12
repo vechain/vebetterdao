@@ -24,7 +24,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const isConnectedUser = compareAddresses(account?.address ?? "", address)
 
   const { data } = useSustainabilityActions({
-    wallet: address ?? undefined,
+    wallet: address,
     direction: "desc",
   })
 

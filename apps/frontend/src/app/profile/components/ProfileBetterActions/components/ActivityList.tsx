@@ -14,7 +14,7 @@ type Props = {
 export const ActivityList = ({ address, setIsCalendarView }: Props) => {
   const { t } = useTranslation()
   const { data, fetchNextPage, hasNextPage } = useSustainabilityActions({
-    wallet: address ?? undefined,
+    wallet: address,
     direction: "desc",
   })
 

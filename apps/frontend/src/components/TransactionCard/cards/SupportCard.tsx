@@ -1,6 +1,7 @@
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilHeart } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
+import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { B3trTransaction } from "@/api"
 import { ActionModal } from "./BetterActionCard"
@@ -51,7 +52,7 @@ export const SupportCard = ({ transaction }: Props) => {
             <HStack gap={2}>
               <Text fontWeight={600}>
                 {"-"}
-                {compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))}
+                {compactFormatter.format(Number(ethers.formatEther(transaction?.value ?? 0)))}
               </Text>
               <Text fontWeight={400} fontSize={"sm"}>
                 {"VOT3"}

@@ -18,7 +18,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   const endOfDay = dayjs(date).endOf("day").unix()
 
   const actionsOfDayQuery = useSustainabilityActions({
-    wallet: date ? (address ?? "") : undefined,
+    wallet: address,
     after: startOfDay,
     before: endOfDay,
   })

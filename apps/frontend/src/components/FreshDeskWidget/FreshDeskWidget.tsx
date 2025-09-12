@@ -13,7 +13,7 @@ const runBeforeInit = (widgetId: number | string) => () => {
     const n = function (...args) {
       n.q.push(args)
     }
-    ;(n.q = []), (window.FreshworksWidget = n)
+    ;((n.q = []), (window.FreshworksWidget = n))
   }
 }
 

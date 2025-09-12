@@ -5,9 +5,9 @@ import {
   SustainabilityAppUsersByRoundResponse,
 } from "@/api/indexer/sustainability/useSustainabilityAppUsersByRound"
 import {
-  getSustainabilityAppOverviewByRound,
-  SustainabilityAppOverViewByRoundResponse,
-} from "@/api/indexer/sustainability/useSustainabilityAppOverviewByRound"
+  getAppActionRoundLeaderboard,
+  AppActionRoundLeaderboardResponse,
+} from "@/api/indexer/actions/useAppActionLeaderboard"
 
 type Props = {
   startRound: number
@@ -54,8 +54,7 @@ export const useAppsSustainabilityActions = ({ startRound, endRound }: Props) =>
 
         // Fetch all pages for the current round
         while (hasNext) {
-          const result: SustainabilityAppOverViewByRoundResponse = await getSustainabilityAppOverviewByRound({
-            appId,
+          const result: AppActionRoundLeaderboardResponse = await getAppActionRoundLeaderboard({
             roundId: round,
             page,
             size: 1000,

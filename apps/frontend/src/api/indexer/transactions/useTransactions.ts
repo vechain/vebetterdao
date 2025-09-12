@@ -13,13 +13,28 @@ export interface TransactionsResponse {
 }
 
 export interface B3trTransaction {
+  id: string
+  blockId: string
   blockNumber: number
   blockTimestamp: number
-  user: string
+  to: string
+  from: string
+  origin: string
   txId: string
-  amountB3TR?: number
-  amountVOT3?: number
-  txType: "SWAP" | "CLAIM_REWARD" | "PROPOSAL_SUPPORT" | "UPGRADE_GM" | "B3TR_ACTION"
+  value?: number
+  inputToken?: string
+  outputToken?: string
+  inputValue?: string
+  outputValue?: string
+  eventName:
+    | "B3TR_SWAP_VOT3_TO_B3TR"
+    | "B3TR_SWAP_B3TR_TO_VOT3"
+    | "B3TR_PROPOSAL_SUPPORT"
+    | "B3TR_CLAIM_REWARD"
+    | "B3TR_UPGRADE_GM"
+    | "B3TR_ACTION"
+    | "B3TR_PROPOSAL_VOTE"
+    | "B3TR_XALLOCATION_VOTE"
   appId?: string
   proof?: {
     version: number
@@ -67,13 +82,16 @@ type TransactionsRequest = {
  */
 export const getTransactions = async (data: TransactionsRequest): Promise<TransactionsResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.user) throw new Error("wallet is required")
 
-  const queryString = buildQueryString(data)
+  const { user, ...queryParams } = data
+  const queryString = buildQueryString(queryParams)
 
-  const response = await fetch(`${indexerUrl}/b3tr-txs?${queryString}`, {
-    method: "GET",
-  })
+  const response = await fetch(
+    `${indexerUrl}/history/${user}?eventName=B3TR_SWAP_VOT3_TO_B3TR&eventName=B3TR_SWAP_B3TR_TO_VOT3&eventName=B3TR_PROPOSAL_SUPPORT&eventName=B3TR_CLAIM_REWARD&eventName=B3TR_UPGRADE_GM&eventName=B3TR_ACTION&eventName=B3TR_PROPOSAL_VOTE&eventName=B3TR_XALLOCATION_VOTE&${queryString}`,
+    {
+      method: "GET",
+    },
+  )
 
   if (!response.ok) {
     throw new Error(`Failed to fetch transactions: ${response.statusText}`)

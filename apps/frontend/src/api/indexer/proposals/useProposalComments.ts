@@ -27,7 +27,7 @@ export type ProposalCommentsResponse = z.infer<typeof ProposalCommentsResponseSc
 export type ProposalComment = z.infer<typeof ProposalCommentSchema>
 
 type ProposalCommentsRequest = {
-  proposalId?: string
+  proposalId: string
   voter?: string
   support?: "FOR" | "AGAINST" | "ABSTAIN"
   page?: number
@@ -45,11 +45,10 @@ type ProposalCommentsRequest = {
  */
 export const getProposalComments = async (data: ProposalCommentsRequest): Promise<ProposalCommentsResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.proposalId) throw new Error("proposalId is required")
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/voting/proposals/comments?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr/proposals/${data.proposalId}/comments?${queryString}`, {
     method: "GET",
   })
 

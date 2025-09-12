@@ -36,7 +36,7 @@ export const getSustainabilitySingleUserOverview = async ({
   if (!wallet) throw new Error("Wallet is required")
 
   const queryString = buildQueryString({ roundId })
-  const endpoint = `${indexerUrl}/sustainability/user/${wallet}/overview`
+  const endpoint = `${indexerUrl}/b3tr/actions/users/${wallet}/overview`
   const response = await fetch(`${endpoint}?${queryString}`, {
     method: "GET",
   })
