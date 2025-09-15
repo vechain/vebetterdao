@@ -59,6 +59,8 @@ export const useProposalEnriched = () => {
         ...event,
         ...details,
         state,
+        // Use the fallback logic from getGrantProposalMetadataOrReturnDefault if title is missing
+        title: details?.title || details?.projectName || details?.shortDescription || "Grant Proposal",
       } as EnsureRequired<
         typeof event & typeof details & { state: ProposalState },
         "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
@@ -74,6 +76,8 @@ export const useProposalEnriched = () => {
         ...event,
         ...details,
         state,
+        // Use fallback logic for standard proposals as well
+        title: details?.title || details?.shortDescription || "Standard Proposal",
       } as EnsureRequired<
         typeof event & typeof details & { state: ProposalState },
         "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"

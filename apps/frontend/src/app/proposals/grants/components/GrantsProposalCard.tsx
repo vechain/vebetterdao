@@ -1,10 +1,3 @@
-import { HStack, VStack, Heading, Text, Card, Separator, Center, Stack, Box } from "@chakra-ui/react"
-import { B3TRIcon } from "@/components/Icons/B3TRIcon"
-import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
-import { useRouter } from "next/navigation"
-import { ProposalState, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
-import { formatTimeLeft } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
 import {
   useProposalDepositEvent,
   useProposalInteractionDates,
@@ -12,13 +5,21 @@ import {
   useProposalVotesIndexer,
   useUserSingleProposalVoteEvent,
 } from "@/api"
-import { formatEther } from "ethers"
-import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
-import { useMemo } from "react"
+import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { Box, Card, Center, Heading, HStack, Separator, Stack, Text, VStack } from "@chakra-ui/react"
+import { formatTimeLeft } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { formatEther } from "ethers"
+import { useRouter } from "next/navigation"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
+import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
 
 type GrantsProposalCardProps = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }
@@ -61,7 +62,6 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   // Extract the mapped vote type from the hook
   const userVoteOption = userVoteEvent?.userVote
   const hasUserVoted = !!userVoteEvent?.hasVoted
-
   return (
     <Card.Root w="full" p={{ base: 5, md: 7 }} cursor="pointer" onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">

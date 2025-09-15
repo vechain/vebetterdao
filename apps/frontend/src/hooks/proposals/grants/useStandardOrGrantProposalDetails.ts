@@ -72,9 +72,10 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
 
 const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Promise<T | undefined> => {
   try {
-    return await getIpfsMetadata<T>(ipfsUri, parseJson)
+    const result = await getIpfsMetadata<T>(ipfsUri, parseJson)
+    return result
   } catch (error) {
-    console.error("Error fetching proposal IPFS metadata:", error)
+    console.error("Error fetching proposal IPFS metadata for", ipfsUri, ":", error)
     return undefined
   }
 }
