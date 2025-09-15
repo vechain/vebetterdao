@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next"
 import { MilestonesActions } from "../../../grants/components"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
 import { ProposalStatusBadge } from "@/components/Proposal/ProposalStatusBadge"
+import { useIsDepositReached } from "@/api"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
@@ -18,8 +19,12 @@ type ProposalOverviewProps = {
 export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const proposalId = proposal?.id ?? ""
+  const proposerAddress = proposal?.proposerAddress ?? ""
 
-  const { data: vnsData } = useVechainDomain(proposal?.proposerAddress)
+  const { data: vnsData } = useVechainDomain(proposerAddress)
+  const { data: isDepositReached } = useIsDepositReached(proposalId)
+
   const proposerName = vnsData?.domain
 
   // Header Content (badge, proposer, title)
@@ -28,16 +33,16 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
       <HStack justify={"space-between"} align={"flex-start"} w="full">
         <ProposalStatusBadge
           proposalState={proposal?.state}
-          isDepositReached={false} // TODO: Handle deposit reached from separate hook
+          isDepositReached={isDepositReached ?? false}
           proposalType={proposal?.type}
         />
         {proposal && (
           <HStack>
-            <AddressIcon address={proposal.proposerAddress} rounded="full" h="20px" w="20px" />
-            {compareAddresses(proposal.proposerAddress, account?.address || "") ? (
+            <AddressIcon address={proposerAddress} rounded="full" h="20px" w="20px" />
+            {compareAddresses(proposerAddress, account?.address || "") ? (
               <Text>{t("You")}</Text>
             ) : (
-              <Text>{proposerName || humanAddress(proposal.proposerAddress, 4, 6)}</Text>
+              <Text>{proposerName || humanAddress(proposerAddress, 4, 6)}</Text>
             )}
           </HStack>
         )}

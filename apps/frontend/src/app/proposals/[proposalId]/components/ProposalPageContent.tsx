@@ -28,7 +28,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   const BreadcrumItems = [
     {
-      label: isGrant ? "Grants" : "Proposals", //TODO: This should be dynamic based on the proposal type like "Grants" or "Proposals"
+      label: isGrant ? "Grants" : "Proposals",
       href: isGrant ? "/proposals/grants" : "/proposals",
     },
     {
@@ -37,7 +37,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     },
   ]
 
-  //TODO: Cleanup this shared info
   const isVotingPhase = proposal?.state === ProposalState.Active
   const targetDate = isVotingPhase ? votingEndDate : supportEndDate
 
@@ -59,7 +58,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]} order={[2, 2, 1]}>
-          {/*TODO: CHECK IF WE NEED LOADING STATE */}
           <Skeleton loading={isLoading}>
             <ProposalOverview isGrant={isGrant} proposal={proposal} />
           </Skeleton>
