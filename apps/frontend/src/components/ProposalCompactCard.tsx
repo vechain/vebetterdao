@@ -1,4 +1,4 @@
-import { ProposalMetadata } from "@/api"
+import { ProposalMetadata, useIsDepositReached } from "@/api"
 import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
@@ -23,7 +23,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   const { account } = useWallet()
   const { id, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description ?? ""))
-
+  const { data: isDepositReached } = useIsDepositReached(id)
   const router = useRouter()
 
   const { supportEndDate } = useProposalInteractionDates(id)
@@ -82,7 +82,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
           <VStack w="full" justifyContent={"space-between"} gap={3} align={"flex-start"}>
             <ProposalStatusBadge
               proposalState={proposalState}
-              isDepositReached={false} //TODO: Implement this, fix the type expected
+              isDepositReached={isDepositReached ?? false}
               containerProps={{
                 py: 1,
                 px: 2,
