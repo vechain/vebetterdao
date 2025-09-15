@@ -1,9 +1,20 @@
 "use client"
-import { Button, Heading, Icon, Popover, Portal, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Heading,
+  Icon,
+  Popover,
+  Portal,
+  Text,
+  useMediaQuery,
+  VStack,
+  Collapsible,
+  HStack,
+} from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Route } from "./Routes"
-import { FaChevronDown, FaChevronRight } from "react-icons/fa6"
+import { FaChevronDown } from "react-icons/fa6"
 import { motion } from "framer-motion"
 
 type Props = {
@@ -37,8 +48,7 @@ const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () 
   }
   onMenuClick?.()
 }
-const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
-  //TODO: Move this to a separate component
+const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
   const router = useRouter()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
@@ -96,7 +106,7 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
                       <Heading
                         size="xs"
                         fontWeight={isSubRouteSelected ? "bold" : "normal"}
-                        color={isSubRouteSelected ? "inherit" : "gray.700"} //TODO: Improve this dark mode handling
+                        color={isSubRouteSelected ? "inherit" : "gray.700"}
                         _dark={{
                           color: isSubRouteSelected ? "white" : "gray.300",
                         }}>
@@ -123,71 +133,134 @@ const ButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: bool
   )
 }
 
+const MobileAccordionWithSubRoutes = ({
+  route,
+  selected,
+  onMenuClick,
+}: {
+  route: Route
+  selected: boolean
+  onMenuClick?: () => void
+}) => {
+  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(selected)
+
+  return (
+    <VStack w="full" align="stretch" p={0}>
+      <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
+        <Collapsible.Trigger asChild>
+          <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
+            <HStack w="full" gap={3}>
+              <Icon as={route.icon} color="text.subtle" size={"2xl"} />
+              <Text fontSize="lg">{route.name}</Text>
+            </HStack>
+            <Icon
+              size="xs"
+              as={FaChevronDown}
+              transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+              transition="transform 0.2s"
+              transformOrigin="center"
+              width="12px"
+              height="12px"
+              flexShrink={0}
+            />
+          </Button>
+        </Collapsible.Trigger>
+        <Collapsible.Content>
+          <VStack w="full" align="stretch" pt={5} pl={12}>
+            {route.subRoutes?.map(subRoute => {
+              return (
+                <Button
+                  key={subRoute.name}
+                  variant="ghost"
+                  w="full"
+                  display="flex"
+                  justifyContent="flex-start"
+                  alignItems="flex-start"
+                  flexDirection="column"
+                  textAlign="left"
+                  onClick={handleClick(subRoute, router, onMenuClick)}>
+                  <Text fontSize="sm">{subRoute.name}</Text>
+                </Button>
+              )
+            })}
+          </VStack>
+        </Collapsible.Content>
+      </Collapsible.Root>
+    </VStack>
+  )
+}
+
 export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
 
+  const renderRoute = (route: Route) => {
+    if (route.component) return route.component
+
+    const hasSubRoutes = route?.subRoutes?.length
+    const selected = isSelected(route, pathname)
+    const onClick = handleClick(route, router, onMenuClick)
+
+    // Desktop rendering
+    if (isLargerThan1200) {
+      if (hasSubRoutes) {
+        return <DesktopButtonWithSubRoutes key={route.name} route={route} selected={selected} />
+      }
+
+      const fontWeight = selected ? 600 : 400
+      return (
+        <Button
+          border="none"
+          colorPalette={selected ? "primary" : "gray"}
+          rounded={"full"}
+          w={["full", "full", "auto"]}
+          key={route.name}
+          variant={selected ? "primaryAction" : "ghost"}
+          onClick={onClick}
+          size="md"
+          fontWeight={fontWeight}
+          fontSize="sm"
+          data-testid={selected ? "current-section" : ""}>
+          {route.name}
+        </Button>
+      )
+    }
+
+    // Mobile rendering
+    if (hasSubRoutes) {
+      return (
+        <MobileAccordionWithSubRoutes key={route.name} route={route} selected={selected} onMenuClick={onMenuClick} />
+      )
+    }
+
+    return (
+      <Button
+        variant="ghost"
+        w={"full"}
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        key={route.name}
+        onClick={onClick}
+        data-testid={selected ? "current-section" : ""}
+        gap={4}>
+        <Icon as={route.icon} color="text.subtle" size={"xl"} />
+        <Text textAlign="left" fontSize="lg">
+          {route.name}
+        </Text>
+      </Button>
+    )
+  }
+
   return (
     <>
       {isLargerThan1200 ? (
-        // Render desktop menu without animations
-        routesToRender.map(route => {
-          if (route.component) return route.component
-          const hasSubRoutes = route?.subRoutes?.length
-          const selected = isSelected(route, pathname)
-          const onClick = handleClick(route, router, onMenuClick)
-          const fontWeight = selected ? 600 : 400
-
-          if (hasSubRoutes) {
-            return <ButtonWithSubRoutes key={route.name} route={route} selected={selected} />
-          }
-          return (
-            <Button
-              border="none"
-              colorPalette={selected ? "primary" : "gray"}
-              rounded={"full"}
-              w={["full", "full", "auto"]}
-              key={route.name}
-              variant={selected ? "primaryAction" : "ghost"}
-              onClick={onClick}
-              size="md"
-              fontWeight={fontWeight}
-              fontSize="sm"
-              data-testid={selected ? "current-section" : ""}>
-              {route.name}
-              {hasSubRoutes && <FaChevronRight size={16} />}
-            </Button>
-          )
-        })
+        routesToRender.map(renderRoute)
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" gap={0} w="full">
-          {routesToRender.map(route => {
-            if (route.component) return route.component
-            const hasSubRoutes = route?.subRoutes?.length
-            const selected = isSelected(route, pathname)
-            const onClick = handleClick(route, router, onMenuClick)
-
-            if (hasSubRoutes) {
-              return <ButtonWithSubRoutes key={route.name} route={route} selected={selected} />
-            }
-
-            return (
-              <Button
-                variant="ghost"
-                w={"full"}
-                display="flex"
-                justifyContent="flex-start"
-                alignItems="center"
-                key={route.name}
-                onClick={onClick}
-                pl={2}
-                data-testid={selected ? "current-section" : ""}>
-                <Icon as={route.icon} />
-                <Text textAlign="left">{route.name}</Text>
-              </Button>
-            )
-          })}
+        <MotionVStack initial={"hidden"} animate="visible" gap={7} pt={5} w="full">
+          {routesToRender.map(renderRoute)}
         </MotionVStack>
       )}
     </>

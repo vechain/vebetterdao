@@ -8,6 +8,7 @@ import {
   VStack,
   useDisclosure,
   useMediaQuery,
+  Separator,
 } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { FaBars } from "react-icons/fa"
@@ -55,6 +56,7 @@ const MobileMenuDrawer: React.FC<Omit<Drawer.RootProps & Props, "children">> = (
             <Drawer.Body display={"flex"} flexDirection={"column"} justifyContent={"space-between"} px={5}>
               <VStack gap={0} w="full">
                 <ProfileButton onMenuClose={() => props.onOpenChange?.({ open: false })} />
+                <Separator my={2} w="full" color="gray.200" />
                 <NavbarMenu routesToRender={routesToRender} onMenuClick={() => props.onOpenChange?.({ open: true })} />
               </VStack>
               <ColorModeButton w={"full"} withText={true} />

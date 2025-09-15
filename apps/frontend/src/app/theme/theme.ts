@@ -434,6 +434,12 @@ const config = defineConfig({
               base: "#2D3748",
             },
           },
+          subtle: {
+            value: {
+              _dark: "#AAAFB6",
+              base: "#525860",
+            },
+          },
           darker: {
             value: {
               _dark: "#767676",
