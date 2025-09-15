@@ -1,11 +1,11 @@
-import { BaseModal } from "@/components/BaseModal"
-import { UseDisclosureProps, VStack, Text, Heading, Button, List, Icon, SimpleGrid } from "@chakra-ui/react"
-import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAllocationsRoundId, useGetUserGMs, useGMRequiredByProposalType } from "@/api"
+import { BaseModal } from "@/components/BaseModal"
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 import { gmNfts } from "@/constants/gmNfts"
+import { Button, Heading, Icon, List, SimpleGrid, Text, UseDisclosureProps, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
-import NftEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+import { Trans, useTranslation } from "react-i18next"
 
 type Props = {
   isOpen: UseDisclosureProps["open"]
@@ -56,7 +56,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
     <BaseModal isOpen={isOpen} onClose={onClose} showCloseButton={true} modalProps={{ size: "md" }}>
       <VStack align="stretch" gap={4} alignItems="center">
         <Icon boxSize={180} color="bg.inverted">
-          <NftEarthIcon />
+          <NFTEarthIcon />
         </Icon>
         <VStack align="stretch" gap={6}>
           <Heading alignSelf="center" fontSize="28px">
@@ -66,7 +66,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
           {!hasNft ? (
             <List.Root as="ol" gap={2}>
               <List.Item>
-                <Text fontSize="16px" fontWeight={400}>
+                <Text fontWeight={400}>
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
                     values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
@@ -76,15 +76,17 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
               </List.Item>
               {!isGrants && (
                 <List.Item>
-                  <Trans
-                    i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
-                    components={{ b: <Text as="span" fontWeight="bold" /> }}
-                  />
+                  <Text>
+                    <Trans
+                      i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
+                      components={{ b: <Text as="span" fontWeight="bold" /> }}
+                    />
+                  </Text>
                 </List.Item>
               )}
             </List.Root>
           ) : (
-            <Text fontSize="16px" fontWeight={400}>
+            <Text fontWeight={400}>
               <Trans
                 i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
                 components={{ b: <Text as="span" fontWeight="bold" /> }}
