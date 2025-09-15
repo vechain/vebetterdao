@@ -1920,8 +1920,6 @@
   "Leave anyway": "Leave anyway",
   "Grant application saved successfully.": "Grant application saved successfully.",
   "How to support Grant and Proposal?": "How to support Grant and Proposal?",
-  "Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>": "Support your favourite grant by locking VOT3 tokens to help it reach the stage. <a>Learn more.</a>",
-  "You’ll need to buy VOT3 — it’s the token used to support and signal interest in grant proposals.": "You’ll need to buy VOT3 — it’s the token used to support and signal interest in grant proposals.",
   "Schedule": "Schedule",
   "How grant application works?": "How grant application works?",
   "1. Submit your application": "1. Submit your application",
@@ -2018,5 +2016,10 @@
   "Filter": "Filter",
   "Round #{{roundId}}: {{dateString}}": "Round #{{roundId}}: {{dateString}}",
   "Claim Milestone": "Claim Milestone",
-  "Search by grant name": "Search by grant name"
+  "Search by grant name": "Search by grant name",
+  "To support and vote for your favourite projects  Apps through Grants and for Proposals, you first need B3TR tokens.": "To support and vote for your favourite projects  Apps through Grants and for Proposals, you first need B3TR tokens.",
+  "Get voting power": "Get voting power",
+  "Earn them by completing <b>three sustainable actions</b> in any VeBetter App.": "Earn them by completing <b>three sustainable actions</b> in any VeBetter App.",
+  "See apps": "See apps",
+  "To support and vote for your favourite grants and proposal, you need to gain voting power. <link>Learn more.</link>": "To support and vote for your favourite grants and proposal, you need to gain voting power. <link>Learn more.</link>"
 }

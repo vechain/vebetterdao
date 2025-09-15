@@ -40,6 +40,16 @@ export const cardSlotRecipe = defineSlotRecipe({
           padding: "24px",
         },
       },
+      subtle: {
+        root: {
+          bg: {
+            base: "#F5F5F5",
+            _dark: "#1A1A1A",
+          },
+          borderWidth: "1px",
+          borderColor: "border.primary",
+        },
+      },
       filledSmall: {
         root: {
           bg: {
