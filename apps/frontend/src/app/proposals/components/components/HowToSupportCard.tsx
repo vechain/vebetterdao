@@ -1,13 +1,21 @@
 import { Card, Heading, Text, Button, Link } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { VOTING_POWER_DOCS_LINK } from "@/constants/links"
+import { useGetVot3Balance } from "@/hooks"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const HowToSupportCard = () => {
   const { t } = useTranslation()
   const router = useRouter()
-  const userHasNoTokens = true
+  const { account } = useWallet()
+  const { data: userVot3Balance } = useGetVot3Balance(account?.address)
+
+  const userHasNoTokens = useMemo(() => {
+    return userVot3Balance?.scaled === "0"
+  }, [userVot3Balance])
+
   const buttonText = userHasNoTokens ? t("Get voting power") : t("See apps")
   const buttonOnClick = useCallback(() => {
     if (userHasNoTokens) {
