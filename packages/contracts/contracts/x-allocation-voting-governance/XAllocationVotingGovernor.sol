@@ -119,16 +119,17 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Cast a vote for a set of x-2-earn applications.
    * @notice Only addresses with a valid passport can vote.
+   * @notice Reverts if autovoting is enabled for the voter.
    */
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
+    require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
+    require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
+
     if (this.isUserAutoVotingEnabledForCurrentCycle(_msgSender())) {
       revert AutoVotingEnabled(_msgSender()); // TODO autovoting: add unit test
     }
 
-    require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
-    require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
-
-    validatePersonhood(_msgSender());
+    validatePersonhoodForCurrentRound(_msgSender());
 
     _castVoteInternal(_msgSender(), roundId, appIds, voteWeights, false);
   }
@@ -137,16 +138,16 @@ abstract contract XAllocationVotingGovernor is
 
   /**
    * @dev Cast a vote for a set of x-2-earn applications on behalf of an account (used for autovoting).
+   * @notice Reverts if autovoting is not enabled for the voter.
    */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
-    require(
-      this.isUserAutoVotingEnabledForCurrentCycle(voter),
-      "XAllocationVotingGovernor: auto voting is not enabled"
-    );
+    if (!this.isUserAutoVotingEnabledForCurrentCycle(voter)) {
+      revert AutoVotingNotEnabled(voter); // TODO autovoting: add unit test
+    }
 
     _checkRelayerEarlyAccessEligibility(roundId);
 
-    (bool isPerson, ) = veBetterPassport().isPersonAtTimepoint(voter, SafeCast.toUint48(clock()));
+    (bool isPerson, ) = veBetterPassport().isPersonAtTimepoint(voter, SafeCast.toUint48(currentRoundSnapshot()));
 
     bytes32[] memory appIds = _getUserVotingPreferences(voter);
     (bytes32[] memory finalAppIds, uint256[] memory voteWeights) = _prepareAutoVoteArrays(voter, roundId, appIds);
@@ -186,15 +187,18 @@ abstract contract XAllocationVotingGovernor is
   }
 
   /**
-   * @dev Validate that the voter is a person at the current timepoint
+   * @dev Validate that the voter is a person at the current round snapshot
    * @param voter The voter address
    */
-  function validatePersonhood(address voter) public view {
+  function validatePersonhoodForCurrentRound(address voter) public view returns (bool) {
     (bool isPerson, string memory explanation) = veBetterPassport().isPersonAtTimepoint(
       voter,
-      SafeCast.toUint48(clock())
+      SafeCast.toUint48(currentRoundSnapshot())
     );
-    require(isPerson, string(abi.encodePacked("GovernorPersonhoodVerificationFailed: ", explanation)));
+    if (!isPerson) {
+      revert GovernorPersonhoodVerificationFailed(voter, explanation);
+    }
+    return isPerson;
   }
 
   /**

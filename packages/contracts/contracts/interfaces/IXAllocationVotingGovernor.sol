@@ -86,7 +86,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error XAllocationVotingPersonhoodVerificationFailed(address person);
 
   /**
-   * @dev Emitted when auto-voting is enabled.
+   * @dev The `voter` has auto-voting not enabled.
+   */
+  error AutoVotingNotEnabled(address voter);
+
+  /**
+   * @dev The `voter` has auto-voting enabled.
    */
   error AutoVotingEnabled(address voter);
 
@@ -370,7 +375,7 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   /**
    * @dev Validates if an account is a person
    */
-  function validatePersonhood(address account) external view;
+  function validatePersonhoodForCurrentRound(address account) external view returns (bool);
 
   /**
    * @dev Gets voting power and validates it's greater than zero

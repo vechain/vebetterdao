@@ -459,7 +459,7 @@ describe("VoterRewards - @shard10", () => {
         forceDeploy: true,
       })
 
-      expect(await voterRewards.version()).to.equal("5")
+      expect(await voterRewards.version()).to.equal("6")
     })
 
     it("Should not have state conflict after upgrading to V3 and V4", async () => {
@@ -1448,7 +1448,7 @@ describe("VoterRewards - @shard10", () => {
 
       const voterRewardsLatest = (await upgradeProxy(
         "VoterRewardsV4",
-        "VoterRewards",
+        "VoterRewardsV5",
         await voterRewardsV4.getAddress(),
         [config.VOTER_REWARDS_LEVELS_V2, config.GM_MULTIPLIERS_V2],
         {

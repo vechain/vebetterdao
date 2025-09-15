@@ -68,7 +68,7 @@ library AutoVotingLogic {
 
     // If user is enabling autovoting (was disabled, now enabling), check eligibility
     if (!currentStatus) {
-      xAllocationVotingGovernor.validatePersonhood(account);
+      xAllocationVotingGovernor.validatePersonhoodForCurrentRound(account);
       xAllocationVotingGovernor.getAndValidateVotingPower(account, xAllocationVotingGovernor.currentRoundSnapshot());
     }
 

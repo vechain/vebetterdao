@@ -39,6 +39,7 @@ import {
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { autoVotingLibraries } from "../scripts/libraries"
 
 describe("X-Allocation Voting - @shard14", function () {
   // Environment params
@@ -104,7 +105,7 @@ describe("X-Allocation Voting - @shard14", function () {
       // Upgrade XAllocationVoting V1 to XAllocationVoting V2
       const xAllocationVoting = (await upgradeProxy(
         "XAllocationVotingV1",
-        "XAllocationVoting",
+        "XAllocationVotingV2",
         await xAllocationVotingV1.getAddress(),
         [],
         { version: 2 },
@@ -183,7 +184,7 @@ describe("X-Allocation Voting - @shard14", function () {
       // Upgrade XAllocationVoting V1 to XAllocationVoting V2
       const xAllocationVotingWithB3TR = (await upgradeProxy(
         "XAllocationVotingV1",
-        "XAllocationVoting",
+        "XAllocationVotingV2",
         await xAllocationVotingWithB3TRV1.getAddress(),
         [],
         { version: 2 },
@@ -323,8 +324,14 @@ describe("X-Allocation Voting - @shard14", function () {
         forceDeploy: true,
       })
 
+      const { AutoVotingLogic } = await autoVotingLibraries()
+
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("XAllocationVoting")
+      const Contract = await ethers.getContractFactory("XAllocationVoting", {
+        libraries: {
+          AutoVotingLogic: await AutoVotingLogic.getAddress(),
+        },
+      })
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -402,6 +409,8 @@ describe("X-Allocation Voting - @shard14", function () {
           config,
         })
 
+      const { AutoVotingLogic } = await autoVotingLibraries()
+
       await getVot3Tokens(otherAccount, "1000")
       await vot3.connect(otherAccount).approve(await governor.getAddress(), "1000")
 
@@ -410,7 +419,11 @@ describe("X-Allocation Voting - @shard14", function () {
         .reverted
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("XAllocationVoting")
+      const Contract = await ethers.getContractFactory("XAllocationVoting", {
+        libraries: {
+          AutoVotingLogic: await AutoVotingLogic.getAddress(),
+        },
+      })
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -420,11 +433,10 @@ describe("X-Allocation Voting - @shard14", function () {
       await veBetterPassport.whitelist(otherAccount.address)
       await veBetterPassport.toggleCheck(1)
 
-      // V1 Contract
-      const V1Contract = await ethers.getContractAt("XAllocationVoting", await xAllocationVoting.getAddress())
+      const LatestContract = await ethers.getContractAt("XAllocationVoting", await xAllocationVoting.getAddress())
 
       // Now we can create a proposal
-      const encodedFunctionCall = V1Contract.interface.encodeFunctionData("upgradeToAndCall", [
+      const encodedFunctionCall = LatestContract.interface.encodeFunctionData("upgradeToAndCall", [
         await implementation.getAddress(),
         "0x",
       ])
@@ -999,6 +1011,8 @@ describe("X-Allocation Voting - @shard14", function () {
           forceDeploy: true,
         })
 
+        const { AutoVotingLogic } = await autoVotingLibraries()
+
         await veBetterPassport.whitelist(owner.address)
         await veBetterPassport.toggleCheck(1)
 
@@ -1007,7 +1021,11 @@ describe("X-Allocation Voting - @shard14", function () {
           owner,
           owner,
           xAllocationVoting,
-          await ethers.getContractFactory("XAllocationVoting"),
+          await ethers.getContractFactory("XAllocationVoting", {
+            libraries: {
+              AutoVotingLogic: await AutoVotingLogic.getAddress(),
+            },
+          }),
           "Update Voting Threshold",
           "setVotingThreshold",
           [newThreshold],
@@ -1037,6 +1055,9 @@ describe("X-Allocation Voting - @shard14", function () {
         const { xAllocationVoting, owner, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        const { AutoVotingLogic } = await autoVotingLibraries()
+
         await bootstrapAndStartEmissions()
 
         await veBetterPassport.whitelist(owner.address)
@@ -1046,7 +1067,11 @@ describe("X-Allocation Voting - @shard14", function () {
           owner,
           owner,
           xAllocationVoting,
-          await ethers.getContractFactory("XAllocationVoting"),
+          await ethers.getContractFactory("XAllocationVoting", {
+            libraries: {
+              AutoVotingLogic: await AutoVotingLogic.getAddress(),
+            },
+          }),
           "Updating quorum numerator",
           "updateQuorumNumerator",
           [1],
@@ -1067,6 +1092,9 @@ describe("X-Allocation Voting - @shard14", function () {
         const { xAllocationVoting, owner, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        const { AutoVotingLogic } = await autoVotingLibraries()
+
         await bootstrapAndStartEmissions()
 
         await veBetterPassport.whitelist(owner.address)
@@ -1077,7 +1105,11 @@ describe("X-Allocation Voting - @shard14", function () {
             owner,
             owner,
             xAllocationVoting,
-            await ethers.getContractFactory("XAllocationVoting"),
+            await ethers.getContractFactory("XAllocationVoting", {
+              libraries: {
+                AutoVotingLogic: await AutoVotingLogic.getAddress(),
+              },
+            }),
             "Updating quorum numerator",
             "updateQuorumNumerator",
             [(await xAllocationVoting.quorumDenominator()) + 1n],
@@ -1115,6 +1147,8 @@ describe("X-Allocation Voting - @shard14", function () {
           forceDeploy: true,
         })
 
+        const { AutoVotingLogic } = await autoVotingLibraries()
+
         await getVot3Tokens(otherAccount, "1000")
 
         // whitelist user
@@ -1131,7 +1165,11 @@ describe("X-Allocation Voting - @shard14", function () {
           otherAccount,
           otherAccount,
           xAllocationVoting,
-          await ethers.getContractFactory("XAllocationVoting"),
+          await ethers.getContractFactory("XAllocationVoting", {
+            libraries: {
+              AutoVotingLogic: await AutoVotingLogic.getAddress(),
+            },
+          }),
           "Updating quorum numerator",
           "updateQuorumNumerator",
           [1],
@@ -1204,6 +1242,9 @@ describe("X-Allocation Voting - @shard14", function () {
         const { xAllocationVoting, owner, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        const { AutoVotingLogic } = await autoVotingLibraries()
+
         await bootstrapAndStartEmissions()
 
         await veBetterPassport.whitelist(owner.address)
@@ -1214,7 +1255,11 @@ describe("X-Allocation Voting - @shard14", function () {
             owner,
             owner,
             xAllocationVoting,
-            await ethers.getContractFactory("XAllocationVoting"),
+            await ethers.getContractFactory("XAllocationVoting", {
+              libraries: {
+                AutoVotingLogic: await AutoVotingLogic.getAddress(),
+              },
+            }),
             "Updating voting period",
             "setVotingPeriod",
             [0],

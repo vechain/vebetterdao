@@ -148,8 +148,9 @@ describe("AutoVoting - @shard14a", function () {
       await startNewAllocationRound()
 
       // cast vote on behalf of user
-      await expect(xAllocationVoting.connect(owner).castVoteOnBehalfOf(user.address, 1)).to.be.revertedWith(
-        "XAllocationVotingGovernor: auto voting is not enabled",
+      await expect(xAllocationVoting.connect(owner).castVoteOnBehalfOf(user.address, 1)).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "AutoVotingNotEnabled",
       )
     })
 
@@ -615,8 +616,9 @@ describe("AutoVoting - @shard14a", function () {
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWith(
-        "GovernorPersonhoodVerificationFailed: User does not meet the criteria to be considered a person",
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "GovernorPersonhoodVerificationFailed",
       )
     })
 
