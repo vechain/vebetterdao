@@ -15,26 +15,10 @@ const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
   return BigNumber(formattedAmount)
 }
 /**
- * Returns the query key for fetching multiple grant proposal details.
- * @param standardProposals Array of standard proposal event data
- * @param grantProposals Array of grant proposal event data
- * @returns The query key for fetching proposal details
+ * Returns the query key for fetching proposal metadata details.
+ * @returns The query key for fetching proposal metadata details
  */
-export const getGrantProposalDetailsQueryKey = (
-  // why do we have the standard in the key for the grant ?
-  standardProposals: ProposalCreatedEvent[],
-  grantProposals: ProposalCreatedEvent[],
-) => [
-  "grantProposalDetails",
-  standardProposals
-    .map(e => e.id)
-    .sort()
-    .join(","),
-  grantProposals
-    .map(e => e.id)
-    .sort()
-    .join(","),
-]
+export const getAllProposalsMetadataQueryKey = () => ["proposalMetadataDetails", "ALL"]
 
 export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnriched | undefined) => {
   return {
@@ -71,6 +55,7 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     companyEmail: ipfsMetadata?.companyEmail ?? "",
     companyTelegram: ipfsMetadata?.companyTelegram ?? "",
     grantsReceiverAddress: ipfsMetadata?.grantsReceiverAddress ?? "",
+    outcomesAttachment: ipfsMetadata?.outcomesAttachment ?? [],
   }
 }
 
@@ -117,7 +102,7 @@ export const useStandardOrGrantProposalDetails = ({
   >
 }> => {
   return useQuery({
-    queryKey: getGrantProposalDetailsQueryKey(standardProposals, grantProposals),
+    queryKey: getAllProposalsMetadataQueryKey(),
     queryFn: async () => {
       if (standardProposals.length === 0 && grantProposals.length === 0) {
         return {

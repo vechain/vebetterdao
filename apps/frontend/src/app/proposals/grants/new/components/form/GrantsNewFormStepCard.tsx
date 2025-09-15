@@ -1,16 +1,17 @@
+import { useCurrentAllocationsRoundId } from "@/api"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
+import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
+import { useGrantProposalFormStore } from "@/store"
+import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
+import { useCallback, useState } from "react"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { VStack, Card, Button, HStack, Stack } from "@chakra-ui/react"
+
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
-import { AboutGrant, Schedule, Milestones } from "./steps"
-import { useForm } from "react-hook-form"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
-import { useCurrentAllocationsRoundId } from "@/api"
-import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
-import { useRouter } from "next/navigation"
-import { useGrantProposalFormStore } from "@/store"
-import { useState } from "react"
+import { AboutGrant, Milestones, Schedule } from "./steps"
 
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
@@ -30,11 +31,12 @@ export const GrantsNewFormStepCard = () => {
 
   const router = useRouter()
 
-  const { setData, ...formData } = useGrantProposalFormStore()
+  const { setData, clearData, ...formData } = useGrantProposalFormStore()
 
-  const { handleSubmit, control, register, formState, setValue, getValues, watch } = useForm<GrantFormData>({
-    defaultValues: formData,
-  })
+  const { handleSubmit, control, register, formState, setValue, getValues, watch, clearErrors, setError, reset } =
+    useForm<GrantFormData>({
+      defaultValues: formData,
+    })
 
   const { errors } = formState
 
@@ -46,7 +48,18 @@ export const GrantsNewFormStepCard = () => {
     },
     {
       key: GrantFormStep.ABOUT_GRANT,
-      content: <AboutGrant register={register} setData={setData} setValue={setValue} watch={watch} errors={errors} />,
+      content: (
+        <AboutGrant
+          register={register}
+          setData={setData}
+          setValue={setValue}
+          getValues={getValues}
+          clearErrors={clearErrors}
+          watch={watch}
+          errors={errors}
+          setError={setError}
+        />
+      ),
       title: t("About grant"),
     },
     {
@@ -77,13 +90,13 @@ export const GrantsNewFormStepCard = () => {
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
-  const goToNext = () => {
-    setCurrentStepIndex(prev => prev + 1)
-  }
+  const goToNext = useCallback(() => {
+    setCurrentStepIndex(currentStepIndex + 1)
+  }, [currentStepIndex])
 
-  const goToPrevious = () => {
-    setCurrentStepIndex(prev => prev - 1)
-  }
+  const goToPrevious = useCallback(() => {
+    setCurrentStepIndex(currentStepIndex - 1)
+  }, [currentStepIndex])
 
   const { onMetadataUpload } = useUploadGrantProposalMetadata()
   const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
@@ -117,6 +130,10 @@ export const GrantsNewFormStepCard = () => {
       votingRoundId: Number(data.votingRoundId),
       depositAmount: "0",
     })
+
+    //Cleanup form and storage
+    clearData()
+    reset()
   }
 
   const firstStep = 0
