@@ -852,6 +852,7 @@ export const getOrDeployContractInstances = async ({
       "XAllocationVotingV4",
       "XAllocationVotingV5",
       "XAllocationVotingV6",
+      "XAllocationVotingV7",
       "XAllocationVoting",
     ],
     [
@@ -878,10 +879,12 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6, 7],
+      versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
       libraries: [
+        undefined,
         undefined,
         undefined,
         undefined,

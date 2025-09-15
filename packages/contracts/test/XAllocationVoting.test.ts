@@ -35,6 +35,7 @@ import {
   XAllocationVotingV1,
   XAllocationVotingV5,
   XAllocationVotingV6,
+  XAllocationVotingV7,
 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
@@ -522,7 +523,7 @@ describe("X-Allocation Voting - @shard14", function () {
       expect(await xAllocationVoting.version()).to.equal("8")
     })
 
-    it("Should not break storage when upgrading to V2, V3, V4, V5, V6 and V7", async () => {
+    it("Should not break storage when upgrading to V2, V3, V4, V5, V6, V7 and V8", async () => {
       const config = createTestConfig()
 
       const configContracts = await getOrDeployContractInstances({
@@ -814,27 +815,37 @@ describe("X-Allocation Voting - @shard14", function () {
       // Upgrade to V7 (using the V6 contract address)
       const xAllocationVotingV7 = (await upgradeProxy(
         "XAllocationVotingV6",
-        "XAllocationVoting",
+        "XAllocationVotingV7",
         await xAllocationVotingV6.getAddress(), // Use V6's address
         [],
         {
           version: 7,
         },
-      )) as XAllocationVoting
+      )) as XAllocationVotingV7
 
       expect(await xAllocationVotingV7.version()).to.equal("7")
-
-      // Toggle auto-voting
-      await xAllocationVotingV7.connect(owner).toggleAutoVoting()
-      expect(await xAllocationVotingV7.isUserAutoVotingEnabled(owner.address)).to.be.true
-
-      // Set voting preferences
-      await xAllocationVotingV7.connect(owner).setUserVotingPreferences([app1Id, app2Id, app3Id])
-      expect(await xAllocationVotingV7.getUserVotingPreferences(owner.address)).to.eql([app1Id, app2Id, app3Id])
 
       // check that round is ok
       expect(await xAllocationVotingV7.currentRoundId()).to.equal(3n)
       expect(await xAllocationVotingV7.state(3n)).to.equal(0n) // Active
+
+      const { AutoVotingLogic } = await autoVotingLibraries()
+
+      // Latest version
+      const xAllocationVoting = (await upgradeProxy(
+        "XAllocationVotingV7",
+        "XAllocationVoting",
+        await xAllocationVotingV7.getAddress(), // Use V7's address
+        [],
+        {
+          version: 8,
+          libraries: {
+            AutoVotingLogic: await AutoVotingLogic.getAddress(),
+          },
+        },
+      )) as XAllocationVoting
+
+      expect(await xAllocationVoting.version()).to.equal("8")
     })
   })
 
