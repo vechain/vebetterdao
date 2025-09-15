@@ -1,28 +1,34 @@
-import { useTranslation } from "react-i18next"
-import { UilInfoCircle } from "@iconscout/react-unicons"
+import { SearchField, SelectField } from "@/components"
 import {
-  VStack,
-  HStack,
-  Heading,
-  Link,
-  Icon,
-  useDisclosure,
+  GrantProposalEnriched,
+  ProposalState,
+  useDebounce,
+  useMilestoneClaimedEvents,
+  useProposalEnriched,
+  useProposalSearch,
+} from "@/hooks"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
+import {
+  createListCollection,
   Grid,
   GridItem,
-  createListCollection,
+  Heading,
+  HStack,
+  Icon,
+  Link,
+  useDisclosure,
+  VStack,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
-import { GrantsStepsCard } from "./GrantsStepCard"
-import { GrantsStatsCards } from "./GrantsStatsCards"
-import { GrantsProposalCard } from "./GrantsProposalCard"
-import { useProposalEnriched } from "@/hooks/proposals/common"
-import { HowToSupportCard } from "../../components/components"
-import { ProposalState, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
-import { useMilestoneClaimedEvents } from "@/hooks/proposals/grants/useMilestoneClaimedEvents"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import BigNumber from "bignumber.js"
-import { SelectField, SearchField } from "@/components"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { HowToSupportCard } from "../../components/components"
 import { useFilteredProposals } from "../../hooks/useFilteredProposals"
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
+import { GrantsProposalCard } from "./GrantsProposalCard"
+import { GrantsStatsCards } from "./GrantsStatsCards"
+import { GrantsStepsCard } from "./GrantsStepCard"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -55,9 +61,15 @@ export const GrantsPageContent = () => {
   const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
 
   //STATES
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300) // 300ms debounce
+
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] } } = useProposalEnriched()
-  const { filteredProposals } = useFilteredProposals(selectedFilter, enrichedGrantProposals)
+
+  // First apply search, then apply filters
+  const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals)
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const approvedStates = useMemo(
@@ -156,7 +168,12 @@ export const GrantsPageContent = () => {
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <VStack gap={6} alignItems="stretch">
             <HStack justifyContent="space-between" w="full" gap={4}>
-              <SearchField /> {/*TODO: Implement search */}
+              <SearchField
+                placeholder={t("Search by grant name")}
+                value={searchTerm}
+                onChange={setSearchTerm}
+                disabled={!enrichedGrantProposals?.length}
+              />
               <SelectField
                 placeholder={t("Status")}
                 options={filterOptions}

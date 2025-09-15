@@ -2017,5 +2017,6 @@
   "Sort By": "Sort By",
   "Filter": "Filter",
   "Round #{{roundId}}: {{dateString}}": "Round #{{roundId}}: {{dateString}}",
-  "Claim Milestone": "Claim Milestone"
+  "Claim Milestone": "Claim Milestone",
+  "Search by grant name": "Search by grant name"
 }
