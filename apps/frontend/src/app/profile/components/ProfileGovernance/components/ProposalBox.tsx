@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+import { useIsDepositReached } from "@/api"
 
 type Props = {
   proposal: ProposalEnriched | GrantProposalEnriched
@@ -14,6 +15,7 @@ export const ProposalBox = ({ proposal, isLoading }: Props) => {
   const router = useRouter()
 
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
+  const { data: isDepositReached } = useIsDepositReached(proposal?.id ?? "")
 
   const title = useMemo(() => {
     if (!proposal?.title) return "Proposal title temporarily unavailable"
@@ -46,7 +48,7 @@ export const ProposalBox = ({ proposal, isLoading }: Props) => {
       <VStack w={"full"} alignItems={"start"} gap={2}>
         <ProposalStatusBadge
           proposalState={proposal.state}
-          isDepositReached={false} //TODO: Implement this, fix the type expected
+          isDepositReached={isDepositReached ?? false}
           textProps={{
             fontSize: 12,
           }}
