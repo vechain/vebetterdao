@@ -75,7 +75,8 @@ export type GrantFormData = {
   // Milestones
   milestones: Array<{
     description: string
-    fundingAmount: number
+    fundingAmount: number //Amount in B3TR
+    fundingAmountUsd: number //Amount in USD
     durationFrom: number //Unix timestamp in seconds
     durationTo: number //Unix timestamp in seconds
   }>

@@ -32,32 +32,36 @@ interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   getValues: UseFormGetValues<GrantFormData>
-  errors: FieldErrors<GrantFormData>
-  setData: (data: GrantFormData) => void
-  formData: GrantFormData
+  setData: (data: Partial<GrantFormData>) => void
   watch: UseFormWatch<GrantFormData>
+  errors: FieldErrors<GrantFormData>
+  formData: GrantFormData
   control: Control<GrantFormData>
 }
 
 type MilestoneSectionProps = {
   register: UseFormRegister<GrantFormData>
-  errors: FieldErrors<GrantFormData>
-  index: number
   removeMilestone: (index: number) => void
+  setData: (data: Partial<GrantFormData>) => void
   getValues: UseFormGetValues<GrantFormData>
+  errors: FieldErrors<GrantFormData>
   watch: UseFormWatch<GrantFormData>
+  index: number
   b3trPerUsd: number
   milestoneMinimumAmount: bigint
   grantType: string
+  setValue: UseFormSetValue<GrantFormData>
 }
 
 export const MilestoneSection = ({
   register,
-  errors,
-  index,
   removeMilestone,
   getValues,
   watch,
+  setValue,
+  setData,
+  index,
+  errors,
   b3trPerUsd,
   milestoneMinimumAmount,
   grantType,
@@ -79,6 +83,17 @@ export const MilestoneSection = ({
   const hasDurationInfo = currentMilestone.durationFrom > 0 && currentMilestone.durationTo > 0
   const formattedDurationFrom = formatDuration(currentMilestone.durationFrom)
   const formattedDurationTo = formatDuration(currentMilestone.durationTo)
+
+  // Sync individual milestone field to store
+  const syncFieldToStore = (field: keyof typeof currentMilestone) => {
+    const value = getValues(`milestones.${index}.${field}`)
+    const updatedMilestones = [...getValues("milestones")]
+    updatedMilestones[index] = {
+      ...updatedMilestones[index],
+      [field]: value,
+    } as (typeof updatedMilestones)[0]
+    setData({ milestones: updatedMilestones })
+  }
 
   return (
     <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })}>
@@ -107,11 +122,25 @@ export const MilestoneSection = ({
                 label={t("Amount")}
                 placeholder="10,000"
                 conversionRate={b3trPerUsd}
-                register={register(`milestones.${index}.fundingAmount`, {
+                registerPrimary={register(`milestones.${index}.fundingAmountUsd`, {
                   required: t("Please enter the amount for this milestone"),
                   validate: (value: number) => validateMilestoneAmount(value, grantType),
                 })}
-                error={errors.milestones?.[index]?.fundingAmount?.message}
+                registerSecondary={register(`milestones.${index}.fundingAmount`)}
+                error={errors.milestones?.[index]?.fundingAmountUsd?.message}
+                onUsdChange={(usdAmount, b3trAmount) => {
+                  setValue(`milestones.${index}.fundingAmountUsd`, Number(usdAmount))
+                  setValue(`milestones.${index}.fundingAmount`, Number(b3trAmount))
+
+                  // Sync to store
+                  const updatedMilestones = [...getValues("milestones")]
+                  updatedMilestones[index] = {
+                    ...updatedMilestones[index],
+                    fundingAmountUsd: Number(usdAmount),
+                    fundingAmount: Number(b3trAmount),
+                  } as (typeof updatedMilestones)[0]
+                  setData({ milestones: updatedMilestones })
+                }}
               />
             </GridItem>
 
@@ -133,6 +162,7 @@ export const MilestoneSection = ({
                 minDate={now} // now
                 size="lg"
                 watch={watch}
+                onBlur={() => syncFieldToStore("durationFrom")}
               />
             </GridItem>
             <GridItem colSpan={1}>
@@ -154,6 +184,7 @@ export const MilestoneSection = ({
                 minDate={now} // now
                 size="lg"
                 watch={watch}
+                onBlur={() => syncFieldToStore("durationTo")}
               />
             </GridItem>
 
@@ -167,6 +198,7 @@ export const MilestoneSection = ({
                   required: t("Please enter the description for this milestone"),
                 })}
                 error={errors.milestones?.[index]?.description?.message}
+                onBlur={() => syncFieldToStore("description")}
               />
             </GridItem>
             {/* Tips */}
@@ -233,6 +265,7 @@ export const Milestones = ({
     milestones.push({
       description: "",
       fundingAmount: 0,
+      fundingAmountUsd: 0,
       durationFrom: dayjs(lastMilestone.durationTo * 1000)
         .add(1, "month")
         .unix(),
@@ -272,10 +305,12 @@ export const Milestones = ({
               index={index}
               removeMilestone={handleRemoveMilestone}
               getValues={getValues}
+              setData={setData}
               watch={watch}
               b3trPerUsd={B3TRPerUSD}
               milestoneMinimumAmount={milestoneMinimumAmount ?? BigInt(0)}
               grantType={grantType}
+              setValue={setValue}
             />
           )
         })}
