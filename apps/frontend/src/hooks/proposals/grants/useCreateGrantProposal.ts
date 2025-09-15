@@ -1,13 +1,14 @@
-import { useCallback, useMemo } from "react"
-import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
-import { B3TRGovernor__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
-import { getConfig } from "@repo/config"
-import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
-import { useBuildTransaction } from "@/hooks"
+import { getProposalClaimableUserDepositsQueryKey, getProposalsEventsQueryKey } from "@/api"
+import { getAllProposalsMetadataQueryKey, getEnrichedProposalsQueryKey, useBuildTransaction } from "@/hooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
-import { type GrantFormData } from "./types"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
+import { GrantFormData } from "./types"
 
 const governorContractAddress = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
@@ -85,7 +86,13 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
   )
 
   const refetchQueryKeys = useMemo(() => {
-    return [getProposalsEventsQueryKey(), getProposalClaimableUserDepositsQueryKey(account?.address ?? "")]
+    return [
+      getProposalsEventsQueryKey(),
+
+      getAllProposalsMetadataQueryKey(),
+      getEnrichedProposalsQueryKey(),
+      getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
+    ]
   }, [account?.address])
   return useBuildTransaction({
     clauseBuilder: buildClauses,

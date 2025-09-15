@@ -9,6 +9,8 @@ import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 
 // Utility type to ensure required fields stay required after spreading
 type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
+// Step 5: Caching the enriched data with a simple query key
+export const getEnrichedProposalsQueryKey = () => ["enriched-proposals"]
 
 export const useProposalEnriched = () => {
   // Step 1: Fetch events
@@ -101,12 +103,9 @@ export const useProposalEnriched = () => {
     standardProposalsDetailsMap,
   ])
 
-  // Step 5: Caching the enriched data with a simple query key
-  const getEnrichedProposalsQueryKey = () => ["enriched-proposals"]
-
   return useQuery({
     queryKey: getEnrichedProposalsQueryKey(),
     queryFn: enrichProposals,
-    retry: 3, //Since events could take longer, we retry 3 times
+    retry: 5, //Since events could take longer, we retry 5 times
   })
 }

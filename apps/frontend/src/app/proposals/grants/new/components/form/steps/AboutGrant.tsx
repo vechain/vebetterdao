@@ -1,40 +1,63 @@
+import { WalletAddressInput } from "@/app/components/Input"
+import { FormSocialConnectButton } from "@/components/CustomFormFields"
+import { FormItem } from "@/components/CustomFormFields/FormItem"
+import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
 import {
-  VStack,
-  Text,
-  Grid,
-  GridItem,
   Accordion,
+  Box,
   Field,
   FileUpload,
-  Icon,
-  Box,
+  Grid,
+  GridItem,
   HStack,
+  Icon,
   InputGroup,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
-import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
-import { useTranslation } from "react-i18next"
-import { FormItem } from "@/components/CustomFormFields/FormItem"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { UilGithub } from "@iconscout/react-unicons"
-import { FaXTwitter } from "react-icons/fa6"
-import { AiOutlineDiscord } from "react-icons/ai"
-import { FormSocialConnectButton } from "@/components/CustomFormFields"
-import { LuMail, LuUpload } from "react-icons/lu"
-import { useEffect } from "react"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { WalletAddressInput } from "@/app/components/Input"
-import { RiTelegram2Line } from "react-icons/ri"
+import { useCallback, useEffect } from "react"
+import {
+  FieldErrors,
+  UseFormClearErrors,
+  UseFormGetValues,
+  UseFormRegister,
+  UseFormSetError,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { AiOutlineDiscord } from "react-icons/ai"
+import { FaXTwitter } from "react-icons/fa6"
+import { LuMail, LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
+import { RiTelegram2Line } from "react-icons/ri"
+
+const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
+const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
 
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
   errors: FieldErrors<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
   watch: UseFormWatch<GrantFormData>
+  getValues: UseFormGetValues<GrantFormData>
   setData: (data: Partial<GrantFormData>) => void
+  clearErrors: UseFormClearErrors<GrantFormData>
+  setError: UseFormSetError<GrantFormData>
 }
-
-export const AboutGrant = ({ register, setData, setValue, watch, errors }: AboutGrantProps) => {
+export const AboutGrant = ({
+  register,
+  setData,
+  setValue,
+  watch,
+  getValues,
+  errors,
+  clearErrors,
+  setError,
+}: AboutGrantProps) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
 
@@ -70,6 +93,14 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
     }
   }, [session?.user, setValue, setData])
 
+  // Store form data on blur
+  const onBlur = (field: keyof GrantFormData) => {
+    const value = getValues(field)
+    if (value) {
+      setData({ [field]: value })
+    }
+  }
+
   // Handle social media auth
   const handleAuth = (platform: "github" | "twitter" | "discord") => {
     const usernameField = platform.concat("Username")
@@ -81,6 +112,87 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
       signIn(platform)
     }
   }
+
+  // Validate individual file (throws errors for manual validation)
+  const validateFile = (file: File): void => {
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      throw new Error(`${file.name}: File type not supported. Use PDF, JPG, JPEG, or PNG.`)
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error(`${file.name}: File too large. Maximum 20MB allowed.`)
+    }
+  }
+
+  // Check if file is already uploaded
+  const isFileDuplicate = (fileName: string, currentAttachments: AttachmentFile[]): boolean => {
+    return currentAttachments.some((attachment: AttachmentFile) => attachment.name === fileName)
+  }
+
+  // Upload single file to IPFS
+  const uploadSingleFile = async (file: File): Promise<AttachmentFile> => {
+    try {
+      const ipfsHash = await uploadBlobToIPFS(file, file.name)
+      return {
+        type: file.type,
+        ipfs: ipfsHash,
+        name: file.name,
+      }
+    } catch {
+      throw new Error(`${file.name}: Upload to IPFS failed.`)
+    }
+  }
+  //Handle file removal
+  const onRemoveFile = useCallback(
+    (file: File) => {
+      const currentAttachments = getValues("outcomesAttachment") || []
+      const updatedAttachments = currentAttachments.filter(attachment => attachment.name !== file.name)
+      setValue("outcomesAttachment", updatedAttachments)
+      setData({ outcomesAttachment: updatedAttachments })
+    },
+    [getValues, setValue, setData],
+  )
+
+  // Handle file uploads with validation and IPFS upload
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (!acceptedFiles.length) return
+      clearErrors("outcomesAttachment")
+      const currentAttachments = getValues("outcomesAttachment") || []
+      const successfulUploads: AttachmentFile[] = []
+
+      for (const file of acceptedFiles) {
+        try {
+          // Check for duplicates
+          if (isFileDuplicate(file.name, currentAttachments)) {
+            return
+          }
+
+          // Validate file
+          validateFile(file)
+
+          // Upload to IPFS
+          const newAttachment = await uploadSingleFile(file)
+          successfulUploads.push(newAttachment)
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : `${file.name}: Unknown error occurred.`
+          setError("outcomesAttachment", {
+            type: "custom",
+            message: errorMessage,
+          })
+          // Continue processing other files even if one fails
+        }
+      }
+
+      // Update form with successful uploads
+      if (successfulUploads.length > 0) {
+        const updatedAttachments = [...currentAttachments, ...successfulUploads]
+        setValue("outcomesAttachment", updatedAttachments)
+        setData({ outcomesAttachment: updatedAttachments })
+      }
+    },
+    [getValues, setValue, setData, clearErrors, setError],
+  )
 
   return (
     <Grid templateColumns={{ base: "1fr", md: "1fr" }} w="full" gap={8}>
@@ -102,6 +214,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       required: t("Please enter your company name"),
                     })}
                     error={errors.companyName?.message}
+                    onBlur={() => onBlur("companyName")}
                   />
                 </GridItem>
                 <GridItem>
@@ -112,6 +225,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       required: t("Please enter your company registered number"),
                     })}
                     error={errors.companyRegisteredNumber?.message}
+                    onBlur={() => onBlur("companyRegisteredNumber")}
                   />
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -122,6 +236,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     placeholder={t("Tell about your team and experience with similar projects")}
                     register={register("companyIntro")}
                     error={errors.companyIntro?.message}
+                    onBlur={() => onBlur("companyIntro")}
                   />
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -131,6 +246,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       <WalletAddressInput
                         placeholder={"e.g. coolName.vet or 0x1a2b3c..."}
                         onAddressResolved={address => setValue("grantsReceiverAddress", address ?? "")}
+                        onBlur={() => onBlur("grantsReceiverAddress")}
                       />
                     </InputGroup>
                   </Field.Root>
@@ -144,6 +260,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     placeholder={t("Enter the email of the company")}
                     register={register("companyEmail")}
                     error={errors.companyEmail?.message}
+                    onBlur={() => onBlur("companyEmail")}
                   />
                 </GridItem>
                 <GridItem>
@@ -160,6 +277,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       },
                     })}
                     error={errors.companyTelegram?.message}
+                    onBlur={() => onBlur("companyTelegram")}
                   />
                 </GridItem>
               </Grid>
@@ -182,6 +300,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     required: t("Please enter your project name"),
                   })}
                   error={errors.projectName?.message}
+                  onBlur={() => onBlur("projectName")}
                 />
               </GridItem>
 
@@ -193,6 +312,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                   isOptional
                   register={register("appTestnetUrl")}
                   error={errors.appTestnetUrl?.message}
+                  onBlur={() => onBlur("appTestnetUrl")}
                 />
               </GridItem>
 
@@ -210,6 +330,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     },
                   })}
                   error={errors.projectWebsite?.message}
+                  onBlur={() => onBlur("projectWebsite")}
                 />
               </GridItem>
               <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -234,6 +355,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                         handleAuth={() => handleAuth("twitter")}
                         leftIcon={<FaXTwitter size={20} />}
                         value={watch("twitterUsername")}
+                        onBlur={() => onBlur("twitterUsername")}
                       />
                     </GridItem>
                     <GridItem w="full">
@@ -246,6 +368,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                         handleAuth={() => handleAuth("github")}
                         leftIcon={<UilGithub size={20} />}
                         value={watch("githubUsername")}
+                        onBlur={() => onBlur("githubUsername")}
                       />
                     </GridItem>
                     <GridItem w="full">
@@ -258,6 +381,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                         handleAuth={() => handleAuth("discord")}
                         leftIcon={<AiOutlineDiscord size={20} />}
                         value={watch("discordUsername")}
+                        onBlur={() => onBlur("discordUsername")}
                       />
                     </GridItem>
                   </Grid>
@@ -272,6 +396,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     required: t("Please describe the problem you are trying to solve"),
                   })}
                   error={errors.problemDescription?.message}
+                  onBlur={() => onBlur("problemDescription")}
                 />
               </GridItem>
               <GridItem>
@@ -283,6 +408,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     required: t("Please describe your solution"),
                   })}
                   error={errors.solutionDescription?.message}
+                  onBlur={() => onBlur("solutionDescription")}
                 />
               </GridItem>
               <GridItem>
@@ -293,6 +419,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     required: t("Please describe your target users"),
                   })}
                   error={errors.targetUsers?.message}
+                  onBlur={() => onBlur("targetUsers")}
                 />
               </GridItem>
               <GridItem>
@@ -303,6 +430,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     required: t("Please describe your competitive edge"),
                   })}
                   error={errors.competitiveEdge?.message}
+                  onBlur={() => onBlur("competitiveEdge")}
                 />
               </GridItem>
             </Grid>
@@ -325,6 +453,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       required: t("Please describe benefits to users"),
                     })}
                     error={errors.benefitsToUsers?.message}
+                    onBlur={() => onBlur("benefitsToUsers")}
                   />
                 </GridItem>
                 <GridItem>
@@ -335,6 +464,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       required: t("Please describe benefits to dApps"),
                     })}
                     error={errors.benefitsToDApps?.message}
+                    onBlur={() => onBlur("benefitsToDApps")}
                   />
                 </GridItem>
                 <GridItem>
@@ -345,6 +475,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       required: t("Please describe benefits to VeChain ecosystem"),
                     })}
                     error={errors.benefitsToVeChainEcosystem?.message}
+                    onBlur={() => onBlur("benefitsToVeChainEcosystem")}
                   />
                 </GridItem>
                 <GridItem>
@@ -355,6 +486,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                       required: t("Please describe X2E model"),
                     })}
                     error={errors.x2EModel?.message}
+                    onBlur={() => onBlur("x2EModel")}
                   />
                 </GridItem>
                 <GridItem>
@@ -364,6 +496,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     isOptional
                     register={register("revenueModel")}
                     error={errors.revenueModel?.message}
+                    onBlur={() => onBlur("revenueModel")}
                   />
                 </GridItem>
                 <GridItem>
@@ -373,6 +506,7 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                     isOptional
                     register={register("highLevelRoadmap")}
                     error={errors.highLevelRoadmap?.message}
+                    onBlur={() => onBlur("highLevelRoadmap")}
                   />
                 </GridItem>
 
@@ -386,7 +520,13 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                         {"Optional"}
                       </Text>
                     </HStack>
-                    <FileUpload.Root w="full" alignItems="stretch" maxFiles={10}>
+                    <FileUpload.Root
+                      w="full"
+                      alignItems="stretch"
+                      maxFiles={3}
+                      accept={ALLOWED_FILE_TYPES}
+                      maxFileSize={MAX_FILE_SIZE}
+                      onFileAccept={({ files }) => onDrop(files)}>
                       <FileUpload.HiddenInput />
                       <FileUpload.Dropzone>
                         <FileUpload.DropzoneContent>
@@ -397,7 +537,20 @@ export const AboutGrant = ({ register, setData, setValue, watch, errors }: About
                           <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 20MB")}</Box>
                         </FileUpload.DropzoneContent>
                       </FileUpload.Dropzone>
-                      <FileUpload.List />
+                      <FileUpload.ItemGroup>
+                        <FileUpload.Context>
+                          {({ acceptedFiles }) =>
+                            acceptedFiles.map(file => (
+                              <FileUpload.Item key={file.name} file={file}>
+                                <FileUpload.ItemPreview />
+                                <FileUpload.ItemName />
+                                <FileUpload.ItemSizeText />
+                                <FileUpload.ItemDeleteTrigger onClick={() => onRemoveFile(file)} />
+                              </FileUpload.Item>
+                            ))
+                          }
+                        </FileUpload.Context>
+                      </FileUpload.ItemGroup>
                     </FileUpload.Root>
                     {errors.outcomesAttachment?.message && (
                       <Field.ErrorText>{errors.outcomesAttachment?.message}</Field.ErrorText>
