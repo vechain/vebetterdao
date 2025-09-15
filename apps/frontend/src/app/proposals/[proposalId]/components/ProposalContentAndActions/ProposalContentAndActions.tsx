@@ -169,9 +169,9 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             {hasAttachments ? (
               <VStack align="flex-start" w="full" gap={4} pt={10}>
                 <Grid templateColumns="repeat(2, 1fr)" w="full" gap={4}>
-                  {proposal?.outcomesAttachment?.map((attachment: AttachmentFile) => (
+                  {proposal?.outcomesAttachment?.map((attachment: AttachmentFile, index: number) => (
                     <GridItem key={attachment.ipfs} colSpan={1}>
-                      <FileAttachmentPreview key={attachment.ipfs} attachment={attachment} />
+                      <FileAttachmentPreview attachment={attachment} uniqueKey={index} />
                     </GridItem>
                   ))}
                 </Grid>

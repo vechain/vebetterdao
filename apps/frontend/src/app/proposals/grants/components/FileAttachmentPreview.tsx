@@ -4,7 +4,7 @@ import { convertUriToUrl, toIPFSURL } from "@/utils"
 import { Box, Button, Card, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { LuDownload, LuFile } from "react-icons/lu"
 
-export const FileAttachmentPreview = ({ attachment }: { attachment: AttachmentFile }) => {
+export const FileAttachmentPreview = ({ attachment, uniqueKey }: { attachment: AttachmentFile; uniqueKey: number }) => {
   const { data: previewImage } = useIpfsImage(toIPFSURL(attachment.ipfs))
 
   const goToFile = (ipfsHash: string) => {
@@ -15,7 +15,7 @@ export const FileAttachmentPreview = ({ attachment }: { attachment: AttachmentFi
 
   return (
     <Card.Root
-      key={attachment.ipfs}
+      key={`${attachment.name}-${uniqueKey}`}
       variant="baseWithBorder"
       borderColor="border.secondary"
       onClick={() => goToFile(attachment.ipfs)}
