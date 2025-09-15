@@ -6,8 +6,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const GrantsNewPageContent = dynamic(
-  () => import("./components/GrantsNewPageContent").then(mod => mod.GrantsNewPageContent),
+const GrantsClientFormLayoutContent = dynamic(
+  () => import("./components/GrantsClientFormLayoutContent").then(mod => mod.GrantsClientFormLayoutContent),
   {
     ssr: false,
     loading: () => (
@@ -18,14 +18,17 @@ const GrantsNewPageContent = dynamic(
   },
 )
 
-export default function GrantsNew() {
+type Props = {
+  children: React.ReactNode
+}
+export default function GrantsNewLayout({ children }: Readonly<Props>) {
   useEffect(() => {
-    AnalyticsUtils.trackPage(`Grants New`)
+    AnalyticsUtils.trackPage("GrantsNew")
   }, [])
 
   return (
     <MotionVStack>
-      <GrantsNewPageContent />
+      <GrantsClientFormLayoutContent>{children}</GrantsClientFormLayoutContent>
     </MotionVStack>
   )
 }

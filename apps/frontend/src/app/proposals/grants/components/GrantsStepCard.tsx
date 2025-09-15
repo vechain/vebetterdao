@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
 import { GrantsStepIndicator } from "./GrantsStepIndicator"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 
 export type Step = {
   key: string
@@ -31,10 +32,11 @@ export const GrantsStepsCard = ({
   isOpen: boolean
   onClose: () => void
 }) => {
+  const router = useRouter()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-  const router = useRouter()
-
+  const { account } = useWallet()
+  const { open: openWalletModal } = useWalletModal()
   //MIMIC USE STEPS HOOK
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
@@ -57,12 +59,15 @@ export const GrantsStepsCard = ({
   const hasMetProposalCriteria = useMetProposalCriteria()
 
   const handleApply = useCallback(() => {
-    if (!hasMetProposalCriteria) {
-      openRequirementModal()
-    } else {
-      router.push("/proposals/grants/new")
+    if (!account?.address) {
+      return openWalletModal()
     }
-  }, [openRequirementModal, router, hasMetProposalCriteria])
+
+    if (!hasMetProposalCriteria) {
+      return openRequirementModal()
+    }
+    router.push("/proposals/grants/new")
+  }, [account?.address, hasMetProposalCriteria, router, openWalletModal, openRequirementModal])
 
   if (!currentStep) {
     return null
