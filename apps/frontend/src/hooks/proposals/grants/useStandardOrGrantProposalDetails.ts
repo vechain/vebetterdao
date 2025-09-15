@@ -71,6 +71,7 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     companyEmail: ipfsMetadata?.companyEmail ?? "",
     companyTelegram: ipfsMetadata?.companyTelegram ?? "",
     grantsReceiverAddress: ipfsMetadata?.grantsReceiverAddress ?? "",
+    outcomesAttachment: ipfsMetadata?.outcomesAttachment ?? [],
   }
 }
 

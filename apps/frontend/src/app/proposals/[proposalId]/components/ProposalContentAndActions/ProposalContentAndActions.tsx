@@ -1,21 +1,22 @@
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
+import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
+import { FileAttachmentPreview } from "@/app/proposals/grants/components"
 import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
 import { useColorModeValue } from "@/components/ui/color-mode"
 import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
-import { GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
+import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
-import { Alert, Box, HStack, Icon, Link, VStack } from "@chakra-ui/react"
+import { Alert, Box, Grid, GridItem, HStack, Icon, Link, VStack } from "@chakra-ui/react"
 import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AiOutlineDiscord } from "react-icons/ai"
-import { RiTelegram2Line } from "react-icons/ri"
 import { FaXTwitter } from "react-icons/fa6"
 import { LiaDiscourse } from "react-icons/lia"
 import { LuMail } from "react-icons/lu"
-import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
+import { RiTelegram2Line } from "react-icons/ri"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -48,6 +49,12 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       }
       return []
     }
+  }, [proposal])
+
+  const hasAttachments = useMemo(() => {
+    if (proposal?.type === ProposalType.Standard) return false
+    const typedProposal = proposal as GrantProposalEnriched
+    return typedProposal?.outcomesAttachment?.length && typedProposal?.outcomesAttachment?.length > 0
   }, [proposal])
 
   return (
@@ -158,6 +165,18 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 </Link>
               </HStack>
             </VStack>
+            {/* File Attachments */}
+            {hasAttachments ? (
+              <VStack align="flex-start" w="full" gap={4} pt={10}>
+                <Grid templateColumns="repeat(2, 1fr)" w="full" gap={4}>
+                  {proposal?.outcomesAttachment?.map((attachment: AttachmentFile) => (
+                    <GridItem key={attachment.ipfs} colSpan={1}>
+                      <FileAttachmentPreview key={attachment.ipfs} attachment={attachment} />
+                    </GridItem>
+                  ))}
+                </Grid>
+              </VStack>
+            ) : null}
           </CollapsibleSection>
         </VStack>
       )}
@@ -185,43 +204,6 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           )}
           {!!actions.length && <ProposalExecutableActions actions={actions} />}
         </VStack>
-        // TODO : Finish the standard proposal
-        //   <VStack gap={4} align="flex-start" w="full">
-        //     <Heading size="lg">{t("Summary")}</Heading>
-        //     <Text>{proposal?.title}</Text>
-        // {/* ============================== STANDARD PROPOSAL ============================== */}
-        // {/* Summary (Description) */}
-        // {/* ABout apllicant */}
-        // {/* Name */}
-        // {/* Roles */}
-        // {/* email */}
-        // {/* User address = proposerAddress */}
-
-        // {/* Proposal details */}
-        // {/* Motivation and goals */}
-        // {/* Detailed description */}
-        // {/* KeyPoints  */}
-        // {/* Execution Plan */}
-        // {/* Expected Impact */}
-        // {/* Outcomes */}
-        // {/* New features */}
-        // {/* Features to change or remove */}
-
-        // {/* Sources and additional for grants */}
-        // {/* Discourse thread */}
-        // {/* Github */}
-        // {/* Telegram */}
-        //     {proposalDecodeError && (
-        //       <Alert.Root status="error" borderRadius={"lg"}>
-        //         <Alert.Indicator />
-        //         <Box>
-        //           <Alert.Title>{t("Error decoding the proposal calldatas")}</Alert.Title>
-        //           <Alert.Description>{proposalDecodeError}</Alert.Description>
-        //         </Box>
-        //       </Alert.Root>
-        //     )}
-        //     {!!actions.length && <ProposalExecutableActions actions={actions} />}
-        //   </VStack>
       )}
     </VStack>
   )

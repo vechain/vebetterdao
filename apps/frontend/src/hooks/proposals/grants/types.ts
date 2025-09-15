@@ -71,7 +71,7 @@ export type GrantFormData = {
   x2EModel: string
   revenueModel: string
   highLevelRoadmap: string
-  outcomesAttachment?: File[]
+  outcomesAttachment?: AttachmentFile[]
   // Milestones
   milestones: Array<{
     description: string
@@ -83,6 +83,12 @@ export type GrantFormData = {
   votingRoundId: string
   // Terms of service
   termsOfService: boolean
+}
+
+export type AttachmentFile = {
+  type: string
+  ipfs: string
+  name?: string
 }
 
 export enum ProposalState {
