@@ -126,7 +126,7 @@ abstract contract XAllocationVotingGovernor is
     require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
     if (this.isUserAutoVotingEnabledForCurrentCycle(_msgSender())) {
-      revert AutoVotingEnabled(_msgSender()); // TODO autovoting: add unit test
+      revert AutoVotingEnabled(_msgSender());
     }
 
     validatePersonhoodForCurrentRound(_msgSender());
@@ -142,7 +142,7 @@ abstract contract XAllocationVotingGovernor is
    */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
     if (!this.isUserAutoVotingEnabledForCurrentCycle(voter)) {
-      revert AutoVotingNotEnabled(voter); // TODO autovoting: add unit test
+      revert AutoVotingNotEnabled(voter);
     }
 
     _checkRelayerEarlyAccessEligibility(roundId);
@@ -202,15 +202,12 @@ abstract contract XAllocationVotingGovernor is
   }
 
   /**
-   * @dev Gets voting power and validates it's greater than zero
-   * @param account The account to check
-   * @param timepoint The timepoint to check voting power at
-   * @return The voting power (guaranteed to be > 0)
+   * @dev Gets voting power for an account and validates it meets the minimum threshold for auto-voting
    */
-  function getAndValidateVotingPower(address account, uint256 timepoint) public view returns (uint256) {
+  function getAndValidateVotingPower(address account, uint256 timepoint) public view returns (uint256, bool) {
     uint256 voterAvailableVotes = getVotes(account, timepoint);
-    require(voterAvailableVotes > 0, "XAllocationVotingGovernor: no votes available");
-    return voterAvailableVotes;
+    bool isValid = voterAvailableVotes > 1 ether;
+    return (voterAvailableVotes, isValid);
   }
 
   /**

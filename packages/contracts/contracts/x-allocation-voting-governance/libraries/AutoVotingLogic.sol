@@ -69,7 +69,12 @@ library AutoVotingLogic {
     // If user is enabling autovoting (was disabled, now enabling), check eligibility
     if (!currentStatus) {
       xAllocationVotingGovernor.validatePersonhoodForCurrentRound(account);
-      xAllocationVotingGovernor.getAndValidateVotingPower(account, xAllocationVotingGovernor.currentRoundSnapshot());
+      (, bool isValid) = xAllocationVotingGovernor.getAndValidateVotingPower(
+        account,
+        xAllocationVotingGovernor.currentRoundSnapshot()
+      );
+      require(isValid, "AutoVotingLogic: at least 1 VOT3 is required");
+      require($._userVotingPreferences[account].length > 0, "AutoVotingLogic: must select at least one app");
     }
 
     // If user is disabling autovoting (was enabled, now disabling), clear preferences
@@ -191,6 +196,8 @@ library AutoVotingLogic {
 
   /**
    * @dev Prepares arrays for auto-voting by filtering eligible apps and calculating vote weights
+   * @notice Returns empty arrays if voter has insufficient voting power
+   * @notice Returns empty arrays if no eligible apps found
    *
    * @param xAllocationVotingGovernorAddress The address of the XAllocationVotingGovernor contract
    * @param voter The address of the voter
@@ -208,10 +215,15 @@ library AutoVotingLogic {
   ) external view returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
     IXAllocationVotingGovernor xAllocationVotingGovernor = IXAllocationVotingGovernor(xAllocationVotingGovernorAddress);
 
-    uint256 voterAvailableVotes = xAllocationVotingGovernor.getAndValidateVotingPower(
+    (uint256 voterAvailableVotes, bool isValid) = xAllocationVotingGovernor.getAndValidateVotingPower(
       voter,
       xAllocationVotingGovernor.roundSnapshot(roundId)
     );
+
+    // If voter has insufficient voting power, return empty arrays
+    if (!isValid) {
+      return (new bytes32[](0), new uint256[](0));
+    }
 
     // Count and collect eligible apps
     uint256 len = preferredApps.length;

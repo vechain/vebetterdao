@@ -380,5 +380,5 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   /**
    * @dev Gets voting power and validates it's greater than zero
    */
-  function getAndValidateVotingPower(address account, uint256 timepoint) external view returns (uint256);
+  function getAndValidateVotingPower(address account, uint256 timepoint) external view returns (uint256, bool);
 }
