@@ -5,7 +5,7 @@ import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
 import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence, useAnimate } from "framer-motion"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -37,15 +37,25 @@ export const GrantsStepsCard = ({
   const { isMobile } = useBreakpoints()
   const { account } = useWallet()
   const { open: openWalletModal } = useWalletModal()
+
   //MIMIC USE STEPS HOOK
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const [scope, animate] = useAnimate()
 
   const goToNext = () => {
+    // Trigger button shrink animation before step change
+    if (currentStepIndex === 0) {
+      animate(scope.current, { width: "120px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
+    }
     setCurrentStepIndex(prev => prev + 1)
   }
 
   const goToPrevious = () => {
     setCurrentStepIndex(prev => prev - 1)
+    // Trigger button expand animation when going back to step 0
+    if (currentStepIndex === 1) {
+      animate(scope.current, { width: "200px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
+    }
   }
 
   const currentStep = steps[currentStepIndex]
@@ -158,13 +168,23 @@ export const GrantsStepsCard = ({
                   </VStack>
                 </motion.div>
               </VStack>
-              <HStack w="full" justifyContent="flex-start">
-                {currentStepIndex > 0 && (
-                  <Button variant="primarySubtle" onClick={goToPrevious}>
-                    {t("Previous")}
-                  </Button>
-                )}
-                <Button variant="primaryAction" onClick={isLastStep ? handleApply : goToNext}>
+              <HStack w="full" justify="flex-start" maxW={{ md: currentStepIndex > 0 ? "100%" : "200px" }}>
+                <AnimatePresence>
+                  {currentStepIndex > 0 && (
+                    <motion.div
+                      key="previous-button"
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: "auto" }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.4, ease: [0.25, 0.25, 0.25, 0.2] }}>
+                      <Button variant="primarySubtle" onClick={goToPrevious}>
+                        {t("Back")}
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <Button ref={scope} variant="primaryAction" onClick={isLastStep ? handleApply : goToNext} w="200px">
                   {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>
@@ -176,9 +196,10 @@ export const GrantsStepsCard = ({
               <UilTimes onClick={onClose} cursor="pointer" size={24} />
             </Box>
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
               key={currentStep.key}>
               <Image
                 src={currentStep.image}
