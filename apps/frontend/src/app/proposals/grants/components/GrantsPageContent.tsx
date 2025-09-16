@@ -171,6 +171,7 @@ export const GrantsPageContent = () => {
           <VStack gap={6} alignItems="stretch">
             <HStack justifyContent="space-between" w="full" gap={4}>
               <SearchField
+                inputProps={{ minW: "200px" }}
                 placeholder={t("Search by grant name")}
                 value={searchTerm}
                 onChange={setSearchTerm}
