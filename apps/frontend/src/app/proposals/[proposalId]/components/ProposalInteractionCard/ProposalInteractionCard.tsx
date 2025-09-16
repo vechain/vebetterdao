@@ -21,13 +21,14 @@ import {
   useQueueProposal,
 } from "@/hooks"
 import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
-import { UilCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaHeart, FaRegHeart } from "react-icons/fa"
 import { FiBarChart2 } from "react-icons/fi"
+import { LuCircleSlash2 } from "react-icons/lu"
 import { TbClockHour8 } from "react-icons/tb"
 
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
@@ -179,7 +180,7 @@ export const ProposalInteractionCard = ({
       {
         percentage: Number(proposalVotesQueryData?.abstainPercentage ?? 0),
         color: "warning.primary",
-        icon: UilCircle,
+        icon: LuCircleSlash2,
       },
       {
         percentage: Number(proposalVotesQueryData?.againstPercentage ?? 0),

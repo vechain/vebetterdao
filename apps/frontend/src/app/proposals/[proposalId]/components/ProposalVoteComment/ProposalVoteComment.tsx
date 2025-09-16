@@ -1,11 +1,12 @@
 import { ProposalComment } from "@/api"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
 import { Card, HStack, Icon, Separator, Text, VStack } from "@chakra-ui/react"
-import { UilCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
+import { LuCircleSlash2 } from "react-icons/lu"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -14,7 +15,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
 
   const voteLabel = {
     FOR: { icon: UilThumbsUp, label: t("Approved"), color: "success.primary" },
-    ABSTAIN: { icon: UilCircle, label: t("Abstain"), color: "warning.primary" },
+    ABSTAIN: { icon: LuCircleSlash2, label: t("Abstain"), color: "warning.primary" },
     AGAINST: { icon: UilThumbsDown, label: t("Against"), color: "error.primary" },
   }
 
