@@ -378,7 +378,12 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function validatePersonhoodForCurrentRound(address account) external view returns (bool);
 
   /**
-   * @dev Gets voting power and validates it's greater than zero
+   * @dev Gets total voting power (voting power + deposit voting power) and validates it's greater than zero
    */
   function getAndValidateVotingPower(address account, uint256 timepoint) external view returns (uint256, bool);
+
+  /**
+   * @dev Get the total voting power (VOT3 tokens + deposits) for a voter at a given timepoint
+   */
+  function getTotalVotingPower(address voter, uint256 roundStart) external view returns (uint256);
 }

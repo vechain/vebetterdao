@@ -202,10 +202,10 @@ abstract contract XAllocationVotingGovernor is
   }
 
   /**
-   * @dev Gets voting power for an account and validates it meets the minimum threshold for auto-voting
+   * @dev Gets total voting power (voting power + deposit voting power) for an account and validates it meets the minimum threshold for auto-voting
    */
   function getAndValidateVotingPower(address account, uint256 timepoint) public view returns (uint256, bool) {
-    uint256 voterAvailableVotes = getVotes(account, timepoint);
+    uint256 voterAvailableVotes = getTotalVotingPower(account, timepoint);
     bool isValid = voterAvailableVotes > 1 ether;
     return (voterAvailableVotes, isValid);
   }
@@ -297,6 +297,19 @@ abstract contract XAllocationVotingGovernor is
    */
   function getVotes(address account, uint256 timepoint) public view virtual returns (uint256) {
     return _getVotes(account, timepoint, "");
+  }
+
+  /**
+   * @dev Get the total voting power (VOT3 tokens + deposits) for a voter at a given timepoint
+   * @param voter The address of the voter
+   * @param roundStart The start of the round (timepoint)
+   * @return Combined voting power from held tokens and proposal deposits
+   */
+  function getTotalVotingPower(address voter, uint256 roundStart) public view virtual returns (uint256) {
+    uint256 voterAvailableVotesWithDeposit = getDepositVotingPower(voter, roundStart);
+    uint256 voterAvailableVotes = getVotes(voter, roundStart) + voterAvailableVotesWithDeposit;
+
+    return voterAvailableVotes;
   }
 
   /**
