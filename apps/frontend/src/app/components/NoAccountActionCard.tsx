@@ -12,7 +12,7 @@ export const NoAccountActionCard = () => {
       size="sm"
       bg="transparent"
       icon={
-        <Icon boxSize={6} color="actions.tertiary.default">
+        <Icon boxSize={20} color="actions.tertiary.default">
           <HandPlantIcon />
         </Icon>
       }
