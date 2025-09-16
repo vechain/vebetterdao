@@ -86,7 +86,7 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
               h="100%"
               zIndex={0}
             />
-            <HStack p="9px 12px" justify="space-between" gap={6} flex={1} zIndex={1} color="#FFFFFF">
+            <HStack p="9px 12px" justify="space-between" gap={6} flex={1} zIndex={1} color="white">
               <Skeleton loading={isUserGmsLoading} w={"68px"} h={"68px"} rounded="8px">
                 <Box
                   w={"68px"}

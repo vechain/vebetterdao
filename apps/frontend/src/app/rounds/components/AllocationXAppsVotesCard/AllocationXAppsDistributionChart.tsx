@@ -137,7 +137,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
         </HStack>
       </Stack>
 
-      <VStack gap={2} color={"#6194F5"} w="full">
+      <VStack gap={2} color={"status.info.primary"} w="full">
         <Skeleton loading={roundAmountLoading} position="relative" w="full">
           <Box bg="#D5D5D5" h="8px" rounded="full" />
           {baseAmountsInfo.map((info, index) => {

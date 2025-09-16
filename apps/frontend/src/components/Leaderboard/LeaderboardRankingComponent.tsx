@@ -54,12 +54,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
       <Card.Root
         p="3"
         bg={{
-          base: isYourRanking ? "brand.primary" : "bg.tertiary",
-          _hover: isYourRanking ? "actions.primary.hover" : undefined,
+          base: isYourRanking ? "actions.primary.default" : "bg.tertiary",
         }}
         color={isYourRanking ? "white" : "text.default"}
         boxShadow={positionStyles.boxShadow}
-        borderColor={positionStyles.borderColor}>
+        borderColor={positionStyles.borderColor}
+        transition="all 0.2s ease-in-out">
         <Card.Body>
           <HStack w="full" justify="space-between">
             <HStack gap={2} zIndex={1}>
@@ -71,11 +71,11 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                       textStyle="sm"
                       fontWeight={isYourRanking ? "bold" : "semibold"}
                       gap={1}
-                      color={isYourRanking ? "text.alt" : "text.default"}>
+                      color={isYourRanking ? "white" : "text.default"}>
                       {domain ? domain : humanAddress(ranking.address, 6, 4) || ""} {isYourRanking && ` (${t("You")})`}
                     </HStack>
 
-                    <Text textStyle="sm" color={isYourRanking ? "text.alt" : "text.default"}>
+                    <Text textStyle="sm" color={isYourRanking ? "white" : "text.default"}>
                       <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
                     </Text>
                   </Box>
@@ -84,7 +84,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
             </HStack>
             {ranking.position !== 0 && (
               <Text
-                color={isYourRanking ? "text.alt" : "text.default"}
+                color={isYourRanking ? "white" : "text.default"}
                 textStyle={positionStyles.fontSize}
                 fontWeight="semibold"
                 zIndex={1}>

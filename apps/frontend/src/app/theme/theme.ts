@@ -259,6 +259,14 @@ const config = defineConfig({
           3: { value: { base: "#B1F16C", _dark: "#B4EA8266" } },
           4: { value: { base: "#B1F16C80", _dark: "#B4EA8233" } },
         },
+
+        social: {
+          telegram: { value: { base: "#0088cc", _dark: "#0088cc" } },
+          discord: { value: { base: "#5865F2", _dark: "#5865F2" } },
+          youtube: { value: { base: "#FF0000", _dark: "#FF0000" } },
+          medium: { value: { base: "black", _dark: "black" } },
+          twitter: { value: { base: "black", _dark: "black" } },
+        },
       },
       animations: {
         pulse: { value: "pulse 1.5s infinite" },

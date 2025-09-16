@@ -87,7 +87,7 @@ export const EditAppLogo = ({ form }: Props) => {
             _hover={{ bg: "#00000033" }}
             onClick={handleClickEdit}>
             <Circle bg={"#00000033"} size={"30px"}>
-              <UilPen color="#FFFFFF" size={"18px"} />
+              <UilPen color="white" size={"18px"} />
             </Circle>
           </Flex>
         </Box>

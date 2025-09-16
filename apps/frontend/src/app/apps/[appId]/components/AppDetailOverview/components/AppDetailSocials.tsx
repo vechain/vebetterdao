@@ -17,11 +17,11 @@ const SocialIconMap = {
 }
 
 const SocialIconColorMap = {
-  Twitter: "#000000",
-  Discord: "#5865F2",
-  Telegram: "#0088cc",
-  Youtube: "#FF0000",
-  Medium: "#000000",
+  Twitter: "social.twitter",
+  Discord: "social.discord",
+  Telegram: "social.telegram",
+  Youtube: "social.youtube",
+  Medium: "social.medium",
 }
 
 export const AppDetailSocials = ({ socialUrls }: { socialUrls: Social[] }) => {

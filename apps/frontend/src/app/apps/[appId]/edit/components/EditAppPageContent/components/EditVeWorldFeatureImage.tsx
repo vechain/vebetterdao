@@ -101,7 +101,7 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
           <IconButton aria-label="Edit featured image" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
-            <UilPen color="#FFFFFF" />
+            <UilPen color="white" />
           </IconButton>
         </Flex>
       </Flex>

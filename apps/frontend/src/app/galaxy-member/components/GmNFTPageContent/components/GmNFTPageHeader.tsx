@@ -47,7 +47,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
           <HStack>
             <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Text color="#FFFFFF" textStyle={isAbove800 ? "md" : "xs"}>
+              <Text color="white" textStyle={isAbove800 ? "md" : "xs"}>
                 {t("You reached the max GM NFT level")}
               </Text>
             </HStack>
@@ -68,7 +68,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
               </Text>
             </Skeleton>
-            <Text color="#FFFFFF" textStyle={isAbove800 ? "md" : "xs"}>
+            <Text color="white" textStyle={isAbove800 ? "md" : "xs"}>
               {"/"}
               {compactFormatter.format(Number(b3trToUpgrade))}
               {" B3TR"}
@@ -111,7 +111,7 @@ export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {
             rounded="12px"
             gap={6}
             flex={1}
-            color="#FFFFFF"
+            color="white"
             flexGrow={4}>
             <Box
               w={isAbove800 ? "132px" : "68px"}

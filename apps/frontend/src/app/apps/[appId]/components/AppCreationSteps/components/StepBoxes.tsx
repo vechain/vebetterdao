@@ -31,7 +31,7 @@ export const StepBoxes = ({
 }: StepBoxesProps) => {
   const borderColor = status === XAppsCreationStepStatus.ACTIVE ? "#004CFC" : "transparent"
   const IconComponent = stepIcon[type]
-  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "#000000"
+  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "black"
 
   return (
     <Stack

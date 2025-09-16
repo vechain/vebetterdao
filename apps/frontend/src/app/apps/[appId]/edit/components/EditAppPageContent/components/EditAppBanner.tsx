@@ -74,7 +74,7 @@ export const EditAppBanner = ({ form }: Props) => {
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
           <IconButton aria-label="Edit banner" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
-            <UilPen color="#FFFFFF" />
+            <UilPen color="white" />
           </IconButton>
         </Flex>
       </Flex>

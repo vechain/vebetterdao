@@ -26,7 +26,7 @@ export const NavbarBalance = () => {
         <BalancePill variant="b3tr">
           <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text color="#FFFFFF" fontSize={fontSize} fontWeight={600}>
+            <Text color="white" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
           </Flex>
@@ -35,7 +35,7 @@ export const NavbarBalance = () => {
         <BalancePill variant="vot3">
           <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color="#000000" fontSize={fontSize} fontWeight={600}>
+            <Text color="black" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
           </Flex>

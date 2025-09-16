@@ -152,7 +152,7 @@ export const AppBalanceCard = () => {
             <Text textStyle="md" fontWeight="semibold" color="brand.primary">
               {t("View history")}
             </Text>
-            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />
+            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="actions.tertiary.default" cursor="pointer" />
           </HStack>
           {!isAppAdmin && (
             <GenericAlert

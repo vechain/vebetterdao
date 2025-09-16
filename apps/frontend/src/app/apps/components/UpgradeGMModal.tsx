@@ -122,7 +122,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                   rounded="12px"
                   gap={isAbove800 ? 5 : 3}
                   flex={1}
-                  color="#FFFFFF"
+                  color="white"
                   flexGrow={4}>
                   <Box
                     w={isAbove800 ? "70px" : "46px"}

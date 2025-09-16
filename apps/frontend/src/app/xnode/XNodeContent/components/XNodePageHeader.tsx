@@ -31,7 +31,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
           gap={6}
           flex={1}
           cursor={"pointer"}
-          color="#FFFFFF"
+          color="white"
           flexGrow={4}>
           <Image
             src={xNodeImage}

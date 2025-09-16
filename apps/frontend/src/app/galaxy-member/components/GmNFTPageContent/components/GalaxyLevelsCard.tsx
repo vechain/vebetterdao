@@ -101,7 +101,7 @@ export const GalaxyLevelsCard = () => {
                   <Flex position="relative" w="10" h="10" rounded="full" overflow={"hidden"}>
                     <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position={"absolute"} />
                     <Flex w="full" h="full" align="center" justify="center" bg={"rgba(0, 0, 0, 0.2)"} zIndex={1}>
-                      <Text textStyle="md" color="#FFFFFF">
+                      <Text textStyle="md" color="white">
                         {gmNft.level}
                       </Text>
                     </Flex>

@@ -1,4 +1,4 @@
-import { Field, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { Field, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
@@ -36,35 +36,35 @@ export const EditAppSocialUrls = ({ form }: Props) => {
         url: twitterUrl,
         error: errors.twitterUrl,
         placeholder: t(`Add your x.com link`),
-        icon: <RiTwitterXFill />,
+        icon: <Icon as={RiTwitterXFill} color="social.twitter" />,
       },
       {
         inputKey: "discordUrl",
         url: discordUrl,
         error: errors.discordUrl,
         placeholder: t(`Add your discord link`),
-        icon: <FaDiscord color="#7289DA" />,
+        icon: <Icon as={FaDiscord} color="social.discord" />,
       },
       {
         inputKey: "telegramUrl",
         url: telegramUrl,
         error: errors.telegramUrl,
         placeholder: t(`Add your telegram link`),
-        icon: <FaTelegram color="#0088CC" />,
+        icon: <Icon as={FaTelegram} color="social.telegram" />,
       },
       {
         inputKey: "youtubeUrl",
         url: youtubeUrl,
         error: errors.youtubeUrl,
         placeholder: t(`Add your youtube link`),
-        icon: <FaYoutube color="#FF0000" />,
+        icon: <Icon as={FaYoutube} color="social.youtube" />,
       },
       {
         inputKey: "mediumUrl",
         url: mediumUrl,
         error: errors.mediumUrl,
         placeholder: t(`Add your medium link`),
-        icon: <FaMedium />,
+        icon: <Icon as={FaMedium} color="social.medium" />,
       },
     ]
   }, [

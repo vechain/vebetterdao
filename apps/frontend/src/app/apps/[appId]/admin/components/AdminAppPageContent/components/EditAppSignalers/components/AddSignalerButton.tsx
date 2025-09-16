@@ -44,7 +44,7 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
           </Dialog.CloseTrigger>
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
-              <UilUser size="54px" color="#004CFC" />
+              <UilUser size="54px" color="actions.tertiary.default" />
               <Heading size="3xl">{t("Add a new signaler")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>

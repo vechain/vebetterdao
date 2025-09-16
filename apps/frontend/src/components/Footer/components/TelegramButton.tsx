@@ -18,7 +18,7 @@ export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
       <Button
         color={"white"}
         bgColor={`#27a6e7`}
-        _hover={{ bg: "#0088cc" }}
+        _hover={{ bg: "social.telegram" }}
         borderRadius={22}
         w={isFullWidth ? "full" : undefined}>
         <FaTelegram size={24} />

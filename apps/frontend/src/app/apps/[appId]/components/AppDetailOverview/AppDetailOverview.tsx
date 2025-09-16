@@ -166,7 +166,7 @@ export const AppDetailOverview = ({
                       )}
                       <Button flex={1} variant={"primary"} onClick={goToWebsite}>
                         {t("Go to Website")}
-                        <UilArrowUpRight color="#FFFFFF" size={"16px"} />
+                        <UilArrowUpRight color="white" size={"16px"} />
                       </Button>
                       {isMobile && (
                         <>

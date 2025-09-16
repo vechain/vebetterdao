@@ -81,7 +81,7 @@ export const CastYourVoteCard: React.FC = () => {
 
               <Button zIndex={1} mt={2} variant={"primary"} borderRadius={"full"} onClick={onClick}>
                 {t("See round")}
-                <FiArrowUpRight color="#FFFFFF" />
+                <FiArrowUpRight color="white" />
               </Button>
             </VStack>
           </GridItem>

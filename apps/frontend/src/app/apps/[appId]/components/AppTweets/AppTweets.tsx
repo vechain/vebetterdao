@@ -140,7 +140,7 @@ export const AppTweets = () => {
                     variant="primary"
                     disabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
-                    <UilCheckCircle color="#FFFFFF" fontSize="16px" />
+                    <UilCheckCircle color="white" fontSize="16px" />
                     {t("Save changes")}
                   </Button>
                 </HStack>
@@ -153,7 +153,7 @@ export const AppTweets = () => {
                     </Button>
                   )}
                   <Button variant="primary" onClick={onNewTweetModalOpen}>
-                    <UilPlus color="#FFFFFF" fontSize="16px" />
+                    <UilPlus color="white" fontSize="16px" />
                     {t("Add X post")}
                   </Button>
                 </HStack>
