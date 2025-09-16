@@ -1,32 +1,32 @@
+import { GenericAlert } from "@/app/components/Alert"
+import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
+import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
+import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
+import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
+import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
+import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
 import {
-  Text,
+  Accordion,
+  Badge,
+  Button,
   Grid,
   GridItem,
   Heading,
-  List,
-  Button,
-  Icon,
-  Accordion,
-  Badge,
   HStack,
+  Icon,
+  Link,
+  List,
+  Text,
   useMediaQuery,
   VStack,
-  Link,
 } from "@chakra-ui/react"
-import { FieldErrors, UseFormRegister, UseFormSetValue, UseFormGetValues, UseFormWatch, Control } from "react-hook-form"
-import { Trans, useTranslation } from "react-i18next"
-import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
-import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
-import { LuArrowRight } from "react-icons/lu"
-import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
-import dayjs from "dayjs"
-import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
-import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
-import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
-import { GenericAlert } from "@/app/components/Alert"
+import dayjs from "dayjs"
+import { Control, FieldErrors, UseFormGetValues, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
+import { Trans, useTranslation } from "react-i18next"
+import { LuArrowRight } from "react-icons/lu"
 
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
@@ -96,7 +96,7 @@ export const MilestoneSection = ({
   }
 
   return (
-    <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })}>
+    <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })} pb={5}>
       <Accordion.ItemTrigger w="full" py={4} textAlign="left" justifyContent="space-between">
         <HStack w="full" gap={4}>
           <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>

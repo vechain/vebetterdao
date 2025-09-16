@@ -197,7 +197,7 @@ export const AboutGrant = ({
   return (
     <Grid templateColumns={{ base: "1fr", md: "1fr" }} w="full" gap={8}>
       <Accordion.Root multiple w="full" defaultValue={["company-details", "project-details", "outcomes"]} spaceY={4}>
-        <Accordion.Item value="company-details" spaceY={2}>
+        <Accordion.Item value="company-details" pb={5}>
           <Accordion.ItemTrigger>
             <Text fontSize="lg" fontWeight="semibold">
               {t("Company details")}
@@ -284,7 +284,7 @@ export const AboutGrant = ({
             </VStack>
           </Accordion.ItemContent>
         </Accordion.Item>
-        <Accordion.Item value="project-details" spaceY={2}>
+        <Accordion.Item value="project-details" pb={5}>
           <Accordion.ItemTrigger>
             <Text fontSize="lg" fontWeight="semibold">
               {t("Grant details")}
@@ -436,7 +436,7 @@ export const AboutGrant = ({
             </Grid>
           </Accordion.ItemContent>
         </Accordion.Item>
-        <Accordion.Item value="outcomes" spaceY={2}>
+        <Accordion.Item value="outcomes" pb={5}>
           <Accordion.ItemTrigger>
             <Text fontSize="lg" fontWeight="semibold">
               {t("Outcomes")}
