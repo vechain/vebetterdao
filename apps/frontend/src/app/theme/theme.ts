@@ -218,6 +218,14 @@ const config = defineConfig({
           },
         },
 
+        brand: {
+          primary: {
+            value: {
+              _dark: "#277CDF",
+              base: "#004CFC",
+            },
+          },
+        },
         // // Brand Colors
         // primary: {
         //   _dark: { value: "#277CDF" },
