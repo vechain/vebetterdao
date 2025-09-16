@@ -269,14 +269,12 @@ export const ActionBanner = () => {
         </SwiperSlide>
       ))}
 
-      {/* Custom Navigation Buttons */}
-
       <IconButton
         className="custom-swiper-button-prev"
         hideBelow="md"
         pos={"absolute"}
         zIndex={2} // Ensure it's above the slides
-        //variant="secondary"
+        variant="subtle"
         color="actions.tertiary.default"
         left={5}
         top={"50%"}
@@ -290,7 +288,7 @@ export const ActionBanner = () => {
         hideBelow="md"
         pos={"absolute"}
         zIndex={2} // Ensure it's above the slides
-        // variant="secondary"
+        variant="subtle"
         color="actions.tertiary.default"
         right={5}
         top={"50%"}

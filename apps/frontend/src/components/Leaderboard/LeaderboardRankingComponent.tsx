@@ -55,6 +55,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
         p="3"
         bg={{
           base: isYourRanking ? "actions.primary.default" : "bg.tertiary",
+          _hover: isYourRanking ? "actions.primary.hover" : undefined,
         }}
         color={isYourRanking ? "white" : "text.default"}
         boxShadow={positionStyles.boxShadow}

@@ -41,7 +41,7 @@ export const SwapB3trVot3 = ({ address }: { address: string }) => {
             value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
           })}
         </Heading>
-        <GridItem justifySelf={{ base: "flex-start", md: "flex-end" }}>
+        <GridItem alignSelf="center" justifySelf={{ base: "flex-start", md: "flex-end" }}>
           <CountdownVoting onOpen={onOpenSnapshot} />
         </GridItem>
 
