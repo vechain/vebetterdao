@@ -69,8 +69,8 @@ export const GrantsNewFormStepCard = () => {
           control={control}
           register={register}
           setValue={setValue}
-          watch={watch}
           getValues={getValues}
+          watch={watch}
           setData={setData}
           errors={errors}
           // pass current RHF values instead of the unstable spread store object
@@ -99,11 +99,16 @@ export const GrantsNewFormStepCard = () => {
   }, [currentStepIndex])
 
   const { onMetadataUpload } = useUploadGrantProposalMetadata()
-  const { sendTransaction: createGrantProposal } = useCreateGrantProposal({
+  const { sendTransaction: createGrantProposal, resetStatus } = useCreateGrantProposal({
     onSuccess: () => {
+      resetStatus()
+      //Cleanup form and storage
+      clearData()
+      reset()
       router.push(`/proposals/grants`)
     },
   })
+
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const onSubmit = async (data: GrantFormData) => {
@@ -121,6 +126,7 @@ export const GrantsNewFormStepCard = () => {
     const milestonesIpfsCID = await onMetadataUpload(data.milestones)
     if (!milestonesIpfsCID) return console.error("Error uploading milestones")
     if (!data.votingRoundId) return console.error("Support round ID is required")
+    resetStatus()
 
     await createGrantProposal({
       metadataIpfsCID: proposalMetadataURI,
@@ -130,10 +136,6 @@ export const GrantsNewFormStepCard = () => {
       votingRoundId: Number(data.votingRoundId),
       depositAmount: "0",
     })
-
-    //Cleanup form and storage
-    clearData()
-    reset()
   }
 
   const firstStep = 0

@@ -88,7 +88,6 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
   const refetchQueryKeys = useMemo(() => {
     return [
       getProposalsEventsQueryKey(),
-
       getAllProposalsMetadataQueryKey(),
       getEnrichedProposalsQueryKey(),
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),

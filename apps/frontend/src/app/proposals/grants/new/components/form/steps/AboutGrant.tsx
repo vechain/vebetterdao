@@ -513,7 +513,7 @@ export const AboutGrant = ({
                 <GridItem colSpan={{ base: 1, md: 2 }}>
                   <Field.Root invalid={!!errors.outcomesAttachment?.message}>
                     <HStack justify="space-between" w="full">
-                      <Field.Label fontSize="sm" fontWeight="medium" htmlFor={register.name}>
+                      <Field.Label fontSize="sm" fontWeight="medium">
                         {t("Attachments")}
                       </Field.Label>
                       <Text fontSize="sm" fontWeight="medium" color="text.subtle">
