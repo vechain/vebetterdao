@@ -1,4 +1,5 @@
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
 import { useCurrentBlock } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
@@ -8,6 +9,18 @@ import { useProposalSnapshot } from "./useProposalSnapshot"
 
 const blockTime = getConfig().network.blockTime
 
+export const getProposalInteractionDatesQueryKey = (
+  proposalId: string,
+  currentBlockNumber?: number,
+  snapshotBlock?: string,
+  deadlineBlock?: string,
+) => ["proposal-interaction-dates", proposalId, currentBlockNumber, snapshotBlock, deadlineBlock]
+
+/**
+ * Hook to calculate proposal interaction dates (support end date and voting end date)
+ * @param proposalId The ID of the proposal
+ * @returns Object containing supportEndDate, votingEndDate, and supportStartBlock
+ */
 export const useProposalInteractionDates = (proposalId: string) => {
   const { data: currentBlock } = useCurrentBlock()
   const proposalSnapshot = useProposalSnapshot(proposalId) //This is the end of support phase / start of voting phase
@@ -18,25 +31,37 @@ export const useProposalInteractionDates = (proposalId: string) => {
     return Number(proposalSnapshot.data)
   }, [currentBlock?.number, proposalSnapshot.data])
 
-  const supportEndDate = useMemo(() => {
-    if (!currentBlock?.number || !proposalSnapshot.data) return 0
-    const endBlockFromNow = Number(proposalSnapshot.data) - currentBlock.number
+  const { data: calculatedDates } = useQuery({
+    queryKey: getProposalInteractionDatesQueryKey(
+      proposalId,
+      currentBlock?.number,
+      proposalSnapshot.data,
+      proposalDeadline.data,
+    ),
+    queryFn: () => {
+      if (!currentBlock?.number || !proposalSnapshot.data || !proposalDeadline.data) {
+        return { supportEndDate: 0, votingEndDate: 0 }
+      }
 
-    const durationLeftTimestamp = endBlockFromNow * blockTime
-    return dayjs().add(durationLeftTimestamp, "milliseconds").toDate().getTime()
-  }, [currentBlock?.number, proposalSnapshot.data])
+      const currentBlockNumber = currentBlock.number
 
-  const votingEndDate = useMemo(() => {
-    if (!currentBlock?.number || !proposalSnapshot.data) return 0
-    const endBlockFromNow = Number(proposalDeadline.data) - currentBlock.number
+      // Calculate support end date
+      const supportEndBlockFromNow = Number(proposalSnapshot.data) - currentBlockNumber
+      const supportDurationLeftTimestamp = supportEndBlockFromNow * blockTime
+      const supportEndDate = dayjs().add(supportDurationLeftTimestamp, "milliseconds").toDate().getTime()
 
-    const durationLeftTimestamp = endBlockFromNow * blockTime
-    return dayjs().add(durationLeftTimestamp, "milliseconds").toDate().getTime()
-  }, [currentBlock?.number, proposalDeadline.data, proposalSnapshot.data])
+      // Calculate voting end date
+      const votingEndBlockFromNow = Number(proposalDeadline.data) - currentBlockNumber
+      const votingDurationLeftTimestamp = votingEndBlockFromNow * blockTime
+      const votingEndDate = dayjs().add(votingDurationLeftTimestamp, "milliseconds").toDate().getTime()
+
+      return { supportEndDate, votingEndDate }
+    },
+  })
 
   return {
-    supportEndDate,
-    votingEndDate,
+    supportEndDate: calculatedDates?.supportEndDate ?? 0,
+    votingEndDate: calculatedDates?.votingEndDate ?? 0,
     supportStartBlock,
   }
 }

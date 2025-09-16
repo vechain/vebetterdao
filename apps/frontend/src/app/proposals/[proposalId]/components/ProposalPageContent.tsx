@@ -1,14 +1,15 @@
 import { useProposalInteractionDates } from "@/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
-import { ProposalTimeline } from "./ProposalTimeline"
-import { useTranslation } from "react-i18next"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, Skeleton, Tabs, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
+import { useTranslation } from "react-i18next"
+
 import { ProposalInteractionCard } from "./ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview"
+import { ProposalTimeline } from "./ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
 
 type Props = {
@@ -40,17 +41,69 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const isVotingPhase = proposal?.state === ProposalState.Active
   const targetDate = isVotingPhase ? votingEndDate : supportEndDate
 
+  // Throttle countdown calculations to reduce re-renders
+  const lastCountdownCalculationRef = useRef<{
+    targetDate: number
+    timestamp: number
+    result: { daysLeft: number; hoursLeft: number; minutesLeft: number }
+  } | null>(null)
+
   const { daysLeft, hoursLeft, minutesLeft } = useMemo(() => {
-    const now = dayjs()
-    const daysLeft = dayjs(targetDate).diff(now, "days")
-    const hoursLeft = dayjs(targetDate).diff(now, "hours") % 24
-    const minutesLeft = dayjs(targetDate).diff(now, "minutes") % 60
-    return {
-      daysLeft,
-      hoursLeft,
-      minutesLeft,
+    if (!targetDate) return { daysLeft: 0, hoursLeft: 0, minutesLeft: 0 }
+
+    const now = Date.now()
+
+    // Throttle calculations - only recalculate every 30 seconds to reduce excessive re-renders
+    if (
+      lastCountdownCalculationRef.current &&
+      lastCountdownCalculationRef.current.targetDate === targetDate &&
+      now - lastCountdownCalculationRef.current.timestamp < 30000 // 30 seconds
+    ) {
+      return lastCountdownCalculationRef.current.result
     }
+
+    const nowDayjs = dayjs()
+    const target = dayjs(targetDate)
+
+    // Only calculate if target is in the future
+    if (target.isBefore(nowDayjs)) {
+      const result = { daysLeft: 0, hoursLeft: 0, minutesLeft: 0 }
+      lastCountdownCalculationRef.current = { targetDate, timestamp: now, result }
+      return result
+    }
+
+    const daysLeft = target.diff(nowDayjs, "days")
+    const hoursLeft = target.diff(nowDayjs, "hours") % 24
+    const minutesLeft = target.diff(nowDayjs, "minutes") % 60
+
+    const result = {
+      daysLeft: Math.max(0, daysLeft),
+      hoursLeft: Math.max(0, hoursLeft),
+      minutesLeft: Math.max(0, minutesLeft),
+    }
+
+    // Cache the result
+    lastCountdownCalculationRef.current = { targetDate, timestamp: now, result }
+
+    return result
   }, [targetDate])
+
+  // Memoize heavy child components to prevent unnecessary re-renders
+  const memoizedProposalInteractionCard = useMemo(
+    () => (
+      <ProposalInteractionCard
+        proposal={proposal}
+        isVotingPhase={isVotingPhase}
+        daysLeft={daysLeft}
+        hoursLeft={hoursLeft}
+        minutesLeft={minutesLeft}
+        isLoading={isLoading}
+      />
+    ),
+    [proposal, isVotingPhase, daysLeft, hoursLeft, minutesLeft, isLoading],
+  )
+
+  const memoizedProposalTimeline = useMemo(() => <ProposalTimeline proposal={proposal} />, [proposal])
 
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
@@ -89,30 +142,16 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                   </Tabs.Trigger>
                 </Tabs.List>
                 <Tabs.Content value="session" pt={6}>
-                  <ProposalInteractionCard
-                    proposal={proposal}
-                    isVotingPhase={isVotingPhase}
-                    daysLeft={daysLeft}
-                    hoursLeft={hoursLeft}
-                    minutesLeft={minutesLeft}
-                    isLoading={isLoading}
-                  />
+                  {memoizedProposalInteractionCard}
                 </Tabs.Content>
                 <Tabs.Content value="timeline" pt={6}>
-                  <ProposalTimeline proposal={proposal} />
+                  {memoizedProposalTimeline}
                 </Tabs.Content>
               </Tabs.Root>
             ) : (
               <>
-                <ProposalInteractionCard
-                  proposal={proposal}
-                  daysLeft={daysLeft}
-                  hoursLeft={hoursLeft}
-                  minutesLeft={minutesLeft}
-                  isVotingPhase={isVotingPhase}
-                  isLoading={isLoading}
-                />
-                <ProposalTimeline proposal={proposal} />
+                {memoizedProposalInteractionCard}
+                {memoizedProposalTimeline}
               </>
             )}
           </VStack>
