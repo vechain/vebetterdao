@@ -143,7 +143,7 @@ export const GrantsStepsCard = ({
                   key={currentStep.key}
                   style={{ width: "100%" }}>
                   <VStack alignItems="flex-start" w="full">
-                    <Heading size="md" textStyle="heading">
+                    <Heading size="xl" textStyle="heading">
                       {currentStep.heading}
                     </Heading>
                     {currentStep.listItems.length > 0 ? (
