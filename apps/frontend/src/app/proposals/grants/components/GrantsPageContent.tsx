@@ -16,6 +16,7 @@ import {
   HStack,
   Icon,
   Link,
+  Skeleton,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
@@ -65,7 +66,10 @@ export const GrantsPageContent = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300) // 300ms debounce
 
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
-  const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] } } = useProposalEnriched()
+  const {
+    data: { enrichedGrantProposals } = { enrichedGrantProposals: [] },
+    isLoading: isLoadingEnrichedGrantProposals,
+  } = useProposalEnriched()
 
   // First apply search, then apply filters
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
@@ -180,8 +184,20 @@ export const GrantsPageContent = () => {
                 isMultiOption
               />
             </HStack>
+
             <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
-              {filteredProposals &&
+              {isLoadingEnrichedGrantProposals ? (
+                <>
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <GridItem key={`grants-list-skeleton-${index + 1}`}>
+                      <Skeleton loading={true} h="200px" w="full" borderRadius="md">
+                        <div />
+                      </Skeleton>
+                    </GridItem>
+                  ))}
+                </>
+              ) : (
+                filteredProposals &&
                 filteredProposals?.map(proposal => (
                   <GridItem key={proposal.id}>
                     <GrantsProposalCard
@@ -189,7 +205,8 @@ export const GrantsPageContent = () => {
                       proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
                     />
                   </GridItem>
-                ))}
+                ))
+              )}
             </Grid>
           </VStack>
         </GridItem>

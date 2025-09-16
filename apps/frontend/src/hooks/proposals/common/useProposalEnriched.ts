@@ -44,9 +44,32 @@ export const useProposalEnriched = () => {
   })
   // Step 4: Create enrichment function with useCallback for stability
   const enrichProposals = useCallback(() => {
+    const hasGrants = !!grantProposals && grantProposals?.length > 0
+    const hasStandard = !!standardProposals && standardProposals?.length > 0
+
     // Early return if no proposals
-    if (!grantProposals.length && !standardProposals.length) {
+    if (!hasGrants && !hasStandard) {
       throw new Error("No proposals found")
+    }
+
+    //If has grant but no grant details, throw an error
+    if (hasGrants && !grantProposalsDetailsMap) {
+      throw new Error("No grant proposal details found")
+    }
+
+    //If has standard but no standard details, throw an error
+    if (hasStandard && !standardProposalsDetailsMap) {
+      throw new Error("No standard proposal details found")
+    }
+
+    //If has grant but no grant states, throw an error
+    if (hasGrants && !grantsProposalStates) {
+      throw new Error("No grant proposal states found")
+    }
+
+    //If has standard but no standard states, throw an error
+    if (hasStandard && !standardProposalStates) {
+      throw new Error("No standard proposal states found")
     }
 
     // Enrich grant proposals
@@ -60,7 +83,7 @@ export const useProposalEnriched = () => {
         ...details,
         state,
         // Use the fallback logic from getGrantProposalMetadataOrReturnDefault if title is missing
-        title: details?.title || details?.projectName || details?.shortDescription || "Grant Proposal",
+        title: details?.title || details?.projectName || details?.shortDescription,
       } as EnsureRequired<
         typeof event & typeof details & { state: ProposalState },
         "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
