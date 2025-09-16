@@ -66,7 +66,13 @@ export const ProposalsPageContent = () => {
 
       <Grid alignItems="flex-start" w={"full"} gap={4} templateColumns={{ base: "1fr", md: "2fr 1fr" }}>
         <Card.Root unstyled>
-          <Card.Header w="full" flexDirection="row" alignItems="flex-start" justifyContent="space-between">
+          <Card.Header
+            w="full"
+            display="flex"
+            py="4"
+            flexDirection="row"
+            alignItems="flex-start"
+            justifyContent="space-between">
             <Card.Title textStyle={{ base: "2xl", md: "3xl" }}> {t("Proposals")} </Card.Title>
 
             <ProposalFilters />
