@@ -40,12 +40,8 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const { data: userDeposits } = useProposalUserDeposit(proposal.id, account?.address ?? "")
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal.id)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal.id)
-  const isSupportOrVotingPhase = proposal.state === ProposalState.Pending || proposal.state === ProposalState.Active
   const communityDepositPercentage =
     (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
-
-  //Show countdown for next step depending on the proposal state
-  const endsAt = proposal.state === ProposalState.Pending ? supportEndDate : votingEndDate
 
   const goToProposal = () => {
     router.push(`/proposals/${proposal.id}`)
@@ -62,6 +58,20 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   // Extract the mapped vote type from the hook
   const userVoteOption = userVoteEvent?.userVote
   const hasUserVoted = !!userVoteEvent?.hasVoted
+
+  const isSupportOrVotingPhase = useMemo(() => {
+    return proposal.state === ProposalState.Pending || proposal.state === ProposalState.Active
+  }, [proposal.state])
+
+  const endsAt = useMemo(() => {
+    return proposal.state === ProposalState.Pending ? supportEndDate : votingEndDate
+  }, [proposal.state, supportEndDate, votingEndDate])
+
+  // Cache the time left calculation to prevent blinking/frequent updates
+  const timeLeftDisplay = useMemo(() => {
+    if (!isSupportOrVotingPhase) return null
+    return formatTimeLeft(endsAt)
+  }, [endsAt, isSupportOrVotingPhase])
   return (
     <Card.Root w="full" p={{ base: 5, md: 7 }} cursor="pointer" onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
@@ -123,10 +133,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 </HStack>
               )}
             </HStack>
-            {isSupportOrVotingPhase && endsAt ? (
+            {timeLeftDisplay ? (
               <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
                 {t("End: {{endDate}}", {
-                  endDate: formatTimeLeft(endsAt),
+                  endDate: timeLeftDisplay,
                 })}
               </Text>
             ) : null}
@@ -140,10 +150,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
               />
-              {isSupportOrVotingPhase && endsAt ? (
+              {timeLeftDisplay ? (
                 <Text fontSize="14px" color="text.subtle">
                   {t("End: {{endDate}}", {
-                    endDate: formatTimeLeft(endsAt),
+                    endDate: timeLeftDisplay,
                   })}
                 </Text>
               ) : null}

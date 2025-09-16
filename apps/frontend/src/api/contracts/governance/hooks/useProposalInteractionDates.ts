@@ -57,6 +57,7 @@ export const useProposalInteractionDates = (proposalId: string) => {
 
       return { supportEndDate, votingEndDate }
     },
+    staleTime: 1000 * 60, // 1 minute
   })
 
   return {
