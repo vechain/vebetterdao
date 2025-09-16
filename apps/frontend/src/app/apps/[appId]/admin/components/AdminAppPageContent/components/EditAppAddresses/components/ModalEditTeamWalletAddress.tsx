@@ -31,7 +31,7 @@ export const ModalEditTeamWalletAddress = ({ handleEditTeamWalletAddress, onClos
               <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
-              <Button variant="dangerGhost" onClick={handleEditTeamWalletAddress}>
+              <Button variant="ghost" color="status.negative.primary" onClick={handleEditTeamWalletAddress}>
                 {t("Yes, I'm sure")}
               </Button>
             </VStack>

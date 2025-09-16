@@ -234,21 +234,22 @@ export const EditAppPageContent = () => {
           flexDirection={["column", "row"]}
           justify={["flex-start", "space-between"]}
           align={["flex-start", "center"]}>
-          <HStack gap={4}>
-            <Field.Root invalid={!!errors.name}>
+          <HStack w="full" gap={4}>
+            <Field.Root w="full" invalid={!!errors.name}>
               <Input
+                fontWeight="semibold"
+                size="lg"
                 {...register("name", {
                   required: { value: true, message: t("Name required") },
                   minLength: { value: 3, message: t("Name must be at least 3 characters") },
                 })}
                 defaultValue={appMetadata?.name ?? ""}
-                textStyle="3xl"
               />
               <Field.ErrorText textStyle="xs">{errors?.name?.message ?? ""}</Field.ErrorText>
             </Field.Root>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-            <Button variant="primaryGhost" onClick={goToAppPage}>
+            <Button variant="ghost" color="actions.tertiary.default" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
             <Button variant="primary" type="submit" disabled={!isFormChanged}>

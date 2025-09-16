@@ -106,7 +106,7 @@ export const EndorsersItem = ({
                 <Popover.Body p={2}>
                   <VStack alignItems="stretch" gap={3}>
                     {isAppAdmin && (
-                      <HStack color="error.primary" onClick={handleRemoveClick} cursor="pointer">
+                      <HStack color="status.negative.primary" onClick={handleRemoveClick} cursor="pointer">
                         <UilTrash />
                         <Text whiteSpace="nowrap" textStyle={["sm", "md"]}>
                           {t("Remove this endorsement")}

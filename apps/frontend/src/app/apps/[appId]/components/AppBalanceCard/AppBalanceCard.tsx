@@ -136,11 +136,10 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"flex-end"} gap={0}>
               <Button
                 mt={1}
+                colorPalette={isPaused ? "red" : undefined}
                 disabled={!isAppAdmin}
                 onClick={onOpenManagementCenter}
-                variant={isPaused ? "dangerFilledTonal" : "primaryAction"}
-                color={isPaused ? "#C84968" : "white"}
-                borderRadius={"full"}
+                variant={isPaused ? "solid" : "primary"}
                 w={"full"}>
                 {isPaused ? t("Resume") : t("Manage")}
               </Button>

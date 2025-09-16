@@ -101,10 +101,10 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
         </HStack>
 
         <VStack align="stretch" w="full">
-          <Button variant={"dangerFilled"} w={"full"} onClick={handleUnendorsement}>
+          <Button colorPalette="red" w={"full"} onClick={handleUnendorsement}>
             {t("Unendorse now")}
           </Button>
-          <Button variant={"primaryGhost"} w={"full"} onClick={onClose}>
+          <Button variant="ghost" color="actions.tertiary.default" w={"full"} onClick={onClose}>
             {t("Cancel")}
           </Button>
         </VStack>

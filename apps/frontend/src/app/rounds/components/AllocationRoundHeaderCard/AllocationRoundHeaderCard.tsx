@@ -82,7 +82,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished, t])
 
   return (
-    <Card.Root w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">
+    <Card.Root w="full" borderRadius={"3xl"} variant="primary" data-testid="allocation-round-header-card">
       <Card.Body>
         <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
           <VStack gap={4} align="flex-start" flex={2}>

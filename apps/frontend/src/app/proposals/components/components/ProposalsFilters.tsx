@@ -12,26 +12,6 @@ const frameworks = createListCollection({
   ],
 })
 
-const filters: Record<ProposalFilter, string[]> = {
-  [ProposalFilter.State]: [
-    StateFilter.Canceled,
-    StateFilter.Defeated,
-    StateFilter.Succeeded,
-    StateFilter.DepositNotMet,
-  ],
-  [ProposalFilter.InThisRound]: [],
-  [ProposalFilter.LookingForSupport]: [],
-  [ProposalFilter.UpcomingVoting]: [], // Pending
-}
-
-// The following are the default filters that are selected when no ProposalFilter.State is set
-const displayFilters = Object.keys(filters).filter(
-  filterKey =>
-    filterKey !== ProposalFilter.InThisRound &&
-    filterKey !== ProposalFilter.LookingForSupport &&
-    filterKey !== ProposalFilter.UpcomingVoting,
-)
-
 const defaultFilters = [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport, ProposalFilter.UpcomingVoting]
 
 export const ProposalFilters = () => {

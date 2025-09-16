@@ -92,11 +92,7 @@ export const LowOnVthoCard: React.FC = () => {
   if (!account?.address || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
-    <Card.Root
-      borderColor={"#F29B32"}
-      backgroundColor={"#FFF3E5"}
-      variant={"baseWithBorder"}
-      boxShadow={"0px 0px 5px #F29B32"}>
+    <Card.Root borderColor={"#F29B32"} backgroundColor={"#FFF3E5"} variant="primary" boxShadow={"0px 0px 5px #F29B32"}>
       <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={1} alignContent={["start", "center"]} justifySelf={["start", "center"]}>

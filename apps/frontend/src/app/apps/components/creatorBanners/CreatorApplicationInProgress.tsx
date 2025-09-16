@@ -6,7 +6,7 @@ export const CreatorApplicationInProgress = () => {
 
   return (
     <Card.Root
-      variant={"baseWithBorder"}
+      variant="primary"
       w="full"
       maxW="100%"
       h={"full"}

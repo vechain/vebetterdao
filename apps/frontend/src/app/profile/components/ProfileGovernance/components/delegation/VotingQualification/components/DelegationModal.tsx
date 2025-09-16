@@ -91,7 +91,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
               onAddressResolved={address => setValue("walletAddress", address ?? "")}
             />
             {isEntity ? (
-              <Text color="error.primary" textStyle="sm">
+              <Text color="status.negative.primary" textStyle="sm">
                 {t("You can't delegate from an account linked as a secondary account")}
               </Text>
             ) : null}
@@ -102,7 +102,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
             {t("Send request")}
           </Button>
 
-          <Button variant={"primaryGhost"} onClick={handleClose}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
             {t("Cancel")}
           </Button>
         </VStack>
@@ -115,7 +115,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     () => (
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="error.primary" size={triangleSize} />
+          <ExclamationTriangle color="status.negative.primary" size={triangleSize} />
           <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to delegate your Voting Qualification?")}
           </Heading>
@@ -126,7 +126,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box color="error.primary" textStyle="sm">
+          <Box color="status.negative.primary" textStyle="sm">
             <Alert.Title as="span">{t("You will not be able to vote until you remove the delegation")}</Alert.Title>
             <Alert.Description as="span">{t("or you receive someone else’s voting qualification.")}</Alert.Description>
           </Box>
@@ -135,7 +135,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={goToPrevious}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={goToPrevious}>
             {t("No, go back")}
           </Button>
         </VStack>

@@ -102,7 +102,7 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
                 onClick={handleAddressFormSubmit(onSubmit)}>
                 {t("Add distributor")}
               </Button>
-              <Button variant="primaryGhost" onClick={handleClose}>
+              <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
                 {t("Cancel")}
               </Button>
             </VStack>
@@ -110,7 +110,7 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
         </Dialog.Body>
       </CustomModalContent>
       <Dialog.Trigger asChild>
-        <Button mt={4} onClick={onOpen} variant="primarySubtle" alignSelf={"flex-start"}>
+        <Button mt={4} onClick={onOpen} variant="ghost" color="actions.tertiary.default" alignSelf={"flex-start"}>
           <UilPlus size="14px" />
           {t("Add distributor")}
         </Button>

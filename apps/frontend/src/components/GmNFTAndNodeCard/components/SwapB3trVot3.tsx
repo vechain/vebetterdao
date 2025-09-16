@@ -1,18 +1,6 @@
 import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { B3TRIcon } from "@/components/Icons"
-import {
-  Button,
-  Heading,
-  Image,
-  Skeleton,
-  useDisclosure,
-  SimpleGrid,
-  Card,
-  Stat,
-  Icon,
-  GridItem,
-  Grid,
-} from "@chakra-ui/react"
+import { Button, Heading, Image, Skeleton, useDisclosure, Card, Stat, Icon, GridItem, Grid } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import React from "react"
 import { useTranslation } from "react-i18next"

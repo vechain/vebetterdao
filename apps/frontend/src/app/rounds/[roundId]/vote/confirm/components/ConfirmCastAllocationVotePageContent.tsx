@@ -143,7 +143,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
             )}
           </Text>
-          <ResponsiveCard cardProps={{ variant: "filled" }}>
+          <ResponsiveCard cardProps={{ variant: "primary" }}>
             <VStack flex={1} w="full" gap={8} align={"flex-start"}>
               <VStack gap={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">

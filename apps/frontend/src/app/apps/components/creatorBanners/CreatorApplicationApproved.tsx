@@ -12,7 +12,7 @@ export const CreatorApplicationApproved = () => {
 
   return (
     <Card.Root
-      variant={"baseWithBorder"}
+      variant="primary"
       w="full"
       h="full"
       maxW="100%"

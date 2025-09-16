@@ -52,7 +52,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
                   <Button variant="primary" onClick={onClose}>
                     {t("Cancel")}
                   </Button>
-                  <Button variant="dangerGhost" onClick={handleDeleteDistributor}>
+                  <Button variant="ghost" color="status.negative.primary" onClick={handleDeleteDistributor}>
                     {t("Yes, remove")}
                   </Button>
                 </VStack>
@@ -74,7 +74,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
           </VStack>
         </HStack>
         {isDeleteable && (
-          <Button variant="dangerGhost" onClick={onOpen}>
+          <Button variant="ghost" color="status.negative.primary" onClick={onOpen}>
             <UilTrash size={"14px"} color="#D23F63" />
             {t("Remove")}
           </Button>
@@ -87,7 +87,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
           </Text>
         </HStack>
         {isDeleteable && (
-          <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+          <IconButton variant="ghost" color="status.negative.primary" aria-label="Remove" onClick={onOpen}>
             <UilTrash size={"14px"} color="#D23F63" />
           </IconButton>
         )}

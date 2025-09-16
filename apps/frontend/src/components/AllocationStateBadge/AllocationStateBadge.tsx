@@ -8,10 +8,9 @@ import { useTranslation } from "react-i18next"
 type Props = {
   roundId: string
   renderIcon?: boolean
-  renderBadge?: boolean
   textProps?: TextProps
 }
-export const AllocationStateBadge = ({ roundId, renderIcon = true, renderBadge = true, textProps = {} }: Props) => {
+export const AllocationStateBadge = ({ roundId, renderIcon = true, textProps = {} }: Props) => {
   const { t } = useTranslation()
   const { data, isLoading, error } = useAllocationsRoundState(roundId)
   const { data: allocationRound } = useAllocationsRound(roundId)
@@ -22,7 +21,10 @@ export const AllocationStateBadge = ({ roundId, renderIcon = true, renderBadge =
   if (isLoading)
     return (
       <Skeleton>
-        <Badge text={t("loading")} icon={renderIcon ? <DotSymbol size={4} color="error.primary" /> : undefined} />
+        <Badge
+          text={t("loading")}
+          icon={renderIcon ? <DotSymbol size={4} color="status.negative.primary" /> : undefined}
+        />
       </Skeleton>
     )
   if (error || data === undefined)

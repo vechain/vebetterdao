@@ -101,23 +101,25 @@ export const DashboardAllocationRounds = () => {
           </Heading>
 
           {!!sortedProposals.length ? (
-            <VStack gap="4" w="full">
-              {sortedProposals.map(proposal => (
-                <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
-              ))}
-            </VStack>
+            <>
+              <VStack gap="4" w="full">
+                {sortedProposals.map(proposal => (
+                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
+                ))}
+              </VStack>
+              <Link
+                href="/proposals"
+                alignSelf="center"
+                color="actions.tertiary.default"
+                fontWeight="semibold"
+                textStyle="sm">
+                {t("View all proposals")}
+              </Link>
+            </>
           ) : (
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Link
-          href="/proposals"
-          alignSelf="center"
-          color="actions.tertiary.default"
-          fontWeight="semibold"
-          textStyle="sm">
-          {t("View all proposals")}
-        </Link>
       </Card.Body>
     </Card.Root>
   )

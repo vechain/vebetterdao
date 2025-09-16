@@ -76,7 +76,7 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
                   onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add signaler")}
                 </Button>
-                <Button variant="primaryGhost" onClick={onClose}>
+                <Button variant="ghost" color="actions.tertiary.default" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
               </VStack>
@@ -87,7 +87,8 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
       <Button
         mt={4}
         onClick={onOpen}
-        variant="primarySubtle"
+        variant="ghost"
+        color="actions.tertiary.default"
         disabled={editAdminForm.getValues("signalers").length >= 3}
         alignSelf={"flex-start"}>
         <UilPlus size="14px" />

@@ -2,11 +2,10 @@ import { useVotingRewards } from "@/api"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { UilGift } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { GenericBanner } from "../../Banners/GenericBanner"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Button, Card, Image } from "@chakra-ui/react"
-import { GenericBanner2 } from "../../Banners/GenericBanner2"
+import { Button, Icon } from "@chakra-ui/react"
+import { GenericBanner } from "../../Banners/GenericBanner"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -34,7 +33,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Prop
   const hasGMRewards = gmRewards > 0
 
   return (
-    <GenericBanner2
+    <GenericBanner
       variant="info"
       title={t("CLAIM YOUR REWARDS")}
       logoSrc="/assets/icons/claim-b3tr-icon.webp"
@@ -44,57 +43,13 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Prop
           : t("Congratulations! You have B3TR to claim for casting your vote in governance.")
       }
       cta={
-        <Button onClick={handleClaim} visual="primary">
+        <Button onClick={handleClaim} variant="primary">
+          <Icon as={UilGift} color="white" />
           {t("Claim your {{b3trToClaim}} B3TR", {
             b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
           })}
         </Button>
       }
-    />
-  )
-
-  return (
-    <Card.Root variant="warning">
-      <Image src="/assets/icons/claim-b3tr-icon.webp" alt="logo" objectFit="cover" w="24" h="24" />
-
-      <Card.Body>
-        <Card.Title>{t("CLAIM YOUR REWARDS NOW! 💰")}</Card.Title>
-        <Card.Description>
-          {hasGMRewards
-            ? t("Congratulations! You have B3TR to claim for casting your vote in governance and holding GM.")
-            : t("Congratulations! You have B3TR to claim for casting your vote in governance.")}
-        </Card.Description>
-      </Card.Body>
-      <Card.Footer>
-        <Button onClick={handleClaim} visual="primary" borderRadius="full">
-          {t("Claim your {{b3trToClaim}} B3TR", {
-            b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
-          })}
-        </Button>
-      </Card.Footer>
-    </Card.Root>
-  )
-
-  return (
-    <GenericBanner
-      title={t("CLAIM YOUR REWARDS NOW! 💰")}
-      titleColor="#3A5798"
-      description={
-        hasGMRewards
-          ? t("Congratulations! You have B3TR to claim for casting your vote in governance and holding GM.")
-          : t("Congratulations! You have B3TR to claim for casting your vote in governance.")
-      }
-      descriptionColor="#0C2D75"
-      logoSrc="/assets/icons/claim-b3tr-icon.webp"
-      backgroundColor="#C8DDFF"
-      backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
-      buttonLabel={t("Claim your {{b3trToClaim}} B3TR", {
-        b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
-      })}
-      onButtonClick={handleClaim}
-      buttonvariant="primary"
-      buttonIcon={<UilGift color="white" />}
-      buttonIconPosition="left"
     />
   )
 }

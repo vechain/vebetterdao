@@ -17,12 +17,8 @@ import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { IconButton } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useMemo } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
-// import Swiper core and required modules
-import { A11y } from "swiper/modules"
-// Import Swiper React components
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
 
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
@@ -35,9 +31,12 @@ import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
 import { StargateMigrationBanner } from "./components/StargateMigrationBanner"
 
-import "@/app/theme/swiper-custom.css"
-// Import Swiper styles
+import { A11y, Navigation } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
 import "swiper/css"
+import "swiper/css/navigation"
+import "@/app/theme/swiper-custom.css"
+
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
@@ -48,16 +47,6 @@ import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
 const VTHO_THRESHOLD = 5
 
 export const ActionBanner = () => {
-  // store controlled swiper instance
-  const swiperRef = useRef<SwiperClass | null>(null) // Create a ref for the Swiper instance with type
-  const [isSliderEnd, setIsSliderEnd] = useState(false)
-  const [isSliderStart, setIsSliderStart] = useState(true)
-
-  const handleSliderChange = useCallback((_swiper: SwiperClass) => {
-    setIsSliderEnd(_swiper.isEnd)
-    setIsSliderStart(_swiper.isBeginning)
-  }, [])
-
   const { account, connection } = useWallet()
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
@@ -247,16 +236,22 @@ export const ActionBanner = () => {
 
   return (
     <Swiper
-      modules={[A11y]}
+      modules={[A11y, Navigation]}
       spaceBetween={20} // Space between slides
       slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
-      navigation={false} // Disable Swiper's built-in navigation
+      navigation={{
+        nextEl: ".custom-swiper-button-next",
+        prevEl: ".custom-swiper-button-prev",
+      }}
       pagination={{ clickable: true }}
       scrollbar={{ draggable: true }}
-      onSwiper={swiper => (swiperRef.current = swiper)} // Store swiper instance
-      onSlideChange={handleSliderChange}
-      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }} // Ensure swiper itself takes full width
-    >
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        display: "flex",
+      }}>
       {slides.map(slide => (
         <SwiperSlide
           key={`slide-${slide?.key}`}
@@ -268,6 +263,7 @@ export const ActionBanner = () => {
             width: "100%",
             height: "100%",
             position: "relative",
+            overflow: "hidden",
           }}>
           {slide}
         </SwiperSlide>
@@ -275,35 +271,33 @@ export const ActionBanner = () => {
 
       {/* Custom Navigation Buttons */}
 
-      {!isSliderStart && (
-        <IconButton
-          hideBelow="md"
-          pos={"absolute"}
-          zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
-          left={5}
-          top={"50%"}
-          transform={"translateY(-50%)"}
-          onClick={() => swiperRef.current?.slidePrev()}
-          aria-label="Prev slide">
-          <FaChevronLeft />
-        </IconButton>
-      )}
+      <IconButton
+        className="custom-swiper-button-prev"
+        hideBelow="md"
+        pos={"absolute"}
+        zIndex={2} // Ensure it's above the slides
+        //variant="secondary"
+        color="actions.tertiary.default"
+        left={5}
+        top={"50%"}
+        transform={"translateY(-50%)"}
+        aria-label="Prev slide">
+        <FaChevronLeft />
+      </IconButton>
 
-      {!isSliderEnd && slides.length > 1 && (
-        <IconButton
-          hideBelow="md"
-          pos={"absolute"}
-          zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
-          right={5}
-          top={"50%"}
-          transform={"translateY(-50%)"}
-          onClick={() => swiperRef.current?.slideNext()}
-          aria-label="Next slide">
-          <FaChevronRight />
-        </IconButton>
-      )}
+      <IconButton
+        className="custom-swiper-button-next"
+        hideBelow="md"
+        pos={"absolute"}
+        zIndex={2} // Ensure it's above the slides
+        // variant="secondary"
+        color="actions.tertiary.default"
+        right={5}
+        top={"50%"}
+        transform={"translateY(-50%)"}
+        aria-label="Next slide">
+        <FaChevronRight />
+      </IconButton>
     </Swiper>
   )
 }

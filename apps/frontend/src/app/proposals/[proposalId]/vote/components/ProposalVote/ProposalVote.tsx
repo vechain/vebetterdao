@@ -101,7 +101,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
   }
 
   return (
-    <Card.Root variant={"baseWithBorder"} w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <Stack flexDir={["column", "column", "row"]} gap={12} as="form" onSubmit={handleCastVote}>
           <VStack alignItems={"stretch"} flex={1} gap={4}>

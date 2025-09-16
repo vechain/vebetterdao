@@ -35,7 +35,7 @@ export const AppCardInnerDetails = ({ xApp }: Props) => {
   const { data: totalEarnings, isLoading: totalEarningsLoading } = useXAppTotalEarnings(roundIds, xApp.id)
 
   return (
-    <Card.Root variant={"filled"} w="full" rounded={"xl"}>
+    <Card.Root variant="primary" w="full" rounded={"xl"}>
       <Card.Body>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
           <Box>

@@ -76,7 +76,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     ({ children }: { children: React.ReactNode }) => {
       if (isDesktop)
         return (
-          <Card.Root variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
+          <Card.Root variant="primary" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
             <Card.Body as={VStack} justifyContent={"space-between"}>
               {children}
             </Card.Body>

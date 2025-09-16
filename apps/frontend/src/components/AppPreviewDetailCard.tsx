@@ -46,7 +46,7 @@ export const AppPreviewDetailCard = ({
   }, [isMobile, openMobileOptions, isMobileOptionsOpen, closeMobileOptions, app])
 
   return (
-    <Card.Root variant={"baseWithBorder"} w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack w="full" gap={4} align="flex-start">
           <Skeleton asChild w="full" h={200} loading={!!isBannerLoading} rounded={"3xl"}>

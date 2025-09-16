@@ -31,7 +31,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
   return (
     <Card.Root
       w="full"
-      variant="filled"
+      variant="primary"
       data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}`}>
       <Card.Body py={4}>
         <VStack gap={4} align="flex-start">
@@ -103,7 +103,8 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               data-testid={`executable-card-${index}-${field.contractAddress}-${field.name}__add-another-tx`}
               size="sm"
               onClick={onAddAnotherTransactionClick}
-              variant="primarySubtle"
+              variant="ghost"
+              color="actions.tertiary.default"
               alignSelf={"flex-start"}
               rounded="full">
               <FaPlus />

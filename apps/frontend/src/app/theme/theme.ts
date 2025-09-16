@@ -121,7 +121,19 @@ const config = defineConfig({
           700: { value: "#003ECC" },
           800: { value: "#003199" },
           900: { value: "#002466" },
-          1000: { value: "#001633" },
+        },
+        red: {
+          DEFAULT: { value: "#D44145" },
+          50: { value: "#FCEEF1" },
+          100: { value: "#F4CCCF" },
+          200: { value: "#E99A9E" },
+          300: { value: "#DF6A6E" },
+          400: { value: "#D44145" },
+          500: { value: "#C53030" },
+          600: { value: "#9B2323" },
+          700: { value: "#7F1C1C" },
+          800: { value: "#631616" },
+          900: { value: "#400E0E" },
         },
       },
     },
@@ -232,6 +244,7 @@ const config = defineConfig({
             subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
           },
         },
+        // graph colors will change after allocations redesign
         graph: {
           1: { value: { base: "#203A87", _dark: "#F0F4F7" } },
           2: { value: { base: "#225EED", _dark: "#4BA0FD" } },

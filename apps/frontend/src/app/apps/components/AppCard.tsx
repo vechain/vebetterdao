@@ -28,7 +28,7 @@ export const AppCard = ({ xApp }: Props) => {
 
   return (
     <Card.Root
-      variant={"baseWithBorder"}
+      variant="primary"
       w="full"
       onClick={navigateToAppDetail}
       _hover={{

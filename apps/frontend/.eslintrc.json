@@ -1,13 +1,7 @@
 {
-  "extends": [
-    "next",
-    "plugin:storybook/recommended"
-  ],
+  "extends": ["next", "plugin:storybook/recommended"],
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "react-hooks"
-  ],
+  "plugins": ["@typescript-eslint", "react-hooks"],
   "rules": {
     "@next/next/no-html-link-for-pages": "off",
     "react/display-name": "off",
@@ -28,12 +22,16 @@
     "no-console": [
       "error",
       {
-        "allow": [
-          "error",
-          "warn",
-          "info"
-        ]
+        "allow": ["error", "warn", "info"]
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.stories.{ts,tsx}"],
+      "rules": {
+        "react/jsx-no-literals": "off"
+      }
+    }
+  ]
 }

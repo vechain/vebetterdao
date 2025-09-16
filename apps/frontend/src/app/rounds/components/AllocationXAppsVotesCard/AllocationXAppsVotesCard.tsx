@@ -55,7 +55,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   }
 
   return (
-    <Card.Root flex={1} h="full" w="full" variant={"baseWithBorder"}>
+    <Card.Root flex={1} h="full" w="full" variant="primary">
       <Card.Header>
         <HStack justify={"space-between"} w="full">
           <Heading size="2xl">{title}</Heading>

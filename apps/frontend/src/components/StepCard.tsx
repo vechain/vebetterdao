@@ -18,7 +18,7 @@ export const StepCard: React.FC<StepCardProps> = ({
 }) => {
   const { t } = useTranslation()
   return (
-    <Card.Root variant="filled" rounded={"3xl"} {...props}>
+    <Card.Root variant="primary" rounded={"3xl"} {...props}>
       <Card.Body>
         <Stack gap={4} align={"flex-start"} {...stackProps}>
           <Image src={stepImageSrc} boxSize={32} alt={`step-${stepNumber}-image`} />

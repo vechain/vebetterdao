@@ -73,7 +73,8 @@ export const DoActionModal = ({ doActionModal }: Props) => {
           {t("Explore apps")}
         </Button>
         <Button
-          variant="primarySubtle"
+          variant="ghost"
+          color="actions.tertiary.default"
           _hover={{ textDecoration: "none" }}
           onClick={() => {
             window.open(VEPASSPORT_DOCS_URL, "_blank")

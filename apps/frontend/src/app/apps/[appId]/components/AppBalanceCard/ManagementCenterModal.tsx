@@ -212,13 +212,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                   components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
-              <Button
-                variant="dangerFilledTonal"
-                borderRadius="full"
-                color="error.primary"
-                w="200px"
-                colorPalette="red"
-                onClick={() => handleShowConfirmation("resume")}>
+              <Button colorPalette="red" borderRadius="full" w="200px" onClick={() => handleShowConfirmation("resume")}>
                 {t("Resume Distribution")}
               </Button>
             </>
@@ -230,13 +224,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
                   components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
-              <Button
-                variant="dangerFilledTonal"
-                borderRadius="full"
-                w="200px"
-                color="error.primary"
-                colorPalette="red"
-                onClick={() => handleShowConfirmation("pause")}>
+              <Button w="200px" colorPalette="red" onClick={() => handleShowConfirmation("pause")}>
                 {t("Pause Distribution")}
               </Button>
             </>
@@ -261,7 +249,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
           </Text>
         </VStack>
         <HStack mt={6} gap={4} width="full">
-          <Button variant="primarySubtle" flex={1} onClick={goToPrevious}>
+          <Button variant="ghost" color="actions.tertiary.default" flex={1} onClick={goToPrevious}>
             {t("Cancel")}
           </Button>
           <Button variant="primary" flex={1} onClick={handleManagementAction}>

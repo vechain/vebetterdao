@@ -1,8 +1,6 @@
 import { Box, VStack, Image, Text, Button } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { EmptyState } from "@/components/ui/empty-state"
-import { CreateProposalCard } from "./CreateProposalCard"
 
 type Props = {
   buttonText: string

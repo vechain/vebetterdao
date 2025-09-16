@@ -203,7 +203,7 @@ export const AdminAppPageContent = () => {
           <EditAppAddresses form={form} />
           <EditAppRewardDistributors form={form} />
           <HStack justify={"space-between"} mt={8}>
-            <Button variant="primaryGhost" onClick={goBack}>
+            <Button variant="plain" color="actions.tertiary.default" onClick={goBack}>
               {t("Go back")}
             </Button>
             <Button variant="primary" type="submit" disabled={disableSaveButton}>

@@ -1,5 +1,5 @@
 import React from "react"
-import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue, Card } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, IconButton, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -16,23 +16,6 @@ type Props = {
 
 export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   const { t } = useTranslation()
-
-  const swiperStyle = useBreakpointValue({
-    base: {
-      position: "relative",
-      width: "100%",
-      height: "100%",
-      overflow: "hidden",
-      display: "flex",
-    },
-    md: {
-      position: "relative",
-      width: "100%",
-      height: "100%",
-      overflow: "hidden",
-      display: "flex",
-    },
-  })
 
   return (
     <Card.Root w="full" variant="primary">
@@ -57,7 +40,13 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
           }}
           pagination={{ clickable: true }}
           scrollbar={{ draggable: true }}
-          style={swiperStyle as any}
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
+            display: "flex",
+          }}
           navigation={{
             nextEl: ".custom-swiper-button-next",
             prevEl: ".custom-swiper-button-prev",

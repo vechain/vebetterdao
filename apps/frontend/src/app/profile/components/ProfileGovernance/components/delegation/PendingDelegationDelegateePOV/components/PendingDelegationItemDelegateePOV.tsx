@@ -40,11 +40,11 @@ export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, de
       </HStack>
       {isConnectedUser && (
         <HStack gap={4}>
-          <Button variant={"dangerGhost"} p={3} onClick={rejectDelegationModal.onOpen}>
-            <UilTimes color="error.primary" />
+          <Button colorPalette="red" variant={"ghost"} p={3} onClick={rejectDelegationModal.onOpen}>
+            <UilTimes color="status.negative.primary" />
             {t("Reject")}
           </Button>
-          <Button variant={"primaryGhost"} p={3} onClick={acceptDelegationModal.onOpen}>
+          <Button variant="ghost" color="actions.tertiary.default" p={3} onClick={acceptDelegationModal.onOpen}>
             <UilCheck color="#004CFC" />
             {t("Accept")}
           </Button>

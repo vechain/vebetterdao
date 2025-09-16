@@ -153,7 +153,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           <Heading size={"xl"}>
             <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: votes.length }} t={t} />
           </Heading>
-          <Button variant={"primaryLink"} onClick={splitEvenly}>
+          <Button variant="plain" color="actions.tertiary.default" onClick={splitEvenly}>
             {t("Split evenly")}
           </Button>
         </HStack>
@@ -175,7 +175,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           onContinue={onContinue}
           helperText={
             error ? (
-              <Text textStyle={"md"} fontWeight="semibold" color="error.primary">
+              <Text textStyle={"md"} fontWeight="semibold" color="status.negative.primary">
                 {error}
               </Text>
             ) : showWarning ? (

@@ -66,7 +66,8 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editTeamWalletAddress ? null : (
               <Button
-                variant="primaryGhost"
+                variant="ghost"
+                color="actions.tertiary.default"
                 bg="#FFFFFF"
                 borderY="1px solid #f4f6f9"
                 borderRight="1px solid #f4f6f9"
@@ -101,7 +102,8 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editAdminAddress ? null : (
               <Button
-                variant="primaryGhost"
+                variant="ghost"
+                color="actions.tertiary.default"
                 bg="#FFFFFF"
                 borderY="1px solid #f4f6f9"
                 borderRight="1px solid #f4f6f9"

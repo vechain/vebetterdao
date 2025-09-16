@@ -93,7 +93,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           onContinue={onContinue}
           helperText={
             onContinueError ? (
-              <Text textStyle={"md"} fontWeight="semibold" color="error.primary">
+              <Text textStyle={"md"} fontWeight="semibold" color="status.negative.primary">
                 {onContinueError}
               </Text>
             ) : (

@@ -14,8 +14,8 @@ import {
 import React, { useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
-import { parseDate, toIPFSURL } from "@/utils"
-import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
+import { toIPFSURL } from "@/utils"
+//import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
 import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
@@ -28,8 +28,8 @@ type Props = Pick<ProposalCreatedEvent, "proposalId" | "description" | "roundIdV
 
 export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, roundIdVoteStart, proposalState }) => {
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
-
-  const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
+  // TODO: this info is hidden in the new design, add it back in case of need
+  // const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
 
   const { t } = useTranslation()
 

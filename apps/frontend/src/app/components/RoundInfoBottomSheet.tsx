@@ -174,7 +174,8 @@ export const RoundInfoBottomSheet = () => {
               <SimpleGrid w="full" columns={canVote ? 2 : 1} gap={4}>
                 <Button
                   onClick={() => router.push(`/rounds/${allocationRound.roundId}`)}
-                  variant="primarySubtle"
+                  variant="ghost"
+                  color="actions.tertiary.default"
                   rounded={"full"}>
                   {t("See More")}
                 </Button>

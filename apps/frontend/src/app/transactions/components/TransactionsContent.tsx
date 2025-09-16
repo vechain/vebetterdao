@@ -85,7 +85,7 @@ export const TransactionsContent = ({ address }: Props) => {
   }, [router])
 
   return (
-    <Card.Root w={"full"} variant={"baseWithBorder"}>
+    <Card.Root w={"full"} variant="primary">
       <Card.Body>
         <VStack gap={6} align="stretch">
           <HStack color="#004CFC" cursor="pointer" onClick={handleGoBack} mb="2">

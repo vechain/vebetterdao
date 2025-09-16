@@ -1,10 +1,10 @@
-import { Card, HStack, Box, Image, Text, LinkBox, Link, LinkOverlay } from "@chakra-ui/react"
+import { Card, HStack, Box, Text, LinkBox, Link, LinkOverlay } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { Trans } from "react-i18next"
-import { AddressButton } from "../AddressButton"
 import { AddressIcon } from "../AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 export type LeaderboardRanking = {
   position: number
@@ -49,73 +49,33 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
     }
   }, [ranking.position])
 
-  const whiteColor = isYourRanking ? "white" : "auto"
-  const grayColor = isYourRanking ? "white" : "#6A6A6A"
-
   return (
     <LinkBox asChild>
       <Card.Root
+        p="3"
         bg={{
           base: isYourRanking ? "brand.primary" : "bg.tertiary",
           _hover: isYourRanking ? "actions.primary.hover" : undefined,
         }}
         color={isYourRanking ? "white" : "text.default"}
         boxShadow={positionStyles.boxShadow}
-        pos="relative"
-        overflow={"hidden"}
         borderColor={positionStyles.borderColor}>
-        <Card.Body color={whiteColor}>
-          {isYourRanking && (
-            <Image
-              src="/assets/backgrounds/your-ranking-bg.svg"
-              alt="Bg image"
-              zIndex={0}
-              rounded={"full"}
-              pos="absolute"
-              right={-7}
-              top={"50%"}
-              h="full"
-              transform={"translateY(-50%)"}
-              aria-label="Bg image"
-            />
-          )}
+        <Card.Body>
           <HStack w="full" justify="space-between">
             <HStack gap={2} zIndex={1}>
               <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
               <LinkOverlay asChild>
                 <Link href={`/profile/${ranking.address}`}>
                   <Box>
-                    <HStack gap={1} color={isYourRanking ? "white" : "text.default"}>
-                      {isYourRanking && (
-                        <Text textStyle="sm" fontWeight="semibold">
-                          {`(${t("You")})`}
-                        </Text>
-                      )}
-
-                      {domain && (
-                        <Text textStyle="md" fontWeight="semibold" h="auto">
-                          {domain}
-                        </Text>
-                      )}
-                      {!domain && (
-                        <AddressButton
-                          unstyled
-                          textStyle="sm"
-                          fontWeight="semibold"
-                          h="auto"
-                          address={ranking.address}
-                          size={"sm"}
-                          onClick={e => e.preventDefault()}
-                          showAddressIcon={false}
-                          showCopyIcon={false}
-                          padding={0}
-                          digitsBeforeEllipsis={5}
-                          digitsAfterEllipsis={3}
-                        />
-                      )}
+                    <HStack
+                      textStyle="sm"
+                      fontWeight={isYourRanking ? "bold" : "semibold"}
+                      gap={1}
+                      color={isYourRanking ? "text.alt" : "text.default"}>
+                      {domain ? domain : humanAddress(ranking.address, 6, 4) || ""} {isYourRanking && ` (${t("You")})`}
                     </HStack>
 
-                    <Text textStyle="sm" color={grayColor}>
+                    <Text textStyle="sm" color={isYourRanking ? "text.alt" : "text.default"}>
                       <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
                     </Text>
                   </Box>
@@ -123,7 +83,11 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
               </LinkOverlay>
             </HStack>
             {ranking.position !== 0 && (
-              <Text textStyle={positionStyles.fontSize} fontWeight="semibold" zIndex={1}>
+              <Text
+                color={isYourRanking ? "text.alt" : "text.default"}
+                textStyle={positionStyles.fontSize}
+                fontWeight="semibold"
+                zIndex={1}>
                 {positionStyles.text}
               </Text>
             )}

@@ -21,7 +21,8 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   const { account } = useWallet()
   const { proposalId, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
-  const isActive = proposalState === ProposalState.Active
+  // TODO: add active state
+  //const isActive = proposalState === ProposalState.Active
 
   const router = useRouter()
 

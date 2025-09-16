@@ -21,7 +21,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
   }
 
   return (
-    <Card.Root variant={"base"} w={["70%", "60%"]} alignSelf={"center"} onClick={navigateToAppDetail}>
+    <Card.Root variant="primary" w={["70%", "60%"]} alignSelf={"center"} onClick={navigateToAppDetail}>
       <Box w="full" position={"relative"} h={[70, 150]}>
         <Image alt={`Banner for ${name}`} w="full" src={banner} h={"full"} objectFit={"cover"} borderTopRadius={"md"} />
         <Image

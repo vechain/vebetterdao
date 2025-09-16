@@ -123,7 +123,7 @@ export const NewProposalRoundPageContent = () => {
           {renderRoundContent()}
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
               {t("Go back")}
             </Button>
             <Button

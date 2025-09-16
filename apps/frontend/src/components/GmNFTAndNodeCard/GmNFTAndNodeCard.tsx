@@ -10,7 +10,6 @@ import { useGetUserGMs, useGetUserNodes } from "@/api"
 import { GmEmptyStateCard } from "./GmEmptyStateCard"
 import { GmActionButton } from "../GmActionButton"
 import { GmCard } from "./GmCard"
-import { useRouter } from "next/navigation"
 import { GetNodeModal } from "./GetNodeModal"
 
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
@@ -29,8 +28,6 @@ export const GmNFTAndNodeCard = () => {
     onOpen: onOpenGetGMAndNodeModal,
     onClose: onCloseGetGMAndNodeModal,
   } = useDisclosure()
-
-  const router = useRouter()
 
   const isLoading = isUserGMsLoading || isNodesLoading
   const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && nodes?.allNodes?.length === 0
@@ -85,7 +82,7 @@ export const GmNFTAndNodeCard = () => {
                   title={selectedGM?.metadata?.name || "name"}
                   footer={`${selectedGM?.multiplier || 0}x ${t("GM reward weight")}`}
                   images={selectedGM?.metadata?.image ? [selectedGM?.metadata?.image] : []}
-                  onCardClick={() => router.push(`/galaxy-member/${selectedGM?.tokenId}`)}
+                  href={`/galaxy-member/${selectedGM?.tokenId}`}
                 />
               ) : (
                 <GmEmptyStateCard
@@ -104,7 +101,7 @@ export const GmNFTAndNodeCard = () => {
                   subtitle={"Nodes"}
                   footer={`Total: ${totalPoints} points`}
                   images={nodes?.allNodes?.map(node => node.image)}
-                  onCardClick={() => router.push(`/profile?tab=nodes`)}
+                  href={`/profile?tab=nodes`}
                 />
               ) : (
                 <GmEmptyStateCard

@@ -52,7 +52,7 @@ export const CancelProposalSection = () => {
               "If you cancel the proposal it will not be voted on in the next round. After the round starts, you will no longer be able to cancel it.",
             )}
           </Text>
-          <Button variant={"dangerFilledTonal"} onClick={confirmationModal.onOpen}>
+          <Button colorPalette="red" onClick={confirmationModal.onOpen}>
             <UilBan size="18px" />
             {t("Cancel this proposal")}
           </Button>
@@ -79,10 +79,10 @@ export const CancelProposalSection = () => {
                     </Text>
                   </VStack>
                   <HStack justifyContent={"flex-end"}>
-                    <Button variant={"primaryGhost"} onClick={handleCloseConfirmationModal}>
+                    <Button variant="ghost" color="actions.tertiary.default" onClick={handleCloseConfirmationModal}>
                       {t("Go back")}
                     </Button>
-                    <Button variant={"dangerFilled"} onClick={handleCancelProposal}>
+                    <Button colorPalette="red" onClick={handleCancelProposal}>
                       <UilBan size="18px" />
                       {t("Cancel this proposal")}
                     </Button>

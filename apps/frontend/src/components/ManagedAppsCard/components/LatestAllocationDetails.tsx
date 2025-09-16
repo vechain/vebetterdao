@@ -1,5 +1,5 @@
 import { useAllocationPoolEvents } from "@/api"
-import { HStack, Heading, Image, Skeleton, Stat, Text, VStack } from "@chakra-ui/react"
+import { HStack, Heading, Image, Skeleton, Stat } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"

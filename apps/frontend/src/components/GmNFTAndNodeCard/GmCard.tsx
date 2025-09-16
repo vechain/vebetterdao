@@ -1,4 +1,4 @@
-import { Avatar, Text, VStack, HStack, AvatarGroup, Card, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { Avatar, Text, VStack, HStack, AvatarGroup, Card, LinkBox, LinkOverlay, Icon } from "@chakra-ui/react"
 import { FaChevronRight } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 
@@ -7,13 +7,13 @@ export const GmCard = ({
   subtitle,
   footer,
   images,
-  onCardClick,
+  href,
 }: {
   title?: string
   subtitle?: string
   images?: string[]
   footer?: string
-  onCardClick?: () => void
+  href?: string
 }) => {
   const { t } = useTranslation()
 
@@ -32,13 +32,13 @@ export const GmCard = ({
                 <Text color="white" fontWeight="semibold">
                   {t("See all")}
                 </Text>
-                <FaChevronRight color="icon.default" size="14px" />
+                <Icon as={FaChevronRight} color="white" boxSize="4" />
               </HStack>
             )}
           </HStack>
         </Card.Title>
         <Card.Body>
-          <LinkOverlay href="#">
+          <LinkOverlay href={href}>
             <HStack alignItems="start">
               <AvatarGroup rounded="lg" shape="square" size="xl" stacking="last-on-top" spaceX={"-1.5rem"}>
                 {images?.slice(0, 2)?.map(image => (
@@ -49,7 +49,7 @@ export const GmCard = ({
 
                 {plusCount > 0 && (
                   <Avatar.Root rounded="lg" border="1px solid #E5EEFF" background="#6194F5">
-                    <Avatar.Fallback fontSize="12px">{`+${plusCount}`}</Avatar.Fallback>
+                    <Avatar.Fallback color="white" fontSize="12px">{`+${plusCount}`}</Avatar.Fallback>
                   </Avatar.Root>
                 )}
               </AvatarGroup>

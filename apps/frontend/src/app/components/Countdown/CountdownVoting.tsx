@@ -1,5 +1,5 @@
 import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
-import { Text, HStack, useMediaQuery, Skeleton, Icon, Button, Flex } from "@chakra-ui/react"
+import { Text, HStack, useMediaQuery, Skeleton, Icon, Flex } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import Countdown from "react-countdown"

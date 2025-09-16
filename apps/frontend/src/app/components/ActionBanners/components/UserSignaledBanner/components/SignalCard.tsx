@@ -7,7 +7,7 @@ type Props = {
 }
 export const SignalCard = ({ appName, reason }: Props) => {
   return (
-    <Card.Root variant={"filledSmall"} w="full">
+    <Card.Root size="sm" variant={"primary"} w="full">
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>

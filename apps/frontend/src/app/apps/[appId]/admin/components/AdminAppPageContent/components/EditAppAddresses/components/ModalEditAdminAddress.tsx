@@ -33,7 +33,7 @@ export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }:
               <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
-              <Button variant="dangerGhost" onClick={handleEditAdminAddress}>
+              <Button variant="ghost" color="status.negative.primary" onClick={handleEditAdminAddress}>
                 {t("Yes, I'm sure")}
               </Button>
             </VStack>

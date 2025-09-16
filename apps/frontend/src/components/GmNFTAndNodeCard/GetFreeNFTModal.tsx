@@ -54,7 +54,7 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
 
             <Dialog.Footer w="full" px={4} pt={1}>
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} w="full">
-                <Button variant={"whiteAction"} color={"#004CFC"} w={"full"} onClick={onClose}>
+                <Button variant="secondary" w={"full"} onClick={onClose}>
                   {t("Maybe later")}
                 </Button>
                 <Button variant={"primary"} w={"full"} onClick={onCtaClick}>

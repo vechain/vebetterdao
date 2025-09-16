@@ -72,8 +72,6 @@ export const AppEndorsementInfoCard = ({
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
-  const lookForEndorsersButtonVariant = !shouldRenderEndorseButton ? "primaryAction" : "primarySubtle"
-
   const shouldDisableEndorsementButton = useMemo(() => {
     return (
       nodeEndorsingApp?.isXNodeDelegator || nodeEndorsingApp?.isXNodeOnCooldown || nodeEndorsingApp?.xNodePoints === 0
@@ -140,7 +138,7 @@ export const AppEndorsementInfoCard = ({
           onClick={() =>
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
           }>
-          <Button w="full" variant={lookForEndorsersButtonVariant}>
+          <Button w="full" variant={shouldRenderEndorseButton ? "secondary" : "primary"}>
             {t("Look for endorsers")}
           </Button>
         </Link>,
@@ -177,7 +175,6 @@ export const AppEndorsementInfoCard = ({
     onOpenEndorsementModal,
     shouldDisableEndorsementButton,
     totalXNodePoints,
-    lookForEndorsersButtonVariant,
     onOpenUnendorsementModal,
   ])
 

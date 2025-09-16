@@ -114,15 +114,15 @@ export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
                 </FeatureFlagWrapper>
               </VStack>
               {isXNodeAttachedToGM ? (
-                <Button
-                  color="error.primary"
-                  variant="dangerFilledTonal"
-                  disabled={isXNodeDelegator}
-                  onClick={handleDetachOnClick}>
+                <Button colorPalette="red" disabled={isXNodeDelegator} onClick={handleDetachOnClick}>
                   {t("Detach")}
                 </Button>
               ) : (
-                <Button variant={"primarySubtle"} onClick={() => handleAttachOnClick()} disabled={isXNodeDelegator}>
+                <Button
+                  variant="ghost"
+                  color="actions.tertiary.default"
+                  onClick={() => handleAttachOnClick()}
+                  disabled={isXNodeDelegator}>
                   {t("Attach")}
                 </Button>
               )}

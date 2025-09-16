@@ -85,7 +85,7 @@ export const SupplyBreakdownCard = () => {
             <VStack gap={1} align="flex-start">
               <Text textStyle="md">{t("VOT3 in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} color={"#3DBA67"}>
+                <Heading size={["2xl", "2xl", "xl"]} color={"brand.secondary"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>

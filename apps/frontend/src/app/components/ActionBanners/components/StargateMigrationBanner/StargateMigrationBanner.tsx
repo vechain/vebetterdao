@@ -1,7 +1,7 @@
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { t } from "i18next"
 import { UilArrowRight } from "@iconscout/react-unicons"
-import { GlassButton } from "@/components/GlassButton"
+import { Button, Icon } from "@chakra-ui/react"
 
 export type Props = {
   isLegacyNode?: boolean
@@ -14,27 +14,20 @@ export const StargateMigrationBanner = ({ isLegacyNode }: Props) => {
 
   return (
     <GenericBanner
+      variant="info"
       title={t("STARGATE IS LIVE 🌌")}
       description={
         isLegacyNode
           ? t("Migrate your legacy node to discover the new stargate universe !")
           : t("Start staking VET to explore the new stargate universe !")
       }
-      titleColor="#FFFFFF"
-      descriptionColor="#E0E0E0"
-      backgroundColor="transparent"
       logoSrc="/assets/images/b3mo-stargate.svg"
-      backgroundImageSrc="/assets/backgrounds/stargate-background.svg"
-      buttonIconPosition="right"
-      buttonLabel={t("Explore")}
-      onButtonClick={GOTOSTARGATE}
-      buttonVariant="custom"
-      customButton={
-        <GlassButton onClick={GOTOSTARGATE} rightIcon={<UilArrowRight />}>
+      cta={
+        <Button variant="primary" onClick={GOTOSTARGATE}>
           {t("Explore")}
-        </GlassButton>
+          <Icon as={UilArrowRight} />
+        </Button>
       }
-      imagePosition="top"
     />
   )
 }

@@ -51,7 +51,7 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={handleClose}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

@@ -116,7 +116,7 @@ export const UpdateConfirmationModal = ({
               <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
-              <Button variant="dangerGhost" onClick={handleSubmit}>
+              <Button variant="ghost" color="status.negative.primary" onClick={handleSubmit}>
                 {t("Yes, I'm sure")}
               </Button>
             </VStack>

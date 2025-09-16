@@ -126,7 +126,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               <Button variant="primary" type="submit">
                 {t("Continue")}
               </Button>
-              <Button variant={"primaryGhost"} onClick={handleClose}>
+              <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
                 {t("Cancel")}
               </Button>
             </VStack>
@@ -139,7 +139,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
         content: (
           <VStack align="stretch" gap={6}>
             <VStack justify="center" align="center" gap={10}>
-              <ExclamationTriangle color="error.primary" size={triangleSize} />
+              <ExclamationTriangle color="status.negative.primary" size={triangleSize} />
               <Heading size={["lg", "lg", "2xl"]} textAlign="center">
                 {t("Are you sure you want to add a manager to your Node?")}
               </Heading>
@@ -154,7 +154,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
                 <Alert.Title as="span">{t("The manager won't be able to transfer or sell your Node.")}</Alert.Title>
                 <Alert.Description as="span">{t("but won't be able to transfer or sell your Node.")}</Alert.Description>
                 {isXNodeAttachedToGM && (
-                  <Text mt={2} textStyle="sm" color="error.primary" fontWeight="semibold">
+                  <Text mt={2} textStyle="sm" color="status.negative.primary" fontWeight="semibold">
                     {t("Notice: the GM NFT attached to this Node will be detached and will lose the free levels.")}
                   </Text>
                 )}
@@ -164,7 +164,7 @@ export const DelegateXNodeModal = ({ xNode, modal }: { xNode: UserNode; modal: U
               <Button variant="primary" onClick={handleDelegate}>
                 {t("Yes, I'm sure")}
               </Button>
-              <Button variant={"primaryGhost"} onClick={goToPrevious}>
+              <Button variant="ghost" color="actions.tertiary.default" onClick={goToPrevious}>
                 {t("No, go back")}
               </Button>
             </VStack>

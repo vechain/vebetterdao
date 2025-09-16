@@ -115,7 +115,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
             />
           ) : null}
           {isEndorsingApp ? (
-            <Card.Root variant={"baseWithBorder"} p={4} rounded="lg">
+            <Card.Root variant="primary" p={4} rounded="lg">
               <VStack align="stretch" gap={6}>
                 <Stack direction={["column", "column", "row"]} justify="space-between">
                   <HStack>
@@ -173,7 +173,8 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                   </Flex>
 
                   <Button
-                    variant="dangerGhost"
+                    variant="ghost"
+                    color="status.negative.primary"
                     onClick={unendorseAppModal.onOpen}
                     w={["full", "full", "auto"]}
                     disabled={shouldDisableEndorsementButton}>

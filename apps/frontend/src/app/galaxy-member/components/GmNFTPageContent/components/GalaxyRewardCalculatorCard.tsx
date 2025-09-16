@@ -1,4 +1,4 @@
-import { Button, Card, Heading, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, Heading, Icon, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UilCalculatorAlt } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -23,8 +23,8 @@ export const GalaxyRewardCalculatorCard = () => {
             </Text>
           </VStack>
 
-          <Button onClick={goToCalculator} variant={"primarySubtle"}>
-            <UilCalculatorAlt color="#004CFC" />
+          <Button onClick={goToCalculator} variant="ghost" color="actions.tertiary.default">
+            <Icon as={UilCalculatorAlt} color="actions.tertiary.default" />
             {t("Estimate Rewards")}
           </Button>
         </VStack>

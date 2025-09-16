@@ -60,7 +60,7 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
               onRevoke={revokeModal.onOpen}
             />
           ) : (
-            <Button variant="primarySubtle" onClick={delegateModal.onOpen}>
+            <Button variant="ghost" color="actions.tertiary.default" onClick={delegateModal.onOpen}>
               <UilArrowUpRight color="#004CFC" />
               {t("Add node manager")}
             </Button>
@@ -122,7 +122,12 @@ const DelegatedNodeDisplay = ({
           </HStack>
         </HStack>
         {isXNodeDelegator && (
-          <Button variant="dangerGhost" colorPalette="red" onClick={onRevoke} w={"fit-content"}>
+          <Button
+            variant="ghost"
+            color="status.negative.primary"
+            colorPalette="red"
+            onClick={onRevoke}
+            w={"fit-content"}>
             {t("Cancel delegation")}
           </Button>
         )}

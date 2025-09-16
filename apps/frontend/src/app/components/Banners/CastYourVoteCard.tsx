@@ -46,7 +46,7 @@ export const CastYourVoteCard: React.FC = () => {
   if (!account?.address || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
 
   return (
-    <Card.Root borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>
+    <Card.Root borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant="primary" overflow={"hidden"}>
       <Card.Body p={6} pos="relative">
         <Image
           rotate="180deg"
