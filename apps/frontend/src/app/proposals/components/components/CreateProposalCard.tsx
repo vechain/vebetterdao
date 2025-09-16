@@ -1,11 +1,12 @@
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { RequirementModal } from "./RequirementModal"
 import { AnalyticsUtils } from "@/utils"
-import { Box, Image, Text, Button, useDisclosure } from "@chakra-ui/react"
+import { Box, Text, Button, useDisclosure, Icon } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
+import ProposalIcon from "@/components/Icons/svg/proposal.svg"
 
 export const CreateProposalCard = () => {
   const { account } = useWallet()
@@ -35,7 +36,7 @@ export const CreateProposalCard = () => {
         alignContent={"flex-start"}
         borderWidth={1}
         borderColor={"#D5D5D5"}>
-        <Image src="/assets/icons/proposal.svg" alt="Proposal icon" boxSize={24} />
+        <Icon as={ProposalIcon} boxSize={24} color="brand.primary" />
         <Text fontSize={24} fontWeight={700} mt={4}>
           {t("Create a proposal")}
         </Text>
