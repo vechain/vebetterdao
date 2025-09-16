@@ -1,15 +1,16 @@
+import { useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
+import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { Card, Heading, HStack, Tabs, Text, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { MilestonesActions } from "../../../grants/components"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
-import { ProposalStatusBadge } from "@/components/Proposal/ProposalStatusBadge"
-import { useIsDepositReached } from "@/api"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
@@ -21,21 +22,27 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   const { account } = useWallet()
   const proposalId = proposal?.id ?? ""
   const proposerAddress = proposal?.proposerAddress ?? ""
+  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
 
   const { data: vnsData } = useVechainDomain(proposerAddress)
-  const { data: isDepositReached } = useIsDepositReached(proposalId)
 
   const proposerName = vnsData?.domain
+  const hasUserVoted = !!userVoteEvent?.hasVoted
 
+  const hasUserDeposited = useMemo(() => {
+    return BigInt(userDeposits ?? 0) > BigInt(0)
+  }, [userDeposits])
   // Header Content (badge, proposer, title)
   const HeaderContent = () => (
     <VStack gap={5} align="flex-start" w="full">
       <HStack justify={"space-between"} align={"flex-start"} w="full">
-        <ProposalStatusBadge
-          proposalState={proposal?.state}
-          isDepositReached={isDepositReached ?? false}
-          proposalType={proposal?.type}
+        <GrantsProposalStatusBadge
+          state={proposal?.state}
+          hasUserSupported={hasUserDeposited}
+          hasUserVoted={hasUserVoted}
         />
+
         {proposal && (
           <HStack>
             <AddressIcon address={proposerAddress} rounded="full" h="20px" w="20px" />
