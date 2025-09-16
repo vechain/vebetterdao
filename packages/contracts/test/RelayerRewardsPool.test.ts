@@ -705,6 +705,161 @@ describe("RelayerRewardsPool - @shard18", function () {
     })
   })
 
+  describe("Reduce Expected Actions", function () {
+    beforeEach(async function () {
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer2.address)
+    })
+
+    it("should reduce expected actions for round correctly", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 10
+      const usersToReduce = 3
+
+      // Set initial total actions
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      const initialTotalActions = await relayerRewardsPool.totalActions(roundId)
+      const initialTotalWeightedActions = await relayerRewardsPool.totalWeightedActions(roundId)
+
+      // Calculate expected reductions
+      const actionsToReduce = usersToReduce * 2 // Each user requires 2 actions (vote + claim)
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+      const weightedActionsToReduce = BigInt(usersToReduce) * (voteWeight + claimWeight)
+
+      const expectedNewTotalActions = initialTotalActions - BigInt(actionsToReduce)
+      const expectedNewTotalWeightedActions = initialTotalWeightedActions - weightedActionsToReduce
+
+      // Reduce expected actions
+      await expect(relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, usersToReduce))
+        .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
+        .withArgs(roundId, usersToReduce, expectedNewTotalActions, expectedNewTotalWeightedActions)
+
+      // Verify the totals are updated correctly
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(expectedNewTotalActions)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(expectedNewTotalWeightedActions)
+    })
+
+    it("should allow pool admin to reduce expected actions", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 5
+      const usersToReduce = 1
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      await expect(relayerRewardsPool.connect(poolAdmin).reduceExpectedActionsForRound(roundId, usersToReduce)).to.not
+        .be.reverted
+    })
+
+    it("should revert when trying to reduce zero users", async function () {
+      const roundId = 1
+
+      await expect(relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, 0))
+        .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
+        .withArgs("userCount")
+    })
+
+    it("should revert when trying to reduce more actions than available", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 2
+      const usersToReduce = 5 // More than available
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      await expect(
+        relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, usersToReduce),
+      ).to.be.revertedWith("RelayerRewardsPool: cannot reduce more actions than available")
+    })
+
+    it("should revert when trying to reduce more weighted actions than available", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 1
+      const usersToReduce = 2 // More than available
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      await expect(
+        relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, usersToReduce),
+      ).to.be.revertedWith("RelayerRewardsPool: cannot reduce more actions than available")
+    })
+
+    it("should not allow non-admin to reduce expected actions", async function () {
+      const roundId = 1
+      const usersToReduce = 1
+
+      await expect(
+        relayerRewardsPool.connect(user1).reduceExpectedActionsForRound(roundId, usersToReduce),
+      ).to.be.revertedWith("RelayerRewardsPool: caller must have admin or pool admin role")
+    })
+
+    it("should handle reducing all users correctly", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 3
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      // Reduce all users
+      await relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, totalAutoVotingUsers)
+
+      // Should result in zero expected actions
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(0)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(0)
+    })
+
+    it("should allow multiple reductions correctly", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 10
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+
+      // First reduction
+      const firstReduction = 3
+      await relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, firstReduction)
+
+      const afterFirstTotalActions = await relayerRewardsPool.totalActions(roundId)
+      const afterFirstTotalWeightedActions = await relayerRewardsPool.totalWeightedActions(roundId)
+
+      // Second reduction
+      const secondReduction = 2
+      const expectedSecondActions = afterFirstTotalActions - BigInt(secondReduction * 2)
+      const expectedSecondWeightedActions =
+        afterFirstTotalWeightedActions - BigInt(secondReduction) * (voteWeight + claimWeight)
+
+      await expect(relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, secondReduction))
+        .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
+        .withArgs(roundId, secondReduction, expectedSecondActions, expectedSecondWeightedActions)
+
+      expect(await relayerRewardsPool.totalActions(roundId)).to.equal(expectedSecondActions)
+      expect(await relayerRewardsPool.totalWeightedActions(roundId)).to.equal(expectedSecondWeightedActions)
+    })
+
+    it("should affect reward claimability correctly", async function () {
+      const roundId = 1
+      const totalAutoVotingUsers = 4
+      const usersToReduce = 2
+
+      await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
+
+      // Register some actions for half the original users
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
+
+      // Before reduction, round should not be complete
+      await waitForNextCycle(emissions)
+      expect(await relayerRewardsPool.isRewardClaimable(roundId)).to.be.false
+
+      // After reducing users, round should be complete
+      await relayerRewardsPool.connect(owner).reduceExpectedActionsForRound(roundId, usersToReduce)
+      expect(await relayerRewardsPool.isRewardClaimable(roundId)).to.be.true
+    })
+  })
+
   describe("Version", function () {
     it("should return the correct version", async function () {
       expect(await relayerRewardsPool.version()).to.equal("1")

@@ -102,6 +102,7 @@ describe("AutoVoting - @shard14a", function () {
       // Toggle auto-voting: ON, OFF, and ON
       await xAllocationVoting.connect(user).toggleAutoVoting()
       await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(user).toggleAutoVoting()
       expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
 
@@ -124,18 +125,18 @@ describe("AutoVoting - @shard14a", function () {
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      // Enable autovoting first
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-
-      // Set voting preferences
+      // Set voting preferences first
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+
+      // Enable autovoting
+      await xAllocationVoting.connect(user).toggleAutoVoting()
 
       // Get and verify preferences
       const preferences = await xAllocationVoting.getUserVotingPreferences(user.address)
       expect(preferences).to.deep.equal([app1Id])
     })
 
-    it("should fail to cast vote on behalf of user if autovoting is not enabled", async function () {
+    it("revert when cast vote on behalf of user if autovoting is not enabled", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
@@ -159,11 +160,11 @@ describe("AutoVoting - @shard14a", function () {
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      // Enable autovoting and set preferences
+      // Set preferences first then enable autovoting
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await expect(xAllocationVoting.connect(user).toggleAutoVoting())
         .to.emit(xAllocationVoting, "AutoVotingToggled")
         .withArgs(user.address, true)
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
 
       // Verify preferences are set
       let preferences = await xAllocationVoting.getUserVotingPreferences(user.address)
@@ -179,9 +180,6 @@ describe("AutoVoting - @shard14a", function () {
     })
 
     it("should validate app preferences", async function () {
-      // Enable autovoting
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-
       // Should revert with empty apps array
       await expect(xAllocationVoting.connect(user).setUserVotingPreferences([])).to.be.revertedWith(
         "AutoVotingLogic: no apps to vote for",
@@ -243,10 +241,10 @@ describe("AutoVoting - @shard14a", function () {
 
       expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("100"))
 
-      // Enable autovoting and set preferences
+      // Set preferences first then enable autovoting
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(user).toggleAutoVoting()
       expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -273,17 +271,34 @@ describe("AutoVoting - @shard14a", function () {
       expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.5"))
     })
 
-    it.skip("revert if app preferences are set to empty array when autovoting is enabled", async function () {
-      // @todo autovoting
-      // Scenario:
-      // Auto voting status
-      // Initial cycle - OFF
-      // Cycle 1 - ON (enabled during previous cycle)
-      // - During Cycle 1, user sets app preferences to empty array
-      // - Toggle autovoting off
-      // Cycle 2 - OFF
-      // - App preferences are cleared
-      // - Users can set app preferences to empty array (This is an edge case)
+    it("revert if app preferences are empty before enabling autovoting", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(user.address))
+      await x2EarnApps.connect(owner).submitApp(user.address, user.address, user.address, "metadataURI")
+      await endorseApp(app1Id, user)
+
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWith(
+        "AutoVotingLogic: must select at least one app",
+      )
+    })
+
+    it("should revert when user with auto-voting enabled tries to cast manual vote", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting()
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+      const userBalance = await vot3.balanceOf(user.address)
+
+      // User with auto-voting enabled tries to manually cast vote - should revert
+      await expect(
+        xAllocationVoting.connect(user).castVote(roundId, [app1Id], [userBalance]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "AutoVotingEnabled")
     })
 
     it("should correctly handle auto-voting status when disabled mid-cycle", async function () {
@@ -297,6 +312,12 @@ describe("AutoVoting - @shard14a", function () {
       // Get initial cycle data
       const initialCycle = await emissions.getCurrentCycle()
       const initialEmissionBlock = await emissions.lastEmissionBlock()
+
+      // Create a test app and set preferences first
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(user.address))
+      await x2EarnApps.connect(owner).submitApp(user.address, user.address, user.address, "metadataURI")
+      await endorseApp(app1Id, user)
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
 
       // Enable auto-voting mid-cycle
       await xAllocationVoting.connect(user).toggleAutoVoting()
@@ -357,7 +378,7 @@ describe("AutoVoting - @shard14a", function () {
       await veBetterPassport.whitelist(user.address)
 
       await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWith(
-        "XAllocationVotingGovernor: no votes available",
+        "AutoVotingLogic: at least 1 VOT3 is required",
       )
     })
 
@@ -379,8 +400,8 @@ describe("AutoVoting - @shard14a", function () {
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      await xAllocationVoting.connect(autoUser).toggleAutoVoting()
       await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -423,8 +444,8 @@ describe("AutoVoting - @shard14a", function () {
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      await xAllocationVoting.connect(user).toggleAutoVoting()
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -460,9 +481,9 @@ describe("AutoVoting - @shard14a", function () {
       await endorseApp(app2Id, appOwner2)
       await endorseApp(app3Id, appOwner3)
 
-      // Enable autovoting and set preferences for all apps
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      // Set preferences first then enable autovoting for all apps
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id, app2Id, app3Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -510,9 +531,9 @@ describe("AutoVoting - @shard14a", function () {
         appIds.push(appId)
       }
 
-      // Enable autovoting and set preferences for all apps
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      // Set preferences first then enable autovoting for all apps
       await xAllocationVoting.connect(user).setUserVotingPreferences(appIds)
+      await xAllocationVoting.connect(user).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -562,7 +583,8 @@ describe("AutoVoting - @shard14a", function () {
 
       const gasResults: { appCount: number; gasUsed: bigint }[] = []
 
-      // Enable autovoting once at the beginning
+      // Enable autovoting once at the beginning (need to set preferences first)
+      await xAllocationVoting.connect(user).setUserVotingPreferences([appIds[0]])
       await xAllocationVoting.connect(user).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
@@ -622,21 +644,15 @@ describe("AutoVoting - @shard14a", function () {
       )
     })
 
-    it("should revert when user has no voting preferences set", async function () {
+    it("should revert when user has no app preferences set", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      // Enable autovoting but don't set preferences
-      await xAllocationVoting.connect(user).toggleAutoVoting()
-
-      await waitForNextCycle(emissions)
-      await emissions.connect(minterAccount).distribute()
-
-      const roundId = await xAllocationVoting.currentRoundId()
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId))
-        .to.emit(xAllocationVoting, "AutoVotingDisabled")
-        .withArgs(user.address, roundId)
+      // Try to enable autovoting but don't set preferences (should fail)
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting()).to.be.revertedWith(
+        "AutoVotingLogic: must select at least one app",
+      )
     })
 
     it("[Edge Case] should revert when the users have no eligible apps to vote for", async function () {
@@ -645,8 +661,8 @@ describe("AutoVoting - @shard14a", function () {
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      await xAllocationVoting.connect(user).toggleAutoVoting()
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -711,8 +727,8 @@ describe("AutoVoting - @shard14a", function () {
         .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
       await endorseApp(app2Id, appOwner2)
 
-      await xAllocationVoting.connect(user).toggleAutoVoting()
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id, app2Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting()
 
       // Start round 2 - app is eligible
       await waitForNextCycle(emissions)
@@ -786,8 +802,8 @@ describe("AutoVoting - @shard14a", function () {
       await endorseApp(app2Id, appOwner2)
       await endorseApp(app3Id, appOwner3)
 
-      await xAllocationVoting.connect(user1).toggleAutoVoting()
       await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id, app2Id, app3Id])
+      await xAllocationVoting.connect(user1).toggleAutoVoting()
 
       // Start round
       await waitForNextCycle(emissions)
@@ -844,13 +860,14 @@ describe("AutoVoting - @shard14a", function () {
         .to.emit(relayerRewardsPool, "RelayerRegistered")
         .withArgs(relayer1.address)
 
-      await expect(xAllocationVoting.connect(user).toggleAutoVoting())
-        .to.emit(xAllocationVoting, "AutoVotingToggled")
-        .withArgs(user.address, true)
-
+      // Set preferences first
       await expect(xAllocationVoting.connect(user).setUserVotingPreferences([app1Id]))
         .to.emit(xAllocationVoting, "PreferredAppsUpdated")
         .withArgs(user.address, [app1Id])
+
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting())
+        .to.emit(xAllocationVoting, "AutoVotingToggled")
+        .withArgs(user.address, true)
 
       const preferences = await xAllocationVoting.getUserVotingPreferences(user.address)
       expect(preferences).to.deep.equal([app1Id])
@@ -932,15 +949,15 @@ describe("AutoVoting - @shard14a", function () {
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
+      // Set voting preferences for auto users first
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user2).setUserVotingPreferences([app1Id])
+
       // Enable autovoting for auto users
       await xAllocationVoting.connect(user).toggleAutoVoting()
       await xAllocationVoting.connect(user1).toggleAutoVoting()
       await xAllocationVoting.connect(user2).toggleAutoVoting()
-
-      // Set voting preferences for auto users
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user2).setUserVotingPreferences([app1Id])
 
       // Start a new round
       await waitForNextCycle(emissions)
@@ -997,11 +1014,11 @@ describe("AutoVoting - @shard14a", function () {
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      await xAllocationVoting.connect(autoUser1).toggleAutoVoting()
-      await xAllocationVoting.connect(autoUser2).toggleAutoVoting()
-
       await xAllocationVoting.connect(autoUser1).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(autoUser2).setUserVotingPreferences([app1Id])
+
+      await xAllocationVoting.connect(autoUser1).toggleAutoVoting()
+      await xAllocationVoting.connect(autoUser2).toggleAutoVoting()
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
