@@ -38,7 +38,7 @@ export const GrantsNewFormStepCard = () => {
       defaultValues: formData,
     })
 
-  const { errors } = formState
+  const { errors, isValid } = formState
 
   const steps: GrantStep[] = [
     {
@@ -157,7 +157,7 @@ export const GrantsNewFormStepCard = () => {
                       {t("Back")}
                     </Button>
                   )}
-                  <Button type="submit" variant="primaryAction" px={8} size="lg">
+                  <Button type="submit" variant="primaryAction" px={8} size="lg" disabled={!isValid}>
                     {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
                   </Button>
                 </HStack>
