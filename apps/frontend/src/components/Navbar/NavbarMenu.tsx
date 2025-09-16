@@ -1,16 +1,5 @@
 "use client"
-import {
-  Button,
-  Heading,
-  Icon,
-  Popover,
-  Portal,
-  Text,
-  useMediaQuery,
-  VStack,
-  Collapsible,
-  HStack,
-} from "@chakra-ui/react"
+import { Button, Icon, HoverCard, Portal, Text, useMediaQuery, VStack, Collapsible, HStack } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Route } from "./Routes"
@@ -50,16 +39,16 @@ const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () 
 }
 const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
   const router = useRouter()
-  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Popover.Root
+    <HoverCard.Root
       positioning={{ placement: "bottom-start" }}
-      closeOnInteractOutside={true}
+      openDelay={100}
+      closeDelay={150}
       open={isOpen}
       onOpenChange={e => setIsOpen(e.open)}>
-      <Popover.Trigger asChild>
+      <HoverCard.Trigger asChild>
         <Button
           w={{ base: "full", md: "auto" }}
           colorScheme={selected ? "primary" : "gray"}
@@ -79,57 +68,42 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
             flexShrink={0}
           />
         </Button>
-      </Popover.Trigger>
+      </HoverCard.Trigger>
       <Portal>
-        <Popover.Positioner>
-          <Popover.Content w="400px" mt={2}>
-            <Popover.Body>
-              <VStack align="stretch">
-                {route.subRoutes?.map(subRoute => {
-                  const isSubRouteSelected = typeof subRoute.onClick === "string" && pathname === subRoute.onClick
-                  return (
-                    <VStack
-                      px={4}
-                      py={2}
-                      key={subRoute.name}
-                      textAlign="start"
-                      alignItems="flex-start"
-                      cursor="pointer"
-                      _hover={{
-                        bg: "gray.50",
-                        _dark: {
-                          bg: "gray.700",
-                        },
-                        borderRadius: "lg",
-                      }}
-                      onClick={handleClick(subRoute, router)}>
-                      <Heading
-                        size="xs"
-                        fontWeight={isSubRouteSelected ? "bold" : "normal"}
-                        color={isSubRouteSelected ? "inherit" : "gray.700"}
-                        _dark={{
-                          color: isSubRouteSelected ? "white" : "gray.300",
-                        }}>
-                        {subRoute.name}
-                      </Heading>
-                      <Text
-                        fontSize={13}
-                        fontWeight="normal"
-                        color={isSubRouteSelected ? "gray.700" : "gray.500"}
-                        _dark={{
-                          color: isSubRouteSelected ? "gray.100" : "gray.400",
-                        }}>
-                        {subRoute.description}
-                      </Text>
-                    </VStack>
-                  )
-                })}
-              </VStack>
-            </Popover.Body>
-          </Popover.Content>
-        </Popover.Positioner>
+        <HoverCard.Positioner>
+          <HoverCard.Content mt={"12px"} minW="400px" borderRadius="2xl" p={2} gap={0}>
+            <VStack align="stretch" w="full" gap={0}>
+              {route.subRoutes?.map(subRoute => {
+                return (
+                  <VStack
+                    key={subRoute.name}
+                    textAlign="start"
+                    alignItems="flex-start"
+                    cursor="pointer"
+                    bg="bg.primary"
+                    borderRadius="2xl"
+                    p={3}
+                    color={"text.subtle"}
+                    _hover={{
+                      fontWeight: "bold",
+                      color: "text.default",
+                    }}
+                    onClick={() => {
+                      handleClick(subRoute, router)()
+                      setIsOpen(false)
+                    }}>
+                    <Text fontSize={"md"}>{subRoute.name}</Text>
+                    <Text fontSize={"sm"} fontWeight="normal" color={"text.subtle"}>
+                      {subRoute.description}
+                    </Text>
+                  </VStack>
+                )
+              })}
+            </VStack>
+          </HoverCard.Content>
+        </HoverCard.Positioner>
       </Portal>
-    </Popover.Root>
+    </HoverCard.Root>
   )
 }
 
