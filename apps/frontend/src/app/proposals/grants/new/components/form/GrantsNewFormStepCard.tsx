@@ -5,13 +5,17 @@ import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMe
 import { useGrantProposalFormStore } from "@/store"
 import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutGrant, Milestones, Schedule } from "./steps"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { getConfig } from "@repo/config"
+import { ethers } from "ethers"
+import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposal"
 
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
@@ -25,6 +29,7 @@ export type GrantStep = {
   content: React.ReactNode
   title: string
 }
+const treasuryInterface = Treasury__factory.createInterface()
 
 export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
@@ -32,6 +37,8 @@ export const GrantsNewFormStepCard = () => {
   const router = useRouter()
 
   const { setData, clearData, ...formData } = useGrantProposalFormStore()
+
+  const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string>("")
 
   const { handleSubmit, control, register, formState, setValue, getValues, watch, clearErrors, setError, reset } =
     useForm<GrantFormData>({
@@ -105,9 +112,36 @@ export const GrantsNewFormStepCard = () => {
       //Cleanup form and storage
       clearData()
       reset()
-      router.push(`/proposals/grants`)
+      goToProposalPage()
     },
   })
+
+  const grantsProposalActions = useMemo(() => {
+    return formData.milestones.map((milestone: GrantFormData["milestones"][0]) => {
+      return {
+        calldata: treasuryInterface.encodeFunctionData("transferB3TR", [
+          getConfig().grantsManagerContractAddress,
+          ethers.parseEther(milestone.fundingAmount.toString()),
+        ]),
+        contractAddress: getConfig().treasuryContractAddress,
+      }
+    })
+  }, [formData?.milestones])
+
+  // We call the hashProposal function to precalculate the proposal id
+  // so we can redirect the user to the proposal page after the tx is confirmed
+  const { data: expectedProposalId } = useHashProposal(
+    grantsProposalActions.map(action => ({
+      contractAddress: action.contractAddress,
+      calldata: action.calldata as string,
+    })),
+    proposalDescriptionUriHash ?? "",
+  )
+
+  const goToProposalPage = useCallback(() => {
+    //Redirect to the proposal page
+    router.push(`/proposals/${expectedProposalId}`)
+  }, [router, expectedProposalId])
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
@@ -127,6 +161,8 @@ export const GrantsNewFormStepCard = () => {
     if (!milestonesIpfsCID) return console.error("Error uploading milestones")
     if (!data.votingRoundId) return console.error("Support round ID is required")
     resetStatus()
+    // We hash the metadata uri, which will be used by the useHashProposal hook to calculate the proposal id
+    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(proposalMetadataURI)))
 
     await createGrantProposal({
       metadataIpfsCID: proposalMetadataURI,
