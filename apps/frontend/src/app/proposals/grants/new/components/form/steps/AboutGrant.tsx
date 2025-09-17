@@ -179,6 +179,12 @@ export const AboutGrant = ({
     [getValues, setValue, setData, clearErrors, setError],
   )
 
+  const [twitterUsername, githubUsername, discordUsername] = [
+    watch("twitterUsername"),
+    watch("githubUsername"),
+    watch("discordUsername"),
+  ]
+
   return (
     <Grid templateColumns={{ base: "1fr", md: "1fr" }} w="full" gap={8}>
       <Accordion.Root multiple w="full" defaultValue={["company-details", "project-details", "outcomes"]} spaceY={4}>
@@ -333,40 +339,40 @@ export const AboutGrant = ({
                   <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={6}>
                     <GridItem w="full">
                       <FormSocialConnectButton
-                        label={t("Connect X")}
+                        label={twitterUsername ? twitterUsername : t("Connect X")}
                         register={register("twitterUsername", {
                           validate: validateAtLeastOneSocial,
                         })}
                         error={errors.twitterUsername?.message}
                         handleAuth={() => handleAuth("twitter")}
                         leftIcon={<FaXTwitter size={20} />}
-                        value={watch("twitterUsername")}
+                        value={twitterUsername}
                         onBlur={() => onBlur("twitterUsername")}
                       />
                     </GridItem>
                     <GridItem w="full">
                       <FormSocialConnectButton
-                        label={t("Connect GitHub")}
+                        label={githubUsername ? githubUsername : t("Connect GitHub")}
                         register={register("githubUsername", {
                           validate: validateAtLeastOneSocial,
                         })}
                         error={errors.githubUsername?.message}
                         handleAuth={() => handleAuth("github")}
                         leftIcon={<UilGithub size={20} />}
-                        value={watch("githubUsername")}
+                        value={githubUsername}
                         onBlur={() => onBlur("githubUsername")}
                       />
                     </GridItem>
                     <GridItem w="full">
                       <FormSocialConnectButton
-                        label={t("Connect Discord")}
+                        label={discordUsername ? discordUsername : t("Connect Discord")}
                         register={register("discordUsername", {
                           validate: validateAtLeastOneSocial,
                         })}
                         error={errors.discordUsername?.message}
                         handleAuth={() => handleAuth("discord")}
                         leftIcon={<AiOutlineDiscord size={20} />}
-                        value={watch("discordUsername")}
+                        value={discordUsername}
                         onBlur={() => onBlur("discordUsername")}
                       />
                     </GridItem>
