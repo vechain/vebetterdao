@@ -3,7 +3,8 @@ import {
   getProposalClaimableUserDepositsQueryKey,
   getProposalsEventsQueryKey,
 } from "@/api"
-import { getAllProposalsMetadataQueryKey, getEnrichedProposalsQueryKey, useBuildTransaction } from "@/hooks"
+import { useBuildTransaction, getEventsKey } from "@/hooks"
+import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
@@ -91,11 +92,21 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
 
   const refetchQueryKeys = useMemo(() => {
     return [
-      getProposalsEventsQueryKey(),
+      // Invalidate proposal events (this triggers the reactive enrichment)
+      getEventsKey({ eventName: "ProposalCreated" }),
+      getEventsKey({ eventName: "ProposalCreatedWithType" }),
+
+      // Invalidate proposal states
       getAllProposalsStateQueryKey(),
+
+      // Invalidate metadata queries
       getAllProposalsMetadataQueryKey(),
-      getEnrichedProposalsQueryKey(),
+
+      // Invalidate user-specific data
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
+
+      // Legacy query keys for backwards compatibility
+      getProposalsEventsQueryKey(),
     ]
   }, [account?.address])
   return useBuildTransaction({

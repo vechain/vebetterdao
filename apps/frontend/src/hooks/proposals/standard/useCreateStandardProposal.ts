@@ -4,8 +4,13 @@ import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
-import { getProposalsEventsQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
-import { useBuildTransaction } from "@/hooks"
+import {
+  getProposalsEventsQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
+  getAllProposalsStateQueryKey,
+} from "@/api"
+import { useBuildTransaction, getEventsKey } from "@/hooks"
+import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -103,7 +108,23 @@ export const useCreateStandardProposal = ({ onSuccess, transactionModalCustomUI 
   )
 
   const refetchQueryKeys = useMemo(() => {
-    return [getProposalsEventsQueryKey(), getProposalClaimableUserDepositsQueryKey(account?.address ?? "")]
+    return [
+      // Invalidate proposal events (this triggers the reactive enrichment)
+      getEventsKey({ eventName: "ProposalCreated" }),
+      getEventsKey({ eventName: "ProposalCreatedWithType" }),
+
+      // Invalidate proposal states
+      getAllProposalsStateQueryKey(),
+
+      // Invalidate metadata queries
+      getAllProposalsMetadataQueryKey(),
+
+      // Invalidate user-specific data
+      getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
+
+      // Legacy query keys for backwards compatibility
+      getProposalsEventsQueryKey(),
+    ]
   }, [account?.address])
   return useBuildTransaction({
     clauseBuilder: buildClauses,

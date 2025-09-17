@@ -1,7 +1,6 @@
 import { useAllProposalsState } from "@/api"
-import { useQuery } from "@tanstack/react-query"
 import BigNumber from "bignumber.js"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
 import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
@@ -9,12 +8,10 @@ import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 
 // Utility type to ensure required fields stay required after spreading
 type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
-// Step 5: Caching the enriched data with a simple query key
-export const getEnrichedProposalsQueryKey = () => ["enriched-proposals"]
 
 export const useProposalEnriched = () => {
   // Step 1: Fetch events
-  const { grantProposals, standardProposals } = useProposalCreatedEvents()
+  const { grantProposals, standardProposals, allProposals } = useProposalCreatedEvents()
 
   // Step 2: Get proposal IDs
   const grantProposalsIds = useMemo(() => {
@@ -31,6 +28,7 @@ export const useProposalEnriched = () => {
       grantProposalsDetailsMap: {},
       standardProposalsDetailsMap: {},
     },
+    isLoading: isDetailsLoading,
   } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
 
   const {
@@ -38,42 +36,17 @@ export const useProposalEnriched = () => {
       grantsProposalStates: [],
       standardProposalStates: [],
     },
+    isLoading: isStatesLoading,
   } = useAllProposalsState({
     grantProposalsIds,
     standardProposalsIds,
   })
-  // Step 4: Create enrichment function with useCallback for stability
-  const enrichProposals = useCallback(() => {
-    const hasGrants = !!grantProposals && grantProposals?.length > 0
-    const hasStandard = !!standardProposals && standardProposals?.length > 0
 
-    // Early return if no proposals
-    if (!hasGrants && !hasStandard) {
-      throw new Error("No proposals found")
-    }
+  // Step 4: Reactively enrich grant proposals using useMemo
+  const enrichedGrantProposals = useMemo((): GrantProposalEnriched[] => {
+    if (!grantProposals?.length) return []
 
-    //If has grant but no grant details, throw an error
-    if (hasGrants && !grantProposalsDetailsMap) {
-      throw new Error("No grant proposal details found")
-    }
-
-    //If has standard but no standard details, throw an error
-    if (hasStandard && !standardProposalsDetailsMap) {
-      throw new Error("No standard proposal details found")
-    }
-
-    //If has grant but no grant states, throw an error
-    if (hasGrants && !grantsProposalStates) {
-      throw new Error("No grant proposal states found")
-    }
-
-    //If has standard but no standard states, throw an error
-    if (hasStandard && !standardProposalStates) {
-      throw new Error("No standard proposal states found")
-    }
-
-    // Enrich grant proposals
-    const enrichedGrantProposals: GrantProposalEnriched[] = grantProposals.map(event => {
+    return grantProposals.map(event => {
       const stateData = grantsProposalStates?.find(state => state.proposalId === event.id)
       const state = stateData?.state ?? ProposalState.Pending
       const details = grantProposalsDetailsMap?.[event.id]
@@ -83,18 +56,23 @@ export const useProposalEnriched = () => {
         ...details,
         state,
         // Use the fallback logic from getGrantProposalMetadataOrReturnDefault if title is missing
-        title: details?.title || details?.projectName || details?.shortDescription,
+        title: details?.title || details?.projectName || details?.shortDescription || "Grant Proposal",
       } as EnsureRequired<
         typeof event & typeof details & { state: ProposalState },
         "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
       >
     })
+  }, [grantProposals, grantsProposalStates, grantProposalsDetailsMap])
 
-    // Enrich standard proposals
-    const enrichedStandardProposals: ProposalEnriched[] = standardProposals.map(event => {
+  // Step 5: Reactively enrich standard proposals using useMemo
+  const enrichedStandardProposals = useMemo((): ProposalEnriched[] => {
+    if (!standardProposals?.length) return []
+
+    return standardProposals.map(event => {
       const stateData = standardProposalStates?.find(state => state.proposalId === event.id)
       const state = stateData?.state ?? ProposalState.Pending
       const details = standardProposalsDetailsMap?.[event.id]
+
       return {
         ...event,
         ...details,
@@ -106,34 +84,40 @@ export const useProposalEnriched = () => {
         "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
       >
     })
+  }, [standardProposals, standardProposalStates, standardProposalsDetailsMap])
 
-    const proposals = [...enrichedGrantProposals, ...enrichedStandardProposals]
+  // Step 6: Combine all proposals using useMemo
+  const proposals = useMemo(() => {
+    return [...enrichedGrantProposals, ...enrichedStandardProposals]
+  }, [enrichedGrantProposals, enrichedStandardProposals])
 
-    // Calculate total grant amount
-    const totalGrantAmount = enrichedGrantProposals.reduce(
+  // Step 7: Calculate total grant amount using useMemo
+  const totalGrantAmount = useMemo(() => {
+    return enrichedGrantProposals.reduce(
       (acc, event) => acc.plus(BigNumber(event?.grantAmountRequested) ?? BigNumber(0)),
       BigNumber(0),
     )
+  }, [enrichedGrantProposals])
 
-    return {
+  // Step 8: Calculate loading state
+  const isLoading = useMemo(() => {
+    return isDetailsLoading || isStatesLoading
+  }, [isDetailsLoading, isStatesLoading])
+
+  // Return both basic and enriched data - this gives maximum flexibility
+  return {
+    data: {
+      // Basic proposal events (fast, no dependencies)
+      grantProposals,
+      standardProposals,
+      proposals: allProposals,
+
+      // Enriched proposals (reactive to state/metadata changes)
       enrichedGrantProposals,
       enrichedStandardProposals,
-      proposals,
+      enrichedProposals: proposals,
       totalGrantAmount,
-    }
-  }, [
-    grantProposals,
-    standardProposals,
-    grantsProposalStates,
-    standardProposalStates,
-    grantProposalsDetailsMap,
-    standardProposalsDetailsMap,
-  ])
-
-  return useQuery({
-    queryKey: getEnrichedProposalsQueryKey(),
-    queryFn: enrichProposals,
-    retry: true,
-    retryOnMount: true,
-  })
+    },
+    isLoading,
+  }
 }

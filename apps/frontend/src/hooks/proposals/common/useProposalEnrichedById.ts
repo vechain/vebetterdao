@@ -1,18 +1,24 @@
-import { useQuery } from "@tanstack/react-query"
+import { useMemo } from "react"
 
 import { useProposalEnriched } from "./useProposalEnriched"
 
 /**
- * Hook to return the enriched proposal and the ty[e of the proposal ] given a proposalId
+ * Hook to return the enriched proposal by ID
+ * Now much simpler and reactive since useProposalEnriched provides enriched data
  *
  * @param proposalId - The ID of the proposal to retrieve
- * @returns Proposal data
+ * @returns Enriched proposal data with reactive updates
  */
 export const useProposalEnrichedById = (proposalId: string) => {
-  const { data: { proposals } = { proposals: [] }, isLoading } = useProposalEnriched()
-  return useQuery({
-    queryKey: ["proposal-enriched-by-id", proposalId],
-    queryFn: () => proposals?.find(p => p.id === proposalId),
-    enabled: !!proposals?.length && !isLoading,
-  })
+  const { data: { enrichedProposals } = { enrichedProposals: [] }, isLoading } = useProposalEnriched()
+
+  // Find the enriched proposal by ID using useMemo for performance
+  const proposal = useMemo(() => {
+    return enrichedProposals?.find(p => p.id === proposalId)
+  }, [enrichedProposals, proposalId])
+
+  return {
+    data: proposal,
+    isLoading,
+  }
 }

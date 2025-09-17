@@ -133,9 +133,6 @@ export const useStandardOrGrantProposalDetails = ({
         if (!proposal.ipfsDescription) return undefined
         return await safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
       },
-      enabled: !!proposal.ipfsDescription,
-      retry: 3,
-      staleTime: 5 * 60 * 1000, // 5 minutes - high cache time for successful fetches
     })),
   })
 
@@ -147,9 +144,6 @@ export const useStandardOrGrantProposalDetails = ({
         if (!proposal.ipfsDescription) return undefined
         return await safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
       },
-      enabled: !!proposal.ipfsDescription,
-      retry: 3,
-      staleTime: 5 * 60 * 1000, // 5 minutes - high cache time for successful fetches
     })),
   })
 
