@@ -34,6 +34,8 @@ import { TbClockHour8 } from "react-icons/tb"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -80,6 +82,7 @@ export const ProposalInteractionCard = ({
   const { data: proposalVotes } = useProposalVotesIndexer({
     proposalId,
   })
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   // ===== CONTRACT TRANSACTION HOOKS =====
   const { sendTransaction: queueProposal } = useQueueProposal({ proposalId })
@@ -97,14 +100,15 @@ export const ProposalInteractionCard = ({
   const hasUserAlreadyVoted = userHasAlreadyVotedInProposal?.[proposalId] ?? false
   const userVot3Balance = Number(userVot3BalanceQueryData?.original ?? 0)
   const proposalDepositReached = isDepositReached ?? false
-
+  const currentUserCanQueueOrExecute = permissions?.isProposalExecutor ?? false
+  const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
   // Check if the proposal is queuable and executable
   const isQueuable = useMemo(() => {
-    return proposal?.state === ProposalState.Succeeded
+    return proposal?.state === ProposalState.Succeeded && proposalHasTargets
   }, [proposal?.state])
 
   const isExecutable = useMemo(() => {
-    return proposal?.state === ProposalState.Queued
+    return proposal?.state === ProposalState.Queued && proposalHasTargets
   }, [proposal?.state])
 
   const percentageSupported = useMemo(() => {
@@ -120,15 +124,28 @@ export const ProposalInteractionCard = ({
 
   // ===== BUSINESS LOGIC =====
   const shouldShowActionButton = useMemo(() => {
+    if (!account?.address) {
+      return false
+    }
+
     if (proposal?.state === ProposalState.Active) {
       return !hasUserAlreadyVoted && userVotingPower > 0
     }
 
     if (proposal?.state === ProposalState.Pending) {
-      return !proposalDepositReached && userVot3Balance > 0
+      return (
+        !proposalDepositReached &&
+        userVot3Balance > 0 &&
+        !compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
+      )
     }
 
-    return isQueuable || isExecutable
+    //User has permissions to execute or queue
+    if ((isQueuable || isExecutable) && currentUserCanQueueOrExecute) {
+      return isQueuable || isExecutable
+    }
+
+    return false
   }, [
     proposal?.state,
     isQueuable,
@@ -137,6 +154,9 @@ export const ProposalInteractionCard = ({
     userVotingPower,
     proposalDepositReached,
     userVot3Balance,
+    currentUserCanQueueOrExecute,
+    account?.address,
+    proposal?.proposerAddress,
   ])
 
   const isActionButtonDisabled = useMemo(() => {
@@ -148,13 +168,18 @@ export const ProposalInteractionCard = ({
     }
 
     // If it's voting phase AND: User has voted OR User cannot vote
-    if (isVotingPhase) {
+    if (proposal?.state === ProposalState.Active) {
       return hasUserAlreadyVoted || userVotingPower === 0
     }
 
     // If it's support phase AND: User has no balance OR Maximum support reached
-    if (!isVotingPhase) {
+    if (proposal?.state === ProposalState.Pending) {
       return userVot3Balance < 1 || proposalDepositReached
+    }
+
+    //User has permissions to execute or queue
+    if (isQueuable || isExecutable) {
+      return !currentUserCanQueueOrExecute
     }
 
     return false
