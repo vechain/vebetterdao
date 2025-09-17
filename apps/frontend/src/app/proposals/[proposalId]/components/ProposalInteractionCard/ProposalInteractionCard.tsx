@@ -66,7 +66,7 @@ export const ProposalInteractionCard = ({
 
   // ===== CONTRACT QUERIES =====
   const { data: isDepositReached } = useIsDepositReached(proposalId)
-  const { data: userHasAlreadyVotedInProposal } = useHasVotedInProposals([proposalId])
+  const { data: userHasAlreadyVotedInProposal } = useHasVotedInProposals([proposalId], account?.address ?? "")
   const { data: userVot3BalanceQueryData } = useGetVot3Balance(account?.address)
   const { data: proposalDepositThresholdQueryData } = useProposalDepositThreshold(proposalId)
   const { data: currentDepositAmountQueryData } = useGetProposalDeposits(proposalId)
@@ -358,7 +358,7 @@ export const ProposalInteractionCard = ({
             />
 
             {/* User Support Badge */}
-            {userDeposits && (
+            {userDeposits && proposal?.state === ProposalState.Pending ? (
               <HStack>
                 <Text color="gray.600">{t("You supported with")}</Text>
                 <Box border="2px solid" borderColor="success.primary" color="success.primary" borderRadius="lg">
@@ -368,7 +368,7 @@ export const ProposalInteractionCard = ({
                   </HStack>
                 </Box>
               </HStack>
-            )}
+            ) : null}
 
             {/* Action Button */}
             {shouldShowActionButton && (
