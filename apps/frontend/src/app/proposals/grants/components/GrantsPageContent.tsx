@@ -182,6 +182,7 @@ export const GrantsPageContent = () => {
                 placeholder={t("Status")}
                 options={filterOptions}
                 defaultValue={defaultValue}
+                showReset
                 onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
                 isMultiOption
               />
