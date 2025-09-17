@@ -1,8 +1,6 @@
-import { ProposalMetadata, useIsDepositReached } from "@/api"
+import { useIsDepositReached } from "@/api"
 import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
-import { useIpfsMetadata } from "@/api/ipfs"
 import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
-import { toIPFSURL } from "@/utils"
 import { Card, HStack, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
@@ -21,8 +19,7 @@ type Props = {
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { id, description } = proposal
-  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description ?? ""))
+  const { id } = proposal
   const { data: isDepositReached } = useIsDepositReached(id)
   const router = useRouter()
 
@@ -34,40 +31,38 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     router.push(`/proposals/${id}`)
   }, [router, id])
 
-  const hasVotedText = useMemo(() => {
-    switch (proposalState) {
-      case ProposalState.Pending:
-        return (
-          <Skeleton loading={!supportEndDate}>
-            <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
-              {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
-            </Text>
-          </Skeleton>
-        )
-      case ProposalState.Canceled:
-      case ProposalState.DepositNotMet:
-        return (
+  const proposalExtraInfo = useMemo(() => {
+    if (proposal.state === ProposalState.Pending) {
+      return (
+        <Skeleton loading={!supportEndDate}>
           <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
-            {t("Vote didn't start")}
+            {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
           </Text>
-        )
-      case ProposalState.Active:
-      case ProposalState.Executed:
-      case ProposalState.Defeated:
-      case ProposalState.Succeeded:
-      case ProposalState.Queued:
-        return (
-          <ProposalYourVote
-            proposalId={id}
-            proposalState={proposalState}
-            renderTitle={false}
-            textProps={{ color: "gray.500", fontSize: "14px" }}
-          />
-        )
-      default:
-        return ""
+        </Skeleton>
+      )
     }
-  }, [supportEndDate, proposalState, t, id])
+    if (proposal.state === ProposalState.DepositNotMet) {
+      return (
+        <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+          {t("Vote didn't start")}
+        </Text>
+      )
+    }
+    if (
+      !!account?.address &&
+      [ProposalState.Active, ProposalState.Executed, ProposalState.Queued].includes(proposal.state as ProposalState)
+    ) {
+      return (
+        <ProposalYourVote
+          proposalId={id}
+          proposalState={proposal.state}
+          renderTitle={false}
+          textProps={{ color: "gray.500", fontSize: "14px" }}
+        />
+      )
+    }
+    return ""
+  }, [supportEndDate, proposal.state, t, id, account?.address])
 
   return (
     <Card.Root
@@ -90,17 +85,10 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
               proposalType={proposal.type}
             />
             <VStack w="full" gap={1} align={"flex-start"}>
-              <Skeleton
-                loading={proposalMetadata.isLoading}
-                lineClamp={3}
-                flex={2.5}
-                mr={{ base: 0, md: 10 }}
-                alignSelf={"flex-start"}>
-                <Text fontSize={"14px"} fontWeight={600}>
-                  {proposalMetadata.data?.title}
-                </Text>
-              </Skeleton>
-              {!!account?.address && hasVotedText}
+              <Text fontSize={"14px"} fontWeight={600}>
+                {proposal?.title}
+              </Text>
+              {proposalExtraInfo}
             </VStack>
           </VStack>
           <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
