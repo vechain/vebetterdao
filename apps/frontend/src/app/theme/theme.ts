@@ -10,6 +10,7 @@ import { nativeSelectSlotRecipe } from "./native-select"
 import { popoverSlotRecipe } from "./popover"
 import { selectSlotRecipe } from "./select"
 import { stepsSlotRecipe } from "./steps"
+import { checkboxSlotRecipe } from "./checkbox"
 
 const config = defineConfig({
   preflight: true,
@@ -37,6 +38,7 @@ const config = defineConfig({
       select: selectSlotRecipe,
       numberInput: numberInputSlotRecipe,
       popover: popoverSlotRecipe,
+      checkbox: checkboxSlotRecipe,
     },
 
     keyframes: {
