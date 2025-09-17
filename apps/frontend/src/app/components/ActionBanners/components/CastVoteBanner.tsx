@@ -23,8 +23,8 @@ export const CastVoteBanner = () => {
       description={t("It’s time to make your voice heard in this round and earn exciting rewards!")}
       cta={
         <Button variant="primary" onClick={handleVote}>
-          <UilArrowRight color="white" />
           {t("See round")}
+          <UilArrowRight color="white" />
         </Button>
       }
     />

@@ -23,8 +23,8 @@ export const GalaxyRewardCalculatorCard = () => {
             </Text>
           </VStack>
 
-          <Button onClick={goToCalculator} variant="ghost" color="actions.tertiary.default">
-            <Icon as={UilCalculatorAlt} color="actions.tertiary.default" />
+          <Button onClick={goToCalculator} variant="secondary">
+            <Icon as={UilCalculatorAlt} />
             {t("Estimate Rewards")}
           </Button>
         </VStack>

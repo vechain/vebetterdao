@@ -153,7 +153,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           <Heading size={"xl"}>
             <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: votes.length }} t={t} />
           </Heading>
-          <Button variant="plain" color="actions.tertiary.default" onClick={splitEvenly}>
+          <Button variant="secondary" onClick={splitEvenly}>
             {t("Split evenly")}
           </Button>
         </HStack>

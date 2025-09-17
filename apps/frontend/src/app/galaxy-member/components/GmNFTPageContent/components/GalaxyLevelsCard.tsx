@@ -2,7 +2,7 @@ import { useGetUserGMs, useGMMaxLevel, UserGM } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { ToggleTip } from "@/components/ui/toggle-tip"
 import { gmNfts } from "@/constants/gmNfts"
-import { Button, Card, Flex, Heading, HStack, Image, SimpleGrid, VStack, Text } from "@chakra-ui/react"
+import { Button, Card, Flex, Heading, HStack, Image, SimpleGrid, VStack, Text, Icon } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
@@ -85,7 +85,7 @@ export const GalaxyLevelsCard = () => {
                   </VStack>
                 }>
                 <Button size="xs" variant="ghost">
-                  <UilInfoCircle color="#004CFC" />
+                  <Icon as={UilInfoCircle} color="actions.tertiary.default" />
                 </Button>
               </ToggleTip>
             </HStack>

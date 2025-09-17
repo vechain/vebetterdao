@@ -147,6 +147,7 @@ export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) =>
         },
       }
     },
+    refetchInterval: 10000,
     enabled: !!proposalId,
   })
 }

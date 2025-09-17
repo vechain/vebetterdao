@@ -43,7 +43,13 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposalId, description, rou
 
   return (
     <LinkBox asChild>
-      <Card.Root variant="primary" alignSelf={"flex-start"} w={"full"} p="4">
+      <Card.Root
+        variant="primary"
+        _hover={{ bg: "card.hover" }}
+        transition="all 0.2s ease-in-out"
+        alignSelf={"flex-start"}
+        w={"full"}
+        p="4">
         <LinkOverlay asChild href={`/proposals/${proposalId}`}>
           <NextLink href={`/proposals/${proposalId}`} />
         </LinkOverlay>

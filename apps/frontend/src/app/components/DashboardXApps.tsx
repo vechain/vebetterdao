@@ -55,7 +55,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
               {t("Explore Apps")}
             </Heading>
             {!!xApps && xApps.length > maxApps && (
-              <Link asChild variant="plain" color="actions.tertiary.default" textStyle="sm" fontWeight="semibold">
+              <Link asChild variant="secondary" textStyle="sm" fontWeight="semibold">
                 <NextLink href="/apps">
                   {t("See all")}
                   <Icon size="sm" as={MdKeyboardArrowRight} />
@@ -116,8 +116,8 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
                     {appMetadata?.description
                       ? appMetadata.description.slice(0, 150) + "..."
                       : appMetadataError?.message
-                        ? appMetadataError.message
-                        : "Error loading description"}
+                      ? appMetadataError.message
+                      : "Error loading description"}
                   </Text>
                 </Skeleton>
               </HStack>

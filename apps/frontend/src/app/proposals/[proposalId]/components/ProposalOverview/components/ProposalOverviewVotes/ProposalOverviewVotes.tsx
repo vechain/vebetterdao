@@ -5,7 +5,6 @@ import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ExclamationTriangle, ResponsiveCard } from "@/components"
-import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -22,17 +21,8 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
   const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({ proposalId })
-
   const { proposal } = useProposalDetail()
   const proposalState = proposal.state
-  const [_, setSeconds] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSeconds(s => s + 1)
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
 
   const votes = {
     for: {
@@ -111,9 +101,9 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
       return (
         <Card.Root variant="primary" w="full" p="4" flex={1} border="sm" borderColor="border.tertiary">
           <Card.Body asChild>
-            <VStack alignItems={"stretch"} w="full" justify={"space-between"} gap="4">
+            <VStack alignItems={"stretch"} w="full" gap="4">
               <Heading size="md">{t("Real time votes")}</Heading>
-              <Stat.Root>
+              <Stat.Root flex={0}>
                 <Stat.Label>{t("Wallets voted")}</Stat.Label>
                 <Stat.ValueText>
                   <Skeleton loading={proposalVotesLoading}>

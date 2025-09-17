@@ -11,7 +11,7 @@ export const GmPoolAmountCard = () => {
   const { formatted: gmPoolAmount } = useGMPoolAmount(Number(currentRoundId))
 
   return (
-    <Card.Root variant="primary">
+    <Card.Root variant="primary" border="sm" borderColor="border.active">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack gap={2}>

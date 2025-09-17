@@ -30,8 +30,8 @@ export const CastProposalVoteBanners = ({ id, description }: Props) => {
       logoSrc="/assets/icons/vote-icon.webp"
       cta={
         <Button variant="primary" onClick={goToProposalPage}>
-          <UilArrowRight color="white" />
           {t("Vote now")}
+          <UilArrowRight color="white" />
         </Button>
       }
     />
