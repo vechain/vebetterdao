@@ -133,6 +133,7 @@ export const useProposalEnriched = () => {
   return useQuery({
     queryKey: getEnrichedProposalsQueryKey(),
     queryFn: enrichProposals,
-    retry: 5, //Since events could take longer, we retry 5 times
+    retry: 10,
+    retryOnMount: true,
   })
 }
