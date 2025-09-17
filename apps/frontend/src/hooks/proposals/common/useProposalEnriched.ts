@@ -4,30 +4,19 @@ import BigNumber from "bignumber.js"
 import { useCallback, useMemo } from "react"
 
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
+import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
 import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
-import {
-  EnsureRequired,
-  getEnrichedProposalsQueryKey,
-  getGrantProposalDetailsWithFallbacks,
-  getStandardProposalDetailsWithFallbacks,
-  safeFetchIpfsMetadata,
-} from "./utils"
 
-/**
- * Hook for enriching proposals with IPFS metadata and state information
- *
- * This hook:
- * 1. Fetches proposal creation events
- * 2. Gets current proposal states
- * 3. Fetches IPFS metadata for each proposal
- * 4. Enriches proposals with fallback data
- * 5. Calculates total grant amounts
- */
+// Utility type to ensure required fields stay required after spreading
+type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
+// Step 5: Caching the enriched data with a simple query key
+export const getEnrichedProposalsQueryKey = () => ["enriched-proposals"]
+
 export const useProposalEnriched = () => {
-  // Fetch proposal creation events
+  // Step 1: Fetch events
   const { grantProposals, standardProposals } = useProposalCreatedEvents()
 
-  // Extract proposal IDs for state queries
+  // Step 2: Get proposal IDs
   const grantProposalsIds = useMemo(() => {
     return grantProposals?.map(event => event.id) || []
   }, [grantProposals])
@@ -36,7 +25,14 @@ export const useProposalEnriched = () => {
     return standardProposals?.map(event => event.id) || []
   }, [standardProposals])
 
-  // Get current proposal states
+  // Step 3: Get proposal states, details, and voting data
+  const {
+    data: { grantProposalsDetailsMap, standardProposalsDetailsMap } = {
+      grantProposalsDetailsMap: {},
+      standardProposalsDetailsMap: {},
+    },
+  } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
+
   const {
     data: { grantsProposalStates, standardProposalStates } = {
       grantsProposalStates: [],
@@ -46,71 +42,74 @@ export const useProposalEnriched = () => {
     grantProposalsIds,
     standardProposalsIds,
   })
-
-  // Main enrichment function with metadata fetching
-  const enrichProposals = useCallback(async () => {
+  // Step 4: Create enrichment function with useCallback for stability
+  const enrichProposals = useCallback(() => {
     const hasGrants = !!grantProposals && grantProposals?.length > 0
     const hasStandard = !!standardProposals && standardProposals?.length > 0
 
-    // Force retry if no proposals found instead of returning empty data
+    // Early return if no proposals
     if (!hasGrants && !hasStandard) {
-      console.error("No proposals found - retrying...")
-      throw new Error("No proposals found - retrying...")
+      throw new Error("No proposals found")
     }
 
-    // Fetch IPFS metadata for all proposals in parallel
-    const grantProposalsMetadataPromises =
-      grantProposals?.map(event => safeFetchIpfsMetadata<GrantProposalEnriched>(event.ipfsDescription, false)) || []
+    //If has grant but no grant details, throw an error
+    if (hasGrants && !grantProposalsDetailsMap) {
+      throw new Error("No grant proposal details found")
+    }
 
-    const standardProposalsMetadataPromises =
-      standardProposals?.map(event => safeFetchIpfsMetadata<ProposalEnriched>(event.ipfsDescription, false)) || []
+    //If has standard but no standard details, throw an error
+    if (hasStandard && !standardProposalsDetailsMap) {
+      throw new Error("No standard proposal details found")
+    }
 
-    const [grantProposalsMetadata, standardProposalsMetadata] = await Promise.all([
-      Promise.all(grantProposalsMetadataPromises),
-      Promise.all(standardProposalsMetadataPromises),
-    ])
+    //If has grant but no grant states, throw an error
+    if (hasGrants && !grantsProposalStates) {
+      throw new Error("No grant proposal states found")
+    }
 
-    // Enrich grant proposals with fetched metadata and fallbacks
-    const enrichedGrantProposals: GrantProposalEnriched[] =
-      grantProposals?.map((event, index) => {
-        const stateData = grantsProposalStates?.find(state => state.proposalId === event.id)
-        const state = stateData?.state ?? ProposalState.Pending
-        const ipfsMetadata = grantProposalsMetadata[index]
+    //If has standard but no standard states, throw an error
+    if (hasStandard && !standardProposalStates) {
+      throw new Error("No standard proposal states found")
+    }
 
-        const enrichedDetails = getGrantProposalDetailsWithFallbacks(event, ipfsMetadata)
+    // Enrich grant proposals
+    const enrichedGrantProposals: GrantProposalEnriched[] = grantProposals.map(event => {
+      const stateData = grantsProposalStates?.find(state => state.proposalId === event.id)
+      const state = stateData?.state ?? ProposalState.Pending
+      const details = grantProposalsDetailsMap?.[event.id]
 
-        return {
-          ...enrichedDetails,
-          state,
-          id: event.id,
-        } as EnsureRequired<
-          typeof enrichedDetails & { state: ProposalState },
-          "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
-        >
-      }) || []
+      return {
+        ...event,
+        ...details,
+        state,
+        // Use the fallback logic from getGrantProposalMetadataOrReturnDefault if title is missing
+        title: details?.title || details?.projectName || details?.shortDescription,
+      } as EnsureRequired<
+        typeof event & typeof details & { state: ProposalState },
+        "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
+      >
+    })
 
-    // Enrich standard proposals with fetched metadata and fallbacks
-    const enrichedStandardProposals: ProposalEnriched[] =
-      standardProposals?.map((event, index) => {
-        const stateData = standardProposalStates?.find(state => state.proposalId === event.id)
-        const state = stateData?.state ?? ProposalState.Pending
-        const ipfsMetadata = standardProposalsMetadata[index]
-
-        const enrichedDetails = getStandardProposalDetailsWithFallbacks(event, ipfsMetadata)
-
-        return {
-          ...enrichedDetails,
-          state,
-          id: event.id,
-        } as EnsureRequired<
-          typeof enrichedDetails & { state: ProposalState },
-          "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
-        >
-      }) || []
+    // Enrich standard proposals
+    const enrichedStandardProposals: ProposalEnriched[] = standardProposals.map(event => {
+      const stateData = standardProposalStates?.find(state => state.proposalId === event.id)
+      const state = stateData?.state ?? ProposalState.Pending
+      const details = standardProposalsDetailsMap?.[event.id]
+      return {
+        ...event,
+        ...details,
+        state,
+        // Use fallback logic for standard proposals as well
+        title: details?.title || details?.shortDescription || "Standard Proposal",
+      } as EnsureRequired<
+        typeof event & typeof details & { state: ProposalState },
+        "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
+      >
+    })
 
     const proposals = [...enrichedGrantProposals, ...enrichedStandardProposals]
 
-    // Calculate total grant amount requested across all grant proposals
+    // Calculate total grant amount
     const totalGrantAmount = enrichedGrantProposals.reduce(
       (acc, event) => acc.plus(BigNumber(event?.grantAmountRequested) ?? BigNumber(0)),
       BigNumber(0),
@@ -122,19 +121,18 @@ export const useProposalEnriched = () => {
       proposals,
       totalGrantAmount,
     }
-  }, [grantProposals, standardProposals, grantsProposalStates, standardProposalStates])
+  }, [
+    grantProposals,
+    standardProposals,
+    grantsProposalStates,
+    standardProposalStates,
+    grantProposalsDetailsMap,
+    standardProposalsDetailsMap,
+  ])
 
   return useQuery({
     queryKey: getEnrichedProposalsQueryKey(),
     queryFn: enrichProposals,
-    retry: (failureCount, error) => {
-      // Always retry for "No proposals found" errors up to 5 times
-      if (error instanceof Error && error.message.includes("No proposals found")) {
-        return failureCount < 5
-      }
-      // For other errors, retry up to 3 times
-      return failureCount < 3
-    },
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff with max 30s
+    retry: 5, //Since events could take longer, we retry 5 times
   })
 }
