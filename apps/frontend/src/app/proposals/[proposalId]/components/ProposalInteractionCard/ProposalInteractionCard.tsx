@@ -11,6 +11,7 @@ import {
   useProposalVotes,
   useProposalVotesIndexer,
 } from "@/api"
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
 import {
   ProposalType as GrantsProposalType,
@@ -22,6 +23,7 @@ import {
 } from "@/hooks"
 import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo, useState } from "react"
@@ -34,8 +36,6 @@ import { TbClockHour8 } from "react-icons/tb"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
-import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -105,11 +105,11 @@ export const ProposalInteractionCard = ({
   // Check if the proposal is queuable and executable
   const isQueuable = useMemo(() => {
     return proposal?.state === ProposalState.Succeeded && proposalHasTargets
-  }, [proposal?.state])
+  }, [proposal?.state, proposalHasTargets])
 
   const isExecutable = useMemo(() => {
     return proposal?.state === ProposalState.Queued && proposalHasTargets
-  }, [proposal?.state])
+  }, [proposal?.state, proposalHasTargets])
 
   const percentageSupported = useMemo(() => {
     if (currentDepositAmount === 0n) return "0"
