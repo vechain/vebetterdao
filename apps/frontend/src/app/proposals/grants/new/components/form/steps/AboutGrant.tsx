@@ -1,21 +1,8 @@
-import { WalletAddressInput } from "@/app/components/Input"
-import { FormSocialConnectButton } from "@/components/CustomFormFields"
+import { FormSocialConnectButton, validateWalletAddress } from "@/components/CustomFormFields"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
 import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
-import {
-  Accordion,
-  Box,
-  Field,
-  FileUpload,
-  Grid,
-  GridItem,
-  HStack,
-  Icon,
-  InputGroup,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
+import { Accordion, Box, Field, FileUpload, Grid, GridItem, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useCallback, useEffect } from "react"
@@ -60,8 +47,6 @@ export const AboutGrant = ({
 }: AboutGrantProps) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
-
-  const grantsReceiverAddress = watch("grantsReceiverAddress")
 
   // Custom validation function to ensure at least one social account is connected
   const validateAtLeastOneSocial = (_value: string): string | boolean => {
@@ -240,16 +225,17 @@ export const AboutGrant = ({
                   />
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
-                  <Field.Root invalid={!grantsReceiverAddress}>
-                    <Field.Label>{t("Receiver Address")}</Field.Label>
-                    <InputGroup>
-                      <WalletAddressInput
-                        placeholder={"e.g. coolName.vet or 0x1a2b3c..."}
-                        onAddressResolved={address => setValue("grantsReceiverAddress", address ?? "")}
-                        onBlur={() => onBlur("grantsReceiverAddress")}
-                      />
-                    </InputGroup>
-                  </Field.Root>
+                  <FormItem
+                    label={t("Receiver Address")}
+                    type="text"
+                    isOptional
+                    placeholder={"e.g. 0x1a2b3c..."}
+                    register={register("grantsReceiverAddress", {
+                      validate: value => validateWalletAddress(value, t("Receiver Address")),
+                    })}
+                    error={errors.grantsReceiverAddress?.message}
+                    onBlur={() => onBlur("grantsReceiverAddress")}
+                  />
                 </GridItem>
                 <GridItem>
                   <FormItem
