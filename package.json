@@ -97,7 +97,7 @@
     "dotenv-cli": "latest",
     "hardhat": "2.19.1",
     "husky": "^8.0.0",
-    "lint-staged": "^15.2.7",
+    "lint-staged": "12.5.0",
     "prettier": "^3.3.0",
     "turbo": "^2.5.0",
     "@vechain/picasso": "^2.1.1"
@@ -108,7 +108,7 @@
   "resolutions": {
     "ansi-styles": "4.3.0",
     "debug": "4.4.1",
-    "chalk": "5.6.0",
+    "chalk": "4.1.2",
     "supports-color": "8.1.1",
     "strip-ansi": "6.0.1",
     "ansi-regex": "5.0.1",
