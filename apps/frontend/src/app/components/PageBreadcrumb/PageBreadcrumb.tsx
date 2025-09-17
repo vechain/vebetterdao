@@ -1,6 +1,8 @@
+"use client"
 import React from "react"
 import { Breadcrumb, Text } from "@chakra-ui/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { BsChevronRight } from "react-icons/bs"
 
 type PageBreadcrumbProps = {
@@ -11,11 +13,13 @@ type PageBreadcrumbProps = {
 }
 
 export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
+  const pathname = usePathname()
+
   return (
     <Breadcrumb.Root>
       <Breadcrumb.List gap={2}>
         {items.map((item, index) => {
-          const isCurrentPage = window.location.pathname === item.href
+          const isCurrentPage = pathname === item.href
           const isLast = index === items.length - 1
           const highlightedText = isCurrentPage || isLast
           const fontWeight = highlightedText ? "bold" : "normal"
