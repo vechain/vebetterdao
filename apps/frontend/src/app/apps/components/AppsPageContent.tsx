@@ -38,8 +38,13 @@ export const AppsPageContent = () => {
   const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
   const { data: xApps } = useSortXappAlphabetically(xAppsNotSorted)
 
+  // New apps looking for endorsement
+  const newLookingForEndorsementApps = xApps?.newLookingForEndorsement ?? []
+  // New apps that has reached endorsement score but not yet active in allocations
+  const newlyEndorsedApps = xApps?.active.filter(app => app.isNew) ?? []
+
   // New apps looking for endorsement slider
-  const newApps = xApps?.newLookingForEndorsement ?? []
+  const newApps = [...newLookingForEndorsementApps, ...newlyEndorsedApps]
   const hasNewApps = newApps.length > 0
 
   // Apps tabs
