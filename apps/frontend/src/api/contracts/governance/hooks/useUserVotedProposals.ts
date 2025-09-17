@@ -8,11 +8,11 @@ import { useMemo } from "react"
  * @returns The proposals voted by the user from the given ids.
  */
 export const useUserVotedProposals = (proposalIds?: string[]) => {
-  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
 
   const userVotedProposalsEnriched = useMemo(() => {
-    return proposals?.filter(proposal => proposalIds?.includes(proposal.id))
-  }, [proposals, proposalIds])
+    return enrichedProposals?.filter(proposal => proposalIds?.includes(proposal.id))
+  }, [enrichedProposals, proposalIds])
 
   //TODO: Make this a useQuery and refetch when casting vote
   return userVotedProposalsEnriched

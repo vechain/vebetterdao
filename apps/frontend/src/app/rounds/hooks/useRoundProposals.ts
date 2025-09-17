@@ -7,10 +7,10 @@ import { useProposalEnriched } from "@/hooks/proposals/common"
 
 export const useRoundProposals = (roundId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const currentRoundIdProposals = useFilteredProposals(
     [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport],
-    proposals,
+    enrichedProposals,
   )
 
   const otherProposals = useMemo(() => {

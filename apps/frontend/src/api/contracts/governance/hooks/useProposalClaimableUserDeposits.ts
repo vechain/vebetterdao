@@ -35,8 +35,11 @@ export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) =>
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES, proposals)
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(
+    CLAIMABLE_STATES,
+    enrichedProposals,
+  )
 
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),

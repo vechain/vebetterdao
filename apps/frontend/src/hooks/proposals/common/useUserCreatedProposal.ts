@@ -10,15 +10,15 @@ export const getUserProposalsCreatedEventsQueryKey = (walletAddress: string) => 
 ]
 
 export const useUserCreatedProposal = (walletAddress: string) => {
-  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
 
   return useQuery({
     queryKey: getUserProposalsCreatedEventsQueryKey(walletAddress),
     queryFn: () => {
       const filteredProposals =
-        proposals?.filter(proposal => compareAddresses(proposal.proposerAddress, walletAddress)) ?? []
+        enrichedProposals?.filter(proposal => compareAddresses(proposal.proposerAddress, walletAddress)) ?? []
       return filteredProposals
     },
-    enabled: !!walletAddress || (!!walletAddress && !!proposals),
+    enabled: !!walletAddress || (!!walletAddress && !!enrichedProposals),
   })
 }

@@ -78,10 +78,10 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { data: { proposals } = { proposals: [] } } = useProposalEnriched()
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
   const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
     [ProposalFilter.InThisRound],
-    proposals,
+    enrichedProposals,
   )
   const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
     activeProposals?.map(proposal => proposal?.id),
