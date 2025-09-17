@@ -35,7 +35,7 @@ export const VotingRequirementsList = () => {
         </List.Item>
         <List.Item>
           <List.Indicator asChild color="inherit">
-            {voteBalance?.original > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
+            {!!voteBalance?.original && Number(voteBalance.original) > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
           </List.Indicator>
 
           {t("Swap your B3TR for VOT3 this round before the snapshot")}
