@@ -1,4 +1,4 @@
-import { SearchField, SelectField } from "@/components"
+import { MobileFilterDrawer, SearchField, SelectField } from "@/components"
 import {
   GrantProposalEnriched,
   ProposalState,
@@ -6,6 +6,7 @@ import {
   useMilestoneClaimedEvents,
   useProposalEnriched,
   useProposalSearch,
+  useBreakpoints,
 } from "@/hooks"
 import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 import {
@@ -40,6 +41,8 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
+  const { isMobile } = useBreakpoints()
+
   //CONSTANTS
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -171,21 +174,37 @@ export const GrantsPageContent = () => {
           <VStack gap={6} alignItems="stretch">
             <HStack w="full" gap={4}>
               <SearchField
-                inputProps={{ minW: "200px" }}
+                inputProps={{ minW: "200px", flex: 1 }}
                 placeholder={t("Search by grant name")}
                 value={searchTerm}
                 onChange={setSearchTerm}
                 disabled={!enrichedGrantProposals?.length}
               />
-              <SelectField
-                w="25%"
-                placeholder={t("Status")}
-                options={filterOptions}
-                defaultValue={defaultValue}
-                showReset
-                onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
-                isMultiOption
-              />
+
+              {isMobile ? (
+                <>
+                  {/* Mobile Filter */}
+                  <MobileFilterDrawer
+                    options={filterOptions}
+                    selectedValues={selectedFilter}
+                    onApply={setSelectedFilter}
+                    placeholder={t("Filter statuses")}
+                  />
+                </>
+              ) : (
+                <>
+                  {/* Desktop Filter */}
+                  <SelectField
+                    w="25%"
+                    placeholder={t("Status")}
+                    options={filterOptions}
+                    defaultValue={defaultValue}
+                    showReset
+                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                    isMultiOption
+                  />
+                </>
+              )}
             </HStack>
 
             <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
