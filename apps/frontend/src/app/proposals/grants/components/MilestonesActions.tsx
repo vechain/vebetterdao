@@ -13,7 +13,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const states = getAllMilestoneStates(proposal)
   const steps = useMemo(
     () =>
-      states.map((state, index) => {
+      states?.map((state, index) => {
         const milestone = proposal?.milestones?.[index]
         const stepKey = `proposal-${proposal?.id}-milestones-actions-step-${index}`
         return {
@@ -39,6 +39,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
 
   const isAllMilestoneCompleted = states.every(milestoneState => milestoneState === MilestoneState.Claimed)
   const displaySteps = useMemo(() => {
+    if (!steps) return []
+
     const base = steps
     if (!isAllMilestoneCompleted) return base
 
@@ -66,6 +68,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     //If there is no pending milestone, return the index of the last step
     return pendingIndex >= 0 ? pendingIndex : Math.max(0, steps.length - 1)
   }, [states, isAllMilestoneCompleted, displaySteps.length, steps.length])
+
+  if (!displaySteps) return null
 
   return (
     <Steps.Root
