@@ -14,7 +14,6 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { FaXTwitter } from "react-icons/fa6"
-import { LiaDiscourse } from "react-icons/lia"
 import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
 
@@ -119,51 +118,52 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
 
           <CollapsibleSection title={t("Sources and additional")}>
             <VStack gap={2} align="flex-start" w="full">
-              {/* Discourse thread (only standard proposal) */}
-              <HStack>
-                <Icon as={LiaDiscourse} size="lg" />
-                <Link href={proposal?.discourseUrl} target="_blank" rel="noopener noreferrer">
-                  {"Discourse thread"}
-                </Link>
-              </HStack>
-
-              <HStack>
-                <Icon as={AiOutlineDiscord} size="lg" />
-                <Link
-                  href={`https://discord.com/users/${proposal.discordUsername}`}
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  {"Discord"}
-                </Link>
-              </HStack>
-
-              <HStack>
-                <Icon as={UilGithub} />
-                <Link href={`https://github.com/${proposal?.githubUsername}`} target="_blank" rel="noopener noreferrer">
-                  {"Github"}
-                </Link>
-              </HStack>
-
-              <HStack>
-                <Icon as={RiTelegram2Line} size="lg" />
-                <Link href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
-                  {"Telegram"}
-                </Link>
-              </HStack>
-
-              <HStack>
-                <Icon as={UilGlobe} />
-                <Link href={proposal?.projectWebsite} target="_blank" rel="noopener noreferrer">
-                  {"Project website"}
-                </Link>
-              </HStack>
-
-              <HStack>
-                <Icon as={FaXTwitter} size="lg" />
-                <Link href={`https://x.com/${proposal?.twitterUsername}`} target="_blank" rel="noopener noreferrer">
-                  {"Twitter"}
-                </Link>
-              </HStack>
+              {proposal?.discordUsername ? (
+                <HStack>
+                  <Icon as={AiOutlineDiscord} size="lg" />
+                  <Link
+                    href={`https://discord.com/users/${proposal.discordUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {"Discord"}
+                  </Link>
+                </HStack>
+              ) : null}
+              {proposal?.githubUsername ? (
+                <HStack>
+                  <Icon as={UilGithub} />
+                  <Link
+                    href={`https://github.com/${proposal?.githubUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {"Github"}
+                  </Link>
+                </HStack>
+              ) : null}
+              {proposal?.companyTelegram ? (
+                <HStack>
+                  <Icon as={RiTelegram2Line} size="lg" />
+                  <Link href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
+                    {"Telegram"}
+                  </Link>
+                </HStack>
+              ) : null}
+              {proposal?.projectWebsite ? (
+                <HStack>
+                  <Icon as={UilGlobe} />
+                  <Link href={proposal?.projectWebsite} target="_blank" rel="noopener noreferrer">
+                    {"Project website"}
+                  </Link>
+                </HStack>
+              ) : null}
+              {proposal?.twitterUsername ? (
+                <HStack>
+                  <Icon as={FaXTwitter} size="lg" />
+                  <Link href={`https://x.com/${proposal?.twitterUsername}`} target="_blank" rel="noopener noreferrer">
+                    {"Twitter"}
+                  </Link>
+                </HStack>
+              ) : null}
             </VStack>
             {/* File Attachments */}
             {hasAttachments ? (
