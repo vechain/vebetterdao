@@ -7,10 +7,7 @@ import { getGrantProposalStateQueryKey } from "./useGrantProposalState"
 import { useMemo } from "react"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
-export const getAllProposalsStateQueryKey = (grantProposalsIds?: string[], standardProposalsIds?: string[]) =>
-  grantProposalsIds && standardProposalsIds
-    ? ["PROPOSALS", "ALL", "STATE", grantProposalsIds, standardProposalsIds]
-    : ["PROPOSALS", "ALL", "STATE"]
+export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
 
 export const useAllProposalsState = ({
   grantProposalsIds,
@@ -46,7 +43,7 @@ export const useAllProposalsState = ({
   }, [b3trGovernorAddress, standardProposalsIds])
 
   return useQuery({
-    queryKey: getAllProposalsStateQueryKey(grantProposalsIds, standardProposalsIds),
+    queryKey: getAllProposalsStateQueryKey(),
     queryFn: async () => {
       const calls: MultipleClausesCallParameters = [...grantProposalsCalls, ...standardProposalsCalls]
 
@@ -72,6 +69,6 @@ export const useAllProposalsState = ({
         }),
       }
     },
-    enabled: !!grantProposalsIds.length || (!!standardProposalsIds.length && !!thor),
+    enabled: (!!grantProposalsIds.length || !!standardProposalsIds.length) && !!thor,
   })
 }
