@@ -169,7 +169,7 @@ export const GrantsPageContent = () => {
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
         <GridItem colSpan={{ base: 1, md: 2 }}>
           <VStack gap={6} alignItems="stretch">
-            <HStack justifyContent="space-between" w="full" gap={4}>
+            <HStack w="full" gap={4}>
               <SearchField
                 inputProps={{ minW: "200px" }}
                 placeholder={t("Search by grant name")}
@@ -178,6 +178,7 @@ export const GrantsPageContent = () => {
                 disabled={!enrichedGrantProposals?.length}
               />
               <SelectField
+                w="25%"
                 placeholder={t("Status")}
                 options={filterOptions}
                 defaultValue={defaultValue}
