@@ -40,12 +40,12 @@ export const AppsPageContent = () => {
 
   // New apps looking for endorsement
   const newLookingForEndorsementApps = xApps?.newLookingForEndorsement ?? []
+  const hasLookingForEndorsementApps = newLookingForEndorsementApps.length > 0
+
   // New apps that has reached endorsement score but not yet active in allocations
   const newlyEndorsedApps = xApps?.active.filter(app => app.isNew) ?? []
-
   // New apps looking for endorsement slider
   const newApps = [...newLookingForEndorsementApps, ...newlyEndorsedApps]
-  const hasNewApps = newApps.length > 0
 
   // Apps tabs
   const currentActiveApps =
@@ -79,7 +79,7 @@ export const AppsPageContent = () => {
         </VStack>
       )}
 
-      {hasNewApps && <AppsLookingForEndorsement filteredApps={newApps} />}
+      {hasLookingForEndorsementApps && <AppsLookingForEndorsement filteredApps={newLookingForEndorsementApps} />}
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
