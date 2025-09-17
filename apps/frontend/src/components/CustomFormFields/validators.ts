@@ -22,7 +22,7 @@ export const validateAppId = (value: string, fieldName: string) => {
 }
 
 export const genericValidation = (value: string, fieldName: string) => {
-  return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
+  return (value && AddressUtils.isValid(value)) || t("Invalid {{fieldName}}", { fieldName })
 }
 
 export const validateMilestoneAmount = (value: number, grantType: string) => {
@@ -43,4 +43,10 @@ export const validateMilestoneAmount = (value: number, grantType: string) => {
   }
 
   return true
+}
+
+export const validateWalletAddress = (value: string, fieldName: string) => {
+  return (value && AddressUtils.isValid(value)) || value.endsWith(".vet")
+    ? true
+    : t("Invalid {{fieldName}}", { fieldName })
 }
