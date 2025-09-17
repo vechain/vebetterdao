@@ -1,8 +1,9 @@
 import { getIpfsMetadata } from "@/api/ipfs"
-import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import { useQueries } from "@tanstack/react-query"
 import { Treasury__factory } from "@vechain/vebetterdao-contracts"
 import BigNumber from "bignumber.js"
 import { formatEther } from "ethers"
+import { useMemo } from "react"
 
 import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
 
@@ -19,6 +20,28 @@ const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
  * @returns The query key for fetching proposal metadata details
  */
 export const getAllProposalsMetadataQueryKey = () => ["proposalMetadataDetails", "ALL"]
+
+/**
+ * Returns the query key for fetching individual grant proposal metadata.
+ * @param proposalId The proposal ID
+ * @param ipfsHash The IPFS hash
+ */
+export const getGrantProposalMetadataQueryKey = (proposalId: string, ipfsHash?: string) => [
+  "grantProposalMetadata",
+  proposalId,
+  ipfsHash,
+]
+
+/**
+ * Returns the query key for fetching individual standard proposal metadata.
+ * @param proposalId The proposal ID
+ * @param ipfsHash The IPFS hash
+ */
+export const getStandardProposalMetadataQueryKey = (proposalId: string, ipfsHash?: string) => [
+  "standardProposalMetadata",
+  proposalId,
+  ipfsHash,
+]
 
 export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnriched | undefined) => {
   return {
@@ -71,17 +94,26 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
 }
 
 const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Promise<T | undefined> => {
+  if (!ipfsUri) return undefined
+
   try {
     const result = await getIpfsMetadata<T>(ipfsUri, parseJson)
-    return result
+    // Validate that we got actual data, not just an empty object
+    if (result && typeof result === "object" && Object.keys(result).length > 0) {
+      return result
+    }
+    // If we got an empty object or null, treat it as a failure to trigger retry
+    throw new Error(`Empty or invalid metadata received for ${ipfsUri}`)
   } catch (error) {
     console.error("Error fetching proposal IPFS metadata for", ipfsUri, ":", error)
-    return undefined
+    // Re-throw to trigger retry mechanism
+    throw error
   }
 }
 
 /**
  * Hook to fetch detailed information for grant proposals including IPFS metadata
+ * Uses individual queries for each proposal to prevent failures from blocking successful fetches
  * @param standardProposals Array of standard proposal event data containing IPFS hashes and proposer addresses
  * @param grantProposals Array of grant proposal event data containing IPFS hashes and proposer addresses
  * @returns Object with detailed proposal information mapped by proposal ID
@@ -92,74 +124,85 @@ export const useStandardOrGrantProposalDetails = ({
 }: {
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
-}): UseQueryResult<{
-  standardProposalsDetailsMap: Record<
-    string,
-    Omit<ProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
-  >
-  grantProposalsDetailsMap: Record<
-    string,
-    Omit<GrantProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
-  >
-}> => {
-  return useQuery({
-    queryKey: getAllProposalsMetadataQueryKey(),
-    queryFn: async () => {
-      if (standardProposals.length === 0 && grantProposals.length === 0) {
-        return {
-          grantProposalsDetailsMap: {},
-          standardProposalsDetailsMap: {},
-        }
-      }
-
-      // Batch fetch IPFS metadata for grant proposals
-      const grantProposalsIpfsMetadataPromises = grantProposals.map(event =>
-        event.ipfsDescription
-          ? safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${event.ipfsDescription}`, false)
-          : Promise.resolve(undefined),
-      )
-      const grantProposalsIpfsMetadatas = await Promise.all(grantProposalsIpfsMetadataPromises)
-
-      // Batch fetch IPFS metadata for standard proposals
-      const standardProposalsIpfsMetadataPromises = standardProposals.map(event =>
-        event.ipfsDescription
-          ? safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${event.ipfsDescription}`, false)
-          : Promise.resolve(undefined),
-      )
-      const standardProposalsIpfsMetadatas = await Promise.all(standardProposalsIpfsMetadataPromises)
-
-      // Create detailed proposal objects mapped by ID
-      const grantProposalsDetailsMap: Record<
-        string,
-        Omit<GrantProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
-      > = {}
-      const standardProposalsDetailsMap: Record<
-        string,
-        Omit<ProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
-      > = {}
-
-      grantProposals.forEach((event, index) => {
-        const ipfsMetadata = grantProposalsIpfsMetadatas[index]
-        const allCalldatas = event.calldatas.map(calldata => getAndDecodeGrantAmount(calldata))
-        const grantAmountRequested = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
-        grantProposalsDetailsMap[event.id] = {
-          ...event,
-          ...getGrantProposalMetadataOrReturnDefault(ipfsMetadata),
-          grantAmountRequested: grantAmountRequested.toNumber(),
-        }
-      })
-
-      standardProposals.forEach((event, index) => {
-        const ipfsMetadata = standardProposalsIpfsMetadatas[index]
-
-        standardProposalsDetailsMap[event.id] = {
-          ...event,
-          ...getStandardProposalMetadataOrReturnDefault(ipfsMetadata),
-        }
-      })
-
-      return { grantProposalsDetailsMap, standardProposalsDetailsMap }
-    },
-    enabled: standardProposals.length > 0 || grantProposals.length > 0,
+}) => {
+  // Create unique queries for each grant proposal
+  const grantProposalQueries = useQueries({
+    queries: grantProposals.map(proposal => ({
+      queryKey: getGrantProposalMetadataQueryKey(proposal.id, proposal.ipfsDescription),
+      queryFn: async () => {
+        if (!proposal.ipfsDescription) return undefined
+        return await safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
+      },
+      enabled: !!proposal.ipfsDescription,
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes - high cache time for successful fetches
+    })),
   })
+
+  // Create unique queries for each standard proposal
+  const standardProposalQueries = useQueries({
+    queries: standardProposals.map(proposal => ({
+      queryKey: getStandardProposalMetadataQueryKey(proposal.id, proposal.ipfsDescription),
+      queryFn: async () => {
+        if (!proposal.ipfsDescription) return undefined
+        return await safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
+      },
+      enabled: !!proposal.ipfsDescription,
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes - high cache time for successful fetches
+    })),
+  })
+
+  // Memoize the processed results to avoid unnecessary re-calculations
+  const result = useMemo(() => {
+    // Create detailed proposal objects mapped by ID
+    const grantProposalsDetailsMap: Record<
+      string,
+      Omit<GrantProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
+    > = {}
+    const standardProposalsDetailsMap: Record<
+      string,
+      Omit<ProposalEnriched, "state" | "votingRoundId" | "isStateLoading" | "isLoading">
+    > = {}
+
+    // Process grant proposals
+    grantProposals.forEach((event, index) => {
+      const query = grantProposalQueries[index]
+      const ipfsMetadata = query?.data
+      const allCalldatas = event.calldatas.map(calldata => getAndDecodeGrantAmount(calldata))
+      const grantAmountRequested = allCalldatas.reduce((acc, curr) => acc.plus(curr), BigNumber(0))
+
+      grantProposalsDetailsMap[event.id] = {
+        ...event,
+        ...getGrantProposalMetadataOrReturnDefault(ipfsMetadata),
+        grantAmountRequested: grantAmountRequested.toNumber(),
+      }
+    })
+
+    // Process standard proposals
+    standardProposals.forEach((event, index) => {
+      const query = standardProposalQueries[index]
+      const ipfsMetadata = query?.data
+
+      standardProposalsDetailsMap[event.id] = {
+        ...event,
+        ...getStandardProposalMetadataOrReturnDefault(ipfsMetadata),
+      }
+    })
+
+    // Calculate loading and error states
+    const isLoading = grantProposalQueries.some(q => q.isLoading) || standardProposalQueries.some(q => q.isLoading)
+    const isError = grantProposalQueries.some(q => q.isError) || standardProposalQueries.some(q => q.isError)
+    const error = grantProposalQueries.find(q => q.error)?.error || standardProposalQueries.find(q => q.error)?.error
+
+    return {
+      data: { grantProposalsDetailsMap, standardProposalsDetailsMap },
+      isLoading,
+      isError,
+      error,
+      isSuccess: !isLoading && !isError,
+    }
+  }, [grantProposals, standardProposals, grantProposalQueries, standardProposalQueries])
+
+  return result
 }
