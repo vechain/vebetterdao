@@ -1,4 +1,4 @@
-import { getProposalStateQueryKey } from "@/api"
+import { getAllProposalsStateQueryKey, getProposalStateQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
@@ -38,7 +38,10 @@ export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
     ]
   }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, proposal?.values])
 
-  const refetchQueryKeys = useMemo(() => [getProposalStateQueryKey(proposalId)], [proposalId])
+  const refetchQueryKeys = useMemo(
+    () => [getProposalStateQueryKey(proposalId), getAllProposalsStateQueryKey()],
+    [proposalId],
+  )
 
   return useBuildTransaction({
     clauseBuilder,
