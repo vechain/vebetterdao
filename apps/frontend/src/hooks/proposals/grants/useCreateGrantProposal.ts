@@ -1,4 +1,8 @@
-import { getProposalClaimableUserDepositsQueryKey, getProposalsEventsQueryKey } from "@/api"
+import {
+  getAllProposalsStateQueryKey,
+  getProposalClaimableUserDepositsQueryKey,
+  getProposalsEventsQueryKey,
+} from "@/api"
 import { getAllProposalsMetadataQueryKey, getEnrichedProposalsQueryKey, useBuildTransaction } from "@/hooks"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 import { buildClause } from "@/utils/buildClause"
@@ -88,6 +92,7 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
   const refetchQueryKeys = useMemo(() => {
     return [
       getProposalsEventsQueryKey(),
+      getAllProposalsStateQueryKey(),
       getAllProposalsMetadataQueryKey(),
       getEnrichedProposalsQueryKey(),
       getProposalClaimableUserDepositsQueryKey(account?.address ?? ""),
