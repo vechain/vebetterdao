@@ -7,8 +7,15 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "types": ["node", "mocha"]
+    "types": [
+      "node",
+      "mocha",
+      "chai",
+      "hardhat",
+      "@nomicfoundation/hardhat-chai-matchers",
+      "@nomicfoundation/hardhat-ethers"
+    ]
   },
-  "include": ["index.ts", "artifacts/contracts/**/*.json", "typechain-types/**/*.ts"],
-  "exclude": ["node_modules", "dist", "scripts", "test"]
+  "include": ["index.ts", "artifacts/contracts/**/*.json", "typechain-types/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "dist", "scripts"]
 }
