@@ -43,6 +43,11 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const communityDepositPercentage =
     (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
 
+  const goToProposerProfile = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    router.push(`/profile/${proposal.proposerAddress}`)
+  }
+
   const goToProposal = () => {
     router.push(`/proposals/${proposal.id}`)
   }
@@ -75,6 +80,8 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   return (
     <Card.Root
       w="full"
+      borderColor="border.secondary"
+      borderWidth="1px"
       p={{ base: 5, md: 7 }}
       _hover={{ bg: "gray.50", _dark: { bg: "black.1000" } }}
       cursor="pointer"
@@ -100,19 +107,21 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 </Box>
                 {/* Separator */}
                 <Center height="20px">
-                  <Separator orientation="vertical" />
+                  <Separator orientation="vertical" h="20px" />
                 </Center>
               </>
             )}
             {/* Proposer */}
-            <AddressWithProfilePicture address={proposal.proposerAddress} />
+            <Box _hover={{ opacity: 0.7 }} onClick={goToProposerProfile}>
+              <AddressWithProfilePicture address={proposal.proposerAddress} />
+            </Box>
             <Center height="20px">
-              <Separator orientation="vertical" />
+              <Separator orientation="vertical" h="20px" />
             </Center>
           </HStack>
           {grantProposal && <ProposalLinksAndSocials proposal={grantProposal} />}
         </Stack>
-        <Separator w="full" h={1} />
+        <Separator w="full" h={1} color="border.secondary" />
         {/* Footer */}
         {isMobile ? (
           /* Mobile Layout */
