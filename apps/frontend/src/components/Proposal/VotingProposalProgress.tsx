@@ -1,7 +1,7 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { ProposalState, useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
+import { ProposalState, useProposalVotes, useProposalCreatedEvent } from "@/api"
 import { Box, Card, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
@@ -23,7 +23,7 @@ interface VotingProposalProgressProps {
 
 const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
   const { t } = useTranslation()
-  const { data: proposalVotes } = useProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes } = useProposalVotes(proposalId)
 
   const votes = {
     for: {

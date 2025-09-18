@@ -1,4 +1,4 @@
-import { B3trTransaction } from "@/api"
+import { Transaction } from "@/api"
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilGlobe } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
@@ -7,8 +7,9 @@ import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
 type Props = {
-  transaction: B3trTransaction
+  transaction: Transaction
 }
 
 const compactFormatter = getCompactFormatter(2)

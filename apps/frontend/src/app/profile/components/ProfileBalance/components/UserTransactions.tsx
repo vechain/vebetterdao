@@ -12,10 +12,7 @@ type Props = {
 export const UserTransactions = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { data } = useTransactions({
-    user: address ?? "",
-    size: 5,
-  })
+  const { data } = useTransactions(address ?? "", { size: 5 })
 
   const transactions = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? []

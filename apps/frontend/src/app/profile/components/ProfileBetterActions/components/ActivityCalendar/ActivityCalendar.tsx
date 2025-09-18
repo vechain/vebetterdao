@@ -31,8 +31,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   const startDate = currentDate.startOf("month").format("YYYY-MM-DD")
   const endDate = currentDate.endOf("month").format("YYYY-MM-DD")
 
-  const currentMonthOverviewQuery = useUserActionSummaryForDateRange({
-    wallet: address,
+  const currentMonthOverviewQuery = useUserActionSummaryForDateRange(address || "", {
     startDate,
     endDate,
   })
