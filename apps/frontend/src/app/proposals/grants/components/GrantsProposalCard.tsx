@@ -117,9 +117,11 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
               </>
             )}
             <AddressWithProfilePicture address={proposal.proposerAddress} />
-            <Center height="20px" px={2}>
-              <Separator orientation="vertical" h="20px" />
-            </Center>
+            {grantProposal && (
+              <Center height="20px" px={2}>
+                <Separator orientation="vertical" h="20px" />
+              </Center>
+            )}
           </HStack>
           {grantProposal && <ProposalLinksAndSocials proposal={grantProposal} />}
         </Stack>
