@@ -1,12 +1,3 @@
-import { CollapsibleSection } from "@/app/components/CollapsibleSection"
-import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
-import { FileAttachmentPreview } from "@/app/proposals/grants/components"
-import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
-import { useColorModeValue } from "@/components/ui/color-mode"
-import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
-import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
-import { ProposalFormAction } from "@/store"
-import { removeTitleHeading } from "@/utils"
 import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
 import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
@@ -16,6 +7,16 @@ import { AiOutlineDiscord } from "react-icons/ai"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
+
+import { CollapsibleSection } from "@/app/components/CollapsibleSection"
+import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
+import { FileAttachmentPreview } from "@/app/proposals/grants/components"
+import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
+import { useColorModeValue } from "@/components/ui/color-mode"
+import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
+import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
+import { ProposalFormAction } from "@/store"
+import { removeTitleHeading } from "@/utils"
 
 import { SocialLink } from "../SocialLink"
 
@@ -32,9 +33,16 @@ type Props = {
 }
 
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
+  // ==========================================
+  // HOOKS
+  // ==========================================
   const { t } = useTranslation()
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
   const markdownPreviewTextColor = useColorModeValue("#2D3748", "#E4E4E4")
+
+  // ==========================================
+  // COMPUTED VALUES & CONSTANTS
+  // ==========================================
   const actions: ProposalFormAction[] = useMemo(() => {
     try {
       setProposalDecodeError(null)
@@ -58,10 +66,15 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     return typedProposal?.outcomesAttachment?.length && typedProposal?.outcomesAttachment?.length > 0
   }, [proposal])
 
+  // ==========================================
+  // RENDER
+  // ==========================================
   return (
     <VStack gap={4} align="flex-start" w="full">
+      {/* Grant proposal content */}
       {isGrantProposal(proposal) && (
         <VStack gap={"40px"} align="flex-start" w="full">
+          {/* Company details section */}
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
             <CollapsibleSectionItem
               title={proposal?.companyName}
@@ -90,6 +103,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             <CollapsibleSectionItem title={t("Intro")} value={proposal?.companyIntro} />
           </CollapsibleSection>
 
+          {/* Grant details section */}
           <CollapsibleSection title={t("Grant details")} defaultOpen={true}>
             <VStack align="flex-start" textAlign="flex-start" w="full">
               <CollapsibleSectionItem title={t("Problem")} value={proposal?.problemDescription} />
@@ -103,6 +117,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             </VStack>
           </CollapsibleSection>
 
+          {/* Outcomes section */}
           <CollapsibleSection title={t("Outcomes")}>
             <VStack align="flex-start" w="full">
               <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.benefitsToUsers} />
@@ -118,6 +133,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             </VStack>
           </CollapsibleSection>
 
+          {/* Sources and additional information section */}
           <CollapsibleSection title={t("Sources and additional")}>
             <VStack gap={"16px"} align="flex-start" w="full">
               {proposal?.discordUsername ? (
@@ -140,7 +156,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
               ) : null}
             </VStack>
-            {/* File Attachments */}
+
+            {/* File attachments */}
             {hasAttachments ? (
               <VStack align="flex-start" w="full" gap={4} pt={10}>
                 <Grid templateColumns="repeat(2, 1fr)" w="full" gap={4}>
@@ -156,8 +173,10 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
         </VStack>
       )}
 
+      {/* Standard proposal content */}
       {isStandardProposal(proposal) && (
         <VStack gap={8} align="flex-start" w="full">
+          {/* Markdown content */}
           <MDEditor.Markdown
             source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
             style={{
@@ -168,6 +187,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               padding: "20px",
             }}
           />
+
+          {/* Error display */}
           {proposalDecodeError && (
             <Alert.Root status="error" borderRadius={"lg"}>
               <Alert.Indicator />
@@ -177,6 +198,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               </Box>
             </Alert.Root>
           )}
+
+          {/* Executable actions */}
           {!!actions.length && <ProposalExecutableActions actions={actions} />}
         </VStack>
       )}
