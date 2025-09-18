@@ -1788,5 +1788,7 @@
   "The previous round has ended. Start a new round to continue voting.": "The previous round has ended. Start a new round to continue voting.",
   "Start new round & claim allocations": "Start new round & claim allocations",
   "Transaction completed!": "Transaction completed!",
-  "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps."
+  "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps.",
+  "Recommended size: 720x720 (minimum).": "Recommended size: 720x720 (minimum).",
+  "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose."
 }
