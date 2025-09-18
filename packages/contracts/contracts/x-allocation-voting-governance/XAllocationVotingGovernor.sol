@@ -60,8 +60,9 @@ import { IB3TRGovernor } from "../interfaces/IB3TRGovernor.sol";
  * - Added B3TRGovernor contract to the contract
  *
  * ----- Version 8 -----
- * - Added castVoteOnBehalfOf function
+ * - Added autovoting functionality allowing users to enable automatic voting with predefined app preferences
  * - Added refactoring to code for voting
+ * - Integrate RelayerRewardsPool contract to handle relayer rewards for autovoting
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,

@@ -119,4 +119,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Vechain Nodes x GM upgrades feature",
     },
   },
+  VOT3: {
+    name: "vot3",
+    configAddressField: "vot3ContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Integrate with XAllocationVoting contract with auto-voting constraints",
+    },
+  },
 } as const
