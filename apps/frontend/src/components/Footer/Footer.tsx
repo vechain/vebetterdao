@@ -112,7 +112,7 @@ export const Footer: React.FC = () => {
   )
 
   return (
-    <Flex bgColor={"#191714"}>
+    <Flex bgColor="bg.primary">
       <Container
         maxW="breakpoint-xl"
         display={"flex"}

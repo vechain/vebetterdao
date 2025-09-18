@@ -24,13 +24,7 @@ export const FreshDeskButton: React.FC<Props> = ({ isFullWidth }) => {
   }
 
   return (
-    <Button
-      onClick={openFreshdeskWidget}
-      color={"white"}
-      bgColor={`#006063`}
-      _hover={{ bg: "#004143" }}
-      borderRadius={22}
-      w={isFullWidth ? "full" : undefined}>
+    <Button onClick={openFreshdeskWidget} variant="secondary" w={isFullWidth ? "full" : undefined}>
       <FaQuestionCircle size={24} />
       <Text fontWeight="semibold" textStyle="md">
         {t("Help")}
