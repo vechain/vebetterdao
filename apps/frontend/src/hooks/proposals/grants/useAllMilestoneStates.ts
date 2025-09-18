@@ -1,9 +1,10 @@
-import { useMemo } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { GrantProposalEnriched, MilestoneState } from "./types"
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+import { useMemo } from "react"
+
+import { GrantProposalEnriched, MilestoneState } from "./types"
 
 const address = getConfig().grantsManagerContractAddress
 const abi = GrantsManager__factory.abi
@@ -66,7 +67,5 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
       }
     },
     enabled: hasValidData && !!thor,
-    retry: 3,
-    staleTime: 30 * 1000, // 30 seconds - milestone states don't change often
   })
 }

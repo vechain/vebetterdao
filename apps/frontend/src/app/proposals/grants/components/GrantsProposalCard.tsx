@@ -6,11 +6,11 @@ import {
   useUserSingleProposalVoteEvent,
 } from "@/api"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import { B3TRIcon } from "@/components/Icons/B3TRIcon"
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { Box, Card, Center, Heading, HStack, Separator, Stack, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, Center, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
 import { formatTimeLeft } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
@@ -104,10 +104,10 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
 
         {/* Grant Information & Proposer Section */}
         <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
-          <HStack>
+          <HStack color="text.subtle">
             {grantProposal && (
               <>
-                <B3TRIcon boxSize={{ base: "14px", md: "16px" }} />
+                <Icon as={B3trIcon} color="actions.primary.default" boxSize={5} />
                 <Text>
                   {grantProposal.grantAmountRequested} {"B3TR"}
                 </Text>
@@ -116,7 +116,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                     {"•"} {grantProposal.grantType === "dapp" ? "App" : "Tooling"} {"Grant"}
                   </Text>
                 </Box>
-                <Center height="20px">
+                <Center height="20px" px={2}>
                   <Separator orientation="vertical" h="20px" />
                 </Center>
               </>
@@ -124,7 +124,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             <Box _hover={{ opacity: 0.7 }} onClick={goToProposerProfile}>
               <AddressWithProfilePicture address={proposal.proposerAddress} />
             </Box>
-            <Center height="20px">
+            <Center height="20px" px={2}>
               <Separator orientation="vertical" h="20px" />
             </Center>
           </HStack>

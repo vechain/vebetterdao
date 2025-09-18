@@ -34,16 +34,16 @@ export const ProposalCommunityInteractions = ({
       thumbsUpIcon: userVoteOption === VoteType.VOTE_FOR ? ThumbsUpSolidIcon : ThumbsUpIcon,
       thumbsDownIcon: userVoteOption === VoteType.VOTE_AGAINST ? ThumbsDownSolidIcon : ThumbsDownIcon,
       circleIcon: AbstainIcon,
-      forColor: userVoteOption === VoteType.VOTE_FOR ? "success.strong" : "text.subtle",
-      againstColor: userVoteOption === VoteType.VOTE_AGAINST ? "error.strong" : "text.subtle",
-      abstainColor: userVoteOption === VoteType.ABSTAIN ? "warning.strong" : "text.subtle",
+      forColor: userVoteOption === VoteType.VOTE_FOR ? "success.strong" : "icon.subtle",
+      againstColor: userVoteOption === VoteType.VOTE_AGAINST ? "error.strong" : "icon.subtle",
+      abstainColor: userVoteOption === VoteType.ABSTAIN ? "warning.strong" : "icon.subtle",
     }
   }, [userVoteOption])
 
   if (state === ProposalState.Pending) {
     const formattedDepositPercentage = Math.floor(Number(depositPercentage))
     const heartIcon = hasUserDeposited ? HeartSolidIcon : HeartIcon
-    const heartColor = hasUserDeposited ? "actions.primary.default" : "text.subtle"
+    const heartColor = hasUserDeposited ? "actions.primary.default" : "icon.subtle"
 
     return (
       <HStack
