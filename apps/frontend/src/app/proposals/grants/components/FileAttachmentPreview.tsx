@@ -18,6 +18,7 @@ export const FileAttachmentPreview = ({ attachment, uniqueKey }: { attachment: A
       key={`${attachment.name}-${uniqueKey}`}
       variant="baseWithBorder"
       borderColor="border.secondary"
+      borderRadius={"16px"}
       onClick={() => goToFile(attachment.ipfs)}
       cursor="pointer">
       <Card.Body py={3} px={4} m={0}>

@@ -59,7 +59,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   // RENDER
   // ==========================================
   return (
-    <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
+    <Card.Root variant="baseWithBorder" w="full" borderRadius={"16px"}>
       <Card.Body p={"32px"}>
         <VStack gap={4} align="flex-start" w="full">
           {/* Header section with status badge, proposer info, and title */}

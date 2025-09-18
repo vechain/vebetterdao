@@ -344,6 +344,14 @@ const config = defineConfig({
               },
             },
           },
+          tertiary: {
+            default: {
+              value: {
+                _dark: "#4D88FF",
+                base: "#004CFC",
+              },
+            },
+          },
         },
 
         // Text Colors

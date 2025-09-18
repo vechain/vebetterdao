@@ -7,7 +7,7 @@ import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunct
 import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
-import { Alert, Box, Grid, GridItem, HStack, Icon, Link, VStack } from "@chakra-ui/react"
+import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
 import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
 import { useMemo, useState } from "react"
@@ -16,6 +16,8 @@ import { AiOutlineDiscord } from "react-icons/ai"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
+
+import { SocialLink } from "../SocialLink"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -59,7 +61,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   return (
     <VStack gap={4} align="flex-start" w="full">
       {isGrantProposal(proposal) && (
-        <VStack gap={4} align="flex-start" w="full">
+        <VStack gap={"40px"} align="flex-start" w="full">
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
             <CollapsibleSectionItem
               title={proposal?.companyName}
@@ -67,21 +69,21 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             />
             <VStack py={2} align="flex-start" w="full">
               {proposal?.companyEmail ? (
-                <HStack>
-                  <Icon as={LuMail} size="lg" />
-                  <Link href={`mailto:${proposal?.companyEmail}`} target="_blank" rel="noopener noreferrer">
-                    {proposal?.companyEmail}
-                  </Link>
-                </HStack>
+                <SocialLink
+                  icon={LuMail}
+                  href={`mailto:${proposal.companyEmail}`}
+                  label="Email"
+                  value={proposal.companyEmail}
+                />
               ) : null}
 
               {proposal?.companyTelegram ? (
-                <HStack>
-                  <Icon as={RiTelegram2Line} size="lg" />
-                  <Link href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
-                    {proposal?.companyTelegram}
-                  </Link>
-                </HStack>
+                <SocialLink
+                  icon={RiTelegram2Line}
+                  href={proposal.companyTelegram}
+                  label="Telegram"
+                  value={proposal.companyTelegram}
+                />
               ) : null}
             </VStack>
 
@@ -117,52 +119,25 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           </CollapsibleSection>
 
           <CollapsibleSection title={t("Sources and additional")}>
-            <VStack gap={2} align="flex-start" w="full">
+            <VStack gap={"16px"} align="flex-start" w="full">
               {proposal?.discordUsername ? (
-                <HStack>
-                  <Icon as={AiOutlineDiscord} size="lg" />
-                  <Link
-                    href={`https://discord.com/users/${proposal.discordUsername}`}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {"Discord"}
-                  </Link>
-                </HStack>
+                <SocialLink
+                  icon={AiOutlineDiscord}
+                  href={`https://discord.com/users/${proposal.discordUsername}`}
+                  label="Discord"
+                />
               ) : null}
               {proposal?.githubUsername ? (
-                <HStack>
-                  <Icon as={UilGithub} />
-                  <Link
-                    href={`https://github.com/${proposal?.githubUsername}`}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {"Github"}
-                  </Link>
-                </HStack>
+                <SocialLink icon={UilGithub} href={`https://github.com/${proposal.githubUsername}`} label="Github" />
               ) : null}
               {proposal?.companyTelegram ? (
-                <HStack>
-                  <Icon as={RiTelegram2Line} size="lg" />
-                  <Link href={proposal?.companyTelegram} target="_blank" rel="noopener noreferrer">
-                    {"Telegram"}
-                  </Link>
-                </HStack>
+                <SocialLink icon={RiTelegram2Line} href={proposal.companyTelegram} label="Telegram" />
               ) : null}
               {proposal?.projectWebsite ? (
-                <HStack>
-                  <Icon as={UilGlobe} />
-                  <Link href={proposal?.projectWebsite} target="_blank" rel="noopener noreferrer">
-                    {"Project website"}
-                  </Link>
-                </HStack>
+                <SocialLink icon={UilGlobe} href={proposal.projectWebsite} label="Project website" />
               ) : null}
               {proposal?.twitterUsername ? (
-                <HStack>
-                  <Icon as={FaXTwitter} size="lg" />
-                  <Link href={`https://x.com/${proposal?.twitterUsername}`} target="_blank" rel="noopener noreferrer">
-                    {"Twitter"}
-                  </Link>
-                </HStack>
+                <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
               ) : null}
             </VStack>
             {/* File Attachments */}
