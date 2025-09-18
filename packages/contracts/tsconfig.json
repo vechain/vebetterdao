@@ -7,7 +7,14 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "types": ["node"]
+    "types": [
+      "node",
+      "mocha",
+      "chai",
+      "hardhat",
+      "@nomicfoundation/hardhat-chai-matchers",
+      "@nomicfoundation/hardhat-ethers"
+    ]
   },
   "include": [
     "index.ts",

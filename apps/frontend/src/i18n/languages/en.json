@@ -2022,5 +2022,7 @@
   "Reset": "Reset",
   "Filter statuses": "Filter statuses",
   "You have <b>{{votesToClaim}} VOT3</b> tokens ready to be claimed from supporting {{amountProposals}} proposals.": "You have <b>{{votesToClaim}} VOT3</b> tokens ready to be claimed from supporting {{amountProposals}} proposals.",
-  "Claim back": "Claim back"
+  "Claim back": "Claim back",
+  "Recommended size: 720x720 (minimum).": "Recommended size: 720x720 (minimum).",
+  "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose."
 }
