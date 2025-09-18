@@ -4,6 +4,7 @@ import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { Accordion, Circle, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { Calendar } from "iconoir-react"
 import { useEffect, useMemo, useState } from "react"
@@ -24,32 +25,28 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
   }, [milestoneStatesData])
 
-  const currentStep = useMemo(() => {
-    const completedIndex = filteredMilestoneStatesData.findIndex(
-      milestone => milestone.state === MilestoneState.Approved || milestone.state === MilestoneState.Claimed,
-    )
-    return completedIndex >= 0 ? completedIndex : 0
-  }, [filteredMilestoneStatesData])
-
   const formatDuration = (durationFrom: number, durationTo: number) => {
     const from = dayjs(durationFrom * 1000).format("MMM D, YYYY")
     const to = dayjs(durationTo * 1000).format("MMM D, YYYY")
     return `${from} - ${to}`
   }
 
-  const formatFundingAmount = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  }
-
-  // Set all accordion items to be open when data loads
+  // ==========================================
+  // EFFECTS
+  // ==========================================
   useEffect(() => {
     if (filteredMilestoneStatesData.length > 0) {
       const allAccordionValues = filteredMilestoneStatesData.map((_, index) => `milestone-accordion-item-${index}`)
       setAccordionValue(allAccordionValues)
     }
+  }, [filteredMilestoneStatesData])
+
+  const currentStep = useMemo(() => {
+    const reversedIndex = filteredMilestoneStatesData
+      .slice()
+      .reverse()
+      .findIndex(milestone => milestone.state === MilestoneState.Approved || milestone.state === MilestoneState.Claimed)
+    return reversedIndex >= 0 ? filteredMilestoneStatesData.length - 1 - reversedIndex : 0
   }, [filteredMilestoneStatesData])
 
   // ==========================================
@@ -74,7 +71,10 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
             onValueChange={details => setAccordionValue(details.value)}
             w="full">
             {filteredMilestoneStatesData.map((milestone, index) => (
-              <Steps.Item key={`milestone-step-${milestone.index}`} index={index}>
+              <Steps.Item
+                key={`milestone-step-${milestone.index}`}
+                index={index}
+                color={index === currentStep ? "text.default" : "text.subtle"}>
                 <Steps.Indicator>
                   <Steps.Status
                     incomplete={<Circle bg="actions.primary.default" size="0" />}
@@ -88,7 +88,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                     {/* Milestone header */}
                     <VStack align="flex-start" gap={"16px"} pb={"16px"}>
                       <Accordion.ItemTrigger py={1}>
-                        <Text fontSize="lg" fontWeight={"semibold"} color="text.subtle">
+                        <Text fontSize="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
                       </Accordion.ItemTrigger>
@@ -99,7 +99,11 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                           index={index}
                           icon={B3trIcon}
                           title={t("Amount to grant")}
-                          value={formatFundingAmount(milestone.milestone?.fundingAmount ?? 0)}
+                          value={humanNumber(
+                            milestone.milestone?.fundingAmount ?? 0,
+                            milestone.milestone?.fundingAmount ?? 0,
+                            "B3TR",
+                          )}
                         />
                         <MilestoneItem
                           index={index}

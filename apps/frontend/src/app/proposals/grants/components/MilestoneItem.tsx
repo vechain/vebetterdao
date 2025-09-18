@@ -12,7 +12,7 @@ export const MilestoneItem = ({ icon, title, value }: MilestoneItemProps) => {
     <HStack w="full" align="flex-start">
       <Icon as={icon} boxSize={5} color="icon.subtle" />
       <HStack>
-        <VStack w="full" align="flex-start" color="text.subtle">
+        <VStack w="full" align="flex-start">
           <Text fontSize="md" fontWeight={"semibold"}>
             {title}
           </Text>
