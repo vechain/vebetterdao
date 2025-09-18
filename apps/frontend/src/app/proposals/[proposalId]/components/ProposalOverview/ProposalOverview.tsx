@@ -18,24 +18,33 @@ type ProposalOverviewProps = {
 }
 
 export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
+  // ==========================================
+  // HOOKS
+  // ==========================================
   const { t } = useTranslation()
   const { account } = useWallet()
-  const proposalId = proposal?.id ?? ""
+  const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
+  const { data: vnsData } = useVechainDomain(proposal?.proposerAddress ?? "")
+
+  // ==========================================
+  // COMPUTED VALUES & CONSTANTS
+  // ==========================================
   const proposerAddress = proposal?.proposerAddress ?? ""
-  const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
-  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
-
-  const { data: vnsData } = useVechainDomain(proposerAddress)
-
   const proposerName = vnsData?.domain
   const hasUserVoted = !!userVoteEvent?.hasVoted
+  const connectedUserIsProposer = compareAddresses(proposerAddress, account?.address ?? "")
 
   const hasUserDeposited = useMemo(() => {
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
-  // Header Content (badge, proposer, title)
+
+  // ==========================================
+  // COMPONENTS
+  // ==========================================
   const HeaderContent = () => (
     <VStack gap={5} align="flex-start" w="full">
+      {/* Status badge and proposer info */}
       <HStack justify={"space-between"} align={"flex-start"} w="full">
         <GrantsProposalStatusBadge
           state={proposal?.state}
@@ -43,30 +52,30 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
           hasUserVoted={hasUserVoted}
         />
 
-        {proposal && (
-          <HStack>
-            <AddressIcon address={proposerAddress} rounded="full" h="20px" w="20px" />
-            {compareAddresses(proposerAddress, account?.address || "") ? (
-              <Text>{t("You")}</Text>
-            ) : (
-              <Text>{proposerName || humanAddress(proposerAddress, 4, 6)}</Text>
-            )}
-          </HStack>
-        )}
+        <HStack>
+          <AddressIcon address={proposerAddress} rounded="full" h="20px" w="20px" />
+          <Text>{connectedUserIsProposer ? t("You") : proposerName || humanAddress(proposerAddress, 4, 6)}</Text>
+        </HStack>
       </HStack>
 
+      {/* Proposal title */}
       <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
     </VStack>
   )
 
+  // ==========================================
+  // RENDER
+  // ==========================================
   return (
     <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
       <Card.Body>
         <VStack gap={4} align="flex-start" w="full">
+          {/* Header section with status badge, proposer info, and title */}
           <HeaderContent />
 
-          {/* Tabs if it is a grant proposal */}
+          {/* Content section: Tabbed interface for grants, direct content for regular proposals */}
           {isGrant ? (
+            /* Grant proposals: Overview and Milestones tabs */
             <Tabs.Root defaultValue="overview" w="full" colorPalette="blue" fitted>
               <Tabs.List>
                 <Tabs.Trigger
@@ -98,6 +107,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
               </Tabs.Content>
             </Tabs.Root>
           ) : (
+            /* Regular proposals: Direct content display */
             <ProposalContentAndActions proposal={proposal} />
           )}
         </VStack>
