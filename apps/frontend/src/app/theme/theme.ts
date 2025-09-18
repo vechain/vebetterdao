@@ -139,15 +139,6 @@ const config = defineConfig({
     },
 
     semanticTokens: {
-      fonts: {
-        body: {
-          value: `var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
-        },
-        heading: {
-          value: `var(--instrument-sans) var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol`,
-        },
-      },
-
       colors: {
         brand: {
           primary: { value: { base: "{colors.blue.600}", _dark: "white" } },

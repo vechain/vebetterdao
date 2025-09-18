@@ -1,17 +1,10 @@
 "use client"
-// app/layout.tsx
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { Inter, Instrument_Sans } from "next/font/google"
+import { Inter } from "next/font/google"
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-})
-
-const instrumentSans = Instrument_Sans({
-  variable: "--font-instrument-sans",
+  variable: "--global-font-body",
   subsets: ["latin"],
   display: "swap",
 })
@@ -79,7 +72,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       style={{
         scrollBehavior: "smooth",
       }}
-      className={`${inter.variable} ${instrumentSans.variable}`}>
+      className={`${inter.variable}`}>
       <head>
         <title>{t("VeBetterDAO")}</title>
         <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO's governance." />
