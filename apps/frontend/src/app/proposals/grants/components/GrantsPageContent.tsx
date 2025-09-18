@@ -1,4 +1,4 @@
-import { MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import { ConvertModal, MobileFilterDrawer, SearchField, SelectField } from "@/components"
 import {
   GrantProposalEnriched,
   ProposalState,
@@ -108,7 +108,7 @@ export const GrantsPageContent = () => {
   const desktopStepCardDisclosure = useDisclosure({ defaultOpen: true })
   const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
   const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
-
+  const { open: isOpenConvertModal, onClose: onCloseConvertModal, onOpen: onOpenConvertModal } = useDisclosure()
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
@@ -138,101 +138,106 @@ export const GrantsPageContent = () => {
   }, [milestoneClaimedEvents])
 
   return (
-    <VStack w="full" gap={8} pb={8}>
-      <GrantsBanners />
-      <HStack
-        alignItems="center"
-        textAlign="center"
-        w="full"
-        justifyContent={{ base: "space-between", lg: "flex-start" }}>
-        <Heading size="3xl">{t("Grants")}</Heading>
-        {!open && (
-          <Link
-            display="inline-flex"
-            alignItems="center"
-            fontWeight={500}
-            color="primary.500"
-            fontSize="md"
-            onClick={onOpen}>
-            <Icon as={UilInfoCircle} boxSize={4} />
-            {t("More info")}
-          </Link>
-        )}
-      </HStack>
-      <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
-      <GrantsStatsCards
-        totalApplications={enrichedGrantProposals?.length || 0}
-        totalApproved={totalGrantsApproved}
-        totalFunds={totalDistributedAmount.toNumber()}
-      />
+    <>
+      <VStack w="full" gap={8} pb={8}>
+        <GrantsBanners />
+        <HStack
+          alignItems="center"
+          textAlign="center"
+          w="full"
+          justifyContent={{ base: "space-between", lg: "flex-start" }}>
+          <Heading size="3xl">{t("Grants")}</Heading>
+          {!open && (
+            <Link
+              display="inline-flex"
+              alignItems="center"
+              fontWeight={500}
+              color="primary.500"
+              fontSize="md"
+              onClick={onOpen}>
+              <Icon as={UilInfoCircle} boxSize={4} />
+              {t("More info")}
+            </Link>
+          )}
+        </HStack>
+        <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
+        <GrantsStatsCards
+          totalApplications={enrichedGrantProposals?.length || 0}
+          totalApproved={totalGrantsApproved}
+          totalFunds={totalDistributedAmount.toNumber()}
+        />
 
-      <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
-        <GridItem colSpan={{ base: 1, md: 2 }}>
-          <VStack gap={6} alignItems="stretch">
-            <HStack w="full" gap={4}>
-              <SearchField
-                inputProps={{ minW: "200px", flex: 1 }}
-                placeholder={t("Search by grant name")}
-                value={searchTerm}
-                onChange={setSearchTerm}
-                disabled={!enrichedGrantProposals?.length}
-              />
+        <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
+          <GridItem colSpan={{ base: 1, md: 2 }}>
+            <VStack gap={6} alignItems="stretch">
+              <HStack w="full" gap={4}>
+                <SearchField
+                  inputProps={{ minW: "200px", flex: 1 }}
+                  placeholder={t("Search by grant name")}
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  disabled={!enrichedGrantProposals?.length}
+                />
 
-              {isMobile ? (
-                <>
-                  {/* Mobile Filter */}
-                  <MobileFilterDrawer
-                    options={filterOptions}
-                    selectedValues={selectedFilter}
-                    onApply={setSelectedFilter}
-                    placeholder={t("Filter statuses")}
-                  />
-                </>
-              ) : (
-                <>
-                  {/* Desktop Filter */}
-                  <SelectField
-                    w="25%"
-                    placeholder={t("Status")}
-                    options={filterOptions}
-                    defaultValue={filterDefaultValues}
-                    showReset
-                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
-                    isMultiOption
-                  />
-                </>
-              )}
-            </HStack>
-
-            <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
-              {isLoadingEnrichedGrantProposals ? (
-                <>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <GridItem key={`grants-list-skeleton-${index + 1}`}>
-                      <Skeleton loading={true} h="200px" w="full" borderRadius="md">
-                        <div />
-                      </Skeleton>
-                    </GridItem>
-                  ))}
-                </>
-              ) : (
-                filteredProposals &&
-                filteredProposals?.map(proposal => (
-                  <GridItem key={proposal.id}>
-                    <GrantsProposalCard
-                      key={proposal.id}
-                      proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
+                {isMobile ? (
+                  <>
+                    {/* Mobile Filter */}
+                    <MobileFilterDrawer
+                      options={filterOptions}
+                      selectedValues={selectedFilter}
+                      onApply={setSelectedFilter}
+                      placeholder={t("Filter statuses")}
                     />
-                  </GridItem>
-                ))
-              )}
-            </Grid>
-          </VStack>
-        </GridItem>
-        <GridItem colSpan={{ base: 1, md: 1 }}>
-          <HowToSupportCard />
-        </GridItem>
-      </Grid>
-    </VStack>
+                  </>
+                ) : (
+                  <>
+                    {/* Desktop Filter */}
+                    <SelectField
+                      w="25%"
+                      placeholder={t("Status")}
+                      options={filterOptions}
+                      defaultValue={filterDefaultValues}
+                      showReset
+                      onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                      isMultiOption
+                    />
+                  </>
+                )}
+              </HStack>
+
+              <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
+                {isLoadingEnrichedGrantProposals ? (
+                  <>
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <GridItem key={`grants-list-skeleton-${index + 1}`}>
+                        <Skeleton loading={true} h="200px" w="full" borderRadius="md">
+                          <div />
+                        </Skeleton>
+                      </GridItem>
+                    ))}
+                  </>
+                ) : (
+                  filteredProposals &&
+                  filteredProposals?.map(proposal => (
+                    <GridItem key={proposal.id}>
+                      <GrantsProposalCard
+                        key={proposal.id}
+                        proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
+                      />
+                    </GridItem>
+                  ))
+                )}
+              </Grid>
+            </VStack>
+          </GridItem>
+          <GridItem colSpan={{ base: 1, md: 1 }}>
+            <HowToSupportCard onOpenConvertModal={onOpenConvertModal} />
+          </GridItem>
+        </Grid>
+      </VStack>
+
+      {/* Convert/Swap Modal */}
+      <ConvertModal isOpen={isOpenConvertModal} onClose={onCloseConvertModal} />
+    </>
   )
 }

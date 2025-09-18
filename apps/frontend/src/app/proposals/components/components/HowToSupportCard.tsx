@@ -6,22 +6,23 @@ import { VOTING_POWER_DOCS_LINK } from "@/constants/links"
 import { useGetVot3Balance } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 
-export const HowToSupportCard = () => {
+export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: () => void }) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const { data: userVot3Balance } = useGetVot3Balance(account?.address)
 
   const userHasNoTokens = useMemo(() => {
-    return userVot3Balance?.scaled === "0"
+    return userVot3Balance?.original === "0"
   }, [userVot3Balance])
 
-  const buttonText = userHasNoTokens ? t("Get voting power") : t("See apps")
+  const buttonText = userHasNoTokens ? t("See apps") : t("Get voting power")
   const buttonOnClick = useCallback(() => {
     if (userHasNoTokens) {
-      router.push("/apps")
+      return router.push("/apps")
     }
-  }, [router, userHasNoTokens])
+    onOpenConvertModal()
+  }, [onOpenConvertModal, router, userHasNoTokens])
   return (
     <Card.Root w="full" variant="subtle">
       <Card.Body gap={2}>
@@ -46,9 +47,9 @@ export const HowToSupportCard = () => {
         ) : (
           <Text color="text.subtle" fontSize="sm">
             <Trans
-              i18nKey="To support and vote for your favourite grants and proposal, you need to gain voting power. <link>Learn more.</link>"
+              i18nKey="To support and vote for your favourite grants and proposal, you need to gain voting power. <Link>Learn more.</Link>"
               components={{
-                link: <Link target="_blank" href={VOTING_POWER_DOCS_LINK} textDecoration="underline" />,
+                Link: <Link target="_blank" href={VOTING_POWER_DOCS_LINK} textDecoration="underline" />,
               }}
             />
           </Text>
