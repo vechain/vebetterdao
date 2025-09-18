@@ -3,7 +3,7 @@ import { TestPk } from "@repo/contracts/scripts/helpers/seedAccounts"
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, TransactionClause } from "@vechain/sdk-core"
 import { TransactionUtils } from "@repo/utils"
-import { XAllocationVoting__factory } from "@repo/contracts/typechain-types"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 
 export const toggleAutoVotingAndSelectApps = async (
   thorClient: ThorClient,
@@ -29,13 +29,13 @@ export const toggleAutoVotingAndSelectApps = async (
     ),
   )
 
-  await TransactionUtils.sendTx(thorClient, clauses, account.pk)
+  await TransactionUtils.sendTx(thorClient as any, clauses, account.pk)
 }
 
 export const isAutoVotingEnabled = async (thorClient: ThorClient, config: AppConfig, account: TestPk) => {
   const autoVotingEnabled = await thorClient.contracts.executeCall(
     config.xAllocationVotingContractAddress,
-    ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("isUserAutoVotingEnabled"),
+    ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("isUserAutoVotingEnabledForCurrentCycle"),
     [account.address.toString()],
   )
 
@@ -59,7 +59,7 @@ export const castVoteOnBehalfOf = async (
     ),
   )
 
-  await TransactionUtils.sendTx(thorClient, clauses, account.pk)
+  await TransactionUtils.sendTx(thorClient as any, clauses, account.pk)
 }
 
 export const castVoteOnBehalfOfMultiClauses = async (
@@ -81,7 +81,7 @@ export const castVoteOnBehalfOfMultiClauses = async (
     )
   }
 
-  await TransactionUtils.sendTx(thorClient, clauses, account.pk, 5, true)
+  await TransactionUtils.sendTx(thorClient as any, clauses, account.pk, 5, true)
 }
 
 export const configureAutoVoting = async (
