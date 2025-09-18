@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.26.6",
+  "version": "1.26.7",
   "private": true,
   "scripts": {
     "postinstall": "yarn chakra:typegen && yarn generate:schema",
@@ -57,7 +57,7 @@
     "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "mixpanel-browser": "^2.49.0",
-    "next": "14.2.26",
+    "next": "14.2.32",
     "next-auth": "^4.24.10",
     "next-remove-imports": "^1.0.12",
     "next-themes": "^0.4.6",
