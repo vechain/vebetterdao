@@ -407,6 +407,7 @@ export const AboutGrant = ({
                 <FormItem
                   label={t("Target user")}
                   placeholder={t("Who are your target users")}
+                  type="textarea"
                   register={register("targetUsers", {
                     required: t("Please describe your target users"),
                   })}
@@ -418,6 +419,7 @@ export const AboutGrant = ({
                 <FormItem
                   label={t("Competitive edge / Differentiation factor")}
                   placeholder={t("Competitive edge / Differentiation factor")}
+                  type="textarea"
                   register={register("competitiveEdge", {
                     required: t("Please describe your competitive edge"),
                   })}
@@ -441,6 +443,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Benefits to users")}
                     placeholder={t("Benefits to users")}
+                    type="textarea"
                     register={register("benefitsToUsers", {
                       required: t("Please describe benefits to users"),
                     })}
@@ -452,6 +455,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Benefits to dApps")}
                     placeholder={t("Benefits to dApps")}
+                    type="textarea"
                     register={register("benefitsToDApps", {
                       required: t("Please describe benefits to dApps"),
                     })}
@@ -463,6 +467,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Benefits to VeChain ecosystem")}
                     placeholder={t("Benefits to VeChain ecosystem")}
+                    type="textarea"
                     register={register("benefitsToVeChainEcosystem", {
                       required: t("Please describe benefits to VeChain ecosystem"),
                     })}
@@ -474,6 +479,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("X2E model")}
                     placeholder={t("X2E model")}
+                    type="textarea"
                     register={register("x2EModel", {
                       required: t("Please describe X2E model"),
                     })}
@@ -485,6 +491,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Revenue model")}
                     placeholder={t("Describe your revenue model")}
+                    type="textarea"
                     isOptional
                     register={register("revenueModel")}
                     error={errors.revenueModel?.message}
@@ -495,6 +502,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("High level roadmap")}
                     placeholder={t("Describe your high level roadmap or add attachment below")}
+                    type="textarea"
                     isOptional
                     register={register("highLevelRoadmap")}
                     error={errors.highLevelRoadmap?.message}
