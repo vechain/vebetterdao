@@ -50,8 +50,7 @@ export const useFilteredProposals = (
       [StateFilter.Queued]: proposal.state === ProposalState.Queued,
       [StateFilter.Executed]: proposal.state === ProposalState.Executed,
       [StateFilter.DepositNotMet]: proposal.state === ProposalState.DepositNotMet,
-      //Same as executed, otherwise it would go to either cancel of completed depending on the milestones
-      [StateFilter.InDevelopment]: proposal.state === ProposalState.Executed,
+      [StateFilter.InDevelopment]: proposal.state === ProposalState.InDevelopment,
       [StateFilter.Completed]: proposal.state === ProposalState.Completed,
       [StateFilter.Pending]: proposal.state === ProposalState.Pending,
       [StateFilter.Active]: proposal.state === ProposalState.Active,

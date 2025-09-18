@@ -2,11 +2,11 @@ import { MobileFilterDrawer, SearchField, SelectField } from "@/components"
 import {
   GrantProposalEnriched,
   ProposalState,
+  useBreakpoints,
   useDebounce,
   useMilestoneClaimedEvents,
   useProposalEnriched,
   useProposalSearch,
-  useBreakpoints,
 } from "@/hooks"
 import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 import {
@@ -41,7 +41,6 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoints()
 
   //CONSTANTS
   const filterOptions = useMemo(() => {
@@ -51,51 +50,13 @@ export const GrantsPageContent = () => {
         { label: t("Support phase"), value: ProposalFilter.LookingForSupport },
         { label: t("Supported"), value: ProposalFilter.UpcomingVoting },
         { label: t("Approved"), value: StateFilter.Succeeded },
-        { label: t("In development"), value: StateFilter.Executed },
+        { label: t("In development"), value: StateFilter.InDevelopment },
         { label: t("Completed"), value: StateFilter.Completed },
         { label: t("Cancelled"), value: StateFilter.Canceled },
       ],
     })
   }, [t])
-  //Get all the values of the filterOptions as an array
-  const defaultValue = filterOptions.items.map(item => item.value)
-
-  //UI HOOKS
-
-  const { open, onOpen, onClose } = useDisclosure({ defaultOpen: true })
-
-  //STATES
-  const [searchTerm, setSearchTerm] = useState("")
-  const debouncedSearchTerm = useDebounce(searchTerm, 300) // 300ms debounce
-
-  const { selectedFilter, setSelectedFilter } = useProposalFilters()
-  const {
-    data: { enrichedGrantProposals } = { enrichedGrantProposals: [] },
-    isLoading: isLoadingEnrichedGrantProposals,
-  } = useProposalEnriched()
-
-  // First apply search, then apply filters
-  const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals)
-  const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
-
-  const approvedStates = useMemo(
-    () => [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed],
-    [],
-  )
-
-  //Total grants approved
-  const totalGrantsApproved = useMemo(() => {
-    return enrichedGrantProposals.filter(proposal => approvedStates.includes(proposal.state)).length
-  }, [enrichedGrantProposals, approvedStates])
-
-  //Total distributed amount
-  const totalDistributedAmount = useMemo(() => {
-    return (
-      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(BigNumber(event.amount)), BigNumber(0)) ?? BigNumber(0)
-    )
-  }, [milestoneClaimedEvents])
-
+  const filterDefaultValues = filterOptions.items.map(item => item.value)
   const stepsArray = [
     {
       key: GrantsStep.SUBMIT_APPLICATION,
@@ -140,6 +101,38 @@ export const GrantsPageContent = () => {
       image: "/assets/images/grants/step-4.png",
     },
   ]
+
+  //UI HOOKS
+  const { isMobile } = useBreakpoints()
+  const { open, onOpen, onClose } = useDisclosure({ defaultOpen: !isMobile })
+
+  // LOGIC HOOKS
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 3000)
+
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
+  const {
+    data: { enrichedGrantProposals } = { enrichedGrantProposals: [] },
+    isLoading: isLoadingEnrichedGrantProposals,
+  } = useProposalEnriched()
+  const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals)
+  const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
+
+  // COMPUTED VALUES
+  const totalGrantsApproved = useMemo(() => {
+    return enrichedGrantProposals.filter(proposal =>
+      [ProposalState.Succeeded, ProposalState.InDevelopment, ProposalState.Completed, ProposalState.Executed].includes(
+        proposal.state,
+      ),
+    ).length
+  }, [enrichedGrantProposals])
+
+  const totalDistributedAmount = useMemo(() => {
+    return (
+      milestoneClaimedEvents?.reduce((acc, event) => acc.plus(BigNumber(event.amount)), BigNumber(0)) ?? BigNumber(0)
+    )
+  }, [milestoneClaimedEvents])
 
   return (
     <VStack w="full" gap={8} pb={8}>
@@ -198,7 +191,7 @@ export const GrantsPageContent = () => {
                     w="25%"
                     placeholder={t("Status")}
                     options={filterOptions}
-                    defaultValue={defaultValue}
+                    defaultValue={filterDefaultValues}
                     showReset
                     onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
                     isMultiOption
