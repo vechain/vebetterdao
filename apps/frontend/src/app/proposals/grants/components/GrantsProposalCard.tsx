@@ -77,11 +77,6 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   // ==========================================
   // EVENT HANDLERS
   // ==========================================
-  const goToProposerProfile = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    router.push(`/profile/${proposal.proposerAddress}`)
-  }
-
   const goToProposal = () => {
     router.push(`/proposals/${proposal.id}`)
   }
@@ -121,9 +116,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 </Center>
               </>
             )}
-            <Box _hover={{ opacity: 0.7 }} onClick={goToProposerProfile}>
-              <AddressWithProfilePicture address={proposal.proposerAddress} />
-            </Box>
+            <AddressWithProfilePicture address={proposal.proposerAddress} />
             <Center height="20px" px={2}>
               <Separator orientation="vertical" h="20px" />
             </Center>

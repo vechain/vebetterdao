@@ -1,13 +1,10 @@
 import { useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
-import { AddressIcon } from "@/components/AddressIcon"
+import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { Card, Heading, HStack, Tabs, Text, VStack } from "@chakra-ui/react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
+import { Card, Heading, HStack, Tabs, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-import { useTranslation } from "react-i18next"
 
 import { MilestonesActions } from "../../../grants/components"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
@@ -21,19 +18,15 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   // ==========================================
   // HOOKS
   // ==========================================
-  const { t } = useTranslation()
   const { account } = useWallet()
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
-  const { data: vnsData } = useVechainDomain(proposal?.proposerAddress ?? "")
 
   // ==========================================
   // COMPUTED VALUES & CONSTANTS
   // ==========================================
   const proposerAddress = proposal?.proposerAddress ?? ""
-  const proposerName = vnsData?.domain
   const hasUserVoted = !!userVoteEvent?.hasVoted
-  const connectedUserIsProposer = compareAddresses(proposerAddress, account?.address ?? "")
 
   const hasUserDeposited = useMemo(() => {
     return BigInt(userDeposits ?? 0) > BigInt(0)
@@ -43,7 +36,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   // COMPONENTS
   // ==========================================
   const HeaderContent = () => (
-    <VStack gap={5} align="flex-start" w="full">
+    <VStack align="flex-start" w="full">
       {/* Status badge and proposer info */}
       <HStack justify={"space-between"} align={"flex-start"} w="full">
         <GrantsProposalStatusBadge
@@ -52,14 +45,13 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
           hasUserVoted={hasUserVoted}
         />
 
-        <HStack>
-          <AddressIcon address={proposerAddress} rounded="full" h="20px" w="20px" />
-          <Text>{connectedUserIsProposer ? t("You") : proposerName || humanAddress(proposerAddress, 4, 6)}</Text>
-        </HStack>
+        <AddressWithProfilePicture address={proposerAddress} />
       </HStack>
 
       {/* Proposal title */}
-      <Heading size={["2xl", "4xl"]}>{proposal?.title}</Heading>
+      <Heading size={["2xl", "4xl"]} py={"40px"}>
+        {proposal?.title}
+      </Heading>
     </VStack>
   )
 
@@ -68,7 +60,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   // ==========================================
   return (
     <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
-      <Card.Body>
+      <Card.Body p={"32px"}>
         <VStack gap={4} align="flex-start" w="full">
           {/* Header section with status badge, proposer info, and title */}
           <HeaderContent />
