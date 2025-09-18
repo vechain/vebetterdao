@@ -50,6 +50,15 @@ export const badgeRecipe = defineRecipe({
           color: "#F29B32",
         },
       },
+      //In development badge (Yellow)
+      "in-development": {
+        bg: "#E6EEFF",
+        color: "#004CFC",
+        _dark: {
+          bg: "rgba(255, 255, 255, 0.15)",
+          color: "#D4E2FF",
+        },
+      },
       // Declined badge (Red)
       declined: {
         bg: "#FCEEF1",

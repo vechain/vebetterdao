@@ -4,8 +4,10 @@ import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
-import { UilBan, UilCheck, UilCodeBranch } from "@iconscout/react-unicons"
+import { UilBan } from "@iconscout/react-unicons"
 import { useMemo } from "react"
+import { FaRegCircleCheck } from "react-icons/fa6"
+import { IoIosCode } from "react-icons/io"
 
 type Props = {
   state?: ProposalState
@@ -41,12 +43,12 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
     variant: "approval-phase",
   },
   [ProposalState.Canceled]: {
-    text: "Declined",
+    text: "Cancelled",
     icon: UilBan,
     variant: "declined",
   },
   [ProposalState.Defeated]: {
-    text: "Declined",
+    text: "Cancelled",
     icon: UilBan,
     variant: "declined",
   },
@@ -57,13 +59,13 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
   [ProposalState.Queued]: {
     text: "Queued",
-    icon: UilCodeBranch,
-    variant: "support-phase",
+    icon: IoIosCode,
+    variant: "in-development",
   },
 
   [ProposalState.Executed]: {
     text: "Executed",
-    icon: UilCheck,
+    icon: FaRegCircleCheck,
     variant: "completed",
   },
 
@@ -75,13 +77,13 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
 
   [ProposalState.InDevelopment]: {
     text: "In development",
-    icon: UilCodeBranch,
-    variant: "support-phase",
+    icon: IoIosCode,
+    variant: "in-development",
   },
 
   [ProposalState.Completed]: {
     text: "Completed",
-    icon: UilCheck,
+    icon: FaRegCircleCheck,
     variant: "completed",
   },
 }
