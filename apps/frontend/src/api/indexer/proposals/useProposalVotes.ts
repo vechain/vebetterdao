@@ -17,28 +17,28 @@ export type GroupedProposalVotes = Record<
   }
 >
 
-export const getProposalVotesQuerykey = (proposalId: string) => ["proposalVotes", proposalId]
+export const getProposalVotesQueryKey = (proposalId: string) => ["proposalVotes", proposalId]
 
 export const useProposalVotes = (proposalId: string) =>
   indexerQueryClient.useQuery(
     "get",
     "/api/v1/b3tr/proposals/{proposalId}/results",
     {
-      queryKey: getProposalVotesQuerykey(proposalId),
+      queryKey: getProposalVotesQueryKey(proposalId),
       params: { path: { proposalId } },
     },
     {
       select(data) {
-        const totalPower = data.reduce((acc, item) => acc + item.totalPower, 0)
+        const totalPower = data.reduce((acc, item) => acc + BigInt(item.totalPower), BigInt(0))
         const totalVoters = data.reduce((acc, item) => acc + item.voters, 0)
-        const totalWeight = data.reduce((acc, item) => acc + item.totalWeight, 0)
+        const totalWeight = data.reduce((acc, item) => acc + BigInt(item.totalWeight), BigInt(0))
 
         const groupedVotes = data.reduce((acc, item) => {
           acc[item.support.toLowerCase() as Lowercase<ProposalVotes["support"]>] = {
-            totalWeight: item.totalWeight,
+            totalWeight: Number(item.totalWeight),
             voters: item.voters,
-            percentage: item.totalWeight / totalWeight,
-            percentagePower: item.totalPower / totalPower,
+            percentage: Number(BigInt(BigInt(item?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100,
+            percentagePower: Number((BigInt(item?.totalPower ?? 0) * BigInt(10000)) / BigInt(totalPower)) / 100,
           }
           return acc
         }, {} as GroupedProposalVotes)

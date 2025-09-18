@@ -755,8 +755,6 @@ export interface components {
       hasNext: boolean
     }
     VeVoteProposalResult: {
-      /** Format: int32 */
-      version: number
       /** Format: int64 */
       blockNumber: number
       /** Format: int64 */
@@ -767,7 +765,6 @@ export interface components {
       totalWeight: number
       /** Format: int32 */
       totalVoters: number
-      documentId: string
     }
     HistoricProposals: {
       id: string
