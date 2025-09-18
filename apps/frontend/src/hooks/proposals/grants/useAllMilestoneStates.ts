@@ -13,11 +13,7 @@ const method = "milestoneState" as const
 /**
  * Query key for all milestone states of a proposal
  */
-export const getAllMilestoneStatesQueryKey = (proposalId?: string, milestoneCount?: number) => [
-  "all-milestone-states",
-  proposalId,
-  milestoneCount,
-]
+export const getAllMilestoneStatesQueryKey = (proposalId?: string) => ["all-milestone-states", proposalId]
 
 /**
  * Hook to get all milestone states for a proposal using executeMultipleClausesCall
@@ -29,7 +25,7 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
   const hasValidData = !!proposal?.id && milestones.length > 0
 
   return useQuery({
-    queryKey: getAllMilestoneStatesQueryKey(proposal?.id, milestones.length),
+    queryKey: getAllMilestoneStatesQueryKey(proposal?.id),
     queryFn: async () => {
       if (!thor || !proposal?.id || milestones.length === 0) {
         return []

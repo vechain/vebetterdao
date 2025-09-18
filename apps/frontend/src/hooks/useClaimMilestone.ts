@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from "react"
+import { getAllProposalsStateQueryKey } from "@/api"
+import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
-import { buildClause } from "@/utils/buildClause"
+import { useCallback, useMemo } from "react"
 
+import { getAllMilestoneStatesQueryKey } from "./proposals/grants/useAllMilestoneStates"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getMilestoneStateQueryKey } from "./proposals/grants/useMilestoneState"
 
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const GrantsManagerInterface = GrantsManager__factory.createInterface()
@@ -18,7 +19,7 @@ type Props = { proposalId: string; milestoneIndex: number; onSuccess?: () => voi
  * @param onSuccess  the callback to call after the grant is claimed
  * @returns the claim transaction
  */
-export const useClaimGrants = ({ proposalId, milestoneIndex, onSuccess }: Props) => {
+export const useClaimMilestone = ({ proposalId, milestoneIndex, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -31,10 +32,9 @@ export const useClaimGrants = ({ proposalId, milestoneIndex, onSuccess }: Props)
     ]
   }, [proposalId, milestoneIndex])
 
-  // TODO(Grant) : Are they more refetch query ?
   const refetchQueryKeys = useMemo(
-    () => [getMilestoneStateQueryKey(proposalId, milestoneIndex)],
-    [proposalId, milestoneIndex],
+    () => [getAllMilestoneStatesQueryKey(proposalId), getAllProposalsStateQueryKey()],
+    [proposalId],
   )
 
   return useBuildTransaction({

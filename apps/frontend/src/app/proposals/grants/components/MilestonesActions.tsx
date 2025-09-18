@@ -1,14 +1,10 @@
 import { MilestoneItem } from "@/app/proposals/grants/components"
-import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
-import { Accordion, Circle, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
-import { UilInfoCircle } from "@iconscout/react-unicons"
-import { humanNumber } from "@repo/utils/FormattingUtils"
-import dayjs from "dayjs"
-import { Calendar } from "iconoir-react"
+import { Accordion, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { BsCheck } from "react-icons/bs"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================
@@ -18,36 +14,27 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
 
-  // ==========================================
-  // COMPUTED VALUES & CONSTANTS
-  // ==========================================
-  const filteredMilestoneStatesData = useMemo(() => {
+  const milestones = useMemo(() => {
     return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
   }, [milestoneStatesData])
 
-  const formatDuration = (durationFrom: number, durationTo: number) => {
-    const from = dayjs(durationFrom * 1000).format("MMM D, YYYY")
-    const to = dayjs(durationTo * 1000).format("MMM D, YYYY")
-    return `${from} - ${to}`
-  }
+  const currentStep = useMemo(() => {
+    // Find first pending/rejected milestone, or return last index if all completed, or 0 if empty
+    const firstPendingIndex = milestones.findIndex(
+      milestone => milestone.state === MilestoneState.Pending || milestone.state === MilestoneState.Rejected,
+    )
+    return firstPendingIndex >= 0 ? firstPendingIndex : Math.max(0, milestones.length - 1)
+  }, [milestones])
 
   // ==========================================
   // EFFECTS
   // ==========================================
   useEffect(() => {
-    if (filteredMilestoneStatesData.length > 0) {
-      const allAccordionValues = filteredMilestoneStatesData.map((_, index) => `milestone-accordion-item-${index}`)
+    if (milestones.length > 0) {
+      const allAccordionValues = milestones.map((_, index) => `milestone-accordion-item-${index}`)
       setAccordionValue(allAccordionValues)
     }
-  }, [filteredMilestoneStatesData])
-
-  const currentStep = useMemo(() => {
-    const reversedIndex = filteredMilestoneStatesData
-      .slice()
-      .reverse()
-      .findIndex(milestone => milestone.state === MilestoneState.Approved || milestone.state === MilestoneState.Claimed)
-    return reversedIndex >= 0 ? filteredMilestoneStatesData.length - 1 - reversedIndex : 0
-  }, [filteredMilestoneStatesData])
+  }, [milestones])
 
   // ==========================================
   // RENDER
@@ -57,20 +44,21 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
       <Steps.Root
         orientation="vertical"
         defaultStep={0}
-        count={filteredMilestoneStatesData.length}
+        count={milestones.length}
         size="sm"
         w="full"
         h="full"
         step={currentStep}
         colorPalette="blue"
-        variant="primaryVertical">
+        variant="primaryVertical"
+        pt={"40px"}>
         <Steps.List>
           <Accordion.Root
             multiple // allow any item to be open
             value={accordionValue}
             onValueChange={details => setAccordionValue(details.value)}
             w="full">
-            {filteredMilestoneStatesData.map((milestone, index) => (
+            {milestones.map((milestone, index) => (
               <Steps.Item
                 key={`milestone-step-${milestone.index}`}
                 index={index}
@@ -78,8 +66,12 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                 <Steps.Indicator>
                   <Steps.Status
                     incomplete={<Circle bg="actions.primary.default" size="0" />}
-                    complete={<Circle bg="actions.primary.default" size="40%" />}
-                    current={<Circle bg="actions.primary.default" size="55%" />}
+                    complete={
+                      <Circle bg="actions.primary.default" size="50%" zIndex={10}>
+                        <Icon as={BsCheck} boxSize={4} color="actions.primary.text" />
+                      </Circle>
+                    }
+                    current={<Circle bg="actions.primary.default" size="55%" zIndex={10} />}
                   />
                 </Steps.Indicator>
                 <Steps.Separator />
@@ -94,33 +86,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                       </Accordion.ItemTrigger>
                     </VStack>
                     <Accordion.ItemContent>
-                      <VStack align="flex-start" gap={"16px"} h="full">
+                      {proposal && (
                         <MilestoneItem
-                          index={index}
-                          icon={B3trIcon}
-                          title={t("Amount to grant")}
-                          value={humanNumber(
-                            milestone.milestone?.fundingAmount ?? 0,
-                            milestone.milestone?.fundingAmount ?? 0,
-                            "B3TR",
-                          )}
+                          milestoneData={milestone}
+                          proposal={proposal}
+                          isCurrentStep={index === currentStep}
+                          milestoneIndex={index}
                         />
-                        <MilestoneItem
-                          index={index}
-                          icon={Calendar}
-                          title={t("Duration")}
-                          value={formatDuration(
-                            milestone.milestone?.durationFrom ?? 0,
-                            milestone.milestone?.durationTo ?? 0,
-                          )}
-                        />
-                        <MilestoneItem
-                          index={index}
-                          icon={UilInfoCircle}
-                          title={t("Description")}
-                          value={milestone.milestone?.description ?? ""}
-                        />
-                      </VStack>
+                      )}
                     </Accordion.ItemContent>
                   </Accordion.Item>
                 </VStack>
@@ -132,21 +105,3 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     </Skeleton>
   )
 }
-
-// TODO: Reject will be on the right side as cancel proposal
-//   const handleRejectGrant = () => {
-//     rejectGrant()
-//   }
-//   <Button variant="primaryAction" disabled={!permissions?.isGrantRejector} onClick={handleRejectGrant}>
-//   {"Reject Grant"}
-// </Button>
-// const { sendTransaction: rejectGrant } = useRejectGrant({
-//   proposalId: proposal.id,
-//   onSuccess: () => {
-//     queryClient.invalidateQueries({ queryKey: getProposalStateQueryKey(proposal.id) })
-//   },
-// })
-
-//  <Button variant="primaryAction" disabled={!permissions?.isGrantRejector} onClick={handleRejectGrant}>
-// {"Reject Grant"}
-// </Button>
