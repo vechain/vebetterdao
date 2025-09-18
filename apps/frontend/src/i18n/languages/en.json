@@ -1788,6 +1788,11 @@
   "The previous round has ended. Start a new round to continue voting.": "The previous round has ended. Start a new round to continue voting.",
   "Start new round & claim allocations": "Start new round & claim allocations",
   "Transaction completed!": "Transaction completed!",
+  "You're not eligible to vote yet. To vote in next round:": "You're not eligible to vote yet. To vote in next round:",
+  "You're not eligible to vote yet.": "You're not eligible to vote yet.",
+  "Complete at least 3 sustainable actions": "Complete at least 3 sustainable actions",
+  "Swap your B3TR for VOT3 this round before the snapshot": "Swap your B3TR for VOT3 this round before the snapshot",
+  "To be able to vote on the next round’s allocations and proposals": "To be able to vote on the next round’s allocations and proposals",
   "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps.",
   "Recommended size: 720x720 (minimum).": "Recommended size: 720x720 (minimum).",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose."
