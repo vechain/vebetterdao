@@ -3,11 +3,11 @@ import { ClaimCard } from "./cards/ClaimCard"
 import { SupportCard } from "./cards/SupportCard"
 import { SwapCard } from "./cards/SwapCard"
 import { UpgradeGMCard } from "./cards/UpgradeGMCard"
-import { B3trTransaction } from "@/api"
+import { Transaction } from "@/api"
 import { ethers } from "ethers"
 
 type Props = {
-  transaction: B3trTransaction
+  transaction: Transaction
 }
 
 export const TransactionCard = ({ transaction }: Props) => {

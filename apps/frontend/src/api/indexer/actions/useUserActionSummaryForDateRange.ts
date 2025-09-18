@@ -1,80 +1,27 @@
-import { buildQueryString } from "@/api/utils"
-import { getConfig } from "@repo/config"
-import { useInfiniteQuery } from "@tanstack/react-query"
-import { z } from "zod"
-import { TotalImpactSchema } from "./schemas"
+import { indexerQueryClient } from "../api"
+import { paths } from "../schema"
 
-const indexerUrl = getConfig().indexerUrl
+type UserActionSummaryForDateRangeQuery = paths["/api/v1/b3tr/actions/users/{wallet}/daily-summaries"]["get"]
 
-export const UserActionSummaryForDateRangeObjectSchema = z.object({
-  entity: z.string(),
-  date: z.string(),
-  actionsRewarded: z.number(),
-  totalRewardAmount: z.number(),
-  uniqueAppsUsed: z.array(z.string()).optional(),
-  totalImpact: TotalImpactSchema.optional(),
-})
+type UserActionSummaryForDateRangeQueryOptions = UserActionSummaryForDateRangeQuery["parameters"]["query"]
 
-export const UserActionSummaryForDateRangeSchema = z.object({
-  pagination: z.object({
-    hasNext: z.boolean(),
-  }),
-  data: z.array(UserActionSummaryForDateRangeObjectSchema).default([]),
-})
+type UserActionSummaryForDateRangeQueryResponse =
+  UserActionSummaryForDateRangeQuery["responses"]["200"]["content"]["*/*"]
 
-export type UserActionSummaryForDateRangeResponse = z.infer<typeof UserActionSummaryForDateRangeSchema>
-
-type UserActionSummaryForDateRangeRequest = {
-  wallet: string
-  startDate?: string
-  endDate?: string
-  page?: number
-  size?: number
-  direction?: "asc" | "desc"
-}
-
-/**
- * Get the user action summary by day for a single user in a specific date range
- * @param data  the request data @see UserActionSummaryForDateRangeRequest
- * @returns the response data @see UserActionSummaryForDateRangeResponse
- */
-export const getUserActionSummaryForDateRange = async (
-  data: UserActionSummaryForDateRangeRequest,
-): Promise<UserActionSummaryForDateRangeResponse> => {
-  if (!indexerUrl) throw new Error("Indexer URL not found")
-
-  const queryString = buildQueryString(data)
-
-  const response = await fetch(`${indexerUrl}/b3tr/actions/users/${data.wallet}/daily-summaries?${queryString}`, {
-    method: "GET",
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch user action summary: ${response.statusText}`)
-  }
-
-  return UserActionSummaryForDateRangeSchema.parse(await response.json())
-}
-
-export const getUserActionSummaryForDateRangeQueryKey = (
-  data: Omit<UserActionSummaryForDateRangeRequest, "page" | "size">,
-) => ["USER_ACTION_SUMMARY", "DATE_RANGE", data.wallet, data.startDate, data.endDate, data.direction]
-
-/**
- * Get the user action summaries by day for a single user in a specific date range
- * @param data the request data @see UserActionSummaryForDateRangeRequest
- * @returns the query object with the data @see UserActionSummaryForDateRangeResponse
- */
-export const useUserActionSummaryForDateRange = ({
-  direction = "asc",
-  ...data
-}: Omit<UserActionSummaryForDateRangeRequest, "page" | "size">) => {
-  return useInfiniteQuery({
-    queryKey: getUserActionSummaryForDateRangeQueryKey({ direction, ...data }),
-    queryFn: ({ pageParam = 0 }) =>
-      getUserActionSummaryForDateRange({ page: pageParam, size: 100, direction, ...data }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _pages, lastPageParam) =>
-      lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
-  })
+export const useUserActionSummaryForDateRange = (
+  wallet: string,
+  queryOptions: UserActionSummaryForDateRangeQueryOptions,
+) => {
+  const { direction = "ASC" } = queryOptions
+  return indexerQueryClient.useInfiniteQuery(
+    "get",
+    "/api/v1/b3tr/actions/users/{wallet}/daily-summaries",
+    {
+      params: { path: { wallet }, query: { ...queryOptions, direction }, enabled: !!wallet },
+    },
+    {
+      initialPageParam: 0,
+      getNextPageParam: (lastPage: UserActionSummaryForDateRangeQueryResponse) => lastPage.pagination.hasNext,
+    },
+  )
 }

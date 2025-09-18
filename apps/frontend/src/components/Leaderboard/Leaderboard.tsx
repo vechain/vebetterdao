@@ -34,9 +34,8 @@ export const Leaderboard = () => {
     }
   }, [roundId, selectedRoundId])
 
-  const userRoundOverview = useUserActionOverview({
-    wallet: account?.address ?? "",
-    roundId: selectedRoundId,
+  const userRoundOverview = useUserActionOverview(account?.address ?? "", {
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
   })
 
   const onRoundChange = (roundId: string) => () => {
@@ -57,7 +56,10 @@ export const Leaderboard = () => {
     }
   }, [userRoundOverview, account?.address])
 
-  const leaderboardQuery = useUserActionLeaderboard({ roundId: selectedRoundId, direction: "desc" })
+  const leaderboardQuery = useUserActionLeaderboard({
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
+    direction: "DESC",
+  })
 
   const flatLeaderboard = useMemo(
     () =>

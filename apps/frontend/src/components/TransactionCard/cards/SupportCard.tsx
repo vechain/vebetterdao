@@ -3,12 +3,13 @@ import { UilHeart } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { B3trTransaction } from "@/api"
+import { Transaction } from "@/api"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
 type Props = {
-  transaction: B3trTransaction
+  transaction: Transaction
 }
 
 const compactFormatter = getCompactFormatter(2)

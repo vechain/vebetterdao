@@ -6,12 +6,7 @@ import { useMemo } from "react"
  * @returns Map containing appId and their position in the sorted list
  */
 export function useAppsSustainabilityData() {
-  const querySearchData = {
-    direction: "desc" as const,
-    sortBy: "totalRewardAmount",
-  }
-
-  const { data, isLoading, error } = useAppActionLeaderboard(querySearchData)
+  const { data, isLoading, error } = useAppActionLeaderboard({ direction: "DESC", sortBy: "totalRewardAmount" })
 
   const allAppsSortedByRewards = useMemo(() => {
     if (!data?.pages[0]) return new Map()

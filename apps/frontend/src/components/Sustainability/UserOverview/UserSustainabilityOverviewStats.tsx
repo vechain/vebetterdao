@@ -16,9 +16,7 @@ type Props = {
 export const UserSustainabilityOverviewStats = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { data, isLoading } = useUserActionOverview({
-    wallet: address ?? "",
-  })
+  const { data, isLoading } = useUserActionOverview(address ?? "")
 
   //TOOD: Indexer should return aggregated data
   const parsedData = useMemo(() => {

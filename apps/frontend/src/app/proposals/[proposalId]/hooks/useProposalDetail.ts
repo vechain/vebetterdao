@@ -20,7 +20,7 @@ import {
   useProposalQueuedEvent,
   useProposalExecutedEvent,
   useProposalCanceledEvent,
-  useProposalVotesIndexer,
+  useProposalVotes,
 } from "@/api"
 import { ethers } from "ethers"
 import dayjs from "dayjs"
@@ -47,7 +47,7 @@ export const useProposalDetailById = (proposalId: string) => {
   )
   const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
-  const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotes(proposalId)
   const proposalSnapshotVot3 = useGetVotesOnBlock(
     proposalSnapshotBlock,
     account?.address ?? undefined,

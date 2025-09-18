@@ -1,5 +1,5 @@
 export * from "./useAppActionLeaderboard"
-export * from "./useB3trActions"
+export * from "./useUsersB3trActions"
 export * from "./useUserActionLeaderboard"
 export * from "./useUserActionOverview"
 export * from "./useUserActionSummaryForDateRange"
