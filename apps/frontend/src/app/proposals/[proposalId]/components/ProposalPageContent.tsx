@@ -2,7 +2,7 @@ import { useProposalInteractionDates } from "@/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
-import { Grid, GridItem, HStack, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useMemo, useRef } from "react"
@@ -139,7 +139,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
             borderColor="border.primary"
             boxSize={"40px"}
             onClick={onOpen}>
-            <UilShareAlt color="icon.subtle" />
+            <Icon as={UilShareAlt} color="icon.subtle" />
           </IconButton>
         </HStack>
 
