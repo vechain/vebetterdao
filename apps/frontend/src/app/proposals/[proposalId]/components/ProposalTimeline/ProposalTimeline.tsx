@@ -10,12 +10,22 @@ type Props = {
 }
 
 export const ProposalTimeline = ({ proposal }: Props) => {
-  const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal?.id ?? "")
+  const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
 
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
   const isGrant = proposal?.type === ProposalType.Grant
   const hasActions = Array.isArray(proposal?.values) && proposal?.values.length > 0
+
+  const timelineDates = useMemo(() => {
+    return {
+      supportStartDate: proposalCreatedAt * 1000,
+      supportEndDate: supportEndDate,
+      votingEndDate: votingEndDate,
+      hasValidDates: hasValidDates,
+      isLoading: isLoading,
+    }
+  }, [proposalCreatedAt, supportEndDate, votingEndDate, hasValidDates, isLoading])
 
   const timelineSteps = useMemo(
     () => [
@@ -24,23 +34,27 @@ export const ProposalTimeline = ({ proposal }: Props) => {
         state: [ProposalState.Pending],
         description: t("Round #{{roundId}}: {{dateString}}", {
           roundId: Number(proposalVotingRoundId) - 1,
-          dateString: dayjs(proposalCreatedAt * 1000).format("MMM D, YYYY"),
+          dateString: dayjs(timelineDates.supportStartDate).format("MMM D, YYYY"),
         }),
       },
       {
         label: t("Approval phase"),
         state: [ProposalState.Active, ProposalState.Succeeded],
-        description: t("Round #{{roundId}}: {{dateString}}", {
-          roundId: Number(proposalVotingRoundId),
-          dateString: `${dayjs(supportEndDate).format("MMM D, YYYY")} - ${dayjs(votingEndDate).format("MMM D, YYYY")}`,
-        }),
+        description: timelineDates.hasValidDates
+          ? t("Round #{{roundId}}: {{dateString}}", {
+              roundId: Number(proposalVotingRoundId),
+              dateString: `${dayjs(timelineDates.supportEndDate).format("MMM D, YYYY")} - ${dayjs(timelineDates.votingEndDate).format("MMM D, YYYY")}`,
+            })
+          : "---",
       },
       ...(hasActions
         ? [
             {
               label: isGrant ? t("In development") : t("Executed"),
               state: [ProposalState.InDevelopment, ProposalState.Executed, ProposalState.Queued],
-              description: dayjs(votingEndDate).format("MMM D, YYYY"),
+              description: timelineDates.hasValidDates
+                ? dayjs(timelineDates.votingEndDate).format("MMM D, YYYY")
+                : "---",
             },
           ]
         : []),
@@ -50,7 +64,15 @@ export const ProposalTimeline = ({ proposal }: Props) => {
         description: "Project completed successfully",
       },
     ],
-    [proposalVotingRoundId, proposalCreatedAt, supportEndDate, votingEndDate, hasActions, isGrant],
+    [
+      proposalVotingRoundId,
+      timelineDates.supportStartDate,
+      timelineDates.supportEndDate,
+      timelineDates.votingEndDate,
+      timelineDates.hasValidDates,
+      hasActions,
+      isGrant,
+    ],
   )
 
   const invalidState = useMemo(() => {
