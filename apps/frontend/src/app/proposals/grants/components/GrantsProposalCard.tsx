@@ -90,7 +90,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
       borderColor="border.secondary"
       borderWidth="1px"
       p={{ base: 5, md: 7 }}
-      _hover={{ bg: "gray.50", _dark: { bg: "black.1000" } }}
+      _hover={{ bg: "gray.50", _dark: { bg: "#000000" } }}
       cursor="pointer"
       onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
