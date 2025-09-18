@@ -73,7 +73,12 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
     return formatTimeLeft(endsAt)
   }, [endsAt, isSupportOrVotingPhase])
   return (
-    <Card.Root w="full" p={{ base: 5, md: 7 }} cursor="pointer" onClick={goToProposal}>
+    <Card.Root
+      w="full"
+      p={{ base: 5, md: 7 }}
+      _hover={{ bg: "gray.50", _dark: { bg: "black.1000" } }}
+      cursor="pointer"
+      onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
         {/* Title */}
         <Heading size="md">{proposal.title}</Heading>
