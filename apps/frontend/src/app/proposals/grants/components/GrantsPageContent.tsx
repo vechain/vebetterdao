@@ -104,7 +104,9 @@ export const GrantsPageContent = () => {
 
   //UI HOOKS
   const { isMobile } = useBreakpoints()
-  const { open, onOpen, onClose } = useDisclosure({ defaultOpen: !isMobile })
+  const desktopStepCardDisclosure = useDisclosure({ defaultOpen: true })
+  const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
+  const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
 
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
