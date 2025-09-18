@@ -1,4 +1,3 @@
-import { GenericAlert } from "@/app/components/Alert"
 import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
@@ -24,6 +23,7 @@ import {
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
+import { useMemo } from "react"
 import { Control, FieldErrors, UseFormGetValues, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { LuArrowRight } from "react-icons/lu"
@@ -48,7 +48,7 @@ type MilestoneSectionProps = {
   watch: UseFormWatch<GrantFormData>
   index: number
   b3trPerUsd: number
-  milestoneMinimumAmount: bigint
+  canRemoveAnyMilestone: boolean
   grantType: string
   setValue: UseFormSetValue<GrantFormData>
 }
@@ -63,7 +63,7 @@ export const MilestoneSection = ({
   index,
   errors,
   b3trPerUsd,
-  milestoneMinimumAmount,
+  canRemoveAnyMilestone,
   grantType,
 }: MilestoneSectionProps) => {
   const { t } = useTranslation()
@@ -73,7 +73,6 @@ export const MilestoneSection = ({
   const [isMobile] = useMediaQuery(["(max-width: 767px)"])
 
   const now = dayjs().unix()
-  const canRemoveAnyMilestone = milestoneNumber > Number(milestoneMinimumAmount)
   const formatDuration = (duration: number | string) => {
     const durationInMiliseconds = Number(duration) * 1000 //Convert to miliseconds
     return dayjs(durationInMiliseconds).format("MM/DD/YYYY")
@@ -257,6 +256,10 @@ export const Milestones = ({
   const milestones = watch("milestones")
   const now = dayjs().unix()
   const grantType = getValues("grantType")
+  const canRemoveAnyMilestone = useMemo(
+    () => milestones.length > Number(milestoneMinimumAmount ?? 3),
+    [milestones.length, milestoneMinimumAmount],
+  )
 
   const handleAddMilestone = () => {
     //Get the last milestone
@@ -266,10 +269,10 @@ export const Milestones = ({
       description: "",
       fundingAmount: 0,
       fundingAmountUsd: 0,
-      durationFrom: dayjs(lastMilestone.durationTo * 1000)
+      durationFrom: dayjs(lastMilestone.durationTo ?? now * 1000)
         .add(1, "month")
         .unix(),
-      durationTo: dayjs(lastMilestone.durationTo * 1000)
+      durationTo: dayjs(lastMilestone.durationTo ?? now * 1000)
         .add(2, "month")
         .unix(),
     })
@@ -290,8 +293,6 @@ export const Milestones = ({
     setData({ ...formData, milestones })
   }
 
-  const hasFewMilestones = milestones.length < Number(milestoneMinimumAmount ?? 0n)
-
   return (
     <VStack align="stretch" w="full">
       <Accordion.Root multiple defaultValue={["milestone-0"]}>
@@ -308,7 +309,7 @@ export const Milestones = ({
               setData={setData}
               watch={watch}
               b3trPerUsd={B3TRPerUSD}
-              milestoneMinimumAmount={milestoneMinimumAmount ?? BigInt(0)}
+              canRemoveAnyMilestone={canRemoveAnyMilestone ?? false}
               grantType={grantType}
               setValue={setValue}
             />
@@ -356,15 +357,6 @@ export const Milestones = ({
             rules={{ required: "Please accept the terms of service" }}
             error={errors.termsOfService?.message}
           />
-          {hasFewMilestones && (
-            <GenericAlert
-              isLoading={false}
-              message={t("To complete your grant application, you must create at least {{threshold}} milestones.", {
-                threshold: Number(milestoneMinimumAmount ?? 0n),
-              })}
-              type="error"
-            />
-          )}
         </GridItem>
       </Grid>
     </VStack>

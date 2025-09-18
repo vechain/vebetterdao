@@ -1,7 +1,6 @@
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
-import dayjs from "dayjs"
 
 export type GrantFormStoreState = GrantFormData & {
   setData: (data: Partial<GrantFormStoreState>) => void
@@ -42,22 +41,22 @@ const initialState: GrantFormData = {
       description: "",
       fundingAmount: 0,
       fundingAmountUsd: 0,
-      durationFrom: dayjs().add(1, "day").unix(),
-      durationTo: dayjs().add(1, "month").unix(),
+      durationFrom: 0,
+      durationTo: 0,
     },
     {
       description: "",
       fundingAmount: 0,
       fundingAmountUsd: 0,
-      durationFrom: dayjs().add(2, "month").unix(),
-      durationTo: dayjs().add(3, "month").unix(),
+      durationFrom: 0,
+      durationTo: 0,
     },
     {
       description: "",
       fundingAmount: 0,
       fundingAmountUsd: 0,
-      durationFrom: dayjs().add(4, "month").unix(),
-      durationTo: dayjs().add(5, "month").unix(),
+      durationFrom: 0,
+      durationTo: 0,
     },
   ],
   termsOfService: false,
