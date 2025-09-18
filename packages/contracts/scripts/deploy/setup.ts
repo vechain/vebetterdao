@@ -105,7 +105,7 @@ export const setupEnvironment = async (
         b3tr,
         vot3,
         vechainNodesMock,
-        shouldEndorseXApps(),
+        false, // TODO: change this back to 'shouldEndorseXApps()' when we can endorse x-apps with latest Stargate changes
       )
       break
     case "testnet":

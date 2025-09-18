@@ -309,7 +309,7 @@ export async function deployAll(config: ContractsConfig) {
     config.CONTRACTS_ADMIN_ADDRESS, // Pauser
   )
 
-  const vot3 = (await deployProxy(
+  let vot3 = (await deployProxy(
     "VOT3",
     [
       config.CONTRACTS_ADMIN_ADDRESS, // admin
@@ -600,7 +600,7 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN, // upgrader
         await b3tr.getAddress(), // b3trAddress
         await emissions.getAddress(), // emissionsAddress
-        TEMP_ADMIN, // xAllocationVotingAddress
+        TEMP_ADMIN, // xAllocationVotingAddress - will be assigned later below
       ],
     ],
     {
@@ -609,7 +609,6 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as RelayerRewardsPool
 
-  const tempB3trGovernorAddress = TEMP_ADMIN
   const xAllocationVoting = (await deployAndUpgrade(
     [
       "XAllocationVotingV1",
@@ -639,13 +638,13 @@ export async function deployAll(config: ContractsConfig) {
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
         },
       ],
-      [veBetterPassportContractAddress],
       [],
       [],
       [],
       [],
-      [tempB3trGovernorAddress],
-      [await relayerRewardsPool.getAddress()],
+      [],
+      [],
+      [],
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6, 7, 8],
@@ -662,6 +661,10 @@ export async function deployAll(config: ContractsConfig) {
       logOutput: true,
     },
   )) as XAllocationVoting
+
+  vot3 = (await upgradeProxy("VOT3V1", "VOT3", await vot3.getAddress(), [await xAllocationVoting.getAddress()], {
+    version: 2,
+  })) as VOT3
 
   voterRewards = (await upgradeProxy(
     "VoterRewardsV5",
@@ -1119,16 +1122,25 @@ export async function deployAll(config: ContractsConfig) {
     .setXAllocationVotingAddress(await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   console.log("XAllocationVoting address set in RelayerRewardsPool contract")
+
   await relayerRewardsPool
     .connect(deployer)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await xAllocationVoting.getAddress())
     .then(async tx => await tx.wait())
   console.log("Pool admin role granted to XAllocationVoting")
+
   await relayerRewardsPool
     .connect(deployer)
     .grantRole(await relayerRewardsPool.POOL_ADMIN_ROLE(), await voterRewards.getAddress())
     .then(async tx => await tx.wait())
   console.log("Pool admin role granted to VoterRewards")
+
+  // Set RelayerRewardsPool address in XAllocationVoting
+  await xAllocationVoting
+    .connect(deployer)
+    .setRelayerRewardsPoolAddress(await relayerRewardsPool.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("RelayerRewardsPool address set in XAllocationVoting contract")
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
@@ -1178,7 +1190,6 @@ export async function deployAll(config: ContractsConfig) {
       .grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), deployer.address)
       .then(async tx => await tx.wait())
     console.log("Governance role granted to admin in ", await xAllocationVoting.getAddress())
-    await xAllocationVoting.connect(deployer).setB3TRGovernor(await governor.getAddress())
 
     await xAllocationVoting
       .connect(deployer)
@@ -1187,6 +1198,20 @@ export async function deployAll(config: ContractsConfig) {
     console.log("Governance role granted to admin in ", await xAllocationVoting.getAddress())
     await transferContractsAddressManagerRole(xAllocationVoting, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationVoting, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+
+    // Set VeBetterPassport address in XAllocationVoting (Initialised removed in https://github.com/vechain/b3tr/pull/2220 to reduce storage space)
+    await xAllocationVoting
+      .connect(deployer)
+      .setVeBetterPassport(await veBetterPassport.getAddress())
+      .then(async tx => await tx.wait())
+    console.log("VeBetterPassport address set in XAllocationVoting contract")
+
+    // Set B3TRGovernor address in XAllocationVoting (Initialised removed in https://github.com/vechain/b3tr/pull/2220 to reduce storage space)
+    await xAllocationVoting
+      .connect(deployer)
+      .setB3TRGovernor(await governor.getAddress())
+      .then(async tx => await tx.wait())
+    console.log("B3TRGovernor address set in XAllocationVoting contract")
 
     await transferGovernanceRole(treasury, deployer, deployer.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(treasury, deployer, config.CONTRACTS_ADMIN_ADDRESS)
