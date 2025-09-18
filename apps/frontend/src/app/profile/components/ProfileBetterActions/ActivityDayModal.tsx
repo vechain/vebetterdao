@@ -18,7 +18,9 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   const endOfDay = dayjs(date).endOf("day").unix()
 
   const actionsOfDayQuery = useUsersB3trActions(address, {
+    // @ts-expect-error TODO: this should be fixed in indexer side
     after: { startOfDay },
+    // @ts-expect-error TODO: this should be fixed in indexer side
     before: { endOfDay },
   })
 
