@@ -13,6 +13,11 @@ import {
 } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import {
   ProposalType as GrantsProposalType,
   ProposalEnriched,
@@ -22,15 +27,12 @@ import {
   useQueueProposal,
 } from "@/hooks"
 import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
-import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FaHeart, FaRegHeart } from "react-icons/fa"
 import { FiBarChart2 } from "react-icons/fi"
-import { LuCircleSlash2 } from "react-icons/lu"
 import { TbClockHour8 } from "react-icons/tb"
 
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
@@ -183,7 +185,16 @@ export const ProposalInteractionCard = ({
     }
 
     return false
-  }, [proposal?.state, isVotingPhase, hasUserAlreadyVoted, userVotingPower, userVot3Balance, proposalDepositReached])
+  }, [
+    proposal?.state,
+    isQueuable,
+    isExecutable,
+    hasUserAlreadyVoted,
+    userVotingPower,
+    userVot3Balance,
+    proposalDepositReached,
+    currentUserCanQueueOrExecute,
+  ])
 
   const progressBarSegments = useMemo(() => {
     if (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.DepositNotMet) {
@@ -191,7 +202,7 @@ export const ProposalInteractionCard = ({
         {
           percentage: Number(percentageSupported ?? 0),
           color: "success.primary",
-          icon: userDeposits ? FaHeart : FaRegHeart,
+          icon: userDeposits ? HeartSolidIcon : HeartIcon,
         },
       ]
     }
@@ -200,17 +211,17 @@ export const ProposalInteractionCard = ({
       {
         percentage: Number(proposalVotesQueryData?.forPercentage ?? 0),
         color: "success.primary",
-        icon: UilThumbsUp,
+        icon: ThumbsUpIcon,
       },
       {
         percentage: Number(proposalVotesQueryData?.abstainPercentage ?? 0),
         color: "warning.primary",
-        icon: LuCircleSlash2,
+        icon: AbstainIcon,
       },
       {
         percentage: Number(proposalVotesQueryData?.againstPercentage ?? 0),
         color: "error.primary",
-        icon: UilThumbsDown,
+        icon: ThumbsDownIcon,
       },
     ]
   }, [
@@ -363,7 +374,7 @@ export const ProposalInteractionCard = ({
                 <Text color="gray.600">{t("You supported with")}</Text>
                 <Box border="2px solid" borderColor="success.primary" color="success.primary" borderRadius="lg">
                   <HStack gap={2} px="12px" py="8px">
-                    <Icon as={FaHeart} boxSize={5} color="success.primary" />
+                    <Icon as={HeartIcon} boxSize={5} color="success.primary" />
                     <Text>{t("{{amount}} VOT3", { amount: Number(ethers.formatEther(userDeposits)).toFixed(1) })}</Text>
                   </HStack>
                 </Box>

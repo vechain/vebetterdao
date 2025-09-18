@@ -1,7 +1,8 @@
-import { Card, CardBody, CardHeader, Heading, Text, VStack, Icon, Separator, List } from "@chakra-ui/react"
-import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+import { Card, CardBody, CardHeader, Heading, Icon, List, Separator, Text, VStack } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
-import { LuCircleSlash2 } from "react-icons/lu"
 
 export const HowGrantWorks = () => {
   const { t } = useTranslation()
@@ -25,9 +26,9 @@ export const HowGrantWorks = () => {
             "The community and VeChain Foundation review and vote to approve or reject your grant <thumbsUp/>, <thumbsDown/>, <abstain/>"
           }
           components={{
-            thumbsUp: <Icon as={UilThumbsUp} size={"sm"} />,
-            thumbsDown: <Icon as={UilThumbsDown} size={"sm"} />,
-            abstain: <Icon as={LuCircleSlash2} size={"xs"} />,
+            thumbsUp: <Icon as={ThumbsUpIcon} boxSize={4} />,
+            thumbsDown: <Icon as={ThumbsDownIcon} boxSize={4} />,
+            abstain: <Icon as={AbstainIcon} boxSize={4} />,
           }}
         />
       ),

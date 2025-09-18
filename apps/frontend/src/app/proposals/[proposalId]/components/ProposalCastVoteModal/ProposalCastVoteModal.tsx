@@ -1,10 +1,12 @@
-import { AbstainedIcon, RegularModal } from "@/components"
-import { VStack, Heading, RadioGroup, Card, HStack, Textarea, Button, Text } from "@chakra-ui/react"
-import { t } from "i18next"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { UilThumbsUp, UilThumbsDown } from "@iconscout/react-unicons"
-import { useCallback, useMemo, useState } from "react"
+import { RegularModal } from "@/components"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { Button, Card, Heading, HStack, Icon, RadioGroup, Text, Textarea, VStack } from "@chakra-ui/react"
+import { t } from "i18next"
+import { useCallback, useMemo, useState } from "react"
 
 type Props = {
   isVoteModalOpen: boolean
@@ -21,17 +23,20 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
       {
         id: "1",
         title: "Approve",
-        icon: <UilThumbsUp color="#38BF66" size={20} />,
+        icon: ThumbsUpIcon,
+        iconColor: "status.success.primary",
       },
       {
         id: "2",
         title: "Abstain",
-        icon: <AbstainedIcon size={20} />,
+        icon: AbstainIcon,
+        iconColor: "status.warning.primary",
       },
       {
         id: "0",
         title: "Against",
-        icon: <UilThumbsDown color="#D23F63" size={20} />,
+        icon: ThumbsDownIcon,
+        iconColor: "status.error.primary",
       },
     ],
     [],
@@ -41,7 +46,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
     onClose()
     setSelectedVote(null)
     setComment("")
-  }, [])
+  }, [onClose])
 
   const castVoteMutation = useProposalCastVote({
     proposalId,
@@ -88,7 +93,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
                   onClick={() => setSelectedVote(option.id)}>
                   <HStack justify="space-between">
                     <HStack gap={3}>
-                      {option.icon}
+                      <Icon as={option.icon} color={option.iconColor} boxSize={5} />
                       <Text fontWeight="medium">{option.title}</Text>
                     </HStack>
                     <RadioGroup.Item value={option.id}>

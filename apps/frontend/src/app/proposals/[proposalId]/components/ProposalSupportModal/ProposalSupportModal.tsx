@@ -1,12 +1,12 @@
 import { useCurrentAllocationsRoundId } from "@/api"
 import { GenericAlert } from "@/app/components/Alert"
 import { MulticolorBar, RegularModal, ResultsDisplay } from "@/components"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { filterAmountInput } from "@/utils/filterAmountInput"
 import { Button, Heading, HStack, Icon, Image, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
-import { UilHeart } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
@@ -204,7 +204,7 @@ export const ProposalSupportModal = ({
         {/* Results Section */}
         <ResultsDisplay
           proposalId={proposalId}
-          segments={[{ ...progressData, icon: UilHeart }]}
+          segments={[{ ...progressData, icon: HeartIcon }]}
           tokenAmount={proposalDeposits + inputAmount}
           showTokenAmount={true}
         />

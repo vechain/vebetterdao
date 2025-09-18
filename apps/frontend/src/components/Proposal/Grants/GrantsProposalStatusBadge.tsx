@@ -1,8 +1,11 @@
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
-import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilBan, UilCheck, UilCodeBranch } from "@iconscout/react-unicons"
 import { useMemo } from "react"
-import { FaHeart, FaThumbsUp } from "react-icons/fa6"
 
 type Props = {
   state?: ProposalState
@@ -27,14 +30,14 @@ type BadgeConfig = {
 const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   [ProposalState.Pending]: {
     text: "Support phase",
-    icon: UilHeart,
-    filledIcon: FaHeart,
+    icon: HeartIcon,
+    filledIcon: HeartSolidIcon,
     variant: "support-phase",
   },
   [ProposalState.Active]: {
     text: "Approval phase",
-    icon: UilThumbsUp,
-    filledIcon: FaThumbsUp,
+    icon: ThumbsUpIcon,
+    filledIcon: ThumbsUpSolidIcon,
     variant: "approval-phase",
   },
   [ProposalState.Canceled]: {
@@ -49,7 +52,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
   [ProposalState.Succeeded]: {
     text: "Approved",
-    icon: UilCheck,
+    icon: ThumbsUpSolidIcon,
     variant: "approved",
   },
   [ProposalState.Queued]: {

@@ -1,12 +1,13 @@
 import { ProposalComment } from "@/api"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { Card, HStack, Icon, Separator, Text, VStack } from "@chakra-ui/react"
-import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { LuCircleSlash2 } from "react-icons/lu"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -14,9 +15,9 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
 
   const voteLabel = {
-    FOR: { icon: UilThumbsUp, label: t("Approved"), color: "success.primary" },
-    ABSTAIN: { icon: LuCircleSlash2, label: t("Abstain"), color: "warning.primary" },
-    AGAINST: { icon: UilThumbsDown, label: t("Against"), color: "error.primary" },
+    FOR: { icon: ThumbsUpIcon, label: t("Approved"), color: "success.primary" },
+    ABSTAIN: { icon: AbstainIcon, label: t("Abstain"), color: "warning.primary" },
+    AGAINST: { icon: ThumbsDownIcon, label: t("Against"), color: "error.primary" },
   }
 
   const voteType = vote.support
@@ -28,7 +29,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"top"}>
           <HStack fontSize={"lg"} fontWeight={"semibold"}>
-            <Icon as={voteLabel[voteType].icon} color={voteLabel[voteType].color} />
+            <Icon as={voteLabel[voteType].icon} color={voteLabel[voteType].color} boxSize={5} />
             <Text color={voteLabel[voteType].color}>{voteLabel[voteType].label}</Text>
           </HStack>
           <Text color={"text.subtle"}>{dayjs(vote.blockTimestamp * 1000).fromNow()}</Text>
