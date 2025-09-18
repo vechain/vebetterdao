@@ -11,7 +11,7 @@ import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { Box, Card, Center, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
-import { formatTimeLeft } from "@repo/utils/FormattingUtils"
+import { formatTimeLeft, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
 import { useRouter } from "next/navigation"
@@ -104,7 +104,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
               <>
                 <Icon as={B3trIcon} color="actions.primary.default" boxSize={5} />
                 <Text>
-                  {grantProposal.grantAmountRequested} {"B3TR"}
+                  {humanNumber(grantProposal.grantAmountRequested, grantProposal.grantAmountRequested, "B3TR")}
                 </Text>
                 <Box hideBelow="md">
                   <Text>
