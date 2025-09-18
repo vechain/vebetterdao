@@ -1,9 +1,9 @@
 import { VoteType } from "@/api"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 import { HStack, Icon, Text } from "@chakra-ui/react"
-import { LuCircleSlash2 } from "react-icons/lu"
-import { FaHeart, FaRegHeart, FaThumbsUp, FaThumbsDown, FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa6"
 import { useMemo } from "react"
+import { FaHeart, FaRegHeart, FaRegThumbsDown, FaRegThumbsUp, FaThumbsDown, FaThumbsUp } from "react-icons/fa6"
+import { LuCircleSlash2 } from "react-icons/lu"
 
 export const ProposalCommunityInteractions = ({
   proposalId,
@@ -36,7 +36,7 @@ export const ProposalCommunityInteractions = ({
   }, [userVoteOption])
 
   if (state === ProposalState.Pending) {
-    const formattedDepositPercentage = Number(depositPercentage).toFixed(2)
+    const formattedDepositPercentage = Math.floor(Number(depositPercentage))
     const heartIcon = hasUserDeposited ? FaHeart : FaRegHeart
     const heartColor = hasUserDeposited ? "actions.primary.default" : "text.subtle"
 
