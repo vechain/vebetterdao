@@ -28,6 +28,7 @@ import { useTranslation } from "react-i18next"
 
 import { HowToSupportCard } from "../../components/components"
 import { useFilteredProposals } from "../../hooks/useFilteredProposals"
+import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
@@ -138,6 +139,7 @@ export const GrantsPageContent = () => {
 
   return (
     <VStack w="full" gap={8} pb={8}>
+      <GrantsBanners />
       <HStack
         alignItems="center"
         textAlign="center"
