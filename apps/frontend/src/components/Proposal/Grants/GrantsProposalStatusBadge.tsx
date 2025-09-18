@@ -1,13 +1,14 @@
-import { Icon, HStack, Text, Badge, type BadgeProps } from "@chakra-ui/react"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilCodeBranch, UilHeart, UilThumbsUp } from "@iconscout/react-unicons"
-import { FaHeart, FaThumbsUp } from "react-icons/fa6"
-import { ProposalState } from "@/hooks/proposals/grants/types"
 import { useMemo } from "react"
+import { FaHeart, FaThumbsUp } from "react-icons/fa6"
 
 type Props = {
   state?: ProposalState
   hasUserSupported?: boolean
   hasUserVoted?: boolean
+  proposalType?: ProposalType
 }
 
 /**
@@ -52,7 +53,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
     variant: "approved",
   },
   [ProposalState.Queued]: {
-    text: "In development",
+    text: "Queued",
     icon: UilCodeBranch,
     variant: "support-phase",
   },
