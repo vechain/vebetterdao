@@ -16,6 +16,6 @@
       "@nomicfoundation/hardhat-ethers"
     ]
   },
-  "include": ["index.ts", "artifacts/contracts/**/*.json", "typechain-types/**/*.ts", "test/**/*.ts"],
-  "exclude": ["node_modules", "dist", "scripts"]
+  "include": ["index.ts", "artifacts/contracts/**/*.json", "typechain-types/**/*.ts"],
+  "exclude": ["node_modules", "dist", "scripts", "test"]
 }
