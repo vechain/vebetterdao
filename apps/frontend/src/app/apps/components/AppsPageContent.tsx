@@ -38,9 +38,14 @@ export const AppsPageContent = () => {
   const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
   const { data: xApps } = useSortXappAlphabetically(xAppsNotSorted)
 
+  // New apps looking for endorsement
+  const newLookingForEndorsementApps = xApps?.newLookingForEndorsement ?? []
+  const hasLookingForEndorsementApps = newLookingForEndorsementApps.length > 0
+
+  // New apps that has reached endorsement score but not yet active in allocations
+  const newlyEndorsedApps = xApps?.active.filter(app => app.isNew) ?? []
   // New apps looking for endorsement slider
-  const newApps = xApps?.newLookingForEndorsement ?? []
-  const hasNewApps = newApps.length > 0
+  const newApps = [...newLookingForEndorsementApps, ...newlyEndorsedApps]
 
   // Apps tabs
   const currentActiveApps =
@@ -76,7 +81,7 @@ export const AppsPageContent = () => {
         </>
       )}
 
-      {hasNewApps && <AppsLookingForEndorsement filteredApps={newApps} />}
+      {hasLookingForEndorsementApps && <AppsLookingForEndorsement filteredApps={newLookingForEndorsementApps} />}
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 

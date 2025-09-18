@@ -1,13 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import {
-  VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES,
-  AVG_PHONE_WIDTH,
-  notFoundImage,
-  VE_WOLRD_SCALING_FACTOR,
-  IMAGE_REQUIREMENTS,
-} from "@/constants"
+import { AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR, IMAGE_REQUIREMENTS } from "@/constants"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -15,6 +9,7 @@ import { handleImageCompression } from "@/utils/imageListCompression"
 import { useTranslation } from "react-i18next"
 import { validateImage } from "@/utils"
 import { toaster } from "@/components/ui/toaster"
+import { VeWorldFeaturedImageGuidelines } from "@/components/CreateEditAppForm"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -106,7 +101,7 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
         </Flex>
       </Flex>
       <Text textStyle="sm" color={invalidFormat ? "red" : "gray"} pt={0}>
-        {invalidFormat ? invalidMessage : t(VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES)}
+        {invalidFormat ? invalidMessage : <VeWorldFeaturedImageGuidelines />}
       </Text>
     </VStack>
   )

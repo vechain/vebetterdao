@@ -1790,5 +1790,7 @@
   "Start new round & claim allocations": "Start new round & claim allocations",
   "Transaction completed!": "Transaction completed!",
   "By clicking the button below, you will also claim allocations for {{count}} apps.": "By clicking the button below, you will also claim allocations for {{count}} apps.",
-  "Filter": "Filter"
+  "Filter": "Filter",
+  "Recommended size: 720x720 (minimum).": "Recommended size: 720x720 (minimum).",
+  "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose."
 }

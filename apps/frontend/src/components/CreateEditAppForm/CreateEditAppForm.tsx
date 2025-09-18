@@ -17,7 +17,6 @@ import {
   BANNER_UPLOAD_GUIDELINES,
   LOGO_UPLOAD_GUIDELINES,
   VEWORLD_BANNER_UPLOAD_GUIDELINES,
-  VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES,
   AVG_PHONE_WIDTH,
   notFoundImage,
   VE_WOLRD_SCALING_FACTOR,
@@ -28,6 +27,7 @@ import { WalletAddressInput } from "@/app/components/Input"
 import { AddressUtils } from "@/utils"
 import { FormItem } from "../CustomFormFields"
 import { CategorySelector } from "@/components/CategorySelector"
+import { VeWorldFeaturedImageGuidelines } from "./VeWorldFeaturedImageGuidelines"
 
 // Validate image uploads with size and type
 const validateImageUpload = async (
@@ -430,7 +430,9 @@ export const CreateEditAppForm = ({
                   {errors.ve_world_featured_image ? (
                     <Field.ErrorText>{errors.ve_world_featured_image.message}</Field.ErrorText>
                   ) : (
-                    <Field.HelperText>{t(VEWORLD_FEATURED_IMAGE_UPLOAD_GUIDELINES)}</Field.HelperText>
+                    <Field.HelperText>
+                      <VeWorldFeaturedImageGuidelines />
+                    </Field.HelperText>
                   )}
                   <UploadFileButton
                     mt={4}
