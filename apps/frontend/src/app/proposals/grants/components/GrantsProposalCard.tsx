@@ -31,6 +31,9 @@ const isGrantProposal = (proposal: GrantProposalEnriched | ProposalEnriched): pr
 }
 
 export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
+  // ==========================================
+  // HOOKS
+  // ==========================================
   const router = useRouter()
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -40,17 +43,12 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const { data: userDeposits } = useProposalUserDeposit(proposal.id, account?.address ?? "")
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal.id)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal.id)
+
+  // ==========================================
+  // COMPUTED VALUES & CONSTANTS
+  // ==========================================
   const communityDepositPercentage =
     (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
-
-  const goToProposerProfile = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    router.push(`/profile/${proposal.proposerAddress}`)
-  }
-
-  const goToProposal = () => {
-    router.push(`/proposals/${proposal.id}`)
-  }
 
   const grantProposal = useMemo(() => {
     return isGrantProposal(proposal) ? proposal : null
@@ -60,7 +58,6 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
 
-  // Extract the mapped vote type from the hook
   const userVoteOption = userVoteEvent?.userVote
   const hasUserVoted = !!userVoteEvent?.hasVoted
 
@@ -72,11 +69,26 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
     return proposal.state === ProposalState.Pending ? supportEndDate : votingEndDate
   }, [proposal.state, supportEndDate, votingEndDate])
 
-  // Cache the time left calculation to prevent blinking/frequent updates
   const timeLeftDisplay = useMemo(() => {
     if (!isSupportOrVotingPhase) return null
     return formatTimeLeft(endsAt)
   }, [endsAt, isSupportOrVotingPhase])
+
+  // ==========================================
+  // EVENT HANDLERS
+  // ==========================================
+  const goToProposerProfile = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    router.push(`/profile/${proposal.proposerAddress}`)
+  }
+
+  const goToProposal = () => {
+    router.push(`/proposals/${proposal.id}`)
+  }
+
+  // ==========================================
+  // RENDER
+  // ==========================================
   return (
     <Card.Root
       w="full"
@@ -87,15 +99,14 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
       cursor="pointer"
       onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
-        {/* Title */}
+        {/* Header Section */}
         <Heading size="md">{proposal.title}</Heading>
 
-        {/* B3TR and App Grant */}
+        {/* Grant Information & Proposer Section */}
         <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
           <HStack>
             {grantProposal && (
               <>
-                {/* Amount and grant type */}
                 <B3TRIcon boxSize={{ base: "14px", md: "16px" }} />
                 <Text>
                   {grantProposal.grantAmountRequested} {"B3TR"}
@@ -105,13 +116,11 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                     {"•"} {grantProposal.grantType === "dapp" ? "App" : "Tooling"} {"Grant"}
                   </Text>
                 </Box>
-                {/* Separator */}
                 <Center height="20px">
                   <Separator orientation="vertical" h="20px" />
                 </Center>
               </>
             )}
-            {/* Proposer */}
             <Box _hover={{ opacity: 0.7 }} onClick={goToProposerProfile}>
               <AddressWithProfilePicture address={proposal.proposerAddress} />
             </Box>
@@ -121,10 +130,12 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
           </HStack>
           {grantProposal && <ProposalLinksAndSocials proposal={grantProposal} />}
         </Stack>
+
         <Separator w="full" h={1} color="border.secondary" />
-        {/* Footer */}
+
+        {/* Footer Section */}
         {isMobile ? (
-          /* Mobile Layout */
+          // Mobile Layout
           <VStack w="full" gap={2}>
             <HStack w="full" justifyContent="space-between">
               <GrantsProposalStatusBadge
@@ -156,7 +167,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             ) : null}
           </VStack>
         ) : (
-          /* Desktop Layout */
+          // Desktop Layout
           <HStack w="full" justifyContent="space-between">
             <HStack gap={4}>
               <GrantsProposalStatusBadge
@@ -172,7 +183,6 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 </Text>
               ) : null}
             </HStack>
-            {/* {isSupportOrVotingPhase && ( */}
             <HStack gap={2}>
               <ProposalCommunityInteractions
                 proposalId={proposal.id}
@@ -185,7 +195,6 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 userVoteOption={userVoteOption}
               />
             </HStack>
-            {/* )} */}
           </HStack>
         )}
       </VStack>
