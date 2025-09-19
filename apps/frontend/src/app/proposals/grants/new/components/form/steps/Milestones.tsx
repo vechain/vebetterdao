@@ -1,7 +1,9 @@
+import { GenericAlert } from "@/app/components/Alert"
 import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
 import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
+import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
 import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
@@ -121,6 +123,7 @@ export const MilestoneSection = ({
                 label={t("Amount")}
                 placeholder="10,000"
                 conversionRate={b3trPerUsd}
+                initialValue={currentMilestone.fundingAmountUsd}
                 registerPrimary={register(`milestones.${index}.fundingAmountUsd`, {
                   required: t("Please enter the amount for this milestone"),
                   validate: (value: number) => validateMilestoneAmount(value, grantType),
@@ -139,6 +142,8 @@ export const MilestoneSection = ({
                     fundingAmount: Number(b3trAmount),
                   } as (typeof updatedMilestones)[0]
                   setData({ milestones: updatedMilestones })
+
+                  setValue("milestones", updatedMilestones)
                 }}
               />
             </GridItem>
@@ -262,36 +267,55 @@ export const Milestones = ({
   )
 
   const handleAddMilestone = () => {
-    //Get the last milestone
-    const lastMilestone = milestones[milestones.length - 1] ?? { durationTo: now }
-    //Append to internal array and update the form store
-    milestones.push({
-      description: "",
-      fundingAmount: 0,
-      fundingAmountUsd: 0,
-      durationFrom: dayjs(lastMilestone.durationTo ?? now * 1000)
-        .add(1, "month")
-        .unix(),
-      durationTo: dayjs(lastMilestone.durationTo ?? now * 1000)
-        .add(2, "month")
-        .unix(),
-    })
-    setValue("milestones", milestones)
-    //Persist the new milestone in the form data
-    setData({ ...formData, milestones })
+    //Get current milestones to avoid stale state
+    const currentMilestones = getValues("milestones")
+    const lastMilestone = currentMilestones[currentMilestones.length - 1] ?? { durationTo: now }
+
+    //Create new milestone array
+    const newMilestones = [
+      ...currentMilestones,
+      {
+        description: "",
+        fundingAmount: 0,
+        fundingAmountUsd: 0,
+        durationFrom: dayjs(lastMilestone.durationTo ?? now * 1000)
+          .add(1, "month")
+          .unix(),
+        durationTo: dayjs(lastMilestone.durationTo ?? now * 1000)
+          .add(2, "month")
+          .unix(),
+      },
+    ]
+
+    setValue("milestones", newMilestones)
+    setData({ ...formData, milestones: newMilestones })
   }
 
   const handleRemoveMilestone = (index: number) => {
     if (index === 0) {
       return
     }
-    //Remove the milestone from the form data
-    const milestones = getValues("milestones")
-    milestones.splice(index, 1)
-    setValue("milestones", milestones)
-    //Persist the new milestone in the form data
-    setData({ ...formData, milestones })
+    //Get current milestones to avoid stale state
+    const currentMilestones = getValues("milestones")
+    const newMilestones = currentMilestones.filter((_, i) => i !== index)
+
+    setValue("milestones", newMilestones)
+    setData({ ...formData, milestones: newMilestones })
   }
+
+  // Calculate total in real-time using watched values
+  const totalRequestedAmount = useMemo(() => {
+    if (!milestones || !Array.isArray(milestones)) return 0
+    return milestones.reduce((acc, milestone) => {
+      const amount = Number(milestone?.fundingAmountUsd) || 0
+      return acc + amount
+    }, 0)
+  }, [milestones])
+
+  const isTotalRequestedAmountValid = useMemo(() => {
+    const maxAmount = grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT
+    return totalRequestedAmount <= maxAmount
+  }, [totalRequestedAmount, grantType])
 
   return (
     <VStack align="stretch" w="full">
@@ -358,6 +382,16 @@ export const Milestones = ({
             error={errors.termsOfService?.message}
           />
         </GridItem>
+        {!isTotalRequestedAmountValid && (
+          <GridItem colSpan={2}>
+            <GenericAlert
+              type="error"
+              message={t("The maximum amount for this grant type is {{value}} USD", {
+                value: grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT,
+              })}
+            />
+          </GridItem>
+        )}
       </Grid>
     </VStack>
   )

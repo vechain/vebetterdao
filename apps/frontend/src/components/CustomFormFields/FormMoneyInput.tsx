@@ -1,6 +1,6 @@
 import { Field, HStack, Input, Text, Box, InputGroup } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 type FormMoneyInputProps = {
   label?: string
@@ -13,6 +13,7 @@ type FormMoneyInputProps = {
   isOptional?: boolean
   conversionRate?: number
   onUsdChange?: (usdAmount: string, b3trAmount: string) => void
+  initialValue?: number
 }
 
 /**
@@ -52,6 +53,7 @@ export const FormMoneyInput = ({
   isOptional = false,
   conversionRate,
   onUsdChange,
+  initialValue,
 }: FormMoneyInputProps) => {
   const [displayValue, setDisplayValue] = useState("")
 
@@ -60,6 +62,13 @@ export const FormMoneyInput = ({
     const num = value.replace(/\D/g, "")
     return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
   }
+
+  // Initialize displayValue with the initial value on mount
+  useEffect(() => {
+    if (initialValue && initialValue > 0) {
+      setDisplayValue(formatCurrency(initialValue.toString()))
+    }
+  }, [initialValue])
 
   // Handle input change with formatting
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
