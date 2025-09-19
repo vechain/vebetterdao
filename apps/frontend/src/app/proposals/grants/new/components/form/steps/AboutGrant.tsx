@@ -212,6 +212,7 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Registered number")}
                     placeholder={"Eg. 01234567"}
+                    tooltip={t("Company VAT number e.g. 01234567")}
                     register={register("companyRegisteredNumber", {
                       required: t("Please enter your company registered number"),
                     })}
@@ -479,6 +480,9 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("X2E model")}
                     placeholder={t("X2E model")}
+                    tooltip={t(
+                      "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).",
+                    )}
                     type="textarea"
                     register={register("x2EModel", {
                       required: t("Please describe X2E model"),

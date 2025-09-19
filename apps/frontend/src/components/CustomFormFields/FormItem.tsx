@@ -1,5 +1,7 @@
-import { Field, HStack, Input, Text, Textarea, InputGroup } from "@chakra-ui/react"
+import { Tooltip } from "@/components/ui/tooltip"
+import { Field, HStack, Icon, Input, InputGroup, Text, Textarea } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
+import { GoQuestion } from "react-icons/go"
 
 type FormItemProps = {
   label?: string
@@ -11,6 +13,7 @@ type FormItemProps = {
   onBlur?: () => void
   isOptional?: boolean
   leftElement?: React.ReactNode
+  tooltip?: string
 }
 
 export const FormItem = ({
@@ -23,6 +26,7 @@ export const FormItem = ({
   onBlur,
   isOptional = false,
   leftElement,
+  tooltip,
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
 
@@ -33,6 +37,11 @@ export const FormItem = ({
           <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
             {label}
           </Field.Label>
+          {tooltip && (
+            <Tooltip content={tooltip} positioning={{ placement: "top" }} contentProps={{ p: 4, borderRadius: "lg" }}>
+              <Icon as={GoQuestion} boxSize={5} color="icon.subtle" />
+            </Tooltip>
+          )}
           {isOptional && (
             <Text fontSize="sm" fontWeight="medium" color="text.subtle">
               {"Optional"}
