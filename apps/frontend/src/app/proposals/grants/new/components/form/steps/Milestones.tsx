@@ -2,7 +2,6 @@ import { GenericAlert } from "@/app/components/Alert"
 import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
-import { validateMilestoneAmount } from "@/components/CustomFormFields/validators"
 import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
 import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
@@ -127,7 +126,22 @@ export const MilestoneSection = ({
                 initialValue={currentMilestone.fundingAmountUsd}
                 registerPrimary={register(`milestones.${index}.fundingAmountUsd`, {
                   required: t("Please enter the amount for this milestone"),
-                  validate: (value: number) => validateMilestoneAmount(value, grantType),
+                  validate: (value: number) => {
+                    const allMilestones = getValues("milestones")
+                    const total = allMilestones.reduce((acc, milestone, idx) => {
+                      // Use the current value being validated if it's for this milestone
+                      const amount = idx === index ? value : milestone.fundingAmountUsd
+                      return acc + (Number(amount) || 0)
+                    }, 0)
+
+                    const maxAmount = grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT
+                    return (
+                      total <= maxAmount ||
+                      t("Total amount across all milestones exceeds maximum allowed: ${{maxAmount}} USD", {
+                        maxAmount: maxAmount.toLocaleString(),
+                      })
+                    )
+                  },
                 })}
                 registerSecondary={register(`milestones.${index}.fundingAmount`)}
                 error={errors.milestones?.[index]?.fundingAmountUsd?.message}
@@ -145,6 +159,21 @@ export const MilestoneSection = ({
                   setData({ milestones: updatedMilestones })
 
                   setValue("milestones", updatedMilestones)
+
+                  // Trigger validation for all milestone amounts to update total validation
+                  setTimeout(() => {
+                    getValues("milestones").forEach((_, idx) => {
+                      if (idx !== index) {
+                        setValue(
+                          `milestones.${idx}.fundingAmountUsd`,
+                          getValues(`milestones.${idx}.fundingAmountUsd`),
+                          {
+                            shouldValidate: true,
+                          },
+                        )
+                      }
+                    })
+                  }, 0)
                 }}
               />
             </GridItem>
@@ -383,6 +412,7 @@ export const Milestones = ({
             error={errors.termsOfService?.message}
           />
         </GridItem>
+
         {!isTotalRequestedAmountValid && (
           <GridItem colSpan={2}>
             <GenericAlert
