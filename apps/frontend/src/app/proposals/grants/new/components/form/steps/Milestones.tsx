@@ -321,7 +321,7 @@ export const Milestones = ({
     <VStack align="stretch" w="full">
       <Accordion.Root multiple defaultValue={["milestone-0"]}>
         {milestones.map((milestone, index) => {
-          const uniqueKey = `${milestone.durationFrom}-${milestone.durationTo}`
+          const uniqueKey = `milestone-${index}-${milestone.durationFrom}-${milestone.durationTo}-${milestone.fundingAmountUsd}`
           return (
             <MilestoneSection
               key={uniqueKey}
