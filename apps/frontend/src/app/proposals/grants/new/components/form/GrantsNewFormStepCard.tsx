@@ -64,10 +64,21 @@ export const GrantsNewFormStepCard = () => {
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string>("")
 
   // Form state
-  const { handleSubmit, control, register, formState, setValue, getValues, watch, clearErrors, setError, reset } =
-    useForm<GrantFormData>({
-      defaultValues: formData,
-    })
+  const {
+    handleSubmit,
+    control,
+    register,
+    formState,
+    setValue,
+    getValues,
+    watch,
+    clearErrors,
+    setError,
+    reset,
+    trigger,
+  } = useForm<GrantFormData>({
+    defaultValues: formData,
+  })
   const { errors, isValid } = formState
 
   // ============================================================================
@@ -190,6 +201,12 @@ export const GrantsNewFormStepCard = () => {
   }, [router, expectedProposalId])
 
   const onSubmit = async (data: GrantFormData) => {
+    if (!isValid) {
+      //trigger all errors
+      trigger()
+      return
+    }
+
     // Navigate to next step if not on final step
     if (currentStepIndex !== lastStep) {
       return goToNext()
@@ -261,7 +278,7 @@ export const GrantsNewFormStepCard = () => {
                     {t("Back")}
                   </Button>
                 )}
-                <Button type="submit" variant="primaryAction" px={8} size="lg" disabled={!isValid}>
+                <Button type="submit" variant="primaryAction" px={8} size="lg">
                   {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>
