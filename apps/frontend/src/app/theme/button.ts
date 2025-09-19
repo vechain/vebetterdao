@@ -79,9 +79,15 @@ export const buttonRecipe = defineRecipe({
       secondary: {
         rounded: "full",
         color: "rgba(0, 76, 252, 1)",
-        bgColor: "rgba(224, 233, 254, 1)",
+        bgColor: {
+          base: "rgba(224, 233, 254, 1)",
+          _dark: "transparent",
+        },
         _hover: {
-          bg: "#7b818e",
+          bg: {
+            base: "#D4E2FF",
+            _dark: "transparent",
+          },
           _disabled: {
             bg: "rgba(224, 233, 254, 0.7)",
           },
