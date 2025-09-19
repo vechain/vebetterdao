@@ -3,7 +3,9 @@ import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
 export type GrantFormStoreState = GrantFormData & {
-  setData: (data: Partial<GrantFormStoreState>) => void
+  currentStep: number
+  setData: (data: Partial<GrantFormData>) => void
+  setCurrentStep: (step: number) => void
   clearData: () => void
 }
 
@@ -74,12 +76,18 @@ export const useGrantProposalFormStore = create<GrantFormStoreState>()(
     persist(
       set => ({
         ...initialState,
-        setData: (data: Partial<GrantFormStoreState>) =>
+        currentStep: 0,
+        setData: (data: Partial<GrantFormData>) =>
           set(state => ({
             ...state,
             ...data,
           })),
-        clearData: () => set(initialState),
+        setCurrentStep: (step: number) =>
+          set(state => ({
+            ...state,
+            currentStep: step,
+          })),
+        clearData: () => set({ ...initialState, currentStep: 0 }),
       }),
       {
         name: "GRANT_PROPOSAL_FORM_STORE",

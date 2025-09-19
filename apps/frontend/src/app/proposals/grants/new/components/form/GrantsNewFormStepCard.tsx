@@ -1,9 +1,14 @@
 import { useCurrentAllocationsRoundId } from "@/api"
+import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposal"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 import { useGrantProposalFormStore } from "@/store"
 import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
+import { Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { ethers } from "ethers"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -12,10 +17,10 @@ import { useTranslation } from "react-i18next"
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutGrant, Milestones, Schedule } from "./steps"
-import { Treasury__factory } from "@vechain/vebetterdao-contracts"
-import { getConfig } from "@repo/config"
-import { ethers } from "ethers"
-import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposal"
+
+// ============================================================================
+// TYPES AND CONSTANTS
+// ============================================================================
 
 export enum GrantFormStep {
   GRANT_TYPE = "GRANT_TYPE",
@@ -29,23 +34,45 @@ export type GrantStep = {
   content: React.ReactNode
   title: string
 }
+
+const STEP_INDICES = {
+  GRANT_TYPE: 0,
+  ABOUT_GRANT: 1,
+  MILESTONES: 2,
+  SCHEDULE: 3,
+} as const
+
 const treasuryInterface = Treasury__factory.createInterface()
 
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export const GrantsNewFormStepCard = () => {
+  // ============================================================================
+  // HOOKS AND STATE
+  // ============================================================================
+
   const { t } = useTranslation()
-
   const router = useRouter()
+  const { data: session } = useSession()
 
-  const { setData, clearData, ...formData } = useGrantProposalFormStore()
+  // Store state
+  const { setData, clearData, currentStep: storedStep, setCurrentStep, ...formData } = useGrantProposalFormStore()
 
+  // Component state
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string>("")
 
+  // Form state
   const { handleSubmit, control, register, formState, setValue, getValues, watch, clearErrors, setError, reset } =
     useForm<GrantFormData>({
       defaultValues: formData,
     })
-
   const { errors, isValid } = formState
+
+  // ============================================================================
+  // STEP CONFIGURATION
+  // ============================================================================
 
   const steps: GrantStep[] = [
     {
@@ -80,7 +107,6 @@ export const GrantsNewFormStepCard = () => {
           watch={watch}
           setData={setData}
           errors={errors}
-          // pass current RHF values instead of the unstable spread store object
           formData={getValues()}
         />
       ),
@@ -93,28 +119,51 @@ export const GrantsNewFormStepCard = () => {
     },
   ]
 
-  //MIMIC USE STEPS HOOK
+  // ============================================================================
+  // STEP MANAGEMENT
+  // ============================================================================
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(() => {
+    // Initialize step based on stored step and session data at mount time
+    const hasSessionSocial =
+      session?.user && (session.user.githubUsername || session.user.twitterUsername || session.user.discordUsername)
+
+    // If user has social accounts and stored step is before About Grant, go to About Grant
+    if (hasSessionSocial && storedStep < STEP_INDICES.ABOUT_GRANT) {
+      setCurrentStep(STEP_INDICES.ABOUT_GRANT)
+      return STEP_INDICES.ABOUT_GRANT
+    }
+
+    return storedStep
+  })
 
   const goToNext = useCallback(() => {
-    setCurrentStepIndex(currentStepIndex + 1)
-  }, [currentStepIndex])
+    const nextStep = currentStepIndex + 1
+    setCurrentStepIndex(nextStep)
+    setCurrentStep(nextStep)
+  }, [currentStepIndex, setCurrentStep])
 
   const goToPrevious = useCallback(() => {
-    setCurrentStepIndex(currentStepIndex - 1)
-  }, [currentStepIndex])
+    const prevStep = currentStepIndex - 1
+    setCurrentStepIndex(prevStep)
+    setCurrentStep(prevStep)
+  }, [currentStepIndex, setCurrentStep])
+
+  // ============================================================================
+  // PROPOSAL SUBMISSION LOGIC
+  // ============================================================================
 
   const { onMetadataUpload } = useUploadGrantProposalMetadata()
   const { sendTransaction: createGrantProposal, resetStatus } = useCreateGrantProposal({
     onSuccess: () => {
       resetStatus()
-      //Cleanup form and storage
       clearData()
       reset()
       goToProposalPage()
     },
   })
+
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const grantsProposalActions = useMemo(() => {
     return formData.milestones.map((milestone: GrantFormData["milestones"][0]) => {
@@ -128,8 +177,6 @@ export const GrantsNewFormStepCard = () => {
     })
   }, [formData?.milestones])
 
-  // We call the hashProposal function to precalculate the proposal id
-  // so we can redirect the user to the proposal page after the tx is confirmed
   const { data: expectedProposalId } = useHashProposal(
     grantsProposalActions.map(action => ({
       contractAddress: action.contractAddress,
@@ -139,84 +186,89 @@ export const GrantsNewFormStepCard = () => {
   )
 
   const goToProposalPage = useCallback(() => {
-    //Redirect to the proposal page
     router.push(`/proposals/${expectedProposalId}`)
   }, [router, expectedProposalId])
 
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const onSubmit = async (data: GrantFormData) => {
+    // Navigate to next step if not on final step
     if (currentStepIndex !== lastStep) {
       return goToNext()
     }
 
+    // Validate prerequisites
     if (!currentRoundId || isNaN(Number(currentRoundId))) return
-
-    const title = data.projectName
-    const shortDescription = data.problemDescription
-    const proposalMetadataURI = await onMetadataUpload({ ...data, title, shortDescription })
-    if (!proposalMetadataURI) return console.error("Error uploading proposal metadata")
-
-    const milestonesIpfsCID = await onMetadataUpload(data.milestones)
-    if (!milestonesIpfsCID) return console.error("Error uploading milestones")
     if (!data.votingRoundId) return console.error("Support round ID is required")
-    resetStatus()
-    // We hash the metadata uri, which will be used by the useHashProposal hook to calculate the proposal id
-    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(proposalMetadataURI)))
 
-    await createGrantProposal({
-      metadataIpfsCID: proposalMetadataURI,
-      milestonesIpfsCID,
-      milestones: data.milestones,
-      grantsReceiver: data.grantsReceiverAddress,
-      votingRoundId: Number(data.votingRoundId),
-      depositAmount: "0",
-    })
+    try {
+      // Prepare proposal data
+      const title = data.projectName
+      const shortDescription = data.problemDescription
+      const cleanData = { ...formData, ...data }
+
+      // Upload metadata to IPFS
+      const proposalMetadataURI = await onMetadataUpload({ ...cleanData, title, shortDescription })
+      if (!proposalMetadataURI) return console.error("Error uploading proposal metadata")
+
+      const milestonesIpfsCID = await onMetadataUpload(data.milestones)
+      if (!milestonesIpfsCID) return console.error("Error uploading milestones")
+
+      // Hash metadata URI for proposal ID calculation
+      setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(proposalMetadataURI)))
+
+      resetStatus()
+
+      // Submit proposal
+      await createGrantProposal({
+        metadataIpfsCID: proposalMetadataURI,
+        milestonesIpfsCID,
+        milestones: data.milestones,
+        grantsReceiver: data.grantsReceiverAddress,
+        votingRoundId: Number(data.votingRoundId),
+        depositAmount: "0",
+      })
+    } catch (error) {
+      console.error("Error submitting proposal:", error)
+    }
   }
+
+  // ============================================================================
+  // RENDER HELPERS
+  // ============================================================================
 
   const firstStep = 0
   const lastStep = steps.length - 1
-  const currentStep = steps[currentStepIndex]
+  const currentStepData = steps[currentStepIndex]
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
-    <>
-      <Card.Root>
-        <Card.Header>
-          <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
-        </Card.Header>
-        <Card.Body px={{ base: 3, md: 8 }}>
-          <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-            <VStack gap={4} w="full" align="flex-start">
-              {currentStep?.content}
-              <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
-                <HStack gap={4} w="full">
-                  {currentStepIndex !== firstStep && (
-                    <Button onClick={goToPrevious} variant="secondary" px={8} size="lg">
-                      {t("Back")}
-                    </Button>
-                  )}
-                  <Button type="submit" variant="primaryAction" px={8} size="lg" disabled={!isValid}>
-                    {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
+    <Card.Root>
+      <Card.Header>
+        <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
+      </Card.Header>
+
+      <Card.Body px={{ base: 3, md: 8 }}>
+        <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+          <VStack gap={4} w="full" align="flex-start">
+            {currentStepData?.content}
+
+            <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
+              <HStack gap={4} w="full">
+                {currentStepIndex !== firstStep && (
+                  <Button onClick={goToPrevious} variant="secondary" px={8} size="lg">
+                    {t("Back")}
                   </Button>
-                </HStack>
-                {/* {stepsUI.value !== firstStep && (
-                  <Button
-                    variant="primaryLink"
-                    onClick={handleSaveDraft}
-                    px={8}
-                    disabled={isSaveDraftDisabled}
-                    _disabled={{
-                      opacity: 0.5,
-                      cursor: "not-allowed",
-                    }}>
-                    {t("Save draft")}
-                  </Button>
-                )} */}
-              </Stack>
-            </VStack>
-          </form>
-        </Card.Body>
-      </Card.Root>
-    </>
+                )}
+                <Button type="submit" variant="primaryAction" px={8} size="lg" disabled={!isValid}>
+                  {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
+                </Button>
+              </HStack>
+            </Stack>
+          </VStack>
+        </form>
+      </Card.Body>
+    </Card.Root>
   )
 }
