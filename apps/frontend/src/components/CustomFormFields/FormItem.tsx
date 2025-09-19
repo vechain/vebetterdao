@@ -34,7 +34,12 @@ export const FormItem = ({
     <Field.Root invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
       {label && (
         <HStack justify="space-between" w="full">
-          <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
+          <Field.Label
+            fontSize="sm"
+            fontWeight="400"
+            color="text.default"
+            mb={description ? 0 : undefined}
+            htmlFor={register.name}>
             {label}
           </Field.Label>
           {tooltip && (
@@ -43,7 +48,7 @@ export const FormItem = ({
             </Tooltip>
           )}
           {isOptional && (
-            <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+            <Text fontSize="sm" fontWeight="regular" color="text.subtle">
               {"Optional"}
             </Text>
           )}
