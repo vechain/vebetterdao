@@ -40,7 +40,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ### Directory Structure
 
 - `/assets`: Main directory for all application assets
-
   - `/animations`: JSON animation files (Lottie)
   - `/backgrounds`: Background images and patterns
   - `/icons`: UI icons and small visual elements

@@ -1,25 +1,22 @@
-import { B3trTransaction } from "@/api"
+import { Transaction } from "@/api"
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
+import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
-import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
 type Props = {
-  transaction: B3trTransaction
+  transaction: Transaction
+  vot3ToB3tr: boolean
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const SwapCard = ({ transaction }: Props) => {
+export const SwapCard = ({ transaction, vot3ToB3tr }: Props) => {
   const { t } = useTranslation()
-  const vot3ToB3tr = useMemo(() => {
-    if (!transaction?.amountB3TR || !transaction?.amountVOT3) return false
-
-    return transaction.amountB3TR > transaction.amountVOT3
-  }, [transaction.amountB3TR, transaction.amountVOT3])
 
   const actionModal = useDisclosure()
   const { isConnectedUser } = useRetrieveProfilIdentity()
@@ -57,17 +54,13 @@ export const SwapCard = ({ transaction }: Props) => {
             <HStack gap={2}>
               <Text fontWeight="semibold">
                 {"+"}
-                {vot3ToB3tr
-                  ? compactFormatter.format(Number(transaction?.amountB3TR ?? 0))
-                  : compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))}
+                {compactFormatter.format(Number(ethers.formatEther(transaction?.outputValue ?? 0)))}
               </Text>
               <Text textStyle="sm">{vot3ToB3tr ? "B3TR" : "VOT3"}</Text>
             </HStack>
             <HStack gap={2} textStyle={"xs"} color={"#6A6A6A"}>
               <Text fontWeight="semibold">
-                {vot3ToB3tr
-                  ? compactFormatter.format(Number(transaction?.amountVOT3 ?? 0))
-                  : compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}
+                {compactFormatter.format(Number(ethers.formatEther(transaction?.inputValue ?? 0)))}
               </Text>
               <Text>{vot3ToB3tr ? "VOT3" : "B3TR"}</Text>
             </HStack>

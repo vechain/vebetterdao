@@ -1,37 +1,59 @@
-import { useAccountLinking, useCanUserVote, useUserDelegation } from "@/api"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { Card, HStack, Text, VStack, Button } from "@chakra-ui/react"
+import { useAccountLinking, useCanUserVote, useUserDelegation, useUserScore } from "@/api"
+import { useGetVot3Balance } from "@/hooks"
+import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, List, Skeleton } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
 import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { LuCircleCheck, LuCircleDashed } from "react-icons/lu"
 
 type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions"
 
 type CantVoteReasonText = {
   title: string
-  description: string
+  description: ReactNode
   onLearnMoreClick?: () => void
 }
+
+export const VotingRequirementsList = () => {
+  const { t } = useTranslation()
+  const { account } = useWallet()
+  const { missingActions, isLoading: isLoadingMissingActions } = useUserScore()
+  const { data: voteBalance, isLoading: isLoadingVoteBalance } = useGetVot3Balance(account?.address)
+
+  return (
+    <Skeleton loading={isLoadingMissingActions || isLoadingVoteBalance}>
+      <List.Root variant="plain">
+        <List.Item>
+          <List.Indicator asChild color="inherit">
+            {missingActions <= 0 ? <LuCircleCheck /> : <LuCircleDashed />}
+          </List.Indicator>
+
+          {t("Complete at least 3 sustainable actions")}
+        </List.Item>
+        <List.Item>
+          <List.Indicator asChild color="inherit">
+            {!!voteBalance?.original && Number(voteBalance.original) > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
+          </List.Indicator>
+
+          {t("Swap your B3TR for VOT3 this round before the snapshot")}
+        </List.Item>
+      </List.Root>
+    </Skeleton>
+  )
+}
+
 export const CantVoteCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const router = useRouter()
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
+  const doActionModal = useDisclosure()
 
-  const { hasVotesAtSnapshot, snapshotBlock, isLoading: canVoteLoading, isPerson } = useCanUserVote()
-  const snapshotTimestamp = useEstimateBlockTimestamp({ blockNumber: snapshotBlock })
-
-  const snapshotDateText = useMemo(() => {
-    if (!snapshotTimestamp) return ""
-
-    const date = dayjs(snapshotTimestamp).format("MMM D [at] h:mm A")
-
-    return `(${date})`
-  }, [snapshotTimestamp])
+  const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson } = useCanUserVote()
 
   const handleGoToLinking = useCallback(() => {
     router.push("/profile?tab=linked-accounts")
@@ -40,6 +62,10 @@ export const CantVoteCard = () => {
   const handleGoToGovernance = useCallback(() => {
     router.push("/profile?tab=governance")
   }, [router])
+
+  const handleOpenDoActionModal = useCallback(() => {
+    doActionModal.onOpen()
+  }, [doActionModal])
 
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
     if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
@@ -76,25 +102,17 @@ export const CantVoteCard = () => {
           onLearnMoreClick: handleGoToLinking,
         }
       case "no-votes":
-        return {
-          title: t("You can’t vote because you have no voting power."),
-          description: t(
-            "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.",
-            {
-              snapshotDate: snapshotDateText,
-            },
-          ),
-        }
-
       case "no-actions":
         return {
-          title: t("You can't vote because you haven't accumulated enough actions."),
-          description: t("You can earn actions by using the dApps."),
+          title: t("You're not eligible to vote yet. To vote in next round:"),
+          description: <VotingRequirementsList />,
+          onLearnMoreClick: handleOpenDoActionModal,
         }
+
       default:
         return null
     }
-  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking, snapshotDateText])
+  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking, handleOpenDoActionModal])
 
   if (!cantVoteReasonText) return null
 
@@ -108,24 +126,33 @@ export const CantVoteCard = () => {
               <Text fontWeight="bold" color="#AF5F00" as="span">
                 {cantVoteReasonText?.title}
               </Text>
-              <Text color="#AF5F00" as="span">
-                {" "}
-                {cantVoteReasonText?.description}{" "}
-              </Text>
+              <Stack
+                flexDir={{ base: "column", md: "row" }}
+                gap="0"
+                alignSelf="flex-end"
+                justify="space-between"
+                alignItems={{ base: "flex-end", md: "flex-start" }}
+                w="full">
+                <Text color="#AF5F00">{cantVoteReasonText?.description}</Text>
+
+                {!!cantVoteReasonText?.onLearnMoreClick && (
+                  <Button
+                    size="sm"
+                    alignItems="flex-end"
+                    variant="plain"
+                    _hover={{ textDecoration: "underline" }}
+                    color="#AF5F00"
+                    onClick={cantVoteReasonText.onLearnMoreClick}>
+                    {t("Learn more")}
+                  </Button>
+                )}
+              </Stack>
             </VStack>
           </HStack>
-          {!!cantVoteReasonText?.onLearnMoreClick && (
-            <Button
-              variant="plain"
-              alignSelf={"flex-end"}
-              textDecoration="underline"
-              color="#AF5F00"
-              onClick={cantVoteReasonText.onLearnMoreClick}>
-              {t("Learn more")}
-            </Button>
-          )}
         </VStack>
       </Card.Body>
+
+      <DoActionModal doActionModal={doActionModal} />
     </Card.Root>
   )
 }

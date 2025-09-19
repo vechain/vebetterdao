@@ -3,7 +3,9 @@
   "skipLibCheck": true,
   "compilerOptions": {
     "types": ["vitest/globals"],
+    "module": "ESNext",
     "moduleResolution": "bundler",
+    "noUncheckedIndexedAccess": true,
     "plugins": [
       {
         "name": "next"

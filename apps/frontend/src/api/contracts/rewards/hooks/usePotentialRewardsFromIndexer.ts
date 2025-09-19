@@ -30,13 +30,13 @@ export const usePotentialRewardsFromIndexer = (
     const scaledExistingWeight = existing && existing.name.toUpperCase() !== "EARTH" ? existing.multiplier * 100 : 0
 
     const totalGMWeight = gmLevelOverview.reduce((acc, levelData) => {
-      if (levelData.id.toUpperCase() === "EARTH") return acc
+      if (levelData.level.toUpperCase() === "EARTH") return acc
 
-      const levelInfo = gmNfts.find(n => n.name.toUpperCase() === levelData.id.toUpperCase())
+      const levelInfo = gmNfts.find(n => n.name.toUpperCase() === levelData.level.toUpperCase())
       if (!levelInfo) return acc
 
       const scaled = levelInfo.multiplier * 100
-      return acc + levelData.nfts * scaled
+      return acc + levelData.totalNFTs * scaled
     }, 0)
 
     // Rewards with upgraded level

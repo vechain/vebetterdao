@@ -1,4 +1,4 @@
-import { ProposalState, useProposalVotesIndexer } from "@/api"
+import { ProposalState, useProposalVotes } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Card, Heading, Icon, Image, Skeleton, Text, VStack, Stat } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
@@ -20,7 +20,8 @@ const abstainColor = "#B59525"
 export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
-  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
+
   const { proposal } = useProposalDetail()
   const proposalState = proposal.state
 

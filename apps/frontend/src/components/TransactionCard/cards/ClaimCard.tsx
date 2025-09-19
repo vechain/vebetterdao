@@ -1,13 +1,15 @@
-import { B3trTransaction } from "@/api"
+import { Transaction } from "@/api"
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilGift } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
+import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
 type Props = {
-  transaction: B3trTransaction
+  transaction: Transaction
 }
 
 const compactFormatter = getCompactFormatter(2)
@@ -51,7 +53,7 @@ export const ClaimCard = ({ transaction }: Props) => {
             <HStack gap={2}>
               <Text fontWeight="semibold">
                 {"+"}
-                {compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}
+                {compactFormatter.format(Number(ethers.formatEther(transaction?.value ?? 0)))}
               </Text>
               <Text textStyle="sm">{"B3TR"}</Text>
             </HStack>

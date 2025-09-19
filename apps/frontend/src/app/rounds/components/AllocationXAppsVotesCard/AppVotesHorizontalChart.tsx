@@ -54,7 +54,7 @@ Props) => {
     }
   }, [roundId])
 
-  const { data: roundAppVotes } = useRoundAppVotes({ roundId: roundIdNumber })
+  const { data: roundAppVotes } = useRoundAppVotes(roundIdNumber)
 
   const appVotes = useMemo(() => {
     const appVoteResult = roundAppVotes?.filter(vote => vote.appId === data.app) ?? []

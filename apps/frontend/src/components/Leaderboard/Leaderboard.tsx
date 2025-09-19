@@ -1,8 +1,4 @@
-import {
-  useCurrentAllocationsRoundId,
-  useSustainabilitySingleUserOverview,
-  useSustainabilityUserOverviewPerRound,
-} from "@/api"
+import { useCurrentAllocationsRoundId, useUserActionOverview, useUserActionLeaderboard } from "@/api"
 
 import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
@@ -38,9 +34,8 @@ export const Leaderboard = () => {
     }
   }, [roundId, selectedRoundId])
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({
-    wallet: account?.address ?? "",
-    roundId: selectedRoundId,
+  const userRoundOverview = useUserActionOverview(account?.address ?? "", {
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
   })
 
   const onRoundChange = (roundId: string) => () => {
@@ -61,7 +56,10 @@ export const Leaderboard = () => {
     }
   }, [userRoundOverview, account?.address])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
+  const leaderboardQuery = useUserActionLeaderboard({
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
+    direction: "DESC",
+  })
 
   const flatLeaderboard = useMemo(
     () =>
@@ -73,7 +71,7 @@ export const Leaderboard = () => {
   )
   const rankings = flatLeaderboard.map((entry, index) => ({
     position: index + 1,
-    address: entry?.entity as string,
+    address: entry?.wallet as string,
     score: entry?.actionsRewarded as number,
   }))
 

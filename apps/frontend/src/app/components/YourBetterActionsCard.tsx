@@ -1,4 +1,4 @@
-import { useSustainabilityActions } from "@/api"
+import { useUsersB3trActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
 import { Card, Heading, VStack, Text, Link } from "@chakra-ui/react"
 import NextLink from "next/link"
@@ -21,10 +21,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const { account } = useWallet()
   const isConnectedUser = compareAddresses(account?.address ?? "", address)
 
-  const { data } = useSustainabilityActions({
-    wallet: address ?? undefined,
-    direction: "desc",
-  })
+  const { data } = useUsersB3trActions(address, { direction: "DESC" })
 
   const lastActions = data?.pages.map(page => page.data).flat() ?? []
   const lastActionsData = lastActions.slice(0, maxActions)
