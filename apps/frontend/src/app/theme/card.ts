@@ -42,7 +42,6 @@ export const cardSlotRecipe = defineSlotRecipe({
       },
       subtle: {
         root: {
-          bg: "transparent",
           borderWidth: "1px",
           borderColor: "border.primary",
         },
