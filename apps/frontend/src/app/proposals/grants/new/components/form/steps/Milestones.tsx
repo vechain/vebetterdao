@@ -29,6 +29,39 @@ import { Control, FieldErrors, UseFormGetValues, UseFormRegister, UseFormSetValu
 import { Trans, useTranslation } from "react-i18next"
 import { LuArrowRight } from "react-icons/lu"
 
+// ============================================================================
+// Constants & Utilities
+// ============================================================================
+
+const formatDuration = (duration: number | string): string => {
+  const durationInMilliseconds = Number(duration) * 1000 // Convert to milliseconds
+  return dayjs(durationInMilliseconds).format("MM/DD/YYYY")
+}
+
+const getDefaultMilestone = () => ({
+  description: "",
+  fundingAmount: 0,
+  fundingAmountUsd: 0,
+  durationFrom: 0,
+  durationTo: 0,
+})
+
+const calculateTotalAmount = (milestones: GrantFormData["milestones"]): number => {
+  if (!milestones || !Array.isArray(milestones)) return 0
+  return milestones.reduce((acc, milestone) => {
+    const amount = Number(milestone?.fundingAmountUsd) || 0
+    return acc + amount
+  }, 0)
+}
+
+const getMaxGrantAmount = (grantType: string): number => {
+  return grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT
+}
+
+// ============================================================================
+// Types & Interfaces
+// ============================================================================
+
 interface MilestonesProps {
   register: UseFormRegister<GrantFormData>
   setValue: UseFormSetValue<GrantFormData>
@@ -40,19 +73,153 @@ interface MilestonesProps {
   control: Control<GrantFormData>
 }
 
-type MilestoneSectionProps = {
+interface MilestoneSectionProps {
   register: UseFormRegister<GrantFormData>
-  removeMilestone: (index: number) => void
-  setData: (data: Partial<GrantFormData>) => void
+  setValue: UseFormSetValue<GrantFormData>
   getValues: UseFormGetValues<GrantFormData>
-  errors: FieldErrors<GrantFormData>
+  setData: (data: Partial<GrantFormData>) => void
   watch: UseFormWatch<GrantFormData>
+  errors: FieldErrors<GrantFormData>
   index: number
   b3trPerUsd: number
   canRemoveAnyMilestone: boolean
   grantType: string
-  setValue: UseFormSetValue<GrantFormData>
+  removeMilestone: (index: number) => void
 }
+
+interface ValidationOptions {
+  grantType: string
+  milestones: GrantFormData["milestones"]
+  currentIndex: number
+  currentValue: number
+}
+
+// ============================================================================
+// Validation Functions
+// ============================================================================
+
+const validateMilestoneAmount = ({
+  grantType,
+  milestones,
+  currentIndex,
+  currentValue,
+}: ValidationOptions): string | boolean => {
+  const total = milestones.reduce((acc, milestone, idx) => {
+    // Use the current value being validated if it's for this milestone
+    const amount = idx === currentIndex ? currentValue : milestone.fundingAmountUsd
+    return acc + (Number(amount) || 0)
+  }, 0)
+
+  const maxAmount = getMaxGrantAmount(grantType)
+  return (
+    total <= maxAmount ||
+    `Total amount across all milestones exceeds maximum allowed: $${maxAmount.toLocaleString()} USD`
+  )
+}
+
+const validateStartDate = (value: number, now: number): string | boolean => {
+  if (!value) return true
+  return value >= now || "Start date cannot be in the past"
+}
+
+const validateEndDate = (value: number, startDate: number): string | boolean => {
+  if (!value) return true
+  if (startDate && value <= startDate) {
+    return "End date must be after start date"
+  }
+  return true
+}
+
+// ============================================================================
+// Sub-components
+// ============================================================================
+
+const MilestoneTips = () => {
+  const { t } = useTranslation()
+
+  return (
+    <VStack bg="bg.tertiary" p={5} borderRadius="xl" mt={{ base: 0, md: 8 }} textAlign="start">
+      <Heading size="sm" alignSelf="start">
+        {t("Tips")}
+      </Heading>
+      <Text fontSize="sm" color="text.subtle" alignSelf="start">
+        {t("Explain integration and launch on VeBetterDAO, like:")}
+      </Text>
+      <List.Root listStyle="disc" alignSelf="end" fontSize="sm" color="text.subtle" textAlign="justify" px={5}>
+        <List.Item>{t("B3TR integrated as a reward mechanism within the app")}</List.Item>
+        <List.Item>{t("VeWorld wallet support for seamless B3TR transactions")}</List.Item>
+        <List.Item>{t("Testing and optimization reporting to ensure smooth UX and functionality")}</List.Item>
+      </List.Root>
+    </VStack>
+  )
+}
+
+const MilestoneHeader = ({
+  milestoneNumber,
+  hasDurationInfo,
+  formattedDurationFrom,
+  formattedDurationTo,
+  isMobile,
+}: {
+  milestoneNumber: number
+  hasDurationInfo: boolean
+  formattedDurationFrom: string
+  formattedDurationTo: string
+  isMobile: boolean
+}) => {
+  const { t } = useTranslation()
+
+  return (
+    <HStack w="full" gap={4}>
+      <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
+      {hasDurationInfo && !isMobile && (
+        <Badge variant="outline" fontSize="sm" fontWeight="regular">
+          <Text>{formattedDurationFrom}</Text>
+          <LuArrowRight color="subtle.active" size={16} />
+          <Text>{formattedDurationTo}</Text>
+        </Badge>
+      )}
+    </HStack>
+  )
+}
+
+const TermsOfServiceCheckbox = ({
+  control,
+  errors,
+}: {
+  control: Control<GrantFormData>
+  errors: FieldErrors<GrantFormData>
+}) => {
+  return (
+    <FormCheckbox<GrantFormData>
+      name="termsOfService"
+      key="termsOfService"
+      control={control}
+      label={
+        <Trans
+          color="text.default"
+          i18nKey="I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate."
+          components={{
+            Link: (
+              <Link
+                textDecoration="underline"
+                color="text.default"
+                target="_blank"
+                href={GRANT_TERMS_AND_CONDITIONS_LINK}
+              />
+            ),
+          }}
+        />
+      }
+      rules={{ required: "Please accept the terms of service" }}
+      error={errors.termsOfService?.message}
+    />
+  )
+}
+
+// ============================================================================
+// Main Components
+// ============================================================================
 
 export const MilestoneSection = ({
   register,
@@ -69,22 +236,20 @@ export const MilestoneSection = ({
 }: MilestoneSectionProps) => {
   const { t } = useTranslation()
 
+  // Component state and computed values
   const milestoneNumber = index + 1
   const isFirst = index === 0
-  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
-
+  const mediaQueryResult = useMediaQuery(["(max-width: 767px)"])
+  const isMobile = mediaQueryResult?.[0] ?? false
   const now = dayjs().unix()
-  const formatDuration = (duration: number | string) => {
-    const durationInMiliseconds = Number(duration) * 1000 //Convert to miliseconds
-    return dayjs(durationInMiliseconds).format("MM/DD/YYYY")
-  }
 
   const currentMilestone = getValues(`milestones.${index}`)
   const hasDurationInfo = currentMilestone.durationFrom > 0 && currentMilestone.durationTo > 0
   const formattedDurationFrom = formatDuration(currentMilestone.durationFrom)
   const formattedDurationTo = formatDuration(currentMilestone.durationTo)
+  const maxAmount = getMaxGrantAmount(grantType)
 
-  // Sync individual milestone field to store
+  // Event handlers
   const syncFieldToStore = (field: keyof typeof currentMilestone) => {
     const value = getValues(`milestones.${index}.${field}`)
     const updatedMilestones = [...getValues("milestones")]
@@ -95,19 +260,42 @@ export const MilestoneSection = ({
     setData({ milestones: updatedMilestones })
   }
 
+  const handleAmountChange = (usdAmount: string, b3trAmount: string) => {
+    setValue(`milestones.${index}.fundingAmountUsd`, Number(usdAmount))
+    setValue(`milestones.${index}.fundingAmount`, Number(b3trAmount))
+
+    // Sync to store
+    const updatedMilestones = [...getValues("milestones")]
+    updatedMilestones[index] = {
+      ...updatedMilestones[index],
+      fundingAmountUsd: Number(usdAmount),
+      fundingAmount: Number(b3trAmount),
+    } as (typeof updatedMilestones)[0]
+    setData({ milestones: updatedMilestones })
+    setValue("milestones", updatedMilestones)
+
+    // Trigger validation for all milestone amounts to update total validation
+    setTimeout(() => {
+      getValues("milestones").forEach((_, idx) => {
+        if (idx !== index) {
+          setValue(`milestones.${idx}.fundingAmountUsd`, getValues(`milestones.${idx}.fundingAmountUsd`), {
+            shouldValidate: true,
+          })
+        }
+      })
+    }, 0)
+  }
+
   return (
     <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })} pb={5}>
       <Accordion.ItemTrigger w="full" py={4} textAlign="left" justifyContent="space-between">
-        <HStack w="full" gap={4}>
-          <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
-          {hasDurationInfo && !isMobile && (
-            <Badge variant="outline" fontSize="sm" fontWeight="regular">
-              <Text>{formattedDurationFrom}</Text>
-              <LuArrowRight color="subtle.active" size={16} />
-              <Text>{formattedDurationTo}</Text>
-            </Badge>
-          )}
-        </HStack>
+        <MilestoneHeader
+          milestoneNumber={milestoneNumber}
+          hasDurationInfo={hasDurationInfo}
+          formattedDurationFrom={formattedDurationFrom}
+          formattedDurationTo={formattedDurationTo}
+          isMobile={Boolean(isMobile)}
+        />
         <Accordion.ItemIndicator />
       </Accordion.ItemTrigger>
       <Accordion.ItemContent>
@@ -122,59 +310,21 @@ export const MilestoneSection = ({
                 label={t("Amount")}
                 placeholder="10,000"
                 conversionRate={b3trPerUsd}
-                max={grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT}
+                max={maxAmount}
                 initialValue={currentMilestone.fundingAmountUsd}
                 registerPrimary={register(`milestones.${index}.fundingAmountUsd`, {
                   required: t("Please enter the amount for this milestone"),
-                  validate: (value: number) => {
-                    const allMilestones = getValues("milestones")
-                    const total = allMilestones.reduce((acc, milestone, idx) => {
-                      // Use the current value being validated if it's for this milestone
-                      const amount = idx === index ? value : milestone.fundingAmountUsd
-                      return acc + (Number(amount) || 0)
-                    }, 0)
-
-                    const maxAmount = grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT
-                    return (
-                      total <= maxAmount ||
-                      t("Total amount across all milestones exceeds maximum allowed: ${{maxAmount}} USD", {
-                        maxAmount: maxAmount.toLocaleString(),
-                      })
-                    )
-                  },
+                  validate: (value: number) =>
+                    validateMilestoneAmount({
+                      grantType,
+                      milestones: getValues("milestones"),
+                      currentIndex: index,
+                      currentValue: value,
+                    }),
                 })}
                 registerSecondary={register(`milestones.${index}.fundingAmount`)}
                 error={errors.milestones?.[index]?.fundingAmountUsd?.message}
-                onUsdChange={(usdAmount, b3trAmount) => {
-                  setValue(`milestones.${index}.fundingAmountUsd`, Number(usdAmount))
-                  setValue(`milestones.${index}.fundingAmount`, Number(b3trAmount))
-
-                  // Sync to store
-                  const updatedMilestones = [...getValues("milestones")]
-                  updatedMilestones[index] = {
-                    ...updatedMilestones[index],
-                    fundingAmountUsd: Number(usdAmount),
-                    fundingAmount: Number(b3trAmount),
-                  } as (typeof updatedMilestones)[0]
-                  setData({ milestones: updatedMilestones })
-
-                  setValue("milestones", updatedMilestones)
-
-                  // Trigger validation for all milestone amounts to update total validation
-                  setTimeout(() => {
-                    getValues("milestones").forEach((_, idx) => {
-                      if (idx !== index) {
-                        setValue(
-                          `milestones.${idx}.fundingAmountUsd`,
-                          getValues(`milestones.${idx}.fundingAmountUsd`),
-                          {
-                            shouldValidate: true,
-                          },
-                        )
-                      }
-                    })
-                  }, 0)
-                }}
+                onUsdChange={handleAmountChange}
               />
             </GridItem>
 
@@ -187,10 +337,7 @@ export const MilestoneSection = ({
                 placeholder="Select start date"
                 register={register(`milestones.${index}.durationFrom`, {
                   required: t("Please enter the duration for this milestone"),
-                  validate: (value: number) => {
-                    if (!value) return true
-                    return value >= now || "Start date cannot be in the past"
-                  },
+                  validate: (value: number) => validateStartDate(value, now),
                 })}
                 error={errors.milestones?.[index]?.durationFrom?.message}
                 minDate={now} // now
@@ -205,14 +352,7 @@ export const MilestoneSection = ({
                 placeholder="Select end date"
                 register={register(`milestones.${index}.durationTo`, {
                   required: t("Please enter the duration for this milestone"),
-                  validate: (value: number) => {
-                    if (!value) return true
-                    const startDate = getValues(`milestones.${index}.durationFrom`)
-                    if (startDate && value <= startDate) {
-                      return "End date must be after start date"
-                    }
-                    return true
-                  },
+                  validate: (value: number) => validateEndDate(value, getValues(`milestones.${index}.durationFrom`)),
                 })}
                 error={errors.milestones?.[index]?.durationTo?.message}
                 minDate={now} // now
@@ -237,25 +377,7 @@ export const MilestoneSection = ({
             </GridItem>
             {/* Tips */}
             <GridItem>
-              <VStack bg="bg.tertiary" p={5} borderRadius="xl" mt={{ base: 0, md: 8 }} textAlign="start">
-                <Heading size="sm" alignSelf="start">
-                  {t("Tips")}
-                </Heading>
-                <Text fontSize="sm" color="text.subtle" alignSelf="start">
-                  {t("Explain integration and launch on VeBetterDAO, like:")}
-                </Text>
-                <List.Root
-                  listStyle="disc"
-                  alignSelf="end"
-                  fontSize="sm"
-                  color="text.subtle"
-                  textAlign="justify"
-                  px={5}>
-                  <List.Item>{t("B3TR integrated as a reward mechanism within the app")}</List.Item>
-                  <List.Item>{t("VeWorld wallet support for seamless B3TR transactions")}</List.Item>
-                  <List.Item>{t("Testing and optimization reporting to ensure smooth UX and functionality")}</List.Item>
-                </List.Root>
-              </VStack>
+              <MilestoneTips />
             </GridItem>
             {canRemoveAnyMilestone && (
               <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
@@ -283,69 +405,46 @@ export const Milestones = ({
   control,
 }: MilestonesProps) => {
   const { t } = useTranslation()
+
+  // Hooks and data
   const { data: milestoneMinimumAmount } = useMilestoneMinimumAmount()
   const { data: conversionRate } = useGetTokenUsdPrice("B3TR")
 
+  // Computed values
   const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
-
   const milestones = watch("milestones")
-  const now = dayjs().unix()
   const grantType = getValues("grantType")
+
   const canRemoveAnyMilestone = useMemo(
     () => milestones.length > Number(milestoneMinimumAmount ?? 3),
     [milestones.length, milestoneMinimumAmount],
   )
 
-  const handleAddMilestone = () => {
-    //Get current milestones to avoid stale state
-    const currentMilestones = getValues("milestones")
-    const lastMilestone = currentMilestones[currentMilestones.length - 1] ?? { durationTo: now }
+  const totalRequestedAmount = useMemo(() => calculateTotalAmount(milestones), [milestones])
 
-    //Create new milestone array
-    const newMilestones = [
-      ...currentMilestones,
-      {
-        description: "",
-        fundingAmount: 0,
-        fundingAmountUsd: 0,
-        durationFrom: dayjs(lastMilestone.durationTo ?? now * 1000)
-          .add(1, "month")
-          .unix(),
-        durationTo: dayjs(lastMilestone.durationTo ?? now * 1000)
-          .add(2, "month")
-          .unix(),
-      },
-    ]
+  const isTotalRequestedAmountValid = useMemo(() => {
+    return totalRequestedAmount <= getMaxGrantAmount(grantType)
+  }, [totalRequestedAmount, grantType])
+
+  // Event handlers
+  const handleAddMilestone = () => {
+    const currentMilestones = getValues("milestones")
+    const newMilestone = getDefaultMilestone()
+    const newMilestones = [...currentMilestones, newMilestone]
 
     setValue("milestones", newMilestones)
     setData({ ...formData, milestones: newMilestones })
   }
 
   const handleRemoveMilestone = (index: number) => {
-    if (index === 0) {
-      return
-    }
-    //Get current milestones to avoid stale state
+    if (index === 0) return
+
     const currentMilestones = getValues("milestones")
     const newMilestones = currentMilestones.filter((_, i) => i !== index)
 
     setValue("milestones", newMilestones)
     setData({ ...formData, milestones: newMilestones })
   }
-
-  // Calculate total in real-time using watched values
-  const totalRequestedAmount = useMemo(() => {
-    if (!milestones || !Array.isArray(milestones)) return 0
-    return milestones.reduce((acc, milestone) => {
-      const amount = Number(milestone?.fundingAmountUsd) || 0
-      return acc + amount
-    }, 0)
-  }, [milestones])
-
-  const isTotalRequestedAmountValid = useMemo(() => {
-    const maxAmount = grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT
-    return totalRequestedAmount <= maxAmount
-  }, [totalRequestedAmount, grantType])
 
   return (
     <VStack align="stretch" w="full">
@@ -363,7 +462,7 @@ export const Milestones = ({
               setData={setData}
               watch={watch}
               b3trPerUsd={B3TRPerUSD}
-              canRemoveAnyMilestone={canRemoveAnyMilestone ?? false}
+              canRemoveAnyMilestone={canRemoveAnyMilestone}
               grantType={grantType}
               setValue={setValue}
             />
@@ -388,29 +487,7 @@ export const Milestones = ({
           </Text>
         </GridItem>
         <GridItem colSpan={2}>
-          <FormCheckbox<GrantFormData>
-            name="termsOfService"
-            key="termsOfService"
-            control={control}
-            label={
-              <Trans
-                color="text.default"
-                i18nKey="I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate."
-                components={{
-                  Link: (
-                    <Link
-                      textDecoration="underline"
-                      color="text.default"
-                      target="_blank"
-                      href={GRANT_TERMS_AND_CONDITIONS_LINK}
-                    />
-                  ),
-                }}
-              />
-            }
-            rules={{ required: "Please accept the terms of service" }}
-            error={errors.termsOfService?.message}
-          />
+          <TermsOfServiceCheckbox control={control} errors={errors} />
         </GridItem>
 
         {!isTotalRequestedAmountValid && (
@@ -419,7 +496,7 @@ export const Milestones = ({
               isLoading={false}
               type="error"
               message={t("The maximum amount for this grant type is {{value}} USD", {
-                value: grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT,
+                value: getMaxGrantAmount(grantType),
               })}
             />
           </GridItem>
@@ -428,3 +505,14 @@ export const Milestones = ({
     </VStack>
   )
 }
+
+// ============================================================================
+// Summary
+// ============================================================================
+
+// This file contains the organized Milestones component with:
+// 1. Constants and utility functions at the top
+// 2. Clear type definitions and interfaces
+// 3. Validation functions for reusability
+// 4. Sub-components for modularity
+// 5. Main components with clear structure and separation of concerns
