@@ -170,7 +170,7 @@ test("Allocations", async () => {
         appId: "1",
         voters: 1,
         roundId: Number(roundId),
-        totalVotes: "1",
+        totalVotes: 1,
       },
     ],
     isLoading: false,

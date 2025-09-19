@@ -1,2 +1,2 @@
 export * from "./useProposalComments"
-export * from "./useProposalVotesIndexer"
+export * from "./useProposalVotes"
