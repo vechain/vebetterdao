@@ -2,7 +2,7 @@ import {
   useProposalDepositEvent,
   useProposalInteractionDates,
   useProposalUserDeposit,
-  useProposalVotesIndexer,
+  useProposalVotes,
   useUserSingleProposalVoteEvent,
 } from "@/api"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
@@ -39,7 +39,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
   const proposalDepositEvent = useProposalDepositEvent(proposal.id)
-  const { data: proposalVotes } = useProposalVotesIndexer({ proposalId: proposal.id })
+  const { data: proposalVotes } = useProposalVotes(proposal.id)
   const { data: userDeposits } = useProposalUserDeposit(proposal.id, account?.address ?? "")
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal.id)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal.id)
@@ -144,9 +144,9 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                     proposalId={proposal.id}
                     state={proposal.state}
                     depositPercentage={communityDepositPercentage}
-                    votesFor={proposalVotes?.votes.for.percentage}
-                    votesAgainst={proposalVotes?.votes.against.percentage}
-                    votesAbstain={proposalVotes?.votes.abstain.percentage}
+                    votesFor={proposalVotes?.votes?.for?.percentage}
+                    votesAgainst={proposalVotes?.votes?.against?.percentage}
+                    votesAbstain={proposalVotes?.votes?.abstain?.percentage}
                     hasUserDeposited={hasUserDeposited}
                     userVoteOption={userVoteOption}
                   />

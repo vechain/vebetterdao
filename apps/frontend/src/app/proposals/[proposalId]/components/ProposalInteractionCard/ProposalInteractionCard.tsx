@@ -9,7 +9,6 @@ import {
   useProposalTotalVotes,
   useProposalUserDeposit,
   useProposalVotes,
-  useProposalVotesIndexer,
 } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
@@ -81,9 +80,7 @@ export const ProposalInteractionCard = ({
   )
   const { data: proposalVotesQueryData } = useProposalVotes(proposalId)
   const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposalId)
-  const { data: proposalVotes } = useProposalVotesIndexer({
-    proposalId,
-  })
+
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   // ===== CONTRACT TRANSACTION HOOKS =====
@@ -209,26 +206,26 @@ export const ProposalInteractionCard = ({
 
     return [
       {
-        percentage: Number(proposalVotesQueryData?.forPercentage ?? 0),
+        percentage: Number(proposalVotesQueryData?.votes?.for?.percentage ?? 0),
         color: "success.primary",
         icon: ThumbsUpIcon,
       },
       {
-        percentage: Number(proposalVotesQueryData?.abstainPercentage ?? 0),
+        percentage: Number(proposalVotesQueryData?.votes?.abstain?.percentage ?? 0),
         color: "warning.primary",
         icon: AbstainIcon,
       },
       {
-        percentage: Number(proposalVotesQueryData?.againstPercentage ?? 0),
+        percentage: Number(proposalVotesQueryData?.votes?.against?.percentage ?? 0),
         color: "error.primary",
         icon: ThumbsDownIcon,
       },
     ]
   }, [
     proposal?.state,
-    proposalVotesQueryData?.forPercentage,
-    proposalVotesQueryData?.abstainPercentage,
-    proposalVotesQueryData?.againstPercentage,
+    proposalVotesQueryData?.votes?.for,
+    proposalVotesQueryData?.votes?.abstain,
+    proposalVotesQueryData?.votes?.against,
     percentageSupported,
     userDeposits,
   ])
@@ -316,12 +313,12 @@ export const ProposalInteractionCard = ({
     if (isVotingPhase) {
       detailsArray.push({
         label: t("Wallets voted"),
-        value: String(proposalVotes?.totalVoters ?? 0),
+        value: String(proposalVotesQueryData?.totalVoters ?? 0),
       })
     }
 
     return detailsArray
-  }, [t, totalAmountNeeded, amountLeftToReach, isVotingPhase, proposalVotes])
+  }, [t, totalAmountNeeded, amountLeftToReach, isVotingPhase, proposalVotesQueryData])
 
   const handleCloseSupportModal = useCallback(() => {
     setIsSupportModalOpen(false)

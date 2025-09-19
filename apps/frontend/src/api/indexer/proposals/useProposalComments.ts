@@ -4,7 +4,7 @@ import { indexerQueryClient } from "../api"
 
 type ProposalCommentsQuery = paths["/api/v1/b3tr/proposals/{proposalId}/comments"]["get"]
 
-type ProposalCommentsQueryOptions = ProposalCommentsQuery["parameters"]["query"]
+export type ProposalCommentsQueryOptions = ProposalCommentsQuery["parameters"]["query"]
 
 type ProposalCommentsQueryResponse = ProposalCommentsQuery["responses"]["200"]["content"]["*/*"]
 

@@ -1,4 +1,4 @@
-import { ProposalCommentsRequest, useProposalComments } from "@/api"
+import { useProposalComments } from "@/api"
 import { SelectField } from "@/components"
 import { Center, createListCollection, Heading, HStack, Spinner, VStack } from "@chakra-ui/react"
 import { UilSortAmountDown } from "@iconscout/react-unicons"
@@ -22,8 +22,8 @@ type Props = {
 export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   const sortOptions = createListCollection({
     items: [
-      { label: "Newest", value: "desc" },
-      { label: "Oldest", value: "asc" },
+      { label: "Newest", value: "DESC" },
+      { label: "Oldest", value: "ASC" },
     ],
   })
   const filterOptions = createListCollection({
@@ -34,12 +34,12 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
       { label: "Abstain", value: VoteType.ABSTAIN },
     ],
   })
-  const defaultSortOption = "desc" as ProposalCommentsRequest["direction"] //DESC as default
-  const [direction, setDirection] = useState<ProposalCommentsRequest["direction"]>(defaultSortOption)
+  const defaultSortOption = "DESC" //DESC as default
+  const [direction, setDirection] = useState(defaultSortOption)
   const [activeFilter, setFilter] = useState<VoteType>(VoteType.ALL)
   const { data, fetchNextPage, hasNextPage } = useProposalComments(proposalId ?? "", {
-    ...(activeFilter !== VoteType.ALL && { support: activeFilter }),
-    direction,
+    support: activeFilter !== VoteType.ALL ? activeFilter : undefined,
+    direction: direction as "ASC" | "DESC",
   })
 
   const visibleComments = data?.pages.flatMap(page => page.data)
@@ -65,7 +65,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
             options={sortOptions}
             leftIcon={UilSortAmountDown}
             defaultValue={defaultSortOption}
-            onChange={value => setDirection(value[0] as ProposalCommentsRequest["direction"])}
+            onChange={value => setDirection(value[0] as "ASC" | "DESC")}
           />
         </HStack>
       </HStack>
