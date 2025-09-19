@@ -2031,5 +2031,6 @@
   "Recommended size: 720x720 (minimum).": "Recommended size: 720x720 (minimum).",
   "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.",
   "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).": "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).",
-  "Company VAT number e.g. 01234567": "Company VAT number e.g. 01234567"
+  "Company VAT number e.g. 01234567": "Company VAT number e.g. 01234567",
+  "The maximum amount for this grant type is {{value}} USD": "The maximum amount for this grant type is {{value}} USD"
 }

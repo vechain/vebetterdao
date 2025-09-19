@@ -1,6 +1,7 @@
-import { Field, HStack, Input, Text, Box, InputGroup } from "@chakra-ui/react"
+import { MAX_DAPP_GRANT_AMOUNT } from "@/constants"
+import { Box, Field, HStack, Input, InputGroup, Text } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import { UseFormRegisterReturn } from "react-hook-form"
-import { useState, useEffect } from "react"
 
 type FormMoneyInputProps = {
   label?: string
@@ -14,6 +15,7 @@ type FormMoneyInputProps = {
   conversionRate?: number
   onUsdChange?: (usdAmount: string, b3trAmount: string) => void
   initialValue?: number
+  max?: number
 }
 
 /**
@@ -54,6 +56,7 @@ export const FormMoneyInput = ({
   conversionRate,
   onUsdChange,
   initialValue,
+  max = MAX_DAPP_GRANT_AMOUNT,
 }: FormMoneyInputProps) => {
   const [displayValue, setDisplayValue] = useState("")
 
@@ -73,10 +76,11 @@ export const FormMoneyInput = ({
   // Handle input change with formatting
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/\D/g, "") // Keep only digits
-    const formatted = formatCurrency(rawValue)
+    const cappedValue = Math.min(Number(rawValue), max)
+    const formatted = formatCurrency(cappedValue.toString())
     setDisplayValue(formatted)
 
-    const usdAmount = Number(rawValue)
+    const usdAmount = cappedValue
     const tokenAmount = conversionRate ? Math.ceil(usdAmount * conversionRate) : 0
 
     // Update form with USD value (what the user sees)

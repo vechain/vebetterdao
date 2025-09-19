@@ -123,6 +123,7 @@ export const MilestoneSection = ({
                 label={t("Amount")}
                 placeholder="10,000"
                 conversionRate={b3trPerUsd}
+                max={grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT}
                 initialValue={currentMilestone.fundingAmountUsd}
                 registerPrimary={register(`milestones.${index}.fundingAmountUsd`, {
                   required: t("Please enter the amount for this milestone"),
@@ -320,8 +321,8 @@ export const Milestones = ({
   return (
     <VStack align="stretch" w="full">
       <Accordion.Root multiple defaultValue={["milestone-0"]}>
-        {milestones.map((milestone, index) => {
-          const uniqueKey = `milestone-${index}-${milestone.durationFrom}-${milestone.durationTo}-${milestone.fundingAmountUsd}`
+        {milestones.map((_, index) => {
+          const uniqueKey = `milestone-${index}`
           return (
             <MilestoneSection
               key={uniqueKey}
@@ -385,6 +386,7 @@ export const Milestones = ({
         {!isTotalRequestedAmountValid && (
           <GridItem colSpan={2}>
             <GenericAlert
+              isLoading={false}
               type="error"
               message={t("The maximum amount for this grant type is {{value}} USD", {
                 value: grantType === "dapp" ? MAX_DAPP_GRANT_AMOUNT : MAX_TOOLING_GRANT_AMOUNT,
