@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { TransactionType } from "@/constants"
+import { TransactionEvent } from "@/api/indexer/transactions/useTransactions"
 
 type Props = {
   address: string
@@ -17,31 +18,37 @@ export const TransactionsContent = ({ address }: Props) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
-  const filters: { id: TransactionType | "all"; label: string }[] = useMemo(
+  const filters: { id: TransactionType | "all"; label: string; filter: TransactionEvent[] | undefined }[] = useMemo(
     () => [
       {
         id: "all",
         label: t("All transactions"),
+        filter: undefined,
       },
       {
         id: TransactionType.B3TR_ACTION,
         label: t("Better Action"),
+        filter: ["B3TR_ACTION"],
       },
       {
         id: TransactionType.SWAP,
         label: t("Token conversion"),
+        filter: ["B3TR_SWAP_VOT3_TO_B3TR", "B3TR_SWAP_B3TR_TO_VOT3"],
       },
       {
         id: TransactionType.CLAIM_REWARD,
         label: t("Rewards"),
+        filter: ["B3TR_CLAIM_REWARD"],
       },
       {
         id: TransactionType.PROPOSAL_SUPPORT,
         label: t("Proposal support"),
+        filter: ["B3TR_PROPOSAL_SUPPORT"],
       },
       {
         id: TransactionType.UPGRADE_GM,
         label: t("Galaxy member"),
+        filter: ["B3TR_UPGRADE_GM"],
       },
     ],
     [t],
@@ -51,9 +58,8 @@ export const TransactionsContent = ({ address }: Props) => {
 
   const selectedFilter = useMemo(() => filters.find(filter => filter.id === filterId), [filterId, filters])
 
-  const { data, fetchNextPage, hasNextPage } = useTransactions({
-    user: address ?? "",
-    txType: selectedFilter?.id === "all" ? undefined : (selectedFilter?.id as TransactionType),
+  const { data, fetchNextPage, hasNextPage } = useTransactions(address ?? "", {
+    eventName: selectedFilter?.filter,
   })
   const transactions = useMemo(() => {
     return data?.pages.flatMap(page => page.data) ?? []

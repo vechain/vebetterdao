@@ -1,107 +1,39 @@
-import { buildQueryString } from "@/api/utils"
-import { TransactionType } from "@/constants"
-import { getConfig } from "@repo/config"
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { indexerQueryClient } from "../api"
+import { paths } from "../schema"
 
-const indexerUrl = getConfig().indexerUrl
+type TransactionsQuery = paths["/api/v1/history/{account}"]["get"]
 
-export interface TransactionsResponse {
-  pagination: {
-    hasNext: boolean
-  }
-  data: B3trTransaction[]
-}
+type TransactionsQueryOptions = TransactionsQuery["parameters"]["query"]
 
-export interface B3trTransaction {
-  blockNumber: number
-  blockTimestamp: number
-  user: string
-  txId: string
-  amountB3TR?: number
-  amountVOT3?: number
-  txType: "SWAP" | "CLAIM_REWARD" | "PROPOSAL_SUPPORT" | "UPGRADE_GM" | "B3TR_ACTION"
-  appId?: string
-  proof?: {
-    version: number
-    description?: string
-    proof: {
-      description?: string
-      image?: string
-      link?: string
-      text?: string
-      video?: string
-    }
-    impact?: {
-      carbon?: number
-      water?: number
-      energy?: number
-      waste_mass?: number
-      waste_items?: number
-      waste_reduction?: number
-      biodiversity?: number
-      people?: number
-      timber?: number
-      plastic?: number
-      learning_time?: number
-      trees_planted?: number
-      calories_burned?: number
-      clean_energy_production_wh?: number
-    }
-  }
-}
+type TransactionsQueryResponse = TransactionsQuery["responses"]["200"]["content"]["*/*"]
 
-type TransactionsRequest = {
-  user: string
-  txType?: TransactionType
-  before?: number
-  after?: number
-  page?: number
-  size?: number
-  direction?: "asc" | "desc"
-}
+export type Transaction = TransactionsQueryResponse["data"][number]
 
-/**
- * Get the transactions for a user, with the given request data
- * @param data  the request data @see TransactionsRequest
- * @returns the response data @see TransactionsResponse
- */
-export const getTransactions = async (data: TransactionsRequest): Promise<TransactionsResponse> => {
-  if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.user) throw new Error("wallet is required")
+export type TransactionEvent = NonNullable<NonNullable<TransactionsQueryOptions>["eventName"]>[number]
 
-  const queryString = buildQueryString(data)
-
-  const response = await fetch(`${indexerUrl}/b3tr-txs?${queryString}`, {
-    method: "GET",
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch transactions: ${response.statusText}`)
-  }
-
-  const res = await response.json()
-  return res
-}
-
-export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" | "size">) => [
-  "TRANSACTIONS",
-  data.user,
-  data.direction,
-  data.txType,
-]
-
-/**
- * Get the transactions for a user, with the given request data
- * @param data the request data @see TransactionsRequest
- * @returns the query object with the data @see TransactionsResponse
- */
-export const useTransactions = ({ user, direction = "desc", txType, size }: Omit<TransactionsRequest, "page">) => {
-  return useInfiniteQuery({
-    queryKey: getTransactionsQueryKey({ user, direction, txType }),
-    queryFn: ({ pageParam = 0 }) =>
-      getTransactions({ page: pageParam, user, direction, txType, ...(size && { size }) }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, _pages, lastPageParam) =>
-      lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
-  })
+export const useTransactions = (account: string, queryOptions?: TransactionsQueryOptions) => {
+  const {
+    // default event names
+    eventName = [
+      "B3TR_SWAP_VOT3_TO_B3TR",
+      "B3TR_SWAP_B3TR_TO_VOT3",
+      "B3TR_PROPOSAL_SUPPORT",
+      "B3TR_CLAIM_REWARD",
+      "B3TR_UPGRADE_GM",
+      "B3TR_ACTION",
+      "B3TR_PROPOSAL_VOTE",
+      "B3TR_XALLOCATION_VOTE",
+    ],
+  } = queryOptions || {}
+  return indexerQueryClient.useInfiniteQuery(
+    "get",
+    "/api/v1/history/{account}",
+    {
+      params: { path: { account }, query: { ...queryOptions, eventName }, enabled: !!account },
+    },
+    {
+      initialPageParam: 0,
+      getNextPageParam: (lastPage: TransactionsQueryResponse) => lastPage.pagination.hasNext,
+    },
+  )
 }

@@ -1,16 +1,17 @@
-import { useCallback, useMemo } from "react"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getHasVotedQueryKey,
+  getIsProposalQuorumReachedQueryKey,
   getProposalsEventsQueryKey,
-  getProposalVotesQuerykey,
+  getProposalVotesQueryKey,
   getUserProposalsVoteEventsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
-import { getIsProposalQuorumReachedQueryKey } from "@/api/contracts/governance/hooks/useIsProposalQuorumReached"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -46,7 +47,7 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
   const refetchQueryKeys = useMemo(
     () => [
       getHasVotedQueryKey([proposalId], account?.address ?? undefined),
-      getProposalVotesQuerykey(proposalId),
+      getProposalVotesQueryKey(proposalId),
       getIsProposalQuorumReachedQueryKey(proposalId),
       getUserProposalsVoteEventsQueryKey(account?.address ?? undefined),
       getProposalsEventsQueryKey(),

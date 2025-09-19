@@ -1,4 +1,4 @@
-import { useAccountLinking, useSustainabilityCurrentRoundOverview } from "@/api"
+import { useAccountLinking, useUserActionCurrentRoundOverview } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
@@ -19,7 +19,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
   const { data: vnsData } = useVechainDomain(account)
   const domain = vnsData?.domain
   const isUserAccountCard = compareAddresses(account, userAccount?.address ?? "")
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useUserActionCurrentRoundOverview(account)
   const {
     isPassport,
     isEntity,

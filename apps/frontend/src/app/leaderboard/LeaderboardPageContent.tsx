@@ -1,8 +1,4 @@
-import {
-  useCurrentAllocationsRoundId,
-  useSustainabilitySingleUserOverview,
-  useSustainabilityUserOverviewPerRound,
-} from "@/api"
+import { useCurrentAllocationsRoundId, useUserActionOverview, useUserActionLeaderboard } from "@/api"
 import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
@@ -35,9 +31,8 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     setSelectedRoundId(roundId)
   }
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({
-    wallet: account?.address ?? "",
-    roundId: selectedRoundId,
+  const userRoundOverview = useUserActionOverview(account?.address ?? "", {
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
   })
 
   const yourRaking = useMemo(() => {
@@ -51,7 +46,10 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     }
   }, [userRoundOverview, account?.address])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
+  const leaderboardQuery = useUserActionLeaderboard({
+    roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
+    direction: "DESC",
+  })
 
   const visibleRankings = useMemo(
     () => leaderboardQuery.data?.pages.map(page => page.data).flat() ?? [],
@@ -120,11 +118,11 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             <LeaderboardRankingComponent
               ranking={{
                 position: idx + 1,
-                address: ranking?.entity ?? "",
+                address: ranking?.wallet ?? "",
                 score: ranking?.actionsRewarded ?? 0,
               }}
-              key={`leaderboard-${ranking?.entity ?? idx}-${ranking?.roundId ?? idx}`}
-              isYourRanking={AddressUtils.compareAddresses(ranking?.entity ?? "", account?.address ?? "")}
+              key={`leaderboard-${ranking?.wallet ?? idx}-${ranking?.roundId ?? idx}`}
+              isYourRanking={AddressUtils.compareAddresses(ranking?.wallet ?? "", account?.address ?? "")}
             />
           ))}
         </VStack>

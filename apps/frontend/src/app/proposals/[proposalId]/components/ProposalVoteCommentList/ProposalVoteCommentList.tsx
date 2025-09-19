@@ -36,14 +36,12 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   })
   const defaultSortOption = "desc" as ProposalCommentsRequest["direction"] //DESC as default
   const [direction, setDirection] = useState<ProposalCommentsRequest["direction"]>(defaultSortOption)
-
   const [activeFilter, setFilter] = useState<VoteType>(VoteType.ALL)
-
-  const { data, fetchNextPage, hasNextPage } = useProposalComments({
-    proposalId: proposalId ?? "",
+  const { data, fetchNextPage, hasNextPage } = useProposalComments(proposalId ?? "", {
     ...(activeFilter !== VoteType.ALL && { support: activeFilter }),
     direction,
   })
+
   const visibleComments = data?.pages.flatMap(page => page.data)
   const commentsCount = visibleComments?.length ?? 0
 
