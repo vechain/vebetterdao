@@ -20,10 +20,14 @@ export const NoAccountActionCard = () => {
       <ConnectWalletButton
         connectionVariant="modal"
         buttonStyleProps={{
-          bg: "#E0E9FE",
-          textColor: "var(--vbd-colors-actions-primary-default)",
-          px: 10,
           leftIcon: <FaWallet />,
+          px: "10",
+          rounded: "full",
+          color: "var(--vbd-colors-actions-primary-text)",
+          bgColor: "var(--vbd-colors-actions-primary-default)",
+          _hover: { bg: "var(--vbd-colors-actions-primary-hover)" },
+          _disabled: { bg: "var(--vbd-colors-actions-primary-disabled)" },
+          _focus: { bg: "var(--vbd-colors-actions-primary-pressed)" },
         }}
       />
     </EmptyState>

@@ -1,6 +1,5 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
@@ -39,11 +38,9 @@ export const Navbar: React.FC = () => {
     return routesToRender
   }, [routesToRender])
 
-  const bg = useColorModeValue("#F7F7F7", "#131313")
-  const borderColor = useColorModeValue("#EEEEEE", "#2D2D2F")
   return (
     <Box
-      bg={bg}
+      bg="bg.secondary"
       px={0}
       position={"sticky"}
       top={0}
@@ -55,7 +52,8 @@ export const Navbar: React.FC = () => {
       <HStack
         justify={"space-between"}
         p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
-        borderBottom={`1px solid ${borderColor}`}>
+        border="sm"
+        borderColor="border.secondary">
         {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (

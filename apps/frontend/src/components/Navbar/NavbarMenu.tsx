@@ -66,11 +66,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
             <Button
               key={route.name}
               border="none"
-              bgColor={selected ? "actions.primary.default" : "transparent"}
-              _hover={{ bgColor: selected ? "actions.primary.default" : "bg.subtle" }}
-              color={selected ? "white" : "inherit"}
-              // colorPalette={selected ? "primary" : "gray"}
-              // variant={selected ? "primaryAction" : "ghost"}
+              variant={selected ? "primary" : "subtle"}
               rounded={"full"}
               w={["full", "full", "auto"]}
               onClick={onClick}
