@@ -183,9 +183,9 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 proposalId={proposal.id}
                 state={proposal.state}
                 depositPercentage={communityDepositPercentage}
-                votesFor={proposalVotes?.votes.for.percentage}
-                votesAgainst={proposalVotes?.votes.against.percentage}
-                votesAbstain={proposalVotes?.votes.abstain.percentage}
+                votesFor={proposalVotes?.votes?.for?.percentage}
+                votesAgainst={proposalVotes?.votes?.against?.percentage}
+                votesAbstain={proposalVotes?.votes?.abstain?.percentage}
                 hasUserDeposited={hasUserDeposited}
                 userVoteOption={userVoteOption}
               />
