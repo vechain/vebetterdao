@@ -1,6 +1,6 @@
 import { Checkbox, HStack, Icon, ListCollection, Portal, Select, Text } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { ElementType } from "react"
+import { useTranslation } from "react-i18next"
 
 interface SelectFieldProps
   extends Omit<Select.RootProps, "collection" | "onValueChange" | "defaultValue" | "multiple" | "onChange"> {
@@ -29,7 +29,6 @@ export const SelectField = ({
       {...selectProps}
       collection={options}
       variant="filled"
-      maxW={"220px"}
       {...(isMultiOption && { multiple: true })}
       {...(defaultValue && { defaultValue: Array.isArray(defaultValue) ? defaultValue : [defaultValue] })}
       onValueChange={e => onChange(e.value)}>
@@ -62,11 +61,13 @@ export const SelectField = ({
                   return (
                     <Select.Item item={option} key={option.value}>
                       <HStack>
-                        <Checkbox.Root size="sm" checked={isSelected}>
-                          <Checkbox.Control>
-                            <Checkbox.Indicator />
-                          </Checkbox.Control>
-                        </Checkbox.Root>
+                        {isMultiOption && (
+                          <Checkbox.Root size="sm" checked={isSelected}>
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                          </Checkbox.Root>
+                        )}
                         <Text fontSize="14px">{option.label}</Text>
                       </HStack>
                     </Select.Item>
