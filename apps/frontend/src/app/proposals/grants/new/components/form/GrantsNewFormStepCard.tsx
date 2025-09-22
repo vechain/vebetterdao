@@ -8,7 +8,7 @@ import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { Treasury__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
-import { useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -88,7 +88,7 @@ export const GrantsNewFormStepCard = () => {
   const steps: GrantStep[] = [
     {
       key: GrantFormStep.GRANT_TYPE,
-      content: <GrantTypeSelection control={control} />,
+      content: <GrantTypeSelection control={control} setValue={setValue} setData={setData} />,
       title: t("Type"),
     },
     {
@@ -170,6 +170,7 @@ export const GrantsNewFormStepCard = () => {
       resetStatus()
       clearData()
       reset()
+      signOut({ redirect: false })
       goToProposalPage()
     },
   })

@@ -57,6 +57,12 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
     <Controller
       name="grantType"
       control={control}
+      rules={{
+        required: {
+          value: true,
+          message: t("Invalid {{fieldName}}", { fieldName: "Grant type" }),
+        },
+      }}
       render={({ field: { value } }) => (
         <VStack gap={8} align="stretch" w="full">
           <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
@@ -88,8 +94,8 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                       {t("Apply if you are building")}
                     </Text>
                     <List.Root gap={2} display={{ base: "none", md: "block" }}>
-                      {info.requirements.map((req, index) => (
-                        <List.Item key={`${req}-${index}`} display="flex" alignItems="center">
+                      {info.requirements.map(req => (
+                        <List.Item key={req} display="flex" alignItems="center">
                           <List.Indicator asChild color="#004CFC">
                             <Icon as={BsCheck} />
                           </List.Indicator>
