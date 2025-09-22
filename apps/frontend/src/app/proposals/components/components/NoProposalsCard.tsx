@@ -1,4 +1,4 @@
-import { Box, VStack, Image, Text, Button } from "@chakra-ui/react"
+import { Card, VStack, Image, Text, Button } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
@@ -11,11 +11,10 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
   const { t } = useTranslation()
 
   return (
-    <Box
+    <Card.Root
       bg="card.subtle"
       borderRadius="xl"
-      py={{ base: 5, md: 16 }}
-      px={{ base: 5, md: 14 }}
+      p={{ base: "4", md: "8" }}
       w={"full"}
       position={"relative"}
       overflow={"clip"}>
@@ -37,6 +36,6 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
           {buttonText}
         </Button>
       </VStack>
-    </Box>
+    </Card.Root>
   )
 }

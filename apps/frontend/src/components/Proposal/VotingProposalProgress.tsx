@@ -10,9 +10,9 @@ import { FaRegHeart } from "react-icons/fa6"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ProposalYourVote } from "./ProposalYourVote"
 
-const forColor = "status.positive.secondary"
-const againstColor = "status.negative.secondary"
-const abstainColor = "status.warning.secondary"
+const forColor = "status.positive.primary"
+const againstColor = "status.negative.primary"
+const abstainColor = "status.warning.primary"
 
 const compactFormatter = getCompactFormatter(1)
 

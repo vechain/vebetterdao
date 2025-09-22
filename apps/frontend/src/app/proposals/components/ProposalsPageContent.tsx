@@ -73,7 +73,7 @@ export const ProposalsPageContent = () => {
             flexDirection="row"
             alignItems="flex-start"
             justifyContent="space-between">
-            <Card.Title textStyle={{ base: "2xl", md: "3xl" }}> {t("Proposals")} </Card.Title>
+            <Card.Title textStyle={{ base: "2xl", md: "3xl" }}> {t("Proposals")}</Card.Title>
 
             <ProposalFilters />
           </Card.Header>

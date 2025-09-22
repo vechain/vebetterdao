@@ -13,9 +13,13 @@ type Props = {
   proposalId: string
 }
 
-const forColor = "#3DBA67"
-const againstColor = "#C84968"
-const abstainColor = "#B59525"
+// const forColor = "#3DBA67"
+// const againstColor = "#C84968"
+// const abstainColor = "#B59525"
+
+const forColor = "status.positive.primary"
+const againstColor = "status.negative.primary"
+const abstainColor = "status.warning.primary"
 
 export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
