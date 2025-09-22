@@ -91,7 +91,7 @@ export const AllApps = ({
       </VStack>
     ) : (
       <VStack w="full" gap={4}>
-        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
+        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full" alignItems="center">
           {isEmpty ? (
             <GridItem colSpan={2}>
               <AppsEmptyState />
