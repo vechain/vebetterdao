@@ -16,6 +16,12 @@ interface ScheduleProps {
   control: Control<GrantFormData>
   watch: UseFormWatch<GrantFormData>
 }
+type Option = {
+  id: number
+  label: string
+  value: number
+  endDate: dayjs.Dayjs
+}
 export const Schedule = ({ errors, control, watch }: ScheduleProps) => {
   const { t } = useTranslation()
 
@@ -27,32 +33,28 @@ export const Schedule = ({ errors, control, watch }: ScheduleProps) => {
   const options = useMemo(() => {
     if (!currentRoundId) return []
 
-    const optionsArray = []
+    const optionsArray: Option[] = []
     const baseRoundId = Number(currentRoundId)
+    // Options:
 
-    // Option 1: Current round + 1 (if proposal can start in next round)
-    if (canStartInNextRound) {
-      const currentWeekRoundId = baseRoundId + 1
-      const currentWeekDeadline = dayjs(currentRoundDeadlineDate)
+    //(if proposal can start in next round)
+    // Option 1: Current round + 1
+    // Option 2: Current round + 2
 
+    //(if proposal can't start in next round)
+    // Option 1: Current round + 2
+    // Option 2: Current round + 3
+
+    Array.from({ length: 2 }, (_, index) => {
+      const incrementFactor = canStartInNextRound ? index + 1 : index + 2
+      const roundId = baseRoundId + incrementFactor
+      const deadline = dayjs(currentRoundDeadlineDate).add(incrementFactor, "week")
       optionsArray.push({
-        id: currentWeekRoundId,
-        label: `${t("From today")} - ${currentWeekDeadline.format("DD/MM/YYYY")}`,
-        value: currentWeekRoundId,
-        endDate: currentWeekDeadline,
+        id: roundId,
+        label: `${t("From today")} - ${deadline.format("DD/MM/YYYY")}`,
+        value: roundId,
+        endDate: deadline,
       })
-    }
-
-    // Option 2: Next available round (always available as fallback)
-    const nextAvailableRoundId = canStartInNextRound ? baseRoundId + 2 : baseRoundId + 1
-    const weeksToAdd = canStartInNextRound ? 1 : 0
-    const nextAvailableDeadline = dayjs(currentRoundDeadlineDate).add(weeksToAdd, "week")
-
-    optionsArray.push({
-      id: nextAvailableRoundId,
-      label: `${t("From today")} - ${nextAvailableDeadline.format("DD/MM/YYYY")}`,
-      value: nextAvailableRoundId,
-      endDate: nextAvailableDeadline,
     })
 
     return optionsArray
@@ -101,6 +103,7 @@ export const Schedule = ({ errors, control, watch }: ScheduleProps) => {
             label={t("Date")}
             placeholder={t("Select date")}
             options={formSelectOptions}
+            defaultValue={formSelectOptions?.[0]?.value}
             error={errors.votingRoundId?.message}
             required
           />
