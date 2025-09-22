@@ -206,14 +206,16 @@ contract XAllocationVoting is
   /**
    * @dev Set the VeBetterPassport contract
    */
-  function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external onlyRole(GOVERNANCE_ROLE) {
+  function setVeBetterPassport(
+    IVeBetterPassport newVeBetterPassport
+  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVeBetterPassport(newVeBetterPassport);
   }
 
   /**
    * @dev Set the B3TRGovernor contract
    */
-  function setB3TRGovernor(IB3TRGovernor newB3TRGovernor) external onlyRole(GOVERNANCE_ROLE) {
+  function setB3TRGovernor(IB3TRGovernor newB3TRGovernor) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setB3TRGovernor(newB3TRGovernor);
   }
 
