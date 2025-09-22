@@ -526,7 +526,7 @@ const config = defineConfig({
           },
           subtle: {
             value: {
-              _dark: "#36322D",
+              _dark: "#402404",
               base: "#FFF3E5",
             },
           },
@@ -590,6 +590,22 @@ const config = defineConfig({
             value: {
               _dark: "#212A23",
               base: "#E9FDF1",
+            },
+          },
+        },
+
+        // Status Colors - Neutral
+        neutral: {
+          subtle: {
+            value: {
+              _dark: "#363A3F",
+              base: "#F1F2F3",
+            },
+          },
+          strong: {
+            value: {
+              _dark: "#D2D5D9",
+              base: "#525860",
             },
           },
         },
