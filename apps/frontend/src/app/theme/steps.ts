@@ -7,18 +7,10 @@ export const stepsSlotRecipe = defineSlotRecipe({
     variant: {
       primaryVertical: {
         indicator: {
-          bg: "#E0E9FE",
-          "&[data-complete]": {
-            bg: "#E0E9FE",
-          },
-          "&[data-current]": {
-            borderColor: "#E0E9FE",
-          },
+          bg: "{colors.actions.secondary.default}",
         },
+
         separator: {
-          "&[data-complete]": {
-            bg: "#004CFC",
-          },
           "&[data-orientation=vertical]": {
             maxHeight: "calc(100% - var(--steps-size))",
             top: "calc(var(--steps-size))",

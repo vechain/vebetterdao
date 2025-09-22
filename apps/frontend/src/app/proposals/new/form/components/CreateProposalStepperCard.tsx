@@ -84,9 +84,9 @@ export const CreateProposalStepperCard = () => {
               <Steps.Item key={step.key} index={index}>
                 <Steps.Indicator>
                   <Steps.Status
-                    incomplete={<Circle bg="#004CFC" size="0" />}
-                    complete={<Circle bg="#004CFC" size="2" />}
-                    current={<Circle bg="#004CFC" size="3" />}
+                    incomplete={<Circle bg="actions.primary.default" size="0" />}
+                    complete={<Circle bg="actions.primary.default" size="2" />}
+                    current={<Circle bg="actions.primary.default" size="3" />}
                   />
                 </Steps.Indicator>
                 <Box flexShrink="0">
