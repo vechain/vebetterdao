@@ -118,12 +118,12 @@ const validateMilestoneAmount = ({
 }
 
 const validateStartDate = (value: number, now: number): string | boolean => {
-  if (!value) return true
+  if (!value || value === 0) return "Please enter the duration for this milestone"
   return value >= now || "Start date cannot be in the past"
 }
 
 const validateEndDate = (value: number, startDate: number): string | boolean => {
-  if (!value) return true
+  if (!value || value === 0) return "Please enter the duration for this milestone"
   if (startDate && value <= startDate) {
     return "End date must be after start date"
   }
@@ -336,7 +336,6 @@ export const MilestoneSection = ({
                 label="Duration"
                 placeholder="Select start date"
                 register={register(`milestones.${index}.durationFrom`, {
-                  required: t("Please enter the duration for this milestone"),
                   validate: (value: number) => validateStartDate(value, now),
                 })}
                 error={errors.milestones?.[index]?.durationFrom?.message}
@@ -351,7 +350,6 @@ export const MilestoneSection = ({
                 {...(isMobile && { label: "Duration" })}
                 placeholder="Select end date"
                 register={register(`milestones.${index}.durationTo`, {
-                  required: t("Please enter the duration for this milestone"),
                   validate: (value: number) => validateEndDate(value, getValues(`milestones.${index}.durationFrom`)),
                 })}
                 error={errors.milestones?.[index]?.durationTo?.message}
