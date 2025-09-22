@@ -75,7 +75,8 @@
     "analyze-proposal-deposits:mainnet": "npx hardhat run scripts/data/remainingProposalDeposits/analyze.ts --network vechain_mainnet",
     "analyze-proposal-deposits:testnet-staging": "npx hardhat run scripts/data/remainingProposalDeposits/analyze.ts --network vechain_testnet",
     "seed-voting-power:testnet-staging": "npx hardhat run scripts/data/remainingProposalDeposits/seed.ts --network vechain_testnet",
-    "seed-voting-power:mainnet": "npx hardhat run scripts/data/remainingProposalDeposits/seed.ts --network vechain_mainnet"
+    "seed-voting-power:mainnet": "npx hardhat run scripts/data/remainingProposalDeposits/seed.ts --network vechain_mainnet",
+    "setup-environment:local": "npx hardhat run scripts/standalone/setupLocalEnvironment.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",

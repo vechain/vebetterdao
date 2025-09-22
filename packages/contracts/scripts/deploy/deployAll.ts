@@ -33,7 +33,6 @@ import {
   initializeProxy,
   saveContractsToFile,
   upgradeProxy,
-  deployStargateProxyWithoutInitialization,
 } from "../helpers"
 import { autoVotingLibraries, governanceLibraries, passportLibraries } from "../libraries"
 import {
@@ -48,8 +47,7 @@ import {
   validateContractRole,
 } from "../helpers/roles"
 import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
-import { deployStargateNFTLibraries } from "./deploys/deployStargateNftLibraries"
-import { initialTokenLevels, vthoRewardPerBlock } from "../../contracts/mocks/const"
+import { ZERO_ADDRESS } from "@vechain/sdk-core"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -283,8 +281,20 @@ export async function deployAll(config: ContractsConfig) {
     throw new Error("Failed to deploy X2Earn latest libraries")
   }
 
-  // Stargate and NFTs related contracts : they are already deployed from stargate project
-  // See from more details: {https://github.com/vechain/stargate-contracts/blob/main/README.md }
+  // Stargate and NFTs related contracts: They needed to deploy in Stargate repo first
+  // See from more details: { https://github.com/vechain/stargate-contracts/blob/main/README.md }
+  if (config.VECHAIN_NODES_CONTRACT_ADDRESS === ZERO_ADDRESS) {
+    throw new Error("VECHAIN_NODES_CONTRACT_ADDRESS is not set")
+  }
+  if (config.STARGATE_NFT_CONTRACT_ADDRESS === ZERO_ADDRESS) {
+    throw new Error("STARGATE_NFT_CONTRACT_ADDRESS is not set")
+  }
+  if (config.STARGATE_DELEGATE_CONTRACT_ADDRESS === ZERO_ADDRESS) {
+    throw new Error("STARGATE_DELEGATE_CONTRACT_ADDRESS is not set")
+  }
+  if (config.NODE_MANAGEMENT_CONTRACT_ADDRESS === ZERO_ADDRESS) {
+    throw new Error("NODE_MANAGEMENT_CONTRACT_ADDRESS is not set")
+  }
   let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
   const vechainNodesAddress = await vechainNodesMock.getAddress()
   console.log("Using Vechain Nodes Mock deployed at: ", vechainNodesAddress)
@@ -941,6 +951,7 @@ export async function deployAll(config: ContractsConfig) {
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
     GrantsManager: await grantsManager.getAddress(),
+    RelayerRewardsPool: await relayerRewardsPool.getAddress(),
   }
 
   const libraries: {
@@ -1142,6 +1153,20 @@ export async function deployAll(config: ContractsConfig) {
     .then(async tx => await tx.wait())
   console.log("RelayerRewardsPool address set in XAllocationVoting contract")
 
+  // Set VeBetterPassport address in XAllocationVoting (Initialised removed in https://github.com/vechain/b3tr/pull/2220 to reduce storage space)
+  await xAllocationVoting
+    .connect(deployer)
+    .setVeBetterPassport(await veBetterPassport.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("VeBetterPassport address set in XAllocationVoting contract")
+
+  // Set B3TRGovernor address in XAllocationVoting (Initialised removed in https://github.com/vechain/b3tr/pull/2220 to reduce storage space)
+  await xAllocationVoting
+    .connect(deployer)
+    .setB3TRGovernor(await governor.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("B3TRGovernor address set in XAllocationVoting contract")
+
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
   await setupEnvironment(
@@ -1198,20 +1223,6 @@ export async function deployAll(config: ContractsConfig) {
     console.log("Governance role granted to admin in ", await xAllocationVoting.getAddress())
     await transferContractsAddressManagerRole(xAllocationVoting, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(xAllocationVoting, deployer, config.CONTRACTS_ADMIN_ADDRESS)
-
-    // Set VeBetterPassport address in XAllocationVoting (Initialised removed in https://github.com/vechain/b3tr/pull/2220 to reduce storage space)
-    await xAllocationVoting
-      .connect(deployer)
-      .setVeBetterPassport(await veBetterPassport.getAddress())
-      .then(async tx => await tx.wait())
-    console.log("VeBetterPassport address set in XAllocationVoting contract")
-
-    // Set B3TRGovernor address in XAllocationVoting (Initialised removed in https://github.com/vechain/b3tr/pull/2220 to reduce storage space)
-    await xAllocationVoting
-      .connect(deployer)
-      .setB3TRGovernor(await governor.getAddress())
-      .then(async tx => await tx.wait())
-    console.log("B3TRGovernor address set in XAllocationVoting contract")
 
     await transferGovernanceRole(treasury, deployer, deployer.address, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(treasury, deployer, config.CONTRACTS_ADMIN_ADDRESS)
@@ -1556,6 +1567,7 @@ export async function deployAll(config: ContractsConfig) {
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
     grantsManager: grantsManager,
+    relayerRewardsPool: relayerRewardsPool,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,
@@ -1573,6 +1585,7 @@ export async function deployAll(config: ContractsConfig) {
       passportPoPScoreLogic: PassportPoPScoreLogic,
       passportSignalingLogic: PassportSignalingLogic,
       passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
+      autoVotingLogic: AutoVotingLogic,
     },
   }
 }

@@ -105,7 +105,7 @@ export const setupEnvironment = async (
         b3tr,
         vot3,
         vechainNodesMock,
-        false, // TODO: change this back to 'shouldEndorseXApps()' when we can endorse x-apps with latest Stargate changes
+        shouldEndorseXApps(),
       )
       break
     case "testnet":
@@ -190,7 +190,7 @@ export const setupLocalEnvironment = async (
    */
 
   // If the first 8 accounts does not have the correct nodes, run the following line
-  // await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
+  await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
   await startEmissions(emissionsContract, admin)
 
   if (endorseApps) {
