@@ -9,6 +9,7 @@ import { headingRecipe } from "./heading"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
 import { popoverSlotRecipe } from "./popover"
+import { radioGroupSlotRecipe } from "./radio-group"
 import { selectSlotRecipe } from "./select"
 import { stepsSlotRecipe } from "./steps"
 
@@ -39,6 +40,7 @@ const config = defineConfig({
       numberInput: numberInputSlotRecipe,
       popover: popoverSlotRecipe,
       checkbox: checkboxSlotRecipe,
+      radioGroup: radioGroupSlotRecipe,
     },
 
     keyframes: {
