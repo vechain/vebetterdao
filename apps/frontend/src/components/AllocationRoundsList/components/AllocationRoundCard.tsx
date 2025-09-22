@@ -54,28 +54,32 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
         rounded="lg"
         data-testid={`round-card-#${roundId}`}
         p="4">
-        <Card.Body p="0">
-          <HStack justify={"space-between"} w="full">
-            <Stack w="full" gap={1} flex={2}>
-              <HStack gap={2} w="fit-content" justify="space-between">
-                <AllocationStateBadge roundId={roundId} data-testid={`round-card-#${roundId}`} renderIcon={isActive} />
+        <LinkOverlay w="full" flex={1}>
+          <Card.Body p="0">
+            <HStack justify={"space-between"} w="full">
+              <Stack w="full" gap={1} flex={2}>
+                <HStack gap={2} w="fit-content" justify="space-between">
+                  <AllocationStateBadge
+                    roundId={roundId}
+                    data-testid={`round-card-#${roundId}`}
+                    renderIcon={isActive}
+                  />
 
-                <DotSymbol
-                  boxProps={{ hideBelow: "md" }}
-                  color={isActive ? "text.default" : "text.subtle"}
-                  size={"4px"}
-                />
-                <Skeleton hideBelow="md" loading={isLoading}>
-                  <Text color={isActive ? "text.default" : "text.subtle"} textStyle="xs">
-                    {isActive
-                      ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
-                      : allocationRound.voteEndTimestamp?.fromNow()}
-                  </Text>
-                </Skeleton>
-              </HStack>
+                  <DotSymbol
+                    boxProps={{ hideBelow: "md" }}
+                    color={isActive ? "text.default" : "text.subtle"}
+                    size={"4px"}
+                  />
+                  <Skeleton hideBelow="md" loading={isLoading}>
+                    <Text color={isActive ? "text.default" : "text.subtle"} textStyle="xs">
+                      {isActive
+                        ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
+                        : allocationRound.voteEndTimestamp?.fromNow()}
+                    </Text>
+                  </Skeleton>
+                </HStack>
 
-              <HStack mt={0.5} w="full" justify="space-between">
-                <LinkOverlay w="full" flex={1}>
+                <HStack mt={0.5} w="full" justify="space-between">
                   <Link href={`rounds/${roundId}`}>
                     <Heading as="h3" size="md" fontWeight="semibold">
                       {t("Round #{{round}}", {
@@ -83,47 +87,47 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                       })}
                     </Heading>
                   </Link>
-                </LinkOverlay>
-              </HStack>
-              <HStack w="fit-content" justify="space-between" textStyle="xs" fontWeight={400}>
-                <Skeleton loading={isLoading}>
-                  <Text>
-                    {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
-                    {allocationRound.voteEndTimestamp?.format("MMM D")}
-                  </Text>
-                </Skeleton>
-              </HStack>
-            </Stack>
-            <HStack gap={4} justify="flex-end" flex={1}>
-              <Stack direction={["column", "column", "row"]} gap={4} align={["flex-end", "flex-end", "center"]}>
-                <Box width={"max-content"} justifyContent={"end"}>
-                  <Skeleton loading={roundAmountLoading}>
-                    {roundAmountError ? (
-                      <Text color="red.500">{roundAmountError.message}</Text>
-                    ) : (
-                      <VStack gap={0} alignItems="flex-end">
-                        <HStack gap={1}>
-                          <Heading size="xl">{compactFormatter.format(Number(totalAmount))}</Heading>
-                          <B3TRIcon boxSize={"20px"} colorVariant="dark" />
-                        </HStack>
-                        <Text textStyle={"xs"} color="text.subtle">
-                          {t("total allocation")}
-                        </Text>
-                      </VStack>
-                    )}
+                </HStack>
+                <HStack w="fit-content" justify="space-between" textStyle="xs" fontWeight={400}>
+                  <Skeleton loading={isLoading}>
+                    <Text>
+                      {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
+                      {allocationRound.voteEndTimestamp?.format("MMM D")}
+                    </Text>
                   </Skeleton>
-                </Box>
-
-                <OverlappedAppsImages
-                  appsIds={mostVotedAppsQuery.data.map(a => a.id)}
-                  isLoading={mostVotedAppsQuery.isLoading}
-                  otherAppsActiveColor={isActive}
-                />
+                </HStack>
               </Stack>
-              <Icon as={FaAngleRight} boxSize={"24px"} fill="inherit" data-testid={`round-link-#${roundId}`} />
+              <HStack gap={4} justify="flex-end" flex={1}>
+                <Stack direction={["column", "column", "row"]} gap={4} align={["flex-end", "flex-end", "center"]}>
+                  <Box width={"max-content"} justifyContent={"end"}>
+                    <Skeleton loading={roundAmountLoading}>
+                      {roundAmountError ? (
+                        <Text color="red.500">{roundAmountError.message}</Text>
+                      ) : (
+                        <VStack gap={0} alignItems="flex-end">
+                          <HStack gap={1}>
+                            <Heading size="xl">{compactFormatter.format(Number(totalAmount))}</Heading>
+                            <B3TRIcon boxSize={"20px"} colorVariant="dark" />
+                          </HStack>
+                          <Text textStyle={"xs"} color="text.subtle">
+                            {t("total allocation")}
+                          </Text>
+                        </VStack>
+                      )}
+                    </Skeleton>
+                  </Box>
+
+                  <OverlappedAppsImages
+                    appsIds={mostVotedAppsQuery.data.map(a => a.id)}
+                    isLoading={mostVotedAppsQuery.isLoading}
+                    otherAppsActiveColor={isActive}
+                  />
+                </Stack>
+                <Icon as={FaAngleRight} boxSize={"24px"} fill="inherit" data-testid={`round-link-#${roundId}`} />
+              </HStack>
             </HStack>
-          </HStack>
-        </Card.Body>
+          </Card.Body>
+        </LinkOverlay>
       </Card.Root>
     </LinkBox>
   )

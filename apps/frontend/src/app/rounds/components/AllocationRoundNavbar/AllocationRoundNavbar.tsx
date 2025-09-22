@@ -43,7 +43,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     router.push(`/rounds/${nextRound}`)
   }
 
-  const bgColor = data.state === 0 ? "#B1F16C" : "#E1E1E1"
+  const bgColor = data.state === 0 ? "banner.green" : "gray.200"
 
   // State to store the client width
   const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
@@ -83,7 +83,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           px={20}>
           <Button
             data-testid="prev-round-button"
-            color={prevButtonDisabled ? "#757575" : "#004CFC"}
+            color="actions.tertiary.default"
             size="sm"
             variant={"plain"}
             aria-label="Go to previous round"
@@ -95,20 +95,16 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
           <Stack direction={["column", "column", "row"]} gap={4} align={"center"}>
             <Skeleton loading={isLoading}>
-              <Heading size="lg" color={"#131313"}>
-                {t("Round #{{round}}", {
-                  round: data?.roundId,
-                })}
-              </Heading>
+              <Heading size="lg">{t("Round #{{round}}", { round: data?.roundId })}</Heading>
             </Skeleton>
-            <Box w={1.5} h={1.5} borderRadius={"full"} bg={"#252525"} />
+            <Box w={1.5} h={1.5} borderRadius={"full"} bg={"text.subtle"} />
             <HStack gap={2} align={"center"}>
               <Skeleton loading={isLoading}>
-                <Text color={"#131313"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
-              <Icon as={FaArrowRight} color={"#131313"} />
+              <Icon as={FaArrowRight} color="icon.default" />
               <Skeleton loading={isLoading}>
-                <Text color={"#131313"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
               </Skeleton>
             </HStack>
             <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
@@ -117,7 +113,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             data-testid="next-round-button"
             variant={"plain"}
             size="sm"
-            color={nextButtonDisabled ? "#757575" : "#004CFC"}
+            color="actions.tertiary.default"
             aria-label="Go to next round"
             disabled={nextButtonDisabled}
             onClick={goToNextRound}>
@@ -136,10 +132,11 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       bgColor={bgColor}
       px={4}
       py={2}
+      mt={-2}
       data-testid={`allocation-round-${roundId}-nav-mobile`}>
       <IconButton
         data-testid="prev-round-button"
-        color={prevButtonDisabled ? "#757575" : "#004CFC"}
+        color="actions.tertiary.default"
         variant={"ghost"}
         disabled={prevButtonDisabled}
         onClick={goToPreviousRound}
@@ -149,28 +146,24 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack gap={4}>
           <Skeleton loading={isLoading}>
-            <Heading size="xl" color={"#131313"}>
-              {t("Round #{{round}}", {
-                round: data?.roundId ?? 0,
-              })}
-            </Heading>
+            <Heading size="xl">{t("Round #{{round}}", { round: data?.roundId ?? 0 })}</Heading>
           </Skeleton>
           <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
         </HStack>
 
         <HStack gap={2} align={"center"}>
           <Skeleton loading={isLoading}>
-            <Text color={"#131313"}>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+            <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
-          <Icon as={FaArrowRight} color={"#131313"} />
+          <Icon as={FaArrowRight} color="icon.default" />
           <Skeleton loading={isLoading}>
-            <Text color={"#131313"}>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+            <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
           </Skeleton>
         </HStack>
       </VStack>
       <IconButton
         data-testid="next-round-button"
-        color={nextButtonDisabled ? "#757575" : "#004CFC"}
+        color="actions.tertiary.default"
         variant={"ghost"}
         aria-label="Go to next round"
         onClick={goToNextRound}
