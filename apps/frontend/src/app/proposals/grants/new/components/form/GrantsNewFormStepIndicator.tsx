@@ -58,12 +58,7 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
                     height="auto"
                     bg="transparent"
                     boxSize={6}>
-                    <Icon
-                      as={FaChevronRight}
-                      boxSize={4}
-                      // color="icons.subtle"
-                      color="gray.400"
-                    />
+                    <Icon as={FaChevronRight} boxSize={4} color="icon.subtle" />
                   </Steps.Separator>
                 )}
               </Steps.Item>
