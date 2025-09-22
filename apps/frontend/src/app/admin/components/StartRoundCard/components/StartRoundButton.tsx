@@ -41,37 +41,33 @@ export const StartRoundButton = ({ redirectTo, onSuccess }: StartRoundButtonProp
   return (
     <VStack alignItems="start" w="full" gap={4}>
       {xAppsLeftCount > 0 && (
-        <Text>
+        <Text color="inherit">
           {t("By clicking the button below, you will also claim allocations for {{count}} apps.", {
             count: xAppsLeftCount,
           })}
         </Text>
       )}
       <VStack w="full" gap={4} alignItems="start">
-        <VStack>
-          <Text>
-            {currentRound.voteEndTimestamp?.isBefore()
-              ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
-                  currentRoundId: currentRoundId,
-                  currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
-                })
-              : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
-                  currentRoundId: currentRoundId,
-                  currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
-                })}
-          </Text>
-        </VStack>
+        <Text color="inherit">
+          {currentRound.voteEndTimestamp?.isBefore()
+            ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
+                currentRoundId: currentRoundId,
+                currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
+              })
+            : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
+                currentRoundId: currentRoundId,
+                currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
+              })}
+        </Text>
 
-        <VStack>
-          <Button
-            colorPalette="blue"
-            disabled={isCurrentRoundActive || isTransactionPending || status === "success"}
-            onClick={() => sendTransaction()}
-            loading={isTransactionPending}
-            data-testid="start-voting-round-button">
-            {getButtonText()}
-          </Button>
-        </VStack>
+        <Button
+          variant="secondary"
+          disabled={isCurrentRoundActive || isTransactionPending || status === "success"}
+          onClick={() => sendTransaction()}
+          loading={isTransactionPending}
+          data-testid="start-voting-round-button">
+          {getButtonText()}
+        </Button>
       </VStack>
     </VStack>
   )
