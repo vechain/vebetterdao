@@ -9,9 +9,10 @@ import { useTranslation } from "react-i18next"
 
 type Props = {
   address: string
+  truncateAddress?: boolean
 }
 
-export const AddressWithProfilePicture = ({ address }: Props) => {
+export const AddressWithProfilePicture = ({ address, truncateAddress = true }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
@@ -19,11 +20,13 @@ export const AddressWithProfilePicture = ({ address }: Props) => {
   const { data: vechainDomain } = useVechainDomain(address)
   const isConnectedUser = compareAddresses(address, account?.address ?? "")
 
-  const digitsBeforeEllipsis = isMobile ? 6 : 18
-  const digitsAfterEllipsis = isMobile ? 3 : 0
-  const displayAddress = vechainDomain?.domain
-    ? humanDomain(vechainDomain.domain, digitsBeforeEllipsis, digitsAfterEllipsis)
-    : humanAddress(address ?? "", digitsBeforeEllipsis, digitsAfterEllipsis)
+  const digitsBeforeEllipsis = truncateAddress ? (isMobile ? 8 : 10) : 25
+  const digitsAfterEllipsis = truncateAddress ? (isMobile ? 6 : 4) : 25
+  const displayAddress = truncateAddress
+    ? vechainDomain?.domain
+      ? humanDomain(vechainDomain.domain, digitsBeforeEllipsis, digitsAfterEllipsis)
+      : humanAddress(address ?? "", digitsBeforeEllipsis, digitsAfterEllipsis)
+    : vechainDomain?.domain || address
 
   const handleClick = (e: React.MouseEvent<any>) => {
     e.stopPropagation()
