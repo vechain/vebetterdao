@@ -1,12 +1,16 @@
 import { AppConfig } from "@repo/config"
-import { TestPk } from "@repo/contracts/scripts/helpers/seedAccounts"
+import { TestPk } from "../../../../../../contracts/scripts/helpers/seedAccounts"
 import { ThorClient } from "@vechain/sdk-network"
-import { whitelist } from "@repo/contracts/scripts/helpers/ve-better-passport"
-import { airdropB3trFromTreasury, airdropVTHO, transferErc20 } from "@repo/contracts/scripts/helpers/airdrop"
-import { B3TR__factory, Emissions__factory } from "@repo/contracts/typechain-types"
+import { whitelist } from "../../../../../../contracts/scripts/helpers/ve-better-passport"
+import {
+  airdropB3trFromTreasury,
+  airdropVTHO,
+  transferErc20,
+} from "../../../../../../contracts/scripts/helpers/airdrop"
+import { B3TR__factory, Emissions__factory } from "../../../../../../contracts/typechain-types"
 import { TransactionClause } from "@vechain/sdk-core"
 import { Address, ABIContract, Clause } from "@vechain/sdk-core"
-import { VOT3__factory } from "@repo/contracts/typechain-types"
+import { VOT3__factory } from "../../../../../../contracts/typechain-types"
 import { TransactionUtils } from "@repo/utils"
 
 export const waitForNextRound = async (thorClient: ThorClient, config: AppConfig) => {
@@ -112,7 +116,7 @@ export const setupAccountsForVoting = async (
             ),
           )
 
-          await TransactionUtils.sendTx(thorClient, clauses, seedAccount.key.pk, 5, true)
+          await TransactionUtils.sendTx(thorClient as any, clauses, seedAccount.key.pk, 5, true)
           console.log(`${seedAccount.key.address} - Converted B3TR to VOT3`)
 
           successfulConversions++

@@ -1,5 +1,5 @@
 import { AppConfig } from "@repo/config"
-import { TestPk } from "@repo/contracts/scripts/helpers/seedAccounts"
+import { TestPk } from "../../../../../../contracts/scripts/helpers/seedAccounts"
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, TransactionClause } from "@vechain/sdk-core"
 import { TransactionUtils } from "@repo/utils"
@@ -16,20 +16,20 @@ export const toggleAutoVotingAndSelectApps = async (
   clauses.push(
     Clause.callFunction(
       Address.of(config.xAllocationVotingContractAddress),
-      ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("toggleAutoVoting"),
-      [],
+      ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("setUserVotingPreferences"),
+      [apps],
     ),
   )
 
   clauses.push(
     Clause.callFunction(
       Address.of(config.xAllocationVotingContractAddress),
-      ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("setUserVotingPreferences"),
-      [apps],
+      ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("toggleAutoVoting"),
+      [],
     ),
   )
 
-  await TransactionUtils.sendTx(thorClient as any, clauses, account.pk)
+  await TransactionUtils.sendTx(thorClient as any, clauses, account.pk, 5, true)
 }
 
 export const isAutoVotingEnabled = async (thorClient: ThorClient, config: AppConfig, account: TestPk) => {
@@ -91,20 +91,38 @@ export const configureAutoVoting = async (
   seedAccounts: any[],
   appIds: string[],
 ) => {
-  console.log("\n=== Configuring auto-voting ===")
+  console.log("\n🤖 Configuring auto-voting for all accounts...")
+  console.log(`🎯 Total accounts to configure: ${numVoters}`)
+  console.log(`📱 Apps available for voting: ${appIds.length}`)
+
   let autoVotingConfigured = 0
+  let alreadyEnabled = 0
 
   for (let i = 0; i < numVoters; i++) {
     const seedAccount = seedAccounts[i]
+    const accountNumber = i + 1
     const isAutoVotingEnabledForUser = await isAutoVotingEnabled(thorClient, config, seedAccount.key)
 
     if (!isAutoVotingEnabledForUser) {
-      await toggleAutoVotingAndSelectApps(thorClient, config, seedAccount.key, appIds)
-      autoVotingConfigured++
-      console.log(`Enabled auto-voting for account ${i + 1}: ${seedAccount.key.address}`)
+      console.log(`⚙️  Account ${accountNumber} (${seedAccount.key.address}): Enabling auto-voting...`)
+      try {
+        await toggleAutoVotingAndSelectApps(thorClient, config, seedAccount.key, appIds)
+        autoVotingConfigured++
+        console.log(`✅ Account ${accountNumber}: Auto-voting enabled successfully`)
+      } catch (error) {
+        console.log(`❌ Account ${accountNumber}: Failed to enable auto-voting - ${error}`)
+      }
     } else {
-      console.log(`Auto-voting already enabled for account ${i + 1}: ${seedAccount.key.address}`)
+      alreadyEnabled++
+      console.log(`ℹ️  Account ${accountNumber} (${seedAccount.key.address}): Auto-voting already enabled`)
     }
   }
-  console.log(`Auto-voting configured for ${autoVotingConfigured} new accounts`)
+
+  console.log(`\n📊 Auto-voting Configuration Summary:`)
+  console.log(`✅ Newly configured: ${autoVotingConfigured} accounts`)
+  console.log(`ℹ️  Already enabled: ${alreadyEnabled} accounts`)
+  console.log(`🎯 Total ready for auto-voting: ${autoVotingConfigured + alreadyEnabled}/${numVoters} accounts`)
+  console.log(
+    `📈 Configuration success rate: ${(((autoVotingConfigured + alreadyEnabled) / numVoters) * 100).toFixed(1)}%`,
+  )
 }

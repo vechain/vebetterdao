@@ -1,6 +1,10 @@
 import { AppConfig, getConfig } from "@repo/config"
 import { distributeEmissions } from "../../../../../contracts/scripts/helpers/emissions"
-import { Emissions__factory, XAllocationVoting__factory } from "../../../../../contracts/typechain-types"
+import {
+  Emissions__factory,
+  X2EarnApps__factory,
+  XAllocationVoting__factory,
+} from "../../../../../contracts/typechain-types"
 import { Clause, Address, ABIContract } from "@vechain/sdk-core"
 import { TransactionUtils } from "@repo/utils"
 import { ThorClient } from "@vechain/sdk-network"
@@ -45,8 +49,12 @@ const simulateRound = async () => {
   console.log(`Using round ID: ${currentRoundId}`)
 
   console.log("3. Getting eligible apps for voting...")
-  const mugshotAppId = "0x2fc30c2ad41a2994061efaf218f1d52dc92bc4a31a0f02a4916490076a7a393a" // Mugshot Harcoded
-  const appIds = [mugshotAppId]
+  const allAppsResult = await thorClient.contracts.executeCall(
+    config.x2EarnAppsContractAddress,
+    ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("allEligibleApps"),
+    [],
+  )
+  const appIds = allAppsResult.result?.array?.[0] as string[]
 
   console.log("4. Casting votes with 4 accounts...")
   const voters = accounts.slice(1, NUM_VOTERS + 1)
@@ -55,8 +63,7 @@ const simulateRound = async () => {
     const voter = voters[i]
 
     try {
-      const randomApps = appIds.filter(() => Math.random() > 0.5)
-      const appsToVote = randomApps.length > 0 ? randomApps : [appIds[0]] // At least vote for one app
+      const appsToVote = [appIds[0]] // At least vote for one app
 
       const voteWeight = ethers.parseEther("1000") // 1000 VOT3 tokens worth
       const weights = appsToVote.map(() => voteWeight)
@@ -67,7 +74,7 @@ const simulateRound = async () => {
         [currentRoundId, appsToVote, weights],
       )
 
-      await TransactionUtils.sendTx(thorClient, [castVoteClause], voter.pk)
+      await TransactionUtils.sendTx(thorClient as any, [castVoteClause], voter.pk, 5, true)
 
       console.log(`Voter ${i + 1} (${voter.address}) voted for ${appsToVote.length} apps`)
     } catch (error: any) {

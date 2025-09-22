@@ -42,7 +42,7 @@ const simulateGas = async () => {
   }
 
   const gasResult = await TransactionUtils.estimateGas(
-    thorClient,
+    thorClient as any,
     [
       Clause.callFunction(
         Address.of(config.voterRewardsContractAddress),
