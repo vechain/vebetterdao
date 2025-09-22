@@ -72,7 +72,7 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
       <Portal>
         <HoverCard.Positioner>
           <HoverCard.Content mt={"12px"} minW="400px" borderRadius="2xl" p={2} gap={0}>
-            <VStack align="stretch" w="full" gap={0}>
+            <VStack align="stretch" w="full" gap="2">
               {route.subRoutes?.map(subRoute => {
                 return (
                   <VStack

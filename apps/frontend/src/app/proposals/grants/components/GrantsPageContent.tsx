@@ -69,7 +69,7 @@ export const GrantsPageContent = () => {
         ),
         t("Once submitted, your Grant proposal becomes visible to the community."),
       ],
-      image: "/assets/images/grants/step-1.png",
+      image: "/assets/images/grants/step-1.webp",
     },
     {
       key: GrantsStep.GET_SUPPORT,
@@ -79,7 +79,7 @@ export const GrantsPageContent = () => {
         t("Your Grant needs 3.5M VOT3 deposited within 1 week to move forward."),
         t("If it doesn't reach that , it's cancelled automatically."),
       ],
-      image: "/assets/images/grants/step-2.png",
+      image: "/assets/images/grants/step-2.webp",
     },
     {
       key: GrantsStep.COMMUNITY_VOTE,
@@ -89,7 +89,7 @@ export const GrantsPageContent = () => {
         t("The community express support as Likes, Dislikes and Abstains"),
         t("If the Grant is approved, you will receive funds"),
       ],
-      image: "/assets/images/grants/step-3.png",
+      image: "/assets/images/grants/step-3.webp",
     },
     {
       key: GrantsStep.RECEIVE_FUNDS,
@@ -99,7 +99,7 @@ export const GrantsPageContent = () => {
         t("Funds are released milestone by milestone"),
         t("Deliver, get reviewed, unlock the next payment — until you complete the project"),
       ],
-      image: "/assets/images/grants/step-4.png",
+      image: "/assets/images/grants/step-4.webp",
     },
   ]
 
