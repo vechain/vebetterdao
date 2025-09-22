@@ -18,13 +18,17 @@ import {
   Icon,
   Link,
   Skeleton,
+  Text,
   useDisclosure,
   VStack,
+  Button,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import BigNumber from "bignumber.js"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { useRouter } from "next/navigation"
+import { useWallet } from "@vechain/vechain-kit"
 
 import { HowToSupportCard } from "../../components/components"
 import { useFilteredProposals } from "../../hooks/useFilteredProposals"
@@ -32,6 +36,8 @@ import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { ProposalType } from "@/types"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -42,7 +48,8 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-
+  const router = useRouter()
+  const { account } = useWallet()
   //CONSTANTS
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -112,6 +119,7 @@ export const GrantsPageContent = () => {
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const hasMetProposalCriteria = useMetProposalCriteria(ProposalType.GRANT)
 
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
   const {
@@ -137,29 +145,41 @@ export const GrantsPageContent = () => {
     )
   }, [milestoneClaimedEvents])
 
+  const showApplyForGrant = useMemo(() => {
+    return account?.address && hasMetProposalCriteria
+  }, [account?.address, hasMetProposalCriteria])
+
+  const onApplyForGrant = useCallback(() => {
+    router.push("/proposals/grants/new")
+  }, [router])
+
   return (
     <>
       <VStack w="full" gap={8} pb={8}>
         <GrantsBanners />
-        <HStack
-          alignItems="center"
-          textAlign="center"
-          w="full"
-          justifyContent={{ base: "space-between", lg: "flex-start" }}>
-          <Heading size="3xl">{t("Grants")}</Heading>
-          {!open && (
-            <Link
-              display="inline-flex"
-              alignItems="center"
-              fontWeight={500}
-              color="primary.500"
-              fontSize="md"
-              onClick={onOpen}>
-              <Icon as={UilInfoCircle} boxSize={4} />
-              {t("More info")}
-            </Link>
+        <HStack w="full" justifyContent="space-between">
+          <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
+            <Heading size="3xl">{t("Grants")}</Heading>
+            {!open && (
+              <Link
+                display="inline-flex"
+                alignItems="center"
+                fontWeight={500}
+                color="primary.500"
+                fontSize="md"
+                onClick={onOpen}>
+                <Icon as={UilInfoCircle} boxSize={4} />
+                {t("More info")}
+              </Link>
+            )}
+          </HStack>
+          {showApplyForGrant && (
+            <Button variant="primaryAction" onClick={onApplyForGrant}>
+              <Text>{t("Apply for Grant")}</Text>
+            </Button>
           )}
         </HStack>
+
         <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
         <GrantsStatsCards
           totalApplications={enrichedGrantProposals?.length || 0}

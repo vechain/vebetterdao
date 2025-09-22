@@ -2033,5 +2033,6 @@
   "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).": "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).",
   "Company VAT number e.g. 01234567": "Company VAT number e.g. 01234567",
   "The maximum amount for this grant type is {{value}} USD": "The maximum amount for this grant type is {{value}} USD",
-  "Total amount across all milestones exceeds maximum allowed: ${{maxAmount}} USD": "Total amount across all milestones exceeds maximum allowed: ${{maxAmount}} USD"
+  "Total amount across all milestones exceeds maximum allowed: ${{maxAmount}} USD": "Total amount across all milestones exceeds maximum allowed: ${{maxAmount}} USD",
+  "Apply for Grant": "Apply for Grant"
 }
