@@ -1,5 +1,5 @@
-import { createListCollection, Field, Portal, RadioGroup, Select } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { createListCollection, Field, HStack, Icon, Portal, RadioGroup, Select } from "@chakra-ui/react"
+import { ElementType, useMemo } from "react"
 import { Control, Controller, FieldPath, FieldValues } from "react-hook-form"
 
 interface FormSelectOption {
@@ -22,6 +22,7 @@ interface FormSelectProps<
   isRequired?: boolean
   defaultValue?: FormSelectOption["value"]
   onValueChange?: (value: string | number) => void
+  leftIcon?: ElementType
 }
 
 export const FormSelect = <
@@ -41,6 +42,7 @@ export const FormSelect = <
     isRequired,
     defaultValue,
     onValueChange,
+    leftIcon,
     ...rest
   } = props
 
@@ -82,7 +84,10 @@ export const FormSelect = <
               <Select.HiddenSelect />
               <Select.Control>
                 <Select.Trigger>
-                  <Select.ValueText placeholder={placeholder} />
+                  <HStack gap={2} w="full">
+                    {leftIcon && <Icon as={leftIcon} color="icon.subtle" size={"sm"} />}
+                    <Select.ValueText placeholder={placeholder} />
+                  </HStack>
                 </Select.Trigger>
               </Select.Control>
               <Portal>

@@ -5,6 +5,7 @@ import { FormSelect } from "@/components/CustomFormFields"
 import { useEstimateBlockTimestamp } from "@/hooks"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Calendar } from "iconoir-react"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { Control, FieldErrors, UseFormWatch } from "react-hook-form"
@@ -116,6 +117,7 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
             defaultValue={formSelectOptions?.[0]?.value}
             error={errors.votingRoundId?.message}
             onValueChange={handleVotingRoundChange}
+            leftIcon={Calendar}
           />
         </Skeleton>
       </GridItem>
