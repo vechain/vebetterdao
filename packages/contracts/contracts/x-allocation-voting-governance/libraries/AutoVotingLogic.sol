@@ -16,7 +16,7 @@ library AutoVotingLogic {
 
   /**
    * @dev Storage structure for AutoVoting preferences
-   * @custom:storage-location erc7201:b3tr.storage.AutoVotingLogic
+   * @dev This struct is used by AutoVotingLogicUpgradeable for storage management
    */
   struct AutoVotingStorage {
     mapping(address => Checkpoints.Trace208) _autoVotingEnabled;

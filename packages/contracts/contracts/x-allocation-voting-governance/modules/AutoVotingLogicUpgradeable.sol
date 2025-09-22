@@ -14,9 +14,11 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   // Import the storage struct from the library
   using AutoVotingLogic for AutoVotingLogic.AutoVotingStorage;
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.AutoVotingLogic")) - 1)) & ~bytes32(uint256(0xff))
+  /// @notice Storage struct is defined in AutoVotingLogic library but storage location is managed here
+  /// @dev keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.AutoVotingLogic")) - 1)) & ~bytes32(uint256(0xff))
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.AutoVotingLogic
   bytes32 private constant AutoVotingStorageLocation =
-    0x9419c2851faafbde6edee787e493cc4536bda194619add1c98e58286236c7c00;
+    0x79e5bcd052c027862431086e284ba2fb16d80aac052316614d6368ef7f884a00;
 
   function _getAutoVotingStorage() private pure returns (AutoVotingLogic.AutoVotingStorage storage $) {
     assembly {
