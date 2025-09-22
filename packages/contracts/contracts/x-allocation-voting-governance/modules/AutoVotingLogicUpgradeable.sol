@@ -64,11 +64,11 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   // ---------- Getters ---------- //
 
   /**
-   * @dev Checks if autovoting is enabled for an account at the current timepoint
+   * @dev Checks if autovoting is enabled for an account at latest timepoint
    */
   function _isAutoVotingEnabled(address account) internal view virtual override returns (bool) {
     AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
-    return AutoVotingLogic.isAutoVotingEnabled($, account, clock());
+    return AutoVotingLogic.isAutoVotingEnabled($, account);
   }
 
   /**

@@ -129,18 +129,13 @@ library AutoVotingLogic {
   // ---------- Getters ---------- //
 
   /**
-   * @dev Checks if autovoting is enabled for an account at the current timepoint
+   * @dev Checks if autovoting is enabled for an account at the latest timepoint
    * @param $ The storage struct for AutoVoting preferences
    * @param account The address to check
-   * @param clock The current timepoint
-   * @return Whether autovoting is enabled for the account at the current timepoint
+   * @return Whether autovoting is enabled for the account at the latest timepoint
    */
-  function isAutoVotingEnabled(
-    AutoVotingStorage storage $,
-    address account,
-    uint48 clock
-  ) external view returns (bool) {
-    return $._autoVotingEnabled[account].upperLookupRecent(clock) == 1;
+  function isAutoVotingEnabled(AutoVotingStorage storage $, address account) external view returns (bool) {
+    return $._autoVotingEnabled[account].latest() == 1;
   }
 
   /**
