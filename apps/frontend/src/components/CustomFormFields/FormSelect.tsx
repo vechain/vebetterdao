@@ -19,8 +19,9 @@ interface FormSelectProps<
   options: FormSelectOption[]
   error?: string
   disabled?: boolean
-  required?: boolean
+  isRequired?: boolean
   defaultValue?: FormSelectOption["value"]
+  onValueChange?: (value: string | number) => void
 }
 
 export const FormSelect = <
@@ -29,7 +30,19 @@ export const FormSelect = <
 >(
   props: FormSelectProps<TFieldValues, TName>,
 ) => {
-  const { name, control, label, placeholder, options, error, disabled, required, defaultValue, ...rest } = props
+  const {
+    name,
+    control,
+    label,
+    placeholder,
+    options,
+    error,
+    disabled,
+    isRequired,
+    defaultValue,
+    onValueChange,
+    ...rest
+  } = props
 
   // Create list collection for Chakra UI Select
   const collection = useMemo(() => {
@@ -43,12 +56,13 @@ export const FormSelect = <
   }, [options])
 
   return (
-    <Field.Root invalid={!!error} disabled={disabled} required={required} {...rest} w="full">
+    <Field.Root invalid={!!error} disabled={disabled} {...rest} w="full">
       {label && <Field.Label>{label}</Field.Label>}
 
       <Controller
         name={name}
         control={control}
+        {...(isRequired && { rules: { required: `${label ?? "This field"} is required` } })}
         render={({ field }) => (
           <RadioGroup.Root
             w="full"
@@ -61,8 +75,8 @@ export const FormSelect = <
               value={field.value ? [String(field.value)] : []}
               onValueChange={details => {
                 const selectedValue = details.value[0]
-                const selectedOption = options.find(opt => String(opt.value) === selectedValue)
-                field.onChange(selectedOption?.value || "")
+                field.onChange(selectedValue)
+                onValueChange?.(selectedValue ?? "")
               }}
               disabled={disabled}>
               <Select.HiddenSelect />

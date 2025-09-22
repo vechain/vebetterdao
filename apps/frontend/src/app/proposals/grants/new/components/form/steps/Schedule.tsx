@@ -6,7 +6,7 @@ import { useEstimateBlockTimestamp } from "@/hooks"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { Control, FieldErrors, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
@@ -15,6 +15,7 @@ interface ScheduleProps {
   errors: FieldErrors<GrantFormData>
   control: Control<GrantFormData>
   watch: UseFormWatch<GrantFormData>
+  setData: (data: Partial<GrantFormData>) => void
 }
 type Option = {
   id: number
@@ -22,7 +23,7 @@ type Option = {
   value: number
   endDate: dayjs.Dayjs
 }
-export const Schedule = ({ errors, control, watch }: ScheduleProps) => {
+export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => {
   const { t } = useTranslation()
 
   const { data: currentRoundId, isLoading: isCurrentRoundIdLoading } = useCurrentAllocationsRoundId()
@@ -85,6 +86,14 @@ export const Schedule = ({ errors, control, watch }: ScheduleProps) => {
   const hasFewDaysLeft = useMemo(() => {
     return countdownDate && daysLeft <= FEW_DAYS_LEFT_THRESHOLD
   }, [countdownDate, daysLeft])
+
+  const handleVotingRoundChange = useCallback(
+    (value: string | number) => {
+      setData({ votingRoundId: String(value) })
+    },
+    [setData],
+  )
+
   return (
     <Grid templateColumns={{ base: 5, md: 5 }} w="full" gap={6}>
       <GridItem colSpan={5}>
@@ -100,12 +109,13 @@ export const Schedule = ({ errors, control, watch }: ScheduleProps) => {
           <FormSelect
             name="votingRoundId"
             control={control}
+            isRequired
             label={t("Date")}
             placeholder={t("Select date")}
             options={formSelectOptions}
             defaultValue={formSelectOptions?.[0]?.value}
             error={errors.votingRoundId?.message}
-            required
+            onValueChange={handleVotingRoundChange}
           />
         </Skeleton>
       </GridItem>
