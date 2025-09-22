@@ -1,5 +1,6 @@
 import { Steps, Icon, useMediaQuery, Flex } from "@chakra-ui/react"
-import { BsCheck, BsChevronRight } from "react-icons/bs"
+import { FaCheck, FaChevronRight } from "react-icons/fa6"
+
 import { GrantStep } from "./GrantsNewFormStepCard"
 
 export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: number; steps: GrantStep[] }) => {
@@ -31,11 +32,18 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
 
             return (
               <Steps.Item key={step.key} index={index}>
-                <Steps.Indicator>
-                  <Steps.Status complete={<Icon as={BsCheck} boxSize={5} />} incomplete={<Steps.Number />} />
+                <Steps.Indicator boxSize={6}>
+                  <Steps.Status complete={<Icon as={FaCheck} boxSize={4} />} incomplete={<Steps.Number />} />
                 </Steps.Indicator>
 
-                {showStepTitle && <Steps.Title fontSize={{ base: "sm", md: "sm" }}>{step.title}</Steps.Title>}
+                {showStepTitle && (
+                  <Steps.Title
+                    textStyle={{ base: "sm", md: "sm" }}
+                    color={index === activeStep ? "text.default" : "text.subtle"}
+                    fontWeight={index === activeStep ? "semibold" : "normal"}>
+                    {step.title}
+                  </Steps.Title>
+                )}
 
                 {index < steps.length - 1 && (
                   <Steps.Separator
@@ -48,8 +56,9 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
                     _after={{ display: "none" }}
                     borderWidth="0"
                     height="auto"
-                    bg="transparent">
-                    <Icon as={BsChevronRight} boxSize={4} color={index < activeStep ? "blue.500" : "gray.400"} />
+                    bg="transparent"
+                    boxSize={6}>
+                    <Icon as={FaChevronRight} boxSize={4} color="icon.subtle" />
                   </Steps.Separator>
                 )}
               </Steps.Item>
