@@ -1882,7 +1882,7 @@
   "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly": "<b>Tip</b>: For a 12-months grant, it's best to break down milestones monthly or quarterly",
   "Please agree to the Terms of Service": "Please agree to the Terms of Service",
   "I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate.": "I agree to the <Link>Terms of Service</Link> and acknowledge the information provided is accurate.",
-  "End: {{endDate}}": "End: {{endDate}}",
+  "Ends: {{endDate}}": "Ends: {{endDate}}",
   "Not enough balance to upgrade your GM NFT to the next level.": "Not enough balance to upgrade your GM NFT to the next level.",
   "Upgrade NFT": "Upgrade NFT",
   "Get free NFT": "Get free NFT",
