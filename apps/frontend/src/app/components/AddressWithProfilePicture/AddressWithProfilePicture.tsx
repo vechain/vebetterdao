@@ -1,4 +1,5 @@
 import { AddressIcon } from "@/components/AddressIcon"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { HStack, LinkBox, Text } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
@@ -14,11 +15,15 @@ export const AddressWithProfilePicture = ({ address }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
+  const { isMobile } = useBreakpoints()
   const { data: vechainDomain } = useVechainDomain(address)
   const isConnectedUser = compareAddresses(address, account?.address ?? "")
+
+  const digitsBeforeEllipsis = isMobile ? 6 : 18
+  const digitsAfterEllipsis = isMobile ? 3 : 0
   const displayAddress = vechainDomain?.domain
-    ? humanDomain(vechainDomain.domain, 18, 0)
-    : humanAddress(address ?? "", 6, 3)
+    ? humanDomain(vechainDomain.domain, digitsBeforeEllipsis, digitsAfterEllipsis)
+    : humanAddress(address ?? "", digitsBeforeEllipsis, digitsAfterEllipsis)
 
   const handleClick = (e: React.MouseEvent<any>) => {
     e.stopPropagation()
