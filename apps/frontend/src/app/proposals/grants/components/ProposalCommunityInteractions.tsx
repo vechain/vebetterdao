@@ -61,15 +61,15 @@ export const ProposalCommunityInteractions = ({
     <HStack gap={5}>
       <HStack key={`${proposalId}-votesFor`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={forColor}>
         <Icon as={thumbsUpIcon} boxSize={5} />
-        <Text>{`${votesFor ?? 0}%`}</Text>
+        <Text>{`${Math.floor(votesFor ?? 0)}%`}</Text>
       </HStack>
       <HStack key={`${proposalId}-votesAgainst`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={againstColor}>
         <Icon as={thumbsDownIcon} boxSize={5} />
-        <Text>{`${votesAgainst ?? 0}%`}</Text>
+        <Text>{`${Math.floor(votesAgainst ?? 0)}%`}</Text>
       </HStack>
       <HStack key={`${proposalId}-votesAbstain`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={abstainColor}>
         <Icon as={circleIcon} fontWeight="bold" boxSize={5} />
-        <Text>{`${votesAbstain ?? 0}%`}</Text>
+        <Text>{`${Math.floor(votesAbstain ?? 0)}%`}</Text>
       </HStack>
     </HStack>
   )

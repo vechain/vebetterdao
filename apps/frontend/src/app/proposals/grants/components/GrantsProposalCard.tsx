@@ -144,9 +144,9 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                     proposalId={proposal.id}
                     state={proposal.state}
                     depositPercentage={communityDepositPercentage}
-                    votesFor={proposalVotes?.votes?.for?.percentage}
-                    votesAgainst={proposalVotes?.votes?.against?.percentage}
-                    votesAbstain={proposalVotes?.votes?.abstain?.percentage}
+                    votesFor={proposalVotes?.votes?.for?.percentagePower}
+                    votesAgainst={proposalVotes?.votes?.against?.percentagePower}
+                    votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
                     hasUserDeposited={hasUserDeposited}
                     userVoteOption={userVoteOption}
                   />
@@ -183,9 +183,9 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 proposalId={proposal.id}
                 state={proposal.state}
                 depositPercentage={communityDepositPercentage}
-                votesFor={proposalVotes?.votes?.for?.percentage}
-                votesAgainst={proposalVotes?.votes?.against?.percentage}
-                votesAbstain={proposalVotes?.votes?.abstain?.percentage}
+                votesFor={proposalVotes?.votes?.for?.percentagePower}
+                votesAgainst={proposalVotes?.votes?.against?.percentagePower}
+                votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
                 hasUserDeposited={hasUserDeposited}
                 userVoteOption={userVoteOption}
               />

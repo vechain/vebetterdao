@@ -206,17 +206,17 @@ export const ProposalInteractionCard = ({
 
     return [
       {
-        percentage: Number(proposalVotesQueryData?.votes?.for?.percentage ?? 0),
+        percentage: Number(proposalVotesQueryData?.votes?.for?.percentagePower ?? 0),
         color: "success.primary",
         icon: ThumbsUpIcon,
       },
       {
-        percentage: Number(proposalVotesQueryData?.votes?.abstain?.percentage ?? 0),
+        percentage: Number(proposalVotesQueryData?.votes?.abstain?.percentagePower ?? 0),
         color: "warning.primary",
         icon: AbstainIcon,
       },
       {
-        percentage: Number(proposalVotesQueryData?.votes?.against?.percentage ?? 0),
+        percentage: Number(proposalVotesQueryData?.votes?.against?.percentagePower ?? 0),
         color: "error.primary",
         icon: ThumbsDownIcon,
       },
