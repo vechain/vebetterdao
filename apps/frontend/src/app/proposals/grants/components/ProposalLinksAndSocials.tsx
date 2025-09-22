@@ -1,7 +1,6 @@
 import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { HStack, Icon } from "@chakra-ui/react"
-import { FaXTwitter } from "react-icons/fa6"
-import { AiOutlineDiscord } from "react-icons/ai"
+import { Discord, X } from "iconoir-react"
 import { UilGithub } from "@iconscout/react-unicons"
 
 export const ProposalLinksAndSocials = ({ proposal }: { proposal: GrantProposalEnriched }) => {
@@ -16,11 +15,12 @@ export const ProposalLinksAndSocials = ({ proposal }: { proposal: GrantProposalE
   }
 
   return (
-    <HStack fontSize={{ base: "14px", md: "20px" }} gap={"16px"}>
+    <HStack gap={"16px"} color="icon.subtle">
       {/* <Icon as={LiaDiscourse} onClick={(e) => handleLinkClick(e, discourseUrl)} cursor="pointer" /> */}
       {hasTwitter ? (
         <Icon
-          as={FaXTwitter}
+          as={X}
+          boxSize={5}
           cursor="pointer"
           onClick={e => handleLinkClick(e, `https://x.com/${proposal.twitterUsername}`)}
           _hover={{ opacity: 0.7 }}
@@ -28,7 +28,8 @@ export const ProposalLinksAndSocials = ({ proposal }: { proposal: GrantProposalE
       ) : null}
       {hasDiscord ? (
         <Icon
-          as={AiOutlineDiscord}
+          as={Discord}
+          boxSize={5}
           cursor="pointer"
           onClick={e => handleLinkClick(e, `https://discord.com/users/${proposal.discordUsername}`)}
           _hover={{ opacity: 0.7 }}
@@ -37,6 +38,7 @@ export const ProposalLinksAndSocials = ({ proposal }: { proposal: GrantProposalE
       {hasGithub ? (
         <Icon
           as={UilGithub}
+          boxSize={5}
           cursor="pointer"
           onClick={e => handleLinkClick(e, `https://github.com/${proposal.githubUsername}`)}
           _hover={{ opacity: 0.7 }}

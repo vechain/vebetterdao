@@ -31,10 +31,10 @@ const StatsCard = ({ icon, value, label }: StatsCardProps) => (
       display="flex"
       alignItems="center"
       justifyContent="center">
-      <Icon as={icon} boxSize="60px" color="brand.primary" />
+      <Icon as={icon} boxSize={{ base: 10, md: "60px" }} color="brand.primary" />
     </Box>
     <VStack alignItems="flex-start" gap={0}>
-      <Heading size={{ base: "lg", lg: "2xl" }}>{value}</Heading>
+      <Heading size={{ base: "md", lg: "2xl" }}>{value}</Heading>
       <Text fontSize={{ base: "xs", lg: "sm" }} color="text.subtle">
         {label}
       </Text>

@@ -10,7 +10,7 @@ import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { Box, Card, Center, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
 import { formatTimeLeft, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
@@ -95,35 +95,47 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
       onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
         {/* Header Section */}
-        <Heading size="md">{proposal.title}</Heading>
+        <Heading size={{ base: "lg", lg: "md" }}>{proposal.title}</Heading>
 
         {/* Grant Information & Proposer Section */}
-        <Stack direction={{ base: "column", md: "row" }} w="full" fontSize={{ base: "14px", md: "16px" }} gap={4}>
-          <HStack color="text.subtle">
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          w="full"
+          fontSize={{ base: "14px", md: "16px" }}
+          justify={{ base: "flex-start" }}
+          gap={{ base: 3, md: 2 }}
+          align={{ base: "flex-start", md: "center" }}>
+          <HStack
+            color="text.subtle"
+            gap={{ base: 2, md: 3 }}
+            flexWrap={{ base: "wrap", sm: "nowrap" }}
+            w={{ base: "full", md: "auto" }}>
             {grantProposal && (
               <>
-                <Icon as={B3trIcon} color="actions.primary.default" boxSize={5} />
-                <Text>
-                  {humanNumber(grantProposal.grantAmountRequested, grantProposal.grantAmountRequested, "B3TR")}
-                </Text>
-                <Box hideBelow="md">
-                  <Text>
-                    {"•"} {grantProposal.grantType === "dapp" ? "App" : "Tooling"} {"Grant"}
+                <HStack gap={2} minW="fit-content">
+                  <Icon as={B3trIcon} color="actions.primary.default" boxSize={{ base: 4, md: 5 }} />
+                  <Text fontSize={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
+                    {humanNumber(grantProposal.grantAmountRequested, grantProposal.grantAmountRequested, "B3TR")}
                   </Text>
-                </Box>
-                <Center height="20px" px={2}>
-                  <Separator orientation="vertical" h="20px" />
-                </Center>
+                  <Text display={{ base: "none", lg: "block" }} fontSize={{ base: "sm", lg: "md" }}>
+                    {"•"} {grantProposal.grantType === "dapp" ? "App" : "Tooling"}
+                  </Text>
+                </HStack>
+                <Separator orientation="vertical" h="16px" />
               </>
             )}
-            <AddressWithProfilePicture address={proposal.proposerAddress} />
-            {grantProposal && (
-              <Center height="20px" px={2}>
-                <Separator orientation="vertical" h="20px" />
-              </Center>
-            )}
+            <HStack minW="fit-content">
+              <AddressWithProfilePicture address={proposal.proposerAddress} />
+            </HStack>
           </HStack>
-          {grantProposal && <ProposalLinksAndSocials proposal={grantProposal} />}
+          {grantProposal && (
+            <>
+              {!isMobile && <Separator orientation="vertical" h="16px" />}
+              <HStack justify="flex-start">
+                <ProposalLinksAndSocials proposal={grantProposal} />
+              </HStack>
+            </>
+          )}
         </Stack>
 
         <Separator w="full" h={1} color="border.secondary" />
@@ -155,7 +167,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
             </HStack>
             {timeLeftDisplay ? (
               <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
-                {t("End: {{endDate}}", {
+                {t("Ends: {{endDate}}", {
                   endDate: timeLeftDisplay,
                 })}
               </Text>
@@ -172,7 +184,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
               />
               {timeLeftDisplay ? (
                 <Text fontSize="14px" color="text.subtle">
-                  {t("End: {{endDate}}", {
+                  {t("Ends: {{endDate}}", {
                     endDate: timeLeftDisplay,
                   })}
                 </Text>

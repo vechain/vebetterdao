@@ -159,14 +159,14 @@ export const GrantsPageContent = () => {
         <GrantsBanners />
         <HStack w="full" justifyContent="space-between">
           <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
-            <Heading size="3xl">{t("Grants")}</Heading>
+            <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Grants")}</Heading>
             {!open && (
               <Link
                 display="inline-flex"
                 alignItems="center"
                 fontWeight={500}
                 color="primary.500"
-                fontSize="md"
+                fontSize={{ base: "xs", lg: "md" }}
                 onClick={onOpen}>
                 <Icon as={UilInfoCircle} boxSize={4} />
                 {t("More info")}
@@ -174,7 +174,7 @@ export const GrantsPageContent = () => {
             )}
           </HStack>
           {showApplyForGrant && (
-            <Button variant="primaryAction" onClick={onApplyForGrant}>
+            <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
               <Text>{t("Apply for Grant")}</Text>
             </Button>
           )}
