@@ -109,42 +109,6 @@ contract RelayerRewardsPool is
     }
   }
 
-  /// @notice Emitted when the B3TR contract address is updated
-  /// @param newAddress The new B3TR contract address
-  /// @param oldAddress The old B3TR contract address
-  event B3TRAddressUpdated(address indexed newAddress, address indexed oldAddress);
-
-  /// @notice Emitted when the Emissions contract address is updated
-  /// @param newAddress The new Emissions contract address
-  /// @param oldAddress The old Emissions contract address
-  event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
-
-  /// @notice Emitted when the XAllocationVoting contract address is updated
-  /// @param newAddress The new XAllocationVoting contract address
-  /// @param oldAddress The old XAllocationVoting contract address
-  event XAllocationVotingAddressUpdated(address indexed newAddress, address indexed oldAddress);
-
-  /// @notice Custom error for when relayer is already registered
-  error RelayerAlreadyRegistered(address relayer);
-
-  /// @notice Custom error for when relayer is not registered
-  error RelayerNotRegistered(address relayer);
-
-  /// @notice Custom error for when a round has not ended yet
-  error RoundNotEnded(uint256 roundId);
-
-  /// @notice Custom error for when trying to claim rewards twice
-  error RewardsAlreadyClaimed(address relayer, uint256 roundId);
-
-  /// @notice Custom error for when there are no rewards to claim
-  error NoRewardsToClaim(address relayer, uint256 roundId);
-
-  /// @notice Custom error for when transfer fails
-  error TransferFailed();
-
-  /// @notice Custom error for invalid parameters
-  error InvalidParameter(string parameter);
-
   /// @notice Modifier to check if the caller has either the default admin or pool admin role
   modifier onlyRoleOrAdmin(bytes32 role) {
     require(

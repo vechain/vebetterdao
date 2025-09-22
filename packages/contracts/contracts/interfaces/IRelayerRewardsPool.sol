@@ -38,6 +38,161 @@ enum RelayerAction {
  * who perform auto-voting actions on behalf of users.
  */
 interface IRelayerRewardsPool {
+  // =========================== Events ===========================
+
+  /**
+   * @notice Emitted when early access vote allocations are set for a round
+   * @param roundId The round ID
+   * @param totalAutoVoteUsers The total number of auto-voting users
+   * @param totalActions The total number of actions to be allocated
+   * @param totalWeightedActions The total weighted actions to be allocated
+   * @param numRelayers The number of registered relayers
+   */
+  event TotalAutoVotingActionsSet(
+    uint256 indexed roundId,
+    uint256 totalAutoVoteUsers,
+    uint256 totalActions,
+    uint256 totalWeightedActions,
+    uint256 numRelayers
+  );
+
+  /**
+   * @notice Emitted when expected actions are reduced for a round
+   * @param roundId The round ID
+   * @param userCount The number of users removed from expected actions
+   * @param newTotalActions The new total actions required
+   * @param newTotalWeightedActions The new total weighted actions required
+   */
+  event ExpectedActionsReduced(
+    uint256 indexed roundId,
+    uint256 userCount,
+    uint256 newTotalActions,
+    uint256 newTotalWeightedActions
+  );
+
+  /**
+   * @notice Emitted when a relayer action is registered
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @param actionCount The new total action count for the relayer
+   * @param weight The weight of the action
+   */
+  event RelayerActionRegistered(address indexed relayer, uint256 indexed roundId, uint256 actionCount, uint256 weight);
+
+  /**
+   * @notice Emitted when rewards are deposited for a round
+   * @param roundId The round ID
+   * @param amount The amount deposited
+   * @param totalRewards The new total rewards for the round
+   */
+  event RewardsDeposited(uint256 indexed roundId, uint256 amount, uint256 totalRewards);
+
+  /**
+   * @notice Emitted when a relayer claims rewards
+   * @param relayer The relayer address
+   * @param roundId The round ID
+   * @param amount The amount claimed
+   */
+  event RelayerRewardsClaimed(address indexed relayer, uint256 indexed roundId, uint256 amount);
+
+  /**
+   * @notice Emitted when vote weight is updated
+   * @param newWeight The new vote weight
+   * @param oldWeight The old vote weight
+   */
+  event VoteWeightUpdated(uint256 newWeight, uint256 oldWeight);
+
+  /**
+   * @notice Emitted when claim weight is updated
+   * @param newWeight The new claim weight
+   * @param oldWeight The old claim weight
+   */
+  event ClaimWeightUpdated(uint256 newWeight, uint256 oldWeight);
+
+  /**
+   * @notice Emitted when relayer fee percentage is updated
+   * @param newFee The new relayer fee percentage
+   * @param oldFee The old relayer fee percentage
+   */
+  event RelayerFeePercentageUpdated(uint256 newFee, uint256 oldFee);
+
+  /**
+   * @notice Emitted when fee cap is updated
+   * @param newFee The new fee cap
+   * @param oldFee The old fee cap
+   */
+  event FeeCapUpdated(uint256 newFee, uint256 oldFee);
+
+  /**
+   * @notice Emitted when relayer fee denominator is updated
+   * @param newDenominator The new relayer fee denominator
+   * @param oldDenominator The old relayer fee denominator
+   */
+  event RelayerFeeDenominatorUpdated(uint256 newDenominator, uint256 oldDenominator);
+
+  /**
+   * @notice Emitted when a relayer is registered
+   * @param relayer The address of the registered relayer
+   */
+  event RelayerRegistered(address indexed relayer);
+
+  /**
+   * @notice Emitted when a relayer is unregistered
+   * @param relayer The address of the unregistered relayer
+   */
+  event RelayerUnregistered(address indexed relayer);
+
+  /**
+   * @notice Emitted when early access blocks are updated
+   * @param newBlocks The new number of early access blocks
+   * @param oldBlocks The old number of early access blocks
+   */
+  event EarlyAccessBlocksUpdated(uint256 newBlocks, uint256 oldBlocks);
+
+  /**
+   * @notice Emitted when the B3TR contract address is updated
+   * @param newAddress The new B3TR contract address
+   * @param oldAddress The old B3TR contract address
+   */
+  event B3TRAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /**
+   * @notice Emitted when the Emissions contract address is updated
+   * @param newAddress The new Emissions contract address
+   * @param oldAddress The old Emissions contract address
+   */
+  event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /**
+   * @notice Emitted when the XAllocationVoting contract address is updated
+   * @param newAddress The new XAllocationVoting contract address
+   * @param oldAddress The old XAllocationVoting contract address
+   */
+  event XAllocationVotingAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  // =========================== Custom Errors ===========================
+
+  /// @notice Custom error for when relayer is already registered
+  error RelayerAlreadyRegistered(address relayer);
+
+  /// @notice Custom error for when relayer is not registered
+  error RelayerNotRegistered(address relayer);
+
+  /// @notice Custom error for when a round has not ended yet
+  error RoundNotEnded(uint256 roundId);
+
+  /// @notice Custom error for when trying to claim rewards twice
+  error RewardsAlreadyClaimed(address relayer, uint256 roundId);
+
+  /// @notice Custom error for when there are no rewards to claim
+  error NoRewardsToClaim(address relayer, uint256 roundId);
+
+  /// @notice Custom error for when transfer fails
+  error TransferFailed();
+
+  /// @notice Custom error for invalid parameters
+  error InvalidParameter(string parameter);
+
   // =========================== Getters ===========================
 
   /**
@@ -216,115 +371,4 @@ interface IRelayerRewardsPool {
    * @param roundId The round ID
    */
   function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view;
-
-  // =========================== Events ===========================
-
-  /**
-   * @notice Emitted when early access vote allocations are set for a round
-   * @param roundId The round ID
-   * @param totalAutoVoteUsers The total number of auto-voting users
-   * @param totalActions The total number of actions to be allocated
-   * @param totalWeightedActions The total weighted actions to be allocated
-   * @param numRelayers The number of registered relayers
-   */
-  event TotalAutoVotingActionsSet(
-    uint256 indexed roundId,
-    uint256 totalAutoVoteUsers,
-    uint256 totalActions,
-    uint256 totalWeightedActions,
-    uint256 numRelayers
-  );
-
-  /**
-   * @notice Emitted when expected actions are reduced for a round
-   * @param roundId The round ID
-   * @param userCount The number of users removed from expected actions
-   * @param newTotalActions The new total actions required
-   * @param newTotalWeightedActions The new total weighted actions required
-   */
-  event ExpectedActionsReduced(
-    uint256 indexed roundId,
-    uint256 userCount,
-    uint256 newTotalActions,
-    uint256 newTotalWeightedActions
-  );
-
-  /**
-   * @notice Emitted when a relayer action is registered
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @param actionCount The new total action count for the relayer
-   * @param weight The weight of the action
-   */
-  event RelayerActionRegistered(address indexed relayer, uint256 indexed roundId, uint256 actionCount, uint256 weight);
-
-  /**
-   * @notice Emitted when rewards are deposited for a round
-   * @param roundId The round ID
-   * @param amount The amount deposited
-   * @param totalRewards The new total rewards for the round
-   */
-  event RewardsDeposited(uint256 indexed roundId, uint256 amount, uint256 totalRewards);
-
-  /**
-   * @notice Emitted when a relayer claims rewards
-   * @param relayer The relayer address
-   * @param roundId The round ID
-   * @param amount The amount claimed
-   */
-  event RelayerRewardsClaimed(address indexed relayer, uint256 indexed roundId, uint256 amount);
-
-  /**
-   * @notice Emitted when vote weight is updated
-   * @param newWeight The new vote weight
-   * @param oldWeight The old vote weight
-   */
-  event VoteWeightUpdated(uint256 newWeight, uint256 oldWeight);
-
-  /**
-   * @notice Emitted when claim weight is updated
-   * @param newWeight The new claim weight
-   * @param oldWeight The old claim weight
-   */
-  event ClaimWeightUpdated(uint256 newWeight, uint256 oldWeight);
-
-  /**
-   * @notice Emitted when relayer fee percentage is updated
-   * @param newFee The new relayer fee percentage
-   * @param oldFee The old relayer fee percentage
-   */
-  event RelayerFeePercentageUpdated(uint256 newFee, uint256 oldFee);
-
-  /**
-   * @notice Emitted when fee cap is updated
-   * @param newFee The new fee cap
-   * @param oldFee The old fee cap
-   */
-  event FeeCapUpdated(uint256 newFee, uint256 oldFee);
-
-  /**
-   * @notice Emitted when relayer fee denominator is updated
-   * @param newDenominator The new relayer fee denominator
-   * @param oldDenominator The old relayer fee denominator
-   */
-  event RelayerFeeDenominatorUpdated(uint256 newDenominator, uint256 oldDenominator);
-
-  /**
-   * @notice Emitted when a relayer is registered
-   * @param relayer The address of the registered relayer
-   */
-  event RelayerRegistered(address indexed relayer);
-
-  /**
-   * @notice Emitted when a relayer is unregistered
-   * @param relayer The address of the unregistered relayer
-   */
-  event RelayerUnregistered(address indexed relayer);
-
-  /**
-   * @notice Emitted when early access blocks are updated
-   * @param newBlocks The new number of early access blocks
-   * @param oldBlocks The old number of early access blocks
-   */
-  event EarlyAccessBlocksUpdated(uint256 newBlocks, uint256 oldBlocks);
 }
