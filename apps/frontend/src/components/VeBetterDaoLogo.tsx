@@ -1,13 +1,9 @@
 "use client"
-import { Image } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
+import { Icon } from "@chakra-ui/react"
 import React from "react"
 
-export const VeBetterDaoLogo: React.FC = () => {
-  const lightModeUrl = "/assets/logos/VeBetter_WhiteMode.svg"
-  const darkModeUrl = "/assets/logos/VeBetter_DarkMode.svg"
-  const logoUrl = useColorModeValue(lightModeUrl, darkModeUrl)
+import VBDLogo from "@/components/Icons/svg/vebetter-dao-logo.svg"
 
-  //Priority is set to true to prevent the logo from being lazy loaded and FOC
-  return <Image width="32" src={logoUrl} alt="VeBetter Logo" />
+export const VeBetterDaoLogo: React.FC = () => {
+  return <Icon as={VBDLogo} color="icon.default" />
 }

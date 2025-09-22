@@ -101,7 +101,7 @@ export const Leaderboard = () => {
             p={4}
             h="full"
             zIndex={2}
-            bg="rgba(255, 255, 255, 0.6)">
+            bg="transparency.100">
             <Heading size="md">{t("Not enough data for the week")}</Heading>
             <Text textStyle="sm" color="text.subtle" textAlign={"center"}>
               {t("Leaderboard is available since the integration of sustainability proofs 🥇")}
