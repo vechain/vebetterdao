@@ -1,3 +1,5 @@
 src/*/local.lambda.ts
 src/*/*/local.lambda.ts
 src/*/*/*/local.lambda.ts
+
+src/helpers/simulate/x-allocation-voting/data/*
