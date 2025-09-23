@@ -599,11 +599,6 @@
   "Total B3TR Balance": "Total B3TR Balance",
   "Total VOT3 Balance": "Total VOT3 Balance",
   "Withdraw reason": "Withdraw reason",
-  "10%": "10%",
-  "25%": "25%",
-  "50%": "50%",
-  "75%": "75%",
-  "100%": "100%",
   "Supply breakdown": "Supply breakdown",
   "B3TR in circulation": "B3TR in circulation",
   "VOT3 in circulation": "VOT3 in circulation",
@@ -1225,5 +1220,7 @@
   "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).": "X2Earn is VeBetterDAO’s framework for apps that reward sustainable actions with B3TR. The “X” can be any activity (e.g., Plant-2-Earn, Sweat-2-Earn).",
   "Company VAT number e.g. 01234567": "Company VAT number e.g. 01234567",
   "The maximum amount for this grant type is {{value}} USD": "The maximum amount for this grant type is {{value}} USD",
-  "Apply for Grant": "Apply for Grant"
+  "Apply for Grant": "Apply for Grant",
+  "Mint": "Mint",
+  "Burn": "Burn"
 }

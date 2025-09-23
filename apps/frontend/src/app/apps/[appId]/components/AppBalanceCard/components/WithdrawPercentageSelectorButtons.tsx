@@ -30,7 +30,7 @@ export const WithdrawPercentageSelectorButtons: React.FC<PercentageSelectorButto
           w={"full"}
           h={"30px"}
           textStyle="md">
-          {percentage === 1 ? (isMobile ? `${percentage * 100}%` : t("Deposit all")) : `${percentage * 100}%`}
+          {percentage === 1 ? (isMobile ? `${percentage * 100}%` : t("Withdraw all")) : `${percentage * 100}%`}
         </Button>
       ))}
     </SimpleGrid>
