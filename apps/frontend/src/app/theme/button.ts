@@ -4,6 +4,8 @@ export const buttonRecipe = defineRecipe({
   base: {
     rounded: "md",
     fontWeight: 600,
+    focusRing: "outside",
+    focusRingColor: "actions.primary.default",
   },
   variants: {
     variant: {

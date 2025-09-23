@@ -54,7 +54,7 @@ export const GrantsStepsCard = ({
     setCurrentStepIndex(prev => prev - 1)
     // Trigger button expand animation when going back to step 0
     if (currentStepIndex === 1) {
-      animate(scope.current, { width: "200px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
+      animate(scope.current, { width: "160px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
     }
   }
 
@@ -177,14 +177,14 @@ export const GrantsStepsCard = ({
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.4, ease: [0.25, 0.25, 0.25, 0.2] }}>
-                      <Button variant="primarySubtle" onClick={goToPrevious}>
+                      <Button variant="primarySubtle" w="120px" onClick={goToPrevious}>
                         {t("Back")}
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <Button ref={scope} variant="primaryAction" onClick={isLastStep ? handleApply : goToNext} w="200px">
+                <Button ref={scope} variant="primaryAction" onClick={isLastStep ? handleApply : goToNext} w="120px">
                   {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>
