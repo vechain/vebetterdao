@@ -4,9 +4,9 @@ import HeartIconFilled from "@/components/Icons/svg/heart-solid.svg"
 import ThumbsDownIconFilled from "@/components/Icons/svg/thumbs-down-solid.svg"
 import ThumbsUpIconFilled from "@/components/Icons/svg/thumbs-up-solid.svg"
 import { Box, HStack, Icon, Text } from "@chakra-ui/react"
-import { ethers } from "ethers"
+import { humanNumber } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-
+import { ethers } from "ethers"
 export interface UserInteractionBadgesProps {
   userDeposits?: bigint
   userVoteOption?: VoteType
@@ -63,7 +63,7 @@ export const UserInteractionBadges = ({ userDeposits, userVoteOption }: UserInte
         label: t("You supported with"),
         color: "success.primary",
         icon: HeartIconFilled,
-        text: t("{{amount}} VOT3", { amount: Number(ethers.formatEther(userDeposits)).toFixed(1) }),
+        text: humanNumber(ethers.formatEther(userDeposits), ethers.formatEther(userDeposits), "VOT3"),
       }
     }
 
