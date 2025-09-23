@@ -275,11 +275,11 @@ export const GrantsNewFormStepCard = () => {
             <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
               <HStack gap={4} w="full">
                 {currentStepIndex !== firstStep && (
-                  <Button onClick={goToPrevious} variant="secondary" px={8} size="lg">
+                  <Button w="40" onClick={goToPrevious} variant="secondary" px={8} size="lg">
                     {t("Back")}
                   </Button>
                 )}
-                <Button type="submit" variant="primaryAction" px={8} size="lg">
+                <Button w="40" type="submit" variant="primaryAction" px={8} size="lg">
                   {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>
