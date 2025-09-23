@@ -15,8 +15,15 @@ export const useAppActionLeaderboard = (queryOptions: AppActionLeaderboardQueryO
       params: { query: queryOptions },
     },
     {
+      pageParamName: "page",
       initialPageParam: 0,
-      getNextPageParam: (lastPage: AppActionLeaderboardQueryResponse) => lastPage.pagination.hasNext,
+      getNextPageParam: (
+        lastPage: AppActionLeaderboardQueryResponse,
+        _allPages: AppActionLeaderboardQueryResponse[],
+        lastPageParam: number,
+      ) => {
+        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+      },
     },
   )
 }

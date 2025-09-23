@@ -4,3 +4,6 @@
 yarn lint-staged
 
 ./apps/frontend/scripts/check-unused-assets.sh
+if git diff --cached --name-only | grep -q 'apps/frontend/src/i18n/languages/en.json'; then
+  node apps/frontend/scripts/find-unused-translations.js
+fi

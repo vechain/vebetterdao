@@ -20,7 +20,6 @@ export const useProposalComments = (proposalId: string, queryOptions?: ProposalC
     },
     {
       pageParamName: "page",
-
       initialPageParam: 0,
       getNextPageParam: (
         lastPage: ProposalCommentsQueryResponse,
