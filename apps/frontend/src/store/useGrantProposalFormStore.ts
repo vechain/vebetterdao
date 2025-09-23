@@ -20,6 +20,7 @@ const initialState: GrantFormData = {
   githubUsername: "",
   twitterUsername: "",
   discordUsername: "",
+  discordUserId: "",
   // Project details
   problemDescription: "",
   solutionDescription: "",

@@ -59,6 +59,7 @@ export type GrantFormData = {
   githubUsername: string
   twitterUsername: string
   discordUsername: string
+  discordUserId: string
   // Project details
   problemDescription: string
   solutionDescription: string

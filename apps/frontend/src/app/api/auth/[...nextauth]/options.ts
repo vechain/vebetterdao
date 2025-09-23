@@ -74,6 +74,9 @@ export const authOptions: NextAuthOptions = {
       if (token?.discordUsername) {
         session.user.discordUsername = token.discordUsername
       }
+      if (token?.discordUserId) {
+        session.user.discordUserId = token.discordUserId
+      }
       return session
     },
     async jwt({ token, account, profile }: any) {
@@ -98,6 +101,9 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "discord") {
         if (profile?.username) {
           token.discordUsername = profile.username // Capture Discord username
+        }
+        if (profile?.id) {
+          token.discordUserId = profile.id // Capture Discord user id
         }
       }
 

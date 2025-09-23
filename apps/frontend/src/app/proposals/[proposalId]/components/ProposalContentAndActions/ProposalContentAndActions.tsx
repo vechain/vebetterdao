@@ -136,10 +136,10 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           {/* Sources and additional information section */}
           <CollapsibleSection title={t("Sources and additional")}>
             <VStack gap={"16px"} align="flex-start" w="full">
-              {proposal?.discordUsername ? (
+              {proposal?.discordUserId ? (
                 <SocialLink
                   icon={AiOutlineDiscord}
-                  href={`https://discord.com/users/${proposal.discordUsername}`}
+                  href={`https://discord.com/users/${proposal.discordUserId}`}
                   label="Discord"
                 />
               ) : null}

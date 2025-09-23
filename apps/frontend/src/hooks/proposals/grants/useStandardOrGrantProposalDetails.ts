@@ -60,6 +60,7 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     githubUsername: ipfsMetadata?.githubUsername ?? "",
     twitterUsername: ipfsMetadata?.twitterUsername ?? "",
     discordUsername: ipfsMetadata?.discordUsername ?? "",
+    discordUserId: ipfsMetadata?.discordUserId ?? "",
     grantType: ipfsMetadata?.grantType ?? "",
     problemDescription: ipfsMetadata?.problemDescription ?? "",
     solutionDescription: ipfsMetadata?.solutionDescription ?? "",
