@@ -1458,5 +1458,7 @@
   "Company VAT number e.g. 01234567": "Company VAT number e.g. 01234567",
   "The maximum amount for this grant type is {{value}} USD": "The maximum amount for this grant type is {{value}} USD",
   "Apply for Grant": "Apply for Grant",
-  "Executed": "Executed"
+  "Executed": "Executed",
+  "Approve & Fund": "Approve & Fund",
+  "Claim Reward": "Claim Reward"
 }
