@@ -704,23 +704,33 @@ contract GrantsManager is
     }
   }
 
+  function _getRejectedMilestonesAmount(uint256 proposalId) internal view returns (uint256 rejectedAmount) {
+    GrantsManagerStorage storage $ = _getGrantsManagerStorage();
+    Milestone[] memory milestones = $.grant[proposalId].milestones;
+    for (uint256 i = 0; i < milestones.length; i++) {
+      if (milestones[i].isRejected) {
+        rejectedAmount += milestones[i].amount;
+      }
+    }
+  }
+
   /**
    * @notice Transfers the remaining amount to the treasury
    * @param proposalId The ID of the proposal
    */
   function _transferRemainingAmountToTreasury(uint256 proposalId) internal {
     GrantsManagerStorage storage $ = _getGrantsManagerStorage();
-    uint256 remainingAmount = $.grant[proposalId].totalAmount - $.grant[proposalId].claimedAmount;
-    if (remainingAmount > 0) {
+    uint256 rejectedAmount = _getRejectedMilestonesAmount(proposalId);
+    if (rejectedAmount > 0) {
       // Make sure we have the balance before trying to transfer
       uint256 currentBalance = $.b3tr.balanceOf(address(this));
-      if (currentBalance < remainingAmount) {
-        revert InsufficientFunds(currentBalance, remainingAmount);
+      if (currentBalance < rejectedAmount) {
+        revert InsufficientFunds(currentBalance, rejectedAmount);
       }
 
-      $.b3tr.transfer(address($.treasury), remainingAmount);
+      $.b3tr.transfer(address($.treasury), rejectedAmount);
     }
-    emit MilestoneRejectedAndFundsReturnedToTreasury(proposalId, remainingAmount);
+    emit MilestoneRejectedAndFundsReturnedToTreasury(proposalId, rejectedAmount);
   }
 
   /**
