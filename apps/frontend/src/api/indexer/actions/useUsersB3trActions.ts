@@ -17,8 +17,15 @@ export const useUsersB3trActions = (wallet: string, queryOptions: UserB3trAction
       params: { path: { wallet }, query: queryOptions },
     },
     {
+      pageParamName: "page",
       initialPageParam: 0,
-      getNextPageParam: (lastPage: UserB3trActionsQueryResponse) => lastPage.pagination.hasNext,
+      getNextPageParam: (
+        lastPage: UserB3trActionsQueryResponse,
+        _allPages: UserB3trActionsQueryResponse[],
+        lastPageParam: number,
+      ) => {
+        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+      },
     },
   )
 }
