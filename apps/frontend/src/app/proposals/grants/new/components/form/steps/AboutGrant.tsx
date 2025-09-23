@@ -235,7 +235,6 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Receiver Address")}
                     type="text"
-                    isOptional
                     placeholder={"e.g. 0x1a2b3c..."}
                     register={register("grantsReceiverAddress", {
                       validate: value => validateWalletAddress(value, t("Receiver Address")),

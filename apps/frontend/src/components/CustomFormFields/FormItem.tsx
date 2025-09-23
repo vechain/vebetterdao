@@ -59,7 +59,7 @@ export const FormItem = ({
           {description}
         </Text>
       )}
-      <InputGroup {...(leftElement && { startElement: leftElement })}>
+      <InputGroup {...(leftElement && { startElement: leftElement })} h="full">
         <InputComponent
           placeholder={placeholder}
           {...register}
