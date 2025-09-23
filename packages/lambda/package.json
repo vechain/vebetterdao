@@ -13,6 +13,7 @@
     "test": "yarn build && TEST_ENVIRONMENT=testnet jest",
     "start": "npx ts-node",
     "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts",
+    "simulate:local:x-allocation-voting-seeded-accounts": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/seededAccounts.ts",
     "simulate:local:x-allocation-voting": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateRoundCastVote.ts",
     "simulate:local:x-allocation-voting-on-behalf": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateRoundCastVoteOnBehalf.ts",
     "simulate:local:x-allocation-voting-gas": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateGas.ts"
