@@ -13,6 +13,8 @@ import {
   VStack,
   useBreakpointValue,
   useMediaQuery,
+  InputProps,
+  Icon,
 } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
@@ -64,7 +66,7 @@ type FormDateInputProps = {
   // Date constraints in Unix seconds (to match GrantFormData schema)
   minDate?: number
   maxDate?: number
-  size?: "sm" | "md" | "lg"
+  size?: InputProps["size"]
   watch?: UseFormWatch<any>
 }
 
@@ -338,8 +340,17 @@ export const FormDateInput = ({
         positioning={{ strategy: "fixed", placement }}
         closeOnInteractOutside={true}>
         <Popover.Trigger w="full">
-          <InputGroup w="full" startElement={<LuCalendar color="contrast-fg-on-muted" pointerEvents="none" />}>
+          <InputGroup
+            w="full"
+            startElement={<Icon as={LuCalendar} color="icon.subtle" />}
+            startElementProps={{
+              h: "50%",
+              color: "text.default",
+              textStyle: "md",
+              pl: "3",
+            }}>
             <Input
+              p="3"
               size={size}
               placeholder={placeholder}
               value={displayValue}
@@ -349,6 +360,7 @@ export const FormDateInput = ({
               rounded="xl"
               name={register.name}
               ref={register.ref}
+              style={{ paddingInlineStart: "2rem" }}
             />
           </InputGroup>
         </Popover.Trigger>

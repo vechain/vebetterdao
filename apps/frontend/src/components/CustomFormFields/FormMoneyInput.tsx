@@ -120,15 +120,29 @@ export const FormMoneyInput = ({
         </Text>
       )}
 
-      <InputGroup startElement="$" endElement="USD">
+      <InputGroup
+        startElement="$"
+        startElementProps={{
+          px: "2",
+          w: "8",
+          h: "50%",
+          borderRight: "sm",
+          borderColor: "border.primary",
+          color: "text.default",
+          textStyle: "md",
+        }}>
         <Input
           {...registerPrimary}
+          size="xl"
           placeholder={placeholder}
           value={displayValue}
           onChange={handleChange}
           onBlur={onBlur}
           rounded="xl"
           textAlign="left"
+          textStyle="md"
+          p="3"
+          style={{ paddingInlineStart: "2.5rem" }}
         />
       </InputGroup>
 

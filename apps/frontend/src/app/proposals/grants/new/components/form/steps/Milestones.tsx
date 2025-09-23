@@ -287,7 +287,7 @@ export const MilestoneSection = ({
   }
 
   return (
-    <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })} pb={5}>
+    <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })}>
       <Accordion.ItemTrigger w="full" py={4} textAlign="left" justifyContent="space-between">
         <MilestoneHeader
           milestoneNumber={milestoneNumber}
@@ -303,7 +303,7 @@ export const MilestoneSection = ({
           {t("Define the milestones for your project. Funds will be released as milestones are completed.")}
         </Text>
         <Accordion.ItemBody>
-          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
+          <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6} pl="1">
             {/* Amount */}
             <GridItem colSpan={1}>
               <FormMoneyInput
@@ -340,7 +340,7 @@ export const MilestoneSection = ({
                 })}
                 error={errors.milestones?.[index]?.durationFrom?.message}
                 minDate={now} // now
-                size="lg"
+                size="xl"
                 watch={watch}
                 onBlur={() => syncFieldToStore("durationFrom")}
               />
@@ -361,7 +361,7 @@ export const MilestoneSection = ({
             </GridItem>
 
             {/* Description */}
-            <GridItem minH="160px" colSpan={1}>
+            <GridItem minH="160px" h="full" colSpan={1}>
               <FormItem
                 label={t("Description")}
                 type="textarea"
