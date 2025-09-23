@@ -9,6 +9,8 @@ export const buttonRecipe = defineRecipe({
     fontWeight: "semibold",
     px: "6",
     py: "3",
+    focusRing: "outside",
+    focusRingColor: "actions.primary.default",
   },
   variants: {
     variant: {
@@ -25,6 +27,13 @@ export const buttonRecipe = defineRecipe({
         _hover: { bg: "actions.secondary.hover" },
         _disabled: { bg: "actions.secondary.disabled" },
         _focus: { bg: "actions.secondary.pressed" },
+      },
+      tertiary: {
+        color: "actions.tertiary.text",
+        bgColor: "actions.tertiary.default",
+        _hover: { bg: "actions.tertiary.hover" },
+        _disabled: { bg: "actions.tertiary.disabled" },
+        _focus: { bg: "actions.tertiary.pressed" },
       },
       subtle: {
         bg: "card.subtle",

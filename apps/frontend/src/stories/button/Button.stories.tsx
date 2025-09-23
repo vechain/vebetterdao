@@ -13,5 +13,6 @@ export const Default = () => (
   <VStack alignItems="flex-start" gap="4">
     <Button variant="primary">{"Primary"}</Button>
     <Button variant="secondary">{"Secondary"}</Button>
+    <Button variant="tertiary">{"Tertiary"}</Button>
   </VStack>
 )
