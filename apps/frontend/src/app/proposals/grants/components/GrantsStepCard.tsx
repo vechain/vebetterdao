@@ -42,21 +42,21 @@ export const GrantsStepsCard = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [scope, animate] = useAnimate()
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     // Trigger button shrink animation before step change
-    if (currentStepIndex === 0) {
+    if (currentStepIndex === 0 && !isMobile) {
       animate(scope.current, { width: "120px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
     }
     setCurrentStepIndex(prev => prev + 1)
-  }
+  }, [currentStepIndex, isMobile, animate, scope])
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentStepIndex(prev => prev - 1)
     // Trigger button expand animation when going back to step 0
-    if (currentStepIndex === 1) {
+    if (currentStepIndex === 1 && !isMobile) {
       animate(scope.current, { width: "160px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
     }
-  }
+  }, [currentStepIndex, isMobile, animate, scope])
 
   const currentStep = steps[currentStepIndex]
   const isLastStep = currentStepIndex === steps.length - 1
@@ -92,7 +92,7 @@ export const GrantsStepsCard = ({
         height="100%">
         <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
           <HStack w="full" justify="space-between" alignItems="center">
-            <UilArrowLeft onClick={goToPrevious} cursor="pointer" />
+            {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
             <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
             <UilTimes onClick={onClose} cursor="pointer" size={24} />
           </HStack>
