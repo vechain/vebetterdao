@@ -9,6 +9,7 @@ import {
   useProposalTotalVotes,
   useProposalUserDeposit,
   useProposalVotes,
+  useUserSingleProposalVoteEvent,
 } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
@@ -25,7 +26,7 @@ import {
   useGetVot3Balance,
   useQueueProposal,
 } from "@/hooks"
-import { Box, Button, Card, Heading, HStack, Icon, Separator, Skeleton, Text } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Icon, Separator, Skeleton } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
@@ -37,6 +38,7 @@ import { TbClockHour8 } from "react-icons/tb"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
+import { UserInteractionBadges } from "../UserInteractionBadges"
 
 type Props = {
   proposal?: ProposalEnriched
@@ -80,6 +82,7 @@ export const ProposalInteractionCard = ({
   )
   const { data: proposalVotesQueryData } = useProposalVotes(proposalId)
   const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposalId)
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
 
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
@@ -101,6 +104,7 @@ export const ProposalInteractionCard = ({
   const proposalDepositReached = isDepositReached ?? false
   const currentUserCanQueueOrExecute = permissions?.isProposalExecutor ?? false
   const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
+  const userVoteOption = userVoteEvent?.userVote
   // Check if the proposal is queuable and executable
   const isQueuable = useMemo(() => {
     return proposal?.state === ProposalState.Succeeded && proposalHasTargets
@@ -365,18 +369,8 @@ export const ProposalInteractionCard = ({
               showTokenAmount={false}
             />
 
-            {/* User Support Badge */}
-            {userDeposits && proposal?.state === ProposalState.Pending ? (
-              <HStack>
-                <Text color="gray.600">{t("You supported with")}</Text>
-                <Box border="2px solid" borderColor="success.primary" color="success.primary" borderRadius="lg">
-                  <HStack gap={2} px="12px" py="8px">
-                    <Icon as={HeartIcon} boxSize={5} color="success.primary" />
-                    <Text>{t("{{amount}} VOT3", { amount: Number(ethers.formatEther(userDeposits)).toFixed(1) })}</Text>
-                  </HStack>
-                </Box>
-              </HStack>
-            ) : null}
+            {/* User Interaction Badges */}
+            <UserInteractionBadges userDeposits={userDeposits} userVoteOption={userVoteOption} />
 
             {/* Action Button */}
             {shouldShowActionButton && (
