@@ -1,11 +1,5 @@
 import { describe, it, beforeEach } from "mocha"
-import {
-  setupProposer,
-  validateProposalEvents,
-  setupGovernanceFixtureWithEmissions,
-  GRANT_PROPOSAL_TYPE,
-  setupVoter,
-} from "./fixture.test"
+import { setupProposer, setupGovernanceFixtureWithEmissions } from "./fixture.test"
 import {
   B3TRGovernor,
   VOT3,
@@ -24,16 +18,9 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import { ContractFactory, Interface } from "ethers"
-import {
-  createGrantProposal,
-  createProposalWithMultipleFunctionsAndExecuteItGrant,
-  getRoundId,
-  moveBlocks,
-  payDeposit,
-  waitForCurrentRoundToEnd,
-} from "../helpers/common"
+import { createProposalWithMultipleFunctionsAndExecuteItGrant } from "../helpers/common"
 
-describe.only("Governance - Milestone Management - @shard4d", function () {
+describe("Governance - Milestone Management - @shard4g", function () {
   let governor: B3TRGovernor
   let vot3: VOT3
   let b3tr: B3TR

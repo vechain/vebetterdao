@@ -128,6 +128,8 @@ jobs:
             label: Governance - Compatibility & Thresholds
           - shard: shard4f
             label: Governance - Upgrades
+          - shard: shard4g
+            label: Governance - Milestone Management
           - shard: shard5
             label: Node Management
           - shard: shard6
