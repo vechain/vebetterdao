@@ -1,6 +1,6 @@
 import { useAccountPermissions } from "@/api/contracts/account"
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
@@ -108,8 +108,14 @@ export const MilestoneItem = ({ milestoneData, proposal, isCurrentStep, mileston
 
   // Determine if reviewer actions should show
   const shouldShowReviewerActions = useMemo(() => {
-    return account?.address && isGrantApprover && isCurrentStep && milestoneData.state === MilestoneState.Pending
-  }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state])
+    return (
+      account?.address &&
+      isGrantApprover &&
+      isCurrentStep &&
+      milestoneData.state === MilestoneState.Pending &&
+      proposal.state === ProposalState.InDevelopment
+    )
+  }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -142,10 +148,10 @@ export const MilestoneItem = ({ milestoneData, proposal, isCurrentStep, mileston
       {shouldShowReviewerActions && (
         <HStack w="full">
           <Button variant="secondary" onClick={handleReject}>
-            {"Reject"}
+            {t("Reject")}
           </Button>
           <Button variant="primaryAction" onClick={handleApprove}>
-            {"Approve & Fund"}
+            {t("Approve & Fund")}
           </Button>
         </HStack>
       )}
@@ -154,7 +160,7 @@ export const MilestoneItem = ({ milestoneData, proposal, isCurrentStep, mileston
       {shouldShowClaimAction && (
         <HStack w="full">
           <Button variant="primaryAction" onClick={handleClaim}>
-            {"Claim Reward"}
+            {t("Claim Reward")}
           </Button>
         </HStack>
       )}
