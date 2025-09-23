@@ -3,7 +3,7 @@ import { TestPk } from "../../../../../../contracts/scripts/helpers/seedAccounts
 import { ThorClient } from "@vechain/sdk-network"
 import { ABIContract, Address, Clause, TransactionClause } from "@vechain/sdk-core"
 import { TransactionUtils } from "@repo/utils"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
+import { VoterRewards__factory, XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 
 export const toggleAutoVotingAndSelectApps = async (
   thorClient: ThorClient,
@@ -32,7 +32,11 @@ export const toggleAutoVotingAndSelectApps = async (
   await TransactionUtils.sendTx(thorClient as any, clauses, account.pk, 5, true)
 }
 
-export const isAutoVotingEnabled = async (thorClient: ThorClient, config: AppConfig, account: TestPk) => {
+export const isAutoVotingEnabledForCurrentCycle = async (
+  thorClient: ThorClient,
+  config: AppConfig,
+  account: TestPk,
+) => {
   const autoVotingEnabled = await thorClient.contracts.executeCall(
     config.xAllocationVotingContractAddress,
     ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("isUserAutoVotingEnabledForCurrentCycle"),
@@ -84,6 +88,26 @@ export const castVoteOnBehalfOfMultiClauses = async (
   await TransactionUtils.sendTx(thorClient as any, clauses, account.pk, 5, true)
 }
 
+export const claimRewardForUser = async (
+  thorClient: ThorClient,
+  config: AppConfig,
+  account: TestPk,
+  relayer: TestPk,
+  currentRoundNumber: number,
+) => {
+  const clauses: TransactionClause[] = []
+
+  clauses.push(
+    Clause.callFunction(
+      Address.of(config.voterRewardsContractAddress),
+      ABIContract.ofAbi(VoterRewards__factory.abi).getFunction("claimReward"),
+      [currentRoundNumber, account.address.toString()],
+    ),
+  )
+
+  await TransactionUtils.sendTx(thorClient as any, clauses, relayer.pk, 5, true)
+}
+
 export const configureAutoVoting = async (
   thorClient: ThorClient,
   config: AppConfig,
@@ -91,9 +115,7 @@ export const configureAutoVoting = async (
   seedAccounts: any[],
   appIds: string[],
 ) => {
-  console.log("\n🤖 Configuring auto-voting for all accounts...")
-  console.log(`🎯 Total accounts to configure: ${numVoters}`)
-  console.log(`📱 Apps available for voting: ${appIds.length}`)
+  console.log(`🤖 Configuring auto-voting for ${numVoters} accounts`)
 
   let autoVotingConfigured = 0
   let alreadyEnabled = 0
@@ -101,28 +123,21 @@ export const configureAutoVoting = async (
   for (let i = 0; i < numVoters; i++) {
     const seedAccount = seedAccounts[i]
     const accountNumber = i + 1
-    const isAutoVotingEnabledForUser = await isAutoVotingEnabled(thorClient, config, seedAccount.key)
+    const isAutoVotingEnabledForUser = await isAutoVotingEnabledForCurrentCycle(thorClient, config, seedAccount.key)
 
     if (!isAutoVotingEnabledForUser) {
-      console.log(`⚙️  Account ${accountNumber} (${seedAccount.key.address}): Enabling auto-voting...`)
       try {
         await toggleAutoVotingAndSelectApps(thorClient, config, seedAccount.key, appIds)
         autoVotingConfigured++
-        console.log(`✅ Account ${accountNumber}: Auto-voting enabled successfully`)
+        console.log(`✅ Account ${accountNumber}: Auto-voting enabled`)
       } catch (error) {
         console.log(`❌ Account ${accountNumber}: Failed to enable auto-voting - ${error}`)
       }
     } else {
       alreadyEnabled++
-      console.log(`ℹ️  Account ${accountNumber} (${seedAccount.key.address}): Auto-voting already enabled`)
+      console.log(`ℹ️  Account ${accountNumber}: Auto-voting already enabled`)
     }
   }
 
-  console.log(`\n📊 Auto-voting Configuration Summary:`)
-  console.log(`✅ Newly configured: ${autoVotingConfigured} accounts`)
-  console.log(`ℹ️  Already enabled: ${alreadyEnabled} accounts`)
-  console.log(`🎯 Total ready for auto-voting: ${autoVotingConfigured + alreadyEnabled}/${numVoters} accounts`)
-  console.log(
-    `📈 Configuration success rate: ${(((autoVotingConfigured + alreadyEnabled) / numVoters) * 100).toFixed(1)}%`,
-  )
+  console.log(`📊 Summary: ${autoVotingConfigured} configured, ${alreadyEnabled} already enabled`)
 }
