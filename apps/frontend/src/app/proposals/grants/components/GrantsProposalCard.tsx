@@ -1,4 +1,5 @@
 import {
+  useIsDepositReached,
   useProposalDepositEvent,
   useProposalInteractionDates,
   useProposalUserDeposit,
@@ -43,6 +44,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   const { data: userDeposits } = useProposalUserDeposit(proposal.id, account?.address ?? "")
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal.id)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal.id)
+  const { data: depositReached } = useIsDepositReached(proposal.id ?? "")
 
   // ==========================================
   // COMPUTED VALUES & CONSTANTS
@@ -149,6 +151,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 state={proposal.state}
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
+                depositReached={depositReached ?? false}
               />
               {isSupportOrVotingPhase && (
                 <HStack gap={2}>
@@ -181,6 +184,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 state={proposal.state}
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
+                depositReached={depositReached ?? false}
               />
               {timeLeftDisplay ? (
                 <Text fontSize="14px" color="text.subtle">

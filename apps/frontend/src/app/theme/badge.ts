@@ -62,6 +62,11 @@ export const badgeRecipe = defineRecipe({
         bg: "success.subtle",
         color: "success.strong",
       },
+      // Supported badge (Green)
+      supported: {
+        bg: "success.subtle",
+        color: "success.strong",
+      },
       outline: {
         bg: "transparent",
         borderColor: "#D5D5D5", //TODO: Use a variable

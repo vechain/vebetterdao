@@ -1,7 +1,7 @@
-import { useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
+import { useIsDepositReached, useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
 import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { Card, Heading, HStack, Tabs, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -21,6 +21,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   const { account } = useWallet()
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
+  const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
 
   // ==========================================
   // COMPUTED VALUES & CONSTANTS
@@ -40,9 +41,10 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
       {/* Status badge and proposer info */}
       <HStack justify={"space-between"} align={"flex-start"} w="full">
         <GrantsProposalStatusBadge
-          state={proposal?.state}
+          state={proposal?.state ?? ProposalState.Pending}
           hasUserSupported={hasUserDeposited}
           hasUserVoted={hasUserVoted}
+          depositReached={depositReached ?? false}
         />
 
         <AddressWithProfilePicture address={proposerAddress} />
