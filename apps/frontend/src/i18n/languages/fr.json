@@ -1794,5 +1794,6 @@
   "To be able to vote on the next round’s allocations and proposals": "Pour pouvoir voter sur les allocations et propositions du prochain tour",
   "By clicking the button below, you will also claim allocations for {{count}} apps.": "En cliquant sur le bouton ci-dessous, vous revendiquerez également des allocations pour {{count}} applications.",
   "Recommended size: 720x720 (minimum).": "Taille recommandée : 720x720 (minimum).",
-  "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Les ressources ne doivent pas contenir de logos, marques, texte ou tout objet/élément sans rapport avec l'objectif de l'application."
+  "Assets should not contain logos, brands, text, or any unrelated objects/elements to the app's purpose.": "Les ressources ne doivent pas contenir de logos, marques, texte ou tout objet/élément sans rapport avec l'objectif de l'application.",
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Soumettez votre application dans l'écosystème avec toutes les informations nécessaires, y compris le logo, la biographie du créateur et les liens vers les réseaux sociaux."
 }
