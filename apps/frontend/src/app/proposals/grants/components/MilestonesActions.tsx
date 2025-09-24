@@ -1,18 +1,22 @@
 import { MilestoneItem } from "@/app/proposals/grants/components"
 import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
-import { Accordion, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
+import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
+import { EditPencil } from "iconoir-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================
   // HOOKS
   // ==========================================
+  const { account } = useWallet()
   const { data: milestoneStatesData, isLoading } = useAllMilestoneStates(proposal)
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
+  const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
 
   const milestones = useMemo(() => {
     return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
@@ -52,7 +56,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         colorPalette="blue"
         variant="primaryVertical"
         pt={"40px"}>
-        <Steps.List>
+        <Steps.List flex={1}>
           <Accordion.Root
             multiple // allow any item to be open
             value={accordionValue}
@@ -75,19 +79,29 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                   />
                 </Steps.Indicator>
                 <Steps.Separator />
-                <VStack pb={"24px"} align="flex-start">
+                <VStack pb={"24px"} align="flex-start" w="full" flex={1}>
                   <Accordion.Item value={`milestone-accordion-item-${index}`} border="none" w="full">
                     {/* Milestone header */}
                     <VStack align="flex-start" gap={"16px"} pb={"16px"}>
-                      <Accordion.ItemTrigger py={1}>
+                      <Accordion.ItemTrigger py={1} display="flex" justifyContent="space-between" w="full">
                         <Text fontSize="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
+
+                        {milestone.milestone?.durationFrom &&
+                          new Date(milestone.milestone.durationFrom) > new Date() &&
+                          account?.address === proposal?.proposerAddress && (
+                            <Button variant="primarySubtle" size="sm" onClick={() => setMilestoneEditIndex(index)}>
+                              <Icon as={EditPencil} />
+                              {t("Edit")}
+                            </Button>
+                          )}
                       </Accordion.ItemTrigger>
                     </VStack>
                     <Accordion.ItemContent>
                       {proposal && (
                         <MilestoneItem
+                          mode={milestoneEditIndex === index ? "edit" : "read"}
                           milestoneData={milestone}
                           proposal={proposal}
                           isCurrentStep={index === currentStep}

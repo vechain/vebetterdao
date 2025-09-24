@@ -23,6 +23,7 @@ type MilestoneWithState = {
   }
   state: MilestoneState
   index: number
+  mode?: "read" | "edit"
 }
 
 type MilestoneItemProps = {
@@ -30,6 +31,7 @@ type MilestoneItemProps = {
   proposal: GrantProposalEnriched
   isCurrentStep: boolean
   milestoneIndex: number
+  mode?: "read" | "edit"
 }
 
 const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType; title: string; value: string }) => (
@@ -48,7 +50,13 @@ const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType;
   </HStack>
 )
 
-export const MilestoneItem = ({ milestoneData, proposal, isCurrentStep, milestoneIndex }: MilestoneItemProps) => {
+export const MilestoneItem = ({
+  milestoneData,
+  proposal,
+  isCurrentStep,
+  milestoneIndex,
+  mode = "read",
+}: MilestoneItemProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address)
@@ -127,11 +135,15 @@ export const MilestoneItem = ({ milestoneData, proposal, isCurrentStep, mileston
           "B3TR",
         )}
       />
-      <MilestoneItemContent
-        icon={Calendar}
-        title={t("Duration")}
-        value={formatDuration(milestoneData.milestone?.durationFrom ?? 0, milestoneData.milestone?.durationTo ?? 0)}
-      />
+      {mode === "read" ? (
+        <MilestoneItemContent
+          icon={Calendar}
+          title={t("Duration")}
+          value={formatDuration(milestoneData.milestone?.durationFrom ?? 0, milestoneData.milestone?.durationTo ?? 0)}
+        />
+      ) : (
+        <div>Edit mode</div>
+      )}
       <MilestoneItemContent
         icon={UilInfoCircle}
         title={t("Description")}

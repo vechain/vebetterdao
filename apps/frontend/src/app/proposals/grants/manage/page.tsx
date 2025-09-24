@@ -26,68 +26,6 @@ const BreadcrumItems = [
   },
 ]
 
-// type GrantProposalEditCardProps = {
-//   mode: "read" | "edit"
-//   proposal: GrantProposalEnriched
-// }
-
-// const GrantProposalCard = ({ mode, proposal }: GrantProposalEditCardProps) => {
-//   const { t } = useTranslation()
-
-//   const timeLeftDisplay = "10 days"
-
-//   return (
-//     <LinkBox>
-//       <LinkOverlay asChild href="/proposals/grants/manage/1">
-//         <Card.Root p="8" gap="8" divideY="1px" divideColor="border.secondary">
-//           <Card.Header gap="4" p="0">
-//             <Card.Title>{proposal.title}</Card.Title>
-//             <HStack divideX="1px" divideColor="border.secondary" gap="4">
-//               <Text>{t("Status")}</Text>
-//               <Text>{t("Status")}</Text>
-//             </HStack>
-//           </Card.Header>
-
-//           <Card.Footer asChild p="0" pt="6" alignItems={{ base: "flex-start", md: "center" }}>
-//             {mode === "edit" ? (
-//               <ButtonGroup>
-//                 <Button variant="primaryAction" size="md">
-//                   {t("Edit")}
-//                 </Button>
-//                 <Button variant="primaryAction" size="md">
-//                   {t("Delete")}
-//                 </Button>
-//               </ButtonGroup>
-//             ) : (
-//               <HStack justifyContent="space-between">
-//                 <SimpleGrid columns={{ base: 1, md: 2 }} gap="4" alignItems={{ base: "flex-start", md: "center" }}>
-//                   <GrantsProposalStatusBadge state={proposal.state} />
-//                   {timeLeftDisplay ? (
-//                     <Text textStyle={{ base: "xs", md: "sm" }} color="text.subtle">
-//                       {t("Ends: {{endDate}}", { endDate: timeLeftDisplay })}
-//                     </Text>
-//                   ) : null}
-//                 </SimpleGrid>
-
-//                 <ProposalCommunityInteractions
-//                   proposalId={proposal.id}
-//                   state={proposal.state}
-//                   depositPercentage={communityDepositPercentage}
-//                   votesFor={proposalVotes?.votes?.for?.percentagePower}
-//                   votesAgainst={proposalVotes?.votes?.against?.percentagePower}
-//                   votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
-//                   hasUserDeposited={hasUserDeposited}
-//                   userVoteOption={userVoteOption}
-//                 />
-//               </HStack>
-//             )}
-//           </Card.Footer>
-//         </Card.Root>
-//       </LinkOverlay>
-//     </LinkBox>
-//   )
-// }
-
 export default function GrantsNew() {
   const { account } = useWallet()
   const { t } = useTranslation()
@@ -134,6 +72,8 @@ export default function GrantsNew() {
             usersGrants?.map(proposal => (
               <GrantsProposalCard
                 key={proposal.id}
+                variant="card"
+                mode="edit"
                 proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
               />
             ))

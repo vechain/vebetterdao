@@ -2,7 +2,7 @@ import { defineRecipe } from "@chakra-ui/react"
 
 export const buttonRecipe = defineRecipe({
   base: {
-    rounded: "md",
+    rounded: "full",
     fontWeight: 600,
     _active: {
       outlineWidth: "2px",
