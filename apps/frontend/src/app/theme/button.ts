@@ -9,8 +9,12 @@ export const buttonRecipe = defineRecipe({
     fontWeight: "semibold",
     px: "6",
     py: "3",
-    focusRing: "outside",
-    focusRingColor: "actions.primary.default",
+    _active: {
+      outlineWidth: "2px",
+      outlineOffset: "2px",
+      outlineStyle: "solid",
+      outlineColor: "actions.primary.default",
+    },
   },
   variants: {
     variant: {
