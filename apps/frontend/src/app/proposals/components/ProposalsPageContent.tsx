@@ -26,7 +26,7 @@ export const ProposalsPageContent = () => {
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
   const onNewClick = useCallback(() => {
     if (!account?.address) {
       open()
