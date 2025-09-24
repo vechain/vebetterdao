@@ -1,5 +1,5 @@
 import { AppVotesGiven } from "@/api"
-import { HStack, VStack, Text, Card } from "@chakra-ui/react"
+import { HStack, VStack, Text, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { AppVotedBox } from "./AppVotedBox"
@@ -21,12 +21,12 @@ export const TopVotedApps = ({ votedApps, isMoreTopVotedApps, onSeeAllAppsVoted 
             {t("Most Voted Apps")}
           </Text>
           {isMoreTopVotedApps && (
-            <HStack color="actions.tertiary.default" cursor={"pointer"} onClick={onSeeAllAppsVoted}>
+            <Button variant="ghost" size="sm" color="actions.tertiary.default" onClick={onSeeAllAppsVoted}>
               <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
                 {t("See All")}
               </Text>
               <FiArrowUpRight size={16} />
-            </HStack>
+            </Button>
           )}
         </HStack>
         <VStack w={"full"} gap={4}>

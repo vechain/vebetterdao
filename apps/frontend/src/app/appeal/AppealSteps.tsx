@@ -20,6 +20,7 @@ import {
   signalResetActions,
   signaledAfterKYC,
 } from "@/constants"
+import NextLink from "next/link"
 
 export const AppealSteps = () => {
   const router = useRouter()
@@ -205,8 +206,8 @@ export const AppealSteps = () => {
       return (
         <Text>
           {step.description}{" "}
-          <Link color="blue.500" href={step.linkUrl} textDecoration="underline">
-            {step.linkText}
+          <Link color="blue.500" asChild textDecoration="underline">
+            <NextLink href={step.linkUrl}>{step.linkText}</NextLink>
           </Link>
         </Text>
       )

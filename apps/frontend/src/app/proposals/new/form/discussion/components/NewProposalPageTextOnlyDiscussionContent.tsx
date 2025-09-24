@@ -20,10 +20,6 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const { t } = useTranslation()
   const { setData } = useProposalFormStore()
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onSubmit = useCallback(
     (data: FormData) => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({
@@ -70,7 +66,7 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       </Card.Body>
       <Card.Footer>
         <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-          <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
+          <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
             {t("Go back")}
           </Button>
           <Button data-testid="continue" variant="primary" type="submit" form="new-proposal-form">

@@ -1,16 +1,16 @@
 import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
-import React, { useCallback, useMemo } from "react"
+import React, { useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
 import { useTranslation } from "react-i18next"
-import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
+import NextLink from "next/link"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -24,15 +24,9 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
   // TODO: add active state
   //const isActive = proposalState === ProposalState.Active
 
-  const router = useRouter()
-
   const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(proposalId)
 
   const { t } = useTranslation()
-
-  const goToProposal = useCallback(() => {
-    router.push(`/proposals/${proposalId}`)
-  }, [router, proposalId])
 
   const hasVotedText = useMemo(() => {
     switch (proposalState) {
@@ -74,31 +68,33 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
         alignSelf={"flex-start"}
         w={"full"}
         p="4">
-        <Card.Body p="0">
-          <HStack justifyContent={"space-between"} w="full">
-            <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-              <ProposalStatusBadge proposalId={proposal.proposalId} proposalState={proposalState} />
-              <VStack w="full" gap="1" align={"flex-start"}>
-                <Skeleton
-                  loading={proposalMetadata.isLoading}
-                  lineClamp={3}
-                  flex={2.5}
-                  mr={{ base: 0, md: 10 }}
-                  alignSelf={"flex-start"}>
-                  <LinkOverlay>
-                    <Text textStyle={"sm"} fontWeight="semibold">
-                      {proposalMetadata.data?.title}
-                    </Text>
-                  </LinkOverlay>
-                </Skeleton>
-                {!!account?.address && hasVotedText}
-              </VStack>
-            </VStack>
-            <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost">
-              <FaAngleRight />
-            </IconButton>
-          </HStack>
-        </Card.Body>
+        <LinkOverlay asChild>
+          <NextLink href={`proposals/${proposalId}`}>
+            <Card.Body p="0">
+              <HStack justifyContent={"space-between"} w="full">
+                <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
+                  <ProposalStatusBadge proposalId={proposal.proposalId} proposalState={proposalState} />
+                  <VStack w="full" gap="1" align={"flex-start"}>
+                    <Skeleton
+                      loading={proposalMetadata.isLoading}
+                      lineClamp={3}
+                      flex={2.5}
+                      mr={{ base: 0, md: 10 }}
+                      alignSelf={"flex-start"}>
+                      <Text textStyle={"sm"} fontWeight="semibold">
+                        {proposalMetadata.data?.title}
+                      </Text>
+                    </Skeleton>
+                    {!!account?.address && hasVotedText}
+                  </VStack>
+                </VStack>
+                <IconButton aria-label="Go to proposal" variant="ghost">
+                  <FaAngleRight />
+                </IconButton>
+              </HStack>
+            </Card.Body>
+          </NextLink>
+        </LinkOverlay>
       </Card.Root>
     </LinkBox>
   )

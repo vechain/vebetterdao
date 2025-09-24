@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useMintNFT, useUpgradeGM } from "@/hooks"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useGMMaxLevel, useGetUserGMs } from "@/api"
@@ -21,7 +21,6 @@ export const GmActionButton = ({
   buttonProps: ButtonProps
 }) => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { resetModal: resetTransactionModal, onClose: closeTransactionModal } = useTransactionModal()
 
   // Wallet and user data
@@ -85,11 +84,6 @@ export const GmActionButton = ({
     upgradeGM()
   }, [upgradeGM])
 
-  // Navigation handlers
-  const goToVote = useCallback(() => {
-    router.push(`/rounds/${currentRoundId}/vote`)
-  }, [currentRoundId, router])
-
   // Action click handlers
   const handleOnUpgrade = useCallback(() => {
     resetTransactionModal()
@@ -102,8 +96,8 @@ export const GmActionButton = ({
     // Case 1: User hasn't voted and doesn't own GM NFT
     if (!hasUserVoted && !isGMOwned) {
       return (
-        <Button {...buttonProps} onClick={goToVote}>
-          {t("Vote now")}
+        <Button {...buttonProps} asChild>
+          <NextLink href={`/rounds/${currentRoundId}/vote`}>{t("Vote now")}</NextLink>
         </Button>
       )
     }
@@ -139,7 +133,7 @@ export const GmActionButton = ({
     )
   }, [
     buttonProps,
-    goToVote,
+    currentRoundId,
     handleOnUpgrade,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,

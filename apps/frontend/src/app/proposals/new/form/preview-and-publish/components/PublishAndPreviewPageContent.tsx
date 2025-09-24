@@ -25,10 +25,6 @@ export const PublishAndPreviewPageContent = () => {
 
   const { data: threshold } = useDepositThreshold()
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   // We call the hashProposal function to precalculate the proposal id
   // so we can redirect the user to the proposal page after the tx is confirmed
   const { data: expectedProposalId } = useHashProposal(
@@ -158,7 +154,7 @@ export const PublishAndPreviewPageContent = () => {
           </VStack>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
+            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
               {t("Go back")}
             </Button>
             <Button data-testid="publish" variant="primary" onClick={onSubmit}>

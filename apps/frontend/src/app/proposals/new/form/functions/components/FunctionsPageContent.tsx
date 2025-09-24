@@ -45,10 +45,6 @@ export const FunctionsPageContent = () => {
     )
   }, [router, actions, t])
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const handleAddFunction = useCallback(
     (data: SelectedFunction) => () => {
       setSubmitError(null)
@@ -112,7 +108,7 @@ export const FunctionsPageContent = () => {
               {submitError}
             </Text>
             <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-              <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
+              <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                 {t("Go back")}
               </Button>
               <Button data-testid="continue" variant="primary" onClick={onContinue}>

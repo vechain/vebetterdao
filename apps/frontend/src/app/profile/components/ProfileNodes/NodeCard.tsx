@@ -33,8 +33,8 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
               <ConditionalWrapper
                 condition={isClickable}
                 wrapper={({ children }) => (
-                  <LinkOverlay href={`/xnode/${node.nodeId}`} as={NextLink}>
-                    {children}
+                  <LinkOverlay asChild>
+                    <NextLink href={`/xnode/${node.nodeId}`}>{children}</NextLink>
                   </LinkOverlay>
                 )}>
                 <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>

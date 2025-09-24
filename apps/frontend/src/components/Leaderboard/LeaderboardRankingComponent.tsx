@@ -1,10 +1,11 @@
-import { Card, HStack, Box, Text, LinkBox, Link, LinkOverlay } from "@chakra-ui/react"
+import { Card, HStack, Box, Text, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { Trans } from "react-i18next"
 import { AddressIcon } from "../AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import NextLink from "next/link"
 
 export type LeaderboardRanking = {
   position: number
@@ -62,11 +63,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
         borderColor={positionStyles.borderColor}
         transition="all 0.2s ease-in-out">
         <Card.Body>
-          <HStack w="full" justify="space-between">
-            <HStack gap={2} zIndex={1}>
-              <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
-              <LinkOverlay asChild>
-                <Link href={`/profile/${ranking.address}`}>
+          <LinkOverlay asChild>
+            <NextLink href={`/profile/${ranking.address}`}>
+              <HStack w="full" justify="space-between">
+                <HStack gap={2} zIndex={1}>
+                  <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
+
                   <Box>
                     <HStack
                       textStyle="sm"
@@ -80,19 +82,19 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                       <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
                     </Text>
                   </Box>
-                </Link>
-              </LinkOverlay>
-            </HStack>
-            {ranking.position !== 0 && (
-              <Text
-                color={isYourRanking ? "white" : "text.default"}
-                textStyle={positionStyles.fontSize}
-                fontWeight="semibold"
-                zIndex={1}>
-                {positionStyles.text}
-              </Text>
-            )}
-          </HStack>
+                </HStack>
+                {ranking.position !== 0 && (
+                  <Text
+                    color={isYourRanking ? "white" : "text.default"}
+                    textStyle={positionStyles.fontSize}
+                    fontWeight="semibold"
+                    zIndex={1}>
+                    {positionStyles.text}
+                  </Text>
+                )}
+              </HStack>
+            </NextLink>
+          </LinkOverlay>
         </Card.Body>
       </Card.Root>
     </LinkBox>

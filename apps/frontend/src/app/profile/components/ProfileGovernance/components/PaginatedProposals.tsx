@@ -51,7 +51,7 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
       <Card.Body gap={4}>
         <Button
           variant={"plain"}
-          color="primary"
+          color="actions.tertiary.default"
           onClick={goBack}
           size="sm"
           alignItems="center"

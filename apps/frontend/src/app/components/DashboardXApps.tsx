@@ -88,40 +88,42 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
     <LinkBox asChild>
       <Card.Root variant="subtle">
         <Card.Body>
-          <LinkOverlay href={`/apps/${xApp.id}`}>
-            <VStack alignItems={"start"} justify={"flex-start"} gap={3}>
-              <HStack gap={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
-                <Skeleton loading={isLogoLoading} alignContent={"start"}>
-                  <Image
-                    src={logo?.image ?? notFoundImage}
-                    alt={"logo"}
-                    aspectRatio={1}
-                    maxW={"40px"}
-                    borderRadius="9px"
-                  />
-                </Skeleton>
-
-                <VStack gap={1} align="flex-start" w={"fit-content"}>
-                  <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-                    <Heading size={"md"}>
-                      {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                    </Heading>
+          <LinkOverlay asChild>
+            <NextLink href={`/apps/${xApp.id}`}>
+              <VStack alignItems={"start"} justify={"flex-start"} gap={3}>
+                <HStack gap={3} justifyContent={"start"} w={"full"} alignItems={"center"}>
+                  <Skeleton loading={isLogoLoading} alignContent={"start"}>
+                    <Image
+                      src={logo?.image ?? notFoundImage}
+                      alt={"logo"}
+                      aspectRatio={1}
+                      maxW={"40px"}
+                      borderRadius="9px"
+                    />
                   </Skeleton>
-                </VStack>
-              </HStack>
 
-              <HStack gap={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
-                <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
-                  <Text textStyle={"sm"} color={"text.subtle"}>
-                    {appMetadata?.description
-                      ? appMetadata.description.slice(0, 150) + "..."
-                      : appMetadataError?.message
-                        ? appMetadataError.message
-                        : "Error loading description"}
-                  </Text>
-                </Skeleton>
-              </HStack>
-            </VStack>
+                  <VStack gap={1} align="flex-start" w={"fit-content"}>
+                    <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
+                      <Heading size={"md"}>
+                        {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                      </Heading>
+                    </Skeleton>
+                  </VStack>
+                </HStack>
+
+                <HStack gap={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
+                  <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
+                    <Text textStyle={"sm"} color={"text.subtle"}>
+                      {appMetadata?.description
+                        ? appMetadata.description.slice(0, 150) + "..."
+                        : appMetadataError?.message
+                          ? appMetadataError.message
+                          : "Error loading description"}
+                    </Text>
+                  </Skeleton>
+                </HStack>
+              </VStack>
+            </NextLink>
           </LinkOverlay>
         </Card.Body>
       </Card.Root>

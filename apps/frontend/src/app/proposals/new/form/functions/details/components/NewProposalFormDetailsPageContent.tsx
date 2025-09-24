@@ -22,10 +22,6 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
   const router = useRouter()
   const { setData } = useProposalFormStore()
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onSubmit = useCallback(
     (data: FormData) => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({
@@ -71,7 +67,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
           <Heading size="md">{t("Basic information")}</Heading>
           <NewProposalForm onSubmit={onSubmit} formId="new-proposal-form" />
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
+            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
               {t("Go back")}
             </Button>
             <Button data-testid="continue" variant="primary" type="submit" form="new-proposal-form">

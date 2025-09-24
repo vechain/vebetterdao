@@ -39,7 +39,11 @@ export const AppCreationSteps = () => {
                 <Icon color="logo">
                   <UilInfoCircle />
                 </Icon>
-                <Link color="brand.primary" href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
+                <Link
+                  color="brand.primary"
+                  href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}
+                  rel="noopener noreferrer"
+                  target="_blank">
                   {t("Know more about Apps")}
                 </Link>
               </HStack>

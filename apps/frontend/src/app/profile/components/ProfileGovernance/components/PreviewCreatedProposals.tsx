@@ -1,6 +1,6 @@
 import { ProposalCreatedEvent, ProposalMetadata, useIpfsMetadatas } from "@/api"
 import { toIPFSURL, validateIpfsUri } from "@/utils"
-import { HStack, VStack, Text, Card, Icon } from "@chakra-ui/react"
+import { HStack, VStack, Text, Card, Icon, Button } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -57,12 +57,12 @@ export const PreviewCreatedProposals = ({
             {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
           </Text>
           {isMoreProposals && (
-            <HStack onClick={onSeeAllProposals}>
-              <Text textStyle={{ base: "sm", md: "md" }} color="actions.tertiary.default" fontWeight="semibold">
+            <Button variant="ghost" size="sm" color="actions.tertiary.default" onClick={onSeeAllProposals}>
+              <Text textStyle="sm" color="actions.tertiary.default" fontWeight="semibold">
                 {t("See All")}
               </Text>
               <Icon as={FiArrowUpRight} boxSize={4} color="actions.tertiary.default" />
-            </HStack>
+            </Button>
           )}
         </HStack>
         <VStack w={"full"} gap={4}>

@@ -31,10 +31,6 @@ export const NewProposalRoundPageContent = () => {
 
   const { votingStartRoundId, setData } = useProposalFormStore()
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onContinue = useCallback(() => {
     router.push("/proposals/new/form/support")
     AnalyticsUtils.trackEvent(
@@ -123,7 +119,7 @@ export const NewProposalRoundPageContent = () => {
           {renderRoundContent()}
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
+            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
               {t("Go back")}
             </Button>
             <Button

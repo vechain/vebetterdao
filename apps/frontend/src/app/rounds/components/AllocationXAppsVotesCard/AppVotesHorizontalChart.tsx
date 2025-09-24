@@ -4,7 +4,7 @@ import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
 import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -36,16 +36,12 @@ export const AppVotesHorizontalChart = ({
   renderMaxAllocation = false,
 }: //   showTotalVoters = false,
 Props) => {
-  const router = useRouter()
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
 
-  const onIconClick = () => {
-    router.push(`/apps/${data.app}`)
-  }
   const roundIdNumber = useMemo(() => {
     try {
       return Number(roundId)
@@ -76,14 +72,15 @@ Props) => {
         <HStack gap={3} align={"center"} justify={"flex-start"}>
           <VStack gap={0} align={"flex-start"}>
             <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
-              <Image
-                _hover={{ cursor: "pointer", transform: "scale(1.05)", transition: "transform 0.2s" }}
-                onClick={onIconClick}
-                src={logo?.image ?? notFoundImage}
-                w="full"
-                borderRadius="9px"
-                alt={appMetadata?.name}
-              />
+              <NextLink href={`/apps/${data.app}`}>
+                <Image
+                  _hover={{ cursor: "pointer", transform: "scale(1.05)", transition: "transform 0.2s" }}
+                  src={logo?.image ?? notFoundImage}
+                  w="full"
+                  borderRadius="9px"
+                  alt={appMetadata?.name}
+                />
+              </NextLink>
             </Skeleton>
           </VStack>
           <VStack gap={0} align={"flex-start"}>

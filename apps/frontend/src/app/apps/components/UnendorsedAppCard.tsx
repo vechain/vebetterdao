@@ -12,7 +12,6 @@ import {
   Tag,
   LinkBox,
   LinkOverlay,
-  Link,
 } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -53,102 +52,100 @@ export const UnendorsedAppCard = ({ appId, isNewApp, layout = "default" }: Props
 
   return (
     <LinkBox asChild>
-      <LinkOverlay>
-        <Card.Root variant="subtle" w="full" maxW="full">
-          <Card.Body>
-            <Stack
-              direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
-              align="stretch"
-              w="full"
-              h="full">
-              <Stack direction="row" gap={4} align="center" flex="1">
-                <Avatar.Root shape="rounded" boxSize="3.5rem" borderRadius="0.75rem">
-                  <Avatar.Image
-                    src={logo?.image ?? notFoundImage}
-                    alt="logo"
-                    borderRadius="0.75rem"
-                    objectFit="contain"
-                  />
-                  <Avatar.Fallback name={appMetadata?.name} />
-                </Avatar.Root>
+      <LinkOverlay asChild>
+        <NextLink href={`/apps/${appId}`}>
+          <Card.Root variant="subtle" w="full" maxW="full">
+            <Card.Body>
+              <Stack
+                direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
+                align="stretch"
+                w="full"
+                h="full">
+                <Stack direction="row" gap={4} align="center" flex="1">
+                  <Avatar.Root shape="rounded" boxSize="3.5rem" borderRadius="0.75rem">
+                    <Avatar.Image
+                      src={logo?.image ?? notFoundImage}
+                      alt="logo"
+                      borderRadius="0.75rem"
+                      objectFit="contain"
+                    />
+                    <Avatar.Fallback name={appMetadata?.name} />
+                  </Avatar.Root>
 
-                <Stack flex="1" gap={0} align="stretch" justify="center" overflow="hidden">
-                  <Skeleton loading={appMetadataLoading}>
-                    <HStack gap={4} align="center">
-                      <Link asChild>
-                        <NextLink href={`/apps/${appId}`}>
-                          <Heading
-                            size="xl"
-                            lineClamp={1}
-                            maxW={{ base: "full", md: "150px", lg: "200px" }}
-                            overflow="hidden"
-                            textOverflow="ellipsis">
-                            {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                          </Heading>
-                        </NextLink>
-                      </Link>
-                      {isNewApp && (
-                        <Tag.Root size="sm" variant="solid" colorPalette="green" fontWeight="semibold">
-                          <Tag.StartElement>
-                            <Icon color="info.default" boxSize={3}>
-                              <NewAppIcon />
-                            </Icon>
-                          </Tag.StartElement>
-                          <Tag.Label>{t("New!")}</Tag.Label>
-                        </Tag.Root>
-                      )}
-                    </HStack>
-                  </Skeleton>
-                  <Skeleton loading={appMetadataLoading}>
-                    <Text textStyle="sm" color="text.subtle" overflow="hidden" textOverflow="ellipsis" lineClamp={2}>
-                      {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
-                    </Text>
-                  </Skeleton>
-                </Stack>
-              </Stack>
-
-              <Separator orientation="vertical" h="100%" size="sm" px={2} borderColor="border.emphasized" />
-              <Separator orientation="horizontal" h="100%" size="sm" borderColor="border.emphasized" />
-
-              <Stack direction="row" align="center" justify="center">
-                <Stack
-                  direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
-                  gap={3}
-                  align={{ base: "center", lg: "stretch", md: "stretch" }}
-                  justify={{ base: "space-between", md: "stretch" }}
-                  w="full">
-                  <VStack gap={0} alignItems="flex-start">
-                    <Skeleton loading={isEndorsementStatusLoading}>
-                      <HStack gap={1} align="flex-end">
-                        <Text textStyle="2xl" lineHeight={1} color={color}>
-                          {endorsementScore}
-                        </Text>
-                        <Text textStyle="sm" lineHeight={1} color={color}>{`/${endorsementThreshold}`}</Text>
+                  <Stack flex="1" gap={0} align="stretch" justify="center" overflow="hidden">
+                    <Skeleton loading={appMetadataLoading}>
+                      <HStack gap={4} align="center">
+                        <Heading
+                          size="xl"
+                          lineClamp={1}
+                          maxW={{ base: "full", md: "150px", lg: "200px" }}
+                          overflow="hidden"
+                          textOverflow="ellipsis">
+                          {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                        </Heading>
+                        {isNewApp && (
+                          <Tag.Root size="sm" variant="solid" colorPalette="green" fontWeight="semibold">
+                            <Tag.StartElement>
+                              <Icon color="info.default" boxSize={3}>
+                                <NewAppIcon />
+                              </Icon>
+                            </Tag.StartElement>
+                            <Tag.Label>{t("New!")}</Tag.Label>
+                          </Tag.Root>
+                        )}
                       </HStack>
                     </Skeleton>
-                    <Text textStyle="xs" color="text.subtle">
-                      {t("Total score")}
-                    </Text>
-                  </VStack>
+                    <Skeleton loading={appMetadataLoading}>
+                      <Text textStyle="sm" color="text.subtle" overflow="hidden" textOverflow="ellipsis" lineClamp={2}>
+                        {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
+                      </Text>
+                    </Skeleton>
+                  </Stack>
+                </Stack>
 
-                  {isUserAppEndorser && (
+                <Separator orientation="vertical" h="100%" size="sm" px={2} borderColor="border.emphasized" />
+                <Separator orientation="horizontal" h="100%" size="sm" borderColor="border.emphasized" />
+
+                <Stack direction="row" align="center" justify="center">
+                  <Stack
+                    direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
+                    gap={3}
+                    align={{ base: "center", lg: "stretch", md: "stretch" }}
+                    justify={{ base: "space-between", md: "stretch" }}
+                    w="full">
                     <VStack gap={0} alignItems="flex-start">
-                      <Skeleton loading={isUserNodesLoading}>
-                        <Text textStyle="2xl" color="#004CFC">
-                          {nodeEndorsingApp?.xNodePoints}
-                        </Text>
+                      <Skeleton loading={isEndorsementStatusLoading}>
+                        <HStack gap={1} align="flex-end">
+                          <Text textStyle="2xl" lineHeight={1} color={color}>
+                            {endorsementScore}
+                          </Text>
+                          <Text textStyle="sm" lineHeight={1} color={color}>{`/${endorsementThreshold}`}</Text>
+                        </HStack>
                       </Skeleton>
                       <Text textStyle="xs" color="text.subtle">
-                        {t("Your score")}
+                        {t("Total score")}
                       </Text>
                     </VStack>
-                  )}
+
+                    {isUserAppEndorser && (
+                      <VStack gap={0} alignItems="flex-start">
+                        <Skeleton loading={isUserNodesLoading}>
+                          <Text textStyle="2xl" color="#004CFC">
+                            {nodeEndorsingApp?.xNodePoints}
+                          </Text>
+                        </Skeleton>
+                        <Text textStyle="xs" color="text.subtle">
+                          {t("Your score")}
+                        </Text>
+                      </VStack>
+                    )}
+                  </Stack>
+                  <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color="icon.default" alignSelf={"center"} />
                 </Stack>
-                <Icon hideBelow="md" as={UilAngleRight} boxSize={"32px"} color="icon.default" alignSelf={"center"} />
               </Stack>
-            </Stack>
-          </Card.Body>
-        </Card.Root>
+            </Card.Body>
+          </Card.Root>
+        </NextLink>
       </LinkOverlay>
     </LinkBox>
   )

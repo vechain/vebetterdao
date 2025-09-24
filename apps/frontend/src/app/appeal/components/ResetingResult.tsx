@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Box, Button, VStack, Code, Collapsible, useDisclosure, Text } from "@chakra-ui/react"
@@ -13,7 +13,6 @@ export const ResetingResult = ({
   resetingStatus: ResetStatus
   apiResponse: string | undefined
 }) => {
-  const router = useRouter()
   const { open: isOpen, onToggle } = useDisclosure()
   const { t } = useTranslation()
 
@@ -21,8 +20,8 @@ export const ResetingResult = ({
     <>
       {resetingStatus === RESET_STATUS.SUCCESS && (
         <VStack alignItems={"flex-start"} gap={2} mt={2}>
-          <Button variant="primary" w="auto" onClick={() => router.push("/")}>
-            {t("Back to Dashboard")}
+          <Button asChild variant="primary" w="auto">
+            <NextLink href="/">{t("Back to Dashboard")}</NextLink>
           </Button>
         </VStack>
       )}

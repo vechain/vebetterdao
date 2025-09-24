@@ -46,8 +46,8 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
               <ConditionalWrapper
                 condition={isClickable}
                 wrapper={({ children }) => (
-                  <LinkOverlay href={`/galaxy-member/${gm?.tokenId}`} as={NextLink}>
-                    {children}
+                  <LinkOverlay asChild>
+                    <NextLink href={`/galaxy-member/${gm?.tokenId}`}>{children}</NextLink>
                   </LinkOverlay>
                 )}>
                 <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>

@@ -14,6 +14,7 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { FaAngleLeft } from "react-icons/fa6"
 import { ProfileGMLevel } from "./ProfileGMLevel"
 import { ProfileNodes } from "./ProfileNodes"
+import NextLink from "next/link"
 
 enum Tab {
   Balance = "balance",
@@ -143,11 +144,13 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"breakpoint-md"} mx="auto">
       {!isConnectedUser && (
-        <Link href="/" color="actions.secondary.text-lighter">
-          <Icon as={FaAngleLeft} boxSize={3} />
-          <Text textStyle="sm" fontWeight="semibold">
-            {t("Go back")}
-          </Text>
+        <Link asChild w="max-content" color="actions.secondary.text-lighter">
+          <NextLink href="/">
+            <Icon as={FaAngleLeft} boxSize={3} />
+            <Text textStyle="sm" fontWeight="semibold">
+              {t("Go back")}
+            </Text>
+          </NextLink>
         </Link>
       )}
       <ProfileHeader address={parsedAddress} />

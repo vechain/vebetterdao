@@ -29,8 +29,8 @@ import {
 import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import NextLink from "next/link"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
@@ -65,11 +65,6 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
-
-  const router = useRouter()
-  const goToApps = useCallback(() => {
-    router.push("/apps")
-  }, [router])
 
   const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
   const shouldDisableEndorsementButton = useMemo(() => {
@@ -203,8 +198,8 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
                         "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
                       )}
                     </Text>
-                    <Button variant="primary" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
-                      {t("Browse apps")}
+                    <Button variant="primary" asChild mt={4} w={["full", "full", "auto"]}>
+                      <NextLink href="/apps">{t("Browse apps")}</NextLink>
                     </Button>
                   </>
                 )}

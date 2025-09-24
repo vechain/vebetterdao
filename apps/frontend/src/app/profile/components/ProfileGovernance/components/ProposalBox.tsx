@@ -3,6 +3,7 @@ import { ProposalStatusBadge } from "@/components"
 import { Card, Icon, LinkBox, LinkOverlay, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
+import NextLink from "next/link"
 
 type Props = {
   proposalId: string
@@ -33,10 +34,12 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
               proposalState={proposalState}
               badgeProps={{ textStyle: "xs" }}
             />
-            <LinkOverlay href={`/proposals/${proposalId}`}>
-              <Text textStyle="sm" fontWeight="semibold">
-                {title}
-              </Text>
+            <LinkOverlay asChild>
+              <NextLink href={`/proposals/${proposalId}`}>
+                <Text textStyle="sm" fontWeight="semibold">
+                  {title}
+                </Text>
+              </NextLink>
             </LinkOverlay>
           </VStack>
           <Icon as={IoIosArrowForward} boxSize={{ base: 4, md: 6 }} color="icon.default" />

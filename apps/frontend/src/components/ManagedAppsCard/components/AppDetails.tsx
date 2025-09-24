@@ -2,8 +2,8 @@ import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { Separator, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import NextLink from "next/link"
+import { useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
 
@@ -15,7 +15,6 @@ type Props = {
 }
 
 export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false }: Props) => {
-  const router = useRouter()
   const {
     data: appMetadata,
     isLoading: appMetadataLoading,
@@ -33,10 +32,6 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
       return "Error"
     }
   }, [isAdmin, isModerator])
-
-  const navigateToAppDetail = useCallback(() => {
-    router.push(`/apps/${appId}`)
-  }, [router, appId])
 
   return (
     <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap="4">
@@ -61,8 +56,10 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
             aria-label="Go to App"
             width="6"
             disabled={isAppMetadataError}
-            onClick={navigateToAppDetail}>
-            <FiArrowUpRight />
+            asChild>
+            <NextLink href={`/apps/${appId}`}>
+              <FiArrowUpRight />
+            </NextLink>
           </IconButton>
         </Skeleton>
       </HStack>

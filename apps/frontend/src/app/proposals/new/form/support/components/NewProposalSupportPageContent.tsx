@@ -36,10 +36,6 @@ export const NewProposalSupportPageContent = () => {
 
   const { errors } = formState
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ depositAmount: data.amount })
@@ -124,7 +120,7 @@ export const NewProposalSupportPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-              <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={goBack}>
+              <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                 {t("Go back")}
               </Button>
               <Button data-testid="continue" variant="primary" type="submit">

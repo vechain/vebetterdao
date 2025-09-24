@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
+import NextLink from "next/link"
 
 export const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
@@ -177,12 +178,8 @@ export const Leaderboard = () => {
               </>
             )}
           </VStack>
-          <Link
-            href={`/leaderboard/${selectedRoundId}`}
-            color="actions.tertiary.default"
-            fontWeight="semibold"
-            alignSelf="center">
-            {t("See full leaderboard")}
+          <Link asChild color="actions.tertiary.default" fontWeight="semibold" alignSelf="center">
+            <NextLink href={`/leaderboard/${selectedRoundId}`}>{t("See full leaderboard")}</NextLink>
           </Link>
         </VStack>
       </Card.Body>

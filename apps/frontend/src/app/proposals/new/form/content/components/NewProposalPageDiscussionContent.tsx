@@ -66,9 +66,6 @@ export const NewProposalPageDiscussionContent = () => {
     },
     [setData, router, title, shortDescription, onMetadataUpload, control],
   )
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
 
   const resetMarkdownToDefault = useCallback(() => {
     const defaultMarkdown = updateMarkdownTemplatePlaceholders({
@@ -153,7 +150,7 @@ export const NewProposalPageDiscussionContent = () => {
               data-testid="go-back"
               variant="ghost"
               color="actions.tertiary.default"
-              onClick={goBack}
+              onClick={router.back}
               disabled={isMetadataUploading}>
               {t("Go back")}
             </Button>
