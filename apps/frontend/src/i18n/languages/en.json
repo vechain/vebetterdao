@@ -1463,5 +1463,6 @@
   "Claim Reward": "Claim Reward",
   "Approve": "Approve",
   "Option": "Option",
-  "Voters": "Voters"
+  "Voters": "Voters",
+  "Minimum <Link>quorum</Link> (30%) reached": "Minimum <Link>quorum</Link> (30%) reached"
 }
