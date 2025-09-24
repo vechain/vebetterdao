@@ -13,3 +13,4 @@ export const TERMS_AND_CONDITIONS_LINK = "https://www.vebetterdao.org/terms-of-s
 export const GRANT_TERMS_AND_CONDITIONS_LINK =
   "https://files.vebetterdao.org/vebetterdaocontainer/VeBetterDAO_Grant_Terms_And_Conditions.pdf"
 export const VOTING_POWER_DOCS_LINK = "https://docs.vebetterdao.org/vebetterdao/governance#quadratic-voting"
+export const PROPOSALS_QUORUM_DOCS_LINK = "https://docs.vebetterdao.org/vebetterdao/governance?q=quorum"
