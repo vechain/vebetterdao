@@ -10,6 +10,7 @@ import {
   useProposalUserDeposit,
   useProposalVotes,
   useUserSingleProposalVoteEvent,
+  useVot3PastSupply,
 } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
@@ -79,6 +80,7 @@ export const ProposalInteractionCard = ({
     Number(roundSnapshot ?? 0),
     proposal?.type ?? GrantsProposalType.Standard,
   )
+  const { data: votesAtSnapshotQueryData } = useVot3PastSupply(Number(roundSnapshot ?? 0))
   const { data: proposalVotesQueryData } = useProposalVotes(proposalId)
   const { data: proposalTotalVotesQueryData } = useProposalTotalVotes(proposalId)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposalId)
@@ -104,6 +106,7 @@ export const ProposalInteractionCard = ({
   const currentUserCanQueueOrExecute = permissions?.isProposalExecutor ?? false
   const proposalHasTargets = proposal?.targets && proposal?.targets.length > 0
   const userVoteOption = userVoteEvent?.userVote
+  const totalVotesAtSnapshot = Number(votesAtSnapshotQueryData ?? 0)
   // Check if the proposal is queuable and executable
   const isQueuable = useMemo(() => {
     return proposal?.state === ProposalState.Succeeded && proposalHasTargets
@@ -405,6 +408,7 @@ export const ProposalInteractionCard = ({
         userDeposits={userDeposits ?? BigInt(0)}
         proposalDepositThreshold={proposalDepositThreshold}
         resultsDetails={resultsDetails}
+        totalVotesAtSnapshot={totalVotesAtSnapshot}
         proposalState={proposal?.state ?? ProposalState.Pending}
         proposalId={proposalId}
         proposalQuorum={proposalQuorumBigInt}

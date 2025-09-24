@@ -2,11 +2,12 @@ import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
 import { MulticolorBar, RegularModal, ResultsDetailsList, ResultsDisplay } from "@/components"
 import { ProposalState } from "@/hooks"
 import { VotingSegment } from "@/types/voting"
-import { Box, Grid, GridItem, HStack, Icon, Separator, Table, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Icon, Separator, Stack, Table, Text, VStack } from "@chakra-ui/react"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
+import { useMemo } from "react"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
-import { formatEther } from "viem"
+import { formatEther, parseEther } from "viem"
 
 type Props = {
   isResultsModalOpen: boolean
@@ -22,6 +23,7 @@ type Props = {
   votingSegments: VotingSegment[]
   userDeposits: bigint
   proposalDepositThreshold: bigint
+  totalVotesAtSnapshot: string
   resultsDetails: { label: string; value: string }[]
   proposalState: ProposalState
   proposalId: string
@@ -38,6 +40,7 @@ type Props = {
 interface ChartQuorumProps {
   proposalQuorum: bigint
   proposalTotalVotes: bigint
+  totalVotesAtSnapshot: string
 }
 
 type VotingResultContentProps = {
@@ -62,12 +65,14 @@ type VotingResultContentProps = {
     totalWeight: bigint
     votes: GroupedProposalVotes
   }
+  totalVotesAtSnapshot: string
 }
 
 const VotingResultContent = ({
   progressBarSegments,
   proposalId,
   proposalState,
+  totalVotesAtSnapshot,
   userDeposits,
   proposalDepositThreshold,
   votingSegments,
@@ -76,64 +81,74 @@ const VotingResultContent = ({
   proposalVotesData,
 }: VotingResultContentProps) => {
   return (
-    <VStack w="full" align="stretch">
-      <Grid templateColumns="1fr 1fr" gap={4}>
-        <GridItem w="full" bg="bg.subtle" p={5} borderRadius="16px">
-          <Text>{"Votes"}</Text>
-          {/* Progress Bar */}
-          <MulticolorBar segments={progressBarSegments} />
-          {/* Results Display with Token Amount */}
-          <ResultsDisplay
-            proposalId={proposalId}
-            segments={progressBarSegments}
-            tokenAmount={
-              proposalState === ProposalState.Pending ? (userDeposits ?? BigInt(0)) : proposalDepositThreshold
-            }
-            showTokenAmount
-          />
-          <Table.Root variant="line" mt={5} bg="transparent">
-            <Table.Header w="full">
-              <Table.Row>
-                <Table.ColumnHeader>{t("Option")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("Voters")}</Table.ColumnHeader>
-                <Table.ColumnHeader>{t("Voting power")}</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {votingSegments.map(segment => (
-                <Table.Row key={`${segment.option}-${proposalId}`}>
-                  <Table.Cell>
-                    <HStack>
-                      <Icon as={segment.icon} color={segment.color} boxSize={"16px"} />
-                      <Text>{segment.option}</Text>
-                    </HStack>
-                  </Table.Cell>
-                  <Table.Cell>{segment.voters}</Table.Cell>
-                  <Table.Cell textAlign="end">{humanNumber(formatEther(segment.votingPower))}</Table.Cell>
-                </Table.Row>
-              ))}
-              {/* Total Row */}
-              <Table.Row>
+    <Stack direction={{ base: "column", md: "row" }} w="full" align="stretch" gap={4}>
+      <VStack bg="bg.subtle" p={5} borderRadius="16px" gap={4}>
+        <Text fontSize="md" fontWeight="semibold" alignSelf="flex-start">
+          {"Votes"}
+        </Text>
+        {/* Progress Bar */}
+        <MulticolorBar segments={progressBarSegments} />
+        {/* Results Display with Token Amount */}
+        <ResultsDisplay
+          proposalId={proposalId}
+          segments={progressBarSegments}
+          tokenAmount={proposalState === ProposalState.Pending ? (userDeposits ?? BigInt(0)) : proposalDepositThreshold}
+          showTokenAmount
+        />
+        <Table.Root variant="line" bg="transparent">
+          <Table.Header w="full">
+            <Table.Row>
+              <Table.ColumnHeader>{t("Option")}</Table.ColumnHeader>
+              <Table.ColumnHeader>{t("Voters")}</Table.ColumnHeader>
+              <Table.ColumnHeader>{t("Voting power")}</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {votingSegments.map(segment => (
+              <Table.Row key={`${segment.option}-${proposalId}`}>
                 <Table.Cell>
-                  <Text fontWeight="bold">{"Total"}</Text>
+                  <HStack>
+                    <Icon as={segment.icon} color={segment.color} boxSize={"16px"} />
+                    <Text fontWeight="semibold" color="text.subtle">
+                      {segment.option}
+                    </Text>
+                  </HStack>
                 </Table.Cell>
-                <Table.Cell>
-                  <Text fontWeight="bold">{proposalVotesData.totalVoters}</Text>
-                </Table.Cell>
-                <Table.Cell textAlign="end">
-                  <Text fontWeight="bold">{humanNumber(formatEther(proposalVotesData.totalWeight))}</Text>
+                <Table.Cell color="text.subtle">{segment.voters}</Table.Cell>
+                <Table.Cell color="text.subtle" textAlign="end">
+                  {humanNumber(formatEther(segment.votingPower))}
                 </Table.Cell>
               </Table.Row>
-            </Table.Body>
-          </Table.Root>
-        </GridItem>
-        <GridItem bg="bg.subtle" p={5} borderRadius="16px">
-          {/* Quorum */}
-          <Text>{"Quorum"}</Text>
-          <ChartQuorum proposalQuorum={proposalQuorum} proposalTotalVotes={proposalTotalVotes} />
-        </GridItem>
-      </Grid>
-    </VStack>
+            ))}
+            {/* Total Row */}
+            <Table.Row>
+              <Table.Cell>
+                <Text fontWeight="semibold" color="text.subtle">
+                  {"Total"}
+                </Text>
+              </Table.Cell>
+              <Table.Cell>
+                <Text color="text.subtle">{proposalVotesData.totalVoters}</Text>
+              </Table.Cell>
+              <Table.Cell textAlign="end">
+                <Text color="text.subtle">{humanNumber(formatEther(proposalVotesData.totalWeight))}</Text>
+              </Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table.Root>
+      </VStack>
+      <VStack bg="bg.subtle" p={5} borderRadius="16px">
+        {/* Quorum */}
+        <Text fontSize="md" fontWeight="semibold" alignSelf="flex-start">
+          {"Quorum"}
+        </Text>
+        <ChartQuorum
+          proposalQuorum={proposalQuorum}
+          proposalTotalVotes={proposalTotalVotes}
+          totalVotesAtSnapshot={totalVotesAtSnapshot}
+        />
+      </VStack>
+    </Stack>
   )
 }
 
@@ -182,25 +197,32 @@ const SupportResultContent = ({
   )
 }
 
-const ChartQuorum = ({ proposalQuorum, proposalTotalVotes }: ChartQuorumProps) => {
-  const quorumPercentage = proposalQuorum > 0 ? Number((proposalTotalVotes * BigInt(100)) / proposalQuorum) : 0
+const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot }: ChartQuorumProps) => {
+  //100% means totalVotesAtSnapshot
+  //Quorum is proposalQuorum
+  //To get the percentage filled, is proposalTotalVotes / totalVotesAtSnapshot
+  //To get the percentage remaining, is 100 - (proposalTotalVotes / totalVotesAtSnapshot)
 
-  // Cap at 100% for display
-  const displayPercentage = Math.min(quorumPercentage, 100)
-  const remainingPercentage = Math.max(100 - displayPercentage, 0)
+  const percentageFilled = useMemo(() => {
+    if (!totalVotesAtSnapshot || !proposalTotalVotes) return BigInt(0)
+    const totalVotesAtSnapshotBigInt = parseEther(totalVotesAtSnapshot.toString())
+    return (proposalTotalVotes * BigInt(100)) / totalVotesAtSnapshotBigInt
+  }, [proposalTotalVotes, totalVotesAtSnapshot])
+
+  const percentageRemaining = BigInt(100) - percentageFilled
+  const isQuorumReached = proposalTotalVotes >= proposalQuorum
+
+  const filledColor = useMemo(() => {
+    return isQuorumReached ? "#22c55e" : "#DF6A6E"
+  }, [isQuorumReached])
 
   const chartData = [
-    { name: "Quorum Met", value: displayPercentage, color: "#22c55e" },
-    { name: "Remaining", value: remainingPercentage, color: "#e5e7eb" },
+    { name: "Quorum Met", value: Number(percentageFilled), color: filledColor },
+    { name: "Remaining", value: Number(percentageRemaining), color: "#e5e7eb" },
   ]
-
-  const isQuorumReached = quorumPercentage >= 100
 
   return (
     <Box p={5} borderRadius="16px">
-      <Text textAlign="center" mb={4} fontSize="lg" fontWeight="semibold">
-        {"Quorum"}
-      </Text>
       <Box w="200px" h="200px" position="relative">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -224,7 +246,7 @@ const ChartQuorum = ({ proposalQuorum, proposalTotalVotes }: ChartQuorumProps) =
         </ResponsiveContainer>
         <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" textAlign="center">
           <Text fontSize="2xl" fontWeight="bold" color={isQuorumReached ? "success.primary" : "gray.700"}>
-            {`${displayPercentage}%`}
+            {`${percentageFilled}%`}
           </Text>
         </Box>
       </Box>
@@ -247,6 +269,7 @@ export const ProposalResultsDetailsModal = ({
   votingSegments,
   userDeposits,
   proposalDepositThreshold,
+  totalVotesAtSnapshot,
   resultsDetails,
   proposalState,
   proposalId,
@@ -286,6 +309,7 @@ export const ProposalResultsDetailsModal = ({
           proposalState={proposalState}
           userDeposits={userDeposits}
           proposalDepositThreshold={proposalDepositThreshold}
+          totalVotesAtSnapshot={totalVotesAtSnapshot}
           votingSegments={votingSegments}
           proposalQuorum={proposalQuorum}
           proposalTotalVotes={proposalTotalVotes}
