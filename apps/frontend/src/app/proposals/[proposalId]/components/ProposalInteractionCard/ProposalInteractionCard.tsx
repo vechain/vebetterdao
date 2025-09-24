@@ -51,7 +51,7 @@ export const ProposalInteractionCard = ({
   minutesLeft,
   isLoading,
 }: {
-  proposal: ProposalEnriched
+  proposal?: ProposalEnriched
   isVotingPhase: boolean
   daysLeft: number
   hoursLeft: number
