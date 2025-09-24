@@ -231,20 +231,15 @@ const config = defineConfig({
               base: "#004CFC",
             },
           },
+          secondary: {
+            _dark: { value: "#B4EA82" },
+            base: { value: "#B1F16C" },
+          },
+          tertiary: {
+            _dark: { value: "#FFFFFF" },
+            base: { value: "#000000" },
+          },
         },
-        // // Brand Colors
-        // primary: {
-        //   _dark: { value: "#277CDF" },
-        //   base: { value: "#004CFC" },
-        // },
-        // secondary: {
-        //   _dark: { value: "#B4EA82" },
-        //   base: { value: "#B1F16C" },
-        // },
-        // tertiary: {
-        //   _dark: { value: "#FFFFFF" },
-        //   base: { value: "#000000" },
-        // },
         "secondary-strong": {
           value: {
             _dark: "#4F5945",

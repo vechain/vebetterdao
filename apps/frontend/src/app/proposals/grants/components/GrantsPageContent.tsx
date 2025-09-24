@@ -174,9 +174,19 @@ export const GrantsPageContent = () => {
             )}
           </HStack>
           {showApplyForGrant && (
-            <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
-              <Text>{t("Apply for Grant")}</Text>
-            </Button>
+            <HStack gap="4">
+              <Button
+                asChild
+                variant="ghost"
+                color="actions.tertiary.default"
+                size={{ base: "sm", md: "md" }}
+                rounded="full">
+                <Link href="grants/manage">{t("My grants")}</Link>
+              </Button>
+              <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
+                <Text>{t("Apply for Grant")}</Text>
+              </Button>
+            </HStack>
           )}
         </HStack>
 
