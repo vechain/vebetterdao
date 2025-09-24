@@ -1,5 +1,4 @@
-import { Button, HStack, Text } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { Button, SimpleGrid } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
 import { UseFormSetValue } from "react-hook-form"
@@ -10,6 +9,8 @@ type PercentageSelectorButtonsProps = {
   setValue: UseFormSetValue<{ amount: string; reason: string; customReason: string }>
 }
 
+const WITHDRAW_PERCENTAGES = [0.1, 0.25, 0.5, 0.75, 1] as const
+
 export const WithdrawPercentageSelectorButtons: React.FC<PercentageSelectorButtonsProps> = ({
   availableAmount,
   setValue,
@@ -17,74 +18,21 @@ export const WithdrawPercentageSelectorButtons: React.FC<PercentageSelectorButto
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
 
-  const tenPercentButton = useMemo(
-    () => (
-      <Button
-        onClick={() => setValue("amount", new BigNumber(availableAmount).times(0.1).toString())}
-        w={"full"}
-        h={"30px"}
-        variant={"secondary"}>
-        <Text textStyle="sm">{t("10%")}</Text>
-      </Button>
-    ),
-    [availableAmount, setValue, t],
-  )
-
-  const twentyFivePercentButton = useMemo(
-    () => (
-      <Button
-        onClick={() => setValue("amount", new BigNumber(availableAmount).times(0.25).toString())}
-        w={"full"}
-        h={"30px"}
-        variant={"secondary"}>
-        <Text textStyle="sm">{t("25%")}</Text>
-      </Button>
-    ),
-    [availableAmount, setValue, t],
-  )
-
-  const fiftyPercentButton = useMemo(
-    () => (
-      <Button
-        onClick={() => setValue("amount", new BigNumber(availableAmount).times(0.5).toString())}
-        w={"full"}
-        h={"30px"}
-        variant={"secondary"}>
-        <Text textStyle="sm">{t("50%")}</Text>
-      </Button>
-    ),
-    [availableAmount, setValue, t],
-  )
-
-  const seventyFivePercentButton = useMemo(
-    () => (
-      <Button
-        onClick={() => setValue("amount", new BigNumber(availableAmount).times(0.75).toString())}
-        w={"full"}
-        h={"30px"}
-        variant={"secondary"}>
-        <Text textStyle="sm">{t("75%")}</Text>
-      </Button>
-    ),
-    [availableAmount, setValue, t],
-  )
-
-  const maxButton = useMemo(
-    () => (
-      <Button onClick={() => setValue("amount", availableAmount)} variant={"secondary"} w={"full"} h={"30px"}>
-        <Text textStyle="sm">{isMobile ? t("100%") : t("Withdraw all")}</Text>
-      </Button>
-    ),
-    [availableAmount, setValue, t, isMobile],
-  )
-
   return (
-    <HStack w="full" justify={"space-evenly"} mb={4}>
-      {tenPercentButton}
-      {twentyFivePercentButton}
-      {fiftyPercentButton}
-      {seventyFivePercentButton}
-      {maxButton}
-    </HStack>
+    <SimpleGrid columns={5} gap="4" my="4">
+      {WITHDRAW_PERCENTAGES.map(percentage => (
+        <Button
+          key={percentage.toString()}
+          onClick={() => {
+            setValue("amount", new BigNumber(availableAmount).times(percentage).toString())
+          }}
+          variant="secondary"
+          w={"full"}
+          h={"30px"}
+          textStyle="md">
+          {percentage === 1 ? (isMobile ? `${percentage * 100}%` : t("Withdraw all")) : `${percentage * 100}%`}
+        </Button>
+      ))}
+    </SimpleGrid>
   )
 }

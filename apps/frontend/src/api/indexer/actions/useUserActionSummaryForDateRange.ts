@@ -20,8 +20,15 @@ export const useUserActionSummaryForDateRange = (
       params: { path: { wallet }, query: { ...queryOptions, direction }, enabled: !!wallet },
     },
     {
+      pageParamName: "page",
       initialPageParam: 0,
-      getNextPageParam: (lastPage: UserActionSummaryForDateRangeQueryResponse) => lastPage.pagination.hasNext,
+      getNextPageParam: (
+        lastPage: UserActionSummaryForDateRangeQueryResponse,
+        _allPages: UserActionSummaryForDateRangeQueryResponse[],
+        lastPageParam: number,
+      ) => {
+        return lastPage.pagination.hasNext ? lastPageParam + 1 : undefined
+      },
     },
   )
 }

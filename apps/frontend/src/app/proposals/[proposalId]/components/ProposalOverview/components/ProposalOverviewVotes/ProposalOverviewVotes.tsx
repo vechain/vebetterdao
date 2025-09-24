@@ -35,14 +35,14 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
       color: forColor,
       text: t("Votes for"),
       percentage: proposalVotes?.votes?.for?.percentagePower ?? 0,
-      voters: proposalVotes?.votes.for.voters ?? 0,
+      voters: proposalVotes?.votes.for?.voters ?? 0,
       icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
     },
     against: {
       color: againstColor,
       text: t("Against"),
       percentage: proposalVotes?.votes?.against?.percentagePower ?? 0,
-      voters: proposalVotes?.votes.against.voters ?? 0,
+      voters: proposalVotes?.votes.against?.voters ?? 0,
       icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
     },
 
@@ -50,7 +50,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
       color: abstainColor,
       text: t("Abstained"),
       percentage: proposalVotes?.votes?.abstain?.percentagePower ?? 0,
-      voters: proposalVotes?.votes.abstain.voters ?? 0,
+      voters: proposalVotes?.votes.abstain?.voters ?? 0,
       icon: <Image src={"/assets/icons/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }

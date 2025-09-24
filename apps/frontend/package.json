@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.26.9",
+  "version": "1.27.2",
   "private": true,
   "scripts": {
     "postinstall": "yarn chakra:typegen && yarn generate:schema",

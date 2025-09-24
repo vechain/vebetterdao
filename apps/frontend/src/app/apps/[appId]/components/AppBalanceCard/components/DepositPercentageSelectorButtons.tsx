@@ -19,7 +19,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
   const { isMobile } = useBreakpoints()
 
   return (
-    <SimpleGrid columns={5} gap="4" m="4">
+    <SimpleGrid columns={5} gap="4" my="4">
       {DEPOSIT_PERCENTAGES.map(percentage => (
         <Button
           key={percentage.toString()}
