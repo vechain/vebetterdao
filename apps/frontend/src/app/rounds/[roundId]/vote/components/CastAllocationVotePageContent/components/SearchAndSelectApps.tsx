@@ -67,8 +67,9 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
           onCheckedChange={e => onCheckboxChange(!!e.checked)}
           checked={isSelectAllChecked}
           size="lg">
+          <Checkbox.HiddenInput />
           <Checkbox.Control />
-          {t("Select all")}
+          <Checkbox.Label>{t("Select all")}</Checkbox.Label>
         </Checkbox.Root>
       </HStack>
       <VStack w="full" gap={4}>
