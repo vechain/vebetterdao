@@ -26,6 +26,7 @@ import {
   useGetVot3Balance,
   useQueueProposal,
 } from "@/hooks"
+import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
 import { Button, Card, Heading, HStack, Icon, Separator, Skeleton } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -35,19 +36,10 @@ import { useTranslation } from "react-i18next"
 import { FiBarChart2 } from "react-icons/fi"
 import { TbClockHour8 } from "react-icons/tb"
 
-import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
-import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
-import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
+import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
+import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
+import { ProposalSupportModal } from "../ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges"
-
-type Props = {
-  proposal?: ProposalEnriched
-  isVotingPhase: boolean
-  daysLeft: number
-  hoursLeft: number
-  minutesLeft: number
-  isLoading: boolean
-}
 
 export const ProposalInteractionCard = ({
   proposal,
@@ -56,7 +48,14 @@ export const ProposalInteractionCard = ({
   hoursLeft,
   minutesLeft,
   isLoading,
-}: Props) => {
+}: {
+  proposal: ProposalEnriched
+  isVotingPhase: boolean
+  daysLeft: number
+  hoursLeft: number
+  minutesLeft: number
+  isLoading: boolean
+}) => {
   // ===== STATE =====
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
@@ -197,6 +196,44 @@ export const ProposalInteractionCard = ({
     currentUserCanQueueOrExecute,
   ])
 
+  // ===== VOTING DATA PROCESSING =====
+  const votingSegments: VotingSegment[] = useMemo(() => {
+    if (!proposalVotesQueryData?.votes) return []
+
+    return [
+      {
+        option: "Approve",
+        voters: proposalVotesQueryData.votes.for?.voters ?? 0,
+        votingPower: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
+        totalWeight: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
+        percentage: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
+        percentagePower: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
+        color: "success.primary",
+        icon: ThumbsUpIcon,
+      },
+      {
+        option: "Abstain",
+        voters: proposalVotesQueryData.votes.abstain?.voters ?? 0,
+        votingPower: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
+        totalWeight: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
+        percentage: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
+        percentagePower: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
+        color: "warning.primary",
+        icon: AbstainIcon,
+      },
+      {
+        option: "Against",
+        voters: proposalVotesQueryData.votes.against?.voters ?? 0,
+        votingPower: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
+        totalWeight: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
+        percentage: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
+        percentagePower: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
+        color: "error.primary",
+        icon: ThumbsDownIcon,
+      },
+    ]
+  }, [proposalVotesQueryData?.votes])
+
   const progressBarSegments = useMemo(() => {
     if (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.DepositNotMet) {
       return [
@@ -208,31 +245,8 @@ export const ProposalInteractionCard = ({
       ]
     }
 
-    return [
-      {
-        percentage: Number(proposalVotesQueryData?.votes?.for?.percentagePower ?? 0),
-        color: "success.primary",
-        icon: ThumbsUpIcon,
-      },
-      {
-        percentage: Number(proposalVotesQueryData?.votes?.abstain?.percentagePower ?? 0),
-        color: "warning.primary",
-        icon: AbstainIcon,
-      },
-      {
-        percentage: Number(proposalVotesQueryData?.votes?.against?.percentagePower ?? 0),
-        color: "error.primary",
-        icon: ThumbsDownIcon,
-      },
-    ]
-  }, [
-    proposal?.state,
-    proposalVotesQueryData?.votes?.for,
-    proposalVotesQueryData?.votes?.abstain,
-    proposalVotesQueryData?.votes?.against,
-    percentageSupported,
-    userDeposits,
-  ])
+    return votingSegments.map(votingSegmentToProgressBar)
+  }, [proposal?.state, votingSegments, percentageSupported, userDeposits])
 
   // ===== ACTION HANDLERS =====
   const handleVoteAction = useCallback(() => {
@@ -387,11 +401,15 @@ export const ProposalInteractionCard = ({
         isResultsModalOpen={isResultsModalOpen}
         onClose={() => setIsResultsModalOpen(false)}
         progressBarSegments={progressBarSegments}
+        votingSegments={votingSegments}
         userDeposits={userDeposits ?? BigInt(0)}
         proposalDepositThreshold={proposalDepositThreshold}
         resultsDetails={resultsDetails}
-        isVotingPhase={isVotingPhase}
+        proposalState={proposal?.state ?? ProposalState.Pending}
         proposalId={proposalId}
+        proposalQuorum={proposalQuorumBigInt}
+        proposalTotalVotes={proposalTotalVotes}
+        proposalVotesData={proposalVotesQueryData}
       />
 
       {/* ===== VOTE MODAL ===== */}

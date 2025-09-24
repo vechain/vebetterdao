@@ -19,6 +19,7 @@ export const ResultsDisplay = ({ proposalId, segments, tokenAmount, showTokenAmo
     justify: "space-between",
     w: "full",
     gap: isSingleSegment ? 2 : 0,
+    pt: "20px",
   } as const
 
   const segmentProps = {
