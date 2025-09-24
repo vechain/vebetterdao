@@ -66,7 +66,7 @@ export const GrantsStepsCard = ({
   const openRequirementModal = useCallback(() => setIsRequirementModalOpen(true), [])
   const closeRequirementModal = useCallback(() => setIsRequirementModalOpen(false), [])
 
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
 
   const handleApply = useCallback(() => {
     if (!account?.address) {

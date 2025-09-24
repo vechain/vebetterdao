@@ -119,7 +119,7 @@ export const GrantsPageContent = () => {
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const hasMetProposalCriteria = useMetProposalCriteria(ProposalType.GRANT)
+  const { hasMetProposalCriteria } = useMetProposalCriteria(ProposalType.GRANT)
 
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
   const {

@@ -15,7 +15,7 @@ export const CreateProposalCard = () => {
 
   const { t } = useTranslation()
 
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
 
   const onNewClick = useCallback(() => {
     if (!account?.address) {
