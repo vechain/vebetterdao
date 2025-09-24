@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   },
   description: platformMetadataDescription,
   applicationName: platformAppName,
+  keywords: ["VeBetter", "B3TR", "governance", "sustainability", "VeChain", "Web3", "DAO"],
   appleWebApp: {
     title: platformAppName,
   },
