@@ -85,7 +85,15 @@ export const useFilteredProposals = (
       ProposalState.DepositNotMet,
     ]
     return proposals.sort((a: ProposalWithStateAndDeposit, b: ProposalWithStateAndDeposit) => {
-      return stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state)
+      // First, sort by phase (state order)
+      const phaseComparison = stateOrder.indexOf(a.state) - stateOrder.indexOf(b.state)
+
+      // If they're in the same phase, sort by newest to oldest (createdAt descending)
+      if (phaseComparison === 0) {
+        return (b.createdAt || 0) - (a.createdAt || 0)
+      }
+
+      return phaseComparison
     })
   }, [])
 
