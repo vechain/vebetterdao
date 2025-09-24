@@ -202,12 +202,7 @@ export const ProposalSupportModal = ({
         {/* Progress Bar */}
         <MulticolorBar segments={[progressData]} />
         {/* Results Section */}
-        <ResultsDisplay
-          proposalId={proposalId}
-          segments={[{ ...progressData, icon: HeartIcon }]}
-          tokenAmount={proposalDeposits + inputAmount}
-          showTokenAmount={true}
-        />
+        <ResultsDisplay proposalId={proposalId} segments={[{ ...progressData, icon: HeartIcon }]} />
 
         {/* Info Message */}
         <GenericAlert

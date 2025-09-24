@@ -1461,5 +1461,9 @@
   "Executed": "Executed",
   "Approve & Fund": "Approve & Fund",
   "Claim Reward": "Claim Reward",
-  "Approve": "Approve"
+  "Approve": "Approve",
+  "Option": "Option",
+  "Voters": "Voters",
+  "Minimum <Link>quorum</Link> (30%) reached": "Minimum <Link>quorum</Link> (30%) reached",
+  "{{percentage}}% (your support)": "{{percentage}}% (your support)"
 }

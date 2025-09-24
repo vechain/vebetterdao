@@ -1,19 +1,12 @@
-import { HStack, Icon, Separator, Text } from "@chakra-ui/react"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
+import { HStack, Icon, Text } from "@chakra-ui/react"
 
 type ResultsDisplayProps = {
   proposalId: string
   segments: { percentage: number; color: string; icon: React.ElementType }[]
-  tokenAmount: bigint
-  showTokenAmount?: boolean
+  helperText?: string
 }
-export const ResultsDisplay = ({ proposalId, segments, tokenAmount, showTokenAmount = false }: ResultsDisplayProps) => {
-  const { t } = useTranslation()
-
+export const ResultsDisplay = ({ proposalId, segments, helperText }: ResultsDisplayProps) => {
   const isSingleSegment = segments.length === 1
-  const hasMultipleSegments = segments.length > 1
-  const shouldShowTokenAmount = showTokenAmount && isSingleSegment
 
   const containerProps = {
     justify: "space-between",
@@ -27,13 +20,9 @@ export const ResultsDisplay = ({ proposalId, segments, tokenAmount, showTokenAmo
     justify: isSingleSegment ? "flex-start" : "center",
   } as const
 
-  const shouldShowSeparator = (index: number) => {
-    return hasMultipleSegments && index !== segments.length - 1
-  }
-
   return (
     <HStack {...containerProps}>
-      {segments.map((segment, index) => (
+      {segments.map(segment => (
         <>
           <HStack key={`${proposalId}-${segment.color}`} {...segmentProps}>
             <Icon as={segment.icon} boxSize={5} color={segment.color} />
@@ -41,12 +30,11 @@ export const ResultsDisplay = ({ proposalId, segments, tokenAmount, showTokenAmo
               {`${Math.floor(segment.percentage)}%`}
             </Text>
           </HStack>
-          {shouldShowSeparator(index) && <Separator orientation="vertical" height="4" />}
         </>
       ))}
-      {shouldShowTokenAmount && (
+      {helperText && (
         <Text fontSize="md" color="text.subtle">
-          {t("{{amount}} VOT3", { amount: ethers.formatEther(tokenAmount) })}
+          {helperText}
         </Text>
       )}
     </HStack>

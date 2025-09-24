@@ -13,6 +13,7 @@ import { popoverSlotRecipe } from "./popover"
 import { radioGroupSlotRecipe } from "./radio-group"
 import { selectSlotRecipe } from "./select"
 import { stepsSlotRecipe } from "./steps"
+import { tableSlotRecipe } from "./table"
 
 const config = defineConfig({
   preflight: true,
@@ -43,6 +44,7 @@ const config = defineConfig({
       popover: popoverSlotRecipe,
       checkbox: checkboxSlotRecipe,
       radioGroup: radioGroupSlotRecipe,
+      table: tableSlotRecipe,
     },
 
     keyframes: {
