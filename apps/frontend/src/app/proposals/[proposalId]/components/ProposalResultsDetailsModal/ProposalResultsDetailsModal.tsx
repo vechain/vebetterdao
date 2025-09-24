@@ -153,6 +153,7 @@ const SupportResultContent = ({
   totalSupporters,
   userDeposits,
 }: SupportResultContentProps) => {
+  const { t } = useTranslation()
   const helperText = useMemo(() => {
     const formattedSupportAmount = humanNumber(formatEther(proposalSupportAmount ?? 0n))
     const formattedDepositThreshold = humanNumber(formatEther(proposalSupportThreshold ?? 0n))
@@ -161,8 +162,8 @@ const SupportResultContent = ({
 
   const userSupportPercentage = useMemo(() => {
     if (!userDeposits || !proposalSupportThreshold) return 0
-    const result = userDeposits / proposalSupportThreshold
-    return Math.min(Number(result), 1) * 100
+    const result = Number(userDeposits) / Number(proposalSupportThreshold)
+    return Math.min(result, 1) * 100
   }, [userDeposits, proposalSupportThreshold])
 
   return (
@@ -175,7 +176,7 @@ const SupportResultContent = ({
             <HStack>
               <Icon as={HeartSolidIcon} color="success.primary" boxSize={5} />
               <Text fontSize="md" color="text.subtle">
-                {userSupportPercentage} {"(your support)"}
+                {t("{{percentage}}% (your support)", { percentage: userSupportPercentage.toFixed(2) })}
               </Text>
             </HStack>
             <Text fontSize="md" color="text.subtle">
