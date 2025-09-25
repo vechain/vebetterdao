@@ -366,10 +366,10 @@
   "Vote for no": "Vote for no",
   "Vote for yes": "Vote for yes",
   "Voting power": "Voting power",
-  "Share this proposal": "Share this proposal",
-  "Copy link to proposal": "Copy link to proposal",
+  "Share this {{proposalType}}": "Share this {{proposalType}}",
+  "Copy link to {{proposalType}}": "Copy link to {{proposalType}}",
   "Copied!": "Copied!",
-  "Share the proposal on social media and invite people to vote": "Share the proposal on social media and invite people to vote",
+  "Share the {{proposalType}} on social media and invite people to vote": "Share the {{proposalType}} on social media and invite people to vote",
   "Executable in {{timestamp}}": "Executable in {{timestamp}}",
   "VOT3": "VOT3",
   "Treasury address": "Treasury address",
@@ -1464,5 +1464,6 @@
   "Option": "Option",
   "Voters": "Voters",
   "Minimum <Link>quorum</Link> (30%) reached": "Minimum <Link>quorum</Link> (30%) reached",
-  "{{percentage}}% (your support)": "{{percentage}}% (your support)"
+  "{{percentage}}% (your support)": "{{percentage}}% (your support)",
+  "grant": "grant"
 }
