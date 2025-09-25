@@ -48,6 +48,16 @@ export const AboutGrant = ({
   const { t } = useTranslation()
   const { data: session } = useSession()
 
+  const mapUploadError = (error: string): string => {
+    if (error === "FILE_INVALID_TYPE") {
+      return t("File type not supported. Use PDF, JPG, JPEG, or PNG.")
+    }
+    if (error === "FILE_TOO_LARGE") {
+      return t("File too large. Maximum 5MB allowed.")
+    }
+    return error
+  }
+
   // Custom validation function to ensure at least one social account is connected
   const validateAtLeastOneSocial = (_value: string): string | boolean => {
     const twitterUsername = watch("twitterUsername")
@@ -123,8 +133,8 @@ export const AboutGrant = ({
         ipfs: ipfsHash,
         name: file.name,
       }
-    } catch {
-      throw new Error(`${file.name}: Upload to IPFS failed.`)
+    } catch (error) {
+      throw error
     }
   }
   //Handle file removal
@@ -587,17 +597,25 @@ export const AboutGrant = ({
                     <FileUpload.Root
                       w="full"
                       alignItems="stretch"
-                      maxFiles={3}
+                      maxFiles={10}
                       accept={ALLOWED_FILE_TYPES}
                       maxFileSize={MAX_FILE_SIZE}
-                      onFileAccept={({ files }) => onDrop(files)}>
+                      onFileAccept={({ files }) => onDrop(files)}
+                      onFileReject={({ files }) => {
+                        files.forEach(file => {
+                          file.errors.forEach(error => {
+                            setError("outcomesAttachment", {
+                              type: "custom",
+                              message: mapUploadError(error),
+                            })
+                          })
+                        })
+                      }}>
                       <FileUpload.HiddenInput />
                       <FileUpload.Dropzone>
                         <FileUpload.DropzoneContent>
-                          <HStack>
-                            <Icon as={LuUpload} size="md" color="fg.muted" />
-                            <Box>{t("Upload file")}</Box>
-                          </HStack>
+                          <Icon as={LuUpload} size="md" color="fg.muted" />
+                          <Box>{t("Upload file")}</Box>
                           <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 5MB")}</Box>
                         </FileUpload.DropzoneContent>
                       </FileUpload.Dropzone>
