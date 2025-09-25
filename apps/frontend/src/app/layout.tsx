@@ -4,10 +4,11 @@ import { Metadata, Viewport } from "next"
 import { ClientWrapper } from "./client-wrapper"
 
 // Get metadata of the platform
+const basePath = getConfig()?.basePath
 const platformMetadata = pagesMetadata?.platform
 const title = platformMetadata?.title
 const metadataDesc = platformMetadata?.description
-const imageUrl = `${getConfig().basePath}${platformMetadata?.image}`
+const imageUrl = `${basePath}${platformMetadata?.image}`
 const imageExtension = platformMetadata?.imageExtension
 
 export const viewport: Viewport = {
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     type: "website",
-    url: "%VITE_BASE_URL%",
+    url: basePath,
     description: metadataDesc,
     siteName: APPLICATION_NAME,
     images: [
