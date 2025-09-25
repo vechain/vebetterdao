@@ -24,6 +24,7 @@ const nextConfig = {
     })
     return config
   },
+  rewrites: () => [{ source: "/storybook", destination: "/storybook/index.html" }],
 }
 
 module.exports = nextConfig
