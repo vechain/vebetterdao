@@ -357,6 +357,24 @@ const config = defineConfig({
                 base: "#004CFC",
               },
             },
+            hover: {
+              value: {
+                _dark: "#1A66FF",
+                base: "#003ECC",
+              },
+            },
+            pressed: {
+              value: {
+                _dark: "#004CFC",
+                base: "#003199",
+              },
+            },
+            disabled: {
+              value: {
+                _dark: "#747C89",
+                base: "#747C89",
+              },
+            },
           },
         },
 

@@ -51,20 +51,6 @@ export const buttonRecipe = defineRecipe({
           },
         },
       },
-      tertiaryAction: {
-        rounded: "full",
-        fontSize: "16px",
-        fontWeight: 500,
-        px: "24px",
-        color: "#004CFC",
-        bgColor: "rgba(177, 241, 108, 1)",
-        _hover: {
-          bg: "rgba(177, 241, 108, 0.9)",
-          _disabled: {
-            bg: "rgba(177, 241, 108, 0.7)",
-          },
-        },
-      },
       whiteAction: {
         rounded: "full",
         fontSize: "16px",
@@ -96,6 +82,20 @@ export const buttonRecipe = defineRecipe({
           },
         },
       },
+
+      tertiary: {
+        bgColor: "transparent",
+        color: "actions.tertiary.default",
+        _hover: {
+          color: "actions.tertiary.hover",
+        },
+        _pressed: {
+          color: "actions.tertiary.pressed",
+        },
+        _disabled: {
+          color: "actions.tertiary.disabled",
+        },
+      },
       primaryGhost: {
         rounded: "full",
         fontSize: "16px",
@@ -104,7 +104,7 @@ export const buttonRecipe = defineRecipe({
         color: "#004CFC",
         bgColor: "transparent",
         _hover: {
-          bg: "#004CFC22",
+          color: "#0038b5",
           _disabled: {
             bg: "transparent",
           },
