@@ -127,7 +127,7 @@ export const GrantsPageContent = () => {
     isLoading: isLoadingEnrichedGrantProposals,
   } = useProposalEnriched()
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   // COMPUTED VALUES

@@ -1,8 +1,8 @@
 import { useMemo } from "react"
 
-import { GrantProposalEnriched, ProposalEnriched } from "../grants/types"
+import { GrantFormData, GrantProposalEnriched, ProposalEnriched } from "../grants/types"
 
-export type SearchableProposal = ProposalEnriched | GrantProposalEnriched
+export type SearchableProposal = ProposalEnriched | GrantProposalEnriched | GrantFormData
 
 /**
  * Custom hook for searching proposals by text
@@ -18,10 +18,11 @@ export const useProposalSearch = (proposals: SearchableProposal[], searchTerm: s
 
     return proposals.filter(proposal => {
       // Primary search fields with higher priority
-      const title = proposal?.title?.toLowerCase() || ""
+      const title = "title" in proposal ? proposal?.title?.toLowerCase() : ""
+      const projectName = "projectName" in proposal ? proposal?.projectName?.toLowerCase() : ""
 
       // Search across all relevant fields
-      return title.includes(normalizedSearchTerm)
+      return title.includes(normalizedSearchTerm) || projectName.includes(normalizedSearchTerm)
     })
   }, [proposals, searchTerm])
 

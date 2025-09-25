@@ -10,7 +10,7 @@ import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack, Button } from "@chakra-ui/react"
+import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
 import { formatTimeLeft, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
@@ -22,8 +22,6 @@ import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
 
 type GrantsProposalCardProps = {
-  mode?: "read" | "edit"
-  variant?: "button" | "card"
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }
 }
 
@@ -32,7 +30,7 @@ const isGrantProposal = (proposal: GrantProposalEnriched | ProposalEnriched): pr
   return proposal.type === ProposalType.Grant
 }
 
-export const GrantsProposalCard = ({ proposal, mode = "read", variant = "button" }: GrantsProposalCardProps) => {
+export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   // ==========================================
   // HOOKS
   // ==========================================
@@ -92,11 +90,9 @@ export const GrantsProposalCard = ({ proposal, mode = "read", variant = "button"
       borderColor="border.secondary"
       borderWidth="1px"
       p={{ base: 5, md: 7 }}
-      {...(variant === "button" && {
-        _hover: { bg: "gray.50", _dark: { bg: "#000000" } },
-        cursor: "pointer",
-        onClick: goToProposal,
-      })}>
+      _hover={{ bg: "gray.50", _dark: { bg: "#000000" } }}
+      cursor="pointer"
+      onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
         {/* Header Section */}
         <Heading size={{ base: "lg", lg: "md" }}>{proposal.title}</Heading>
@@ -144,80 +140,65 @@ export const GrantsProposalCard = ({ proposal, mode = "read", variant = "button"
 
         <Separator w="full" h={1} color="border.secondary" />
 
-        {mode === "edit" && (
-          <HStack w="full" gap={2}>
-            <Button w="40" variant="secondary" size="md">
-              {t("Edit")}
-            </Button>
-            <Button w="40" variant="ghost" size="md">
-              {t("Delete")}
-            </Button>
-          </HStack>
-        )}
-
         {/* Footer Section */}
-        {mode === "read" && (
-          <>
-            {isMobile ? (
-              // Mobile Layout
-              <VStack w="full" gap={2}>
-                <HStack w="full" justifyContent="space-between">
-                  <GrantsProposalStatusBadge
-                    state={proposal.state}
-                    hasUserSupported={hasUserDeposited}
-                    hasUserVoted={hasUserVoted}
-                  />
-                  {isSupportOrVotingPhase && (
-                    <ProposalCommunityInteractions
-                      proposalId={proposal.id}
-                      state={proposal.state}
-                      depositPercentage={communityDepositPercentage}
-                      votesFor={proposalVotes?.votes?.for?.percentagePower}
-                      votesAgainst={proposalVotes?.votes?.against?.percentagePower}
-                      votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
-                      hasUserDeposited={hasUserDeposited}
-                      userVoteOption={userVoteOption}
-                    />
-                  )}
-                </HStack>
-                {timeLeftDisplay && (
-                  <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
-                    {t("Ends: {{endDate}}", { endDate: timeLeftDisplay })}{" "}
-                  </Text>
-                )}
-              </VStack>
-            ) : (
-              // Desktop Layout
-              <HStack w="full" justifyContent="space-between">
-                <HStack gap={4}>
-                  <GrantsProposalStatusBadge
-                    state={proposal.state}
-                    hasUserSupported={hasUserDeposited}
-                    hasUserVoted={hasUserVoted}
-                  />
-                  {timeLeftDisplay ? (
-                    <Text fontSize="14px" color="text.subtle">
-                      {t("Ends: {{endDate}}", {
-                        endDate: timeLeftDisplay,
-                      })}
-                    </Text>
-                  ) : null}
-                </HStack>
-                <HStack gap={2}>
-                  <ProposalCommunityInteractions
-                    proposalId={proposal.id}
-                    state={proposal.state}
-                    depositPercentage={communityDepositPercentage}
-                    votesFor={proposalVotes?.votes?.for?.percentagePower}
-                    votesAgainst={proposalVotes?.votes?.against?.percentagePower}
-                    votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
-                    hasUserDeposited={hasUserDeposited}
-                    userVoteOption={userVoteOption}
-                  />
-                </HStack>
-              </HStack>
+        {isMobile ? (
+          // Mobile Layout
+          <VStack w="full" gap={2}>
+            <HStack w="full" justifyContent="space-between">
+              <GrantsProposalStatusBadge
+                state={proposal.state}
+                hasUserSupported={hasUserDeposited}
+                hasUserVoted={hasUserVoted}
+              />
+              {isSupportOrVotingPhase && (
+                <ProposalCommunityInteractions
+                  proposalId={proposal.id}
+                  state={proposal.state}
+                  depositPercentage={communityDepositPercentage}
+                  votesFor={proposalVotes?.votes?.for?.percentagePower}
+                  votesAgainst={proposalVotes?.votes?.against?.percentagePower}
+                  votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
+                  hasUserDeposited={hasUserDeposited}
+                  userVoteOption={userVoteOption}
+                />
+              )}
+            </HStack>
+            {timeLeftDisplay && (
+              <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
+                {t("Ends: {{endDate}}", { endDate: timeLeftDisplay })}{" "}
+              </Text>
             )}
-          </>
+          </VStack>
+        ) : (
+          // Desktop Layout
+          <HStack w="full" justifyContent="space-between">
+            <HStack gap={4}>
+              <GrantsProposalStatusBadge
+                state={proposal.state}
+                hasUserSupported={hasUserDeposited}
+                hasUserVoted={hasUserVoted}
+              />
+              {timeLeftDisplay ? (
+                <Text fontSize="14px" color="text.subtle">
+                  {t("Ends: {{endDate}}", {
+                    endDate: timeLeftDisplay,
+                  })}
+                </Text>
+              ) : null}
+            </HStack>
+            <HStack gap={2}>
+              <ProposalCommunityInteractions
+                proposalId={proposal.id}
+                state={proposal.state}
+                depositPercentage={communityDepositPercentage}
+                votesFor={proposalVotes?.votes?.for?.percentagePower}
+                votesAgainst={proposalVotes?.votes?.against?.percentagePower}
+                votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
+                hasUserDeposited={hasUserDeposited}
+                userVoteOption={userVoteOption}
+              />
+            </HStack>
+          </HStack>
         )}
       </VStack>
     </Card.Root>

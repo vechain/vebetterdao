@@ -14,6 +14,8 @@ import { GrantsProposalCard } from "../components/GrantsProposalCard"
 import { useWallet } from "@vechain/vechain-kit"
 import { EmptyState } from "@/components/ui/empty-state"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useDraftGrantProposalStore } from "@/store"
+import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
 
 const BreadcrumItems = [
   {
@@ -35,15 +37,17 @@ export default function GrantsNew() {
 
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] as GrantProposalEnriched[] } } =
     useProposalEnriched()
-  const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-
+  const { draftGrantProposals } = useDraftGrantProposalStore()
   const usersGrants = useMemo(() => {
-    return searchedProposals.filter(proposal => compareAddresses(proposal.proposerAddress, account?.address))
-  }, [searchedProposals, account?.address])
+    return enrichedGrantProposals.filter(proposal => compareAddresses(proposal.proposerAddress, account?.address))
+  }, [enrichedGrantProposals, account?.address])
 
-  const anyGrantExists = useMemo(() => {
-    return usersGrants && usersGrants.length > 0
-  }, [usersGrants])
+  const proposals = [...draftGrantProposals, ...usersGrants]
+  const searchedProposals = useProposalSearch(proposals, debouncedSearchTerm)
+
+  const userHasGrantsProposal = useMemo(() => {
+    return searchedProposals && searchedProposals.length > 0
+  }, [searchedProposals])
 
   return (
     <>
@@ -51,7 +55,7 @@ export default function GrantsNew() {
         <GridItem display="flex" flexDirection="column" gap="4">
           <HStack justifyContent="space-between">
             <PageBreadcrumb items={BreadcrumItems} />
-            {anyGrantExists && (
+            {userHasGrantsProposal && (
               <Button variant="primaryAction" size="md">
                 {t("Apply for grant")}
               </Button>
@@ -68,15 +72,17 @@ export default function GrantsNew() {
         <GridItem />
 
         <GridItem display="flex" flexDirection="column" gap="6">
-          {anyGrantExists ? (
-            usersGrants?.map(proposal => (
-              <GrantsProposalCard
-                key={proposal.id}
-                variant="card"
-                mode="edit"
-                proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
-              />
-            ))
+          {userHasGrantsProposal ? (
+            searchedProposals?.map(proposal =>
+              "id" in proposal ? (
+                <GrantsProposalCard
+                  key={proposal.id}
+                  proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
+                />
+              ) : (
+                <GrantsProposalDraftCard key={proposal.projectName} proposal={proposal} />
+              ),
+            )
           ) : (
             <EmptyState title={t("No grants proposal found")}>
               <Button variant="primaryAction" size="md">

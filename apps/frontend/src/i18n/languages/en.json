@@ -1462,5 +1462,11 @@
   "My grants": "My grants",
   "Delete": "Delete",
   "No grants proposal found": "No grants proposal found",
-  "Apply for grant": "Apply for grant"
+  "Apply for grant": "Apply for grant",
+  "This action cannot be undone. This will permanently cancel your grant proposal.": "This action cannot be undone. This will permanently cancel your grant proposal.",
+  "grant application": "grant application",
+  "App Grant": "App Grant",
+  "Tooling Grant": "Tooling Grant",
+  "Are you sure?": "Are you sure?",
+  "You should add a project name to save a draft": "You should add a project name to save a draft"
 }

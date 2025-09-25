@@ -23,6 +23,7 @@ import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
 import { datadogRum } from "@datadog/browser-rum"
+import { Toaster } from "@/components/ui/toaster"
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
@@ -132,6 +133,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 {children}
               </Container>
               <TransactionModal />
+              <Toaster />
             </Flex>
             <Footer />
           </VStack>

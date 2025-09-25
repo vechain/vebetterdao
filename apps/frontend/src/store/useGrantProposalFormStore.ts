@@ -4,7 +4,7 @@ import { devtools, persist } from "zustand/middleware"
 
 export type GrantFormStoreState = GrantFormData & {
   currentStep: number
-  setData: (data: Partial<GrantFormData>) => void
+  setData: (data: Partial<GrantFormData>, currentStep?: number) => void
   setCurrentStep: (step: number) => void
   clearData: () => void
 }
@@ -69,6 +69,8 @@ const initialState: GrantFormData = {
   grantsReceiverAddress: "",
 }
 
+export const GRANT_PROPOSAL_FORM_STORE_NAME = "GRANT_PROPOSAL_FORM_STORE"
+
 /**
  * Store for the multi-step proposal form data
  */
@@ -78,10 +80,11 @@ export const useGrantProposalFormStore = create<GrantFormStoreState>()(
       set => ({
         ...initialState,
         currentStep: 0,
-        setData: (data: Partial<GrantFormData>) =>
+        setData: (data: Partial<GrantFormData>, currentStep?: number) =>
           set(state => ({
             ...state,
             ...data,
+            currentStep: currentStep ?? state.currentStep,
           })),
         setCurrentStep: (step: number) =>
           set(state => ({
@@ -91,7 +94,35 @@ export const useGrantProposalFormStore = create<GrantFormStoreState>()(
         clearData: () => set({ ...initialState, currentStep: 0 }),
       }),
       {
-        name: "GRANT_PROPOSAL_FORM_STORE",
+        name: GRANT_PROPOSAL_FORM_STORE_NAME,
+      },
+    ),
+  ),
+)
+
+export const useDraftGrantProposalStore = create<{
+  draftGrantProposals: GrantFormData[]
+  addDraftGrantProposal: (draftGrantProposal: GrantFormData) => void
+  removeDraftGrantProposal: (proposalId: string) => void
+}>()(
+  devtools(
+    persist(
+      (set, get) => ({
+        draftGrantProposals: [] as GrantFormData[],
+        addDraftGrantProposal: (draftGrantProposal: GrantFormData) =>
+          set(state => ({
+            draftGrantProposals: [
+              draftGrantProposal,
+              ...state.draftGrantProposals.filter(proposal => proposal.projectName !== draftGrantProposal.projectName),
+            ],
+          })),
+        removeDraftGrantProposal: (projectName: string) =>
+          set({
+            draftGrantProposals: get().draftGrantProposals.filter(proposal => proposal.projectName !== projectName),
+          }),
+      }),
+      {
+        name: "DRAFT_GRANT_PROPOSAL_STORE",
       },
     ),
   ),

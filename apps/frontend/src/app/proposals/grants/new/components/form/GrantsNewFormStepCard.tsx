@@ -3,20 +3,22 @@ import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposa
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
-import { useGrantProposalFormStore } from "@/store"
+import { useDraftGrantProposalStore, useGrantProposalFormStore } from "@/store"
 import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
+import { toaster } from "@/components/ui/toaster"
 import { getConfig } from "@repo/config"
 import { Treasury__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { signOut, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutGrant, Milestones, Schedule } from "./steps"
+import { GRANT_PROPOSAL_FORM_STORE_NAME } from "@/store/useGrantProposalFormStore"
 
 // ============================================================================
 // TYPES AND CONSTANTS
@@ -56,9 +58,11 @@ export const GrantsNewFormStepCard = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { data: session } = useSession()
+  const formRef = useRef<HTMLFormElement>(null)
 
   // Store state
   const { setData, clearData, currentStep: storedStep, setCurrentStep, ...formData } = useGrantProposalFormStore()
+  const { addDraftGrantProposal } = useDraftGrantProposalStore()
 
   // Component state
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string>("")
@@ -159,6 +163,23 @@ export const GrantsNewFormStepCard = () => {
     setCurrentStepIndex(prevStep)
     setCurrentStep(prevStep)
   }, [currentStepIndex, setCurrentStep])
+
+  const saveDraft = useCallback(() => {
+    if (!formData.projectName) {
+      toaster.create({
+        description: t("You should add a project name to save a draft"),
+        type: "error",
+        closable: true,
+      })
+      return
+    }
+
+    addDraftGrantProposal(formData)
+    formRef.current?.reset?.()
+    clearData()
+    localStorage.removeItem(GRANT_PROPOSAL_FORM_STORE_NAME)
+    router.push("/proposals/grants/manage")
+  }, [addDraftGrantProposal, formRef, formData, t, router, clearData])
 
   // ============================================================================
   // PROPOSAL SUBMISSION LOGIC
@@ -268,14 +289,14 @@ export const GrantsNewFormStepCard = () => {
       </Card.Header>
 
       <Card.Body px={{ base: 3, md: 8 }}>
-        <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+        <form ref={formRef} onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
             {currentStepData?.content}
 
             <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
               <HStack gap={4} w="full">
                 {currentStepIndex !== firstStep && (
-                  <Button w="40" onClick={goToPrevious} variant="secondary" px={8} size="lg">
+                  <Button w="40" type="button" onClick={goToPrevious} variant="secondary" px={8} size="lg">
                     {t("Back")}
                   </Button>
                 )}
@@ -283,6 +304,19 @@ export const GrantsNewFormStepCard = () => {
                   {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>
+
+              {currentStepIndex !== firstStep && (
+                <Button
+                  w="40"
+                  type="button"
+                  onClick={saveDraft}
+                  variant="ghost"
+                  color="actions.tertiary.default"
+                  px={8}
+                  size="lg">
+                  {t("Save draft")}
+                </Button>
+              )}
             </Stack>
           </VStack>
         </form>
