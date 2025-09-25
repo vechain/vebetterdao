@@ -35,4 +35,10 @@ export const pagesMetadata = {
       "View your governance activity: votes cast, proposals backed and rewards earned. Build your engagement in VeBetter and shape Web3 for good.",
     socialImage: "/assets/images/profile_page.webp",
   },
+  grants: {
+    title: "VeBetterDAO Governance Grants | Shape the VeBetter Ecosystem ",
+    description:
+      "Help decide which projects receive funding through the VeBetterDAO. Vote on impactful proposals and guide grant distribution in the VeChain-powered ecosystem.",
+    socialImage: "/assets/images/grants_page.webp",
+  },
 } as const
