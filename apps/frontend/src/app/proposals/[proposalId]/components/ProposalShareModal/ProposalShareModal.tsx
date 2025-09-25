@@ -1,14 +1,16 @@
-import { Heading, VStack, Dialog, Box, Text, HStack, CloseButton } from "@chakra-ui/react"
-import shareIconAnimation from "./shareIconAnimation.json"
-import { motion } from "framer-motion"
 import { CustomModalContent } from "@/components"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { UilCheckCircle, UilLink } from "@iconscout/react-unicons"
-import { useTranslation } from "react-i18next"
 import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
-import { useCallback, useState } from "react"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import { ProposalType } from "@/hooks/proposals/grants/types"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { Box, CloseButton, Dialog, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { UilCheckCircle, UilLink } from "@iconscout/react-unicons"
+import { motion } from "framer-motion"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
+
+import shareIconAnimation from "./shareIconAnimation.json"
 
 const containerVariants = {
   initial: {
@@ -25,10 +27,12 @@ const containerVariants = {
 
 export const ProposalShareModal = ({
   proposalId,
+  proposalType,
   isOpen,
   onClose,
 }: {
   proposalId: string
+  proposalType: ProposalType
   isOpen: boolean
   onClose: () => void
   onOpen: () => void
@@ -43,6 +47,10 @@ export const ProposalShareModal = ({
       setShowCopiedLink(false)
     }, 2000)
   }, [])
+
+  const proposalTypeText = useMemo(() => {
+    return proposalType === ProposalType.Standard ? t("proposal") : t("grant")
+  }, [proposalType, t])
 
   return (
     <>
@@ -79,15 +87,17 @@ export const ProposalShareModal = ({
                 </Box>
                 <VStack>
                   <Heading fontSize="28px" fontWeight={700}>
-                    {t("Share this proposal")}
+                    {t("Share this {{proposalType}}", { proposalType: proposalTypeText })}
                   </Heading>
-                  <Text fontSize="16px" fontWeight={400} color="#6A6A6A" textAlign={"center"}>
-                    {t("Share the proposal on social media and invite people to vote")}
+                  <Text fontSize="16px" fontWeight={400} color={"text.subtle"} textAlign={"center"}>
+                    {t("Share the {{proposalType}} on social media and invite people to vote", {
+                      proposalType: proposalTypeText,
+                    })}
                   </Text>
                 </VStack>
                 <ShareButtonsBlue
                   descriptionEncoded={encodeURIComponent(
-                    `📢 Proposal alert! Check it out on #VeBetterDao and join me in building a sustainable future 🌱🔗\n\nVote now: https://governance.vebetterdao.org/proposals/${proposalId}\n\n💫 #VeBetterDAO #Vechain`,
+                    `📢 ${proposalTypeText.toUpperCase()} alert! Check it out on #VeBetterDao and join me in building a sustainable future 🌱🔗\n\nVote now: https://governance.vebetterdao.org/${proposalTypeText}s/${proposalId}\n\n💫 #VeBetterDAO #Vechain`,
                   )}
                 />
                 {showCopiedLink ? (
