@@ -4,8 +4,9 @@ export const buttonRecipe = defineRecipe({
   base: {
     rounded: "md",
     fontWeight: 600,
-    focusRing: "outside",
-    focusRingColor: "actions.primary.default",
+    //Commenting out focus ring for now as it is not working as expected
+    // focusRing: "outside",
+    // focusRingColor: "actions.primary.default",
   },
   variants: {
     variant: {
