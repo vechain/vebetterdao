@@ -50,8 +50,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         h="full"
         step={currentStep}
         colorPalette="blue"
-        variant="primaryVertical"
-        pt={"40px"}>
+        variant="primaryVertical">
         <Steps.List>
           <Accordion.Root
             multiple // allow any item to be open
