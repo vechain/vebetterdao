@@ -64,7 +64,6 @@ export const GrantsPageContent = () => {
       ],
     })
   }, [t])
-  const filterDefaultValues = filterOptions.items.map(item => item.value)
   const stepsArray = [
     {
       key: GrantsStep.SUBMIT_APPLICATION,
@@ -216,7 +215,7 @@ export const GrantsPageContent = () => {
                       w="25%"
                       placeholder={t("Status")}
                       options={filterOptions}
-                      defaultValue={filterDefaultValues}
+                      defaultValue={[]}
                       showReset
                       onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
                       isMultiOption

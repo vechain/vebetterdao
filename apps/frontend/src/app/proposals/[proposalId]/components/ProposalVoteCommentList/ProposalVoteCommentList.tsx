@@ -57,14 +57,14 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
           <SelectField
             placeholder={t("Filter")}
             options={filterOptions}
-            defaultValue={defaultSortOption}
+            defaultValue={[defaultSortOption]}
             onChange={value => setFilter(value[0] as VoteType)}
           />
           <SelectField
             placeholder={t("Sort By")}
             options={sortOptions}
             leftIcon={UilSortAmountDown}
-            defaultValue={defaultSortOption}
+            defaultValue={[defaultSortOption]}
             onChange={value => setDirection(value[0] as "ASC" | "DESC")}
           />
         </HStack>
