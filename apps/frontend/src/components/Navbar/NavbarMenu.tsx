@@ -85,7 +85,6 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                     p={3}
                     color={"text.subtle"}
                     _hover={{
-                      fontWeight: "bold",
                       color: "text.default",
                     }}
                     onClick={() => {
@@ -93,9 +92,7 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                       setIsOpen(false)
                     }}>
                     <Text fontSize={"md"}>{subRoute.name}</Text>
-                    <Text fontSize={"sm"} fontWeight="normal" color={"text.subtle"}>
-                      {subRoute.description}
-                    </Text>
+                    <Text fontSize={"sm"}>{subRoute.description}</Text>
                   </VStack>
                 )
               })}
