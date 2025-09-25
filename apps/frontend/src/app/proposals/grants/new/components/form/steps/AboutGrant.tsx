@@ -212,10 +212,9 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Registered number")}
                     placeholder={"Eg. 01234567"}
+                    isOptional
                     tooltip={t("Company VAT number e.g. 01234567")}
-                    register={register("companyRegisteredNumber", {
-                      required: t("Please enter your company registered number"),
-                    })}
+                    register={register("companyRegisteredNumber")}
                     error={errors.companyRegisteredNumber?.message}
                     onBlur={() => onBlur("companyRegisteredNumber")}
                   />

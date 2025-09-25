@@ -42,16 +42,23 @@ export const FormItem = ({
             htmlFor={register.name}>
             {label}
           </Field.Label>
-          {tooltip && (
-            <Tooltip content={tooltip} positioning={{ placement: "top" }} contentProps={{ p: 4, borderRadius: "lg" }}>
-              <Icon as={GoQuestion} boxSize={5} color="icon.subtle" />
-            </Tooltip>
-          )}
-          {isOptional && (
-            <Text fontSize="sm" fontWeight="regular" color="text.subtle">
-              {"Optional"}
-            </Text>
-          )}
+          {isOptional || tooltip ? (
+            <HStack>
+              {isOptional && (
+                <Text fontSize="sm" fontWeight="regular" color="text.subtle">
+                  {"Optional"}
+                </Text>
+              )}
+              {tooltip && (
+                <Tooltip
+                  content={tooltip}
+                  positioning={{ placement: "top" }}
+                  contentProps={{ p: 4, borderRadius: "lg" }}>
+                  <Icon as={GoQuestion} boxSize={5} color="icon.subtle" />
+                </Tooltip>
+              )}
+            </HStack>
+          ) : null}
         </HStack>
       )}
       {description && (
