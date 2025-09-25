@@ -204,7 +204,6 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 wordBreak: "break-word",
                 backgroundColor: "transparent",
                 color: markdownPreviewTextColor,
-                // padding: "10px",
               }}
             />
           </Box>
