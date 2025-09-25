@@ -80,7 +80,6 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                     textAlign="start"
                     alignItems="flex-start"
                     cursor="pointer"
-                    bg="bg.primary"
                     borderRadius="2xl"
                     p={3}
                     color={"text.subtle"}
