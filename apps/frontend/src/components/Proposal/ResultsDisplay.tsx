@@ -11,7 +11,6 @@ export const ResultsDisplay = ({ proposalId, segments, helperText }: ResultsDisp
   const containerProps = {
     justify: "space-between",
     w: "full",
-    gap: isSingleSegment ? 2 : 0,
   } as const
 
   const segmentProps = {
@@ -21,7 +20,7 @@ export const ResultsDisplay = ({ proposalId, segments, helperText }: ResultsDisp
   } as const
 
   return (
-    <HStack {...containerProps}>
+    <HStack p={0} {...containerProps}>
       {segments.map(segment => (
         <>
           <HStack key={`${proposalId}-${segment.color}`} {...segmentProps}>

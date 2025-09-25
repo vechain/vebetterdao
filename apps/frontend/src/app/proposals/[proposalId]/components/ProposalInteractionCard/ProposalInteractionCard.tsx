@@ -29,7 +29,7 @@ import {
   useQueueProposal,
 } from "@/hooks"
 import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
-import { Button, Card, Heading, HStack, Icon, Separator, Skeleton } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, VStack, Icon, Separator, Skeleton } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
@@ -307,40 +307,40 @@ export const ProposalInteractionCard = ({
     <>
       {/* ===== MAIN CARD ===== */}
       <Skeleton loading={isLoading}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root gap={"0px"} variant="baseWithBorder">
           {/* Card Header - Countdown Timer */}
           <Card.Header as={HStack}>
             <Icon as={TbClockHour8} boxSize={5} />
-            <Card.Title>
+            <Card.Title p={0} gap={0}>
               <Heading>{t("Ends in")}</Heading>
             </Card.Title>
           </Card.Header>
 
-          <Card.Body gap={4}>
+          <Card.Body gap={"32px"} p={"32px"}>
             {/* Countdown Display */}
             <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
 
             <Separator />
 
-            {/* Results Section Header */}
-            <HStack justify="space-between">
-              <HStack>
-                <Icon as={FiBarChart2} boxSize={5} />
-                <Heading>{t("Results")}</Heading>
+            <VStack w="full" gap={"24px"} align={"stretch"}>
+              {/* Results Section Header */}
+              <HStack justify="space-between">
+                <HStack>
+                  <Icon as={FiBarChart2} boxSize={5} />
+                  <Heading>{t("Results")}</Heading>
+                </HStack>
+                <Button variant="primaryGhost" onClick={() => setIsResultsModalOpen(true)}>
+                  {t("Details")}
+                </Button>
               </HStack>
-              <Button variant="primaryGhost" onClick={() => setIsResultsModalOpen(true)}>
-                {t("Details")}
-              </Button>
-            </HStack>
-
-            {/* Progress Bar */}
-            <MulticolorBar segments={progressBarSegments} />
-
-            {/* Results Display */}
-            <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
-
-            {/* User Interaction Badges */}
-            <UserInteractionBadges userDeposits={userDeposits} userVoteOption={userVoteOption} />
+              {/* Progress Bar and Results Display */}
+              <VStack gap={"16px"}>
+                <MulticolorBar segments={progressBarSegments} />
+                <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
+              </VStack>
+              {/* User Interaction Badges */}
+              <UserInteractionBadges userDeposits={userDeposits} userVoteOption={userVoteOption} />
+            </VStack>
 
             {/* Action Button */}
             {shouldShowActionButton && (
