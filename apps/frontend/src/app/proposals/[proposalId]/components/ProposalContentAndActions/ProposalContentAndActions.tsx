@@ -39,7 +39,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
   const markdownPreviewTextColor = useColorModeValue("#2D3748", "#E4E4E4")
-
+  const markdownPreviewBackgroundColor = useColorModeValue("#F8F8F8", "#2D2D2F")
   // ==========================================
   // COMPUTED VALUES & CONSTANTS
   // ==========================================
@@ -177,16 +177,37 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       {isStandardProposal(proposal) && (
         <VStack gap={8} align="flex-start" w="full">
           {/* Markdown content */}
-          <MDEditor.Markdown
-            source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
-            style={{
-              width: "100%",
-              wordBreak: "break-word",
-              backgroundColor: "transparent",
-              color: markdownPreviewTextColor,
-              padding: "20px",
-            }}
-          />
+          <Box
+            px={0}
+            m={0}
+            gap={0}
+            w="full"
+            css={{
+              "& .w-md-editor-text": {
+                backgroundColor: "transparent !important",
+              },
+              "& table, & table tr, & table th, & table td, & table thead, & table tbody, & table tfoot": {
+                backgroundColor: "transparent !important",
+              },
+              "& code, & pre, & pre code, & .token": {
+                backgroundColor: `${markdownPreviewBackgroundColor} !important`,
+              },
+              "& blockquote": {
+                color: `${markdownPreviewTextColor} !important`,
+                backgroundColor: `${markdownPreviewBackgroundColor} !important`,
+              },
+            }}>
+            <MDEditor.Markdown
+              source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
+              style={{
+                maxWidth: "100%",
+                wordBreak: "break-word",
+                backgroundColor: "transparent",
+                color: markdownPreviewTextColor,
+                // padding: "10px",
+              }}
+            />
+          </Box>
 
           {/* Error display */}
           {proposalDecodeError && (
