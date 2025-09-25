@@ -1,13 +1,3 @@
-import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
-import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
-import MDEditor from "@uiw/react-md-editor"
-import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { AiOutlineDiscord } from "react-icons/ai"
-import { FaXTwitter } from "react-icons/fa6"
-import { LuMail } from "react-icons/lu"
-import { RiTelegram2Line } from "react-icons/ri"
-
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
 import { FileAttachmentPreview } from "@/app/proposals/grants/components"
@@ -17,6 +7,15 @@ import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunct
 import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
+import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
+import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
+import MDEditor from "@uiw/react-md-editor"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { AiOutlineDiscord } from "react-icons/ai"
+import { FaXTwitter } from "react-icons/fa6"
+import { LuMail } from "react-icons/lu"
+import { RiTelegram2Line } from "react-icons/ri"
 
 import { SocialLink } from "../SocialLink"
 
@@ -39,7 +38,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
   const [proposalDecodeError, setProposalDecodeError] = useState<string | null>(null)
   const markdownPreviewTextColor = useColorModeValue("#2D3748", "#E4E4E4")
-
+  const markdownPreviewBackgroundColor = useColorModeValue("#F8F8F8", "#2D2D2F")
   // ==========================================
   // COMPUTED VALUES & CONSTANTS
   // ==========================================
@@ -76,29 +75,29 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
         <VStack gap={"40px"} align="flex-start" w="full">
           {/* Company details section */}
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
-            <CollapsibleSectionItem
-              title={proposal?.companyName}
-              value={proposal?.companyRegisteredNumber ?? " --- "}
-            />
-            <VStack py={2} align="flex-start" w="full">
-              {proposal?.companyEmail ? (
-                <SocialLink
-                  icon={LuMail}
-                  href={`mailto:${proposal.companyEmail}`}
-                  label="Email"
-                  value={proposal.companyEmail}
-                />
-              ) : null}
+            <CollapsibleSectionItem title={t("Name")} value={proposal?.companyName} />
+            <CollapsibleSectionItem title={t("Registered number")} value={proposal?.companyRegisteredNumber} />
+            {proposal?.companyEmail || proposal?.companyTelegram ? (
+              <VStack py={2} align="flex-start" w="full">
+                {proposal?.companyEmail ? (
+                  <SocialLink
+                    icon={LuMail}
+                    href={`mailto:${proposal.companyEmail}`}
+                    label="Email"
+                    value={proposal.companyEmail}
+                  />
+                ) : null}
 
-              {proposal?.companyTelegram ? (
-                <SocialLink
-                  icon={RiTelegram2Line}
-                  href={proposal.companyTelegram}
-                  label="Telegram"
-                  value={proposal.companyTelegram}
-                />
-              ) : null}
-            </VStack>
+                {proposal?.companyTelegram ? (
+                  <SocialLink
+                    icon={RiTelegram2Line}
+                    href={proposal.companyTelegram}
+                    label="Telegram"
+                    value={proposal.companyTelegram}
+                  />
+                ) : null}
+              </VStack>
+            ) : null}
 
             <CollapsibleSectionItem title={t("Intro")} value={proposal?.companyIntro} />
           </CollapsibleSection>
@@ -177,16 +176,36 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
       {isStandardProposal(proposal) && (
         <VStack gap={8} align="flex-start" w="full">
           {/* Markdown content */}
-          <MDEditor.Markdown
-            source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
-            style={{
-              width: "100%",
-              wordBreak: "break-word",
-              backgroundColor: "transparent",
-              color: markdownPreviewTextColor,
-              padding: "20px",
-            }}
-          />
+          <Box
+            px={0}
+            m={0}
+            gap={0}
+            w="full"
+            css={{
+              "& .w-md-editor-text": {
+                backgroundColor: "transparent !important",
+              },
+              "& table, & table tr, & table th, & table td, & table thead, & table tbody, & table tfoot": {
+                backgroundColor: "transparent !important",
+              },
+              "& code, & pre, & pre code, & .token": {
+                backgroundColor: `${markdownPreviewBackgroundColor} !important`,
+              },
+              "& blockquote": {
+                color: `${markdownPreviewTextColor} !important`,
+                backgroundColor: `${markdownPreviewBackgroundColor} !important`,
+              },
+            }}>
+            <MDEditor.Markdown
+              source={removeTitleHeading(proposal?.markdownDescription, proposal?.title)}
+              style={{
+                maxWidth: "100%",
+                wordBreak: "break-word",
+                backgroundColor: "transparent",
+                color: markdownPreviewTextColor,
+              }}
+            />
+          </Box>
 
           {/* Error display */}
           {proposalDecodeError && (

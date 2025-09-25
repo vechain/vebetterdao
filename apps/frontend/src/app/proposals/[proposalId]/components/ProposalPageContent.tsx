@@ -1,9 +1,12 @@
 import { useProposalInteractionDates } from "@/api"
+import { useAccountPermissions } from "@/api/contracts/account"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -15,9 +18,6 @@ import { ProposalOverview } from "./ProposalOverview"
 import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
 import { ProposalTimeline } from "./ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/vechain-kit"
-import { useAccountPermissions } from "@/api/contracts/account"
 
 type Props = {
   proposalId: string
@@ -209,7 +209,13 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
       </VStack>
 
       {/* Share Modal */}
-      <ProposalShareModal proposalId={proposalId} isOpen={isOpen} onClose={onClose} onOpen={onOpen} />
+      <ProposalShareModal
+        proposalId={proposalId}
+        proposalType={proposal?.type ?? ProposalType.Standard}
+        isOpen={isOpen}
+        onClose={onClose}
+        onOpen={onOpen}
+      />
 
       {/* Cancel Modal */}
       <ProposalCancelModal proposalId={proposalId} isOpen={isOpenCancelModal} onClose={onCloseCancelModal} />
