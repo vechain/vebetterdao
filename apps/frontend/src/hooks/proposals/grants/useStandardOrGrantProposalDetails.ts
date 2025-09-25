@@ -87,7 +87,6 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
   return {
     title: ipfsMetadata?.title ?? "",
     shortDescription: ipfsMetadata?.shortDescription ?? "",
-    ipfsDescription: ipfsMetadata?.ipfsDescription ?? "",
     markdownDescription: ipfsMetadata?.markdownDescription ?? "",
     description: ipfsMetadata?.shortDescription ?? "",
     discourseUrl: ipfsMetadata?.discourseUrl ?? "",

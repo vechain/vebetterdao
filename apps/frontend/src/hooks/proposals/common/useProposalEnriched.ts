@@ -59,7 +59,7 @@ export const useProposalEnriched = () => {
         title: details?.title || details?.projectName || details?.shortDescription || "Grant Proposal",
       } as EnsureRequired<
         typeof event & typeof details & { state: ProposalState },
-        "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
+        "title" | "shortDescription" | "ipfsDescription" | "markdownDescription" | "description" | "proposerAddress"
       >
     })
   }, [grantProposals, grantsProposalStates, grantProposalsDetailsMap])
@@ -81,7 +81,7 @@ export const useProposalEnriched = () => {
         title: details?.title || details?.shortDescription || "Standard Proposal",
       } as EnsureRequired<
         typeof event & typeof details & { state: ProposalState },
-        "title" | "shortDescription" | "markdownDescription" | "description" | "proposerAddress"
+        "title" | "shortDescription" | "ipfsDescription" | "markdownDescription" | "description" | "proposerAddress"
       >
     })
   }, [standardProposals, standardProposalStates, standardProposalsDetailsMap])

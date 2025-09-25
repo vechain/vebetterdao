@@ -11,12 +11,12 @@ import { useWallet } from "@vechain/vechain-kit"
  */
 export const useMetProposalCriteria = (proposalType: ProposalType = ProposalType.STANDARD) => {
   const { account } = useWallet()
-  const { data: gmRequired } = useGMRequiredByProposalType(proposalType)
+  const { data: gmRequired, isLoading: isLoadingGMRequired } = useGMRequiredByProposalType(proposalType)
 
-  const { data: userGMs } = useGetUserGMs(account?.address)
-  const hasMoonNft = useMemo(() => {
+  const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs(account?.address)
+  const hasRequiredGM = useMemo(() => {
     return userGMs?.some(gm => Number(gm.tokenLevel) >= (gmRequired ?? 1))
   }, [userGMs, gmRequired])
 
-  return hasMoonNft ?? false
+  return { hasMetProposalCriteria: !!hasRequiredGM, isLoading: isLoadingGMRequired || isLoadingUserGMs }
 }

@@ -12,7 +12,7 @@ type Props = {
   textProps?: TextProps
   containerProps?: StackProps
   proposalState?: ProposalState
-  isDepositReached: boolean
+  isDepositReached?: boolean
   proposalType?: ProposalType
 }
 
@@ -28,7 +28,12 @@ export const ProposalStatusBadge = ({
   const { t } = useTranslation()
 
   if (proposalType === ProposalType.Grant) {
-    return <GrantsProposalStatusBadge state={proposalState} /> // TODO: extend the exist to remove GrantsBadge
+    return (
+      <GrantsProposalStatusBadge
+        state={proposalState ?? ProposalState.Pending}
+        depositReached={isDepositReached ?? false}
+      />
+    ) // TODO: extend the exist to remove GrantsBadge
   }
   switch (proposalState) {
     case ProposalState.Succeeded:

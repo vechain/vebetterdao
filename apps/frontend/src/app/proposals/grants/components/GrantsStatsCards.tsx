@@ -63,6 +63,7 @@ export const GrantsStatsCards = ({
   return (
     <Box
       w="full"
+      minH={{ base: "80px", lg: "auto" }}
       overflowX={{ base: "auto", lg: "hidden" }}
       css={{
         "&::-webkit-scrollbar": {

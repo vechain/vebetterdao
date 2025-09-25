@@ -34,12 +34,12 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
           proposal?.targets,
           values,
           proposal?.calldatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposal?.description || "")),
+          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
         ],
         comment: "cancel proposal",
       }),
     ]
-  }, [proposal?.calldatas, proposal?.description, proposal?.targets, values])
+  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, values])
 
   const refetchQueryKeys = useMemo(
     () => [

@@ -10,7 +10,8 @@ import { FaRegCircleCheck } from "react-icons/fa6"
 import { IoIosCode } from "react-icons/io"
 
 type Props = {
-  state?: ProposalState
+  state: ProposalState
+  depositReached: boolean
   hasUserSupported?: boolean
   hasUserVoted?: boolean
   proposalType?: ProposalType
@@ -95,8 +96,14 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
  * @param state - The current proposal state
  * @param hasUserSupported - Whether the user has supported the proposal (for support phase)
  * @param hasUserVoted - Whether the user has voted on the proposal (for approval phase)
+ * @param depositReached - Whether the deposit has been reached
  */
-export const GrantsProposalStatusBadge = ({ state = ProposalState.Pending, hasUserSupported, hasUserVoted }: Props) => {
+export const GrantsProposalStatusBadge = ({
+  state = ProposalState.Pending,
+  hasUserSupported,
+  hasUserVoted,
+  depositReached,
+}: Props) => {
   const config = BADGE_CONFIG[state]
 
   const selectedIcon = useMemo(() => {
@@ -110,11 +117,25 @@ export const GrantsProposalStatusBadge = ({ state = ProposalState.Pending, hasUs
     return config.icon
   }, [state, hasUserSupported, hasUserVoted, config])
 
+  const text = useMemo(() => {
+    if (state === ProposalState.Pending && depositReached) {
+      return "Supported"
+    }
+    return config.text
+  }, [state, config, depositReached])
+
+  const variant = useMemo(() => {
+    if (state === ProposalState.Pending && depositReached) {
+      return "approved"
+    }
+    return config.variant
+  }, [state, config, depositReached])
+
   return (
-    <Badge variant={config.variant}>
+    <Badge variant={variant}>
       <HStack textAlign="center" justifyContent="center" alignItems="center">
         <Icon as={selectedIcon} boxSize={4} />
-        <Text fontWeight="semibold"> {config.text}</Text>
+        <Text fontWeight="semibold"> {text}</Text>
       </HStack>
     </Badge>
   )

@@ -1,6 +1,6 @@
 import { useAccountPermissions } from "@/api/contracts/account"
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
 import { useApproveMilestone } from "@/hooks/useApproveMilestone"
 import { useClaimMilestone } from "@/hooks/useClaimMilestone"
 import { useRejectGrant } from "@/hooks/useRejectGrant"
@@ -116,8 +116,14 @@ export const MilestoneItem = ({
 
   // Determine if reviewer actions should show
   const shouldShowReviewerActions = useMemo(() => {
-    return account?.address && isGrantApprover && isCurrentStep && milestoneData.state === MilestoneState.Pending
-  }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state])
+    return (
+      account?.address &&
+      isGrantApprover &&
+      isCurrentStep &&
+      milestoneData.state === MilestoneState.Pending &&
+      proposal.state === ProposalState.InDevelopment
+    )
+  }, [account?.address, isGrantApprover, isCurrentStep, milestoneData.state, proposal.state])
 
   // Determine if claim action should show
   const shouldShowClaimAction = useMemo(() => {
@@ -142,7 +148,7 @@ export const MilestoneItem = ({
           value={formatDuration(milestoneData.milestone?.durationFrom ?? 0, milestoneData.milestone?.durationTo ?? 0)}
         />
       ) : (
-        <div>Edit mode</div>
+        <div></div>
       )}
       <MilestoneItemContent
         icon={UilInfoCircle}
@@ -154,10 +160,10 @@ export const MilestoneItem = ({
       {shouldShowReviewerActions && (
         <HStack w="full">
           <Button variant="secondary" onClick={handleReject}>
-            {"Reject"}
+            {t("Reject")}
           </Button>
           <Button variant="primaryAction" onClick={handleApprove}>
-            {"Approve & Fund"}
+            {t("Approve & Fund")}
           </Button>
         </HStack>
       )}
@@ -166,7 +172,7 @@ export const MilestoneItem = ({
       {shouldShowClaimAction && (
         <HStack w="full">
           <Button variant="primaryAction" onClick={handleClaim}>
-            {"Claim Reward"}
+            {t("Claim Reward")}
           </Button>
         </HStack>
       )}

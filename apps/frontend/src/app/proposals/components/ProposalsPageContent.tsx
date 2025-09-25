@@ -1,7 +1,7 @@
 import { useProposalClaimableUserDeposits } from "@/api"
 import { JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Spinner, Text, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { RequirementModal, ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
@@ -10,7 +10,7 @@ import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { useProposalEnriched } from "@/hooks/proposals/common"
 import { GrantsProposalCard } from "../grants/components"
 
@@ -26,7 +26,7 @@ export const ProposalsPageContent = () => {
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
   const onNewClick = useCallback(() => {
     if (!account?.address) {
       open()
@@ -36,20 +36,6 @@ export const ProposalsPageContent = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
     openRequirementModal()
   }, [account?.address, open, openRequirementModal])
-
-  //First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
-  const sortedProposals = useMemo(() => {
-    return filteredProposals.sort((a, b) => {
-      const getPriority = (proposal: (typeof filteredProposals)[0]) => {
-        if (proposal.state === ProposalState.Active) return 1
-        if (proposal.state === ProposalState.Pending && !proposal.isDepositReached) return 2 // lookingForSupport
-        if (proposal.state === ProposalState.Pending && proposal.isDepositReached) return 3 // upcoming
-        return 4 // Everything else
-      }
-
-      return getPriority(a) - getPriority(b)
-    })
-  }, [filteredProposals])
 
   if (isLoading)
     return (
@@ -90,13 +76,13 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
-          {sortedProposals.map(proposal => (
+          {filteredProposals.map(proposal => (
             <GrantsProposalCard
               key={proposal.id}
               proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
             />
           ))}
-          {sortedProposals.length === 0 && !isLoading && (
+          {filteredProposals.length === 0 && !isLoading && (
             <NoProposalsCard
               onClick={onNewClick}
               buttonText={t("Create proposal")}
@@ -115,7 +101,7 @@ export const ProposalsPageContent = () => {
           {totalClaimableDeposits > 0 && (
             <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
           )}
-          {sortedProposals.length > 0 && <CreateProposalCard />}
+          {filteredProposals.length > 0 && <CreateProposalCard />}
           <JoinCommunity />
         </VStack>
       </HStack>

@@ -1,6 +1,7 @@
 import { paths } from "../schema"
-import { indexerQueryClient } from "../api"
 import BigNumber from "bignumber.js"
+
+import { indexerQueryClient } from "../api"
 
 type ProposalVotesQuery = paths["/api/v1/b3tr/proposals/{proposalId}/results"]["get"]
 
@@ -11,7 +12,7 @@ export type ProposalVotes = ProposalVotesQueryResponse[number]
 export type GroupedProposalVotes = Record<
   Lowercase<ProposalVotes["support"]>,
   {
-    totalWeight: number
+    totalWeight: bigint
     voters: number
     percentage: number
     percentagePower: number
@@ -47,7 +48,7 @@ export const useProposalVotes = (proposalId: string) =>
             : 0
 
           acc[item.support.toLowerCase() as Lowercase<ProposalVotes["support"]>] = {
-            totalWeight: itemWeight.toNumber(),
+            totalWeight: BigInt(itemWeight?.toFixed() ?? "0"),
             voters: item.voters,
             percentage,
             percentagePower,
@@ -57,8 +58,8 @@ export const useProposalVotes = (proposalId: string) =>
 
         return {
           totalVoters,
-          totalPower: totalPower.toNumber(),
-          totalWeight: totalWeight.toNumber(),
+          totalPower: BigInt(totalPower?.toFixed() ?? "0"), //Convert to big int without loosing precision
+          totalWeight: BigInt(totalWeight?.toFixed() ?? "0"), //Convert to big int without loosing precision
           votes: groupedVotes,
         }
       },
