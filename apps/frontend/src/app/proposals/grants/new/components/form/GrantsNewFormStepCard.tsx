@@ -263,13 +263,10 @@ export const GrantsNewFormStepCard = () => {
 
   return (
     <Card.Root>
-      <Card.Header>
-        <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
-      </Card.Header>
-
       <Card.Body px={{ base: 3, md: 8 }}>
         <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
+            <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
             {currentStepData?.content}
 
             <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
