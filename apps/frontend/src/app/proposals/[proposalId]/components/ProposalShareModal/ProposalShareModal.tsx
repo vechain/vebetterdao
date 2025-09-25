@@ -114,7 +114,7 @@ export const ProposalShareModal = ({
                     onClick={handleCopyLink}>
                     <UilLink size="18px" />
                     <Text fontSize="18px" fontWeight={500}>
-                      {t("Copy link to proposal")}
+                      {t("Copy link to {{proposalType}}", { proposalType: proposalTypeText })}
                     </Text>
                   </HStack>
                 )}

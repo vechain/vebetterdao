@@ -367,7 +367,7 @@
   "Vote for yes": "Vote for yes",
   "Voting power": "Voting power",
   "Share this {{proposalType}}": "Share this {{proposalType}}",
-  "Copy link to proposal": "Copy link to proposal",
+  "Copy link to {{proposalType}}": "Copy link to {{proposalType}}",
   "Copied!": "Copied!",
   "Share the {{proposalType}} on social media and invite people to vote": "Share the {{proposalType}} on social media and invite people to vote",
   "Executable in {{timestamp}}": "Executable in {{timestamp}}",
