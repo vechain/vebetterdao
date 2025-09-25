@@ -1,6 +1,7 @@
 import { Tooltip } from "@/components/ui/tooltip"
-import { Field, HStack, Icon, Input, InputGroup, Text, Textarea } from "@chakra-ui/react"
+import { Box, Field, HStack, Icon, Input, InputGroup, Text, Textarea } from "@chakra-ui/react"
 import { UseFormRegisterReturn } from "react-hook-form"
+import { useState } from "react"
 import { GoQuestion } from "react-icons/go"
 
 type FormItemProps = {
@@ -14,6 +15,7 @@ type FormItemProps = {
   isOptional?: boolean
   leftElement?: React.ReactNode
   tooltip?: string
+  maxLength?: number
 }
 
 export const FormItem = ({
@@ -27,8 +29,10 @@ export const FormItem = ({
   isOptional = false,
   leftElement,
   tooltip,
+  maxLength,
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
+  const [charCount, setCharCount] = useState(0)
 
   return (
     <Field.Root invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
@@ -75,11 +79,27 @@ export const FormItem = ({
             minH: "120px",
             resize: "vertical",
           })}
+          onChange={e => {
+            register.onChange(e) // Call the original register onChange
+            setCharCount(e.target.value.length) // Update local character count
+          }}
           onBlur={onBlur}
           rounded="xl"
         />
       </InputGroup>
-      {error && <Field.ErrorText>{error}</Field.ErrorText>}
+      {/* Error text and character count */}
+      {(error || (type === "textarea" && maxLength)) && (
+        <HStack justify="space-between" w="full">
+          <Box flex="1">{error && <Field.ErrorText>{error}</Field.ErrorText>}</Box>
+          {type === "textarea" && maxLength && (
+            <Field.HelperText>
+              {charCount}
+              {"/"}
+              {maxLength}
+            </Field.HelperText>
+          )}
+        </HStack>
+      )}
     </Field.Root>
   )
 }

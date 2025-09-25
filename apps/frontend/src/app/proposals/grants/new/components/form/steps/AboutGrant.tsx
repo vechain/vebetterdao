@@ -225,7 +225,15 @@ export const AboutGrant = ({
                     type="textarea"
                     isOptional
                     placeholder={t("Tell about your team and experience with similar projects")}
-                    register={register("companyIntro")}
+                    register={{
+                      ...register("companyIntro", {
+                        maxLength: {
+                          value: 500,
+                          message: t("{{fieldName}} is too long", { fieldName: t("Intro") }),
+                        },
+                      }),
+                    }}
+                    maxLength={500}
                     error={errors.companyIntro?.message}
                     onBlur={() => onBlur("companyIntro")}
                   />
@@ -385,7 +393,12 @@ export const AboutGrant = ({
                   placeholder="Describe the problem you are trying to solve"
                   register={register("problemDescription", {
                     required: t("Please describe the problem you are trying to solve"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Problem") }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.problemDescription?.message}
                   onBlur={() => onBlur("problemDescription")}
                 />
@@ -397,7 +410,12 @@ export const AboutGrant = ({
                   placeholder={t("Describe solution you are trying to solve")}
                   register={register("solutionDescription", {
                     required: t("Please describe your solution"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Solution") }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.solutionDescription?.message}
                   onBlur={() => onBlur("solutionDescription")}
                 />
@@ -409,7 +427,12 @@ export const AboutGrant = ({
                   type="textarea"
                   register={register("targetUsers", {
                     required: t("Please describe your target users"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Target user") }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.targetUsers?.message}
                   onBlur={() => onBlur("targetUsers")}
                 />
@@ -421,7 +444,14 @@ export const AboutGrant = ({
                   type="textarea"
                   register={register("competitiveEdge", {
                     required: t("Please describe your competitive edge"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", {
+                        fieldName: t("Competitive edge / Differentiation factor"),
+                      }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.competitiveEdge?.message}
                   onBlur={() => onBlur("competitiveEdge")}
                 />
@@ -445,7 +475,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("benefitsToUsers", {
                       required: t("Please describe benefits to users"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Benefits to users") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.benefitsToUsers?.message}
                     onBlur={() => onBlur("benefitsToUsers")}
                   />
@@ -457,7 +492,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("benefitsToDApps", {
                       required: t("Please describe benefits to dApps"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Benefits to dApps") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.benefitsToDApps?.message}
                     onBlur={() => onBlur("benefitsToDApps")}
                   />
@@ -469,7 +509,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("benefitsToVeChainEcosystem", {
                       required: t("Please describe benefits to VeChain ecosystem"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Benefits to VeChain ecosystem") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.benefitsToVeChainEcosystem?.message}
                     onBlur={() => onBlur("benefitsToVeChainEcosystem")}
                   />
@@ -484,7 +529,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("x2EModel", {
                       required: t("Please describe X2E model"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("X2E model") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.x2EModel?.message}
                     onBlur={() => onBlur("x2EModel")}
                   />
@@ -495,7 +545,13 @@ export const AboutGrant = ({
                     placeholder={t("Describe your revenue model")}
                     type="textarea"
                     isOptional
-                    register={register("revenueModel")}
+                    register={register("revenueModel", {
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Revenue model") }),
+                      },
+                    })}
+                    maxLength={500}
                     error={errors.revenueModel?.message}
                     onBlur={() => onBlur("revenueModel")}
                   />
@@ -506,7 +562,13 @@ export const AboutGrant = ({
                     placeholder={t("Describe your high level roadmap or add attachment below")}
                     type="textarea"
                     isOptional
-                    register={register("highLevelRoadmap")}
+                    register={register("highLevelRoadmap", {
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("High level roadmap") }),
+                      },
+                    })}
+                    maxLength={500}
                     error={errors.highLevelRoadmap?.message}
                     onBlur={() => onBlur("highLevelRoadmap")}
                   />
