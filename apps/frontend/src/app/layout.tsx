@@ -7,6 +7,8 @@ import { ClientWrapper } from "./client-wrapper"
 const platformMetadata = pagesMetadata?.platform
 const title = platformMetadata?.title
 const metadataDesc = platformMetadata?.description
+const imageUrl = `${getConfig().basePath}${platformMetadata?.image}`
+const imageExtension = platformMetadata?.imageExtension
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -30,8 +32,8 @@ export const metadata: Metadata = {
     siteName: APPLICATION_NAME,
     images: [
       {
-        url: `${getConfig().basePath}/assets/images/social_image.webp`,
-        type: "image/png",
+        url: imageUrl,
+        type: imageExtension,
         width: IMAGE_DIMENSION.width,
         height: IMAGE_DIMENSION.height,
         alt: APPLICATION_NAME,
@@ -39,10 +41,10 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary_large_image",
     title,
     description: metadataDesc,
-    images: [`${getConfig().basePath}/assets/images/social_image.webp`],
+    images: [imageUrl],
+    card: "summary_large_image",
   },
 }
 

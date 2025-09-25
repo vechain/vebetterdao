@@ -4,6 +4,8 @@ import { getConfig } from "@repo/config"
 
 export function getPageMetadata(pageKey: string): Metadata {
   const pageData = pagesMetadata[pageKey as keyof typeof pagesMetadata]
+  const basePath = getConfig().basePath
+  const pathname = pageData.path ? `${basePath}${pageData.path}` : `${basePath}`
 
   if (!pageData) {
     return {
@@ -19,12 +21,14 @@ export function getPageMetadata(pageKey: string): Metadata {
     description: pageData.description,
     openGraph: {
       title: pageData.title,
+      siteName: APPLICATION_NAME,
+      url: pathname,
       description: pageData.description,
       type: "website",
       images: [
         {
-          url: `${getConfig().basePath}${pageData.socialImage}`,
-          type: "image/png",
+          url: `${basePath}${pageData.image}`,
+          type: pageData.imageExtension,
           width: IMAGE_DIMENSION.width,
           height: IMAGE_DIMENSION.height,
           alt: pageData.title,
@@ -33,9 +37,10 @@ export function getPageMetadata(pageKey: string): Metadata {
     },
     twitter: {
       title: pageData.title,
+      site: pathname,
       description: pageData.description,
+      images: [`${basePath}${pageData.image}`],
       card: "summary_large_image",
-      images: [`${getConfig().basePath}${pageData.socialImage}`],
     },
   }
 }
