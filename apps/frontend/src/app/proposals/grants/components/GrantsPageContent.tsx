@@ -189,7 +189,7 @@ export const GrantsPageContent = () => {
 
         <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
           <GridItem colSpan={{ base: 1, md: 2 }}>
-            <VStack gap={6} alignItems="stretch">
+            <VStack gap={5} alignItems="stretch">
               <HStack w="full" gap={4}>
                 <SearchField
                   inputProps={{ minW: "200px", flex: 1 }}
@@ -225,7 +225,7 @@ export const GrantsPageContent = () => {
                 )}
               </HStack>
 
-              <Grid templateColumns={{ base: "1fr" }} gap={8} w="full">
+              <Grid templateColumns={{ base: "1fr" }} gap={5} w="full">
                 {isLoadingEnrichedGrantProposals ? (
                   <>
                     {Array.from({ length: 3 }).map((_, index) => (
