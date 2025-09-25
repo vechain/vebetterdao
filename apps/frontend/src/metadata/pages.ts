@@ -18,9 +18,9 @@ export const pagesMetadata = {
     socialImage: "/assets/images/dapps_page.webp",
   },
   allocations: {
-    title: "VeBetterDAO Allocations | B3TR Rewards for the Ecosystem",
+    title: "VeBetter Allocations | B3TR Rewards for the Ecosystem",
     description:
-      "Explore how B3TR tokens are distributed through grants, incentives, and governance. Discover how your vote helps shape VeBetterDAO’s real-world impact.",
+      "Explore how B3TR tokens are distributed through grants, incentives, and governance. Discover how your vote helps shape VeBetter’s real-world impact.",
     socialImage: "/assets/images/allocations_page.webp",
   },
   proposals: {
@@ -36,9 +36,9 @@ export const pagesMetadata = {
     socialImage: "/assets/images/profile_page.webp",
   },
   grants: {
-    title: "VeBetterDAO Governance Grants | Shape the VeBetter Ecosystem ",
+    title: "VeBetterD Governance Grants | Shape the VeBetter Ecosystem ",
     description:
-      "Help decide which projects receive funding through the VeBetterDAO. Vote on impactful proposals and guide grant distribution in the VeChain-powered ecosystem.",
+      "Help decide which projects receive funding through the VeBetter. Vote on impactful proposals and guide grant distribution in the VeChain-powered ecosystem.",
     socialImage: "/assets/images/grants_page.webp",
   },
 } as const
