@@ -35,7 +35,7 @@ export const FormItem = ({
   const [charCount, setCharCount] = useState(0)
 
   return (
-    <Field.Root invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
+    <Field.Root p={1} invalid={!!error} h={type === "textarea" ? "full" : "auto"}>
       {label && (
         <HStack justify="space-between" w="full">
           <Field.Label
@@ -84,7 +84,7 @@ export const FormItem = ({
             setCharCount(e.target.value.length) // Update local character count
           }}
           onBlur={onBlur}
-          rounded="xl"
+          borderRadius="xl"
         />
       </InputGroup>
       {/* Error text and character count */}
