@@ -22,7 +22,7 @@ import { LuMail, LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
 import { RiTelegram2Line } from "react-icons/ri"
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
 
 interface AboutGrantProps {
@@ -105,7 +105,7 @@ export const AboutGrant = ({
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      throw new Error(`${file.name}: File too large. Maximum 20MB allowed.`)
+      throw new Error(`${file.name}: File too large. Maximum 5MB allowed.`)
     }
   }
 
@@ -598,7 +598,7 @@ export const AboutGrant = ({
                             <Icon as={LuUpload} size="md" color="fg.muted" />
                             <Box>{t("Upload file")}</Box>
                           </HStack>
-                          <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 20MB")}</Box>
+                          <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 5MB")}</Box>
                         </FileUpload.DropzoneContent>
                       </FileUpload.Dropzone>
                       <FileUpload.ItemGroup>
