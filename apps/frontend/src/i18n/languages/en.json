@@ -1393,7 +1393,7 @@
   "Grant details": "Grant details",
   "Attachments": "Attachments",
   "Upload file": "Upload file",
-  "PDF, JPG, JPEG, PNG, less than 20MB": "PDF, JPG, JPEG, PNG, less than 20MB",
+  "PDF, JPG, JPEG, PNG, less than 5MB": "PDF, JPG, JPEG, PNG, less than 5MB",
   "Company details": "Company details",
   "Support deadline": "Support deadline",
   "Choose when support phase for your Grant must end.": "Choose when support phase for your Grant must end.",
@@ -1477,5 +1477,7 @@
   "{{percentage}}% (your support)": "{{percentage}}% (your support)",
   "grant": "grant",
   "From": "From",
-  "To": "To"
+  "To": "To",
+  "File too large. Maximum 5MB allowed.": "File too large. Maximum 5MB allowed.",
+  "File type not supported. Use PDF, JPG, JPEG, or PNG.": "File type not supported. Use PDF, JPG, JPEG, or PNG."
 }

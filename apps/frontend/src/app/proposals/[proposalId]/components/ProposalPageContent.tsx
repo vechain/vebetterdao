@@ -144,7 +144,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
         </HStack>
 
         {/* Main Content Grid */}
-        <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
+        <Grid templateColumns="repeat(3, 1fr)" gap={"40px"} w="full">
           {/* Left/Main Column */}
           <GridItem colSpan={[3, 3, 2]} order={[2, 2, 1]}>
             <Skeleton loading={isLoading}>

@@ -22,7 +22,7 @@ import { LuMail, LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
 import { RiTelegram2Line } from "react-icons/ri"
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
 
 interface AboutGrantProps {
@@ -47,6 +47,16 @@ export const AboutGrant = ({
 }: AboutGrantProps) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
+
+  const mapUploadError = (error: string): string => {
+    if (error === "FILE_INVALID_TYPE") {
+      return t("File type not supported. Use PDF, JPG, JPEG, or PNG.")
+    }
+    if (error === "FILE_TOO_LARGE") {
+      return t("File too large. Maximum 5MB allowed.")
+    }
+    return error
+  }
 
   // Custom validation function to ensure at least one social account is connected
   const validateAtLeastOneSocial = (_value: string): string | boolean => {
@@ -105,7 +115,7 @@ export const AboutGrant = ({
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      throw new Error(`${file.name}: File too large. Maximum 20MB allowed.`)
+      throw new Error(`${file.name}: File too large. Maximum 5MB allowed.`)
     }
   }
 
@@ -123,8 +133,8 @@ export const AboutGrant = ({
         ipfs: ipfsHash,
         name: file.name,
       }
-    } catch {
-      throw new Error(`${file.name}: Upload to IPFS failed.`)
+    } catch (error) {
+      throw error
     }
   }
   //Handle file removal
@@ -225,7 +235,15 @@ export const AboutGrant = ({
                     type="textarea"
                     isOptional
                     placeholder={t("Tell about your team and experience with similar projects")}
-                    register={register("companyIntro")}
+                    register={{
+                      ...register("companyIntro", {
+                        maxLength: {
+                          value: 500,
+                          message: t("{{fieldName}} is too long", { fieldName: t("Intro") }),
+                        },
+                      }),
+                    }}
+                    maxLength={500}
                     error={errors.companyIntro?.message}
                     onBlur={() => onBlur("companyIntro")}
                   />
@@ -385,7 +403,12 @@ export const AboutGrant = ({
                   placeholder="Describe the problem you are trying to solve"
                   register={register("problemDescription", {
                     required: t("Please describe the problem you are trying to solve"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Problem") }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.problemDescription?.message}
                   onBlur={() => onBlur("problemDescription")}
                 />
@@ -397,7 +420,12 @@ export const AboutGrant = ({
                   placeholder={t("Describe solution you are trying to solve")}
                   register={register("solutionDescription", {
                     required: t("Please describe your solution"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Solution") }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.solutionDescription?.message}
                   onBlur={() => onBlur("solutionDescription")}
                 />
@@ -409,7 +437,12 @@ export const AboutGrant = ({
                   type="textarea"
                   register={register("targetUsers", {
                     required: t("Please describe your target users"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Target user") }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.targetUsers?.message}
                   onBlur={() => onBlur("targetUsers")}
                 />
@@ -421,7 +454,14 @@ export const AboutGrant = ({
                   type="textarea"
                   register={register("competitiveEdge", {
                     required: t("Please describe your competitive edge"),
+                    maxLength: {
+                      value: 500,
+                      message: t("{{fieldName}} is too long", {
+                        fieldName: t("Competitive edge / Differentiation factor"),
+                      }),
+                    },
                   })}
+                  maxLength={500}
                   error={errors.competitiveEdge?.message}
                   onBlur={() => onBlur("competitiveEdge")}
                 />
@@ -445,7 +485,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("benefitsToUsers", {
                       required: t("Please describe benefits to users"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Benefits to users") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.benefitsToUsers?.message}
                     onBlur={() => onBlur("benefitsToUsers")}
                   />
@@ -457,7 +502,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("benefitsToDApps", {
                       required: t("Please describe benefits to dApps"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Benefits to dApps") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.benefitsToDApps?.message}
                     onBlur={() => onBlur("benefitsToDApps")}
                   />
@@ -469,7 +519,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("benefitsToVeChainEcosystem", {
                       required: t("Please describe benefits to VeChain ecosystem"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Benefits to VeChain ecosystem") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.benefitsToVeChainEcosystem?.message}
                     onBlur={() => onBlur("benefitsToVeChainEcosystem")}
                   />
@@ -484,7 +539,12 @@ export const AboutGrant = ({
                     type="textarea"
                     register={register("x2EModel", {
                       required: t("Please describe X2E model"),
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("X2E model") }),
+                      },
                     })}
+                    maxLength={500}
                     error={errors.x2EModel?.message}
                     onBlur={() => onBlur("x2EModel")}
                   />
@@ -495,7 +555,13 @@ export const AboutGrant = ({
                     placeholder={t("Describe your revenue model")}
                     type="textarea"
                     isOptional
-                    register={register("revenueModel")}
+                    register={register("revenueModel", {
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("Revenue model") }),
+                      },
+                    })}
+                    maxLength={500}
                     error={errors.revenueModel?.message}
                     onBlur={() => onBlur("revenueModel")}
                   />
@@ -506,7 +572,13 @@ export const AboutGrant = ({
                     placeholder={t("Describe your high level roadmap or add attachment below")}
                     type="textarea"
                     isOptional
-                    register={register("highLevelRoadmap")}
+                    register={register("highLevelRoadmap", {
+                      maxLength: {
+                        value: 500,
+                        message: t("{{fieldName}} is too long", { fieldName: t("High level roadmap") }),
+                      },
+                    })}
+                    maxLength={500}
                     error={errors.highLevelRoadmap?.message}
                     onBlur={() => onBlur("highLevelRoadmap")}
                   />
@@ -525,18 +597,26 @@ export const AboutGrant = ({
                     <FileUpload.Root
                       w="full"
                       alignItems="stretch"
-                      maxFiles={3}
+                      maxFiles={10}
                       accept={ALLOWED_FILE_TYPES}
                       maxFileSize={MAX_FILE_SIZE}
-                      onFileAccept={({ files }) => onDrop(files)}>
+                      onFileAccept={({ files }) => onDrop(files)}
+                      onFileReject={({ files }) => {
+                        files.forEach(file => {
+                          file.errors.forEach(error => {
+                            setError("outcomesAttachment", {
+                              type: "custom",
+                              message: mapUploadError(error),
+                            })
+                          })
+                        })
+                      }}>
                       <FileUpload.HiddenInput />
                       <FileUpload.Dropzone>
                         <FileUpload.DropzoneContent>
-                          <HStack>
-                            <Icon as={LuUpload} size="md" color="fg.muted" />
-                            <Box>{t("Upload file")}</Box>
-                          </HStack>
-                          <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 20MB")}</Box>
+                          <Icon as={LuUpload} size="md" color="fg.muted" />
+                          <Box>{t("Upload file")}</Box>
+                          <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 5MB")}</Box>
                         </FileUpload.DropzoneContent>
                       </FileUpload.Dropzone>
                       <FileUpload.ItemGroup>

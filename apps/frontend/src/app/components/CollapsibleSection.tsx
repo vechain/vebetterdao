@@ -5,23 +5,25 @@ export const CollapsibleSection = ({
   title,
   children,
   defaultOpen = false,
+  showSeparator = true,
 }: {
   title: string
   children: React.ReactNode
   defaultOpen?: boolean
+  showSeparator?: boolean
 }) => {
   const { isMobile } = useBreakpoints()
 
   if (!isMobile) {
     return (
       <>
-        <VStack align="flex-start" w="full" pb={2}>
-          <Heading size="xl" pt={0} pb={2}>
+        <VStack align="flex-start" w="full">
+          <Heading size="xl" p={0}>
             {title}
           </Heading>
           {children}
         </VStack>
-        <Separator my={2} w="full" color="gray.200" />
+        {showSeparator && <Separator my={2} w="full" color="gray.200" />}
       </>
     )
   }
@@ -41,7 +43,7 @@ export const CollapsibleSection = ({
           </Accordion.ItemContent>
         </Accordion.Item>
       </Accordion.Root>
-      <Separator my={2} w="full" color="gray.200" />
+      {showSeparator && <Separator my={2} w="full" color="gray.200" />}
     </>
   )
 }

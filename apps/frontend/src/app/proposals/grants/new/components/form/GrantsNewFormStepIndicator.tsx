@@ -8,6 +8,7 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
 
   return (
     <Flex
+      w="full"
       overflowX="auto"
       overflowY="hidden"
       whiteSpace="nowrap"

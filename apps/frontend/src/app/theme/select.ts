@@ -22,6 +22,18 @@ export const selectSlotRecipe = defineSlotRecipe({
             color: "gray.300",
           },
         },
+        item: {
+          _hover: {
+            bg: "bg.secondary",
+          },
+          _selected: {
+            bg: "bg.secondary",
+          },
+          borderRadius: "lg",
+        },
+        clearTrigger: {
+          px: 2,
+        },
       },
     },
   },

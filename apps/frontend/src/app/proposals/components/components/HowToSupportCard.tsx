@@ -60,13 +60,7 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
           </Text>
         )}
 
-        <Button
-          onClick={buttonOnClick}
-          variant="ghost"
-          color="primary.500"
-          _hover={{ bg: "none" }}
-          p={0}
-          alignSelf="flex-start">
+        <Button onClick={buttonOnClick} size="md" variant="tertiary" p={0} alignSelf="flex-start">
           {buttonText}
         </Button>
       </Card.Body>

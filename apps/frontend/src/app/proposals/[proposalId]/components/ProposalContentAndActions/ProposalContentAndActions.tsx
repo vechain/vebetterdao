@@ -69,10 +69,10 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   // RENDER
   // ==========================================
   return (
-    <VStack gap={4} align="flex-start" w="full">
+    <VStack gap={7} align="flex-start" w="full">
       {/* Grant proposal content */}
       {isGrantProposal(proposal) && (
-        <VStack gap={"40px"} align="flex-start" w="full">
+        <VStack gap={7} align="flex-start" w="full">
           {/* Company details section */}
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
             <CollapsibleSectionItem title={t("Name")} value={proposal?.companyName} />
@@ -104,7 +104,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
 
           {/* Grant details section */}
           <CollapsibleSection title={t("Grant details")} defaultOpen={true}>
-            <VStack align="flex-start" textAlign="flex-start" w="full">
+            <VStack gap={4} align="flex-start" textAlign="flex-start" w="full">
               <CollapsibleSectionItem title={t("Problem")} value={proposal?.problemDescription} />
               <CollapsibleSectionItem title={t("Solution")} value={proposal?.solutionDescription} />
               <CollapsibleSectionItem title={t("Execution plan")} value={proposal?.highLevelRoadmap} />
@@ -118,7 +118,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
 
           {/* Outcomes section */}
           <CollapsibleSection title={t("Outcomes")}>
-            <VStack align="flex-start" w="full">
+            <VStack gap={4} align="flex-start" w="full">
               <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.benefitsToUsers} />
 
               <CollapsibleSectionItem title={t("Benefits to dApps")} value={proposal?.benefitsToDApps} />
@@ -133,8 +133,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           </CollapsibleSection>
 
           {/* Sources and additional information section */}
-          <CollapsibleSection title={t("Sources and additional")}>
-            <VStack gap={"16px"} align="flex-start" w="full">
+          <CollapsibleSection title={t("Sources and additional")} showSeparator={false}>
+            <VStack gap={4} align="flex-start" w="full">
               {proposal?.discordUserId ? (
                 <SocialLink
                   icon={AiOutlineDiscord}

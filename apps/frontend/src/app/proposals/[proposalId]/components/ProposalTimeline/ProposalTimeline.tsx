@@ -1,8 +1,9 @@
 import { useProposalInteractionDates } from "@/api"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks"
-import { Card, Circle, Heading, Steps, Text, VStack } from "@chakra-ui/react"
+import { Card, Circle, Heading, Icon, Steps, Text, VStack, HStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { t } from "i18next"
+import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
 type Props = {
@@ -91,19 +92,23 @@ export const ProposalTimeline = ({ proposal }: Props) => {
 
   return (
     <>
-      <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"}>
+      <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"} p={0} gap={0}>
         <Card.Header>
-          <Heading fontSize={"20px"} fontWeight={700}>
-            {t("Timeline")}
-          </Heading>
+          <HStack gap={2}>
+            <Icon as={Calendar} boxSize={5} />
+            <Heading fontSize={"20px"} fontWeight={700}>
+              {t("Timeline")}
+            </Heading>
+          </HStack>
         </Card.Header>
-        <Card.Body>
+        <Card.Body pb={0}>
           <Steps.Root
             orientation="vertical"
             defaultStep={0}
             count={timelineSteps.length}
             size="sm"
             w="full"
+            h="full"
             step={currentStep}
             colorPalette={invalidState ? "red" : "blue"}
             variant="primaryVertical">

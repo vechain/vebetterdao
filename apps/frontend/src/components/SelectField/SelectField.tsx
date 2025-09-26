@@ -6,7 +6,7 @@ interface SelectFieldProps
   extends Omit<Select.RootProps, "collection" | "onValueChange" | "defaultValue" | "multiple" | "onChange"> {
   options: ListCollection<{ label: string; value: any }>
   onChange: (value: string[]) => void
-  defaultValue?: string | string[]
+  defaultValue?: string[]
   leftIcon?: ElementType
   placeholder?: string
   isMultiOption?: boolean
@@ -24,11 +24,11 @@ export const SelectField = ({
   ...selectProps
 }: SelectFieldProps) => {
   const { t } = useTranslation()
+
   return (
     <Select.Root
       {...selectProps}
       collection={options}
-      variant="filled"
       {...(isMultiOption && { multiple: true })}
       {...(defaultValue && { defaultValue: Array.isArray(defaultValue) ? defaultValue : [defaultValue] })}
       onValueChange={e => onChange(e.value)}>
@@ -53,7 +53,7 @@ export const SelectField = ({
       </Select.Control>
       <Portal>
         <Select.Positioner>
-          <Select.Content borderRadius="2xl" gap={2} p={4}>
+          <Select.Content borderRadius="2xl" gap={2} p={2}>
             <Select.Context>
               {select =>
                 options.items.map(option => {

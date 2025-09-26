@@ -16,8 +16,8 @@ export const SearchField = ({ placeholder = "Search", value, onChange, disabled,
         {...inputProps}
         {...(disabled && { disabled: true })}
         placeholder={placeholder}
-        variant="filled"
         borderRadius={"xl"}
+        bg="bg.primary"
         value={value}
         onChange={e => onChange?.(e.target.value)}
       />

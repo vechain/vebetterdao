@@ -368,7 +368,12 @@ export const MilestoneSection = ({
                 placeholder={t("Milestone description")}
                 register={register(`milestones.${index}.description`, {
                   required: t("Please enter the description for this milestone"),
+                  maxLength: {
+                    value: 800,
+                    message: t("{{fieldName}} is too long", { fieldName: t("Description") }),
+                  },
                 })}
+                maxLength={800}
                 error={errors.milestones?.[index]?.description?.message}
                 onBlur={() => syncFieldToStore("description")}
               />

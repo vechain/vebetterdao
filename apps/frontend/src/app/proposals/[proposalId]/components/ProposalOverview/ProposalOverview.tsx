@@ -63,14 +63,14 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   return (
     <Card.Root variant="baseWithBorder" w="full" borderRadius={"16px"}>
       <Card.Body p={"32px"}>
-        <VStack gap={4} align="flex-start" w="full">
+        <VStack gap={7} align="flex-start" w="full">
           {/* Header section with status badge, proposer info, and title */}
           <HeaderContent />
 
           {/* Content section: Tabbed interface for grants, direct content for regular proposals */}
           {isGrant ? (
             /* Grant proposals: Overview and Milestones tabs */
-            <Tabs.Root defaultValue="overview" w="full" colorPalette="blue" fitted>
+            <Tabs.Root spaceY={7} defaultValue="overview" w="full" colorPalette="blue" fitted>
               <Tabs.List>
                 <Tabs.Trigger
                   value="overview"
@@ -93,10 +93,10 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
                   {"Milestones"}
                 </Tabs.Trigger>
               </Tabs.List>
-              <Tabs.Content value="overview" pt={6}>
+              <Tabs.Content value="overview">
                 <ProposalContentAndActions proposal={proposal} />
               </Tabs.Content>
-              <Tabs.Content value="milestones" pt={6}>
+              <Tabs.Content value="milestones">
                 <MilestonesActions proposal={proposal as GrantProposalEnriched} />
               </Tabs.Content>
             </Tabs.Root>

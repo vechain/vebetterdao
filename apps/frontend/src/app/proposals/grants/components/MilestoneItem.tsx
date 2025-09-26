@@ -146,7 +146,7 @@ export const MilestoneItem = ({
   }, [account?.address, isGrantReceiver, milestoneData.state])
 
   return (
-    <VStack align="flex-start" gap={"16px"} h="full">
+    <VStack align="flex-start" gap={4} h="full">
       <MilestoneItemContent
         icon={B3trIcon}
         title={t("Amount to grant")}
