@@ -76,7 +76,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           {/* Company details section */}
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
             <CollapsibleSectionItem title={t("Name")} value={proposal?.companyName} />
-            <CollapsibleSectionItem title={t("Registered number")} value={proposal?.companyRegisteredNumber} />
+            <CollapsibleSectionItem title={t("Registration number / VAT")} value={proposal?.companyRegisteredNumber} />
             {proposal?.companyEmail || proposal?.companyTelegram ? (
               <VStack py={2} align="flex-start" w="full">
                 {proposal?.companyEmail ? (

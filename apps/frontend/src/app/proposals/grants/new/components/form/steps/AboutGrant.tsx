@@ -226,7 +226,7 @@ export const AboutGrant = ({
                 </GridItem>
                 <GridItem>
                   <FormItem
-                    label={t("Registered number")}
+                    label={t("Registration number / VAT")}
                     placeholder={"Eg. 01234567"}
                     isOptional
                     tooltip={t("Company VAT number e.g. 01234567")}
