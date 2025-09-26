@@ -8,8 +8,9 @@ type FormItemProps = {
   label?: string
   description?: string
   placeholder?: string
-  type?: "text" | "textarea" | "email" | "url" | "number"
   register: UseFormRegisterReturn
+  type?: "text" | "textarea" | "email" | "url" | "number"
+  defaultValue?: string
   error?: string
   onBlur?: () => void
   isOptional?: boolean
@@ -24,6 +25,7 @@ export const FormItem = ({
   placeholder,
   type = "text",
   register,
+  defaultValue,
   error,
   onBlur,
   isOptional = false,
@@ -32,7 +34,7 @@ export const FormItem = ({
   maxLength,
 }: FormItemProps) => {
   const InputComponent = type === "textarea" ? Textarea : Input
-  const [charCount, setCharCount] = useState(0)
+  const [charCount, setCharCount] = useState(defaultValue?.length ?? 0)
 
   return (
     <Field.Root p={1} invalid={!!error} h={type === "textarea" ? "full" : "auto"}>

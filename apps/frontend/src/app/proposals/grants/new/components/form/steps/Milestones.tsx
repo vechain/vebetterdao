@@ -365,12 +365,13 @@ export const MilestoneSection = ({
               <FormItem
                 label={t("Description")}
                 type="textarea"
+                defaultValue={getValues(`milestones.${index}.description`)}
                 placeholder={t("Milestone description")}
                 register={register(`milestones.${index}.description`, {
                   required: t("Please enter the description for this milestone"),
                   maxLength: {
                     value: 800,
-                    message: t("{{fieldName}} is too long", { fieldName: t("Description") }),
+                    message: t("Text too long. Maximum allowed: {{amount}} characters.", { amount: 800 }),
                   },
                 })}
                 maxLength={800}

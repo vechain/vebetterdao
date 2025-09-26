@@ -1467,5 +1467,6 @@
   "{{percentage}}% (your support)": "{{percentage}}% (your support)",
   "grant": "grant",
   "File too large. Maximum 5MB allowed.": "File too large. Maximum 5MB allowed.",
-  "File type not supported. Use PDF, JPG, JPEG, or PNG.": "File type not supported. Use PDF, JPG, JPEG, or PNG."
+  "File type not supported. Use PDF, JPG, JPEG, or PNG.": "File type not supported. Use PDF, JPG, JPEG, or PNG.",
+  "Text too long. Maximum allowed: {{amount}} characters.": "Text too long. Maximum allowed: {{amount}} characters."
 }
