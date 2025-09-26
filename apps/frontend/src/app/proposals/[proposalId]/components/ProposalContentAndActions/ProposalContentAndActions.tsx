@@ -18,6 +18,7 @@ import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
 
 import { SocialLink } from "../SocialLink"
+import { Linkedin } from "iconoir-react"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -85,6 +86,15 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                     href={`mailto:${proposal.companyEmail}`}
                     label="Email"
                     value={proposal.companyEmail}
+                  />
+                ) : null}
+
+                {proposal?.companyLinkedin ? (
+                  <SocialLink
+                    icon={Linkedin}
+                    href={proposal.companyLinkedin}
+                    label="Linkedin"
+                    value={proposal.companyLinkedin}
                   />
                 ) : null}
 
