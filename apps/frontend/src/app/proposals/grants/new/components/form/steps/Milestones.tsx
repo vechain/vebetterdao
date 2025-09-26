@@ -242,7 +242,7 @@ export const MilestoneSection = ({
   const allMilestones = watch("milestones")
 
   // Component state and computed values
-  const now = dayjs().unix()
+  const now = dayjs().startOf("day").unix()
 
   const milestoneNumber = index + 1
   const isFirst = index === 0
@@ -288,16 +288,6 @@ export const MilestoneSection = ({
     } as (typeof updatedMilestones)[0]
 
     setData({ milestones: updatedMilestones })
-
-    //Re-validate subsequent milestones
-    if (field === "durationFrom" || field === "durationTo") {
-      allMilestones.forEach((_, idx) => {
-        if (idx > index) {
-          trigger(`milestones.${idx}.durationFrom`)
-          trigger(`milestones.${idx}.durationTo`)
-        }
-      })
-    }
   }
 
   const handleAmountChange = (usdAmount: string, b3trAmount: string) => {
@@ -393,7 +383,7 @@ export const MilestoneSection = ({
                 placeholder="Select end date"
                 register={register(`milestones.${index}.durationTo`, {
                   validate: (value: number) =>
-                    validateMilestoneEndDate(value, currentMilestone.durationFrom, allMilestones),
+                    validateMilestoneEndDate(value, getValues(`milestones.${index}.durationFrom`), allMilestones),
                 })}
                 error={errors.milestones?.[index]?.durationTo?.message}
                 minDate={milestoneConstraints.endMinDate}

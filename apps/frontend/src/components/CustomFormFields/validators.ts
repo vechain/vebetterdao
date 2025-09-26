@@ -68,8 +68,8 @@ interface ValidationOptions {
 }
 
 const formatDuration = (duration: number | string): string => {
-  const durationInMilliseconds = Number(duration) * 1000 // Convert to milliseconds
-  return dayjs(durationInMilliseconds).format("MM/DD/YYYY")
+  // duration is already a Unix timestamp in seconds
+  return dayjs.unix(Number(duration)).format("MM/DD/YYYY")
 }
 
 const getMaxGrantAmount = (grantType: string): number => {
@@ -101,6 +101,7 @@ export const validateMilestoneStartDate = (
   milestones: GrantFormData["milestones"],
   currentIndex: number,
 ): string | boolean => {
+  // Allow empty values during form filling - validation will happen at submission
   if (!value || value === 0) return "Please enter the start date for this milestone"
 
   // First milestone must start from now or later
@@ -112,7 +113,13 @@ export const validateMilestoneStartDate = (
   const previousMilestone = milestones[currentIndex - 1]
   if (previousMilestone && previousMilestone.durationTo) {
     const previousEndDate = previousMilestone.durationTo
-    if (value <= previousEndDate) {
+
+    // Compare dates at start of day to avoid time-of-day issues
+    const currentStartOfDay = dayjs.unix(value).startOf("day").unix()
+    const previousEndStartOfDay = dayjs.unix(previousEndDate).startOf("day").unix()
+
+    // Milestone can start on the day after the previous milestone ends
+    if (currentStartOfDay <= previousEndStartOfDay) {
       return `Milestone must start after the previous milestone ends (${formatDuration(previousEndDate)})`
     }
   }
@@ -134,10 +141,19 @@ export const validateMilestoneEndDate = (
   startDate: number,
   milestones: GrantFormData["milestones"],
 ): string | boolean => {
+  // If no value provided, return true to allow it during form interaction
+  // Required validation will be handled at form submission
   if (!value || value === 0) return "Please enter the end date for this milestone"
 
-  if (startDate && value <= startDate) {
-    return "End date must be after start date"
+  // Only validate against start date if start date is set and valid
+  if (startDate && startDate > 0) {
+    // Compare dates at start of day to avoid time-of-day issues
+    const endStartOfDay = dayjs.unix(value).startOf("day").unix()
+    const startStartOfDay = dayjs.unix(startDate).startOf("day").unix()
+
+    if (endStartOfDay <= startStartOfDay) {
+      return "End date must be after start date"
+    }
   }
 
   // Check 12-month limit from first milestone start
