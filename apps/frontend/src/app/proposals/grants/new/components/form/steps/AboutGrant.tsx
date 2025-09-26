@@ -547,8 +547,8 @@ export const AboutGrant = ({
                 </GridItem>
                 <GridItem>
                   <FormItem
-                    label={t("Benefits to dApps")}
-                    placeholder={t("Benefits to dApps")}
+                    label={t("Benefits to apps")}
+                    placeholder={t("Benefits to apps")}
                     type="textarea"
                     defaultValue={textAreasDefaultValues.benefitsToDApps}
                     register={register("benefitsToDApps", {

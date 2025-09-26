@@ -122,7 +122,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             <VStack gap={4} align="flex-start" w="full">
               <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.benefitsToUsers} />
 
-              <CollapsibleSectionItem title={t("Benefits to dApps")} value={proposal?.benefitsToDApps} />
+              <CollapsibleSectionItem title={t("Benefits to apps")} value={proposal?.benefitsToDApps} />
 
               <CollapsibleSectionItem
                 title={t("Benefits to VeChain ecosystem")}
