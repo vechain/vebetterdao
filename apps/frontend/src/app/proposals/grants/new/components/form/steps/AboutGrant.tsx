@@ -284,10 +284,11 @@ export const AboutGrant = ({
                   <FormItem
                     label={t("Email")}
                     leftElement={<Icon as={LuMail} />}
-                    isOptional
                     type="email"
                     placeholder={t("Enter the email of the company")}
-                    register={register("companyEmail")}
+                    register={register("companyEmail", {
+                      required: t("Please enter the company email"),
+                    })}
                     error={errors.companyEmail?.message}
                     onBlur={() => onBlur("companyEmail")}
                   />
