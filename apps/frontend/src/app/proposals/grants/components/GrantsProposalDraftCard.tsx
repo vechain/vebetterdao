@@ -17,7 +17,6 @@ const requiredGrantFieldKeys = [
   "grantsReceiverAddress",
   "companyName",
   "companyRegisteredNumber",
-  "companyIntro",
   "companyEmail",
   "projectName",
   "projectWebsite",
