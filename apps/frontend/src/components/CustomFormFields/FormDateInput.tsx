@@ -48,11 +48,11 @@ type CalendarBodyProps = {
   handleDaySelect: (day: number) => void
   isMobile: boolean
   today: dayjs.Dayjs
+  minDate?: number
 }
 
 type CalendarFooterProps = {
   resetSelection: () => void
-  cancelSelection: () => void
 }
 
 type FormDateInputProps = {
@@ -84,7 +84,7 @@ const CalendarHeader = ({
         <FaChevronLeft />
       </Button>
       <Heading size="md" textAlign="center">
-        {monthName.toUpperCase()}
+        {monthName}
       </Heading>
       <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
         <FaChevronRight />
@@ -155,16 +155,13 @@ const CalendarBody = ({
   )
 }
 
-const CalendarFooter = ({ resetSelection, cancelSelection }: CalendarFooterProps) => {
+const CalendarFooter = ({ resetSelection }: CalendarFooterProps) => {
   const { t } = useTranslation()
 
   return (
     <HStack justify="space-between">
-      <Button size="sm" variant="ghost" onClick={resetSelection}>
+      <Button size="sm" variant="tertiary" onClick={resetSelection}>
         {t("Clear")}
-      </Button>
-      <Button size="sm" variant="outline" onClick={cancelSelection}>
-        {t("Cancel")}
       </Button>
     </HStack>
   )
@@ -280,10 +277,6 @@ export const FormDateInput = ({
     register.onChange(syntheticEvent)
   }, [register])
 
-  const cancelSelection = useCallback(() => {
-    setIsOpen(false)
-  }, [])
-
   // Display value for the input field (formatted for user readability)
   // Note: This is only for visual display - the actual form value remains as Unix timestamp
   const displayValue = useMemo(() => {
@@ -385,9 +378,10 @@ export const FormDateInput = ({
                   handleDaySelect={handleDaySelect}
                   isMobile={!!isMobile}
                   today={today}
+                  minDate={minDate}
                 />
 
-                <CalendarFooter resetSelection={resetSelection} cancelSelection={cancelSelection} />
+                <CalendarFooter resetSelection={resetSelection} />
               </VStack>
             </Popover.Body>
           </Popover.Content>
