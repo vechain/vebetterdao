@@ -52,6 +52,8 @@ export const ProposalShareModal = ({
     return proposalType === ProposalType.Standard ? t("proposal") : t("grant")
   }, [proposalType, t])
 
+  const shareText = `📢 ${proposalTypeText.toUpperCase()} alert! Check it out on #VeBetter and join me in building a sustainable future 🌱🔗\n\nVote now: https://governance.vebetterdao.org/${proposalTypeText}s/${proposalId}\n\n💫 #VeBetter #Vechain`
+
   return (
     <>
       <Dialog.Root
@@ -95,11 +97,7 @@ export const ProposalShareModal = ({
                     })}
                   </Text>
                 </VStack>
-                <ShareButtonsBlue
-                  descriptionEncoded={encodeURIComponent(
-                    `📢 ${proposalTypeText.toUpperCase()} alert! Check it out on #VeBetterDao and join me in building a sustainable future 🌱🔗\n\nVote now: https://governance.vebetterdao.org/${proposalTypeText}s/${proposalId}\n\n💫 #VeBetterDAO #Vechain`,
-                  )}
-                />
+                <ShareButtonsBlue descriptionEncoded={encodeURIComponent(shareText)} />
                 {showCopiedLink ? (
                   <HStack color="#6DCB09">
                     <UilCheckCircle size="20px" />

@@ -48,11 +48,12 @@ type CalendarBodyProps = {
   handleDaySelect: (day: number) => void
   isMobile: boolean
   today: dayjs.Dayjs
+  minDate?: number
+  maxDate?: number
 }
 
 type CalendarFooterProps = {
   resetSelection: () => void
-  cancelSelection: () => void
 }
 
 type FormDateInputProps = {
@@ -84,7 +85,7 @@ const CalendarHeader = ({
         <FaChevronLeft />
       </Button>
       <Heading size="md" textAlign="center">
-        {monthName.toUpperCase()}
+        {monthName}
       </Heading>
       <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
         <FaChevronRight />
@@ -101,7 +102,6 @@ const CalendarBody = ({
   isDaySelected,
   handleDaySelect,
   isMobile,
-  today,
 }: CalendarBodyProps) => {
   return (
     <Grid templateColumns="repeat(7, 1fr)" gap={1}>
@@ -125,8 +125,12 @@ const CalendarBody = ({
         const day = index + 1
         const isSelectable = isDaySelectable(day)
         const isSelected = isDaySelected(day)
-        const isToday = today.isSame(currentDate.date(day), "day")
 
+        // A day is unavailable if it's not selectable
+        const isUnavailable = !isSelectable
+        const bgColor = isUnavailable ? "bg.subtle" : isSelected ? "#004CFC" : "transparent"
+        const textColor = isUnavailable ? "text.subtle" : isSelected ? "white" : "inherit"
+        const borderColor = isUnavailable ? "none" : isSelected ? "border.secondary" : "border.primary"
         return (
           <Button
             key={`day-${day}`}
@@ -139,11 +143,13 @@ const CalendarBody = ({
             unstyled
             fontSize={isMobile ? "2xs" : "xs"}
             fontWeight="medium"
-            bg={isSelected ? "#004CFC" : "transparent"}
-            color={isSelected ? "white" : "inherit"}
+            bg={bgColor}
+            color={textColor}
             borderRadius="md"
-            border={isToday ? "2px solid #000" : "1px solid #dfdfdf"}
+            borderWidth={isUnavailable ? "0px" : "1px"}
+            borderColor={borderColor}
             _hover={{ opacity: isSelectable ? 0.8 : 1 }}
+            cursor={isUnavailable ? "not-allowed" : "pointer"}
             display="flex"
             alignItems="center"
             justifyContent="center">
@@ -155,16 +161,13 @@ const CalendarBody = ({
   )
 }
 
-const CalendarFooter = ({ resetSelection, cancelSelection }: CalendarFooterProps) => {
+const CalendarFooter = ({ resetSelection }: CalendarFooterProps) => {
   const { t } = useTranslation()
 
   return (
     <HStack justify="space-between">
-      <Button size="sm" variant="ghost" onClick={resetSelection}>
+      <Button size="sm" variant="tertiary" onClick={resetSelection}>
         {t("Clear")}
-      </Button>
-      <Button size="sm" variant="outline" onClick={cancelSelection}>
-        {t("Cancel")}
       </Button>
     </HStack>
   )
@@ -229,17 +232,29 @@ export const FormDateInput = ({
     (day: number) => {
       const date = currentDate.date(day)
 
+      // Block past dates (before today)
+      if (date.isBefore(today, "day")) {
+        return false
+      }
+
+      // Block today
+      if (date.isSame(today, "day")) {
+        return false
+      }
+
+      // Respect minDate constraint (but allow selection of minDate itself)
       if (minDate && date.isBefore(dayjs.unix(minDate), "day")) {
         return false
       }
 
+      // Respect maxDate constraint (but allow selection of maxDate itself)
       if (maxDate && date.isAfter(dayjs.unix(maxDate), "day")) {
         return false
       }
 
       return true
     },
-    [currentDate, maxDate, minDate],
+    [currentDate, maxDate, minDate, today],
   )
 
   const handleDaySelect = useCallback(
@@ -279,10 +294,6 @@ export const FormDateInput = ({
     }
     register.onChange(syntheticEvent)
   }, [register])
-
-  const cancelSelection = useCallback(() => {
-    setIsOpen(false)
-  }, [])
 
   // Display value for the input field (formatted for user readability)
   // Note: This is only for visual display - the actual form value remains as Unix timestamp
@@ -385,9 +396,10 @@ export const FormDateInput = ({
                   handleDaySelect={handleDaySelect}
                   isMobile={!!isMobile}
                   today={today}
+                  minDate={minDate}
                 />
 
-                <CalendarFooter resetSelection={resetSelection} cancelSelection={cancelSelection} />
+                <CalendarFooter resetSelection={resetSelection} />
               </VStack>
             </Popover.Body>
           </Popover.Content>

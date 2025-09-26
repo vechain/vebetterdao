@@ -2,6 +2,11 @@ import { GenericAlert } from "@/app/components/Alert"
 import { FormItem, FormMoneyInput } from "@/components/CustomFormFields"
 import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
+import {
+  validateMilestoneAmountTotal,
+  validateMilestoneStartDate,
+  validateMilestoneEndDate,
+} from "@/components/CustomFormFields/validators"
 import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
 import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
 import { useMilestoneMinimumAmount } from "@/hooks/proposals/grants"
@@ -25,26 +30,34 @@ import { UilPlus, UilTrash } from "@iconscout/react-unicons"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
-import { Control, FieldErrors, UseFormGetValues, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form"
+import {
+  Control,
+  FieldErrors,
+  UseFormGetValues,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormTrigger,
+  UseFormWatch,
+} from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { LuArrowRight } from "react-icons/lu"
 
 // ============================================================================
 // Constants & Utilities
 // ============================================================================
-
+const MAX_TEXT_AREA_LENGTH = 800
 const formatDuration = (duration: number | string): string => {
   const durationInMilliseconds = Number(duration) * 1000 // Convert to milliseconds
   return dayjs(durationInMilliseconds).format("MM/DD/YYYY")
 }
 
-const getDefaultMilestone = () => ({
+const defaultMilestoneValues = {
   description: "",
   fundingAmount: 0,
   fundingAmountUsd: 0,
   durationFrom: 0,
   durationTo: 0,
-})
+}
 
 const calculateTotalAmount = (milestones: GrantFormData["milestones"]): number => {
   if (!milestones || !Array.isArray(milestones)) return 0
@@ -71,6 +84,7 @@ interface MilestonesProps {
   errors: FieldErrors<GrantFormData>
   formData: GrantFormData
   control: Control<GrantFormData>
+  trigger: UseFormTrigger<GrantFormData>
 }
 
 interface MilestoneSectionProps {
@@ -79,6 +93,7 @@ interface MilestoneSectionProps {
   getValues: UseFormGetValues<GrantFormData>
   setData: (data: Partial<GrantFormData>) => void
   watch: UseFormWatch<GrantFormData>
+  trigger: UseFormTrigger<GrantFormData>
   errors: FieldErrors<GrantFormData>
   index: number
   b3trPerUsd: number
@@ -87,68 +102,55 @@ interface MilestoneSectionProps {
   removeMilestone: (index: number) => void
 }
 
-interface ValidationOptions {
-  grantType: string
-  milestones: GrantFormData["milestones"]
-  currentIndex: number
-  currentValue: number
-}
-
-// ============================================================================
-// Validation Functions
-// ============================================================================
-
-const validateMilestoneAmount = ({
-  grantType,
-  milestones,
-  currentIndex,
-  currentValue,
-}: ValidationOptions): string | boolean => {
-  const total = milestones.reduce((acc, milestone, idx) => {
-    // Use the current value being validated if it's for this milestone
-    const amount = idx === currentIndex ? currentValue : milestone.fundingAmountUsd
-    return acc + (Number(amount) || 0)
-  }, 0)
-
-  const maxAmount = getMaxGrantAmount(grantType)
-  return (
-    total <= maxAmount ||
-    `Total amount across all milestones exceeds maximum allowed: $${maxAmount.toLocaleString()} USD`
-  )
-}
-
-const validateStartDate = (value: number, now: number): string | boolean => {
-  if (!value || value === 0) return "Please enter the duration for this milestone"
-  return value >= now || "Start date cannot be in the past"
-}
-
-const validateEndDate = (value: number, startDate: number): string | boolean => {
-  if (!value || value === 0) return "Please enter the duration for this milestone"
-  if (startDate && value <= startDate) {
-    return "End date must be after start date"
-  }
-  return true
-}
-
 // ============================================================================
 // Sub-components
 // ============================================================================
 
-const MilestoneTips = () => {
+const MilestoneTips = ({ index }: { index: number }) => {
   const { t } = useTranslation()
+  const tips = [
+    {
+      title: t("Explain integration and launch on VeBetterDAO, like:"),
+      items: [
+        t("B3TR integrated as a reward mechanism within the app"),
+        t("VeWorld wallet support for seamless B3TR transactions"),
+        t("Testing and optimization reporting to ensure smooth UX and functionality"),
+      ],
+    },
+    {
+      title: t("Ready to Launch App Development"),
+      items: [
+        t("Core Web3 features and sustainability (sutainable proofs) live on VeChain"),
+        t("User-friendly design aligned with VeBetter values"),
+        t("Beta release & feedback to refine before public launch"),
+      ],
+    },
+    {
+      title: t("Go-to-Market & Growth"),
+      items: [
+        t("Launch campaign focused on sustainability and rewards"),
+        t("User incentives like referrals, streaks, and engagement bonuses through Vebetter"),
+        t("Growth tracking with KPIs on users, B3TR use, and impact."),
+      ],
+    },
+  ]
+
+  const hasTips = !!tips?.[index]?.title
+  if (!hasTips) return null
 
   return (
     <VStack bg="bg.tertiary" p={5} borderRadius="xl" mt={{ base: 0, md: 8 }} textAlign="start">
       <Heading size="sm" alignSelf="start">
         {t("Tips")}
       </Heading>
+      {}
       <Text fontSize="sm" color="text.subtle" alignSelf="start">
-        {t("Explain integration and launch on VeBetterDAO, like:")}
+        {tips?.[index]?.title}
       </Text>
       <List.Root listStyle="disc" alignSelf="end" fontSize="sm" color="text.subtle" textAlign="justify" px={5}>
-        <List.Item>{t("B3TR integrated as a reward mechanism within the app")}</List.Item>
-        <List.Item>{t("VeWorld wallet support for seamless B3TR transactions")}</List.Item>
-        <List.Item>{t("Testing and optimization reporting to ensure smooth UX and functionality")}</List.Item>
+        {tips?.[index]?.items.map((tip, index) => (
+          <List.Item key={index}>{tip}</List.Item>
+        ))}
       </List.Root>
     </VStack>
   )
@@ -228,6 +230,7 @@ export const MilestoneSection = ({
   watch,
   setValue,
   setData,
+  trigger,
   index,
   errors,
   b3trPerUsd,
@@ -235,28 +238,55 @@ export const MilestoneSection = ({
   grantType,
 }: MilestoneSectionProps) => {
   const { t } = useTranslation()
+  const [isMobile] = useMediaQuery(["(max-width: 767px)"])
+  const allMilestones = watch("milestones")
 
   // Component state and computed values
+  const now = dayjs().startOf("day").unix()
+
   const milestoneNumber = index + 1
   const isFirst = index === 0
-  const mediaQueryResult = useMediaQuery(["(max-width: 767px)"])
-  const isMobile = mediaQueryResult?.[0] ?? false
-  const now = dayjs().unix()
+  const currentMilestone = allMilestones[index] || defaultMilestoneValues
+  const previousMilestone = !isFirst ? allMilestones[index - 1] : null
+  const firstMilestone = allMilestones[0]
 
-  const currentMilestone = getValues(`milestones.${index}`)
-  const hasDurationInfo = currentMilestone.durationFrom > 0 && currentMilestone.durationTo > 0
-  const formattedDurationFrom = formatDuration(currentMilestone.durationFrom)
-  const formattedDurationTo = formatDuration(currentMilestone.durationTo)
-  const maxAmount = getMaxGrantAmount(grantType)
+  // Computed milestone constraints
+  const milestoneConstraints = useMemo(() => {
+    const firstMilestoneStart = firstMilestone?.durationFrom
+    const previousMilestoneEnd = previousMilestone?.durationTo
+
+    // Calculate 12-month limit from first milestone start
+    const twelveMonthLimit = firstMilestoneStart ? dayjs.unix(firstMilestoneStart).add(12, "months").unix() : null
+
+    return {
+      startMinDate: isFirst ? now : previousMilestoneEnd || now,
+      startMaxDate: twelveMonthLimit,
+      endMinDate: currentMilestone.durationFrom || now,
+      endMaxDate: twelveMonthLimit,
+    }
+  }, [now, isFirst, currentMilestone.durationFrom, firstMilestone?.durationFrom, previousMilestone?.durationTo])
+
+  // Formatted display values
+  const { hasDurationInfo, formattedDurationFrom, formattedDurationTo, maxAmount } = useMemo(
+    () => ({
+      hasDurationInfo: currentMilestone.durationFrom > 0 && currentMilestone.durationTo > 0,
+      formattedDurationFrom: formatDuration(currentMilestone.durationFrom),
+      formattedDurationTo: formatDuration(currentMilestone.durationTo),
+      maxAmount: getMaxGrantAmount(grantType),
+    }),
+    [currentMilestone.durationFrom, currentMilestone.durationTo, grantType],
+  )
 
   // Event handlers
   const syncFieldToStore = (field: keyof typeof currentMilestone) => {
     const value = getValues(`milestones.${index}.${field}`)
-    const updatedMilestones = [...getValues("milestones")]
+
+    const updatedMilestones = [...allMilestones]
     updatedMilestones[index] = {
       ...updatedMilestones[index],
       [field]: value,
     } as (typeof updatedMilestones)[0]
+
     setData({ milestones: updatedMilestones })
   }
 
@@ -265,7 +295,7 @@ export const MilestoneSection = ({
     setValue(`milestones.${index}.fundingAmount`, Number(b3trAmount))
 
     // Sync to store
-    const updatedMilestones = [...getValues("milestones")]
+    const updatedMilestones = [...allMilestones]
     updatedMilestones[index] = {
       ...updatedMilestones[index],
       fundingAmountUsd: Number(usdAmount),
@@ -274,17 +304,18 @@ export const MilestoneSection = ({
     setData({ milestones: updatedMilestones })
     setValue("milestones", updatedMilestones)
 
-    // Trigger validation for all milestone amounts to update total validation
-    setTimeout(() => {
-      getValues("milestones").forEach((_, idx) => {
-        if (idx !== index) {
-          setValue(`milestones.${idx}.fundingAmountUsd`, getValues(`milestones.${idx}.fundingAmountUsd`), {
-            shouldValidate: true,
-          })
-        }
-      })
-    }, 0)
+    // Re-validate subsequent milestones
+    allMilestones.forEach((_, idx) => {
+      if (idx !== index) {
+        trigger(`milestones.${idx}.fundingAmountUsd`)
+      }
+    })
   }
+
+  const milestoneDescriptionColSpan = useMemo(() => {
+    //If has no tip, take full width
+    return index > 2 ? 2 : 1
+  }, [index])
 
   return (
     <Accordion.Item key={index} value={`milestone-${index}`} {...(isFirst && { borderTop: "none" })}>
@@ -315,9 +346,9 @@ export const MilestoneSection = ({
                 registerPrimary={register(`milestones.${index}.fundingAmountUsd`, {
                   required: t("Please enter the amount for this milestone"),
                   validate: (value: number) =>
-                    validateMilestoneAmount({
+                    validateMilestoneAmountTotal({
                       grantType,
-                      milestones: getValues("milestones"),
+                      milestones: allMilestones,
                       currentIndex: index,
                       currentValue: value,
                     }),
@@ -336,10 +367,11 @@ export const MilestoneSection = ({
                 label="Duration"
                 placeholder="Select start date"
                 register={register(`milestones.${index}.durationFrom`, {
-                  validate: (value: number) => validateStartDate(value, now),
+                  validate: (value: number) => validateMilestoneStartDate(value, now, allMilestones, index),
                 })}
                 error={errors.milestones?.[index]?.durationFrom?.message}
-                minDate={now} // now
+                minDate={milestoneConstraints.startMinDate}
+                maxDate={milestoneConstraints.startMaxDate || undefined}
                 size="xl"
                 watch={watch}
                 onBlur={() => syncFieldToStore("durationFrom")}
@@ -350,10 +382,12 @@ export const MilestoneSection = ({
                 {...(isMobile && { label: "Duration" })}
                 placeholder="Select end date"
                 register={register(`milestones.${index}.durationTo`, {
-                  validate: (value: number) => validateEndDate(value, getValues(`milestones.${index}.durationFrom`)),
+                  validate: (value: number) =>
+                    validateMilestoneEndDate(value, getValues(`milestones.${index}.durationFrom`), allMilestones),
                 })}
                 error={errors.milestones?.[index]?.durationTo?.message}
-                minDate={now} // now
+                minDate={milestoneConstraints.endMinDate}
+                maxDate={milestoneConstraints.endMaxDate || undefined}
                 size="lg"
                 watch={watch}
                 onBlur={() => syncFieldToStore("durationTo")}
@@ -361,26 +395,29 @@ export const MilestoneSection = ({
             </GridItem>
 
             {/* Description */}
-            <GridItem minH="160px" h="full" colSpan={1}>
+            <GridItem minH="160px" h="full" colSpan={{ base: 1, md: milestoneDescriptionColSpan }}>
               <FormItem
                 label={t("Description")}
                 type="textarea"
+                defaultValue={currentMilestone.description}
                 placeholder={t("Milestone description")}
                 register={register(`milestones.${index}.description`, {
                   required: t("Please enter the description for this milestone"),
                   maxLength: {
-                    value: 800,
-                    message: t("{{fieldName}} is too long", { fieldName: t("Description") }),
+                    value: MAX_TEXT_AREA_LENGTH,
+                    message: t("Text too long. Maximum allowed: {{amount}} characters.", {
+                      amount: MAX_TEXT_AREA_LENGTH,
+                    }),
                   },
                 })}
-                maxLength={800}
+                maxLength={MAX_TEXT_AREA_LENGTH}
                 error={errors.milestones?.[index]?.description?.message}
                 onBlur={() => syncFieldToStore("description")}
               />
             </GridItem>
             {/* Tips */}
             <GridItem>
-              <MilestoneTips />
+              <MilestoneTips index={index} />
             </GridItem>
             {canRemoveAnyMilestone && (
               <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
@@ -406,6 +443,7 @@ export const Milestones = ({
   formData,
   watch,
   control,
+  trigger,
 }: MilestonesProps) => {
   const { t } = useTranslation()
 
@@ -414,26 +452,26 @@ export const Milestones = ({
   const { data: conversionRate } = useGetTokenUsdPrice("B3TR")
 
   // Computed values
-  const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
   const milestones = watch("milestones")
-  const grantType = getValues("grantType")
+  const grantType = watch("grantType")
+  const B3TRPerUSD = 1 / (Number(conversionRate) ?? 1)
 
-  const canRemoveAnyMilestone = useMemo(
-    () => milestones.length > Number(milestoneMinimumAmount ?? 3),
-    [milestones.length, milestoneMinimumAmount],
-  )
+  const computedValues = useMemo(() => {
+    const canRemoveAnyMilestone = milestones.length > Number(milestoneMinimumAmount ?? 3)
+    const totalRequestedAmount = calculateTotalAmount(milestones)
+    const isTotalRequestedAmountValid = totalRequestedAmount <= getMaxGrantAmount(grantType)
 
-  const totalRequestedAmount = useMemo(() => calculateTotalAmount(milestones), [milestones])
-
-  const isTotalRequestedAmountValid = useMemo(() => {
-    return totalRequestedAmount <= getMaxGrantAmount(grantType)
-  }, [totalRequestedAmount, grantType])
+    return {
+      canRemoveAnyMilestone,
+      totalRequestedAmount,
+      isTotalRequestedAmountValid,
+    }
+  }, [milestones, milestoneMinimumAmount, grantType])
 
   // Event handlers
   const handleAddMilestone = () => {
-    const currentMilestones = getValues("milestones")
-    const newMilestone = getDefaultMilestone()
-    const newMilestones = [...currentMilestones, newMilestone]
+    const newMilestone = defaultMilestoneValues
+    const newMilestones = [...milestones, newMilestone]
 
     setValue("milestones", newMilestones)
     setData({ ...formData, milestones: newMilestones })
@@ -442,8 +480,7 @@ export const Milestones = ({
   const handleRemoveMilestone = (index: number) => {
     if (index === 0) return
 
-    const currentMilestones = getValues("milestones")
-    const newMilestones = currentMilestones.filter((_, i) => i !== index)
+    const newMilestones = milestones.filter((_, i) => i !== index)
 
     setValue("milestones", newMilestones)
     setData({ ...formData, milestones: newMilestones })
@@ -465,9 +502,10 @@ export const Milestones = ({
               setData={setData}
               watch={watch}
               b3trPerUsd={B3TRPerUSD}
-              canRemoveAnyMilestone={canRemoveAnyMilestone}
+              canRemoveAnyMilestone={computedValues.canRemoveAnyMilestone}
               grantType={grantType}
               setValue={setValue}
+              trigger={trigger}
             />
           )
         })}
@@ -493,7 +531,7 @@ export const Milestones = ({
           <TermsOfServiceCheckbox control={control} errors={errors} />
         </GridItem>
 
-        {!isTotalRequestedAmountValid && (
+        {!computedValues.isTotalRequestedAmountValid && (
           <GridItem colSpan={2}>
             <GenericAlert
               isLoading={false}

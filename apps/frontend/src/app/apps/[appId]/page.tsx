@@ -44,15 +44,15 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
   const bannerImage = await getIpfsMetadata<string>(metadata.banner, false)
 
   return {
-    title: `${metadata.name} - VeBetterDAO`,
-    description: `${metadata.name} is part of VeBetterDAO! ${metadata.description}`,
+    title: `${metadata.name} - VeBetter`,
+    description: `${metadata.name} is part of VeBetter! ${metadata.description}`,
     openGraph: {
       description: metadata.description,
       images: [bannerImage],
     },
     twitter: {
-      title: `${metadata.name} - VeBetterDAO`,
-      description: `${metadata.name} is part of VeBetterDAO! ${metadata.description}`,
+      title: `${metadata.name} - VeBetter`,
+      description: `${metadata.name} is part of VeBetter! ${metadata.description}`,
       images: [bannerImage],
       card: "summary_large_image",
       site: getConfig().basePath,

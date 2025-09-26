@@ -18,6 +18,7 @@ import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
 
 import { SocialLink } from "../SocialLink"
+import { Linkedin } from "iconoir-react"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -76,7 +77,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           {/* Company details section */}
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
             <CollapsibleSectionItem title={t("Name")} value={proposal?.companyName} />
-            <CollapsibleSectionItem title={t("Registered number")} value={proposal?.companyRegisteredNumber} />
+            <CollapsibleSectionItem title={t("Registration number / VAT")} value={proposal?.companyRegisteredNumber} />
             {proposal?.companyEmail || proposal?.companyTelegram ? (
               <VStack py={2} align="flex-start" w="full">
                 {proposal?.companyEmail ? (
@@ -85,6 +86,15 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                     href={`mailto:${proposal.companyEmail}`}
                     label="Email"
                     value={proposal.companyEmail}
+                  />
+                ) : null}
+
+                {proposal?.companyLinkedin ? (
+                  <SocialLink
+                    icon={Linkedin}
+                    href={proposal.companyLinkedin}
+                    label="Linkedin"
+                    value={proposal.companyLinkedin}
                   />
                 ) : null}
 
@@ -99,7 +109,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               </VStack>
             ) : null}
 
-            <CollapsibleSectionItem title={t("Intro")} value={proposal?.companyIntro} />
+            <CollapsibleSectionItem title={t("Project Intro")} value={proposal?.projectIntro} />
+            <CollapsibleSectionItem title={t("Team Overview")} value={proposal?.teamOverview} />
           </CollapsibleSection>
 
           {/* Grant details section */}
@@ -121,7 +132,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
             <VStack gap={4} align="flex-start" w="full">
               <CollapsibleSectionItem title={t("Benefits to users")} value={proposal?.benefitsToUsers} />
 
-              <CollapsibleSectionItem title={t("Benefits to dApps")} value={proposal?.benefitsToDApps} />
+              <CollapsibleSectionItem title={t("Benefits to apps")} value={proposal?.benefitsToDApps} />
 
               <CollapsibleSectionItem
                 title={t("Benefits to VeChain ecosystem")}

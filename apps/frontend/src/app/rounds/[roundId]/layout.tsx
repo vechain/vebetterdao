@@ -16,14 +16,14 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
   //   const previousImages = (await parent).openGraph?.images || []
 
   return {
-    title: `Round ${id} - VeBetterDAO`,
-    description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
+    title: `Round ${id} - VeBetter`,
+    description: `Cast your vote for round ${id} on VeBetter and earn rewards!`,
     openGraph: {
-      description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
+      description: `Cast your vote for round ${id} on VeBetter and earn rewards!`,
     },
     twitter: {
-      title: `Round ${id} - VeBetterDAO`,
-      description: `Cast your vote for round ${id} on VeBetterDAO and earn rewards!`,
+      title: `Round ${id} - VeBetter`,
+      description: `Cast your vote for round ${id} on VeBetter and earn rewards!`,
       card: "summary_large_image",
       site: getConfig().basePath,
     },

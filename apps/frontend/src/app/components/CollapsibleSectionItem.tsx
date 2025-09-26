@@ -5,7 +5,7 @@ export const CollapsibleSectionItem = ({ title, value }: { title: string; value:
   return (
     <VStack align="flex-start" w="full" gap={0}>
       <Text fontWeight="semibold">{title}</Text>
-      <Text>{value}</Text>
+      <Text w="full">{value}</Text>
     </VStack>
   )
 }

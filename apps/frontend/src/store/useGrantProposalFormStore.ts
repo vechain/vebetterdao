@@ -28,7 +28,9 @@ const initialState: GrantFormData = {
   competitiveEdge: "",
   // Company details
   companyRegisteredNumber: "",
-  companyIntro: "",
+  projectIntro: "",
+  teamOverview: "",
+  companyLinkedin: "",
   companyEmail: "",
   companyTelegram: "",
   // Outcomes
