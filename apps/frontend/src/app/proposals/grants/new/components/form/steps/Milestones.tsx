@@ -32,7 +32,7 @@ import { LuArrowRight } from "react-icons/lu"
 // ============================================================================
 // Constants & Utilities
 // ============================================================================
-
+const MAX_TEXT_AREA_LENGTH = 800
 const formatDuration = (duration: number | string): string => {
   const durationInMilliseconds = Number(duration) * 1000 // Convert to milliseconds
   return dayjs(durationInMilliseconds).format("MM/DD/YYYY")
@@ -370,11 +370,13 @@ export const MilestoneSection = ({
                 register={register(`milestones.${index}.description`, {
                   required: t("Please enter the description for this milestone"),
                   maxLength: {
-                    value: 800,
-                    message: t("Text too long. Maximum allowed: {{amount}} characters.", { amount: 800 }),
+                    value: MAX_TEXT_AREA_LENGTH,
+                    message: t("Text too long. Maximum allowed: {{amount}} characters.", {
+                      amount: MAX_TEXT_AREA_LENGTH,
+                    }),
                   },
                 })}
-                maxLength={800}
+                maxLength={MAX_TEXT_AREA_LENGTH}
                 error={errors.milestones?.[index]?.description?.message}
                 onBlur={() => syncFieldToStore("description")}
               />
