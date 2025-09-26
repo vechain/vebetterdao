@@ -8,25 +8,21 @@ import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 const grantsManagerContractAddress = getConfig().grantsManagerContractAddress
 const grantsManagerInterface = GrantsManager__factory.createInterface()
 
-export const useUpdateGrantMilestoneMetadata = ({
-  proposalId,
-  milestonesIpfsCID,
-}: {
-  proposalId: string
-  milestonesIpfsCID: string
-}) => {
-  return useBuildTransaction({
-    clauseBuilder: () => [
+import { getGrantProposalMetadataQueryKey } from "./useStandardOrGrantProposalDetails"
+
+export const useUpdateGrantMilestoneMetadata = (proposalId: string) => {
+  return useBuildTransaction<string>({
+    clauseBuilder: milestonesIpfsCID => [
       buildClause({
         contractInterface: grantsManagerInterface,
         to: grantsManagerContractAddress,
         method: "updateMilestoneMetadataURI",
         args: [proposalId, milestonesIpfsCID],
-        comment: `Update milestone metadata for proposal ${proposalId}`,
+        comment: `Update milestone metadata for proposal ${proposalId} with milestone ipfs url ${milestonesIpfsCID}`,
       }),
     ],
     onSuccess: () => {},
-    refetchQueryKeys: [],
+    refetchQueryKeys: [getGrantProposalMetadataQueryKey(proposalId)],
     gasPadding: 0.15,
   })
 }

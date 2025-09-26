@@ -1,11 +1,16 @@
 import { getIpfsMetadata } from "@/api/ipfs"
 import { useQueries } from "@tanstack/react-query"
-import { Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { GrantsManager__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
 import BigNumber from "bignumber.js"
 import { formatEther } from "ethers"
 import { useMemo } from "react"
 
 import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
+import { executeCallClause, useThor } from "@vechain/vechain-kit"
+import { getConfig } from "@repo/config"
+
+const abi = GrantsManager__factory.abi
+const contractAddress = getConfig().grantsManagerContractAddress
 
 const treasuryInterface = Treasury__factory.createInterface()
 
@@ -125,14 +130,36 @@ export const useStandardOrGrantProposalDetails = ({
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
 }) => {
-  // Create unique queries for each grant proposal
+  const thor = useThor()
   const grantProposalQueries = useQueries({
     queries: grantProposals.map(proposal => ({
       queryKey: getGrantProposalMetadataQueryKey(proposal.id, proposal.ipfsDescription),
       queryFn: async () => {
         if (!proposal.ipfsDescription) return undefined
-        return await safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
+
+        const proposalDetails = await safeFetchIpfsMetadata<GrantProposalEnriched>(
+          `ipfs://${proposal.ipfsDescription}`,
+          false,
+        )
+        const [milestoneMetadataURI] = await executeCallClause({
+          thor,
+          abi,
+          contractAddress,
+          method: "getMilestoneMetadataURI",
+          args: [BigInt(proposal.id)],
+        })
+
+        if (milestoneMetadataURI) {
+          const milestones = await safeFetchIpfsMetadata<GrantProposalEnriched["milestones"]>(
+            `ipfs://${milestoneMetadataURI}`,
+            false,
+          )
+          if (milestones && proposalDetails) proposalDetails.milestones = milestones
+        }
+
+        return proposalDetails
       },
+      enabled: !!thor,
     })),
   })
 
@@ -168,7 +195,7 @@ export const useStandardOrGrantProposalDetails = ({
 
       grantProposalsDetailsMap[event.id] = {
         ...event,
-        ...getGrantProposalMetadataOrReturnDefault(ipfsMetadata),
+        ...getGrantProposalMetadataOrReturnDefault(ipfsMetadata as GrantProposalEnriched),
         grantAmountRequested: grantAmountRequested.toNumber(),
       }
     })

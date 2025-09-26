@@ -23,12 +23,9 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
   const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
 
-  const { onMetadataUpload, metadataUri, metadataUploading } = useUploadGrantProposalMetadata()
+  const { onMetadataUpload, metadataUploading } = useUploadGrantProposalMetadata()
 
-  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata({
-    proposalId: proposal?.id ?? "",
-    milestonesIpfsCID: metadataUri ?? "",
-  })
+  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
 
   const milestones = useMemo(() => {
     return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
@@ -52,7 +49,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
           if (index === milestoneEditIndex) {
             milestones.push({
               ...milestone,
-              ...milestoneDuration,
+              durationFrom: dayjs(milestoneDuration.from).unix(),
+              durationTo: dayjs(milestoneDuration.to).unix(),
             })
           } else {
             milestones.push(milestone)
@@ -60,8 +58,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
           index++
         }
 
-        await onMetadataUpload(milestones)
-        updateMilestoneMetadata()
+        const ipfsURI = await onMetadataUpload(milestones)
+        updateMilestoneMetadata(ipfsURI)
 
         setMilestoneEditIndex(undefined)
         setMilestoneDuration(undefined)

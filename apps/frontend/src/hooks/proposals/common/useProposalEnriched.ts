@@ -99,11 +99,6 @@ export const useProposalEnriched = () => {
     )
   }, [enrichedGrantProposals])
 
-  // Step 8: Calculate loading state
-  const isLoading = useMemo(() => {
-    return isDetailsLoading || isStatesLoading
-  }, [isDetailsLoading, isStatesLoading])
-
   // Return both basic and enriched data - this gives maximum flexibility
   return {
     data: {
@@ -118,6 +113,6 @@ export const useProposalEnriched = () => {
       enrichedProposals: proposals,
       totalGrantAmount,
     },
-    isLoading,
+    isLoading: isDetailsLoading || isStatesLoading,
   }
 }
