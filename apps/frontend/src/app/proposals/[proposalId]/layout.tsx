@@ -36,27 +36,35 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
     })
 
     const description = (proposal?.decodedData?.[6] || "") as string
-    if (!description) return getDefaultMetadata()
+    let proposalMetadata: ProposalMetadata | null = null
+    if (description) {
+      proposalMetadata = await getIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
+    }
 
-    const proposalMetadata = await getIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
-    if (!proposalMetadata?.title || !proposalMetadata?.shortDescription) return getDefaultMetadata()
+    const title = proposalMetadata?.title
+      ? `${proposalMetadata.title} | ${APPLICATION_NAME}`
+      : `Proposal ${id} | ${APPLICATION_NAME}`
+
+    const desc = proposalMetadata?.shortDescription
+      ? proposalMetadata.shortDescription
+      : pagesMetadata.proposals.description
 
     const config = getConfig()
     const pageUrl = `${config.basePath}/proposals/${id}`
-    const title = `${proposalMetadata.title} | ${APPLICATION_NAME}`
+
     const defaultProposalImage = {
       url: `${config.basePath}${pagesMetadata.proposals.image}`,
-      alt: `${proposalMetadata.title} | ${APPLICATION_NAME}`,
+      alt: `${title} | ${APPLICATION_NAME}`,
       width: IMAGE_DIMENSION.width,
       height: IMAGE_DIMENSION.height,
     }
 
     return {
       title,
-      description: proposalMetadata.shortDescription,
+      description: desc,
       openGraph: {
         title,
-        description: proposalMetadata.shortDescription,
+        description: desc,
         type: "website",
         url: pageUrl,
         siteName: APPLICATION_NAME,
@@ -64,7 +72,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
       },
       twitter: {
         title,
-        description: proposalMetadata.shortDescription,
+        description: desc,
         card: "summary_large_image",
         site: config.basePath,
         images: [defaultProposalImage],
