@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 
     if (!app) return getDefaultMetadata()
 
-    const baseUri = await contract.read.baseURI()
+    const baseUri = await contract.read?.baseURI()
     if (!baseUri) return getDefaultMetadata()
 
     const metadata = await getXAppMetadata(`${baseUri}${app.metadataURI}`)
@@ -86,4 +86,8 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
     console.error("Error generating metadata for app:", params.appId, error)
     return getDefaultMetadata()
   }
+}
+
+export default function AppsLayout({ children }: { children: React.ReactNode }) {
+  return children
 }
