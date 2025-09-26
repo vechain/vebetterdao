@@ -5,6 +5,11 @@ import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { t } from "i18next"
 import dayjs from "dayjs"
 
+export const patternUrlCheck = {
+  value: /^https?:\/\/.+/,
+  message: t("Please enter a valid URL starting with http:// or https://"),
+}
+
 export const validateUrl = (value: string, fieldName: string) => {
   try {
     new URL(value)

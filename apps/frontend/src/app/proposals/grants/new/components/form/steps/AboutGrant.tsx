@@ -1,4 +1,4 @@
-import { FormSocialConnectButton, validateUrl, validateWalletAddress } from "@/components/CustomFormFields"
+import { FormSocialConnectButton, validateWalletAddress } from "@/components/CustomFormFields"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
 import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
@@ -21,6 +21,7 @@ import { FaXTwitter } from "react-icons/fa6"
 import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
 import { Linkedin, Mail, Telegram } from "iconoir-react"
+import { patternUrlCheck } from "@/components/CustomFormFields/validators"
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
 const MAX_TEXT_AREA_LENGTH = 1000
@@ -312,7 +313,7 @@ export const AboutGrant = ({
                     placeholder={t("Enter link here")}
                     isOptional
                     register={register("companyTelegram", {
-                      validate: value => validateUrl(value, "Telegram URL"),
+                      pattern: patternUrlCheck,
                     })}
                     error={errors.companyTelegram?.message}
                     onBlur={() => onBlur("companyTelegram")}
@@ -326,7 +327,7 @@ export const AboutGrant = ({
                     placeholder={t("Enter LinkedIn URL here")}
                     isOptional
                     register={register("companyLinkedin", {
-                      validate: value => validateUrl(value, "Linkedin URL"),
+                      pattern: patternUrlCheck,
                     })}
                     error={errors.companyLinkedin?.message}
                     onBlur={() => onBlur("companyLinkedin")}
@@ -362,7 +363,9 @@ export const AboutGrant = ({
                   leftElement={<Icon as={PiLinkSimple} />}
                   placeholder="Enter link here"
                   isOptional
-                  register={register("appTestnetUrl")}
+                  register={register("appTestnetUrl", {
+                    pattern: patternUrlCheck,
+                  })}
                   error={errors.appTestnetUrl?.message}
                   onBlur={() => onBlur("appTestnetUrl")}
                 />
@@ -376,10 +379,7 @@ export const AboutGrant = ({
                   type="url"
                   isOptional
                   register={register("projectWebsite", {
-                    pattern: {
-                      value: /^https?:\/\/.+/,
-                      message: t("Please enter a valid URL starting with http:// or https://"),
-                    },
+                    pattern: patternUrlCheck,
                   })}
                   error={errors.projectWebsite?.message}
                   onBlur={() => onBlur("projectWebsite")}
