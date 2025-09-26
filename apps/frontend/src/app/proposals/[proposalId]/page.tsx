@@ -52,13 +52,13 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
   if (!proposalMetadata) return {}
 
   return {
-    title: `${proposalMetadata.title} - VeBetterDAO`,
+    title: `${proposalMetadata.title} - VeBetter`,
     description: proposalMetadata.shortDescription,
     openGraph: {
       description: proposalMetadata.shortDescription,
     },
     twitter: {
-      title: `${proposalMetadata.title} - VeBetterDAO`,
+      title: `${proposalMetadata.title} - VeBetter`,
       description: proposalMetadata.shortDescription,
       card: "summary_large_image",
       site: getConfig().basePath,
