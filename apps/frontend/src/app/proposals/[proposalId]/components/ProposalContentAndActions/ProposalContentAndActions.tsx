@@ -99,7 +99,8 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               </VStack>
             ) : null}
 
-            <CollapsibleSectionItem title={t("Intro")} value={proposal?.companyIntro} />
+            <CollapsibleSectionItem title={t("Project Intro")} value={proposal?.projectIntro} />
+            <CollapsibleSectionItem title={t("Team Overview")} value={proposal?.teamOverview} />
           </CollapsibleSection>
 
           {/* Grant details section */}
