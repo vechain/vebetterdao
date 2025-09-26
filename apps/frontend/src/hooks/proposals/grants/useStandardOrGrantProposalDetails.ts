@@ -76,6 +76,8 @@ export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProp
     benefitsToVeChainEcosystem: ipfsMetadata?.benefitsToVeChainEcosystem ?? "",
     companyRegisteredNumber: ipfsMetadata?.companyRegisteredNumber ?? "",
     projectIntro: ipfsMetadata?.projectIntro ?? "",
+    teamOverview: ipfsMetadata?.teamOverview ?? "",
+    companyLinkedin: ipfsMetadata?.companyLinkedin ?? "",
     companyEmail: ipfsMetadata?.companyEmail ?? "",
     companyTelegram: ipfsMetadata?.companyTelegram ?? "",
     grantsReceiverAddress: ipfsMetadata?.grantsReceiverAddress ?? "",
