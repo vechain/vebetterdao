@@ -48,9 +48,11 @@ export type GrantFormData = {
   // About company
   companyName: string
   companyRegisteredNumber: string
-  companyIntro: string
+  projectIntro: string
+  teamOverview: string
   companyEmail: string
   companyTelegram: string
+  companyLinkedin: string
   grantsReceiverAddress: string
   // About project
   projectName: string

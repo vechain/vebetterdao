@@ -1,4 +1,4 @@
-import { FormSocialConnectButton, validateWalletAddress } from "@/components/CustomFormFields"
+import { FormSocialConnectButton, validateUrl, validateWalletAddress } from "@/components/CustomFormFields"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
 import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
@@ -18,13 +18,13 @@ import {
 import { useTranslation } from "react-i18next"
 import { AiOutlineDiscord } from "react-icons/ai"
 import { FaXTwitter } from "react-icons/fa6"
-import { LuMail, LuUpload } from "react-icons/lu"
+import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
-import { RiTelegram2Line } from "react-icons/ri"
-
+import { Linkedin, Mail, Telegram } from "iconoir-react"
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
-const MAX_TEXT_AREA_LENGTH = 500
+const MAX_TEXT_AREA_LENGTH = 1000
+const MAX_TEXT_AREA_LENGTH_SMALL = 500
 interface AboutGrantProps {
   register: UseFormRegister<GrantFormData>
   errors: FieldErrors<GrantFormData>
@@ -186,7 +186,8 @@ export const AboutGrant = ({
   //Get all text areas values from storage
   const textAreasDefaultValues = useMemo(() => {
     return {
-      companyIntro: getValues("companyIntro"),
+      projectIntro: getValues("projectIntro"),
+      teamOverview: getValues("teamOverview"),
       problemDescription: getValues("problemDescription"),
       solutionDescription: getValues("solutionDescription"),
       targetUsers: getValues("targetUsers"),
@@ -236,24 +237,46 @@ export const AboutGrant = ({
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
                   <FormItem
-                    label={t("Intro")}
+                    label={t("Project Intro")}
                     type="textarea"
-                    defaultValue={textAreasDefaultValues.companyIntro}
+                    defaultValue={textAreasDefaultValues.projectIntro}
                     isOptional
-                    placeholder={t("Tell about your team and experience with similar projects")}
+                    placeholder={t("Tell briefly about your project")}
                     register={{
-                      ...register("companyIntro", {
+                      ...register("projectIntro", {
                         maxLength: {
-                          value: MAX_TEXT_AREA_LENGTH,
+                          value: MAX_TEXT_AREA_LENGTH_SMALL,
                           message: t("Text too long. Maximum allowed: {{amount}} characters.", {
-                            amount: MAX_TEXT_AREA_LENGTH,
+                            amount: MAX_TEXT_AREA_LENGTH_SMALL,
                           }),
                         },
                       }),
                     }}
-                    maxLength={MAX_TEXT_AREA_LENGTH}
-                    error={errors.companyIntro?.message}
-                    onBlur={() => onBlur("companyIntro")}
+                    maxLength={MAX_TEXT_AREA_LENGTH_SMALL}
+                    error={errors.projectIntro?.message}
+                    onBlur={() => onBlur("projectIntro")}
+                  />
+                </GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <FormItem
+                    label={t("Team Overview")}
+                    type="textarea"
+                    defaultValue={textAreasDefaultValues.teamOverview}
+                    placeholder={t("Tell about your team structure and roles")}
+                    register={{
+                      ...register("teamOverview", {
+                        required: t("Please enter the team overview"),
+                        maxLength: {
+                          value: MAX_TEXT_AREA_LENGTH_SMALL,
+                          message: t("Text too long. Maximum allowed: {{amount}} characters.", {
+                            amount: MAX_TEXT_AREA_LENGTH_SMALL,
+                          }),
+                        },
+                      }),
+                    }}
+                    maxLength={MAX_TEXT_AREA_LENGTH_SMALL}
+                    error={errors.teamOverview?.message}
+                    onBlur={() => onBlur("teamOverview")}
                   />
                 </GridItem>
                 <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -271,7 +294,7 @@ export const AboutGrant = ({
                 <GridItem>
                   <FormItem
                     label={t("Email")}
-                    leftElement={<Icon as={LuMail} />}
+                    leftElement={<Icon as={Mail} boxSize={4} />}
                     type="email"
                     placeholder={t("Enter the email of the company")}
                     register={register("companyEmail", {
@@ -284,18 +307,29 @@ export const AboutGrant = ({
                 <GridItem>
                   <FormItem
                     label={"Telegram"}
-                    leftElement={<Icon as={RiTelegram2Line} />}
+                    leftElement={<Icon as={Telegram} boxSize={4} />}
                     type="url"
                     placeholder={t("Enter link here")}
                     isOptional
                     register={register("companyTelegram", {
-                      pattern: {
-                        value: /^https?:\/\/.+/,
-                        message: t("Please enter a valid URL starting with http:// or https://"),
-                      },
+                      validate: value => validateUrl(value, "Telegram URL"),
                     })}
                     error={errors.companyTelegram?.message}
                     onBlur={() => onBlur("companyTelegram")}
+                  />
+                </GridItem>
+                <GridItem colSpan={{ base: 1, md: 2 }}>
+                  <FormItem
+                    label={"Linkedin"}
+                    leftElement={<Icon as={Linkedin} boxSize={4} />}
+                    type="url"
+                    placeholder={t("Enter LinkedIn URL here")}
+                    isOptional
+                    register={register("companyLinkedin", {
+                      validate: value => validateUrl(value, "Linkedin URL"),
+                    })}
+                    error={errors.companyLinkedin?.message}
+                    onBlur={() => onBlur("companyLinkedin")}
                   />
                 </GridItem>
               </Grid>
