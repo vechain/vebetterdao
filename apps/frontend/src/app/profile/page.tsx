@@ -5,6 +5,9 @@ import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
+import { getPageMetadata } from "@/utils/metadata"
+
+export const metadata = getPageMetadata("profile")
 
 const ProfilePageContent = dynamic(
   () => import("./components/ProfilePageContent").then(mod => mod.ProfilePageContent),
