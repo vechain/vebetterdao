@@ -58,18 +58,6 @@ export const AboutGrant = ({
     return error
   }
 
-  // Custom validation function to ensure at least one social account is connected
-  const validateAtLeastOneSocial = (_value: string): string | boolean => {
-    const twitterUsername = watch("twitterUsername")
-    const githubUsername = watch("githubUsername")
-    const discordUsername = watch("discordUsername")
-
-    if (!twitterUsername && !githubUsername && !discordUsername) {
-      return t("Please, connect minimum one account of your company or project or your personal one.")
-    }
-    return true
-  }
-
   // Set linked social media usernames if available in session
   useEffect(() => {
     if (session?.user?.githubUsername || session?.user?.twitterUsername || session?.user?.discordUsername) {
@@ -370,7 +358,7 @@ export const AboutGrant = ({
                       {t("Connect accounts")}
                     </Text>
                     <Text fontSize="sm" color="gray.500">
-                      {t("Please, connect minimum one account of your company or project or your personal one.")}
+                      {t("Please connect an account from your company, project, or your personal account")}
                     </Text>
                   </VStack>
 
@@ -378,9 +366,7 @@ export const AboutGrant = ({
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={twitterUsername ? twitterUsername : t("Connect X")}
-                        register={register("twitterUsername", {
-                          validate: validateAtLeastOneSocial,
-                        })}
+                        register={register("twitterUsername")}
                         error={errors.twitterUsername?.message}
                         handleAuth={() => handleAuth("twitter")}
                         leftIcon={<FaXTwitter size={20} />}
@@ -391,9 +377,7 @@ export const AboutGrant = ({
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={githubUsername ? githubUsername : t("Connect GitHub")}
-                        register={register("githubUsername", {
-                          validate: validateAtLeastOneSocial,
-                        })}
+                        register={register("githubUsername")}
                         error={errors.githubUsername?.message}
                         handleAuth={() => handleAuth("github")}
                         leftIcon={<UilGithub size={20} />}
@@ -404,9 +388,7 @@ export const AboutGrant = ({
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={discordUsername ? discordUsername : t("Connect Discord")}
-                        register={register("discordUsername", {
-                          validate: validateAtLeastOneSocial,
-                        })}
+                        register={register("discordUsername")}
                         error={errors.discordUsername?.message}
                         handleAuth={() => handleAuth("discord")}
                         leftIcon={<AiOutlineDiscord size={20} />}
