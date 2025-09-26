@@ -37,6 +37,9 @@ export type DatePickerProps = {
   minDate?: string
   // Input size
   size?: "sm" | "md" | "lg"
+  placeholder?: string
+  variant?: "range" | "single"
+  value?: string
 }
 
 export const DatePicker = ({
@@ -46,6 +49,8 @@ export const DatePicker = ({
   maxDate,
   minDate,
   size = "md",
+  placeholder,
+  variant = "range",
 }: DatePickerProps) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -99,6 +104,12 @@ export const DatePicker = ({
     (day: number) => {
       const selectedDate = currentDate.date(day).format("YYYY-MM-DD")
 
+      if (variant === "single") {
+        onChange(selectedDate, "")
+        setIsOpen(false)
+        return
+      }
+
       if (selectionState === "start") {
         setTempStartDate(selectedDate)
         setTempEndDate("")
@@ -125,7 +136,7 @@ export const DatePicker = ({
         )
       }
     },
-    [currentDate, selectionState, tempStartDate, onChange],
+    [currentDate, selectionState, tempStartDate, onChange, variant],
   )
 
   const resetSelection = useCallback(() => {
@@ -143,10 +154,13 @@ export const DatePicker = ({
   }, [startDate, endDate])
 
   const displayValue = useMemo(() => {
+    if (variant === "single") {
+      return startDate ? dayjs(startDate).format("D MMM, YYYY") : ""
+    }
     if (!startDate && !endDate) return ""
     if (startDate && !endDate) return dayjs(startDate).format("D MMM, YYYY")
     return `${dayjs(startDate).format("D MMM, YYYY")} - ${dayjs(endDate).format("D MMM, YYYY")}`
-  }, [startDate, endDate])
+  }, [startDate, endDate, variant])
 
   const isDayInRange = useCallback(
     (day: number) => {
@@ -183,27 +197,12 @@ export const DatePicker = ({
       open={isOpen}
       onOpenChange={details => setIsOpen(details.open)}
       positioning={{ strategy: "fixed", placement }}
-      closeOnInteractOutside={false}
-      // modifiers={[
-      //   {
-      //     name: "flip",
-      //     options: {
-      //       fallbackPlacements: ["top", "bottom", "right", "left"],
-      //     },
-      //   },
-      //   {
-      //     name: "preventOverflow",
-      //     options: {
-      //       padding: 8,
-      //     },
-      //   },
-      // ]}
-    >
+      closeOnInteractOutside={false}>
       <Popover.Trigger>
         <InputGroup w="full" startElement={<FaCalendarAlt color="contrast-fg-on-muted" pointerEvents="none" />}>
           <Input
             size={size}
-            placeholder={t("Select date range")}
+            placeholder={placeholder || t("Select date range")}
             value={displayValue}
             readOnly
             onClick={() => setIsOpen(!isOpen)}
@@ -289,8 +288,8 @@ export const DatePicker = ({
             </HStack>
 
             {/* Reminder to select an end date */}
-            {tempStartDate && !tempEndDate && (
-              <Text fontSize="xs" color="#D9D9D9" textAlign="center">
+            {variant === "range" && tempStartDate && !tempEndDate && (
+              <Text fontSize="sm" color="#D9D9D9" textAlign="center">
                 {t("Select end date")}
               </Text>
             )}

@@ -1,12 +1,16 @@
 import { MilestoneItem } from "@/app/proposals/grants/components"
-import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 import { EditPencil } from "iconoir-react"
 import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
+import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================
@@ -17,6 +21,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
+  const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
+
+  const { onMetadataUpload, metadataUri, metadataUploading } = useUploadGrantProposalMetadata()
+
+  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata({
+    proposalId: proposal?.id ?? "",
+    milestonesIpfsCID: metadataUri ?? "",
+  })
 
   const milestones = useMemo(() => {
     return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
@@ -29,6 +41,37 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     )
     return firstPendingIndex >= 0 ? firstPendingIndex : Math.max(0, milestones.length - 1)
   }, [milestones])
+
+  const handleSaveEdit = useCallback(
+    async (index: number) => {
+      if (!!milestoneDuration) {
+        if (milestoneEditIndex === undefined) return
+        const milestones = [] as GrantFormData["milestones"]
+        let index = 0
+        for (const milestone of proposal?.milestones ?? []) {
+          if (index === milestoneEditIndex) {
+            milestones.push({
+              ...milestone,
+              ...milestoneDuration,
+            })
+          } else {
+            milestones.push(milestone)
+          }
+          index++
+        }
+
+        await onMetadataUpload(milestones)
+        updateMilestoneMetadata()
+
+        setMilestoneEditIndex(undefined)
+        setMilestoneDuration(undefined)
+      } else {
+        setMilestoneEditIndex(index)
+        setMilestoneDuration(undefined)
+      }
+    },
+    [milestoneDuration, milestoneEditIndex, onMetadataUpload, proposal?.milestones, updateMilestoneMetadata],
+  )
 
   // ==========================================
   // EFFECTS
@@ -55,7 +98,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         step={currentStep}
         colorPalette="blue"
         variant="primaryVertical"
-        pt={"40px"}>
+        pt={{ base: "0", md: "40px" }}>
         <Steps.List flex={1}>
           <Accordion.Root
             multiple // allow any item to be open
@@ -87,13 +130,19 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                         <Text fontSize="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
-
                         {milestone.milestone?.durationFrom &&
-                          new Date(milestone.milestone.durationFrom) > new Date() &&
-                          account?.address === proposal?.proposerAddress && (
-                            <Button variant="primarySubtle" size="sm" onClick={() => setMilestoneEditIndex(index)}>
-                              <Icon as={EditPencil} />
-                              {t("Edit")}
+                          dayjs(milestone.milestone.durationFrom * 1000).isAfter(dayjs()) &&
+                          compareAddresses(account?.address, proposal?.proposerAddress) && (
+                            <Button
+                              variant="primarySubtle"
+                              size="sm"
+                              loading={metadataUploading}
+                              onClick={e => {
+                                e.stopPropagation()
+                                handleSaveEdit(index)
+                              }}>
+                              {!milestoneDuration && <Icon as={EditPencil} />}
+                              {!!milestoneDuration && index === milestoneEditIndex ? t("Save") : t("Edit")}
                             </Button>
                           )}
                       </Accordion.ItemTrigger>
@@ -102,6 +151,9 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                       {proposal && (
                         <MilestoneItem
                           mode={milestoneEditIndex === index ? "edit" : "read"}
+                          onDateChange={(durationFrom, durationTo) => {
+                            setMilestoneDuration({ from: durationFrom, to: durationTo })
+                          }}
                           milestoneData={milestone}
                           proposal={proposal}
                           isCurrentStep={index === currentStep}

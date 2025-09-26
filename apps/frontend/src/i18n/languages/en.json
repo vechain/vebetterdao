@@ -1475,5 +1475,7 @@
   "Voters": "Voters",
   "Minimum <Link>quorum</Link> (30%) reached": "Minimum <Link>quorum</Link> (30%) reached",
   "{{percentage}}% (your support)": "{{percentage}}% (your support)",
-  "grant": "grant"
+  "grant": "grant",
+  "From": "From",
+  "To": "To"
 }
