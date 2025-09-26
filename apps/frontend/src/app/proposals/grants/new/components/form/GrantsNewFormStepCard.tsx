@@ -119,6 +119,7 @@ export const GrantsNewFormStepCard = () => {
           setData={setData}
           errors={errors}
           formData={getValues()}
+          trigger={trigger}
         />
       ),
       title: t("Milestones"),
@@ -203,6 +204,8 @@ export const GrantsNewFormStepCard = () => {
 
   const onSubmit = async (data: GrantFormData) => {
     if (!isValid) {
+      //clear all errors
+      clearErrors()
       //trigger all errors
       trigger()
       return
