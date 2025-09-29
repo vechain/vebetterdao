@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/ui/empty-state"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useDraftGrantProposalStore } from "@/store"
 import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
+import Link from "next/link"
 
 const BreadcrumItems = [
   {
@@ -56,8 +57,8 @@ export default function GrantsNew() {
           <HStack justifyContent="space-between">
             <PageBreadcrumb items={BreadcrumItems} />
             {userHasGrantsProposal && (
-              <Button variant="primaryAction" size="md">
-                {t("Apply for grant")}
+              <Button asChild variant="primaryAction" size="md">
+                <Link href="/proposals/grants/new">{t("Apply for grant")}</Link>
               </Button>
             )}
           </HStack>

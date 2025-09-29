@@ -18,16 +18,14 @@ import {
   Icon,
   Link,
   Skeleton,
-  Text,
   useDisclosure,
   VStack,
   Button,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import BigNumber from "bignumber.js"
-import { useMemo, useState, useCallback } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/vechain-kit"
 
 import { HowToSupportCard } from "../../components/components"
@@ -48,7 +46,6 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { account } = useWallet()
   //CONSTANTS
   const filterOptions = useMemo(() => {
@@ -148,10 +145,6 @@ export const GrantsPageContent = () => {
     return account?.address && hasMetProposalCriteria
   }, [account?.address, hasMetProposalCriteria])
 
-  const onApplyForGrant = useCallback(() => {
-    router.push("/proposals/grants/new")
-  }, [router])
-
   return (
     <>
       <VStack w="full" gap={8} pb={8}>
@@ -178,12 +171,14 @@ export const GrantsPageContent = () => {
                 asChild
                 variant="ghost"
                 color="actions.tertiary.default"
+                focusRingColor="actions.tertiary.default"
                 size={{ base: "sm", md: "md" }}
                 rounded="full">
                 <Link href="grants/manage">{t("My grants")}</Link>
               </Button>
-              <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
-                <Text>{t("Apply for Grant")}</Text>
+
+              <Button asChild variant="primaryAction" size="md">
+                <Link href="/proposals/grants/new">{t("Apply for grant")}</Link>
               </Button>
             </HStack>
           )}
