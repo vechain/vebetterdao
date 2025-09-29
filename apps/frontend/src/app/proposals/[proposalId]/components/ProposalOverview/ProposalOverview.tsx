@@ -51,7 +51,12 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
       </HStack>
 
       {/* Proposal title */}
-      <Heading size={["2xl", "4xl"]} py={{ base: "4", md: "10" }}>
+      <Heading
+        w="full"
+        wordBreak="break-word"
+        overflowWrap="break-word"
+        size={["2xl", "4xl"]}
+        py={{ base: "4", md: "10" }}>
         {proposal?.title}
       </Heading>
     </VStack>

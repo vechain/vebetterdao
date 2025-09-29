@@ -39,14 +39,20 @@ type MilestoneItemProps = {
 const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType; title: string; value?: string }) => (
   <HStack w="full" align="flex">
     <Icon as={icon} boxSize={4} color="icon.subtle" />
-    <HStack>
+    <HStack w="full">
       <VStack w="full" align="flex-start">
         <Text fontSize="sm" fontWeight={"semibold"}>
           {title}
         </Text>
 
         {value && (
-          <Text fontSize="sm" fontWeight={"regular"} lineHeight={"1.5"}>
+          <Text
+            w="full"
+            fontSize="sm"
+            fontWeight={"regular"}
+            lineHeight={"1.5"}
+            wordBreak="break-word"
+            overflowWrap="break-word">
             {value}
           </Text>
         )}
