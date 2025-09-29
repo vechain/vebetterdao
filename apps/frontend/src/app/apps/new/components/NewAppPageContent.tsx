@@ -55,7 +55,7 @@ export const NewAppPageContent = () => {
               <Heading size="3xl">{t("Create a new app")}</Heading>
               <Text>
                 {t(
-                  "Welcome to our platform where you can unleash your creativity and build dApps! Before your app can go live, it will undergo a thorough review process by our moderators. Here's how it works:",
+                  "Welcome to our platform where you can unleash your creativity and build apps! Before your app can go live, it will undergo a thorough review process by our moderators. Here's how it works:",
                 )}
               </Text>
               <Stack direction={["column", "column", "row"]} w="full" gap={4}>
