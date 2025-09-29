@@ -31,11 +31,8 @@ export const getAllProposalsMetadataQueryKey = () => ["proposalMetadataDetails",
  * @param proposalId The proposal ID
  * @param ipfsHash The IPFS hash
  */
-export const getGrantProposalMetadataQueryKey = (proposalId: string, ipfsHash?: string) => [
-  "grantProposalMetadata",
-  proposalId,
-  ipfsHash,
-]
+export const getGrantProposalMetadataQueryKey = (proposalId: string, ipfsHash?: string) =>
+  ipfsHash ? ["grantProposalMetadata", proposalId, ipfsHash] : ["grantProposalMetadata", proposalId]
 
 /**
  * Returns the query key for fetching individual standard proposal metadata.

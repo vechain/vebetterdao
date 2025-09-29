@@ -70,7 +70,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
           {/* Content section: Tabbed interface for grants, direct content for regular proposals */}
           {isGrant ? (
             /* Grant proposals: Overview and Milestones tabs */
-            <Tabs.Root spaceY={7} defaultValue="overview" w="full" colorPalette="blue" fitted lazyMount>
+            <Tabs.Root spaceY={7} defaultValue="overview" w="full" colorPalette="blue" fitted lazyMount unmountOnExit>
               <Tabs.List>
                 <Tabs.Trigger
                   value="overview"

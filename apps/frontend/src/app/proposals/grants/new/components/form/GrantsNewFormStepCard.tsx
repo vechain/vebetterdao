@@ -312,6 +312,7 @@ export const GrantsNewFormStepCard = () => {
                   onClick={saveDraft}
                   variant="ghost"
                   color="actions.tertiary.default"
+                  focusRingColor="actions.tertiary.default"
                   px={8}
                   size="lg">
                   {t("Save draft")}
