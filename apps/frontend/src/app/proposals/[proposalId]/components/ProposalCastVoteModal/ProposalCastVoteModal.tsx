@@ -1,12 +1,12 @@
-import { RegularModal } from "@/components"
+import { BaseModal } from "@/components/BaseModal"
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { Button, Card, Heading, HStack, Icon, RadioGroup, Text, Textarea, VStack } from "@chakra-ui/react"
-import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   isVoteModalOpen: boolean
@@ -14,6 +14,7 @@ type Props = {
   proposalId: string
 }
 export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: Props) => {
+  const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const [selectedVote, setSelectedVote] = useState<string | null>(null)
   const [comment, setComment] = useState("")
@@ -62,8 +63,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
     })
   }, [castVoteMutation, selectedVote, comment, proposalId])
   return (
-    <RegularModal
-      size="md"
+    <BaseModal
       showCloseButton
       isCloseable
       ariaTitle="Vote on this grant"
@@ -131,6 +131,6 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
           {t("Vote")}
         </Button>
       </VStack>
-    </RegularModal>
+    </BaseModal>
   )
 }

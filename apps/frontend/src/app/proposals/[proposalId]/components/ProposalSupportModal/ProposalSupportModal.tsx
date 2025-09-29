@@ -1,6 +1,7 @@
 import { useCurrentAllocationsRoundId } from "@/api"
 import { GenericAlert } from "@/app/components/Alert"
-import { MulticolorBar, RegularModal, ResultsDisplay } from "@/components"
+import { MulticolorBar, ResultsDisplay } from "@/components"
+import { BaseModal } from "@/components/BaseModal"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
 import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
@@ -162,8 +163,7 @@ export const ProposalSupportModal = ({
     depositMutation.sendTransaction({ proposalId, amount: parsedAmount })
   }, [depositMutation, amount, proposalId, parsedAmount])
   return (
-    <RegularModal
-      size="md"
+    <BaseModal
       showCloseButton
       isCloseable
       ariaTitle="Support this grant"
@@ -222,6 +222,6 @@ export const ProposalSupportModal = ({
           {"Support"}
         </Button>
       </VStack>
-    </RegularModal>
+    </BaseModal>
   )
 }
