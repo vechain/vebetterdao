@@ -181,6 +181,7 @@ export const MilestoneItem = ({
                   setDuration({ ...duration, from })
                   onDateChange(from, duration.to)
                 }}
+                value={duration.from}
               />
             </Field.Root>
             <Field.Root display="flex" flexDirection="column" gap={2} alignItems="stretch">
@@ -197,6 +198,7 @@ export const MilestoneItem = ({
                   setDuration({ ...duration, to })
                   onDateChange(duration.from, to)
                 }}
+                value={duration.to}
               />
             </Field.Root>
           </SimpleGrid>

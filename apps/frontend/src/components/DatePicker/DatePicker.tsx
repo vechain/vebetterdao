@@ -51,6 +51,7 @@ export const DatePicker = ({
   size = "md",
   placeholder,
   variant = "range",
+  value,
 }: DatePickerProps) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
@@ -63,7 +64,7 @@ export const DatePicker = ({
   })
 
   // Current view state
-  const today = useMemo(() => dayjs(), [])
+  const today = useMemo(() => (value ? dayjs(value) : dayjs()), [value])
   const [currentDate, setCurrentDate] = useState(today)
   const [selectionState, setSelectionState] = useState<"start" | "end">("start")
   const [tempStartDate, setTempStartDate] = useState(startDate)
