@@ -28,8 +28,16 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
 
   const milestones = useMemo(() => {
-    return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
-  }, [milestoneStatesData])
+    return (
+      proposal?.milestones
+        .map((milestone, index) => ({
+          milestone,
+          state: milestoneStatesData?.find(item => item.index === index)?.state ?? MilestoneState.Pending,
+          index,
+        }))
+        .filter(item => item.milestone !== undefined) || []
+    )
+  }, [milestoneStatesData, proposal?.milestones])
 
   const currentStep = useMemo(() => {
     // Find first pending/rejected milestone, or return last index if all completed, or 0 if empty
