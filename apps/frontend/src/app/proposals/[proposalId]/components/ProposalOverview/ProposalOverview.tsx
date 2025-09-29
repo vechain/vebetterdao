@@ -6,8 +6,8 @@ import { Card, Heading, HStack, Tabs, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { MilestonesActions } from "../../../grants/components"
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
+import { MilestonesActions } from "@/app/grants/components"
 
 type ProposalOverviewProps = {
   isGrant?: boolean

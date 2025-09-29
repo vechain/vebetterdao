@@ -6,7 +6,7 @@ import { HowGrantWorks } from "../components/form"
 const BreadcrumItems = [
   {
     label: "Grants",
-    href: "/proposals/grants",
+    href: "/grants",
   },
 
   {

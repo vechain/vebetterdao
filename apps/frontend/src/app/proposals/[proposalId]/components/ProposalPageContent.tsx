@@ -55,7 +55,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const BreadcrumItems = [
     {
       label: isGrant ? "Grants" : "Proposals",
-      href: isGrant ? "/proposals/grants" : "/proposals",
+      href: isGrant ? "/grants" : "/proposals",
     },
     {
       label: "Overview",

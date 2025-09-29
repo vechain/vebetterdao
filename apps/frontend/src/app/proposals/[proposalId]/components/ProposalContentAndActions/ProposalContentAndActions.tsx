@@ -1,6 +1,6 @@
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
-import { FileAttachmentPreview } from "@/app/proposals/grants/components"
+import { FileAttachmentPreview } from "@/app/grants/components"
 import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
 import { useColorModeValue } from "@/components/ui/color-mode"
 import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"

@@ -52,7 +52,7 @@ export const Routes: Route[] = [
       {
         name: "Grants",
         description: "Need funding? Apply for a grant and get support",
-        onClick: "/proposals/grants",
+        onClick: "/grants",
       },
     ],
   },

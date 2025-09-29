@@ -2,7 +2,6 @@
 
 import { Grid, GridItem, HStack, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { HowToSupportCard } from "../../components"
 import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { ConvertModal, SearchField } from "@/components"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
@@ -17,11 +16,12 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useDraftGrantProposalStore } from "@/store"
 import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
 import Link from "next/link"
+import { HowToSupportCard } from "@/app/proposals"
 
 const BreadcrumItems = [
   {
     label: "Grants",
-    href: "/proposals/grants",
+    href: "/grants",
   },
   {
     label: "My grants",

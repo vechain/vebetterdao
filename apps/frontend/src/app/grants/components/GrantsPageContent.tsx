@@ -30,15 +30,15 @@ import { useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
 
-import { HowToSupportCard } from "../../components/components"
-import { useFilteredProposals } from "../../hooks/useFilteredProposals"
 import { GrantsBanners } from "./Banner/GrantsBanners"
-import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { ProposalType } from "@/types"
 import { useRouter } from "next/navigation"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { GrantsProposalCard } from "@/app/grants/components"
+import { HowToSupportCard } from "@/app/proposals"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",

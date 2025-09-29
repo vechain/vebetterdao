@@ -12,7 +12,7 @@ import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 import { useProposalEnriched } from "@/hooks/proposals/common"
-import { GrantsProposalCard } from "../grants/components"
+import { GrantsProposalCard } from "@/app/grants/components"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()

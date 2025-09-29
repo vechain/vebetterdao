@@ -30,7 +30,7 @@ export default function GrantsNew() {
 
   useEffect(() => {
     if (!hasMetProposalCriteria && !isLoading) {
-      router.push("/proposals/grants")
+      router.push("/grants")
     }
   }, [hasMetProposalCriteria, isLoading, router])
 

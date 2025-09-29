@@ -1,4 +1,4 @@
-import { MilestoneItem } from "@/app/proposals/grants/components"
+import { MilestoneItem } from "@/app/grants/components"
 import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
