@@ -65,6 +65,7 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
           ethers.parseEther(milestone.fundingAmount.toString()),
         ]),
       )
+      const totalAmountAsked = milestones.reduce((acc, milestone) => acc + milestone.fundingAmountUsd, 0)
       const args = [
         Array(milestones.length).fill(treasuryAddress),
         Array(milestones.length).fill(0),
@@ -75,12 +76,13 @@ export const useCreateGrantProposal = ({ onSuccess, transactionModalCustomUI }: 
         grantsReceiver,
         milestonesIpfsCID,
       ]
+      const comment = `Create new grant asking for ${totalAmountAsked} USD , voting round ${votingRoundId} and grants receiver: ${grantsReceiver}`
       const createProposalClause = buildClause({
         contractInterface: b3trGovernorInterface,
         to: governorContractAddress,
         method: "proposeGrant",
         args,
-        comment: `Create new proposal for round ${votingRoundId} with metadata: ${metadataIpfsCID} and milestones: ${milestonesIpfsCID}`,
+        comment,
       })
 
       clauses.push(createProposalClause)
