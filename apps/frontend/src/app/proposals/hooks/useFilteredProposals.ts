@@ -1,6 +1,6 @@
 import { useAllProposalsDepositReached } from "@/api"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
-import { ProposalFilter, StateFilter } from "@/store"
+import { ProposalFilter, StateFilter } from "@/store/useProposalFilters"
 import { useCallback, useMemo } from "react"
 
 /**
@@ -43,6 +43,9 @@ export const useFilteredProposals = (
       [ProposalFilter.InThisRound]: proposal.state === ProposalState.Active,
       [ProposalFilter.LookingForSupport]: proposal.state === ProposalState.Pending && !proposal.isDepositReached,
       [ProposalFilter.UpcomingVoting]: proposal.state === ProposalState.Pending && !!proposal.isDepositReached,
+      [ProposalFilter.ApprovalPhase]:
+        proposal.state === ProposalState.Active || proposal.state === ProposalState.Succeeded,
+      [ProposalFilter.SupportPhase]: proposal.state === ProposalState.Pending,
       // StateFilter values
       [StateFilter.Canceled]: proposal.state === ProposalState.Canceled,
       [StateFilter.Defeated]: proposal.state === ProposalState.Defeated,
