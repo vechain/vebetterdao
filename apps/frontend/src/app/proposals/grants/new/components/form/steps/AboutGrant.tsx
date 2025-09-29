@@ -1,9 +1,11 @@
 import { FormSocialConnectButton, validateWalletAddress } from "@/components/CustomFormFields"
 import { FormItem } from "@/components/CustomFormFields/FormItem"
+import { patternUrlCheck } from "@/components/CustomFormFields/validators"
 import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
 import { Accordion, Box, Field, FileUpload, Grid, GridItem, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
+import { Linkedin, Mail, Telegram } from "iconoir-react"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useCallback, useEffect, useMemo } from "react"
 import {
@@ -20,8 +22,7 @@ import { AiOutlineDiscord } from "react-icons/ai"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
-import { Linkedin, Mail, Telegram } from "iconoir-react"
-import { patternUrlCheck } from "@/components/CustomFormFields/validators"
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]
 const MAX_TEXT_AREA_LENGTH = 1000
@@ -678,7 +679,7 @@ export const AboutGrant = ({
                       }}>
                       <FileUpload.HiddenInput />
                       <FileUpload.Dropzone>
-                        <FileUpload.DropzoneContent>
+                        <FileUpload.DropzoneContent pointerEvents="none">
                           <Icon as={LuUpload} size="md" color="fg.muted" />
                           <Box>{t("Upload file")}</Box>
                           <Box color="fg.muted">{t("PDF, JPG, JPEG, PNG, less than 5MB")}</Box>

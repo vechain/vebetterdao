@@ -1,4 +1,4 @@
-import { ConvertModal, MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import { ConvertModal, MobileFilterDrawer, SearchField, SelectField, EmptyStateCard } from "@/components"
 import {
   GrantProposalEnriched,
   ProposalState,
@@ -17,14 +17,16 @@ import {
   HStack,
   Icon,
   Link,
+  Text,
   Skeleton,
   useDisclosure,
   VStack,
   Button,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { LuFileText } from "react-icons/lu"
 import BigNumber from "bignumber.js"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
 
@@ -36,6 +38,7 @@ import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { ProposalType } from "@/types"
+import { useRouter } from "next/navigation"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -47,6 +50,8 @@ enum GrantsStep {
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const router = useRouter()
+
   //CONSTANTS
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -145,6 +150,54 @@ export const GrantsPageContent = () => {
     return account?.address && hasMetProposalCriteria
   }, [account?.address, hasMetProposalCriteria])
 
+  const onApplyForGrant = useCallback(() => {
+    router.push("/proposals/grants/new")
+  }, [router])
+
+  // Render helpers
+  const renderSkeleton = () => (
+    <>
+      {Array.from({ length: 3 }).map((_, index) => (
+        <GridItem key={`grants-list-skeleton-${index + 1}`}>
+          <Skeleton loading={true} h="200px" w="full" borderRadius="md">
+            <div />
+          </Skeleton>
+        </GridItem>
+      ))}
+    </>
+  )
+
+  const renderProposals = () =>
+    filteredProposals?.map(proposal => (
+      <GridItem key={proposal.id}>
+        <GrantsProposalCard proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }} />
+      </GridItem>
+    ))
+
+  const renderEmptyState = () => {
+    const hasFiltersOrSearch = searchTerm || selectedFilter.length > 0
+    const title = t("No grants found")
+    const description = hasFiltersOrSearch
+      ? t("Try adjusting your search or filters")
+      : t("Be the first to submit a grant proposal")
+
+    const action =
+      !hasFiltersOrSearch && showApplyForGrant
+        ? {
+            label: t("Apply for Grant"),
+            onClick: onApplyForGrant,
+            variant: "outline" as const,
+            size: "sm" as const,
+          }
+        : undefined
+
+    return (
+      <GridItem>
+        <EmptyStateCard icon={<LuFileText />} title={title} description={description} action={action} />
+      </GridItem>
+    )
+  }
+
   return (
     <>
       <VStack w="full" gap={8} pb={8}>
@@ -177,8 +230,8 @@ export const GrantsPageContent = () => {
                 <Link href="grants/manage">{t("My grants")}</Link>
               </Button>
 
-              <Button asChild variant="primaryAction" size="md">
-                <Link href="/proposals/grants/new">{t("Apply for grant")}</Link>
+              <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
+                <Text>{t("Apply for Grant")}</Text>
               </Button>
             </HStack>
           )}
@@ -230,27 +283,14 @@ export const GrantsPageContent = () => {
               </HStack>
 
               <Grid templateColumns={{ base: "1fr" }} gap={5} w="full">
-                {isLoadingEnrichedGrantProposals ? (
-                  <>
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <GridItem key={`grants-list-skeleton-${index + 1}`}>
-                        <Skeleton loading={true} h="200px" w="full" borderRadius="md">
-                          <div />
-                        </Skeleton>
-                      </GridItem>
-                    ))}
-                  </>
-                ) : (
+                {isLoadingEnrichedGrantProposals && renderSkeleton()}
+                {!isLoadingEnrichedGrantProposals &&
                   filteredProposals &&
-                  filteredProposals?.map(proposal => (
-                    <GridItem key={proposal.id}>
-                      <GrantsProposalCard
-                        key={proposal.id}
-                        proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }}
-                      />
-                    </GridItem>
-                  ))
-                )}
+                  filteredProposals.length > 0 &&
+                  renderProposals()}
+                {!isLoadingEnrichedGrantProposals &&
+                  (!filteredProposals || filteredProposals.length === 0) &&
+                  renderEmptyState()}
               </Grid>
             </VStack>
           </GridItem>
