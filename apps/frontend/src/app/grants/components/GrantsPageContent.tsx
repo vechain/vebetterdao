@@ -151,7 +151,7 @@ export const GrantsPageContent = () => {
   }, [account?.address, hasMetProposalCriteria])
 
   const onApplyForGrant = useCallback(() => {
-    router.push("/proposals/grants/new")
+    router.push("/grants/new")
   }, [router])
 
   // Render helpers

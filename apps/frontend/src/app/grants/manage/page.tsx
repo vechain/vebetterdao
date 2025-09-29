@@ -25,7 +25,7 @@ const BreadcrumItems = [
   },
   {
     label: "My grants",
-    href: "/proposals/grants/manage",
+    href: "/grants/manage",
   },
 ]
 
@@ -58,7 +58,7 @@ export default function GrantsNew() {
             <PageBreadcrumb items={BreadcrumItems} />
             {userHasGrantsProposal && (
               <Button asChild variant="primaryAction" size="md">
-                <Link href="/proposals/grants/new">{t("Apply for grant")}</Link>
+                <Link href="/grants/new">{t("Apply for grant")}</Link>
               </Button>
             )}
           </HStack>

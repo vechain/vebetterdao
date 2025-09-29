@@ -76,7 +76,7 @@ export const GrantsStepsCard = ({
     if (!hasMetProposalCriteria) {
       return openRequirementModal()
     }
-    router.push("/proposals/grants/new")
+    router.push("/grants/new")
   }, [account?.address, hasMetProposalCriteria, router, openWalletModal, openRequirementModal])
 
   if (!currentStep) {

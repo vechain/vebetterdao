@@ -179,7 +179,7 @@ export const GrantsNewFormStepCard = () => {
     formRef.current?.reset?.()
     clearData()
     localStorage.removeItem(GRANT_PROPOSAL_FORM_STORE_NAME)
-    router.push("/proposals/grants/manage")
+    router.push("/grants/manage")
   }, [addDraftGrantProposal, formRef, formData, t, router, clearData])
 
   // ============================================================================

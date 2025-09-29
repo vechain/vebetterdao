@@ -11,7 +11,7 @@ const BreadcrumItems = [
 
   {
     label: "Apply for grant",
-    href: "/proposals/grants/new",
+    href: "/grants/new",
   },
 ]
 
