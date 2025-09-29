@@ -257,9 +257,11 @@ export const MilestoneSection = ({
 
     // Calculate 12-month limit from first milestone start
     const twelveMonthLimit = firstMilestoneStart ? dayjs.unix(firstMilestoneStart).add(12, "months").unix() : null
+    const startMinDate = isFirst ? now : previousMilestoneEnd || now
+    const startMinPickableDate = dayjs.unix(startMinDate).add(1, "day").unix()
 
     return {
-      startMinDate: isFirst ? now : previousMilestoneEnd || now,
+      startMinDate: startMinPickableDate,
       startMaxDate: twelveMonthLimit,
       endMinDate: currentMilestone.durationFrom || now,
       endMaxDate: twelveMonthLimit,
