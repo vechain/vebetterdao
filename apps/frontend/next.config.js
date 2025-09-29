@@ -7,7 +7,14 @@ if (typeof self === "undefined") {
 
 const nextConfig = {
   experimental: {
-    optimizePackageImports: ["@chakra-ui/react"],
+    optimizePackageImports: [
+      "@vechain/vebetterdao-contracts",
+      "@vechain/dapp-kit-react",
+      "@vechain/vechain-kit",
+      "@chakra-ui-react",
+      "react-icons",
+      "@iconscout/react-unicons",
+    ],
     turbo: {
       rules: {
         "*.svg": {
@@ -26,4 +33,8 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+})
+
+module.exports = withBundleAnalyzer(nextConfig)
