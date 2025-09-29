@@ -17,8 +17,8 @@ import {
   HStack,
   Icon,
   Link,
-  Skeleton,
   Text,
+  Skeleton,
   useDisclosure,
   VStack,
   Button,
@@ -28,7 +28,6 @@ import { LuFileText } from "react-icons/lu"
 import BigNumber from "bignumber.js"
 import { useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/vechain-kit"
 
 import { HowToSupportCard } from "../../components/components"
@@ -39,6 +38,7 @@ import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { ProposalType } from "@/types"
+import { useRouter } from "next/navigation"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -49,8 +49,9 @@ enum GrantsStep {
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { account } = useWallet()
+  const router = useRouter()
+
   //CONSTANTS
   const filterOptions = useMemo(() => {
     return createListCollection({
@@ -127,7 +128,7 @@ export const GrantsPageContent = () => {
     isLoading: isLoadingEnrichedGrantProposals,
   } = useProposalEnriched()
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   // COMPUTED VALUES
@@ -218,9 +219,21 @@ export const GrantsPageContent = () => {
             )}
           </HStack>
           {showApplyForGrant && (
-            <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
-              <Text>{t("Apply for Grant")}</Text>
-            </Button>
+            <HStack gap="4">
+              <Button
+                asChild
+                variant="ghost"
+                color="actions.tertiary.default"
+                focusRingColor="actions.tertiary.default"
+                size={{ base: "sm", md: "md" }}
+                rounded="full">
+                <Link href="grants/manage">{t("My grants")}</Link>
+              </Button>
+
+              <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
+                <Text>{t("Apply for Grant")}</Text>
+              </Button>
+            </HStack>
           )}
         </HStack>
 

@@ -58,7 +58,7 @@ export const ProposalCommunityInteractions = ({
   }
 
   return (
-    <HStack gap={5}>
+    <HStack gap={{ base: "2", md: "4" }}>
       <HStack key={`${proposalId}-votesFor`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={forColor}>
         <Icon as={thumbsUpIcon} boxSize={5} />
         <Text>{`${Math.floor(votesFor ?? 0)}%`}</Text>

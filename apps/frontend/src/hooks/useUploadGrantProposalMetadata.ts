@@ -12,6 +12,7 @@ type UploadData = (GrantFormData & { title?: string; shortDescription?: string }
 export const useUploadGrantProposalMetadata = () => {
   const [metadataUploading, setMetadataUploading] = useState(false)
   const [metadataUploadError, setMetadataUploadError] = useState<Error | null>(null)
+  const [metadataUri, setMetadataUri] = useState<string | undefined>(undefined)
 
   const onMetadataUpload = useCallback(async (data: UploadData): Promise<string | undefined> => {
     try {
@@ -24,6 +25,7 @@ export const useUploadGrantProposalMetadata = () => {
       const metadataUri = await uploadBlobToIPFS(metadataBlob, "metadata.json")
 
       setMetadataUploading(false)
+      setMetadataUri(metadataUri)
       return metadataUri
     } catch (error) {
       console.error("Error uploading metadata", error)
@@ -34,5 +36,5 @@ export const useUploadGrantProposalMetadata = () => {
     }
   }, [])
 
-  return { onMetadataUpload, metadataUploading, metadataUploadError }
+  return { onMetadataUpload, metadataUploading, metadataUploadError, metadataUri }
 }

@@ -2,11 +2,14 @@ import { defineRecipe } from "@chakra-ui/react"
 
 export const buttonRecipe = defineRecipe({
   base: {
-    rounded: "md",
+    rounded: "full",
     fontWeight: 600,
-    //Commenting out focus ring for now as it is not working as expected
-    // focusRing: "outside",
-    // focusRingColor: "actions.primary.default",
+    _active: {
+      outlineWidth: "2px",
+      outlineOffset: "2px",
+      outlineStyle: "solid",
+      outlineColor: "actions.primary.default",
+    },
   },
   variants: {
     variant: {

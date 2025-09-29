@@ -1,22 +1,43 @@
 import { MilestoneItem } from "@/app/proposals/grants/components"
-import { GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
-import { Accordion, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
-import { useEffect, useMemo, useState } from "react"
+import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
+import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
+import { EditPencil } from "iconoir-react"
+import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
+import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================
   // HOOKS
   // ==========================================
+  const { account } = useWallet()
   const { data: milestoneStatesData, isLoading } = useAllMilestoneStates(proposal)
   const { t } = useTranslation()
   const [accordionValue, setAccordionValue] = useState<string[]>([])
+  const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
+  const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
+
+  const { onMetadataUpload, metadataUploading } = useUploadGrantProposalMetadata()
+
+  const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
 
   const milestones = useMemo(() => {
-    return milestoneStatesData?.filter(item => item.milestone !== undefined) ?? []
-  }, [milestoneStatesData])
+    return (
+      proposal?.milestones
+        .map((milestone, index) => ({
+          milestone,
+          state: milestoneStatesData?.find(item => item.index === index)?.state ?? MilestoneState.Pending,
+          index,
+        }))
+        .filter(item => item.milestone !== undefined) || []
+    )
+  }, [milestoneStatesData, proposal?.milestones])
 
   const currentStep = useMemo(() => {
     // Find first pending/rejected milestone, or return last index if all completed, or 0 if empty
@@ -25,6 +46,38 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     )
     return firstPendingIndex >= 0 ? firstPendingIndex : Math.max(0, milestones.length - 1)
   }, [milestones])
+
+  const handleSaveEdit = useCallback(
+    async (index: number) => {
+      if (!!milestoneDuration) {
+        if (milestoneEditIndex === undefined) return
+        const milestones = [] as GrantFormData["milestones"]
+        let index = 0
+        for (const milestone of proposal?.milestones ?? []) {
+          if (index === milestoneEditIndex) {
+            milestones.push({
+              ...milestone,
+              durationFrom: dayjs(milestoneDuration.from).unix(),
+              durationTo: dayjs(milestoneDuration.to).unix(),
+            })
+          } else {
+            milestones.push(milestone)
+          }
+          index++
+        }
+
+        const ipfsURI = await onMetadataUpload(milestones)
+        updateMilestoneMetadata(ipfsURI)
+
+        setMilestoneEditIndex(undefined)
+        setMilestoneDuration(undefined)
+      } else {
+        setMilestoneEditIndex(index)
+        setMilestoneDuration(undefined)
+      }
+    },
+    [milestoneDuration, milestoneEditIndex, onMetadataUpload, proposal?.milestones, updateMilestoneMetadata],
+  )
 
   // ==========================================
   // EFFECTS
@@ -50,8 +103,9 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         h="full"
         step={currentStep}
         colorPalette="blue"
-        variant="primaryVertical">
-        <Steps.List>
+        variant="primaryVertical"
+        pt={{ base: "0", md: "40px" }}>
+        <Steps.List flex={1}>
           <Accordion.Root
             multiple // allow any item to be open
             value={accordionValue}
@@ -74,19 +128,38 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                   />
                 </Steps.Indicator>
                 <Steps.Separator />
-                <VStack pb={"24px"} align="flex-start">
+                <VStack pb={"24px"} align="flex-start" w="full" flex={1}>
                   <Accordion.Item value={`milestone-accordion-item-${index}`} border="none" w="full">
                     {/* Milestone header */}
                     <VStack align="flex-start" gap={"16px"} pb={"16px"}>
-                      <Accordion.ItemTrigger py={1}>
+                      <Accordion.ItemTrigger py={1} display="flex" justifyContent="space-between" w="full">
                         <Text fontSize="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
+                        {milestone.milestone?.durationFrom &&
+                          dayjs(milestone.milestone.durationFrom * 1000).isAfter(dayjs()) &&
+                          compareAddresses(account?.address, proposal?.proposerAddress) && (
+                            <Button
+                              variant="primarySubtle"
+                              size="sm"
+                              loading={metadataUploading}
+                              onClick={e => {
+                                e.stopPropagation()
+                                handleSaveEdit(index)
+                              }}>
+                              {!milestoneDuration && <Icon as={EditPencil} />}
+                              {!!milestoneDuration && index === milestoneEditIndex ? t("Save") : t("Edit")}
+                            </Button>
+                          )}
                       </Accordion.ItemTrigger>
                     </VStack>
                     <Accordion.ItemContent>
                       {proposal && (
                         <MilestoneItem
+                          mode={milestoneEditIndex === index ? "edit" : "read"}
+                          onDateChange={(durationFrom, durationTo) => {
+                            setMilestoneDuration({ from: durationFrom, to: durationTo })
+                          }}
                           milestoneData={milestone}
                           proposal={proposal}
                           isCurrentStep={index === currentStep}

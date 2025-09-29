@@ -49,15 +49,13 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
 
         return results.map((state, index) => ({
           state: (state as number) ?? MilestoneState.Pending,
-          milestone: milestones[index],
           index,
         }))
       } catch (error) {
         console.error("Error fetching milestone states:", error)
         // Return default pending states for all milestones on error
-        return milestones.map((milestone, index) => ({
+        return milestones.map((_, index) => ({
           state: MilestoneState.Pending,
-          milestone,
           index,
         }))
       }

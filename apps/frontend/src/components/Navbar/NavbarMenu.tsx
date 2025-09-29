@@ -136,7 +136,7 @@ const MobileAccordionWithSubRoutes = ({
             />
           </Button>
         </Collapsible.Trigger>
-        <Collapsible.Content>
+        <Collapsible.Content p="1">
           <VStack w="full" align="stretch" pt={5} pl={12}>
             {route.subRoutes?.map(subRoute => {
               return (
@@ -145,7 +145,7 @@ const MobileAccordionWithSubRoutes = ({
                   variant="ghost"
                   w="full"
                   display="flex"
-                  justifyContent="flex-start"
+                  justifyContent="center"
                   alignItems="flex-start"
                   flexDirection="column"
                   textAlign="left"

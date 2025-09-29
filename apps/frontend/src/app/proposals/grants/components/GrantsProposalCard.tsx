@@ -154,27 +154,23 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
                 depositReached={depositReached ?? false}
               />
               {isSupportOrVotingPhase && (
-                <HStack gap={2}>
-                  <ProposalCommunityInteractions
-                    proposalId={proposal.id}
-                    state={proposal.state}
-                    depositPercentage={communityDepositPercentage}
-                    votesFor={proposalVotes?.votes?.for?.percentagePower}
-                    votesAgainst={proposalVotes?.votes?.against?.percentagePower}
-                    votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
-                    hasUserDeposited={hasUserDeposited}
-                    userVoteOption={userVoteOption}
-                  />
-                </HStack>
+                <ProposalCommunityInteractions
+                  proposalId={proposal.id}
+                  state={proposal.state}
+                  depositPercentage={communityDepositPercentage}
+                  votesFor={proposalVotes?.votes?.for?.percentagePower}
+                  votesAgainst={proposalVotes?.votes?.against?.percentagePower}
+                  votesAbstain={proposalVotes?.votes?.abstain?.percentagePower}
+                  hasUserDeposited={hasUserDeposited}
+                  userVoteOption={userVoteOption}
+                />
               )}
             </HStack>
-            {timeLeftDisplay ? (
+            {timeLeftDisplay && (
               <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
-                {t("Ends: {{endDate}}", {
-                  endDate: timeLeftDisplay,
-                })}
+                {t("Ends: {{endDate}}", { endDate: timeLeftDisplay })}{" "}
               </Text>
-            ) : null}
+            )}
           </VStack>
         ) : (
           // Desktop Layout
