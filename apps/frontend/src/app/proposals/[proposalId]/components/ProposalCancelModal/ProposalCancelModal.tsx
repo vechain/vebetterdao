@@ -1,8 +1,9 @@
 import { useCancelProposal } from "@/hooks/useCancelProposal"
-import { Button, Dialog, Heading, HStack, Portal, Text, VStack } from "@chakra-ui/react"
-import { UilBan } from "@iconscout/react-unicons"
+import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { BaseModal } from "@/components/BaseModal"
+import { GenericAlert } from "@/app/components/Alert/GenericAlert"
 
 export const ProposalCancelModal = ({
   proposalId,
@@ -25,40 +26,32 @@ export const ProposalCancelModal = ({
   }, [cancelProposalMutation, onClose])
 
   return (
-    <Dialog.Root open={isOpen}>
-      <Portal>
-        <Dialog.Positioner>
-          <Dialog.Backdrop />
-          <Dialog.Content>
-            <Dialog.Body py="16px">
-              <VStack alignItems="stretch" gap={6}>
-                <Heading fontSize={"24px"} fontWeight={700}>
-                  {t("Cancel proposal")}
-                </Heading>
-                <VStack alignItems="stretch" gap={0}>
-                  <Text fontSize={"14px"}>
-                    {t(
-                      "Are you completely sure to cancel this proposal? Community support will be returned, and you cannot recover this proposal.",
-                    )}
-                  </Text>
-                  <Text fontWeight={600} fontSize={"14px"}>
-                    {t("This action cannot be undone.")}
-                  </Text>
-                </VStack>
-                <HStack justifyContent={"flex-end"}>
-                  <Button variant={"primaryGhost"} onClick={onClose}>
-                    {t("Go back")}
-                  </Button>
-                  <Button variant={"dangerFilled"} onClick={handleCancelProposal}>
-                    <UilBan size="18px" />
-                    {t("Cancel this proposal")}
-                  </Button>
-                </HStack>
-              </VStack>
-            </Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaTitle={t("Cancel proposal")}
+      showCloseButton={true}
+      isCloseable={true}>
+      <VStack w="full" align="stretch" gap={6}>
+        {/* Results Header */}
+        <HStack>
+          <Heading>{t("Cancel proposal")}</Heading>
+        </HStack>
+
+        <Text>{t("Are you completely sure to cancel this proposal?")}</Text>
+
+        {/* Info Message */}
+        <GenericAlert
+          type="warning"
+          isLoading={false}
+          message={t("Community support will be returned, and you cannot recover this proposal.")}
+        />
+
+        {/* Support Button */}
+        <Button variant="dangerFilled" w="full" onClick={handleCancelProposal}>
+          {t("Cancel this proposal")}
+        </Button>
+      </VStack>
+    </BaseModal>
   )
 }
