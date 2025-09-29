@@ -1,49 +1,15 @@
-import detector from "i18next-browser-languagedetector"
 import i18next from "i18next"
-import dayjs from "../utils/dayjsConfig"
-
-import en from "./languages/en.json"
-import it from "./languages/it.json"
-import fr from "./languages/fr.json"
-import es from "./languages/es.json"
-import zh from "./languages/zh.json"
-import de from "./languages/de.json"
-import ja from "./languages/ja.json"
-import vi from "./languages/vi.json"
-import nl from "./languages/nl.json"
-import ko from "./languages/ko.json"
-import sv from "./languages/sv.json"
-import tw from "./languages/tw.json"
-import tr from "./languages/tr.json"
-import hi from "./languages/hi.json"
-import pt from "./languages/pt.json"
+import detector from "i18next-browser-languagedetector"
+import resourcesToBackend from "i18next-resources-to-backend"
 
 import { initReactI18next } from "react-i18next"
 
-export const enLang = "en"
-
-export const translations: { [key: string]: any } = {
-  en,
-  it,
-  fr,
-  es,
-  zh,
-  de,
-  ja,
-  vi,
-  nl,
-  ko,
-  sv,
-  tw,
-  tr,
-  hi,
-  pt,
-}
+import dayjs from "../utils/dayjsConfig"
 
 export const languages = [
   {
     name: "English",
-    code: enLang,
+    code: "en",
     flag: "🇬🇧",
   },
   {
@@ -97,7 +63,7 @@ export const languages = [
     flag: "🇪🇸",
   },
   {
-    name: "Turkey",
+    name: "Turkish",
     code: "tr",
     flag: "🇹🇷",
   },
@@ -120,18 +86,12 @@ export const languages = [
 
 i18next
   .use(detector)
+  .use(resourcesToBackend((language: string) => import(`./languages/${language}.json`)))
   .use(initReactI18next)
   .init({
-    resources: languages.reduce((acc, language) => {
-      acc[language.code] = {
-        translation: translations[language.code] || {},
-      }
-      return acc
-    }, {} as any),
-    defaultNS: "translation",
+    fallbackLng: "en",
+    lng: "en",
     debug: false,
-    fallbackLng: enLang,
-    lng: enLang,
   })
 
 i18next.on("languageChanged", lng => {

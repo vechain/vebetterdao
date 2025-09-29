@@ -1,9 +1,43 @@
 import { writeFileSync } from "fs"
-import en from "../../i18n/languages/en.json"
 import { forEach } from "lodash"
-import { translations } from "../../i18n"
 import { KeyValueObject } from "./types"
 import { askChatGpt, getFixedWordPrompt, languagesToGenerate, splitObjectIntoBatches } from "./utils"
+
+import en from "../../i18n/languages/en.json"
+import it from "../../i18n/languages/it.json"
+import fr from "../../i18n/languages/fr.json"
+import es from "../../i18n/languages/es.json"
+import zh from "../../i18n/languages/zh.json"
+import de from "../../i18n/languages/de.json"
+import ja from "../../i18n/languages/ja.json"
+import vi from "../../i18n/languages/vi.json"
+import nl from "../../i18n/languages/nl.json"
+import ko from "../../i18n/languages/ko.json"
+import sv from "../../i18n/languages/sv.json"
+import tw from "../../i18n/languages/tw.json"
+import tr from "../../i18n/languages/tr.json"
+import hi from "../../i18n/languages/hi.json"
+import pt from "../../i18n/languages/pt.json"
+
+export const enLang = "en"
+
+export const translations: { [key: string]: any } = {
+  en,
+  it,
+  fr,
+  es,
+  zh,
+  de,
+  ja,
+  vi,
+  nl,
+  ko,
+  sv,
+  tw,
+  tr,
+  hi,
+  pt,
+}
 
 const generatePrompt = (language: string, batch: KeyValueObject) => {
   return `
