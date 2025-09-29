@@ -1,4 +1,8 @@
-import { ConvertModal, MobileFilterDrawer, SearchField, SelectField, EmptyStateCard } from "@/components"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { GrantsProposalCard } from "@/app/grants/components"
+import { HowToSupportCard } from "@/app/proposals"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { ConvertModal, EmptyStateCard, MobileFilterDrawer, SearchField, SelectField } from "@/components"
 import {
   GrantProposalEnriched,
   ProposalState,
@@ -8,8 +12,10 @@ import {
   useProposalEnriched,
   useProposalSearch,
 } from "@/hooks"
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
+import { ProposalType } from "@/types"
 import {
+  Button,
   createListCollection,
   Grid,
   GridItem,
@@ -17,28 +23,22 @@ import {
   HStack,
   Icon,
   Link,
-  Text,
   Skeleton,
+  Text,
   useDisclosure,
   VStack,
-  Button,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { LuFileText } from "react-icons/lu"
-import BigNumber from "bignumber.js"
-import { useMemo, useState, useCallback } from "react"
-import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { LuFileText } from "react-icons/lu"
 
 import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
-import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { ProposalType } from "@/types"
-import { useRouter } from "next/navigation"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { GrantsProposalCard } from "@/app/grants/components"
-import { HowToSupportCard } from "@/app/proposals"
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -56,10 +56,8 @@ export const GrantsPageContent = () => {
   const filterOptions = useMemo(() => {
     return createListCollection({
       items: [
-        { label: t("Approval phase"), value: StateFilter.Active },
-        { label: t("Support phase"), value: ProposalFilter.LookingForSupport },
-        { label: t("Supported"), value: ProposalFilter.UpcomingVoting },
-        { label: t("Approved"), value: StateFilter.Succeeded },
+        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Support phase"), value: ProposalFilter.SupportPhase },
         { label: t("In development"), value: StateFilter.InDevelopment },
         { label: t("Completed"), value: StateFilter.Completed },
         { label: t("Cancelled"), value: StateFilter.Canceled },
