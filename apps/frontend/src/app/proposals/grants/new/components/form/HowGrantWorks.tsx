@@ -23,7 +23,7 @@ export const HowGrantWorks = () => {
       description: (
         <Trans
           i18nKey={
-            "The community and VeChain Foundation review and vote to approve or reject your grant <thumbsUp/>, <thumbsDown/>, <abstain/>"
+            "The community and VeChain Foundation review and vote to approve or reject your grant <thumbsUp/>, <thumbsDown/> and <abstain/>"
           }
           components={{
             thumbsUp: <Icon as={ThumbsUpIcon} boxSize={4} />,
