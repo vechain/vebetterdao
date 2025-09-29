@@ -2,8 +2,8 @@ import { AppConfig } from "."
 const config: AppConfig = {
   environment: "testnet-staging",
   basePath: "https://b3tr-frontend.vercel.app",
-  ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
-  ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
+  ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
+  ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x95761346d18244bb91664181bf91193376197088",
   vot3ContractAddress: "0x6e8b4a88d37897fc11f6ba12c805695f1c41f40e",
   b3trGovernorAddress: "0xc30b4d0837f7e3706749655d8bde0c0f265dd81b",
