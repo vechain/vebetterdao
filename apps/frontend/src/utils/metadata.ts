@@ -44,3 +44,8 @@ export function getPageMetadata(pageKey: string): Metadata {
     },
   }
 }
+
+// Helper function for consistent fallback metadata
+export function getDefaultMetadata(): Metadata {
+  return getPageMetadata("platform")
+}
