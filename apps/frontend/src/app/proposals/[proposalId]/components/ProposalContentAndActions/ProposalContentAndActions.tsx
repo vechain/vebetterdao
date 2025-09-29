@@ -10,6 +10,7 @@ import { removeTitleHeading } from "@/utils"
 import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
 import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
+import { Linkedin } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AiOutlineDiscord } from "react-icons/ai"
@@ -18,7 +19,6 @@ import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
 
 import { SocialLink } from "../SocialLink"
-import { Linkedin } from "iconoir-react"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -64,6 +64,18 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     if (proposal?.type === ProposalType.Standard) return false
     const typedProposal = proposal as GrantProposalEnriched
     return typedProposal?.outcomesAttachment?.length && typedProposal?.outcomesAttachment?.length > 0
+  }, [proposal])
+
+  const hasSocials = useMemo(() => {
+    if (proposal?.type === ProposalType.Standard) return false
+    const typedProposal = proposal as GrantProposalEnriched
+    return (
+      typedProposal?.githubUsername ||
+      typedProposal?.discordUserId ||
+      typedProposal?.companyTelegram ||
+      typedProposal?.projectWebsite ||
+      typedProposal?.twitterUsername
+    )
   }, [proposal])
 
   // ==========================================
@@ -144,42 +156,43 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           </CollapsibleSection>
 
           {/* Sources and additional information section */}
-          <CollapsibleSection title={t("Sources and additional")} showSeparator={false}>
-            <VStack gap={4} align="flex-start" w="full">
-              {proposal?.discordUserId ? (
-                <SocialLink
-                  icon={AiOutlineDiscord}
-                  href={`https://discord.com/users/${proposal.discordUserId}`}
-                  label="Discord"
-                />
-              ) : null}
-              {proposal?.githubUsername ? (
-                <SocialLink icon={UilGithub} href={`https://github.com/${proposal.githubUsername}`} label="Github" />
-              ) : null}
-              {proposal?.companyTelegram ? (
-                <SocialLink icon={RiTelegram2Line} href={proposal.companyTelegram} label="Telegram" />
-              ) : null}
-              {proposal?.projectWebsite ? (
-                <SocialLink icon={UilGlobe} href={proposal.projectWebsite} label="Project website" />
-              ) : null}
-              {proposal?.twitterUsername ? (
-                <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
-              ) : null}
-            </VStack>
-
-            {/* File attachments */}
-            {hasAttachments ? (
-              <VStack align="flex-start" w="full" gap={4} pt={10}>
-                <Grid templateColumns="repeat(2, 1fr)" w="full" gap={4}>
-                  {proposal?.outcomesAttachment?.map((attachment: AttachmentFile, index: number) => (
-                    <GridItem key={attachment.ipfs} colSpan={1}>
-                      <FileAttachmentPreview attachment={attachment} uniqueKey={index} />
-                    </GridItem>
-                  ))}
-                </Grid>
+          {hasSocials || hasAttachments ? (
+            <CollapsibleSection title={t("Sources and additional")} showSeparator={false}>
+              <VStack gap={4} align="flex-start" w="full">
+                {proposal?.discordUserId ? (
+                  <SocialLink
+                    icon={AiOutlineDiscord}
+                    href={`https://discord.com/users/${proposal.discordUserId}`}
+                    label="Discord"
+                  />
+                ) : null}
+                {proposal?.githubUsername ? (
+                  <SocialLink icon={UilGithub} href={`https://github.com/${proposal.githubUsername}`} label="Github" />
+                ) : null}
+                {proposal?.companyTelegram ? (
+                  <SocialLink icon={RiTelegram2Line} href={proposal.companyTelegram} label="Telegram" />
+                ) : null}
+                {proposal?.projectWebsite ? (
+                  <SocialLink icon={UilGlobe} href={proposal.projectWebsite} label="Project website" />
+                ) : null}
+                {proposal?.twitterUsername ? (
+                  <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
+                ) : null}
               </VStack>
-            ) : null}
-          </CollapsibleSection>
+              {/* File attachments */}
+              {hasAttachments ? (
+                <VStack align="flex-start" w="full" gap={4} pt={10}>
+                  <Grid templateColumns="repeat(2, 1fr)" w="full" gap={4}>
+                    {proposal?.outcomesAttachment?.map((attachment: AttachmentFile, index: number) => (
+                      <GridItem key={attachment.ipfs} colSpan={{ base: 2, md: 1 }}>
+                        <FileAttachmentPreview attachment={attachment} uniqueKey={index} />
+                      </GridItem>
+                    ))}
+                  </Grid>
+                </VStack>
+              ) : null}
+            </CollapsibleSection>
+          ) : null}
         </VStack>
       )}
 
