@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts/factories/GalaxyMember__factory"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"

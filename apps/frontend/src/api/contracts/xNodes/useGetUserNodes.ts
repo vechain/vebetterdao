@@ -1,6 +1,6 @@
 import { executeMultipleClausesCall, useThor, executeCallClause, useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { NodeManagement__factory } from "@vechain/vebetterdao-contracts/factories/NodeManagement__factory"
 import {
   GalaxyMember__factory,
   StargateNFT__factory,
