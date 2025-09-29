@@ -158,7 +158,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       ? t(
           "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.",
         )
-      : t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")
+      : t("B3TR are the tokens that you earn through the apps and by participating on the voting sessions.")
   }, [isB3trToVot3, t])
 
   const steps = useMemo<Step<ConvertStep>[]>(

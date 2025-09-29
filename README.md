@@ -26,7 +26,7 @@
                                    #########
 ```
 
-B3TR monorepo intended to contain everything around dapps, contracts, utils and in general everything needed to setup and deploy the B3TR ecosystem
+B3TR monorepo intended to contain everything around apps, contracts, utils and in general everything needed to setup and deploy the B3TR ecosystem
 
 ## Why a monorepo ?
 
@@ -133,7 +133,7 @@ It also does not require the solo node to be running locally, as it will point t
 
 ## Dev Testnet environment
 
-The dev testnet environment is a testnet that is used for testing purposes by developers that want to join VeBetterDAO.
+The dev testnet environment is a testnet that is used for testing purposes by developers that want to join VeBetter.
 It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
 This environment is more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
 

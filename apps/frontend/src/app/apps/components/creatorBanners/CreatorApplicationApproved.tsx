@@ -43,7 +43,7 @@ export const CreatorApplicationApproved = () => {
                 {t("Your Creator's NFT application was approved")}
               </Heading>
               <Text fontSize={"14px"} color="#6A6A6A" fontWeight={400}>
-                {t("You can now submit your app to the VeBetterDAO ecosystem")}
+                {t("You can now submit your app to the VeBetter ecosystem")}
               </Text>
             </Stack>
             <Button fontSize={{ base: "14px" }} variant="primaryAction" borderRadius="full" onClick={goToAppCreation}>
