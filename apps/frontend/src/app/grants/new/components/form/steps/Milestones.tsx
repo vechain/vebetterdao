@@ -4,8 +4,8 @@ import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
 import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
 import {
   validateMilestoneAmountTotal,
-  validateMilestoneStartDate,
   validateMilestoneEndDate,
+  validateMilestoneStartDate,
 } from "@/components/CustomFormFields/validators"
 import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
 import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
@@ -29,7 +29,7 @@ import {
 import { UilPlus, UilTrash } from "@iconscout/react-unicons"
 import { useGetTokenUsdPrice } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   Control,
   FieldErrors,
@@ -446,7 +446,7 @@ export const Milestones = ({
   trigger,
 }: MilestonesProps) => {
   const { t } = useTranslation()
-
+  const [accordionValue, setAccordionValue] = useState<string[]>(["milestone-0"])
   // Hooks and data
   const { data: milestoneMinimumAmount } = useMilestoneMinimumAmount()
   const { data: conversionRate } = useGetTokenUsdPrice("B3TR")
@@ -486,9 +486,19 @@ export const Milestones = ({
     setData({ ...formData, milestones: newMilestones })
   }
 
+  useEffect(() => {
+    if (errors.milestones) {
+      setAccordionValue(Object.keys(errors.milestones).map(key => `milestone-${key}`))
+    }
+  }, [errors.milestones])
+
   return (
     <VStack align="stretch" w="full">
-      <Accordion.Root multiple defaultValue={["milestone-0"]}>
+      <Accordion.Root
+        multiple
+        defaultValue={["milestone-0"]}
+        value={accordionValue}
+        onValueChange={details => setAccordionValue(details.value)}>
         {milestones.map((_, index) => {
           const uniqueKey = `milestone-${index}`
           return (

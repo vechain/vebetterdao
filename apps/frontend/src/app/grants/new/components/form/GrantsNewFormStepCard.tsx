@@ -1,24 +1,24 @@
 import { useCurrentAllocationsRoundId } from "@/api"
 import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposal"
+import { toaster } from "@/components/ui/toaster"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 import { useDraftGrantProposalStore, useGrantProposalFormStore } from "@/store"
+import { GRANT_PROPOSAL_FORM_STORE_NAME } from "@/store/useGrantProposalFormStore"
 import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
-import { toaster } from "@/components/ui/toaster"
 import { getConfig } from "@repo/config"
 import { Treasury__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { signOut, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useRef, useState } from "react"
-import { useForm } from "react-hook-form"
+import { SubmitErrorHandler, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
 import { GrantsNewFormStepIndicator } from "."
 import { GrantTypeSelection } from "../GrantTypeSelection"
 import { AboutGrant, Milestones, Schedule } from "./steps"
-import { GRANT_PROPOSAL_FORM_STORE_NAME } from "@/store/useGrantProposalFormStore"
 
 // ============================================================================
 // TYPES AND CONSTANTS
@@ -43,6 +43,9 @@ const STEP_INDICES = {
   MILESTONES: 2,
   SCHEDULE: 3,
 } as const
+
+const FIRST_STEP = 0
+const LAST_STEP = 3 // SCHEDULE index
 
 const treasuryInterface = Treasury__factory.createInterface()
 
@@ -83,7 +86,7 @@ export const GrantsNewFormStepCard = () => {
   } = useForm<GrantFormData>({
     defaultValues: formData,
   })
-  const { errors, isValid } = formState
+  const { errors } = formState
 
   // ============================================================================
   // STEP CONFIGURATION
@@ -223,62 +226,65 @@ export const GrantsNewFormStepCard = () => {
     router.push(`/proposals/${expectedProposalId}`)
   }, [router, expectedProposalId])
 
-  const onSubmit = async (data: GrantFormData) => {
-    if (!isValid) {
-      //clear all errors
-      clearErrors()
-      //trigger all errors
-      trigger()
-      return
-    }
+  const onSubmit = useCallback(
+    async (data: GrantFormData) => {
+      // Navigate to next step if not on final step
+      if (currentStepIndex !== LAST_STEP) {
+        return goToNext()
+      }
 
-    // Navigate to next step if not on final step
-    if (currentStepIndex !== lastStep) {
-      return goToNext()
-    }
+      // Validate prerequisites
+      if (!currentRoundId || isNaN(Number(currentRoundId))) return
+      if (!data.votingRoundId) return console.error("Support round ID is required")
 
-    // Validate prerequisites
-    if (!currentRoundId || isNaN(Number(currentRoundId))) return
-    if (!data.votingRoundId) return console.error("Support round ID is required")
+      try {
+        // Prepare proposal data
+        const title = data.projectName
+        const shortDescription = data.problemDescription
+        const cleanData = { ...formData, ...data }
 
-    try {
-      // Prepare proposal data
-      const title = data.projectName
-      const shortDescription = data.problemDescription
-      const cleanData = { ...formData, ...data }
+        // Upload metadata to IPFS
+        const proposalMetadataURI = await onMetadataUpload({ ...cleanData, title, shortDescription })
+        if (!proposalMetadataURI) return console.error("Error uploading proposal metadata")
 
-      // Upload metadata to IPFS
-      const proposalMetadataURI = await onMetadataUpload({ ...cleanData, title, shortDescription })
-      if (!proposalMetadataURI) return console.error("Error uploading proposal metadata")
+        const milestonesIpfsCID = await onMetadataUpload(data.milestones)
+        if (!milestonesIpfsCID) return console.error("Error uploading milestones")
 
-      const milestonesIpfsCID = await onMetadataUpload(data.milestones)
-      if (!milestonesIpfsCID) return console.error("Error uploading milestones")
+        // Hash metadata URI for proposal ID calculation
+        setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(proposalMetadataURI)))
 
-      // Hash metadata URI for proposal ID calculation
-      setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(proposalMetadataURI)))
+        resetStatus()
 
-      resetStatus()
+        // Submit proposal
+        await createGrantProposal({
+          metadataIpfsCID: proposalMetadataURI,
+          milestonesIpfsCID,
+          milestones: data.milestones,
+          grantsReceiver: data.grantsReceiverAddress,
+          votingRoundId: Number(data.votingRoundId),
+          depositAmount: "0",
+        })
+      } catch (error) {
+        console.error("Error submitting proposal:", error)
+      }
+    },
+    [currentStepIndex, currentRoundId, goToNext, formData, onMetadataUpload, resetStatus, createGrantProposal],
+  )
 
-      // Submit proposal
-      await createGrantProposal({
-        metadataIpfsCID: proposalMetadataURI,
-        milestonesIpfsCID,
-        milestones: data.milestones,
-        grantsReceiver: data.grantsReceiverAddress,
-        votingRoundId: Number(data.votingRoundId),
-        depositAmount: "0",
+  const onError: SubmitErrorHandler<GrantFormData> = useCallback(errors => {
+    if (errors?.milestones) {
+      toaster.create({
+        description: "Please fill in all the milestones",
+        type: "error",
+        closable: true,
       })
-    } catch (error) {
-      console.error("Error submitting proposal:", error)
     }
-  }
+  }, [])
 
   // ============================================================================
   // RENDER HELPERS
   // ============================================================================
 
-  const firstStep = 0
-  const lastStep = steps.length - 1
   const currentStepData = steps[currentStepIndex]
 
   // ============================================================================
@@ -288,24 +294,24 @@ export const GrantsNewFormStepCard = () => {
   return (
     <Card.Root>
       <Card.Body px={{ base: 3, md: 8 }}>
-        <form ref={formRef} onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+        <form ref={formRef} onSubmit={handleSubmit(onSubmit, onError)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
             <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
             {currentStepData?.content}
 
             <Stack w="full" justify="space-between" direction={{ base: "column", md: "row" }}>
               <HStack gap={4} w="full">
-                {currentStepIndex !== firstStep && (
+                {currentStepIndex !== FIRST_STEP && (
                   <Button w="40" type="button" onClick={goToPrevious} variant="secondary" px={8} size="lg">
                     {t("Back")}
                   </Button>
                 )}
                 <Button w="40" type="submit" variant="primaryAction" px={8} size="lg">
-                  {currentStepIndex === lastStep ? t("Apply") : t("Continue")}
+                  {currentStepIndex === LAST_STEP ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>
 
-              {currentStepIndex !== firstStep && (
+              {currentStepIndex !== FIRST_STEP && (
                 <Button
                   w="40"
                   type="button"
