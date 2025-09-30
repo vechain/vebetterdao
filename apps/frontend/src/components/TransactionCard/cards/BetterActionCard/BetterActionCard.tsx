@@ -1,5 +1,5 @@
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { SustainabilityActionsResponse, useXApps } from "@/api"
+import { UserB3trActions, useXApps } from "@/api"
 import dayjs from "dayjs"
 import { LeafIcon } from "../../../Icons/LeafIcon"
 import { useTranslation } from "react-i18next"
@@ -13,8 +13,9 @@ type Props = {
   blockNumber?: number
   blockTimestamp?: number
   amountB3tr?: number
-  proof?: SustainabilityActionsResponse["data"][number]["proof"]
+  proof?: UserB3trActions[number]["proof"]
 }
+
 export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3tr, proof }: Props) => {
   const { data: apps } = useXApps()
   const { t } = useTranslation()

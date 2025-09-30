@@ -20,7 +20,7 @@ export const JoinCommunity = () => {
       <Box bgColor={"#B1F16C"} p={6} w={"full"} borderRadius={16} position={"relative"} overflow={"clip"}>
         <Image
           src="/assets/backgrounds/community-green-blob.webp"
-          alt="VeBetterDAO community"
+          alt="VeBetter community"
           position={"absolute"}
           rotate="-90deg"
           top={-48}

@@ -72,7 +72,7 @@ export const AppCreationSteps = () => {
                     type={XAppsCreationSteps.ENDORSEMENT}
                     status={getXAppsCreationStepStatus(XAppsCreationSteps.ENDORSEMENT)}
                     description={t(
-                      "X Node Holders will use their NFTs to endorse your dApp. Once it reaches {{value}} points, it becomes eligible for allocations.",
+                      "X Node Holders will use their NFTs to endorse your app. Once it reaches {{value}} points, it becomes eligible for allocations.",
                       { value: endorsementScoreThreshold },
                     )}
                   />
@@ -82,7 +82,7 @@ export const AppCreationSteps = () => {
                     type={XAppsCreationSteps.ALLOCATION}
                     status={getXAppsCreationStepStatus(XAppsCreationSteps.ALLOCATION)}
                     description={t(
-                      "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.",
+                      "The allocation rounds determine the resources and support your app receives from the ecosystem community.",
                     )}
                   />
                 </Grid>

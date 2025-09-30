@@ -27,7 +27,7 @@ type Props = {
 }
 
 export const ProposalVoteCommentList = ({ proposalId }: Props) => {
-  const { data, fetchNextPage, hasNextPage } = useProposalComments({ proposalId })
+  const { data, fetchNextPage, hasNextPage } = useProposalComments(proposalId)
   const [activeFilter, setActiveFilter] = useState<VoteType>("All")
 
   const visibleComments =

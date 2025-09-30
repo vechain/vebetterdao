@@ -1,3 +1,5 @@
+// TODO: idk if this is indexer related
+// can/should be deleted/moved after investigation
 import {
   SecurityLevel,
   useCurrentAllocationsRoundId,

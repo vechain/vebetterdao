@@ -20,7 +20,7 @@ import {
   useProposalQueuedEvent,
   useProposalExecutedEvent,
   useProposalCanceledEvent,
-  useProposalVotesIndexer,
+  useProposalVotes,
 } from "@/api"
 import { ethers } from "ethers"
 import dayjs from "dayjs"
@@ -47,7 +47,7 @@ export const useProposalDetailById = (proposalId: string) => {
   )
   const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
-  const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotes(proposalId)
   const proposalSnapshotVot3 = useGetVotesOnBlock(
     proposalSnapshotBlock,
     account?.address ?? undefined,
@@ -120,14 +120,15 @@ export const useProposalDetailById = (proposalId: string) => {
       forPercentage,
       againstPercentage,
       abstainPercentage
+
     if (proposalVotes) {
-      forVotes = proposalVotes.votes.for.totalWeight
-      againstVotes = proposalVotes.votes.against.totalWeight
-      abstainVotes = proposalVotes.votes.abstain.totalWeight
-      totalVotingPowerUsedInVotes = proposalVotes.totalPower
-      forPercentage = proposalVotes.votes.for.percentage
-      againstPercentage = proposalVotes.votes.against.percentage
-      abstainPercentage = proposalVotes.votes.abstain.percentage
+      forVotes = proposalVotes.votes.for?.totalWeight ?? 0
+      againstVotes = proposalVotes.votes.against?.totalWeight ?? 0
+      abstainVotes = proposalVotes.votes.abstain?.totalWeight ?? 0
+      totalVotingPowerUsedInVotes = proposalVotes?.totalPower ?? 0
+      forPercentage = proposalVotes.votes.for?.percentage ?? 0
+      againstPercentage = proposalVotes.votes.against?.percentage ?? 0
+      abstainPercentage = proposalVotes.votes.abstain?.percentage ?? 0
     }
 
     const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))

@@ -1,14 +1,15 @@
-import { ProposalState, useProposalVotesIndexer } from "@/api"
+import { ProposalState, useProposalVotes } from "@/api"
+import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ExclamationTriangle, ResponsiveCard } from "@/components"
 import { timestampToTimeLeft } from "@/utils"
 import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
-import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
-import { ExclamationTriangle, ResponsiveCard } from "@/components"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
+import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
+import { ProposalVotesResults } from "./components/ProposalVotesResults"
 
 type Props = {
   proposalId: string
@@ -21,7 +22,7 @@ const abstainColor = "#B59525"
 export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
-  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
 
   const { proposal } = useProposalDetail()
   const proposalState = proposal.state
@@ -38,23 +39,23 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
     for: {
       color: forColor,
       text: t("Votes for"),
-      percentage: proposalVotes?.votes.for.percentagePower ?? 0,
-      voters: proposalVotes?.votes.for.voters ?? 0,
+      percentage: proposalVotes?.votes?.for?.percentagePower ?? 0,
+      voters: proposalVotes?.votes.for?.voters ?? 0,
       icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
     },
     against: {
       color: againstColor,
       text: t("Against"),
-      percentage: proposalVotes?.votes.against.percentagePower ?? 0,
-      voters: proposalVotes?.votes.against.voters ?? 0,
+      percentage: proposalVotes?.votes?.against?.percentagePower ?? 0,
+      voters: proposalVotes?.votes.against?.voters ?? 0,
       icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
     },
 
     abstain: {
       color: abstainColor,
       text: t("Abstained"),
-      percentage: proposalVotes?.votes.abstain.percentagePower ?? 0,
-      voters: proposalVotes?.votes.abstain.voters ?? 0,
+      percentage: proposalVotes?.votes?.abstain?.percentagePower ?? 0,
+      voters: proposalVotes?.votes.abstain?.voters ?? 0,
       icon: <Image src={"/assets/icons/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }

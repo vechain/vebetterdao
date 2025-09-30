@@ -1,13 +1,14 @@
-import React, { useMemo } from "react"
-import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
+import { ProposalState, useProposalCreatedEvent, useProposalVotes } from "@/api"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { ProposalState, useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
+import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { Box, Card, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ethers } from "ethers"
+import React, { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
 import { ProposalYourVote } from "./ProposalYourVote"
 
 const forColor = "#3DBA67"
@@ -23,23 +24,23 @@ interface VotingProposalProgressProps {
 
 const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
   const { t } = useTranslation()
-  const { data: proposalVotes } = useProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes } = useProposalVotes(proposalId)
 
   const votes = {
     for: {
       color: forColor,
-      percentage: proposalVotes?.votes.for.percentagePower ?? 0,
+      percentage: proposalVotes?.votes?.for?.percentagePower ?? 0,
       icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
     },
     against: {
       color: againstColor,
-      percentage: proposalVotes?.votes.against.percentagePower ?? 0,
+      percentage: proposalVotes?.votes?.against?.percentagePower ?? 0,
       icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
     },
 
     abstain: {
       color: abstainColor,
-      percentage: proposalVotes?.votes.abstain.percentagePower ?? 0,
+      percentage: proposalVotes?.votes?.abstain?.percentagePower ?? 0,
       icon: <Image src={"/assets/icons/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }

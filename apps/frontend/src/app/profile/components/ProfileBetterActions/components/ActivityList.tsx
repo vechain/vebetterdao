@@ -1,4 +1,4 @@
-import { SustainabilityActionsResponse, useSustainabilityActions } from "@/api"
+import { UserB3trActions, useUsersB3trActions } from "@/api"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { VStack, Spinner, HStack, Heading, Button, Card, Text, Center } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -13,10 +13,7 @@ type Props = {
 
 export const ActivityList = ({ address, setIsCalendarView }: Props) => {
   const { t } = useTranslation()
-  const { data, fetchNextPage, hasNextPage } = useSustainabilityActions({
-    wallet: address ?? undefined,
-    direction: "desc",
-  })
+  const { data, fetchNextPage, hasNextPage } = useUsersB3trActions(address, { direction: "DESC" })
 
   const actions = data?.pages.map(page => page.data).flat() ?? []
 
@@ -24,8 +21,8 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
     setIsCalendarView(true)
   }
 
-  const groupActionsByDay = (actions: SustainabilityActionsResponse["data"]) => {
-    return actions.reduce<Record<string, SustainabilityActionsResponse["data"]>>(
+  const groupActionsByDay = (actions: UserB3trActions) => {
+    return actions.reduce<Record<string, UserB3trActions>>(
       (grouped, action) => {
         const day = dayjs.unix(action.blockTimestamp).format("YYYY-MM-DD")
 
@@ -35,11 +32,11 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
         }
 
         // Now safely push into grouped[day]
-        ;(grouped[day] as SustainabilityActionsResponse["data"]).push(action)
+        ;(grouped[day] as UserB3trActions).push(action)
 
         return grouped
       },
-      {} as Record<string, SustainabilityActionsResponse["data"]>,
+      {} as Record<string, UserB3trActions>,
     )
   }
   const groupedActions = groupActionsByDay(actions)

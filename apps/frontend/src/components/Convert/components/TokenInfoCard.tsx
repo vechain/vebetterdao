@@ -28,7 +28,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       </Text>
     ) : (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        {t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")}
+        {t("B3TR are the tokens that you earn through the apps and by participating on the voting sessions.")}
       </Text>
     )
   }, [isB3TRToVOT3, t])
