@@ -232,7 +232,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                           hideBelow="md"
                           className="custom-swiper-button-prev"
                           pos={"absolute"}
-                          zIndex={99}
+                          zIndex={2}
                           rounded="full"
                           left={0}
                           top={"50%"}
