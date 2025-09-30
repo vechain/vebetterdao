@@ -5,12 +5,13 @@ import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "
 import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
-import { EditPencil } from "iconoir-react"
+import { EditPencil, Prohibition } from "iconoir-react"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
+import { GenericAlert } from "@/app/components/Alert"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================
@@ -89,6 +90,24 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
     }
   }, [milestones])
 
+  const currentStepIndicator = useCallback(
+    (index: number) => {
+      if (milestones?.[index]?.state === MilestoneState.Rejected) {
+        return (
+          <Circle bg="actions.primary.default" size="50%" zIndex={2}>
+            <Icon as={Prohibition} boxSize={3} color="actions.primary.text" />
+          </Circle>
+        )
+      }
+      return <Circle bg="actions.primary.default" size="55%" zIndex={2} />
+    },
+    [milestones],
+  )
+
+  const getFirstRejectedMilestone = useCallback(() => {
+    return milestones?.findIndex(milestone => milestone.state === MilestoneState.Rejected) ?? -1
+  }, [milestones])
+
   // ==========================================
   // RENDER
   // ==========================================
@@ -120,11 +139,11 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                   <Steps.Status
                     incomplete={<Circle bg="actions.primary.default" size="0" />}
                     complete={
-                      <Circle bg="actions.primary.default" size="50%" zIndex={10}>
+                      <Circle bg="actions.primary.default" size="50%" zIndex={2}>
                         <Icon as={BsCheck} boxSize={4} color="actions.primary.text" />
                       </Circle>
                     }
-                    current={<Circle bg="actions.primary.default" size="55%" zIndex={10} />}
+                    current={currentStepIndicator(index)}
                   />
                 </Steps.Indicator>
                 <Steps.Separator />
@@ -164,6 +183,13 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                           proposal={proposal}
                           isCurrentStep={index === currentStep}
                           milestoneIndex={index}
+                        />
+                      )}
+                      {getFirstRejectedMilestone() === index && (
+                        <GenericAlert
+                          type="error"
+                          message="This milestone was rejected by VeBetter Foundation. Contact the Foundation for feedback if needed."
+                          isLoading={false}
                         />
                       )}
                     </Accordion.ItemContent>
