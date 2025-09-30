@@ -8,7 +8,8 @@ import { UilShareAlt } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 import { ProposalCancelCard } from "./ProposalCancelCard"
@@ -21,9 +22,10 @@ import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteC
 
 type Props = {
   proposalId: string
+  typeFilter?: "proposal" | "grant"
 }
 
-export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
+export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter }) => {
   // ==========================================
   // HOOKS
   // ==========================================
@@ -35,6 +37,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
+  const router = useRouter()
   // Ref for throttling countdown calculations
   const lastCountdownCalculationRef = useRef<{
     targetDate: number
@@ -52,6 +55,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const isVotingPhase = proposal?.state === ProposalState.Active
   const targetDate = isVotingPhase ? votingEndDate : supportEndDate
 
+  const overviewHref = isGrant ? `/grants/${proposalId}` : `/proposals/${proposalId}`
+
   const BreadcrumItems = [
     {
       label: isGrant ? "Grants" : "Proposals",
@@ -59,9 +64,19 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     },
     {
       label: "Overview",
-      href: `/proposals/${proposalId}`,
+      href: overviewHref,
     },
   ]
+
+  useEffect(() => {
+    if (isLoading || !proposal || !typeFilter) return
+
+    if (typeFilter === "proposal" && proposal.type === ProposalType.Grant) {
+      router.replace(`/grants/${proposalId}`)
+    } else if (typeFilter === "grant" && proposal.type !== ProposalType.Grant) {
+      router.replace(`/proposals/${proposalId}`)
+    }
+  }, [isLoading, proposal, proposalId, router, typeFilter])
 
   const { daysLeft, hoursLeft, minutesLeft } = useMemo(() => {
     if (!targetDate) return { daysLeft: 0, hoursLeft: 0, minutesLeft: 0 }
