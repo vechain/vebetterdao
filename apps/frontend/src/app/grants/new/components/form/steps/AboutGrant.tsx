@@ -18,7 +18,6 @@ import {
   UseFormWatch,
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { AiOutlineDiscord } from "react-icons/ai"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
@@ -64,7 +63,7 @@ export const AboutGrant = ({
 
   // Set linked social media usernames if available in session
   useEffect(() => {
-    if (session?.user?.githubUsername || session?.user?.twitterUsername || session?.user?.discordUsername) {
+    if (session?.user?.githubUsername || session?.user?.twitterUsername) {
       if (session.user.githubUsername) {
         setValue("githubUsername", session.user.githubUsername)
         setData({ githubUsername: session.user.githubUsername })
@@ -72,10 +71,6 @@ export const AboutGrant = ({
       if (session.user.twitterUsername) {
         setValue("twitterUsername", session.user.twitterUsername)
         setData({ twitterUsername: session.user.twitterUsername })
-      }
-      if (session.user.discordUsername) {
-        setValue("discordUsername", session.user.discordUsername)
-        setData({ discordUsername: session.user.discordUsername })
       }
     }
   }, [session?.user, setValue, setData])
@@ -89,7 +84,7 @@ export const AboutGrant = ({
   }
 
   // Handle social media auth
-  const handleAuth = (platform: "github" | "twitter" | "discord") => {
+  const handleAuth = (platform: "github" | "twitter") => {
     const usernameField = platform.concat("Username")
     const isSignedIn = !!watch(usernameField as keyof GrantFormData)
     if (isSignedIn) {
@@ -181,11 +176,7 @@ export const AboutGrant = ({
     [getValues, setValue, setData, clearErrors, setError],
   )
 
-  const [twitterUsername, githubUsername, discordUsername] = [
-    watch("twitterUsername"),
-    watch("githubUsername"),
-    watch("discordUsername"),
-  ]
+  const [twitterUsername, githubUsername] = [watch("twitterUsername"), watch("githubUsername")]
 
   //Get all text areas values from storage
   const textAreasDefaultValues = useMemo(() => {
@@ -399,7 +390,7 @@ export const AboutGrant = ({
                     </Text>
                   </VStack>
 
-                  <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={6}>
+                  <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={twitterUsername ? twitterUsername : t("Connect X")}
@@ -420,17 +411,6 @@ export const AboutGrant = ({
                         leftIcon={<UilGithub size={20} />}
                         value={githubUsername}
                         onBlur={() => onBlur("githubUsername")}
-                      />
-                    </GridItem>
-                    <GridItem w="full">
-                      <FormSocialConnectButton
-                        label={discordUsername ? discordUsername : t("Connect Discord")}
-                        register={register("discordUsername")}
-                        error={errors.discordUsername?.message}
-                        handleAuth={() => handleAuth("discord")}
-                        leftIcon={<AiOutlineDiscord size={20} />}
-                        value={discordUsername}
-                        onBlur={() => onBlur("discordUsername")}
                       />
                     </GridItem>
                   </Grid>
