@@ -15,7 +15,7 @@ export const pagesMetadata = {
   },
   apps: {
     path: "/apps",
-    title: "VeBetter apps | Vote on Real Projects in the DAO",
+    title: "VeBetter Apps | Vote on Real Projects in the DAO",
     description:
       "Interact with ecosystem apps through governance. Support sustainability, track engagement, and use your voice to influence B3TR-powered decisions on VeChain.",
     image: "/assets/images/apps_page.webp",
