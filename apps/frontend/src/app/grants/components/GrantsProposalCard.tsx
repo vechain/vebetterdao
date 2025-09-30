@@ -97,7 +97,9 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
       onClick={goToProposal}>
       <VStack w="full" gap={4} alignItems="flex-start">
         {/* Header Section */}
-        <Heading size={{ base: "lg", lg: "md" }}>{proposal.title}</Heading>
+        <Heading size={{ base: "lg", lg: "md" }} wordBreak="break-word" flexWrap="wrap">
+          {proposal.title}
+        </Heading>
 
         {/* Grant Information & Proposer Section */}
         <Stack
