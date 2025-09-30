@@ -50,6 +50,8 @@ export const AboutGrant = ({
   const { t } = useTranslation()
   const { data: session } = useSession()
 
+  const isToolingGrant = getValues("grantType") === "tooling"
+
   const mapUploadError = (error: string): string => {
     if (error === "FILE_INVALID_TYPE") {
       return t("File type not supported. Use PDF, JPG, JPEG, or PNG.")
@@ -551,9 +553,10 @@ export const AboutGrant = ({
                     label={t("Benefits to apps")}
                     placeholder={t("Benefits to apps")}
                     type="textarea"
+                    isOptional={isToolingGrant}
                     defaultValue={textAreasDefaultValues.benefitsToDApps}
                     register={register("benefitsToDApps", {
-                      required: t("Please describe benefits to dApps"),
+                      required: !isToolingGrant ? t("Please describe benefits to apps") : false,
                       maxLength: {
                         value: MAX_TEXT_AREA_LENGTH,
                         message: t("Text too long. Maximum allowed: {{amount}} characters.", {
