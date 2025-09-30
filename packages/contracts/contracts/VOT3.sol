@@ -224,7 +224,7 @@ contract VOT3 is
         if (
           address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(from)
         ) {
-          $.xAllocationVoting.toggleAutoVotingForUser(from);
+          $.xAllocationVoting.toggleAutoVoting(from);
         }
       }
     }

@@ -102,6 +102,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error InvalidContractAddress(string contractName);
 
   /**
+   * @dev The `caller` is not valid
+   */
+  error InvalidCaller(address caller);
+
+  /**
    * @dev Emitted when auto-voting is disabled.
    */
   event AutoVotingDisabled(address voter, uint256 roundId);
@@ -293,16 +298,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   function castVote(uint256 roundId, bytes32[] memory appsIds, uint256[] memory voteWeights) external;
 
   /**
-   * @dev Toggle autovoting for the caller
-   */
-  function toggleAutoVoting() external;
-
-  /**
    * @dev Toggle autovoting for a user
    * @param user The address to toggle autovoting for
-   * @notice This function is only callable by the VOT3 contract
+   * @notice This function is only callable by the VOT3 contract or the user themselves
    */
-  function toggleAutoVotingForUser(address user) external;
+  function toggleAutoVoting(address user) external;
 
   /**
    * @dev Check if autovoting is enabled for an account

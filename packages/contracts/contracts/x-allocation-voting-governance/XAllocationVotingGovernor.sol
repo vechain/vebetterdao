@@ -154,7 +154,7 @@ abstract contract XAllocationVotingGovernor is
     (bytes32[] memory finalAppIds, uint256[] memory voteWeights) = _prepareAutoVoteArrays(voter, roundId, appIds);
 
     if (!isPerson || finalAppIds.length == 0) {
-      _toggleAutovoting(voter);
+      _toggleAutoVoting(voter);
       relayerRewardsPool().reduceExpectedActionsForRound(roundId, 1);
       emit AutoVotingDisabled(voter, roundId);
       return;
@@ -456,7 +456,7 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Toggles autovoting for an account
    */
-  function _toggleAutovoting(address account) internal virtual;
+  function _toggleAutoVoting(address account) internal virtual;
 
   /**
    * @dev Checks if autovoting is enabled for an account

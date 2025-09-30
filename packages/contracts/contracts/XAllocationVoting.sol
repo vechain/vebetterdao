@@ -161,18 +161,14 @@ contract XAllocationVoting is
   /**
    * @dev Toggle autovoting for the caller
    */
-  function toggleAutoVoting() public {
-    _toggleAutovoting(_msgSender());
-  }
+  function toggleAutoVoting(address user) public {
+    // Allow VOT3 contract to toggle for any user or the user themselves
+    if (_msgSender() == address(token()) || _msgSender() == user) {
+      _toggleAutoVoting(user);
+      return;
+    }
 
-  /**
-   * @dev Toggle autovoting for a user
-   * @param user The address to toggle autovoting for
-   * @notice This function is only callable by the VOT3 contract, please refer to toggleAutoVoting() instead
-   */
-  function toggleAutoVotingForUser(address user) external {
-    require(msg.sender == address(token()), "XAllocationVoting: only VOT3 contract can call this");
-    _toggleAutovoting(user);
+    revert InvalidCaller(_msgSender());
   }
 
   /**
