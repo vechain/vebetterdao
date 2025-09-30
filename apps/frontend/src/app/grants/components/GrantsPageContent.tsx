@@ -209,14 +209,15 @@ export const GrantsPageContent = () => {
                 alignItems="center"
                 fontWeight={500}
                 color="primary.500"
+                px={0}
                 fontSize={{ base: "xs", lg: "md" }}
                 onClick={onOpen}>
                 <Icon as={UilInfoCircle} boxSize={4} />
-                {t("More info")}
+                {!isMobile && t("More info")}
               </Link>
             )}
           </HStack>
-          {showApplyForGrant && (
+          {showApplyForGrant && !isMobile && (
             <HStack gap="4">
               <Button
                 asChild
@@ -228,7 +229,7 @@ export const GrantsPageContent = () => {
                 <Link href="grants/manage">{t("My grants")}</Link>
               </Button>
 
-              <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
+              <Button variant="primaryAction" size={{ base: "xs", md: "md" }} onClick={onApplyForGrant}>
                 <Text>{t("Apply for Grant")}</Text>
               </Button>
             </HStack>
