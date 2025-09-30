@@ -4,7 +4,7 @@ import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
-import { UilBan } from "@iconscout/react-unicons"
+import { Prohibition } from "iconoir-react"
 import { useMemo } from "react"
 import { FaRegCircleCheck } from "react-icons/fa6"
 import { IoIosCode } from "react-icons/io"
@@ -45,12 +45,12 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
   [ProposalState.Canceled]: {
     text: "Cancelled",
-    icon: UilBan,
+    icon: Prohibition,
     variant: "declined",
   },
   [ProposalState.Defeated]: {
     text: "Cancelled",
-    icon: UilBan,
+    icon: Prohibition,
     variant: "declined",
   },
   [ProposalState.Succeeded]: {
@@ -72,7 +72,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
 
   [ProposalState.DepositNotMet]: {
     text: "Declined",
-    icon: UilBan,
+    icon: Prohibition,
     variant: "declined",
   },
 
