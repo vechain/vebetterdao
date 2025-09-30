@@ -372,7 +372,7 @@ export const ProposalInteractionCard = ({
                 </Button>
               )}
               {canCancelProposal && (
-                <Button variant="primaryAction" w="full" flex={1} onClick={handleCancelProposal}>
+                <Button variant="secondary" w="full" flex={1} onClick={handleCancelProposal}>
                   {t("Cancel {{proposalType}}", {
                     proposalType: proposalTypeText,
                   })}
