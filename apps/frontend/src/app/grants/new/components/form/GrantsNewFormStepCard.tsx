@@ -77,6 +77,7 @@ export const GrantsNewFormStepCard = () => {
     register,
     formState,
     setValue,
+    setFocus,
     getValues,
     watch,
     clearErrors,
@@ -175,6 +176,8 @@ export const GrantsNewFormStepCard = () => {
         type: "error",
         closable: true,
       })
+      setFocus("projectName")
+
       return
     }
 
@@ -183,7 +186,7 @@ export const GrantsNewFormStepCard = () => {
     clearData()
     localStorage.removeItem(GRANT_PROPOSAL_FORM_STORE_NAME)
     router.push("/grants/manage")
-  }, [addDraftGrantProposal, formRef, formData, t, router, clearData])
+  }, [formData, addDraftGrantProposal, clearData, router, t, setFocus])
 
   // ============================================================================
   // PROPOSAL SUBMISSION LOGIC
