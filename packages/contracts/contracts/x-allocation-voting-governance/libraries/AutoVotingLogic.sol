@@ -5,7 +5,7 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-
+import { XAllocationVotingDataTypes } from "./XAllocationVotingDataTypes.sol";
 /**
  * @title AutoVotingLogic
  * @notice Library that handles user preferences for automatic voting in allocation rounds
@@ -13,16 +13,6 @@ import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingG
  */
 library AutoVotingLogic {
   using Checkpoints for Checkpoints.Trace208;
-
-  /**
-   * @dev Storage structure for AutoVoting preferences
-   * @dev This struct is used by AutoVotingLogicUpgradeable for storage management
-   */
-  struct AutoVotingStorage {
-    mapping(address => Checkpoints.Trace208) _autoVotingEnabled;
-    mapping(address => bytes32[]) _userVotingPreferences;
-    Checkpoints.Trace208 _totalAutoVotingUsers;
-  }
 
   /**
    * @notice Emitted when a user toggles their autovoting status
@@ -55,8 +45,8 @@ library AutoVotingLogic {
    * Total Count:  101   ──────────────────────→ 100
    * User Prefs:   [app1, app2] ────────────────→ [] (deleted)
    */
-  function toggleAutovoting(
-    AutoVotingStorage storage $,
+  function toggleAutoVoting(
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
     address xAllocationVotingGovernorAddress,
     address account,
     uint48 clock
@@ -100,7 +90,7 @@ library AutoVotingLogic {
    * @param apps The list of app IDs to vote for
    */
   function setUserVotingPreferences(
-    AutoVotingStorage storage $,
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
     address x2EarnAppsAddress,
     address account,
     bytes32[] memory apps
@@ -134,7 +124,10 @@ library AutoVotingLogic {
    * @param account The address to check
    * @return Whether autovoting is enabled for the account at the latest timepoint
    */
-  function isAutoVotingEnabled(AutoVotingStorage storage $, address account) external view returns (bool) {
+  function isAutoVotingEnabled(
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
+    address account
+  ) external view returns (bool) {
     return $._autoVotingEnabled[account].latest() == 1;
   }
 
@@ -146,7 +139,7 @@ library AutoVotingLogic {
    * @return Whether autovoting is enabled for the account at the specific timepoint
    */
   function isAutoVotingEnabledAtTimepoint(
-    AutoVotingStorage storage $,
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
     address account,
     uint48 timepoint
   ) external view returns (bool) {
@@ -160,7 +153,7 @@ library AutoVotingLogic {
    * @return The list of app IDs the account prefers to vote for
    */
   function getUserVotingPreferences(
-    AutoVotingStorage storage $,
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
     address account
   ) external view returns (bytes32[] memory) {
     return $._userVotingPreferences[account];
@@ -173,7 +166,7 @@ library AutoVotingLogic {
    * @return The total number of users who enabled autovoting at the specific timepoint
    */
   function getTotalAutoVotingUsersAtTimepoint(
-    AutoVotingStorage storage $,
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
     uint48 timepoint
   ) external view returns (uint208) {
     return $._totalAutoVotingUsers.upperLookupRecent(timepoint);
@@ -185,7 +178,10 @@ library AutoVotingLogic {
    * @param clock The current timepoint
    * @return The total number of users who enabled autovoting at the current timepoint
    */
-  function getTotalAutoVotingUsers(AutoVotingStorage storage $, uint48 clock) external view returns (uint208) {
+  function getTotalAutoVotingUsers(
+    XAllocationVotingDataTypes.AutoVotingStorage storage $,
+    uint48 clock
+  ) external view returns (uint208) {
     return $._totalAutoVotingUsers.upperLookupRecent(clock);
   }
 

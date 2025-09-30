@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { AutoVotingLogic } from "../libraries/AutoVotingLogic.sol";
+import { XAllocationVotingDataTypes } from "../libraries/XAllocationVotingDataTypes.sol";
 
 /**
  * @title AutoVotingLogicUpgradeable
@@ -11,16 +12,14 @@ import { AutoVotingLogic } from "../libraries/AutoVotingLogic.sol";
  * @dev This module is intended to be inherited by the XAllocationVoting contract
  */
 abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
-  // Import the storage struct from the library
-  using AutoVotingLogic for AutoVotingLogic.AutoVotingStorage;
-
-  /// @notice Storage struct is defined in AutoVotingLogic library but storage location is managed here
-  /// @dev keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.AutoVotingLogic")) - 1)) & ~bytes32(uint256(0xff))
-  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.AutoVotingLogic
+  /// @notice Storage location for AutoVoting data using ERC-7201 namespaced storage pattern
+  /// @dev This constant defines the storage slot for AutoVotingStorage struct (defined in XAllocationVotingDataTypes)
+  /// @dev Calculated as: keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.AutoVoting")) - 1)) & ~bytes32(uint256(0xff))
+  /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.AutoVoting
   bytes32 private constant AutoVotingStorageLocation =
-    0x79e5bcd052c027862431086e284ba2fb16d80aac052316614d6368ef7f884a00;
+    0x38ba4d920474025bc119851d51630794ab25dc91b5f613afc3c0e85f09fdc100;
 
-  function _getAutoVotingStorage() private pure returns (AutoVotingLogic.AutoVotingStorage storage $) {
+  function _getAutoVotingStorage() private pure returns (XAllocationVotingDataTypes.AutoVotingStorage storage $) {
     assembly {
       $.slot := AutoVotingStorageLocation
     }
@@ -37,16 +36,16 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
   /**
    * @dev Toggles autovoting for an account
    */
-  function _toggleAutovoting(address account) internal virtual override {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
-    AutoVotingLogic.toggleAutovoting($, address(this), account, clock());
+  function _toggleAutoVoting(address account) internal virtual override {
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    AutoVotingLogic.toggleAutoVoting($, address(this), account, clock());
   }
 
   /**
    * @dev Sets the voting preferences for an account
    */
   function _setUserVotingPreferences(address account, bytes32[] memory apps) internal virtual {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
     AutoVotingLogic.setUserVotingPreferences($, address(x2EarnApps()), account, apps);
   }
 
@@ -67,7 +66,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    * @dev Checks if autovoting is enabled for an account at latest timepoint
    */
   function _isAutoVotingEnabled(address account) internal view virtual override returns (bool) {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
     return AutoVotingLogic.isAutoVotingEnabled($, account);
   }
 
@@ -78,7 +77,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
     address account,
     uint48 timepoint
   ) internal view virtual override returns (bool) {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
     return AutoVotingLogic.isAutoVotingEnabledAtTimepoint($, account, timepoint);
   }
 
@@ -86,7 +85,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    * @dev Gets the voting preferences for an account
    */
   function _getUserVotingPreferences(address account) internal view virtual override returns (bytes32[] memory) {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
     return AutoVotingLogic.getUserVotingPreferences($, account);
   }
 
@@ -94,7 +93,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    * @dev Gets the total number of users who enabled autovoting at a specific timepoint
    */
   function _getTotalAutoVotingUsersAtTimepoint(uint48 timepoint) internal view virtual override returns (uint208) {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
     return AutoVotingLogic.getTotalAutoVotingUsersAtTimepoint($, timepoint);
   }
 
@@ -102,7 +101,7 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
    * @dev Gets the total number of users who enabled autovoting at the current timepoint
    */
   function _getTotalAutoVotingUsers() internal view virtual returns (uint208) {
-    AutoVotingLogic.AutoVotingStorage storage $ = _getAutoVotingStorage();
+    XAllocationVotingDataTypes.AutoVotingStorage storage $ = _getAutoVotingStorage();
     return AutoVotingLogic.getTotalAutoVotingUsers($, clock());
   }
 }
