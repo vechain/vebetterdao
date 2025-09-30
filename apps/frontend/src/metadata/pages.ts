@@ -15,10 +15,10 @@ export const pagesMetadata = {
   },
   apps: {
     path: "/apps",
-    title: "VeBetter dApps | Vote on Real Projects in the DAO",
+    title: "VeBetter apps | Vote on Real Projects in the DAO",
     description:
-      "Interact with ecosystem dApps through governance. Support sustainability, track engagement, and use your voice to influence B3TR-powered decisions on VeChain.",
-    image: "/assets/images/dapps_page.webp",
+      "Interact with ecosystem apps through governance. Support sustainability, track engagement, and use your voice to influence B3TR-powered decisions on VeChain.",
+    image: "/assets/images/apps_page.webp",
     imageExtension: "image/webp",
   },
   allocations: {
@@ -47,7 +47,7 @@ export const pagesMetadata = {
   },
   grants: {
     path: "/grants",
-    title: "VeBetterD Governance Grants | Shape the VeBetter Ecosystem ",
+    title: "VeBetter Governance Grants | Shape the VeBetter Ecosystem ",
     description:
       "Help decide which projects receive funding through the VeBetter. Vote on impactful proposals and guide grant distribution in the VeChain-powered ecosystem.",
     image: "/assets/images/grants_page.webp",
