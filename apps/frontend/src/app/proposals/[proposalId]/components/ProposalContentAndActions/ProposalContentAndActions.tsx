@@ -175,6 +175,9 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                 {proposal?.projectWebsite ? (
                   <SocialLink icon={UilGlobe} href={proposal.projectWebsite} label="Project website" />
                 ) : null}
+                {proposal?.appTestnetUrl ? (
+                  <SocialLink icon={UilGlobe} href={proposal.appTestnetUrl} label="App Testnet URL" />
+                ) : null}
                 {proposal?.twitterUsername ? (
                   <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
                 ) : null}
