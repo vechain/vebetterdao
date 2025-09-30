@@ -212,21 +212,23 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                           nextEl: ".custom-swiper-button-next",
                         }}
                         pagination>
-                        {proposal?.outcomesAttachment?.map(attachment => (
-                          <SwiperSlide
-                            key={`slide-${attachment.ipfs}`}
-                            className="slide"
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              width: "100%",
-                              height: "100%",
-                              position: "relative",
-                            }}>
-                            <Image alt={attachment.name || "Attachment image"} src={`${ipfs}/${attachment.ipfs}`} />
-                          </SwiperSlide>
-                        ))}
+                        {proposal?.outcomesAttachment
+                          ?.filter(attachment => attachment.type.startsWith("image"))
+                          .map(attachment => (
+                            <SwiperSlide
+                              key={`slide-${attachment.ipfs}`}
+                              className="slide"
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                width: "100%",
+                                height: "100%",
+                                position: "relative",
+                              }}>
+                              <Image alt={attachment.name || "Attachment image"} src={`${ipfs}/${attachment.ipfs}`} />
+                            </SwiperSlide>
+                          ))}
 
                         <IconButton
                           hideBelow="md"
