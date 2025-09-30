@@ -12,7 +12,7 @@ import { useMetProposalCriteria } from "@/api/contracts/governance"
 export const useNewProposalPageGuard = () => {
   const pathname = usePathname()
   const { account } = useWallet()
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
   const { title, shortDescription, markdownDescription, actions, votingStartRoundId, depositAmount } =
     useProposalFormStore()
 

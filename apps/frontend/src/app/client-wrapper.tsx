@@ -9,6 +9,7 @@ import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel
 import { useEffect } from "react"
 import { datadogRum } from "@datadog/browser-rum"
 import "@/i18n"
+import { Toaster } from "@/components/ui/toaster"
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
@@ -79,6 +80,7 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
             {children}
           </Container>
           <TransactionModal />
+          <Toaster />
         </Flex>
         <Footer />
       </VStack>

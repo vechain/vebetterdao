@@ -1,13 +1,12 @@
-import { ProposalCreatedEvent, ProposalMetadata, useIpfsMetadatas } from "@/api"
-import { toIPFSURL, validateIpfsUri } from "@/utils"
 import { HStack, VStack, Text } from "@chakra-ui/react"
-import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { ProposalBox } from "."
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type Props = {
-  firstProposals?: ProposalCreatedEvent[]
+  firstProposals?: ProposalEnriched[] | GrantProposalEnriched[]
+  isLoading: boolean
   isMoreProposals?: boolean
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
@@ -15,37 +14,12 @@ type Props = {
 
 export const PreviewCreatedProposals = ({
   firstProposals,
+  isLoading,
   isCreatedProposals,
   isMoreProposals,
   onSeeAllProposals,
 }: Props) => {
   const { t } = useTranslation()
-
-  const proposalsURIs = useMemo(() => {
-    if (!firstProposals) return []
-
-    return firstProposals
-      .map(proposal => {
-        const ipfsURL = toIPFSURL(proposal.description)
-
-        // Add only if valid IPFS URI
-        if (validateIpfsUri(ipfsURL)) return ipfsURL
-      })
-      .filter(uri => uri !== undefined) as string[]
-  }, [firstProposals])
-
-  const proposalsMetadata = useIpfsMetadatas<ProposalMetadata>(proposalsURIs ?? [])
-
-  const firstProposalsWithMetadata = useMemo(() => {
-    if (!firstProposals || !proposalsMetadata) return null
-
-    return firstProposals.map((proposal, index) => {
-      return {
-        ...proposal,
-        metadata: proposalsMetadata[index]?.data,
-      }
-    })
-  }, [firstProposals, proposalsMetadata])
 
   if (!firstProposals || firstProposals.length == 0) return null
 
@@ -63,8 +37,8 @@ export const PreviewCreatedProposals = ({
         )}
       </HStack>
       <VStack w={"full"} gap={4}>
-        {firstProposalsWithMetadata?.map(proposal => (
-          <ProposalBox key={proposal.proposalId} proposalId={proposal.proposalId} metadata={proposal.metadata} />
+        {firstProposals?.map(proposal => (
+          <ProposalBox key={proposal.id} proposal={proposal} isLoading={isLoading} />
         ))}
       </VStack>
     </VStack>

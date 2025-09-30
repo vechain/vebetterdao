@@ -7,6 +7,8 @@ export enum ProposalFilter {
   InThisRound = "In this round",
   LookingForSupport = "Looking for support",
   UpcomingVoting = "Upcoming voting",
+  ApprovalPhase = "Approval phase",
+  SupportPhase = "Support phase",
 }
 
 export enum StateFilter {
@@ -16,13 +18,11 @@ export enum StateFilter {
   Queued = "Queued",
   Executed = "Executed",
   DepositNotMet = "Support not reached",
+  InDevelopment = "In development",
+  Completed = "Completed",
+  Pending = "Pending",
+  Active = "Active",
 }
-
-export const initialProposalsFilterValues = [
-  ProposalFilter.InThisRound,
-  ProposalFilter.LookingForSupport,
-  ProposalFilter.UpcomingVoting,
-]
 
 interface ProposalFilterStoreState {
   selectedFilter: (ProposalFilter | StateFilter)[]
@@ -31,7 +31,7 @@ interface ProposalFilterStoreState {
 }
 
 export const useProposalFilters = create<ProposalFilterStoreState>(set => ({
-  selectedFilter: initialProposalsFilterValues,
+  selectedFilter: [],
   setSelectedFilter: filter => set({ selectedFilter: filter }),
-  clearFilter: () => set({ selectedFilter: initialProposalsFilterValues }),
+  clearFilter: () => set({ selectedFilter: [] }),
 }))

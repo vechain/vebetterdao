@@ -4,6 +4,7 @@ import { getConfig } from "@repo/config"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { ProposalFilter, StateFilter } from "@/store"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useProposalEnriched } from "@/hooks/proposals/common"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
@@ -34,7 +35,11 @@ export const getProposalClaimableUserDepositsQueryKey = (userAddress: string) =>
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const thor = useThor()
-  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES)
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(
+    CLAIMABLE_STATES,
+    enrichedProposals,
+  )
 
   return useQuery({
     queryKey: getProposalClaimableUserDepositsQueryKey(userAddress),
@@ -48,7 +53,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
               abi,
               address: GOVERNOR_CONTRACT,
               functionName: "getUserDeposit",
-              args: [BigInt(proposal.proposalId || 0), userAddress],
+              args: [BigInt(proposal.id || 0), userAddress],
             }) as const,
         ),
       })
@@ -56,7 +61,7 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
       const claimableDeposits = res
         .map((deposit, index) => {
           return {
-            proposalId: filteredProposals[index]?.proposalId as string,
+            proposalId: filteredProposals[index]?.id as string,
             deposit: deposit.toString(),
           }
         })

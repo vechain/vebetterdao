@@ -1,10 +1,10 @@
-import { Box, Button, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Button, Image, Text, useDisclosure, VStack, Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { CommunityModal } from "./CommunityModal"
 import { useCallback } from "react"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-
+import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 export const JoinCommunity = () => {
   const { t } = useTranslation()
 
@@ -28,7 +28,7 @@ export const JoinCommunity = () => {
           boxSize={"400px"}
         />
         <VStack alignItems={"flex-start"}>
-          <Image src="/assets/icons/handshake.svg" alt="Join Community" w={32} h={32} />
+          <Icon as={HandshakeIcon} boxSize={32} color="brand.primary" />
           <Text fontSize={15} fontWeight={600} color={"#1E1E1E"}>
             {t("Seeking Guidance or Advice?")}
           </Text>

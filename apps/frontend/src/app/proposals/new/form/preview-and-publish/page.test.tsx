@@ -24,7 +24,7 @@ const spyOnUseMetadataUpload = vi.spyOn(hooks, "useUploadProposalMetadata")
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/preview-and-publish")
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
-const spyOnuseCreateProposal = vi.spyOn(hooks, "useCreateProposal")
+const spyOnuseCreateProposal = vi.spyOn(hooks, "useCreateStandardProposal")
 
 const mockSendTransaction = vi.fn()
 

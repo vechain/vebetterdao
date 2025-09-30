@@ -1,30 +1,40 @@
-import { ProposalState, useIsDepositReached } from "@/api"
-import { Icon, Skeleton, StackProps, TextProps } from "@chakra-ui/react"
+import { Icon, StackProps, TextProps } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 import { Badge, DotSymbol } from "@/components"
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { GrantsProposalStatusBadge } from "./Grants/GrantsProposalStatusBadge"
 
 type Props = {
-  proposalId: string
   renderIcon?: boolean
   renderBadge?: boolean
   textProps?: TextProps
   containerProps?: StackProps
   proposalState?: ProposalState
+  isDepositReached?: boolean
+  proposalType?: ProposalType
 }
 
 export const ProposalStatusBadge = ({
-  proposalId,
   renderBadge = true,
   renderIcon = true,
   textProps = {},
   containerProps = {},
   proposalState,
+  isDepositReached,
+  proposalType,
 }: Props) => {
-  const { data: isDepositReached, isLoading: isDepositReachedLoading } = useIsDepositReached(proposalId)
   const { t } = useTranslation()
 
+  if (proposalType === ProposalType.Grant) {
+    return (
+      <GrantsProposalStatusBadge
+        state={proposalState ?? ProposalState.Pending}
+        depositReached={isDepositReached ?? false}
+      />
+    ) // TODO: extend the exist to remove GrantsBadge
+  }
   switch (proposalState) {
     case ProposalState.Succeeded:
       return (
@@ -100,41 +110,15 @@ export const ProposalStatusBadge = ({
     case ProposalState.Pending:
       if (isDepositReached)
         return (
-          <Skeleton loading={isDepositReachedLoading}>
-            <Badge
-              textProps={{
-                color: "#004CFC",
-                ...textProps,
-              }}
-              containerProps={
-                renderBadge
-                  ? {
-                      bgColor: "#E0E9FE",
-                      ...containerProps,
-                    }
-                  : {
-                      px: 0,
-                      py: 0,
-                      ...containerProps,
-                    }
-              }
-              text={t("Upcoming voting")}
-              icon={renderIcon ? <Icon as={UilClockEight} boxSize={4} color={"#004CFC"} /> : undefined}
-            />
-          </Skeleton>
-        )
-
-      return (
-        <Skeleton loading={isDepositReachedLoading}>
           <Badge
             textProps={{
-              color: "#F29B32",
+              color: "#004CFC",
               ...textProps,
             }}
             containerProps={
               renderBadge
                 ? {
-                    bgColor: "#FFF3E5",
+                    bgColor: "#E0E9FE",
                     ...containerProps,
                   }
                 : {
@@ -143,10 +127,32 @@ export const ProposalStatusBadge = ({
                     ...containerProps,
                   }
             }
-            text={t("Looking for support")}
-            icon={renderIcon ? <Icon as={FaRegHeart} boxSize={4} color={"#F29B32"} /> : undefined}
+            text={t("Upcoming voting")}
+            icon={renderIcon ? <Icon as={UilClockEight} boxSize={4} color={"#004CFC"} /> : undefined}
           />
-        </Skeleton>
+        )
+
+      return (
+        <Badge
+          textProps={{
+            color: "#F29B32",
+            ...textProps,
+          }}
+          containerProps={
+            renderBadge
+              ? {
+                  bgColor: "#FFF3E5",
+                  ...containerProps,
+                }
+              : {
+                  px: 0,
+                  py: 0,
+                  ...containerProps,
+                }
+          }
+          text={t("Looking for support")}
+          icon={renderIcon ? <Icon as={FaRegHeart} boxSize={4} color={"#F29B32"} /> : undefined}
+        />
       )
 
     case ProposalState.Active:
