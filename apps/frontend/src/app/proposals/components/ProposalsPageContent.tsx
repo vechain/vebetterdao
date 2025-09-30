@@ -83,6 +83,7 @@ export const ProposalsPageContent = () => {
               proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
             />
           ))}
+
           {filteredProposals.length === 0 && !isLoading && (
             <NoProposalsCard
               onClick={onNewClick}

@@ -27,6 +27,9 @@ import {
   Skeleton,
   useDisclosure,
   VStack,
+  Pagination,
+  IconButton,
+  ButtonGroup,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
@@ -34,11 +37,13 @@ import BigNumber from "bignumber.js"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuFileText } from "react-icons/lu"
+import { LuFileText, LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
 import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
+
+const pageSize = 10
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -115,6 +120,11 @@ export const GrantsPageContent = () => {
   const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
   const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
   const { open: isOpenConvertModal, onClose: onCloseConvertModal, onOpen: onOpenConvertModal } = useDisclosure()
+  const [page, setPage] = useState(1)
+
+  const startRange = (page - 1) * pageSize
+  const endRange = startRange + pageSize
+
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
@@ -128,6 +138,8 @@ export const GrantsPageContent = () => {
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
   const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
+
+  const visibleProposal = filteredProposals?.slice(startRange, endRange)
 
   // COMPUTED VALUES
   const totalGrantsApproved = useMemo(() => {
@@ -166,7 +178,7 @@ export const GrantsPageContent = () => {
   )
 
   const renderProposals = () =>
-    filteredProposals?.map(proposal => (
+    visibleProposal?.map(proposal => (
       <GridItem key={proposal.id}>
         <GrantsProposalCard proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }} />
       </GridItem>
@@ -292,6 +304,54 @@ export const GrantsPageContent = () => {
                   filteredProposals &&
                   filteredProposals.length > 0 &&
                   renderProposals()}
+
+                {filteredProposals && filteredProposals.length > 0 && (
+                  <Pagination.Root
+                    mx={{ base: "auto", md: "unset" }}
+                    defaultPage={1}
+                    count={filteredProposals.length}
+                    pageSize={pageSize}
+                    page={page}
+                    onPageChange={e => setPage(e.page)}
+                    display="flex"
+                    alignItems="center"
+                    gap="4">
+                    {!isMobile && (
+                      <HStack gap="1">
+                        <Text textStyle="sm">{t("Showing")}</Text>
+
+                        <Pagination.PageText format="long" />
+                      </HStack>
+                    )}
+
+                    <ButtonGroup variant="ghost" size="xs">
+                      <Pagination.PrevTrigger asChild>
+                        <IconButton>
+                          <LuChevronLeft />
+                        </IconButton>
+                      </Pagination.PrevTrigger>
+
+                      {isMobile ? (
+                        <Pagination.PageText format="long" />
+                      ) : (
+                        <Pagination.Items
+                          render={page => (
+                            <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
+                              {page.value}
+                            </IconButton>
+                          )}
+                        />
+                      )}
+
+                      <Pagination.NextTrigger asChild>
+                        <IconButton>
+                          <LuChevronRight />
+                        </IconButton>
+                      </Pagination.NextTrigger>
+                    </ButtonGroup>
+                  </Pagination.Root>
+                )}
+
                 {!isLoadingEnrichedGrantProposals &&
                   (!filteredProposals || filteredProposals.length === 0) &&
                   renderEmptyState()}
