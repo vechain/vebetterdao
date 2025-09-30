@@ -16,20 +16,21 @@ import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProp
 import { ProposalType } from "@/types"
 import {
   Button,
-  Stack,
+  ButtonGroup,
   createListCollection,
   Grid,
   GridItem,
   Heading,
   HStack,
   Icon,
+  IconButton,
   Link,
+  Pagination,
   Skeleton,
+  Stack,
+  Text,
   useDisclosure,
   VStack,
-  Pagination,
-  IconButton,
-  ButtonGroup,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
@@ -37,7 +38,7 @@ import BigNumber from "bignumber.js"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LuFileText, LuChevronLeft, LuChevronRight } from "react-icons/lu"
+import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
 import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsStatsCards } from "./GrantsStatsCards"
