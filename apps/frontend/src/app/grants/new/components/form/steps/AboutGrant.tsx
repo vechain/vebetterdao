@@ -553,10 +553,10 @@ export const AboutGrant = ({
                     label={t("Benefits to apps")}
                     placeholder={t("Benefits to apps")}
                     type="textarea"
-                    isOptional={!isToolingGrant}
+                    isOptional={isToolingGrant}
                     defaultValue={textAreasDefaultValues.benefitsToDApps}
                     register={register("benefitsToDApps", {
-                      required: isToolingGrant ? t("Please describe benefits to apps") : false,
+                      required: !isToolingGrant ? t("Please describe benefits to apps") : false,
                       maxLength: {
                         value: MAX_TEXT_AREA_LENGTH,
                         message: t("Text too long. Maximum allowed: {{amount}} characters.", {
