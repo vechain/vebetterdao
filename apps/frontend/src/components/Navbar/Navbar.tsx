@@ -1,14 +1,13 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
+import { useHideOnScroll } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
-import { useHideOnScroll } from "@/hooks"
 
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
@@ -39,11 +38,9 @@ export const Navbar: React.FC = () => {
     return routesToRender
   }, [routesToRender])
 
-  const bg = useColorModeValue("#F7F7F7", "#131313")
-
   return (
     <Box
-      bg={bg}
+      bg={isLargerThan1200 ? "chakra-body-bg" : "bg.primary"}
       px={0}
       position={"sticky"}
       top={0}
