@@ -378,10 +378,8 @@
   "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.": "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.",
   "Community support will be returned, and you cannot recover this proposal.": "Community support will be returned, and you cannot recover this proposal.",
   "Basic information": "Basic information",
-  "Cancel proposal": "Cancel proposal",
   "This proposal has been canceled by the creator or VeBetter and can no longer be supported.": "This proposal has been canceled by the creator or VeBetter and can no longer be supported.",
   "It was probably fraudulent or harmful to the DAO.": "It was probably fraudulent or harmful to the DAO.",
-  "Cancel this proposal": "Cancel this proposal",
   "canceled": "canceled",
   "Canceled": "Canceled",
   "Cast your vote": "Cast your vote",
@@ -1497,5 +1495,7 @@
   "No grants found": "No grants found",
   "Try adjusting your search or filters": "Try adjusting your search or filters",
   "Be the first to submit a grant proposal": "Be the first to submit a grant proposal",
-  "Are you completely sure to cancel this proposal?": "Are you completely sure to cancel this proposal?"
+  "Cancel {{proposalType}}": "Cancel {{proposalType}}",
+  "Are you sure you want to cancel this {{proposalType}}": "Are you sure you want to cancel this {{proposalType}}",
+  "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible."
 }
