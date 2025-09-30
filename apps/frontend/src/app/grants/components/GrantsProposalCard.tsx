@@ -24,6 +24,7 @@ import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
 
 type GrantsProposalCardProps = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }
+  variant?: "grant" | "proposal"
 }
 
 // Type guard to check if a proposal is a grant proposal
@@ -31,7 +32,7 @@ const isGrantProposal = (proposal: GrantProposalEnriched | ProposalEnriched): pr
   return proposal.type === ProposalType.Grant
 }
 
-export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
+export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsProposalCardProps) => {
   // ==========================================
   // HOOKS
   // ==========================================
@@ -79,8 +80,8 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   // ==========================================
   // EVENT HANDLERS
   // ==========================================
-  const goToProposal = () => {
-    router.push(`/proposals/${proposal.id}`)
+  const goToGrants = () => {
+    router.push(`/${variant === "grant" ? "grants" : "proposals"}/${proposal.id}`)
   }
 
   // ==========================================
@@ -94,7 +95,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
       p={{ base: 5, md: 7 }}
       _hover={{ bg: "gray.50", _dark: { bg: "#000000" } }}
       cursor="pointer"
-      onClick={goToProposal}>
+      onClick={goToGrants}>
       <VStack w="full" gap={4} alignItems="flex-start">
         {/* Header Section */}
         <Heading size={{ base: "lg", lg: "md" }} wordBreak="break-word" flexWrap="wrap">
