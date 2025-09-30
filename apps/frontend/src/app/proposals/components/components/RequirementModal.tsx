@@ -78,7 +78,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
                 <List.Item>
                   <Text>
                     <Trans
-                      i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
+                      i18nKey="Create a discussion thread about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetter."
                       components={{ b: <Text as="span" fontWeight="bold" /> }}
                     />
                   </Text>
@@ -88,7 +88,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
           ) : (
             <Text fontWeight={400}>
               <Trans
-                i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetterDAO."
+                i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetter."
                 components={{ b: <Text as="span" fontWeight="bold" /> }}
               />
             </Text>

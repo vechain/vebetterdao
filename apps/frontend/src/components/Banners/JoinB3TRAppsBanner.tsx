@@ -38,7 +38,7 @@ export const JoinB3TRAppsBanner = () => {
             />
           )}
           <Heading fontSize="2xl" fontWeight="bold" lineHeight={1.2}>
-            {t("Do you have a dApp to join the VeBetter DAO ecosystem?")}
+            {t("Do you have an app to join the VeBetter DAO ecosystem?")}
           </Heading>
           <Text>
             {t(
