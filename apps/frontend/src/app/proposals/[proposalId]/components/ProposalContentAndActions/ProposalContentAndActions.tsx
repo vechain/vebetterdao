@@ -224,7 +224,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                               height: "100%",
                               position: "relative",
                             }}>
-                            <Image alt={attachment.ipfs} src={`${ipfs}/${attachment.ipfs}`} />
+                            <Image alt={attachment.name || "Attachment image"} src={`${ipfs}/${attachment.ipfs}`} />
                           </SwiperSlide>
                         ))}
 
