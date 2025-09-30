@@ -89,7 +89,7 @@ describe("VoterRewards V6 - @shard10a", function () {
 
       // Enable auto-voting for user
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
 
       // Start a new round
       await waitForNextCycle(emissions)
@@ -207,7 +207,7 @@ describe("VoterRewards V6 - @shard10a", function () {
 
       // Enable auto-voting for user
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
 
       // Start a new round
       await waitForNextCycle(emissions)
@@ -239,7 +239,7 @@ describe("VoterRewards V6 - @shard10a", function () {
 
       // Enable auto-voting for user
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
 
       // Start a new round
       await waitForNextCycle(emissions)
@@ -327,9 +327,9 @@ describe("VoterRewards V6 - @shard10a", function () {
 
       // Enable auto-voting for both users
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
       await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user1).toggleAutoVoting()
+      await xAllocationVoting.connect(user1).toggleAutoVoting(user1.address)
       // Start a new round
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -429,7 +429,7 @@ describe("VoterRewards V6 - @shard10a", function () {
 
       // Enable auto-voting for user
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
 
       // Start a new round
       await waitForNextCycle(emissions)
@@ -509,9 +509,9 @@ describe("VoterRewards V6 - @shard10a", function () {
 
       // Enable auto-voting for both users
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting()
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
       await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user1).toggleAutoVoting()
+      await xAllocationVoting.connect(user1).toggleAutoVoting(user1.address)
 
       // Start a new round - both users should be counted in total actions
       await waitForNextCycle(emissions)
