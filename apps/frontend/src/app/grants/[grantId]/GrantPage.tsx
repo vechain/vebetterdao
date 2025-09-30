@@ -6,8 +6,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const ProposalPageContent = dynamic(
-  () => import("./components/ProposalPageContent").then(mod => mod.ProposalPageContent),
+const GrantPageContent = dynamic(
+  () => import("../../proposals/[proposalId]/components/ProposalPageContent").then(mod => mod.ProposalPageContent),
   {
     ssr: false,
     loading: () => (
@@ -20,16 +20,18 @@ const ProposalPageContent = dynamic(
 
 type Props = {
   params: {
-    proposalId: string
+    grantId: string
   }
 }
-export const ProposalPage = ({ params }: Props) => {
+
+export const GrantPage = ({ params }: Readonly<Props>) => {
   useEffect(() => {
-    AnalyticsUtils.trackPage("Proposals")
+    AnalyticsUtils.trackPage("Grants")
   }, [])
+
   return (
     <MotionVStack>
-      <ProposalPageContent proposalId={params.proposalId} typeFilter="proposal" />
+      <GrantPageContent proposalId={params.grantId} typeFilter="grant" />
     </MotionVStack>
   )
 }

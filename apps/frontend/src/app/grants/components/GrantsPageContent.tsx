@@ -1,4 +1,8 @@
-import { ConvertModal, MobileFilterDrawer, SearchField, SelectField, EmptyStateCard } from "@/components"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { GrantsProposalCard } from "@/app/grants/components"
+import { HowToSupportCard } from "@/app/proposals"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { ConvertModal, EmptyStateCard, MobileFilterDrawer, SearchField, SelectField } from "@/components"
 import {
   GrantProposalEnriched,
   ProposalState,
@@ -8,37 +12,39 @@ import {
   useProposalEnriched,
   useProposalSearch,
 } from "@/hooks"
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
+import { ProposalType } from "@/types"
 import {
+  Button,
+  ButtonGroup,
   createListCollection,
   Grid,
   GridItem,
   Heading,
   HStack,
   Icon,
+  IconButton,
   Link,
-  Text,
+  Pagination,
   Skeleton,
+  Stack,
+  Text,
   useDisclosure,
   VStack,
-  Button,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { LuFileText } from "react-icons/lu"
-import BigNumber from "bignumber.js"
-import { useMemo, useState, useCallback } from "react"
-import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
 import { GrantsBanners } from "./Banner/GrantsBanners"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
-import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { ProposalType } from "@/types"
-import { useRouter } from "next/navigation"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { GrantsProposalCard } from "@/app/grants/components"
-import { HowToSupportCard } from "@/app/proposals"
+
+const pageSize = 10
 
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
@@ -56,10 +62,8 @@ export const GrantsPageContent = () => {
   const filterOptions = useMemo(() => {
     return createListCollection({
       items: [
-        { label: t("Approval phase"), value: StateFilter.Active },
-        { label: t("Support phase"), value: ProposalFilter.LookingForSupport },
-        { label: t("Supported"), value: ProposalFilter.UpcomingVoting },
-        { label: t("Approved"), value: StateFilter.Succeeded },
+        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Support phase"), value: ProposalFilter.SupportPhase },
         { label: t("In development"), value: StateFilter.InDevelopment },
         { label: t("Completed"), value: StateFilter.Completed },
         { label: t("Cancelled"), value: StateFilter.Canceled },
@@ -117,6 +121,11 @@ export const GrantsPageContent = () => {
   const mobileStepCardDisclosure = useDisclosure({ defaultOpen: false })
   const { open, onOpen, onClose } = isMobile ? mobileStepCardDisclosure : desktopStepCardDisclosure
   const { open: isOpenConvertModal, onClose: onCloseConvertModal, onOpen: onOpenConvertModal } = useDisclosure()
+  const [page, setPage] = useState(1)
+
+  const startRange = (page - 1) * pageSize
+  const endRange = startRange + pageSize
+
   // LOGIC HOOKS
   const [searchTerm, setSearchTerm] = useState("")
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
@@ -130,6 +139,8 @@ export const GrantsPageContent = () => {
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
   const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
+
+  const visibleProposal = filteredProposals?.slice(startRange, endRange)
 
   // COMPUTED VALUES
   const totalGrantsApproved = useMemo(() => {
@@ -168,7 +179,7 @@ export const GrantsPageContent = () => {
   )
 
   const renderProposals = () =>
-    filteredProposals?.map(proposal => (
+    visibleProposal?.map(proposal => (
       <GridItem key={proposal.id}>
         <GrantsProposalCard proposal={proposal as GrantProposalEnriched & { isDepositReached: boolean }} />
       </GridItem>
@@ -202,7 +213,7 @@ export const GrantsPageContent = () => {
     <>
       <VStack w="full" gap={8} pb={8}>
         <GrantsBanners />
-        <HStack w="full" justifyContent="space-between">
+        <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
           <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
             <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Grants")}</Heading>
             {!open && (
@@ -211,38 +222,44 @@ export const GrantsPageContent = () => {
                 alignItems="center"
                 fontWeight={500}
                 color="primary.500"
+                px={0}
                 fontSize={{ base: "xs", lg: "md" }}
                 onClick={onOpen}>
                 <Icon as={UilInfoCircle} boxSize={4} />
-                {t("More info")}
+                {!isMobile && t("More info")}
               </Link>
             )}
           </HStack>
           {showApplyForGrant && (
-            <HStack gap="4">
+            <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }} gap={4}>
               <Button
                 asChild
-                variant="ghost"
+                variant={isMobile ? "secondary" : "ghost"}
                 color="actions.tertiary.default"
                 focusRingColor="actions.tertiary.default"
-                size={{ base: "sm", md: "md" }}
+                size="md"
+                w={{ base: "50%", md: "auto" }}
                 rounded="full">
-                <Link href="grants/manage">{t("My grants")}</Link>
+                <Link href="grants/manage" fontSize={"md"}>
+                  {t("My grants")}
+                </Link>
               </Button>
 
-              <Button variant="primaryAction" size={{ base: "sm", md: "md" }} onClick={onApplyForGrant}>
-                <Text>{t("Apply for Grant")}</Text>
+              <Button variant="primaryAction" size="md" onClick={onApplyForGrant} w={{ base: "50%", md: "auto" }}>
+                {t("Apply for Grant")}
               </Button>
             </HStack>
           )}
-        </HStack>
+        </Stack>
 
         <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
-        <GrantsStatsCards
-          totalApplications={enrichedGrantProposals?.length || 0}
-          totalApproved={totalGrantsApproved}
-          totalFunds={totalDistributedAmount.toNumber()}
-        />
+        {!isMobile && (
+          <GrantsStatsCards
+            totalApplications={enrichedGrantProposals?.length || 0}
+            totalApproved={totalGrantsApproved}
+            totalFunds={totalDistributedAmount.toNumber()}
+          />
+        )}
 
         <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
           <GridItem colSpan={{ base: 1, md: 2 }}>
@@ -288,6 +305,54 @@ export const GrantsPageContent = () => {
                   filteredProposals &&
                   filteredProposals.length > 0 &&
                   renderProposals()}
+
+                {filteredProposals && filteredProposals.length > 0 && (
+                  <Pagination.Root
+                    mx={{ base: "auto", md: "unset" }}
+                    defaultPage={1}
+                    count={filteredProposals.length}
+                    pageSize={pageSize}
+                    page={page}
+                    onPageChange={e => setPage(e.page)}
+                    display="flex"
+                    alignItems="center"
+                    gap="4">
+                    {!isMobile && (
+                      <HStack gap="1">
+                        <Text textStyle="sm">{t("Showing")}</Text>
+
+                        <Pagination.PageText format="long" />
+                      </HStack>
+                    )}
+
+                    <ButtonGroup variant="ghost" size="xs">
+                      <Pagination.PrevTrigger asChild>
+                        <IconButton>
+                          <LuChevronLeft />
+                        </IconButton>
+                      </Pagination.PrevTrigger>
+
+                      {isMobile ? (
+                        <Pagination.PageText format="long" />
+                      ) : (
+                        <Pagination.Items
+                          render={page => (
+                            <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
+                              {page.value}
+                            </IconButton>
+                          )}
+                        />
+                      )}
+
+                      <Pagination.NextTrigger asChild>
+                        <IconButton>
+                          <LuChevronRight />
+                        </IconButton>
+                      </Pagination.NextTrigger>
+                    </ButtonGroup>
+                  </Pagination.Root>
+                )}
+
                 {!isLoadingEnrichedGrantProposals &&
                   (!filteredProposals || filteredProposals.length === 0) &&
                   renderEmptyState()}

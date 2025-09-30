@@ -79,16 +79,18 @@ export const ProposalsPageContent = () => {
           {filteredProposals.map(proposal => (
             <GrantsProposalCard
               key={proposal.id}
+              variant="proposal"
               proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
             />
           ))}
+
           {filteredProposals.length === 0 && !isLoading && (
             <NoProposalsCard
               onClick={onNewClick}
               buttonText={t("Create proposal")}
               description={
                 <Text fontSize={16} fontWeight={400} mt={2}>
-                  {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}{" "}
+                  {t("Have an idea for something that could improve the experience in VeBetter? ")}{" "}
                   <b style={{ color: "contrast-fg-on-muted" }}>{t("Create a proposal")}</b>{" "}
                   {t("and let the community vote to make it happen!")}
                 </Text>
