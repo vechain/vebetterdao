@@ -24,6 +24,7 @@ import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
 
 type GrantsProposalCardProps = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }
+  variant?: "grant" | "proposal"
 }
 
 // Type guard to check if a proposal is a grant proposal
@@ -31,7 +32,7 @@ const isGrantProposal = (proposal: GrantProposalEnriched | ProposalEnriched): pr
   return proposal.type === ProposalType.Grant
 }
 
-export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
+export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsProposalCardProps) => {
   // ==========================================
   // HOOKS
   // ==========================================
@@ -80,7 +81,7 @@ export const GrantsProposalCard = ({ proposal }: GrantsProposalCardProps) => {
   // EVENT HANDLERS
   // ==========================================
   const goToGrants = () => {
-    router.push(`/grants/${proposal.id}`)
+    router.push(`/${variant === "grant" ? "grants" : "proposals"}/${proposal.id}`)
   }
 
   // ==========================================

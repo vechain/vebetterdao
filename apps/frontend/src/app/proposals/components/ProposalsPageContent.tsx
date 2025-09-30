@@ -79,6 +79,7 @@ export const ProposalsPageContent = () => {
           {filteredProposals.map(proposal => (
             <GrantsProposalCard
               key={proposal.id}
+              variant="proposal"
               proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
             />
           ))}
