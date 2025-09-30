@@ -7,7 +7,7 @@ import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunct
 import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
-import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
+import { Alert, Box, Grid, GridItem, IconButton, Image, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
 import { Link, Linkedin } from "iconoir-react"
@@ -18,7 +18,16 @@ import { FaXTwitter } from "react-icons/fa6"
 import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
 
+import { A11y, Navigation, Pagination } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
+import "@/app/theme/swiper-custom.css"
+import "swiper/css"
+import "swiper/css/navigation"
+import "swiper/css/pagination"
+
 import { SocialLink } from "../SocialLink"
+import { getConfig } from "@repo/config"
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -31,6 +40,8 @@ const isStandardProposal = (proposal?: ProposalEnriched | GrantProposalEnriched)
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
+
+const ipfs = getConfig().ipfsFetchingService
 
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   // ==========================================
@@ -191,6 +202,60 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                         <FileAttachmentPreview attachment={attachment} uniqueKey={index} />
                       </GridItem>
                     ))}
+
+                    <GridItem colSpan={2} px={1}>
+                      <Swiper
+                        modules={[A11y, Navigation, Pagination]}
+                        slidesPerView={1}
+                        navigation={{
+                          prevEl: ".custom-swiper-button-prev",
+                          nextEl: ".custom-swiper-button-next",
+                        }}
+                        pagination>
+                        {proposal?.outcomesAttachment
+                          ?.filter(attachment => attachment.type.startsWith("image"))
+                          .map(attachment => (
+                            <SwiperSlide
+                              key={`slide-${attachment.ipfs}`}
+                              className="slide"
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                width: "100%",
+                                height: "100%",
+                                position: "relative",
+                              }}>
+                              <Image alt={attachment.name || "Attachment image"} src={`${ipfs}/${attachment.ipfs}`} />
+                            </SwiperSlide>
+                          ))}
+
+                        <IconButton
+                          hideBelow="md"
+                          className="custom-swiper-button-prev"
+                          pos={"absolute"}
+                          zIndex={2}
+                          rounded="full"
+                          left={0}
+                          top={"50%"}
+                          transform={"translateY(-50%)"}
+                          aria-label="Previous app">
+                          <FaArrowLeft />
+                        </IconButton>
+                        <IconButton
+                          hideBelow="md"
+                          className="custom-swiper-button-next"
+                          pos={"absolute"}
+                          zIndex={2}
+                          rounded="full"
+                          right={0}
+                          top={"50%"}
+                          transform={"translateY(-50%)"}
+                          aria-label="Next app">
+                          <FaArrowRight />
+                        </IconButton>
+                      </Swiper>
+                    </GridItem>
                   </Grid>
                 </VStack>
               ) : null}
