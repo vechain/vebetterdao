@@ -8,9 +8,9 @@ import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType }
 import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
 import { Alert, Box, Grid, GridItem, VStack } from "@chakra-ui/react"
-import { UilGithub, UilGlobe } from "@iconscout/react-unicons"
+import { UilGithub } from "@iconscout/react-unicons"
 import MDEditor from "@uiw/react-md-editor"
-import { Linkedin } from "iconoir-react"
+import { Link, Linkedin } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AiOutlineDiscord } from "react-icons/ai"
@@ -173,10 +173,10 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
                   <SocialLink icon={RiTelegram2Line} href={proposal.companyTelegram} label="Telegram" />
                 ) : null}
                 {proposal?.projectWebsite ? (
-                  <SocialLink icon={UilGlobe} href={proposal.projectWebsite} label="Project website" />
+                  <SocialLink icon={Link} href={proposal.projectWebsite} label="Project website" />
                 ) : null}
                 {proposal?.appTestnetUrl ? (
-                  <SocialLink icon={UilGlobe} href={proposal.appTestnetUrl} label="App Testnet URL" />
+                  <SocialLink icon={Link} href={proposal.appTestnetUrl} label="App Testnet URL" />
                 ) : null}
                 {proposal?.twitterUsername ? (
                   <SocialLink icon={FaXTwitter} href={`https://x.com/${proposal.twitterUsername}`} label="Twitter" />
