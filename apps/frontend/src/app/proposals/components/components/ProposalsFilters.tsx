@@ -4,7 +4,10 @@ import { MdClose } from "react-icons/md"
 import { useProposalFilters, ProposalFilter, StateFilter } from "@/store"
 import { useTranslation } from "react-i18next"
 
-const filters: Record<ProposalFilter, string[]> = {
+const filters: Record<
+  ProposalFilter.State | ProposalFilter.InThisRound | ProposalFilter.LookingForSupport | ProposalFilter.UpcomingVoting,
+  string[]
+> = {
   [ProposalFilter.State]: [
     StateFilter.Canceled,
     StateFilter.Defeated,
