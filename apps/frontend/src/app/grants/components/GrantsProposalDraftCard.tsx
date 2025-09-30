@@ -26,7 +26,6 @@ const requiredGrantFieldKeys = [
   "targetUsers",
   "competitiveEdge",
   "benefitsToUsers",
-  "benefitsToDApps",
   "benefitsToVeChainEcosystem",
   "x2EModel",
   "revenueModel",
