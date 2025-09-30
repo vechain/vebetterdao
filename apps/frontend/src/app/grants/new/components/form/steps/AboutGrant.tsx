@@ -553,7 +553,7 @@ export const AboutGrant = ({
                     label={t("Benefits to apps")}
                     placeholder={t("Benefits to apps")}
                     type="textarea"
-                    isOptional
+                    isOptional={!isToolingGrant}
                     defaultValue={textAreasDefaultValues.benefitsToDApps}
                     register={register("benefitsToDApps", {
                       required: isToolingGrant ? t("Please describe benefits to apps") : false,
