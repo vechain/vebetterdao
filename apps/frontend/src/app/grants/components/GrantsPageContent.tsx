@@ -300,50 +300,52 @@ export const GrantsPageContent = () => {
                   filteredProposals.length > 0 &&
                   renderProposals()}
 
-                <Pagination.Root
-                  mx={{ base: "auto", md: "unset" }}
-                  defaultPage={1}
-                  count={filteredProposals.length}
-                  pageSize={pageSize}
-                  page={page}
-                  onPageChange={e => setPage(e.page)}
-                  display="flex"
-                  alignItems="center"
-                  gap="4">
-                  {!isMobile && (
-                    <HStack gap="1">
-                      <Text textStyle="sm">{t("Showing")}</Text>
+                {filteredProposals && filteredProposals.length > 0 && (
+                  <Pagination.Root
+                    mx={{ base: "auto", md: "unset" }}
+                    defaultPage={1}
+                    count={filteredProposals.length}
+                    pageSize={pageSize}
+                    page={page}
+                    onPageChange={e => setPage(e.page)}
+                    display="flex"
+                    alignItems="center"
+                    gap="4">
+                    {!isMobile && (
+                      <HStack gap="1">
+                        <Text textStyle="sm">{t("Showing")}</Text>
 
-                      <Pagination.PageText format="long" />
-                    </HStack>
-                  )}
-
-                  <ButtonGroup variant="ghost" size="xs">
-                    <Pagination.PrevTrigger asChild>
-                      <IconButton>
-                        <LuChevronLeft />
-                      </IconButton>
-                    </Pagination.PrevTrigger>
-
-                    {isMobile ? (
-                      <Pagination.PageText format="long" />
-                    ) : (
-                      <Pagination.Items
-                        render={page => (
-                          <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
-                            {page.value}
-                          </IconButton>
-                        )}
-                      />
+                        <Pagination.PageText format="long" />
+                      </HStack>
                     )}
 
-                    <Pagination.NextTrigger asChild>
-                      <IconButton>
-                        <LuChevronRight />
-                      </IconButton>
-                    </Pagination.NextTrigger>
-                  </ButtonGroup>
-                </Pagination.Root>
+                    <ButtonGroup variant="ghost" size="xs">
+                      <Pagination.PrevTrigger asChild>
+                        <IconButton>
+                          <LuChevronLeft />
+                        </IconButton>
+                      </Pagination.PrevTrigger>
+
+                      {isMobile ? (
+                        <Pagination.PageText format="long" />
+                      ) : (
+                        <Pagination.Items
+                          render={page => (
+                            <IconButton rounded="full" variant={{ base: "ghost", _selected: "surface" }}>
+                              {page.value}
+                            </IconButton>
+                          )}
+                        />
+                      )}
+
+                      <Pagination.NextTrigger asChild>
+                        <IconButton>
+                          <LuChevronRight />
+                        </IconButton>
+                      </Pagination.NextTrigger>
+                    </ButtonGroup>
+                  </Pagination.Root>
+                )}
 
                 {!isLoadingEnrichedGrantProposals &&
                   (!filteredProposals || filteredProposals.length === 0) &&
