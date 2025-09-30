@@ -2,7 +2,7 @@ import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
-import { Button, Heading, HStack, Icon, IconButton, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -126,7 +126,7 @@ export const DashboardAllocationRounds = () => {
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack gap={4} w="full">
           <Heading fontSize="24px" fontWeight={400}>
-            {t("Proposals in this round or looking for support")}
+            {t("Proposals and Grants looking for support and approval")}
           </Heading>
 
           {!!sortedProposals.length ? (
@@ -139,9 +139,6 @@ export const DashboardAllocationRounds = () => {
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Link href="/proposals" color="primary" fontWeight="semibold">
-          {t("View all proposals")}
-        </Link>
       </VStack>
     </ResponsiveCard>
   )
