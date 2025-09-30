@@ -16,6 +16,7 @@ import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProp
 import { ProposalType } from "@/types"
 import {
   Button,
+  Stack,
   createListCollection,
   Grid,
   GridItem,
@@ -24,7 +25,6 @@ import {
   Icon,
   Link,
   Skeleton,
-  Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
@@ -200,7 +200,7 @@ export const GrantsPageContent = () => {
     <>
       <VStack w="full" gap={8} pb={8}>
         <GrantsBanners />
-        <HStack w="full" justifyContent="space-between">
+        <Stack direction={{ base: "column", md: "row" }} w="full" justifyContent="space-between">
           <HStack alignItems="center" textAlign="center" w="full" justifyContent="flex-start">
             <Heading size={{ base: "2xl", lg: "3xl" }}>{t("Grants")}</Heading>
             {!open && (
@@ -217,31 +217,36 @@ export const GrantsPageContent = () => {
               </Link>
             )}
           </HStack>
-          {showApplyForGrant && !isMobile && (
-            <HStack gap="4">
+          {showApplyForGrant && (
+            <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }} gap={4}>
               <Button
                 asChild
-                variant="ghost"
+                variant={isMobile ? "secondary" : "ghost"}
                 color="actions.tertiary.default"
                 focusRingColor="actions.tertiary.default"
-                size={{ base: "sm", md: "md" }}
+                size="md"
+                w={{ base: "50%", md: "auto" }}
                 rounded="full">
-                <Link href="grants/manage">{t("My grants")}</Link>
+                <Link href="grants/manage" fontSize={"md"}>
+                  {t("My grants")}
+                </Link>
               </Button>
 
-              <Button variant="primaryAction" size={{ base: "xs", md: "md" }} onClick={onApplyForGrant}>
-                <Text>{t("Apply for Grant")}</Text>
+              <Button variant="primaryAction" size="md" onClick={onApplyForGrant} w={{ base: "50%", md: "auto" }}>
+                {t("Apply for Grant")}
               </Button>
             </HStack>
           )}
-        </HStack>
+        </Stack>
 
         <GrantsStepsCard steps={stepsArray} isOpen={open} onClose={onClose} />
-        <GrantsStatsCards
-          totalApplications={enrichedGrantProposals?.length || 0}
-          totalApproved={totalGrantsApproved}
-          totalFunds={totalDistributedAmount.toNumber()}
-        />
+        {!isMobile && (
+          <GrantsStatsCards
+            totalApplications={enrichedGrantProposals?.length || 0}
+            totalApproved={totalGrantsApproved}
+            totalFunds={totalDistributedAmount.toNumber()}
+          />
+        )}
 
         <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8} w="full">
           <GridItem colSpan={{ base: 1, md: 2 }}>
