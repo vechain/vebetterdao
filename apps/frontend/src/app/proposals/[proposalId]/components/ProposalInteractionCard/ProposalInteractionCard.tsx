@@ -42,6 +42,7 @@ import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges"
+import { ProposalCancelModal } from "../ProposalCancelModal"
 
 export const ProposalInteractionCard = ({
   proposal,
@@ -62,7 +63,7 @@ export const ProposalInteractionCard = ({
   const [isResultsModalOpen, setIsResultsModalOpen] = useState(false)
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false)
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false)
-
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
   const proposalId = proposal?.id ?? ""
   // ===== HOOKS =====
   const { t } = useTranslation()
@@ -130,6 +131,14 @@ export const ProposalInteractionCard = ({
   }, [currentDepositAmount, proposalDepositThreshold])
 
   // ===== BUSINESS LOGIC =====
+  const canCancelProposal = useMemo(() => {
+    if (proposal?.state !== ProposalState.Pending) return false
+    const isProposer = compareAddresses(proposal?.proposerAddress, account?.address)
+    const isAdmin = permissions?.isAdminOfB3TRGovernor
+    //Proposal is pending, and either the proposer or the account is the admin
+    return proposal?.state === ProposalState.Pending && (isProposer || isAdmin)
+  }, [account?.address, permissions?.isAdminOfB3TRGovernor, proposal?.proposerAddress, proposal?.state])
+
   const shouldShowActionButton = useMemo(() => {
     if (!account?.address) {
       return false
@@ -262,6 +271,10 @@ export const ProposalInteractionCard = ({
     setIsSupportModalOpen(true)
   }, [])
 
+  const handleCancelProposal = useCallback(() => {
+    setIsCancelModalOpen(true)
+  }, [])
+
   const getButtonAction = useCallback(() => {
     if (isExecutable) return handleExecuteProposal
     if (isQueuable) return handleQueueProposal
@@ -281,6 +294,10 @@ export const ProposalInteractionCard = ({
     userVot3Balance,
     handleSupportAction,
   ])
+
+  const proposalTypeText = useMemo(() => {
+    return proposal?.type === GrantsProposalType.Standard ? "Grant" : "Proposal"
+  }, [proposal?.type])
 
   const getButtonText = useCallback(() => {
     if (isExecutable) return t("Execute Proposal")
@@ -342,12 +359,26 @@ export const ProposalInteractionCard = ({
               <UserInteractionBadges userDeposits={userDeposits} userVoteOption={userVoteOption} />
             </VStack>
 
-            {/* Action Button */}
-            {shouldShowActionButton && (
-              <Button variant="primaryAction" onClick={handleButtonClick} disabled={isActionButtonDisabled}>
-                {getButtonText()}
-              </Button>
-            )}
+            <HStack w="full" gap={4}>
+              {/* Action Button */}
+              {shouldShowActionButton && (
+                <Button
+                  variant="primaryAction"
+                  w="full"
+                  flex={1}
+                  onClick={handleButtonClick}
+                  disabled={isActionButtonDisabled}>
+                  {getButtonText()}
+                </Button>
+              )}
+              {canCancelProposal && (
+                <Button variant="primaryAction" w="full" flex={1} onClick={handleCancelProposal}>
+                  {t("Cancel {{proposalType}}", {
+                    proposalType: proposalTypeText,
+                  })}
+                </Button>
+              )}
+            </HStack>
           </Card.Body>
         </Card.Root>
       </Skeleton>
@@ -385,6 +416,14 @@ export const ProposalInteractionCard = ({
         votingRoundId={Number(proposal?.votingRoundId ?? 0)}
         proposalThreshold={proposalDepositThreshold}
         proposalDeposits={currentDepositAmount}
+      />
+
+      {/* Cancel Modal */}
+      <ProposalCancelModal
+        proposalId={proposalId}
+        isOpen={isCancelModalOpen}
+        proposalTypeText={proposalTypeText}
+        onClose={() => setIsCancelModalOpen(false)}
       />
     </>
   )

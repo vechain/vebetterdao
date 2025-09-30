@@ -1,18 +1,13 @@
 import { useProposalInteractionDates } from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ProposalCancelCard } from "./ProposalCancelCard"
-import { ProposalCancelModal } from "./ProposalCancelModal"
 import { ProposalInteractionCard } from "./ProposalInteractionCard"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
@@ -30,11 +25,8 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const { data: proposal, isLoading } = useProposalEnrichedById(proposalId)
   const { onOpen, onClose, open: isOpen } = useDisclosure()
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
-  const { onOpen: onOpenCancelModal, onClose: onCloseCancelModal, open: isOpenCancelModal } = useDisclosure()
   const { isMobile } = useBreakpoints()
   const { t } = useTranslation()
-  const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account?.address ?? "")
   // Ref for throttling countdown calculations
   const lastCountdownCalculationRef = useRef<{
     targetDate: number
@@ -99,14 +91,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
     return result
   }, [targetDate])
-
-  const canCancelProposal = useMemo(() => {
-    if (proposal?.state !== ProposalState.Pending) return false
-    const isProposer = compareAddresses(proposal?.proposerAddress, account?.address)
-    const isAdmin = permissions?.isAdminOfB3TRGovernor
-    //Proposal is pending, and either the proposer or the account is the admin
-    return proposal?.state === ProposalState.Pending && (isProposer || isAdmin)
-  }, [account?.address, permissions?.isAdminOfB3TRGovernor, proposal?.proposerAddress, proposal?.state])
 
   // ==========================================
   // MEMOIZED COMPONENTS
@@ -183,7 +167,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                   <Tabs.Content value="session" pt={6}>
                     <VStack align="stretch" gap={8}>
                       {memoizedProposalInteractionCard}
-                      {canCancelProposal && <ProposalCancelCard onOpen={onOpenCancelModal} />}
                     </VStack>
                   </Tabs.Content>
                   <Tabs.Content value="timeline" pt={6}>
@@ -195,7 +178,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
                 <>
                   {memoizedProposalInteractionCard}
                   {memoizedProposalTimeline}
-                  {canCancelProposal && <ProposalCancelCard onOpen={onOpenCancelModal} />}
                 </>
               )}
             </VStack>
@@ -216,9 +198,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
         onClose={onClose}
         onOpen={onOpen}
       />
-
-      {/* Cancel Modal */}
-      <ProposalCancelModal proposalId={proposalId} isOpen={isOpenCancelModal} onClose={onCloseCancelModal} />
     </>
   )
 }
