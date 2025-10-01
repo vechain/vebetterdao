@@ -32,7 +32,7 @@ export const EndorsementInfoBadge = ({
               i18nKey={
                 endorsementLost
                   ? "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more."
-                  : "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more."
+                  : "This app won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more."
               }
               values={{ date: endorsementMaxDate.format("MMM D"), endorsementThreshold }}
               components={{

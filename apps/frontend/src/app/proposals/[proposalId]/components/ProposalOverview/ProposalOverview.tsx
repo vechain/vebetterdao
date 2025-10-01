@@ -1,105 +1,115 @@
-import { Box, Card, Separator, HStack, Heading, Skeleton, Spacer, Stack, Text, VStack } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { AddressIcon } from "@/components/AddressIcon"
-import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
-import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
-import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
-import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
-import { useTranslation } from "react-i18next"
-import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
-import { useProposalDetail } from "../../hooks"
-import { ProposalShareButton } from "./components/ProposalShareButton"
-import { ProposalStatusBadge, ProposalYourVote } from "@/components"
+import { useIsDepositReached, useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
+import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
+import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
+import { Card, Heading, HStack, Tabs, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
 
-export const ProposalOverview = () => {
-  const { t } = useTranslation()
+import { ProposalContentAndActions } from "../ProposalContentAndActions"
+import { MilestonesActions } from "@/app/grants/components"
+
+type ProposalOverviewProps = {
+  isGrant?: boolean
+  proposal?: ProposalEnriched | GrantProposalEnriched
+}
+
+export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
+  // ==========================================
+  // HOOKS
+  // ==========================================
   const { account } = useWallet()
+  const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
+  const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
 
-  const { proposal } = useProposalDetail()
-  const { data: vnsData } = useVechainDomain(proposal.proposer)
-  const proposerName = vnsData?.domain
+  // ==========================================
+  // COMPUTED VALUES & CONSTANTS
+  // ==========================================
+  const proposerAddress = proposal?.proposerAddress ?? ""
+  const hasUserVoted = !!userVoteEvent?.hasVoted
 
+  const hasUserDeposited = useMemo(() => {
+    return BigInt(userDeposits ?? 0) > BigInt(0)
+  }, [userDeposits])
+
+  // ==========================================
+  // COMPONENTS
+  // ==========================================
+  const HeaderContent = () => (
+    <VStack align="flex-start" w="full">
+      {/* Status badge and proposer info */}
+      <HStack justify={"space-between"} align={"flex-start"} w="full">
+        <GrantsProposalStatusBadge
+          state={proposal?.state ?? ProposalState.Pending}
+          hasUserSupported={hasUserDeposited}
+          hasUserVoted={hasUserVoted}
+          depositReached={depositReached ?? false}
+        />
+
+        <AddressWithProfilePicture address={proposerAddress} />
+      </HStack>
+
+      {/* Proposal title */}
+      <Heading
+        w="full"
+        wordBreak="break-word"
+        overflowWrap="break-word"
+        size={["2xl", "4xl"]}
+        py={{ base: "4", md: "10" }}>
+        {proposal?.title}
+      </Heading>
+    </VStack>
+  )
+
+  // ==========================================
+  // RENDER
+  // ==========================================
   return (
-    <Card.Root variant="primary" w="full" borderRadius={"3xl"}>
-      <Card.Body>
-        <Stack
-          direction={["column", "row"]}
-          justify="space-between"
-          gap={{ base: 4, md: 12 }}
-          w="full"
-          alignItems={"stretch"}>
-          <VStack gap={4} align="flex-start" flex={2} justify={"space-between"} minW={0}>
-            <VStack gap={2} align="flex-start">
-              <HStack justify={"space-between"} align={"center"} w="full">
-                <Skeleton loading={proposal.isRoundIdVoteStartLoading}>
-                  <Text color="text.subtle" fontSize="md" textTransform={"uppercase"} fontWeight="semibold">
-                    {t("Round #{{round}}", {
-                      round: proposal.roundIdVoteStart,
-                    })}
-                  </Text>
-                </Skeleton>
-                <ProposalShareButton />
-              </HStack>
+    <Card.Root variant="primary" w="full" borderRadius={"16px"}>
+      <Card.Body p={"32px"}>
+        <VStack gap={7} align="flex-start" w="full">
+          {/* Header section with status badge, proposer info, and title */}
+          <HeaderContent />
 
-              <Skeleton loading={proposal.isTitleLoading}>
-                <Heading size={["2xl", "4xl"]}>{proposal.title}</Heading>
-              </Skeleton>
-              <Skeleton loading={proposal.isStateLoading} alignSelf={"flex-start"}>
-                <ProposalStatusBadge proposalId={proposal.id} proposalState={proposal.state} />
-              </Skeleton>
-              <Spacer h={"24px"} />
-              <Skeleton loading={proposal.isDescriptionLoading}>
-                <Text
-                  color="gray.500"
-                  textStyle={["sm", "md"]}
-                  wordBreak="break-word"
-                  overflowWrap="break-word"
-                  whiteSpace="pre-wrap"
-                  maxW="100%">
-                  {proposal.description}
-                </Text>
-              </Skeleton>
-            </VStack>
-            <Separator color={"#D5D5D5"} w="100%" />
-            <Stack
-              direction={["column", "column", "row"]}
-              w="full"
-              justify={["flex-start", "flex-start", "space-between"]}
-              gap={8}>
-              <Stack
-                direction={["column", "column", "row"]}
-                gap={[4, 4, 12]}
-                align={["flex-start", "flex-start", "center"]}>
-                <Box>
-                  <Text fontWeight={"400"} color="text.subtle">
-                    {t("Created by")}
-                  </Text>
-                  <Skeleton loading={proposal.isProposerLoading}>
-                    <HStack>
-                      <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                      {compareAddresses(proposal.proposer, account?.address || "") ? (
-                        <Text>{t("You")}</Text>
-                      ) : (
-                        <Text>{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
-                      )}
-                    </HStack>
-                  </Skeleton>
-                </Box>
-
-                <ProposalOverviewTime />
-                <ProposalOverviewCommunitySupport />
-                <ProposalOverviewYourSupport />
-
-                <ProposalYourVote proposalId={proposal.id} proposalState={proposal.state} />
-              </Stack>
-
-              {account?.address && <CastProposalVoteButton proposalId={proposal.id} />}
-            </Stack>
-          </VStack>
-          <ProposalOverviewVotes proposalId={proposal.id} />
-        </Stack>
+          {/* Content section: Tabbed interface for grants, direct content for regular proposals */}
+          {isGrant ? (
+            /* Grant proposals: Overview and Milestones tabs */
+            <Tabs.Root spaceY={7} defaultValue="overview" w="full" colorPalette="blue" fitted lazyMount unmountOnExit>
+              <Tabs.List>
+                <Tabs.Trigger
+                  value="overview"
+                  color="text"
+                  fontWeight="400"
+                  _selected={{
+                    color: "#004CFC",
+                    fontWeight: "800",
+                  }}>
+                  {"Overview"}
+                </Tabs.Trigger>
+                <Tabs.Trigger
+                  value="milestones"
+                  color="text.subtle"
+                  fontWeight="600"
+                  _selected={{
+                    color: "#004CFC",
+                    fontWeight: "800",
+                  }}>
+                  {"Milestones"}
+                </Tabs.Trigger>
+              </Tabs.List>
+              <Tabs.Content value="overview">
+                <ProposalContentAndActions proposal={proposal} />
+              </Tabs.Content>
+              <Tabs.Content value="milestones">
+                <MilestonesActions proposal={proposal as GrantProposalEnriched} />
+              </Tabs.Content>
+            </Tabs.Root>
+          ) : (
+            /* Regular proposals: Direct content display */
+            <ProposalContentAndActions proposal={proposal} />
+          )}
+        </VStack>
       </Card.Body>
     </Card.Root>
   )

@@ -103,8 +103,8 @@ export const NewCreatorPageFormContent = () => {
             <Heading color="white" size={{ base: "md", md: "xl", lg: "2xl" }}>
               {t("Apply for Creator's NFT")}
             </Heading>
-            <Text color="white" textStyle={{ base: "sm", md: "md", lg: "lg" }}>
-              {t("Get your Creator’s NFT to be able to submit your app into the VeBetterDAO ecosystem!")}
+            <Text color="white" fontSize={{ base: "sm", md: "md", lg: "lg" }}>
+              {t("Get your Creator’s NFT to be able to submit your app into the VeBetter ecosystem!")}
             </Text>
           </Stack>
 

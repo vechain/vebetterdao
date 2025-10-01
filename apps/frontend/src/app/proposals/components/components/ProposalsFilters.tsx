@@ -3,12 +3,13 @@ import { useTranslation } from "react-i18next"
 import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 import { useState } from "react"
 
-const frameworks = createListCollection({
+const filters = createListCollection({
   items: [
-    { label: StateFilter.Canceled, value: StateFilter.Canceled },
-    { label: StateFilter.Defeated, value: StateFilter.Defeated },
-    { label: StateFilter.Succeeded, value: StateFilter.Succeeded },
     { label: StateFilter.DepositNotMet, value: StateFilter.DepositNotMet },
+    { label: StateFilter.InDevelopment, value: StateFilter.InDevelopment },
+    { label: StateFilter.Completed, value: StateFilter.Completed },
+    { label: StateFilter.Pending, value: StateFilter.Pending },
+    { label: StateFilter.Active, value: StateFilter.Active },
   ],
 })
 
@@ -23,7 +24,7 @@ export const ProposalFilters = () => {
     <Select.Root
       multiple
       positioning={{ placement: "bottom-end", sameWidth: false }}
-      collection={frameworks}
+      collection={filters}
       size="md"
       maxW="40"
       defaultValue={defaultFilters}
@@ -46,9 +47,9 @@ export const ProposalFilters = () => {
       <Portal>
         <Select.Positioner>
           <Select.Content>
-            {frameworks.items.map(framework => (
-              <Select.Item item={framework} key={framework.value}>
-                {framework.label}
+            {filters.items.map(filter => (
+              <Select.Item item={filter} key={filter.value}>
+                {filter.label}
                 <Select.ItemIndicator />
               </Select.Item>
             ))}

@@ -1,9 +1,8 @@
 import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import React, { useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState } from "@/api"
+import { ProposalMetadata, useProposalInteractionDates } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
-import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
 import dayjs from "dayjs"
@@ -11,53 +10,52 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
 import NextLink from "next/link"
+import { ProposalEnriched, ProposalState } from "@/hooks"
 
 type Props = {
-  proposal: ProposalCreatedEvent
+  proposal: ProposalEnriched
   proposalState?: ProposalState
 }
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { proposalId, description } = proposal
+  const { id: proposalId, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
-  // TODO: add active state
-  //const isActive = proposalState === ProposalState.Active
-
-  const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(proposalId)
+  const { supportEndDate } = useProposalInteractionDates(proposalId)
 
   const { t } = useTranslation()
 
-  const hasVotedText = useMemo(() => {
-    switch (proposalState) {
-      case ProposalState.Pending:
-        return (
-          <Skeleton loading={isVotingStartDateLoading}>
-            <Text textStyle={"sm"}>
-              {t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })}
-            </Text>
-          </Skeleton>
-        )
-      case ProposalState.Canceled:
-      case ProposalState.DepositNotMet:
-        return <Text textStyle={"sm"}>{t("Vote didn't start")}</Text>
-      case ProposalState.Active:
-      case ProposalState.Executed:
-      case ProposalState.Defeated:
-      case ProposalState.Succeeded:
-      case ProposalState.Queued:
-        return (
-          <ProposalYourVote
-            proposalId={proposalId}
-            proposalState={proposalState}
-            renderTitle={false}
-            textProps={{ textStyle: "sm" }}
-          />
-        )
-      default:
-        return ""
+  const proposalExtraInfo = useMemo(() => {
+    if (proposal.state === ProposalState.Pending) {
+      return (
+        <Skeleton loading={!supportEndDate}>
+          <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+            {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
+          </Text>
+        </Skeleton>
+      )
     }
-  }, [votingStartDate, proposalState, t, isVotingStartDateLoading, proposalId])
+    if (proposal.state === ProposalState.DepositNotMet) {
+      return (
+        <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+          {t("Vote didn't start")}
+        </Text>
+      )
+    }
+    if (
+      !!account?.address &&
+      [ProposalState.Active, ProposalState.Executed, ProposalState.Queued].includes(proposal.state as ProposalState)
+    ) {
+      return (
+        <ProposalYourVote
+          proposalId={proposalId}
+          proposalState={proposal.state}
+          renderTitle={false}
+          textProps={{ color: "gray.500", fontSize: "14px" }}
+        />
+      )
+    }
+  }, [proposalId, proposal.state, supportEndDate])
 
   return (
     <LinkBox asChild>
@@ -73,7 +71,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
             <Card.Body p="0">
               <HStack justifyContent={"space-between"} w="full">
                 <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
-                  <ProposalStatusBadge proposalId={proposal.proposalId} proposalState={proposalState} />
+                  <ProposalStatusBadge proposalId={proposal.id} proposalState={proposalState} />
                   <VStack w="full" gap="1" align={"flex-start"}>
                     <Skeleton
                       loading={proposalMetadata.isLoading}
@@ -81,11 +79,13 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                       flex={2.5}
                       mr={{ base: 0, md: 10 }}
                       alignSelf={"flex-start"}>
-                      <Text textStyle={"sm"} fontWeight="semibold">
-                        {proposalMetadata.data?.title}
-                      </Text>
+                      <VStack>
+                        <Text textStyle={"sm"} fontWeight="semibold">
+                          {proposalMetadata.data?.title}
+                        </Text>
+                        {proposalExtraInfo}
+                      </VStack>
                     </Skeleton>
-                    {!!account?.address && hasVotedText}
                   </VStack>
                 </VStack>
                 <IconButton aria-label="Go to proposal" variant="ghost">

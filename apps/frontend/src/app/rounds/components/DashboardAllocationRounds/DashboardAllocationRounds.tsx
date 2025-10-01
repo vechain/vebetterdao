@@ -1,13 +1,14 @@
-import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
-import { Button, Heading, HStack, Icon, Link, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import { NoActiveProposalCard } from "../NoActiveProposalCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
@@ -95,27 +96,17 @@ export const DashboardAllocationRounds = () => {
           </Button>
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
-        <VStack alignItems="flex-start" gap="4" w="full">
-          <Heading size="md" fontWeight="semibold">
-            {t("Proposals")} {sortedProposals.length ? `(${sortedProposals.length})` : "(0)"}
+        <VStack gap={4} w="full">
+          <Heading fontSize="24px" fontWeight={400}>
+            {t("Proposals and Grants looking for support and approval")}
           </Heading>
 
           {!!sortedProposals.length ? (
-            <>
-              <VStack gap="4" w="full">
-                {sortedProposals.map(proposal => (
-                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
-                ))}
-              </VStack>
-              <Link
-                href="/proposals"
-                alignSelf="center"
-                color="actions.tertiary.default"
-                fontWeight="semibold"
-                textStyle="sm">
-                {t("View all proposals")}
-              </Link>
-            </>
+            <VStack gap={4} w="full">
+              {sortedProposals.map(proposal => (
+                <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
+              ))}
+            </VStack>
           ) : (
             <NoActiveProposalCard />
           )}

@@ -8,7 +8,7 @@ import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
+import { useCreateStandardProposal, useUploadProposalMetadata } from "@/hooks"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { useDepositThreshold, useHashProposal } from "@/api"
@@ -40,7 +40,7 @@ export const PublishAndPreviewPageContent = () => {
     router.push(`/proposals/${expectedProposalId}`)
   }, [router, expectedProposalId])
 
-  const createProposalMutation = useCreateProposal({
+  const createProposalMutation = useCreateStandardProposal({
     onSuccess,
     transactionModalCustomUI: {
       waitingConfirmation: {

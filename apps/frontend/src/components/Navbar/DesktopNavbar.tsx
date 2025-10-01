@@ -19,16 +19,26 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
 
   return (
     <>
-      <HStack flex="0 0 120px" justifyContent={"start"}>
+      <HStack flex="1" justifyContent={"start"}>
         <NavbarLogo />
       </HStack>
 
       {!!routesToRender.length && (
-        <HStack gap={4} justifyContent={"center"} borderRadius={"full"} bg={"bg.primary"} py={2} px={4}>
-          <NavbarMenu routesToRender={routesToRender} />
-        </HStack>
+        <Box position="absolute" left="50%" transform="translateX(-50%)" zIndex={1}>
+          <HStack
+            gap={4}
+            justifyContent={"center"}
+            borderRadius={"full"}
+            borderWidth={1}
+            borderColor={"rgba(0,0,0, 0.06)"}
+            bg={"light-contrast-on-card-bg"}
+            py={2}
+            px={4}>
+            <NavbarMenu routesToRender={routesToRender} />
+          </HStack>
+        </Box>
       )}
-      <HStack flexShrink={0} gap={4} justifyContent={"end"} alignItems={"center"}>
+      <HStack flex="1" gap={4} justifyContent={"end"} alignItems={"center"}>
         <ColorModeButton />
         {isLargerThan1800 && <NavbarBalance />}
         <Box as="span">

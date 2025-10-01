@@ -44,8 +44,11 @@ export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<st
     console.info("IPFS Hash:", ipfsHash)
 
     return ipfsHash
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error uploading blob:", error)
-    throw new Error("Failed to upload blob to IPFS")
+    const formattedError = error?.response?.data?.message
+      ? error?.response?.data?.message
+      : `${filename}: Unknown error occurred.`
+    throw new Error(`Failed to upload blob to IPFS: ${formattedError}`)
   }
 }

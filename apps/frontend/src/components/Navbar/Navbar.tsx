@@ -4,10 +4,10 @@ import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
+import { useHideOnScroll } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
-import { useHideOnScroll } from "@/hooks"
 
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
@@ -40,7 +40,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <Box
-      bg="bg.secondary"
+      bg={isLargerThan1200 ? "chakra-body-bg" : "bg.primary"}
       px={0}
       position={"sticky"}
       top={0}
@@ -49,11 +49,7 @@ export const Navbar: React.FC = () => {
       w={"full"}
       transition="transform 0.3s ease-in-out"
       transform={isNavbarVisible ? undefined : "translateY(-100%)"}>
-      <HStack
-        justify={"space-between"}
-        p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
-        border="sm"
-        borderColor="border.secondary">
+      <HStack justify={"space-between"} p={isLargerThan1200 ? "16px 48px" : "8px 20px"}>
         {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (

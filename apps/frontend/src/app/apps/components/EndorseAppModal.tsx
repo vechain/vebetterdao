@@ -73,7 +73,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         onClose()
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading size="xl">{t("Endorse {{appName}} dApp", { appName: xApp?.name })}</Heading>
+        <Heading size="xl" fontWeight={700}>
+          {t("Endorse {{appName}} app", { appName: xApp?.name })}
+        </Heading>
 
         <Text
           as="span"
@@ -131,10 +133,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </VStack>
           </RadioGroup.Root>
 
-          <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
-            {t("Current DApp score: {{score}}", { score: appScore })}
+          <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+            {t("Current app score: {{score}}", { score: appScore })}
             <br />
-            {t("DApp score after endorsement: {{score}}", { score: newScore })}
+            {t("App score after endorsement: {{score}}", { score: newScore })}
           </Text>
         </VStack>
 

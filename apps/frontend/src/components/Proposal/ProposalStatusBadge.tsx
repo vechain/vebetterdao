@@ -1,10 +1,11 @@
-import { ProposalState, useIsDepositReached } from "@/api"
+import { useIsDepositReached } from "@/api"
 import { Icon, Badge, BadgeProps, Skeleton } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 import { DotSymbol } from "@/components"
 import { TFunction } from "i18next"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string

@@ -17,6 +17,9 @@ const nextConfig = {
       },
     },
   },
+  // Optimize for Vercel builds
+  swcMinify: true,
+  compress: true,
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

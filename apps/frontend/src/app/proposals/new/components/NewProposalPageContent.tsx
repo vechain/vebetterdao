@@ -7,23 +7,26 @@ import { TFunction } from "i18next"
 import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
-
+import SignIcon from "@/components/Icons/svg/sign.svg"
+import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
+import VoteIcon from "@/components/Icons/svg/vote.svg"
+import ArrowRightIcon from "@/components/Icons/svg/arrow-right.svg"
 const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {
-    stepImageSrc: "/assets/icons/sign.svg",
+    stepIcon: SignIcon,
     stepNumber: 1,
     stepTitle: t("Creation"),
     stepDescription: t("Craft your proposal by outlining the information and functions to be executed."),
   },
   {
-    stepImageSrc: "/assets/icons/handshake.svg",
+    stepIcon: HandshakeIcon,
     stepNumber: 2,
     stepTitle: t("Look for support"),
     stepDescription: t("In order for your proposal to be voted on, it will have to have the support of the community."),
   },
 
   {
-    stepImageSrc: "/assets/icons/vote.svg",
+    stepIcon: VoteIcon,
     stepNumber: 3,
     stepTitle: t("Voting"),
     stepDescription: t(
@@ -31,7 +34,7 @@ const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => 
     ),
   },
   {
-    stepImageSrc: "/assets/icons/arrow-right.svg",
+    stepIcon: ArrowRightIcon,
     stepNumber: 4,
     stepTitle: t("Execution"),
     stepDescription: t("If your proposal receives enough votes, it will be executed."),

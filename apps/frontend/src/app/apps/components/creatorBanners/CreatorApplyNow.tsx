@@ -40,28 +40,54 @@ export const CreatorApplyNow = () => {
             />
           </Box>
 
-          <HStack>
-            <Box aspectRatio={1} w={{ base: "150px", md: "80px" }} />
+          <Stack direction={{ base: "column", md: "row" }} w="full" h="full" justify={"center"} align={"stretch"}>
+            {/* Left Section: Image, Title, and Description */}
+            <HStack>
+              {!isMobile && (
+                <Box w={"80px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
+                  <Image
+                    src="/assets/mascot/mascot-welcoming.webp"
+                    alt="mascot-welcoming"
+                    position="absolute"
+                    transform={"translate(-15%, 50%) rotate(30deg) scale(2.5)"}
+                    objectFit="contain"
+                    borderRadius="9px"
+                  />
+                </Box>
+              )}
+
+              <Stack
+                w={{ base: "full", md: "70%", lg: "80%" }}
+                align={{ base: "center", md: "end" }}
+                justify={{ base: "center", md: "end" }}
+                py={isMobile ? 4 : 2}>
+                <Heading fontWeight={700} fontSize={"17px"}>
+                  {t("Do you have an app to join the VeBetter DAO ecosystem?")}
+                </Heading>
+              </Stack>
+            </HStack>
+
+            {/* Right Section: Score */}
             <Stack
               direction={{ base: "column", md: "row" }}
-              w={{ base: "full", md: "70%", lg: "80%" }}
-              align={{ base: "center", md: "end" }}
-              justify={{ base: "center", md: "end" }}
-              py={isMobile ? 4 : 2}
-              gap={isMobile ? 4 : 0}>
-              <Heading size={"lg"}>{t("Do you have a dApp to join the VeBetter DAO ecosystem?")}</Heading>
+              w={"full"}
+              align={"end"}
+              justify={"end"}
+              px={2}
+              py={isMobile ? 4 : 2}>
               <Button
                 variant="secondary"
                 alignSelf="center"
-                textStyle="md"
-                fontWeight="semibold"
+                fontSize={{ base: "14px" }}
+                fontWeight={600}
+                borderRadius="full"
                 onClick={onOpen}
-                w={{ base: "full", md: "auto" }}>
+                w={{ base: "80%", md: "auto" }}>
                 <UilPlus />
                 {t("Apply now")}
               </Button>
             </Stack>
-          </HStack>
+          </Stack>
         </Card.Body>
       </Card.Root>
       <SubmitCreatorFormModal isOpen={isOpen} onClose={onClose} buttonAction={goToCreatorForm} />

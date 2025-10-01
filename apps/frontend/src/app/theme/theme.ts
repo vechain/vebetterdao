@@ -2,13 +2,19 @@ import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 
 import { alertSlotRecipe } from "./alert"
 import { cardSlotRecipe } from "./card"
+import { checkboxSlotRecipe } from "./checkbox"
 import { dialogSlotRecipe } from "./dialog"
+import { popoverSlotRecipe } from "./popover"
+import { radioGroupSlotRecipe } from "./radio-group"
+import { selectSlotRecipe } from "./select"
 import { stepsSlotRecipe } from "./steps"
+import { tableSlotRecipe } from "./table"
 
+import { badgeRecipe } from "./badge"
 import { buttonRecipe } from "./button"
+import { headingRecipe } from "./heading"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
-import { headingRecipe } from "./heading"
 import { textRecipe } from "./text"
 
 const config = defineConfig({
@@ -42,6 +48,7 @@ const config = defineConfig({
       heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
+      badge: badgeRecipe,
       text: textRecipe,
     },
 
@@ -51,7 +58,12 @@ const config = defineConfig({
       dialog: dialogSlotRecipe,
       steps: stepsSlotRecipe,
       nativeSelect: nativeSelectSlotRecipe,
+      select: selectSlotRecipe,
       numberInput: numberInputSlotRecipe,
+      popover: popoverSlotRecipe,
+      checkbox: checkboxSlotRecipe,
+      radioGroup: radioGroupSlotRecipe,
+      table: tableSlotRecipe,
     },
 
     keyframes: {

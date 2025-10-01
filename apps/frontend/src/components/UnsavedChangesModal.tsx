@@ -1,0 +1,63 @@
+import { Dialog, Heading, Button, Text, Icon, HStack, VStack } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+
+interface UnsavedChangesModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSaveDraft: () => void
+  onLeaveAnyway: () => void
+}
+
+export const UnsavedChangesModal = ({ isOpen, onClose, onSaveDraft, onLeaveAnyway }: UnsavedChangesModalProps) => {
+  const { t } = useTranslation()
+
+  const handleSaveDraft = () => {
+    onSaveDraft()
+  }
+
+  const handleLeaveAnyway = () => {
+    onLeaveAnyway()
+  }
+
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={() => onClose()}>
+      <Dialog.Backdrop />
+      <Dialog.Positioner>
+        <Dialog.Content>
+          <Dialog.Body>
+            <VStack align="center" justify="center">
+              <Icon viewBox="0 0 180 180" color="#C84968" boxSize={40} mb={4}>
+                <path
+                  d="M89.6443 26.4395C91.9847 26.4395 93.9921 26.9588 95.6657 27.8018C99.9742 29.954 102.374 34.5301 102.172 39.1807L99.8923 95.5215V95.5342C99.6418 100.966 94.5069 104.681 89.0144 104.681C83.5093 104.681 78.3728 100.952 78.1365 95.5078L78.1345 95.457L77.4148 60.4062C77.3895 59.1642 78.3759 58.1371 79.6179 58.1113C80.8603 58.0858 81.8883 59.0721 81.9138 60.3145L82.6325 95.3125L82.6492 95.5381C82.8934 97.8607 85.3389 100.181 89.0144 100.181C92.683 100.181 95.1301 97.8664 95.3796 95.5508L95.3962 95.3271L97.6765 38.999V38.9912C97.8109 35.9478 96.2338 33.1123 93.6501 31.8242L93.6423 31.8203L93.2439 31.6338C92.2825 31.218 91.0964 30.9404 89.6443 30.9404C86.6525 30.9405 84.568 32.3441 83.1638 33.8438C82.4575 34.5982 81.9439 35.3592 81.6091 35.9297C81.443 36.2127 81.3235 36.4433 81.2497 36.5947C81.2131 36.67 81.1877 36.7262 81.1736 36.7578L81.1638 36.7773C81.1447 36.8236 81.1244 36.8701 81.1023 36.915L32.0417 136.456C29.0916 142.438 33.4487 149.44 40.1238 149.44H139.175C145.846 149.44 150.199 142.441 147.256 136.455L115.046 71.0947C114.497 69.9803 114.956 68.6314 116.07 68.082C117.185 67.5331 118.533 67.9911 119.083 69.1055L151.293 134.466C155.707 143.439 149.182 153.94 139.175 153.94H40.1238C30.1205 153.94 23.5781 143.443 28.0056 134.466L77.0388 34.9805C77.0464 34.9631 77.0553 34.9429 77.0652 34.9209C77.0982 34.8469 77.1446 34.7466 77.2038 34.625C77.3226 34.3812 77.4969 34.0466 77.7283 33.6523C78.1889 32.8675 78.8941 31.8202 79.8796 30.7676C81.8603 28.6523 85.0564 26.4395 89.6443 26.4395Z"
+                  fill="currentColor"
+                />
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M91.3347 114.29C96.7359 114.29 101.114 118.669 101.114 124.07V129.48C101.114 134.881 96.7357 139.26 91.3347 139.26H85.9245C80.5235 139.26 76.1446 134.881 76.1443 129.48V124.07C76.1443 118.669 80.5233 114.29 85.9245 114.29H91.3347ZM85.9245 118.79C83.0086 118.79 80.6443 121.154 80.6443 124.07V129.48C80.6446 132.396 83.0088 134.76 85.9245 134.76H91.3347C94.2504 134.76 96.6137 132.396 96.614 129.48V124.07C96.614 121.154 94.2505 118.79 91.3347 118.79H85.9245Z"
+                  fill="currentColor"
+                />
+              </Icon>
+              <Heading fontSize="24px">{t("Leave without saving?")}</Heading>
+              <Text color="#6A6A6A">
+                {t(
+                  "You're in the middle of your grant application. If you leave now, your progress won’t be saved. What would you like to do?",
+                )}
+              </Text>
+            </VStack>
+          </Dialog.Body>
+          <Dialog.Footer>
+            <HStack gap={3} justify="space-between" w="full">
+              <Button variant="secondary" onClick={handleLeaveAnyway} w="full">
+                {t("Leave anyway")}
+              </Button>
+              <Button variant="primary" onClick={handleSaveDraft} w="full">
+                {t("Save draft")}
+              </Button>
+            </HStack>
+          </Dialog.Footer>
+        </Dialog.Content>
+      </Dialog.Positioner>
+    </Dialog.Root>
+  )
+}

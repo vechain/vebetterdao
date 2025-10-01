@@ -62,6 +62,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         </Dialog.Root>
       )}
       <HStack gap={6} justify={"space-between"}>
+        {/* Desktop view */}
         <HStack hideBelow="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
@@ -80,7 +81,8 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
           </Button>
         )}
 
-        <HStack hideBelow="md">
+        {/* Mobile view */}
+        <HStack hideFrom="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
           <Text textStyle={"sm"} color="text.subtle">
             {humanAddress(distributor, 8, 6)}

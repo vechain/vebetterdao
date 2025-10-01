@@ -1,15 +1,10 @@
-import {
-  ProposalState,
-  useGetVotesOnBlock,
-  useProposalSnapshot,
-  useUserSingleProposalVoteEvent,
-  useVotingThreshold,
-} from "@/api"
+import { useGetVotesOnBlock, useProposalSnapshot, useUserSingleProposalVoteEvent, useVotingThreshold } from "@/api"
 import { Box, HStack, Icon, Image, Skeleton, Text, TextProps, Em } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"

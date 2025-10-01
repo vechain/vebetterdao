@@ -24,7 +24,7 @@ export const AppsBanner = () => {
           {t("Explore apps")}
         </Heading>
         <Text textStyle="md" color="info.secondary">
-          {t("Browse and discover dApps where you can earn tokens for sustainable actions.")}
+          {t("Browse and discover apps where you can earn tokens for sustainable actions.")}
         </Text>
       </Stack>
       <Image

@@ -161,7 +161,7 @@ export const CreateEditAppForm = ({
           <FormItem
             label={t("Name")}
             placeholder={t("Name")}
-            description={t("The name of your dApp.")}
+            description={t("The name of your app.")}
             register={{
               ...register("name", {
                 required: "App Name is required",
@@ -176,7 +176,7 @@ export const CreateEditAppForm = ({
           <FormItem
             label={t("Description")}
             placeholder={t("Description")}
-            description={t("The description and purpose of your dApp.")}
+            description={t("The description and purpose of your app.")}
             type="textarea"
             register={{
               ...register("description", {
@@ -197,7 +197,7 @@ export const CreateEditAppForm = ({
           <FormItem
             label={t("Project URL")}
             placeholder={t("Project URL")}
-            description={t("The URL of your dApp's website or repository.")}
+            description={t("The URL of your app's website or repository.")}
             register={{
               ...register("projectUrl", {
                 required: "Project URL is required",
@@ -209,10 +209,10 @@ export const CreateEditAppForm = ({
           />
 
           <FormItem
-            label={t("How does your dApp distribute B3TR to the users?")}
+            label={t("How does your app distribute B3TR to the users?")}
             placeholder={t("Distribution Strategy")}
             description={t(
-              "Describe how your app distributes rewards. This information will be publicly visible once your dApp is submitted to VeBetterDAO.",
+              "Describe how your app distributes rewards. This information will be publicly visible once your app is submitted to VeBetter.",
             )}
             type="textarea"
             register={{

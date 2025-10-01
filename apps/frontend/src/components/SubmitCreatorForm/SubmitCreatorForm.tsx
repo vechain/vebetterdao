@@ -14,10 +14,9 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import { useCreatorSubmissionFormStore } from "@/store"
 import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
-import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
-import AppUtils from "@/utils/AppUtils"
 import { FormCheckbox, FormItem } from "../CustomFormFields"
+import { genericValidation, validateUrl, validateEmail, validateAppId } from "../CustomFormFields/validators"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -183,28 +182,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
     }
   }
 
-  const validateUrl = (value: string, fieldName: string) => {
-    try {
-      new URL(value)
-      return true
-    } catch {
-      return t("Invalid {{fieldName}}", { fieldName })
-    }
-  }
-
-  const validateEmail = (value: string, fieldName: string) => {
-    const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
-    return emailRegex.test(value) || t("Invalid {{fieldName}}", { fieldName })
-  }
-
-  const validateAppId = (value: string, fieldName: string) => {
-    return AppUtils.isValid(value) || t("Invalid {{fieldName}}", { fieldName })
-  }
-
-  const genericValidation = (value: string, fieldName: string) => {
-    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
-  }
-
   return (
     <Card.Root w="full" borderRadius="xl">
       <Card.Body w="full" p={{ base: 2, md: 6 }}>
@@ -217,7 +194,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               <FormItem
                 label={t("App Name")}
                 placeholder={t("App Name")}
-                description={t("The name of your dApp.")}
+                description={t("The name of your app.")}
                 register={{
                   ...register("appName", {
                     required: "App Name is required",
@@ -233,7 +210,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               <FormItem
                 label={t("App Description")}
                 placeholder={t("App Description")}
-                description={t("The description and purpose of your dApp.")}
+                description={t("The description and purpose of your app.")}
                 type="textarea"
                 register={{
                   ...register("appDescription", {
@@ -253,10 +230,10 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               />
 
               <FormItem
-                label={t("How does your dApp distribute B3TR to the users?")}
+                label={t("How does your app distribute B3TR to the users?")}
                 placeholder={t("Distribution Strategy")}
                 description={t(
-                  "Describe how your app distributes rewards. This information will be publicly visible once your dApp is submitted to VeBetterDAO.",
+                  "Describe how your app distributes rewards. This information will be publicly visible once your app is submitted to VeBetter.",
                 )}
                 type="textarea"
                 register={{
@@ -279,7 +256,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               <FormItem
                 label={t("Project URL")}
                 placeholder={t("Project URL")}
-                description={t("The URL of your dApp's website or repository.")}
+                description={t("The URL of your app's website or repository.")}
                 register={{
                   ...register("projectUrl", {
                     required: "Project URL is required",
@@ -343,7 +320,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               <FormItem
                 label={t("Email")}
                 placeholder={"Eg. admin@myapp.vet"}
-                description={t("The email address that will be used for communication with VeBetterDAO.")}
+                description={t("The email address that will be used for communication with VeBetter.")}
                 type="email"
                 register={{
                   ...register("adminEmail", {
@@ -359,7 +336,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               <FormItem
                 label={t("Name")}
                 placeholder={"Eg. John Doe"}
-                description={t("Your name or the name of the person responsible for the dApp.")}
+                description={t("Your name or the name of the person responsible for the app.")}
                 register={{
                   ...register("adminName", {
                     maxLength: { value: 100, message: t("{{fieldName}} is too long", { fieldName: t("Name") }) },

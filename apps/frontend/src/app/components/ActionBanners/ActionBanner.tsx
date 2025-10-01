@@ -41,7 +41,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated } from "@/hooks"
+import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated, useProposalEnriched } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -67,11 +67,13 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
-    ProposalFilter.InThisRound,
-  ])
+  const { data: { enrichedProposals } = { enrichedProposals: [] } } = useProposalEnriched()
+  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals(
+    [ProposalFilter.InThisRound],
+    enrichedProposals,
+  )
   const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
-    activeProposals?.map(proposal => proposal?.proposalId),
+    activeProposals?.map(proposal => proposal?.id),
     account?.address ?? undefined,
   )
 
@@ -185,12 +187,12 @@ export const ActionBanner = () => {
 
   //Custom compute proposal banners
   const proposalsToVoteBanners = activeProposals
-    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
+    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.id])
     .map(proposal => (
       <CastProposalVoteBanners
-        key={`cast-vote-in-proposal-${proposal?.proposalId}`}
-        id={proposal?.proposalId}
-        description={proposal?.description}
+        key={`cast-vote-in-proposal-${proposal?.id}`}
+        id={proposal?.id}
+        description={proposal?.description ?? ""}
       />
     ))
 
