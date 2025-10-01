@@ -27,6 +27,7 @@ export const ProposalOverviewHeader = ({
           hasUserSupported={hasUserDeposited}
           hasUserVoted={hasUserVoted}
           depositReached={depositReached ?? false}
+          proposalType={proposal.type}
         />
 
         <AddressWithProfilePicture address={proposerAddress} />

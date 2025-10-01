@@ -155,6 +155,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
                 depositReached={depositReached ?? false}
+                proposalType={proposal.type}
               />
               {isSupportOrVotingPhase && (
                 <ProposalCommunityInteractions
@@ -184,6 +185,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
                 hasUserSupported={hasUserDeposited}
                 hasUserVoted={hasUserVoted}
                 depositReached={depositReached ?? false}
+                proposalType={proposal.type}
               />
               {timeLeftDisplay ? (
                 <Text fontSize="14px" color="text.subtle">
