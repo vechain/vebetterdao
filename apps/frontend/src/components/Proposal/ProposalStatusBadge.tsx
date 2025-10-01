@@ -32,6 +32,7 @@ export const ProposalStatusBadge = ({
       <GrantsProposalStatusBadge
         state={proposalState ?? ProposalState.Pending}
         depositReached={isDepositReached ?? false}
+        proposalType={proposalType}
       />
     ) // TODO: extend the exist to remove GrantsBadge
   }

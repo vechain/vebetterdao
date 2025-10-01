@@ -1496,5 +1496,6 @@
   "Cancel {{proposalType}}": "Cancel {{proposalType}}",
   "Are you sure you want to cancel this {{proposalType}}": "Are you sure you want to cancel this {{proposalType}}",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.",
-  "Showing": "Showing"
+  "Showing": "Showing",
+  "Search by proposal name": "Search by proposal name"
 }

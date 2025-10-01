@@ -65,7 +65,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
 
   [ProposalState.Executed]: {
-    text: "Executed",
+    text: "Completed",
     icon: FaRegCircleCheck,
     variant: "completed",
   },
@@ -103,10 +103,14 @@ export const GrantsProposalStatusBadge = ({
   hasUserSupported,
   hasUserVoted,
   depositReached,
+  proposalType,
 }: Props) => {
   const config = BADGE_CONFIG[state]
 
   const selectedIcon = useMemo(() => {
+    if (state === ProposalState.Succeeded && proposalType === ProposalType.Standard) {
+      return FaRegCircleCheck
+    }
     // Show filled icon if user has interacted in the current phase
     if (state === ProposalState.Pending && hasUserSupported) {
       return config.filledIcon || config.icon
@@ -115,21 +119,27 @@ export const GrantsProposalStatusBadge = ({
     }
 
     return config.icon
-  }, [state, hasUserSupported, hasUserVoted, config])
+  }, [state, hasUserSupported, hasUserVoted, config, proposalType])
 
   const text = useMemo(() => {
+    if (state === ProposalState.Succeeded && proposalType === ProposalType.Standard) {
+      return "Completed"
+    }
     if (state === ProposalState.Pending && depositReached) {
       return "Supported"
     }
     return config.text
-  }, [state, config, depositReached])
+  }, [state, config, depositReached, proposalType])
 
   const variant = useMemo(() => {
+    if (state === ProposalState.Succeeded && proposalType === ProposalType.Standard) {
+      return "completed"
+    }
     if (state === ProposalState.Pending && depositReached) {
       return "approved"
     }
     return config.variant
-  }, [state, config, depositReached])
+  }, [state, config, depositReached, proposalType])
 
   return (
     <Badge variant={variant}>
