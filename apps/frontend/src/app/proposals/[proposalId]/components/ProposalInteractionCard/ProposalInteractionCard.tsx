@@ -29,7 +29,7 @@ import {
   useQueueProposal,
 } from "@/hooks"
 import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
-import { Button, Card, Heading, HStack, VStack, Icon, Separator, Skeleton } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
@@ -38,11 +38,11 @@ import { useTranslation } from "react-i18next"
 import { FiBarChart2 } from "react-icons/fi"
 import { TbClockHour8 } from "react-icons/tb"
 
+import { ProposalCancelModal } from "../ProposalCancelModal"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges"
-import { ProposalCancelModal } from "../ProposalCancelModal"
 
 export const ProposalInteractionCard = ({
   proposal,
@@ -249,7 +249,11 @@ export const ProposalInteractionCard = ({
   }, [proposalVotesQueryData?.votes])
 
   const progressBarSegments = useMemo(() => {
-    if (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.DepositNotMet) {
+    if (
+      proposal?.state === ProposalState.Pending ||
+      proposal?.state === ProposalState.DepositNotMet ||
+      proposal?.state === ProposalState.Canceled
+    ) {
       return [
         {
           percentage: Number(percentageSupported ?? 0),
