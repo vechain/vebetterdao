@@ -17,7 +17,7 @@ export const GrantsStepIndicator = ({
           key={`${step.key}`}
           w="20%"
           h="4px"
-          bg={index <= activeStep ? "primary.500" : "gray.200"}
+          bg={index === activeStep ? "actions.primary.default" : "actions.secondary.default"}
           borderRadius="full"
           transition="background 0.3s"
         />

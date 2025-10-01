@@ -248,6 +248,12 @@ const config = defineConfig({
             secondary: { value: { base: "#FFE4C3", _dark: "#B2752C" } },
             subtle: { value: { base: "#FFF3E5", _dark: "#36322D" } },
           },
+          neutral: {
+            strong: { value: { base: "{colors.gray.600}", _dark: "{colors.gray.300}" } },
+            primary: { value: { base: "{colors.gray.300}", _dark: "{colors.gray.400}" } },
+            secondary: { value: { base: "{colors.gray.200}", _dark: "{colors.gray.500}" } },
+            subtle: { value: { base: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
+          },
         },
         // graph colors will change after allocations redesign
         graph: {

@@ -30,18 +30,12 @@ export const badgeRecipe = defineRecipe({
     },
 
     variant: {
-      warning: { bg: "warning.subtle", color: "warning.strong" },
-      info: { bg: "info.subtle", color: "info.strong" },
-      error: { bg: "error.subtle", color: "error.strong" },
-      neutral: { bg: "neutral.subtle", color: "neutral.strong" },
-      success: { bg: "success.subtle", color: "success.strong" },
-      outline: {
-        bg: "transparent",
-        borderColor: "#D5D5D5", //TODO: dark-mode Use a variable
-        _dark: {
-          borderColor: "#2D2D2F", //TODO: dark-mode Use a variable
-        },
-      },
+      warning: { bg: "status.warning.subtle", color: "status.warning.strong" },
+      info: { bg: "status.info.subtle", color: "status.info.strong" },
+      error: { bg: "status.negative.subtle", color: "status.negative.strong" },
+      neutral: { bg: "status.neutral.subtle", color: "status.neutral.strong" },
+      success: { bg: "status.positive.subtle", color: "status.positive.strong" },
+      outline: { bg: "transparent", borderColor: "border.secondary" },
     },
   },
 

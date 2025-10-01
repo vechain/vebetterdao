@@ -29,8 +29,8 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
     onOpenConvertModal()
   }, [account?.address, onOpenConvertModal, openWalletModal, router, userHasNoTokens])
   return (
-    <Card.Root w="full" variant="subtle">
-      <Card.Body gap={2}>
+    <Card.Root w="full" variant="primary" p="8">
+      <Card.Body gap={4}>
         <Heading size="md">{t("How to support Grant and Proposal?")}</Heading>
 
         {userHasNoTokens ? (
@@ -60,7 +60,7 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
           </Text>
         )}
 
-        <Button onClick={buttonOnClick} size="md" variant="tertiary" p={0} alignSelf="flex-start">
+        <Button onClick={buttonOnClick} size="md" variant="tertiary" alignSelf="flex-start">
           {buttonText}
         </Button>
       </Card.Body>

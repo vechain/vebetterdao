@@ -80,13 +80,7 @@ export const MobileFilterDrawer = ({
         )}
       </Button>
 
-      {/* Filter Modal */}
-      <BaseModal
-        isOpen={isOpen}
-        isCloseable={false} //Do not allow to dismiss
-        onClose={handleClose}
-        ariaTitle={placeholder}
-        ariaDescription="Filter options">
+      <BaseModal isOpen={isOpen} onClose={handleClose} ariaTitle={placeholder} ariaDescription="Filter options">
         <VStack align="stretch" gap={6} w="full">
           {/* Header */}
           <Text fontSize="md" fontWeight="bold">
