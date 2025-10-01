@@ -10,6 +10,7 @@ import {
   useMediaQuery,
   VStack,
 } from "@chakra-ui/react"
+import { Menu } from "iconoir-react"
 import dynamic from "next/dynamic"
 
 import { ColorModeButton } from "../ui/color-mode"
@@ -18,9 +19,6 @@ import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import { ProfileButton } from "./ProfileButton"
 import { Route } from "./Routes"
-import { Menu } from "iconoir-react"
-import { useWallet } from "@vechain/vechain-kit"
-import { useMemo } from "react"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -77,21 +75,20 @@ type Props = {
 }
 export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { open: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
-  const { connection } = useWallet()
 
   const [isLargerThan500] = useMediaQuery(["(min-width: 500px)"])
-  const showConnectButton = useMemo(() => {
-    return (!connection?.isConnected && !isLargerThan500) || isLargerThan500
-  }, [connection?.isConnected, isLargerThan500])
+
   return (
     <>
       <NavbarLogo />
-      <HStack>
-        <NavbarBalance />
-      </HStack>
+      {isLargerThan500 && (
+        <HStack>
+          <NavbarBalance />
+        </HStack>
+      )}
 
       <HStack gap={2}>
-        {showConnectButton ? <ConnectWalletButton /> : null}
+        <ConnectWalletButton />
 
         {!!routesToRender.length && (
           <IconButton onClick={openMenu} variant={"ghost"} rounded="6px" aria-label="Open menu">
