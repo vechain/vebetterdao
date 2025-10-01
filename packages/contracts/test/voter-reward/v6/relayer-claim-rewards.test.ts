@@ -2,8 +2,8 @@ import { ethers } from "hardhat"
 import { expect } from "chai"
 import { describe, it, beforeEach } from "mocha"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { getOrDeployContractInstances, getVot3Tokens, waitForRoundToEnd, waitForNextCycle } from "../helpers"
-import { endorseApp } from "../helpers/xnodes"
+import { getOrDeployContractInstances, getVot3Tokens, waitForRoundToEnd, waitForNextCycle } from "../../helpers"
+import { endorseApp } from "../../helpers/xnodes"
 import {
   XAllocationVoting,
   X2EarnApps,
@@ -12,9 +12,9 @@ import {
   B3TR,
   Emissions,
   RelayerRewardsPool,
-} from "../../typechain-types"
+} from "../../../typechain-types"
 
-describe("VoterRewards V6 - @shard10a", function () {
+describe("VoterRewards V6 - @shard10b", function () {
   let xAllocationVoting: XAllocationVoting
   let x2EarnApps: X2EarnApps
   let veBetterPassport: VeBetterPassport

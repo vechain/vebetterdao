@@ -147,6 +147,8 @@ jobs:
           - shard: shard10
             label: VoterRewards
           - shard: shard10a
+            label: VoterRewards - Upgrade
+          - shard: shard10b
             label: VoterRewards - Relayer Claim Rewards
           - shard: shard11
             label: X2EarnCreator
@@ -157,6 +159,8 @@ jobs:
           - shard: shard14
             label: X-Allocation Voting
           - shard: shard14a
+            label: X-Allocation Voting - Upgrade
+          - shard: shard14b
             label: X-Allocation Voting - Auto Voting
           - shard: shard15
             label: X-Apps

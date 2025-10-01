@@ -8,8 +8,8 @@ import {
   startNewAllocationRound,
   waitForRoundToEnd,
   waitForNextCycle,
-} from "../helpers"
-import { endorseApp } from "../helpers/xnodes"
+} from "../../helpers"
+import { endorseApp } from "../../helpers/xnodes"
 import {
   XAllocationVoting,
   X2EarnApps,
@@ -20,9 +20,9 @@ import {
   VOT3,
   RelayerRewardsPool,
   X2EarnCreator,
-} from "../../typechain-types"
+} from "../../../typechain-types"
 
-describe("AutoVoting - @shard14a", function () {
+describe("AutoVoting - @shard14b", function () {
   let xAllocationVoting: XAllocationVoting
   let x2EarnApps: X2EarnApps
   let veBetterPassport: VeBetterPassport
@@ -86,7 +86,7 @@ describe("AutoVoting - @shard14a", function () {
     await getVot3Tokens(user2, "100")
   }
 
-  describe.only("Core logic", function () {
+  describe("Core logic", function () {
     beforeEach(async function () {
       await setupContracts()
       await emissions.connect(minterAccount).start()
