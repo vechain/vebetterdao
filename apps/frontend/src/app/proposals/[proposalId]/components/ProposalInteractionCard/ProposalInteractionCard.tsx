@@ -319,24 +319,40 @@ export const ProposalInteractionCard = ({
     setIsSupportModalOpen(false)
   }, [])
 
+  const showCountdownBoxes = useMemo(() => {
+    const disabledStates = [
+      ProposalState.Canceled,
+      ProposalState.Defeated,
+      ProposalState.DepositNotMet,
+      ProposalState.Succeeded,
+      ProposalState.Queued,
+      ProposalState.Executed,
+    ]
+
+    return !disabledStates.includes(proposal?.state ?? ProposalState.Pending)
+  }, [proposal?.state])
+
   return (
     <>
       {/* ===== MAIN CARD ===== */}
       <Skeleton loading={isLoading}>
         <Card.Root gap={"0px"} variant="baseWithBorder">
           {/* Card Header - Countdown Timer */}
-          <Card.Header as={HStack}>
-            <Icon as={Clock} boxSize={5} />
-            <Card.Title p={0} gap={0}>
-              <Heading>{t("Ends in")}</Heading>
-            </Card.Title>
-          </Card.Header>
 
           <Card.Body gap={"32px"} p={"32px"}>
-            {/* Countdown Display */}
-            <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
-
-            <Separator />
+            {showCountdownBoxes && (
+              <>
+                <HStack>
+                  <Icon as={Clock} boxSize={5} />
+                  <Card.Title p={0} gap={0}>
+                    <Heading>{t("Ends in")}</Heading>
+                  </Card.Title>
+                </HStack>
+                {/* Countdown Display */}
+                <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
+                <Separator />
+              </>
+            )}
 
             <VStack w="full" gap={"24px"} align={"stretch"}>
               {/* Results Section Header */}
