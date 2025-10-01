@@ -47,7 +47,7 @@ export const ProposalsPageContent = () => {
   const filterOptions = useMemo(() => {
     return createListCollection({
       items: [
-        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Approval phase"), value: StateFilter.Active },
         { label: t("Support phase"), value: ProposalFilter.SupportPhase },
         { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
         { label: t("Cancelled"), value: StateFilter.Canceled },
