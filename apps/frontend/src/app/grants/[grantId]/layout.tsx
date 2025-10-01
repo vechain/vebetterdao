@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
     const pageUrl = `${config.basePath}/grants/${id}`
 
     const defaultProposalImage = {
-      url: `${config.basePath}${pagesMetadata.proposals.image}`,
+      url: `${config.basePath}${pagesMetadata.grants.image}`,
       alt: `${metadataTitle} | ${APPLICATION_NAME}`,
       width: IMAGE_DIMENSION.width,
       height: IMAGE_DIMENSION.height,
