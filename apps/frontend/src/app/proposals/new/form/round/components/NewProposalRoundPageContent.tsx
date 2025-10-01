@@ -7,7 +7,6 @@ import { useCanProposalStartInNextRound, useCurrentAllocationsRoundId } from "@/
 import dayjs from "dayjs"
 import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
 import { useTranslation } from "react-i18next"
-import { isUndefined } from "lodash"
 
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
@@ -44,7 +43,7 @@ export const NewProposalRoundPageContent = () => {
   }, [router])
 
   const rounds = useMemo(() => {
-    if (!currentRoundId || isUndefined(canStartInNextRound)) return []
+    if (!currentRoundId || typeof canStartInNextRound === "undefined") return []
     return Array.from({ length: roundsToRender }, (_, index) => {
       const roundId = canStartInNextRound ? Number(currentRoundId) + index + 1 : Number(currentRoundId) + index + 2
       return {

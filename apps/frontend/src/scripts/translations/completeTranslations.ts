@@ -1,5 +1,4 @@
 import { writeFileSync } from "fs"
-import { forEach } from "lodash"
 import { KeyValueObject } from "./types"
 import { askChatGpt, getFixedWordPrompt, languagesToGenerate, splitObjectIntoBatches } from "./utils"
 
@@ -78,7 +77,7 @@ const completeTranslations = async () => {
       return askChatGpt(generatePrompt(language.name, batch))
     })
     const results = await Promise.all(promises)
-    forEach(results, result => {
+    results.forEach(result => {
       Object.assign(translatedBatches, result)
     })
     writeFileSync(`./src/i18n/languages/${language.code}.json`, JSON.stringify(translatedBatches, null, 2))

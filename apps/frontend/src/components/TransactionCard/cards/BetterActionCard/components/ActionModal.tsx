@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
 import { BaseModal } from "@/components/BaseModal"
-import { isEmpty } from "lodash"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
@@ -52,7 +51,11 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
   const { data: tweet } = useTweet(tweetId ?? undefined)
 
   const isProof = useMemo(() => {
-    return !isEmpty(proof)
+    if (!proof || typeof proof !== "object") {
+      return false
+    }
+
+    return Object.keys(proof).length > 0
   }, [proof])
 
   const renderProof = useMemo(() => {
