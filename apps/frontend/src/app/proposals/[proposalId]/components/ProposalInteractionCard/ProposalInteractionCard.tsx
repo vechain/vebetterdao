@@ -33,10 +33,9 @@ import { Button, Card, Heading, HStack, VStack, Icon, Separator, Skeleton } from
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
+import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiBarChart2 } from "react-icons/fi"
-import { TbClockHour8 } from "react-icons/tb"
 
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
@@ -327,7 +326,7 @@ export const ProposalInteractionCard = ({
         <Card.Root gap={"0px"} variant="baseWithBorder">
           {/* Card Header - Countdown Timer */}
           <Card.Header as={HStack}>
-            <Icon as={TbClockHour8} boxSize={5} />
+            <Icon as={Clock} boxSize={5} />
             <Card.Title p={0} gap={0}>
               <Heading>{t("Ends in")}</Heading>
             </Card.Title>
@@ -343,7 +342,7 @@ export const ProposalInteractionCard = ({
               {/* Results Section Header */}
               <HStack justify="space-between">
                 <HStack>
-                  <Icon as={FiBarChart2} boxSize={5} />
+                  <Icon as={Reports} boxSize={5} />
                   <Heading>{t("Results")}</Heading>
                 </HStack>
                 <Button variant="primaryGhost" onClick={() => setIsResultsModalOpen(true)}>
