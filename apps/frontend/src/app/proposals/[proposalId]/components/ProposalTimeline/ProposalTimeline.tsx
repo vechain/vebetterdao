@@ -9,6 +9,9 @@ import { useMemo } from "react"
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
+//TODO: This should be fixed by the smart contract logic
+//This is a temporary fix to show the correct timeline for the proposals
+const maxVotingRoundCompleted = 48
 
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
@@ -65,8 +68,15 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       ...(!isGrant
         ? [
             {
+              label: t("In development"),
+              state: [ProposalState.Succeeded, ProposalState.Queued],
+              description: timelineDates.hasValidDates
+                ? dayjs(timelineDates.votingEndDate).format("MMM D, YYYY")
+                : "---",
+            },
+            {
               label: t("Completed"),
-              state: [ProposalState.Succeeded, ProposalState.Executed, ProposalState.Queued],
+              state: [ProposalState.Executed],
             },
           ]
         : []),
@@ -92,9 +102,18 @@ export const ProposalTimeline = ({ proposal }: Props) => {
 
   const currentStep = useMemo(() => {
     if (!proposal) return 0
+    if (
+      maxVotingRoundCompleted >= Number(proposalVotingRoundId) &&
+      proposal.state === ProposalState.Succeeded &&
+      !isGrant
+    ) {
+      //TODO: This should be fixed by the smart contract logic
+      //This is a temporary fix to show the correct timeline for the proposals
+      return 3
+    }
     const stepIndex = timelineSteps.findIndex(step => step.state.includes(proposal.state))
     return stepIndex >= 0 ? stepIndex : 0
-  }, [proposal, timelineSteps])
+  }, [isGrant, proposal, proposalVotingRoundId, timelineSteps])
 
   return (
     <>

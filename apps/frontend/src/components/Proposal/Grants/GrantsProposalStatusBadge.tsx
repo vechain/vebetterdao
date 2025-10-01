@@ -2,7 +2,7 @@ import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
 import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
 import { Prohibition } from "iconoir-react"
 import { useMemo } from "react"
@@ -14,7 +14,6 @@ type Props = {
   depositReached: boolean
   hasUserSupported?: boolean
   hasUserVoted?: boolean
-  proposalType?: ProposalType
 }
 
 /**
@@ -103,14 +102,10 @@ export const GrantsProposalStatusBadge = ({
   hasUserSupported,
   hasUserVoted,
   depositReached,
-  proposalType,
 }: Props) => {
   const config = BADGE_CONFIG[state]
 
   const selectedIcon = useMemo(() => {
-    if (state === ProposalState.Succeeded && proposalType === ProposalType.Standard) {
-      return FaRegCircleCheck
-    }
     // Show filled icon if user has interacted in the current phase
     if (state === ProposalState.Pending && hasUserSupported) {
       return config.filledIcon || config.icon
@@ -119,27 +114,21 @@ export const GrantsProposalStatusBadge = ({
     }
 
     return config.icon
-  }, [state, hasUserSupported, hasUserVoted, config, proposalType])
+  }, [state, hasUserSupported, hasUserVoted, config])
 
   const text = useMemo(() => {
-    if (state === ProposalState.Succeeded && proposalType === ProposalType.Standard) {
-      return "Completed"
-    }
     if (state === ProposalState.Pending && depositReached) {
       return "Supported"
     }
     return config.text
-  }, [state, config, depositReached, proposalType])
+  }, [state, config, depositReached])
 
   const variant = useMemo(() => {
-    if (state === ProposalState.Succeeded && proposalType === ProposalType.Standard) {
-      return "completed"
-    }
     if (state === ProposalState.Pending && depositReached) {
       return "approved"
     }
     return config.variant
-  }, [state, config, depositReached, proposalType])
+  }, [state, config, depositReached])
 
   return (
     <Badge variant={variant}>
