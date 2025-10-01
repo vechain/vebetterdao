@@ -37,8 +37,8 @@ export const ProfileGovernance = ({ address }: Props) => {
   const { account } = useWallet()
   const profileWalletAddress = address ?? account?.address ?? ""
 
-  const { data: createdProposals, isLoading: isCreatedProposalsLoading } = useUserCreatedProposal(profileWalletAddress)
-  const { data: votedProposals, isLoading: isVotedProposalsLoading } = useUserProposalsVoteEvents(profileWalletAddress)
+  const { data: createdProposals } = useUserCreatedProposal(profileWalletAddress)
+  const { data: votedProposals } = useUserProposalsVoteEvents(profileWalletAddress)
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
@@ -99,10 +99,6 @@ export const ProfileGovernance = ({ address }: Props) => {
   const isFirstVotedProposalsAvailable = firstVotedProposals && firstVotedProposals.length > 0
   const isFirstTopVotedAppsAvailable = firstTopVotedApps && firstTopVotedApps.length > 0
 
-  const isLoading = useMemo(() => {
-    return isCreatedProposalsLoading || isVotedProposalsLoading
-  }, [isCreatedProposalsLoading, isVotedProposalsLoading])
-
   switch (listView) {
     case ListView.ALL:
       return (
@@ -115,7 +111,6 @@ export const ProfileGovernance = ({ address }: Props) => {
               firstProposals={firstCreatedProposals}
               isMoreProposals={isMoreCreatedProposals}
               isCreatedProposals
-              isLoading={isLoading}
               onSeeAllProposals={onSeeAllCreatedProposals}
             />
           )}
@@ -123,7 +118,6 @@ export const ProfileGovernance = ({ address }: Props) => {
             <PreviewCreatedProposals
               firstProposals={firstVotedProposals}
               isMoreProposals={isMoreVotedProposals}
-              isLoading={isLoading}
               onSeeAllProposals={onSeeAllVotedProposals}
             />
           ) : (
@@ -159,11 +153,9 @@ export const ProfileGovernance = ({ address }: Props) => {
         </>
       )
     case ListView.CREATED:
-      return <PaginatedProposals proposals={createdProposals ?? []} isLoading={isLoading} goBack={onGoBack} />
+      return <PaginatedProposals proposals={createdProposals ?? []} goBack={onGoBack} />
     case ListView.VOTED:
-      return (
-        <PaginatedProposals proposals={votedProposalsWithDescription ?? []} isLoading={isLoading} goBack={onGoBack} />
-      )
+      return <PaginatedProposals proposals={votedProposalsWithDescription ?? []} goBack={onGoBack} />
     case ListView.APPS_VOTED:
       return <PaginatedTopVotedApps topVotedApps={topVotedApps ?? []} goBack={onGoBack} />
   }
