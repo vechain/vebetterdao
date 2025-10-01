@@ -17,6 +17,7 @@ import { useDraftGrantProposalStore } from "@/store"
 import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
 import Link from "next/link"
 import { HowToSupportCard } from "@/app/proposals"
+import { useRouter } from "next/navigation"
 
 const BreadcrumItems = [
   {
@@ -35,6 +36,7 @@ export default function GrantsNew() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isOpenConvertModal, setIsOpenConvertModal] = useState(false)
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const router = useRouter()
 
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] as GrantProposalEnriched[] } } =
     useProposalEnriched()
@@ -49,6 +51,10 @@ export default function GrantsNew() {
   const userHasGrantsProposal = useMemo(() => {
     return searchedProposals && searchedProposals.length > 0
   }, [searchedProposals])
+
+  const applyForGrant = () => {
+    router.push(`/grants/new`)
+  }
 
   return (
     <>
@@ -86,7 +92,7 @@ export default function GrantsNew() {
             )
           ) : (
             <EmptyState title={t("No grants proposal found")}>
-              <Button variant="primaryAction" size="md">
+              <Button variant="primaryAction" size="md" onClick={applyForGrant}>
                 {t("Apply for grant")}
               </Button>
             </EmptyState>
