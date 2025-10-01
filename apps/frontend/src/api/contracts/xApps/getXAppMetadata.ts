@@ -1,5 +1,4 @@
 import { convertUriToUrl } from "@/utils"
-import axios from "axios"
 
 /**
  * The metadata of an xApp from the xApps metadata base uri
@@ -43,9 +42,20 @@ export type XAppMetadata = {
    * @returns  The metadata of the xApp see {@link XAppMetadata}
    */
 export const getXAppMetadata = async (uri: string): Promise<XAppMetadata | undefined> => {
-  const metadata = await axios.get<XAppMetadata>(convertUriToUrl(uri), {
-    timeout: 20000,
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 20000)
 
-  return metadata.data
+  try {
+    const response = await fetch(convertUriToUrl(uri), {
+      signal: controller.signal,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch xApp metadata: ${response.status}`)
+    }
+
+    return (await response.json()) as XAppMetadata
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }

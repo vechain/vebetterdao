@@ -1,4 +1,3 @@
-import axios from "axios"
 import { useQuery } from "@tanstack/react-query"
 import { convertUriToUrl } from "@/utils/uri"
 
@@ -11,11 +10,17 @@ import { convertUriToUrl } from "@/utils/uri"
 export const getIpfsMetadata = async <T>(uri?: string, parseJson = false): Promise<T> => {
   if (!uri) throw new Error("No URI provided")
   const newUri = convertUriToUrl(uri)
-  const metadata = await axios.get<string>(newUri)
+  const response = await fetch(newUri)
 
-  if (parseJson) return JSON.parse(metadata.data)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch IPFS metadata: ${response.status}`)
+  }
 
-  return metadata.data as unknown as T
+  const data = await response.text()
+
+  if (parseJson) return JSON.parse(data)
+
+  return data as unknown as T
 }
 
 export const getIpfsMetadataQueryKey = (ipfsUri?: string) => ["IPFS_METADATA", ipfsUri]

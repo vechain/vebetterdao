@@ -1,4 +1,4 @@
-import { ProposalComment, VoteType } from "@/api"
+import { ProposalComment } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Card, Separator, HStack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
@@ -9,6 +9,12 @@ import { ethers } from "ethers"
 import { useVechainDomain } from "@vechain/vechain-kit"
 
 const compactFormatter = getCompactFormatter(2)
+
+export enum VoteType {
+  VOTE_AGAINST = "AGAINST",
+  VOTE_FOR = "FOR",
+  ABSTAIN = "ABSTAIN",
+}
 
 export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
