@@ -52,7 +52,8 @@ const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType;
             fontWeight={"regular"}
             lineHeight={"1.5"}
             wordBreak="break-word"
-            overflowWrap="break-word">
+            overflowWrap="break-word"
+            whiteSpace="pre-wrap">
             {value}
           </Text>
         )}
