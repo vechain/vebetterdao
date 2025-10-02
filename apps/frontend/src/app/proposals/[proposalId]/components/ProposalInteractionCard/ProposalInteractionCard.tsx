@@ -147,12 +147,10 @@ export const ProposalInteractionCard = ({
       return !hasUserAlreadyVoted && userVotingPower > 0
     }
 
-    if (proposal?.state === ProposalState.Pending) {
-      return (
-        !proposalDepositReached &&
-        userVot3Balance > 0 &&
-        !compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
-      )
+    if (proposal?.state === ProposalState.Pending && proposal?.type === GrantsProposalType.Grant) {
+      return !proposalDepositReached && !compareAddresses(account?.address ?? "", proposal?.proposerAddress ?? "")
+    } else if (proposal?.state === ProposalState.Pending && proposal?.type === GrantsProposalType.Standard) {
+      return !proposalDepositReached
     }
 
     //User has permissions to execute or queue
@@ -162,16 +160,16 @@ export const ProposalInteractionCard = ({
 
     return false
   }, [
+    account?.address,
     proposal?.state,
+    proposal?.type,
+    proposal?.proposerAddress,
     isQueuable,
     isExecutable,
+    currentUserCanQueueOrExecute,
     hasUserAlreadyVoted,
     userVotingPower,
     proposalDepositReached,
-    userVot3Balance,
-    currentUserCanQueueOrExecute,
-    account?.address,
-    proposal?.proposerAddress,
   ])
 
   const isActionButtonDisabled = useMemo(() => {
