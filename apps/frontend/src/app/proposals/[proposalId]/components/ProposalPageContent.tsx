@@ -1,4 +1,9 @@
-import { useProposalInteractionDates } from "@/api"
+import {
+  useIsDepositReached,
+  useProposalInteractionDates,
+  useProposalUserDeposit,
+  useUserSingleProposalVoteEvent,
+} from "@/api"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
 import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
@@ -14,6 +19,8 @@ import { ProposalOverview } from "./ProposalOverview"
 import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
 import { ProposalTimeline } from "./ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
+import { ProposalOverviewHeader } from "./ProposalOverviewHeader"
+import { useWallet } from "@vechain/vechain-kit"
 
 type Props = {
   proposalId: string
@@ -24,9 +31,13 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
   // ==========================================
   // HOOKS
   // ==========================================
+  const { account } = useWallet()
   const { data: proposal, isLoading } = useProposalEnrichedById(proposalId)
   const { onOpen, onClose, open: isOpen } = useDisclosure()
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposalId)
+  const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
+  const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
+  const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
   const { isMobile } = useBreakpoints()
   const { t } = useTranslation()
   const router = useRouter()
@@ -43,6 +54,13 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
   const isGrant = useMemo(() => {
     return proposal?.type === ProposalType.Grant
   }, [proposal])
+
+  const proposerAddress = proposal?.proposerAddress ?? ""
+  const hasUserVoted = !!userVoteEvent?.hasVoted
+
+  const hasUserDeposited = useMemo(() => {
+    return BigInt(userDeposits ?? 0) > BigInt(0)
+  }, [userDeposits])
 
   const isVotingPhase = proposal?.state === ProposalState.Active
   const targetDate = isVotingPhase ? votingEndDate : supportEndDate
@@ -156,38 +174,49 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
             <VStack align="stretch" gap={8}>
               {/* Mobile */}
               {isMobile ? (
-                <Tabs.Root defaultValue="session" w="full" colorPalette="blue" fitted>
-                  <Tabs.List>
-                    <Tabs.Trigger
-                      value="session"
-                      color="text"
-                      fontWeight="400"
-                      _selected={{
-                        color: "#004CFC",
-                        fontWeight: "800",
-                      }}>
-                      {t("Session")}
-                    </Tabs.Trigger>
-                    <Tabs.Trigger
-                      value="timeline"
-                      color="text.subtle"
-                      fontWeight="600"
-                      _selected={{
-                        color: "#004CFC",
-                        fontWeight: "800",
-                      }}>
-                      {t("Timeline")}
-                    </Tabs.Trigger>
-                  </Tabs.List>
-                  <Tabs.Content value="session" pt={6}>
-                    <VStack align="stretch" gap={8}>
-                      {memoizedProposalInteractionCard}
-                    </VStack>
-                  </Tabs.Content>
-                  <Tabs.Content value="timeline" pt={6}>
-                    {memoizedProposalTimeline}
-                  </Tabs.Content>
-                </Tabs.Root>
+                <>
+                  {!!proposal && (
+                    <ProposalOverviewHeader
+                      proposal={proposal}
+                      hasUserDeposited={!!hasUserDeposited}
+                      hasUserVoted={!!hasUserVoted}
+                      depositReached={!!depositReached}
+                      proposerAddress={proposerAddress}
+                    />
+                  )}
+                  <Tabs.Root defaultValue="session" w="full" colorPalette="blue" fitted>
+                    <Tabs.List>
+                      <Tabs.Trigger
+                        value="session"
+                        color="text"
+                        fontWeight="400"
+                        _selected={{
+                          color: "#004CFC",
+                          fontWeight: "800",
+                        }}>
+                        {t("Session")}
+                      </Tabs.Trigger>
+                      <Tabs.Trigger
+                        value="timeline"
+                        color="text.subtle"
+                        fontWeight="600"
+                        _selected={{
+                          color: "#004CFC",
+                          fontWeight: "800",
+                        }}>
+                        {t("Timeline")}
+                      </Tabs.Trigger>
+                    </Tabs.List>
+                    <Tabs.Content value="session" pt={6}>
+                      <VStack align="stretch" gap={8}>
+                        {memoizedProposalInteractionCard}
+                      </VStack>
+                    </Tabs.Content>
+                    <Tabs.Content value="timeline" pt={6}>
+                      {memoizedProposalTimeline}
+                    </Tabs.Content>
+                  </Tabs.Root>
+                </>
               ) : (
                 /* Desktop */
                 <>

@@ -69,67 +69,89 @@ export const GrantsStepsCard = ({
   const { hasMetProposalCriteria } = useMetProposalCriteria()
 
   const handleApply = useCallback(() => {
+    if (!isLastStep) {
+      return goToNext()
+    }
     if (!account?.address) {
       return openWalletModal()
     }
 
     if (!hasMetProposalCriteria) {
+      //Close step modal to open requirement modal
+      onClose()
       return openRequirementModal()
     }
     router.push("/grants/new")
-  }, [account?.address, hasMetProposalCriteria, router, openWalletModal, openRequirementModal])
+  }, [
+    isLastStep,
+    account?.address,
+    hasMetProposalCriteria,
+    router,
+    goToNext,
+    openWalletModal,
+    onClose,
+    openRequirementModal,
+  ])
 
   if (!currentStep) {
     return null
   }
   if (isMobile) {
     return (
-      <BaseBottomSheet
-        isOpen={isOpen}
-        onClose={onClose}
-        ariaTitle={currentStep.title}
-        ariaDescription={currentStep.heading}
-        height="100%">
-        <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
-          <HStack w="full" justify="space-between" alignItems="center">
-            {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
-            <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
-            <UilTimes onClick={onClose} cursor="pointer" size={24} />
-          </HStack>
-          <Box pt={5}>
-            <VStack w="full" textAlign="center" gap={4}>
-              <Heading size="md" textStyle="heading">
-                {currentStep.title}
-              </Heading>
-              <Image
-                src={currentStep.image}
-                alt={`Step ${currentStepIndex + 1}`}
-                objectFit="contain"
-                width={150}
-                height={150}
-              />
-              <Heading size="sm" textStyle="heading">
-                {currentStep.heading}
-              </Heading>
-              <List.Root pl={5} fontSize="sm" gap={2} color="gray.600" textAlign="left">
-                {currentStep.listItems.map((item, index) => (
-                  <List.Item key={`${item}-${index}`}>
-                    <List.Indicator color="#004CFC">
-                      <Icon as={BsCheck} />
-                    </List.Indicator>
-                    {item}
-                  </List.Item>
-                ))}
-              </List.Root>
-              <HStack w="full" justifyContent="flex-start" pt={5}>
-                <Button variant="primaryAction" w="full" onClick={isLastStep ? handleApply : goToNext}>
-                  {isLastStep ? t("Apply") : t("Next")}
-                </Button>
-              </HStack>
-            </VStack>
-          </Box>
-        </Steps.Root>
-      </BaseBottomSheet>
+      <>
+        <BaseBottomSheet
+          isOpen={isOpen}
+          onClose={onClose}
+          ariaTitle={currentStep.title}
+          ariaDescription={currentStep.heading}
+          height="100%">
+          <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
+            <HStack w="full" justify="space-between" alignItems="center">
+              {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
+              <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
+              <UilTimes onClick={onClose} cursor="pointer" size={24} />
+            </HStack>
+            <Box pt={5}>
+              <VStack w="full" textAlign="center" gap={4}>
+                <Heading size="md" textStyle="heading">
+                  {currentStep.title}
+                </Heading>
+                <Image
+                  src={currentStep.image}
+                  alt={`Step ${currentStepIndex + 1}`}
+                  objectFit="contain"
+                  width={150}
+                  height={150}
+                />
+                <Heading size="sm" textStyle="heading">
+                  {currentStep.heading}
+                </Heading>
+                <List.Root pl={5} fontSize="sm" gap={2} color="gray.600" textAlign="left">
+                  {currentStep.listItems.map((item, index) => (
+                    <List.Item key={`${item}-${index}`}>
+                      <List.Indicator color="#004CFC">
+                        <Icon as={BsCheck} />
+                      </List.Indicator>
+                      {item}
+                    </List.Item>
+                  ))}
+                </List.Root>
+                <HStack w="full" justifyContent="flex-start" pt={5}>
+                  <Button variant="primaryAction" w="full" onClick={handleApply}>
+                    {isLastStep ? t("Apply") : t("Next")}
+                  </Button>
+                </HStack>
+              </VStack>
+            </Box>
+          </Steps.Root>
+        </BaseBottomSheet>
+        <RequirementModal
+          isOpen={isRequirementModalOpen}
+          onClose={closeRequirementModal}
+          hasNft={hasMetProposalCriteria}
+          isGrants
+        />
+      </>
     )
   }
 
@@ -184,7 +206,7 @@ export const GrantsStepsCard = ({
                   )}
                 </AnimatePresence>
 
-                <Button ref={scope} variant="primaryAction" onClick={isLastStep ? handleApply : goToNext} w="120px">
+                <Button ref={scope} variant="primaryAction" onClick={handleApply} w="120px">
                   {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>

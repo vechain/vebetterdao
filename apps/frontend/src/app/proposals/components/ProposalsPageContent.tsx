@@ -1,32 +1,62 @@
 import { useProposalClaimableUserDeposits } from "@/api"
-import { JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Spinner, Text, useDisclosure } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { JoinCommunity, MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import {
+  VStack,
+  HStack,
+  Heading,
+  Box,
+  Button,
+  Spinner,
+  Text,
+  useDisclosure,
+  createListCollection,
+} from "@chakra-ui/react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { RequirementModal, ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
+import { RequirementModal, ClaimDeposits, CreateProposalCard, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
-import { useProposalFilters } from "@/store"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { useProposalEnriched } from "@/hooks/proposals/common"
+import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
 import { GrantsProposalCard } from "@/app/grants/components"
+import { useDebounce, useBreakpoints } from "@/hooks"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
-  const { selectedFilter } = useProposalFilters()
-  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] } } = useProposalEnriched()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter, enrichedStandardProposals)
+  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] }, isLoading } = useProposalEnriched()
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
-
   const { hasMetProposalCriteria } = useMetProposalCriteria()
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
+
+  // LOGIC HOOKS
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
+
+  //CONSTANTS
+  const filterOptions = useMemo(() => {
+    return createListCollection({
+      items: [
+        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Support phase"), value: ProposalFilter.SupportPhase },
+        { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
+        { label: t("Cancelled"), value: StateFilter.Canceled },
+      ],
+    })
+  }, [t])
+
+  const { isMobile } = useBreakpoints()
+
   const onNewClick = useCallback(() => {
     if (!account?.address) {
       open()
@@ -63,7 +93,7 @@ export const ProposalsPageContent = () => {
           )}
         </HStack>
       </VStack>
-      <ProposalsFilters alignSelf={"flex-start"} w="full" />
+
       {totalClaimableDeposits > 0 && (
         <Box hideFrom="md" mb={2} mt={3}>
           <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
@@ -76,6 +106,40 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
+          <HStack w="full" gap={4}>
+            <SearchField
+              inputProps={{ minW: "200px", flex: 1 }}
+              placeholder={t("Search by proposal name")}
+              value={searchTerm}
+              onChange={setSearchTerm}
+              disabled={!enrichedStandardProposals?.length}
+            />
+
+            {isMobile ? (
+              <>
+                {/* Mobile Filter */}
+                <MobileFilterDrawer
+                  options={filterOptions}
+                  selectedValues={selectedFilter}
+                  onApply={setSelectedFilter}
+                  placeholder={t("Filter statuses")}
+                />
+              </>
+            ) : (
+              <>
+                {/* Desktop Filter */}
+                <SelectField
+                  w="25%"
+                  placeholder={t("Status")}
+                  options={filterOptions}
+                  defaultValue={[]}
+                  showReset
+                  onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                  isMultiOption
+                />
+              </>
+            )}
+          </HStack>
           {filteredProposals.map(proposal => (
             <GrantsProposalCard
               key={proposal.id}

@@ -2,7 +2,7 @@ import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
 import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
 import { Prohibition } from "iconoir-react"
 import { useMemo } from "react"
@@ -14,7 +14,6 @@ type Props = {
   depositReached: boolean
   hasUserSupported?: boolean
   hasUserVoted?: boolean
-  proposalType?: ProposalType
 }
 
 /**
@@ -65,7 +64,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
 
   [ProposalState.Executed]: {
-    text: "Executed",
+    text: "Completed",
     icon: FaRegCircleCheck,
     variant: "completed",
   },

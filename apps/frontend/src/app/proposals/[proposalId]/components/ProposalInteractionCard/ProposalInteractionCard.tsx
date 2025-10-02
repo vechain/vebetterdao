@@ -33,10 +33,9 @@ import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
+import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiBarChart2 } from "react-icons/fi"
-import { TbClockHour8 } from "react-icons/tb"
 
 import { ProposalCancelModal } from "../ProposalCancelModal"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
@@ -324,30 +323,46 @@ export const ProposalInteractionCard = ({
     setIsSupportModalOpen(false)
   }, [])
 
+  const showCountdownBoxes = useMemo(() => {
+    const disabledStates = [
+      ProposalState.Canceled,
+      ProposalState.Defeated,
+      ProposalState.DepositNotMet,
+      ProposalState.Succeeded,
+      ProposalState.Queued,
+      ProposalState.Executed,
+    ]
+
+    return !disabledStates.includes(proposal?.state ?? ProposalState.Pending)
+  }, [proposal?.state])
+
   return (
     <>
       {/* ===== MAIN CARD ===== */}
       <Skeleton loading={isLoading}>
         <Card.Root gap={"0px"} variant="baseWithBorder">
           {/* Card Header - Countdown Timer */}
-          <Card.Header as={HStack}>
-            <Icon as={TbClockHour8} boxSize={5} />
-            <Card.Title p={0} gap={0}>
-              <Heading>{t("Ends in")}</Heading>
-            </Card.Title>
-          </Card.Header>
 
           <Card.Body gap={"32px"} p={"32px"}>
-            {/* Countdown Display */}
-            <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
-
-            <Separator />
+            {showCountdownBoxes && (
+              <>
+                <HStack>
+                  <Icon as={Clock} boxSize={5} />
+                  <Card.Title p={0} gap={0}>
+                    <Heading>{t("Ends in")}</Heading>
+                  </Card.Title>
+                </HStack>
+                {/* Countdown Display */}
+                <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
+                <Separator />
+              </>
+            )}
 
             <VStack w="full" gap={"24px"} align={"stretch"}>
               {/* Results Section Header */}
               <HStack justify="space-between">
                 <HStack>
-                  <Icon as={FiBarChart2} boxSize={5} />
+                  <Icon as={Reports} boxSize={5} />
                   <Heading>{t("Results")}</Heading>
                 </HStack>
                 <Button variant="primaryGhost" onClick={() => setIsResultsModalOpen(true)}>
