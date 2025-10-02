@@ -42,20 +42,19 @@ export const Routes: Route[] = [
     onClick: "/proposals",
     isVisible: true,
     icon: LiaBalanceScaleSolid,
-    description: "Propose your ideas and let the community decide!",
-    // description: "Create and vote on proposals with your VOT3 tokens to make changes on the ecosystem.",
-    // subRoutes: [
-    //   {
-    //     name: "Proposals",
-    //     description: "Propose your ideas and let the community decide!",
-    //     onClick: "/proposals",
-    //   },
-    //   {
-    //     name: "Grants",
-    //     description: "Need funding? Apply for a grant and get support",
-    //     onClick: "/grants",
-    //   },
-    // ],
+    description: "Create and vote on proposals with your VOT3 tokens to make changes on the ecosystem.",
+    subRoutes: [
+      {
+        name: "Proposals",
+        description: "Propose your ideas and let the community decide!",
+        onClick: "/proposals",
+      },
+      {
+        name: "Grants",
+        description: "Need funding? Apply for a grant and get support",
+        onClick: "/grants",
+      },
+    ],
   },
   { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: FaGear },
