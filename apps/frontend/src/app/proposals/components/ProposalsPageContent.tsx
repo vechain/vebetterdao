@@ -1,29 +1,61 @@
-import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
-import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Spinner, Text, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
+import { useProposalClaimableUserDeposits } from "@/api"
+import { JoinCommunity, MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import {
+  VStack,
+  HStack,
+  Heading,
+  Box,
+  Button,
+  Spinner,
+  Text,
+  useDisclosure,
+  createListCollection,
+} from "@chakra-ui/react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { RequirementModal, ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
+import { RequirementModal, ClaimDeposits, CreateProposalCard, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
-import { useProposalFilters } from "@/store"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
+import { GrantsProposalCard } from "@/app/grants/components"
+import { useDebounce, useBreakpoints } from "@/hooks"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
-  const { selectedFilter } = useProposalFilters()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
-
+  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] }, isLoading } = useProposalEnriched()
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
+  const { hasMetProposalCriteria } = useMetProposalCriteria()
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
 
-  const hasMetProposalCriteria = useMetProposalCriteria()
+  // LOGIC HOOKS
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
+
+  //CONSTANTS
+  const filterOptions = useMemo(() => {
+    return createListCollection({
+      items: [
+        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Support phase"), value: ProposalFilter.SupportPhase },
+        { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
+        { label: t("Cancelled"), value: StateFilter.Canceled },
+      ],
+    })
+  }, [t])
+
+  const { isMobile } = useBreakpoints()
 
   const onNewClick = useCallback(() => {
     if (!account?.address) {
@@ -34,20 +66,6 @@ export const ProposalsPageContent = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
     openRequirementModal()
   }, [account?.address, open, openRequirementModal])
-
-  //First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
-  const sortedProposals = useMemo(() => {
-    return filteredProposals.sort((a, b) => {
-      const getPriority = (proposal: (typeof filteredProposals)[0]) => {
-        if (proposal.state === ProposalState.Active) return 1
-        if (proposal.state === ProposalState.Pending && !proposal.isDepositReached) return 2 // lookingForSupport
-        if (proposal.state === ProposalState.Pending && proposal.isDepositReached) return 3 // upcoming
-        return 4 // Everything else
-      }
-
-      return getPriority(a) - getPriority(b)
-    })
-  }, [filteredProposals])
 
   if (isLoading)
     return (
@@ -75,7 +93,7 @@ export const ProposalsPageContent = () => {
           )}
         </HStack>
       </VStack>
-      <ProposalsFilters alignSelf={"flex-start"} w="full" />
+
       {totalClaimableDeposits > 0 && (
         <Box hideFrom="md" mb={2} mt={3}>
           <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
@@ -88,16 +106,49 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
-          {sortedProposals.map(proposal => (
-            <ProposalInfoCard
-              key={proposal.proposalId}
-              proposalId={proposal.proposalId}
-              description={proposal.description}
-              roundIdVoteStart={proposal.roundIdVoteStart}
-              proposalState={proposal.state}
+          <HStack w="full" gap={4}>
+            <SearchField
+              inputProps={{ minW: "200px", flex: 1 }}
+              placeholder={t("Search by proposal name")}
+              value={searchTerm}
+              onChange={setSearchTerm}
+              disabled={!enrichedStandardProposals?.length}
+            />
+
+            {isMobile ? (
+              <>
+                {/* Mobile Filter */}
+                <MobileFilterDrawer
+                  options={filterOptions}
+                  selectedValues={selectedFilter}
+                  onApply={setSelectedFilter}
+                  placeholder={t("Filter statuses")}
+                />
+              </>
+            ) : (
+              <>
+                {/* Desktop Filter */}
+                <SelectField
+                  w="25%"
+                  placeholder={t("Status")}
+                  options={filterOptions}
+                  defaultValue={[]}
+                  showReset
+                  onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                  isMultiOption
+                />
+              </>
+            )}
+          </HStack>
+          {filteredProposals.map(proposal => (
+            <GrantsProposalCard
+              key={proposal.id}
+              variant="proposal"
+              proposal={proposal as ProposalEnriched & { isDepositReached: boolean }}
             />
           ))}
-          {sortedProposals.length === 0 && !isLoading && (
+
+          {filteredProposals.length === 0 && !isLoading && (
             <NoProposalsCard
               onClick={onNewClick}
               buttonText={t("Create proposal")}
@@ -116,7 +167,7 @@ export const ProposalsPageContent = () => {
           {totalClaimableDeposits > 0 && (
             <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
           )}
-          {sortedProposals.length > 0 && <CreateProposalCard />}
+          {filteredProposals.length > 0 && <CreateProposalCard />}
           <JoinCommunity />
         </VStack>
       </HStack>

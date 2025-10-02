@@ -1,13 +1,19 @@
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 
-import { cardSlotRecipe } from "./card"
-import { dialogSlotRecipe } from "./dialog"
-import { stepsSlotRecipe } from "./steps"
-
+import { alertSlotRecipe } from "./alert"
+import { badgeRecipe } from "./badge"
 import { buttonRecipe } from "./button"
+import { cardSlotRecipe } from "./card"
+import { checkboxSlotRecipe } from "./checkbox"
+import { dialogSlotRecipe } from "./dialog"
+import { headingRecipe } from "./heading"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
-import { headingRecipe } from "./heading"
+import { popoverSlotRecipe } from "./popover"
+import { radioGroupSlotRecipe } from "./radio-group"
+import { selectSlotRecipe } from "./select"
+import { stepsSlotRecipe } from "./steps"
+import { tableSlotRecipe } from "./table"
 
 const config = defineConfig({
   preflight: true,
@@ -24,14 +30,21 @@ const config = defineConfig({
       heading: headingRecipe,
       button: buttonRecipe,
       input: inputRecipe,
+      badge: badgeRecipe,
     },
 
     slotRecipes: {
+      alert: alertSlotRecipe,
       card: cardSlotRecipe,
       dialog: dialogSlotRecipe,
       steps: stepsSlotRecipe,
       nativeSelect: nativeSelectSlotRecipe,
+      select: selectSlotRecipe,
       numberInput: numberInputSlotRecipe,
+      popover: popoverSlotRecipe,
+      checkbox: checkboxSlotRecipe,
+      radioGroup: radioGroupSlotRecipe,
+      table: tableSlotRecipe,
     },
 
     keyframes: {
@@ -213,19 +226,22 @@ const config = defineConfig({
           },
         },
 
-        // // Brand Colors
-        // primary: {
-        //   _dark: { value: "#277CDF" },
-        //   base: { value: "#004CFC" },
-        // },
-        // secondary: {
-        //   _dark: { value: "#B4EA82" },
-        //   base: { value: "#B1F16C" },
-        // },
-        // tertiary: {
-        //   _dark: { value: "#FFFFFF" },
-        //   base: { value: "#000000" },
-        // },
+        brand: {
+          primary: {
+            value: {
+              _dark: "#277CDF",
+              base: "#004CFC",
+            },
+          },
+          secondary: {
+            _dark: { value: "#B4EA82" },
+            base: { value: "#B1F16C" },
+          },
+          tertiary: {
+            _dark: { value: "#FFFFFF" },
+            base: { value: "#000000" },
+          },
+        },
         "secondary-strong": {
           value: {
             _dark: "#4F5945",
@@ -329,6 +345,32 @@ const config = defineConfig({
               },
             },
           },
+          tertiary: {
+            default: {
+              value: {
+                _dark: "#4D88FF",
+                base: "#004CFC",
+              },
+            },
+            hover: {
+              value: {
+                _dark: "#1A66FF",
+                base: "#003ECC",
+              },
+            },
+            pressed: {
+              value: {
+                _dark: "#004CFC",
+                base: "#003199",
+              },
+            },
+            disabled: {
+              value: {
+                _dark: "#747C89",
+                base: "#747C89",
+              },
+            },
+          },
         },
 
         // Text Colors
@@ -341,8 +383,8 @@ const config = defineConfig({
           },
           subtle: {
             value: {
-              _dark: "#979797",
-              base: "#6A6A6A",
+              _dark: "#AAAFB6",
+              base: "#525860",
             },
           },
           lighter: {
@@ -429,6 +471,12 @@ const config = defineConfig({
               base: "#2D3748",
             },
           },
+          subtle: {
+            value: {
+              _dark: "#AAAFB6",
+              base: "#525860",
+            },
+          },
           darker: {
             value: {
               _dark: "#767676",
@@ -481,7 +529,7 @@ const config = defineConfig({
           },
           primary: {
             value: {
-              _dark: "#F29B32",
+              _dark: "#F2A54E",
               base: "#F29B32",
             },
           },
@@ -493,7 +541,7 @@ const config = defineConfig({
           },
           subtle: {
             value: {
-              _dark: "#36322D",
+              _dark: "#402404",
               base: "#FFF3E5",
             },
           },
@@ -501,6 +549,12 @@ const config = defineConfig({
 
         // Status Colors - Error/Negative
         error: {
+          strong: {
+            value: {
+              _dark: "#FC6D90",
+              base: "#B62A4C",
+            },
+          },
           primary: {
             value: {
               _dark: "#D23F63",
@@ -551,6 +605,22 @@ const config = defineConfig({
             value: {
               _dark: "#212A23",
               base: "#E9FDF1",
+            },
+          },
+        },
+
+        // Status Colors - Neutral
+        neutral: {
+          subtle: {
+            value: {
+              _dark: "#363A3F",
+              base: "#F1F2F3",
+            },
+          },
+          strong: {
+            value: {
+              _dark: "#D2D5D9",
+              base: "#525860",
             },
           },
         },

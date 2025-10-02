@@ -1,4 +1,4 @@
-import { Skeleton, Alert, HStack, Icon, Text, Stack } from "@chakra-ui/react"
+import { Alert, HStack, Icon, Skeleton, Stack } from "@chakra-ui/react"
 import { UilExclamationCircle, UilInfoCircle } from "@iconscout/react-unicons"
 
 enum AlertType {
@@ -14,47 +14,28 @@ type Props = {
   message: string
   type: AlertType | keyof typeof AlertType // Allow both enum and string
 }
+
 export const GenericAlert = ({ isLoading = false, title, message, type }: Props) => {
-  const colorSchemes = {
-    [AlertType.warning]: {
-      primaryColor: "#FFF3E5",
-      secondaryColor: "#F29B32",
-      icon: UilExclamationCircle,
-    },
-    [AlertType.error]: {
-      primaryColor: "#FCEEF1",
-      secondaryColor: "#C84968",
-      icon: UilExclamationCircle,
-    },
-    [AlertType.success]: {
-      primaryColor: "#E9FDF1",
-      secondaryColor: "#3DBA67",
-      icon: UilInfoCircle,
-    },
-    [AlertType.info]: {
-      primaryColor: "#E5F3FF",
-      secondaryColor: "#2E9FFF",
-      icon: UilInfoCircle,
-    },
+  const iconMap = {
+    [AlertType.warning]: UilExclamationCircle,
+    [AlertType.error]: UilExclamationCircle,
+    [AlertType.success]: UilInfoCircle,
+    [AlertType.info]: UilInfoCircle,
   }
 
-  const colorScheme = colorSchemes[type] || colorSchemes["info"]
+  const IconComponent = iconMap[type] || iconMap.info
 
   return (
     <Skeleton loading={isLoading}>
-      <Alert.Root bg={colorScheme.primaryColor} borderRadius="8px" my={3}>
-        <Stack flexDir={title ? "column" : "row"}>
+      <Alert.Root status={type} my={3}>
+        <Stack flexDir={title ? "column" : "row"} w="full">
           <HStack w={title ? "full" : "auto"}>
-            <Icon as={colorScheme.icon} boxSize={7} color={colorScheme.secondaryColor} />
-            {title && (
-              <Text fontWeight={600} color={colorScheme.secondaryColor} fontSize="md">
-                {title}
-              </Text>
-            )}
+            <Alert.Indicator>
+              <Icon as={IconComponent} boxSize={7} />
+            </Alert.Indicator>
+            {title && <Alert.Title>{title}</Alert.Title>}
           </HStack>
-          <Alert.Description as="span" fontSize="sm" color="#6A6A6A" alignSelf={title ? "flex-start" : "center"}>
-            {message}
-          </Alert.Description>
+          <Alert.Description alignSelf={title ? "flex-start" : "center"}>{message}</Alert.Description>
         </Stack>
       </Alert.Root>
     </Skeleton>

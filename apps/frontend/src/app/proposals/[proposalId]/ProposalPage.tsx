@@ -29,7 +29,7 @@ export const ProposalPage = ({ params }: Props) => {
   }, [])
   return (
     <MotionVStack>
-      <ProposalPageContent proposalId={params.proposalId} />
+      <ProposalPageContent proposalId={params.proposalId} typeFilter="proposal" />
     </MotionVStack>
   )
 }

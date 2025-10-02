@@ -1,10 +1,12 @@
-import { useCallback, useMemo } from "react"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalStateQueryKey, useProposalCreatedEvent } from "@/api"
+import { getAllProposalsStateQueryKey, getProposalStateQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
+import { getConfig } from "@repo/config"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
+import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -17,7 +19,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns the execute transaction
  */
 export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
-  const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
+  const { data: proposal } = useProposalEnrichedById(proposalId)
 
   const clauseBuilder = useCallback(() => {
     return [
@@ -26,22 +28,20 @@ export const useExecuteProposal = ({ proposalId, onSuccess }: Props) => {
         contractInterface: GovernorInterface,
         method: "execute",
         args: [
-          proposalCreatedEvent.data?.targets,
-          proposalCreatedEvent.data?.values,
-          proposalCreatedEvent.data?.callDatas,
-          ethers.keccak256(ethers.toUtf8Bytes(proposalCreatedEvent.data?.description || "")),
+          proposal?.targets,
+          proposal?.values,
+          proposal?.calldatas,
+          ethers.keccak256(ethers.toUtf8Bytes(proposal?.ipfsDescription || "")),
         ],
         comment: "execute proposal",
       }),
     ]
-  }, [
-    proposalCreatedEvent.data?.callDatas,
-    proposalCreatedEvent.data?.description,
-    proposalCreatedEvent.data?.targets,
-    proposalCreatedEvent.data?.values,
-  ])
+  }, [proposal?.calldatas, proposal?.ipfsDescription, proposal?.targets, proposal?.values])
 
-  const refetchQueryKeys = useMemo(() => [getProposalStateQueryKey(proposalId)], [proposalId])
+  const refetchQueryKeys = useMemo(
+    () => [getProposalStateQueryKey(proposalId), getAllProposalsStateQueryKey()],
+    [proposalId],
+  )
 
   return useBuildTransaction({
     clauseBuilder,

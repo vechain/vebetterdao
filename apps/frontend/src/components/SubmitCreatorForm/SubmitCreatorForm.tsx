@@ -1,5 +1,9 @@
-import { useEffect } from "react"
+import { WalletAddressInput } from "@/app/components/Input"
+import { useCreatorSubmissionFormStore } from "@/store"
 import { Button, Card, Field, Heading, Input, Text, VStack } from "@chakra-ui/react"
+import { UilGithub } from "@iconscout/react-unicons"
+import { signIn, signOut, useSession } from "next-auth/react"
+import { useEffect } from "react"
 import {
   Control,
   FieldErrors,
@@ -10,14 +14,10 @@ import {
   UseFormWatch,
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { signIn, signOut, useSession } from "next-auth/react"
-import { useCreatorSubmissionFormStore } from "@/store"
-import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
-import { AddressUtils } from "@/utils"
-import { WalletAddressInput } from "@/app/components/Input"
-import AppUtils from "@/utils/AppUtils"
+
 import { FormCheckbox, FormItem } from "../CustomFormFields"
+import { genericValidation, patternUrlCheck, validateAppId, validateEmail } from "../CustomFormFields/validators"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -63,6 +63,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
       label: t("Action Verification"),
       description: t("Uses AI validation or unique identifiers to verify sustainable actions."),
       name: "securityActionVerification",
+      required: true,
     },
     {
       label: t("Device Fingerprinting (Optional)"),
@@ -80,6 +81,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
       label: t("Anti-Farming Measures (Optional)"),
       description: t("Implements progressive unlocking, reward scaling, or other anti-farming strategies."),
       name: "securityAntiFarming",
+      required: false,
     },
   ] as const
 
@@ -183,28 +185,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
     }
   }
 
-  const validateUrl = (value: string, fieldName: string) => {
-    try {
-      new URL(value)
-      return true
-    } catch {
-      return t("Invalid {{fieldName}}", { fieldName })
-    }
-  }
-
-  const validateEmail = (value: string, fieldName: string) => {
-    const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
-    return emailRegex.test(value) || t("Invalid {{fieldName}}", { fieldName })
-  }
-
-  const validateAppId = (value: string, fieldName: string) => {
-    return AppUtils.isValid(value) || t("Invalid {{fieldName}}", { fieldName })
-  }
-
-  const genericValidation = (value: string, fieldName: string) => {
-    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
-  }
-
   return (
     <Card.Root w="full" borderRadius="xl">
       <Card.Body w="full" p={{ base: 2, md: 6 }}>
@@ -284,7 +264,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
                   ...register("projectUrl", {
                     required: "Project URL is required",
                     maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
-                    validate: value => validateUrl(value, t("Project URL")),
+                    pattern: patternUrlCheck,
                   }),
                 }}
                 error={errors.projectUrl?.message}
@@ -388,7 +368,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
                       value: 255,
                       message: t("{{fieldName}} is too long", { fieldName: t("Testnet Project URL") }),
                     },
-                    validate: value => validateUrl(value, t("Testnet Project URL")),
+                    pattern: patternUrlCheck,
                   }),
                 }}
                 error={errors.testnetProjectUrl?.message}
@@ -426,6 +406,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
                   label={checkbox.label}
                   description={checkbox.description}
                   control={control}
+                  {...(checkbox.required && { rules: { required: "This is a required security measure" } })}
                   error={errors[checkbox.name]?.message}
                 />
               ))}

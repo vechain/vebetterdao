@@ -1,14 +1,15 @@
-import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
-import { Button, Heading, HStack, Icon, IconButton, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import { NoActiveProposalCard } from "../NoActiveProposalCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
@@ -125,22 +126,19 @@ export const DashboardAllocationRounds = () => {
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack gap={4} w="full">
           <Heading fontSize="24px" fontWeight={400}>
-            {t("Proposals in this round or looking for support")}
+            {t("Proposals and Grants looking for support and approval")}
           </Heading>
 
           {!!sortedProposals.length ? (
             <VStack gap={4} w="full">
               {sortedProposals.map(proposal => (
-                <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
+                <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
               ))}
             </VStack>
           ) : (
             <NoActiveProposalCard />
           )}
         </VStack>
-        <Link href="/proposals" color="primary" fontWeight="semibold">
-          {t("View all proposals")}
-        </Link>
       </VStack>
     </ResponsiveCard>
   )

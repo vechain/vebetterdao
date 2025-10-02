@@ -1,0 +1,1 @@
+export { MulticolorBar } from "./MulticolorBar"
