@@ -22,7 +22,6 @@ import { waitForBlock } from "../helpers"
 import { autoVotingLibraries } from "../../scripts/libraries"
 
 describe("XAllocationVoting Upgrade - @shard14a", function () {
-  // Type definitions for cleaner test code
   type XAllocationContract =
     | XAllocationVotingV3
     | XAllocationVotingV4
@@ -47,7 +46,17 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     [roundId: number]: UserVotesForRound
   }
 
-  // Helper function to validate critical contract state between upgrades
+  /*
+   * USAGE PATTERN:
+   * -------------
+   * This function is called immediately after each upgrade to ensure:
+   * - No storage slots were corrupted during upgrade
+   * - All mappings remain accessible and accurate
+   * - Historical data spanning multiple rounds is preserved
+   *
+   * The test builds up expectedVotes and expectedUserVotes cumulatively,
+   * so each validation checks the ENTIRE history, not just recent changes.
+   */
   async function validateContractState(
     contract: XAllocationContract,
     expectedVersion: string,
@@ -55,17 +64,18 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     expectedVotes: RoundVotesData,
     expectedUserVotes: RoundUserVotes,
   ) {
+    // Verify contract metadata is preserved
     expect(await contract.version()).to.equal(expectedVersion)
     expect(await contract.currentRoundId()).to.equal(expectedRoundId)
 
-    // Validate app votes for each round
+    // This ensures no voting data is lost across any upgrade
     for (const [roundId, appVotes] of Object.entries(expectedVotes)) {
       for (const [appId, expectedAmount] of Object.entries(appVotes)) {
         expect(await contract.getAppVotes(parseInt(roundId), appId)).to.equal(expectedAmount)
       }
     }
 
-    // Validate user voting status for each round
+    // This ensures user participation history is completely preserved
     for (const [roundId, userVotes] of Object.entries(expectedUserVotes)) {
       for (const [userAddress, hasVoted] of Object.entries(userVotes)) {
         expect(await contract.hasVoted(parseInt(roundId), userAddress)).to.equal(hasVoted)
@@ -94,17 +104,19 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       veBetterPassport,
       minterAccount,
       governor,
-      relayerRewardsPool,
     } = configContracts!
 
     const creator1 = creators[0]
     const creator2 = creators[1]
     const creator3 = creators[2]
 
-    // Set personhood threshold to 0
+    // Configure veBetterPassport for testing (no personhood requirements)
     await veBetterPassport.connect(owner).setThresholdPoPScore(0)
     await veBetterPassport.toggleCheck(4)
 
+    // ========================================
+    // DEPLOY: Emissions V1 -> V2 and VoterRewards V1 -> V2
+    // ========================================
     const emissionsV1 = (await deployProxy("Emissions", [
       {
         minter: minterAccount.address,
@@ -133,6 +145,7 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       },
     ])) as EmissionsV1
 
+    // Upgrade Emissions to V2
     const emissions = (await upgradeProxy(
       "EmissionsV1",
       "Emissions",
@@ -143,6 +156,7 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       },
     )) as EmissionsV2
 
+    // Deploy VoterRewards V1
     const voterRewardsV1 = (await deployProxy("VoterRewardsV1", [
       owner.address, // admin
       owner.address, // upgrader
@@ -154,6 +168,7 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
     ])) as VoterRewardsV1
 
+    // Upgrade VoterRewards to V2
     const voterRewardsV2 = (await upgradeProxy(
       "VoterRewardsV1",
       "VoterRewards",
@@ -164,10 +179,12 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       },
     )) as VoterRewardsV2
 
-    // Set vote 2 earn (VoterRewards deployed contract) address in emissions
+    // Link VoterRewards to Emissions
     await emissions.connect(owner).setVote2EarnAddress(await voterRewardsV2.getAddress())
 
-    // Deploy and upgrade through V3
+    // ========================================
+    // DEPLOY: XAllocationVoting V1 -> V2 -> V3
+    // ========================================
     const xAllocationVotingV3 = (await deployAndUpgrade(
       ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3"],
       [
@@ -198,6 +215,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
 
     expect(await xAllocationVotingV3.version()).to.equal("3")
 
+    // ========================================
+    // CONFIGURE: Link contracts and set roles
+    // ========================================
     await emissions.setXAllocationsGovernorAddress(await xAllocationVotingV3.getAddress())
     expect(await emissions.xAllocationsGovernor()).to.eql(await xAllocationVotingV3.getAddress())
 
@@ -216,7 +236,7 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       .connect(owner)
       .grantRole(await xAllocationVotingV3.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
 
-    //Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
+    // Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
     const roundStarterRole = await xAllocationVotingV3.ROUND_STARTER_ROLE()
     await xAllocationVotingV3
       .connect(owner)
@@ -227,16 +247,19 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       .grantRole(roundStarterRole, owner.address)
       .then(async (tx: any) => await tx.wait())
 
+    // ========================================
+    // SETUP: Test users, apps, and initial voting round
+    // ========================================
     const user1 = otherAccounts[0]
     const user2 = otherAccounts[1]
     const user3 = otherAccounts[2]
 
-    // Fund wallets
+    // Fund test users with VOT3 tokens for voting
     await getVot3Tokens(user1, "1000")
     await getVot3Tokens(user2, "1000")
     await getVot3Tokens(user3, "1000")
 
-    // Add apps
+    // Create and endorse test apps
     const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
     const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
     const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
@@ -254,17 +277,18 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     await endorseApp(app2Id, otherAccounts[3])
     await endorseApp(app3Id, otherAccounts[4])
 
-    // Grant minter role to emissions contract
+    // Initialize emissions system
     await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
-    // Bootstrap emissions
     await emissions.connect(minterAccount).bootstrap()
 
-    // start round
+    // ========================================
+    // ROUND 1: Initial voting in V3
+    // ========================================
     await emissions.connect(minterAccount).start()
     const roundId1 = await xAllocationVotingV3.currentRoundId()
     expect(roundId1).to.equal(1n)
 
-    // Round 1: Execute initial votes
+    // Execute initial votes
     await xAllocationVotingV3.connect(user1).castVote(roundId1, [app1Id], [ethers.parseEther("100")])
     await xAllocationVotingV3
       .connect(user2)
@@ -281,7 +305,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       { 1: { [user1.address]: true, [user2.address]: true, [user3.address]: false } },
     )
 
-    // === UPGRADE V3 -> V4 ===
+    // ========================================
+    // UPGRADE V3 -> V4: First upgrade test
+    // ========================================
     const xAllocationVotingV4 = (await upgradeProxy(
       "XAllocationVotingV3",
       "XAllocationVotingV4",
@@ -303,7 +329,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       { 1: { [user1.address]: true, [user2.address]: true, [user3.address]: false } },
     )
 
-    // === UPGRADE V4 -> V5 ===
+    // ========================================
+    // UPGRADE V4 -> V5: Continue upgrade chain
+    // ========================================
     const xAllocationVotingV5 = (await upgradeProxy(
       "XAllocationVotingV4",
       "XAllocationVotingV5",
@@ -324,6 +352,7 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       },
       { 1: { [user1.address]: true, [user2.address]: true, [user3.address]: false } },
     )
+
     expect(await xAllocationVotingV5.state(1n)).to.equal(0n) // Active
 
     // Test voting functionality still works after upgrade
@@ -331,7 +360,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     expect(await xAllocationVotingV5.getAppVotes(roundId1, app1Id)).to.equal(ethers.parseEther("300"))
     expect(await xAllocationVotingV5.hasVoted(roundId1, user3.address)).to.be.true
 
-    // Complete round 1 and start round 2
+    // ========================================
+    // ROUND 1 -> ROUND 2: Complete cycle and test rewards
+    // ========================================
     const blockNextCycle = await emissions.getNextCycleBlock()
     await waitForBlock(Number(blockNextCycle))
     expect(await emissions.isCycleEnded(1)).to.be.true
@@ -340,15 +371,19 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     const roundId2 = await xAllocationVotingV5.currentRoundId()
     expect(roundId2).to.equal(2n)
 
-    // check that rewards are distributed correctly
-    await expect(xAllocationPool.claim(1, app1Id)).to.not.be.reverted
-    await expect(xAllocationPool.claim(1, app2Id)).to.not.be.reverted
-    await expect(xAllocationPool.claim(1, app3Id)).to.not.be.reverted
+    // Verify rewards distribution works correctly
+    await expect(xAllocationPool.claim(1, app1Id)).not.to.be.reverted
+    await expect(xAllocationPool.claim(1, app2Id)).not.to.be.reverted
+    await expect(xAllocationPool.claim(1, app3Id)).not.to.be.reverted
 
-    // Round 2: Execute votes before next upgrade
+    // ========================================
+    // ROUND 2: Execute votes before V5->V6 upgrade
+    // ========================================
     await xAllocationVotingV5.connect(user1).castVote(roundId2, [app1Id], [ethers.parseEther("100")])
 
-    // === UPGRADE V5 -> V6 ===
+    // ========================================
+    // UPGRADE V5 -> V6: Continue upgrade chain
+    // ========================================
     const xAllocationVotingV6 = (await upgradeProxy(
       "XAllocationVotingV5",
       "XAllocationVotingV6",
@@ -373,13 +408,16 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
         2: { [user1.address]: true, [user2.address]: false, [user3.address]: false },
       },
     )
+
     expect(await xAllocationVotingV6.state(2n)).to.equal(0n) // Active
 
     // Test voting functionality still works after V6 upgrade
     await xAllocationVotingV6.connect(user3).castVote(roundId2, [app1Id], [ethers.parseEther("100")])
     expect(await xAllocationVotingV6.getAppVotes(roundId2, app1Id)).to.equal(ethers.parseEther("200"))
 
-    // Complete round 2 and start round 3
+    // ========================================
+    // ROUND 2 -> ROUND 3: Complete cycle and test rewards
+    // ========================================
     await waitForBlock(Number(await emissions.getNextCycleBlock()))
     expect(await emissions.isCycleEnded(roundId2)).to.be.true
 
@@ -387,16 +425,20 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     const roundId3 = await xAllocationVotingV6.currentRoundId()
     expect(roundId3).to.equal(3n)
 
-    // Check that rewards are distributed correctly
+    // Verify rewards distribution works correctly
     await expect(xAllocationPool.claim(2, app1Id)).to.not.be.reverted
     await expect(xAllocationPool.claim(2, app2Id)).to.not.be.reverted
     await expect(xAllocationPool.claim(2, app3Id)).to.not.be.reverted
 
-    // Round 3: Execute votes before next upgrade
+    // ========================================
+    // ROUND 3: Execute votes before V6->V7 upgrade
+    // ========================================
     await xAllocationVotingV6.connect(user1).castVote(roundId3, [app1Id], [ethers.parseEther("100")])
     await xAllocationVotingV6.connect(user2).castVote(roundId3, [app1Id], [ethers.parseEther("100")])
 
-    // === UPGRADE V6 -> V7 ===
+    // ========================================
+    // UPGRADE V6 -> V7: Governance features added
+    // ========================================
     const xAllocationVotingV7 = (await upgradeProxy(
       "XAllocationVotingV6",
       "XAllocationVotingV7",
@@ -427,9 +469,12 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
         3: { [user1.address]: true, [user2.address]: true, [user3.address]: false },
       },
     )
+
     expect(await xAllocationVotingV7.state(3n)).to.equal(0n) // Active
 
-    // === UPGRADE V7 -> V8 ===
+    // ========================================
+    // UPGRADE V7 -> V8: Final upgrade with auto-voting features
+    // ========================================
     const { AutoVotingLogic } = await autoVotingLibraries()
 
     const xAllocationVoting = (await upgradeProxy(
@@ -451,7 +496,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
       .grantRole(await xAllocationVoting.CONTRACTS_ADDRESS_MANAGER_ROLE(), owner.address)
     await xAllocationVoting.connect(owner).setB3TRGovernor(await governor.getAddress())
 
-    // CRITICAL: Final validation - all historical data must be preserved in V8
+    // ========================================
+    // FINAL VALIDATION: All historical data preserved in V8
+    // ========================================
     await validateContractState(
       xAllocationVoting,
       "8",
@@ -474,6 +521,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     expect(await xAllocationVoting.hasVoted(1, user1.address)).to.be.true
     expect(await xAllocationVoting.hasVoted(2, user3.address)).to.be.true
 
+    // ========================================
+    // ROUND 3 -> ROUND 4: Test final functionality
+    // ========================================
     await waitForBlock(Number(await emissions.getNextCycleBlock()))
     expect(await emissions.isCycleEnded(roundId3)).to.be.true
     expect(await xAllocationVoting.state(roundId3)).to.equal(1n) // NOT ACTIVE
@@ -487,7 +537,9 @@ describe("XAllocationVoting Upgrade - @shard14a", function () {
     expect(await xAllocationVoting.getAppVotes(getRoundId4, app2Id)).to.equal(ethers.parseEther("150"))
     expect(await xAllocationVoting.hasVoted(getRoundId4, user2.address)).to.be.true
 
-    // Verify contract addresses are still correct
+    // ========================================
+    // FINAL VERIFICATION: Contract addresses and functionality
+    // ========================================
     expect(await xAllocationVoting.emissions()).to.equal(await emissions.getAddress())
     expect(await xAllocationVoting.voterRewards()).to.equal(await voterRewardsV2.getAddress())
     expect(await xAllocationVoting.x2EarnApps()).to.equal(await x2EarnApps.getAddress())
