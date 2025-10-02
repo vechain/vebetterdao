@@ -1989,5 +1989,6 @@
   "Cancel {{proposalType}}": "{{proposalType}}をキャンセルする",
   "Are you sure you want to cancel this {{proposalType}}": "この{{proposalType}}をキャンセルしてもよろしいですか",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "今キャンセルすると、助成金は削除され、次の投票ラウンドには表示されません。一度ラウンドが始まると、キャンセルはできなくなります。",
-  "Showing": "表示中"
+  "Showing": "表示中",
+  "Search by proposal name": "提案名で検索"
 }
