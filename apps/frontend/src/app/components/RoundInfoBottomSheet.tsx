@@ -4,7 +4,6 @@ import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton, Si
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
-  ProposalState,
   useAllocationAmount,
   useAllocationsRoundState,
   useCanUserVote,
@@ -20,6 +19,7 @@ import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
@@ -197,7 +197,7 @@ export const RoundInfoBottomSheet = () => {
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
               <Heading fontSize="18px" fontWeight={700}>
-                {t("Proposals in this round or looking for support")}
+                {t("Proposals and Grants looking for support and approval")}
               </Heading>
               <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
@@ -207,16 +207,13 @@ export const RoundInfoBottomSheet = () => {
             {!!sortedProposals.length ? (
               <VStack gap={4} w="full">
                 {sortedProposals.map(proposal => (
-                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} proposalState={proposal.state} />
+                  <ProposalCompactCard key={proposal.id} proposal={proposal} proposalState={proposal.state} />
                 ))}
               </VStack>
             ) : (
               <NoActiveProposalCard />
             )}
           </VStack>
-          <Button onClick={() => router.push("/proposals")} variant="primaryGhost" fontWeight="semibold">
-            {t("View all proposals")}
-          </Button>
         </VStack>
       </BaseBottomSheet>
     </>

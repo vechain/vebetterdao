@@ -135,6 +135,7 @@ export const WalletAddressInput = ({
           {...props}
           id={id}
           value={inputValue}
+          borderRadius="xl"
           onChange={handleOnChange}
           placeholder={props?.placeholder ?? t("Enter a wallet address or domain")}
           disabled={props?.disabled}

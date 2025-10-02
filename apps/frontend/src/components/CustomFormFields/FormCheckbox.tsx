@@ -1,40 +1,51 @@
 import { Checkbox, Field, Text } from "@chakra-ui/react"
-import { Control, Controller } from "react-hook-form"
-import { SubmitCreatorFormData } from "../SubmitCreatorForm/SubmitCreatorForm"
+import React from "react"
+import { Control, Controller, FieldPath, FieldValues, RegisterOptions } from "react-hook-form"
 
-type FormCheckboxProps = {
-  label: string
-  name:
-    | "securityApiSecurityMeasures"
-    | "securityActionVerification"
-    | "securityDeviceFingerprint"
-    | "securitySecureKeyManagement"
-    | "securityAntiFarming"
+type FormCheckboxProps<T extends FieldValues> = {
+  label: React.ReactNode
+  name: FieldPath<T>
   description?: string
-  control: Control<SubmitCreatorFormData>
+  control: Control<T>
   error?: string
   onBlur?: () => void
+  rules?: RegisterOptions<T>
 }
 
-export const FormCheckbox = ({ label, name, description, control, error, onBlur }: FormCheckboxProps) => {
+export const FormCheckbox = <T extends FieldValues>({
+  label,
+  name,
+  description,
+  control,
+  error,
+  onBlur,
+  rules,
+}: FormCheckboxProps<T>) => {
   return (
     <Controller
       control={control}
       name={name}
+      rules={rules}
       render={({ field }) => (
         <Field.Root invalid={!!error}>
           <Checkbox.Root
-            checked={field.value}
-            onCheckedChange={({ checked }) => field.onChange(checked)}
+            checked={Boolean(field.value)}
+            onCheckedChange={({ checked }) => field.onChange(Boolean(checked))}
             onBlur={onBlur}
             colorPalette="blue"
             size="md">
             <Checkbox.HiddenInput />
-            <Checkbox.Control />
+            <Checkbox.Control>
+              <Checkbox.Indicator />
+            </Checkbox.Control>
             <Checkbox.Label>
-              <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>
-                {label}
-              </Text>
+              {typeof label === "string" ? (
+                <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>
+                  {label}
+                </Text>
+              ) : (
+                label
+              )}
               <Text fontSize={{ base: "xs", sm: "xs", md: "sm" }}>{description}</Text>
             </Checkbox.Label>
           </Checkbox.Root>

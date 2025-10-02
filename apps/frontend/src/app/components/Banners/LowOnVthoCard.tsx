@@ -36,11 +36,11 @@ export const LowOnVthoCard: React.FC = () => {
     if (balanceNumber.isZero())
       return {
         heading: "Not enough VTHO",
-        body: "VTHO is used as gas in every transaction you complete in VeBetterDAO, like voting, swapping tokens, etc.",
+        body: "VTHO is used as gas in every transaction you complete in VeBetter, like voting, swapping tokens, etc.",
       }
     return {
       heading: "You're low on VTHO ",
-      body: "You're running low on VTHO, used as gas in every transaction you complete in VeBetterDAO, like voting, swapping tokens, etc.",
+      body: "You're running low on VTHO, used as gas in every transaction you complete in VeBetter, like voting, swapping tokens, etc.",
     }
   }, [balance])
 

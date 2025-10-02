@@ -14736,6 +14736,11 @@ i18next@^24.2.1:
   dependencies:
     "@babel/runtime" "^7.26.10"
 
+iconoir-react@^7.11.0:
+  version "7.11.0"
+  resolved "https://registry.yarnpkg.com/iconoir-react/-/iconoir-react-7.11.0.tgz#6456409e87a3c6cd1494eb25fadcb13179d15bc6"
+  integrity sha512-uvTKtnHYwbbTsmQ6HCcliYd50WK0GbjP497RwdISxKzfS01x4cK1Mn/F2mT/t2roSaJQ0I+KnHxMcyvmNMXWsQ==
+
 iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"

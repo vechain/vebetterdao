@@ -28,7 +28,9 @@
     "NEXTAUTH_SECRET",
     "TWITTER_CLIENT_ID",
     "TWITTER_CLIENT_SECRET",
-    "RESET_USER_SIGNAL_COUNT_DOMAIN"
+    "RESET_USER_SIGNAL_COUNT_DOMAIN",
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET"
   ],
   "tasks": {
     "install": {
@@ -160,8 +162,9 @@
       "cache": false
     },
     "compile": {
-      "cache": false,
-      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+      "cache": true,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": ["dist/**", "artifacts/**", "typechain-types/**"]
     },
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]

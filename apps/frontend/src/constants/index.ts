@@ -10,5 +10,6 @@ export * from "./transactions"
 export * from "./AnalyticsEvents"
 export * from "./featureFlag"
 export * from "./XAppsMedia"
+export * from "./proposals"
 
 export const notFoundImage = "/assets/images/image-not-found.webp"

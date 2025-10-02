@@ -77,20 +77,20 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
     )
 
   return (
-    <Box borderWidth={1} borderColor={"#A8A8A8"} w={"full"} borderRadius={9} onClick={onClick}>
-      <HStack p={2} gap={2} w={"full"} justifyContent={"space-between"} px={3.5} py={4}>
-        <HStack w="full">
-          <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
-          <VStack gap={0} align={"flex-start"}>
+    <Box w={"full"} onClick={onClick}>
+      <HStack w={"full"} justifyContent={"flex-start"} py={4}>
+        <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
+        <VStack align={"flex-start"} gap={2}>
+          <HStack>
             <Text fontSize={18} fontWeight={600}>
               {domain ?? humanAddress(account?.address ?? "", 4, 6)}
             </Text>
-            <Text fontSize={12} fontWeight={400}>
-              {t("View your Better Profile")}
-            </Text>
-          </VStack>
-        </HStack>
-        <FaChevronRight size={16} />
+            <FaChevronRight size={16} />
+          </HStack>
+          <Text fontSize={14} color={"#6A6A6A"}>
+            {t("View profile")}
+          </Text>
+        </VStack>
       </HStack>
     </Box>
   )

@@ -213,7 +213,7 @@ export const ManageCreatorsNFT = () => {
                   colorPalette="blue"
                   type="submit"
                   disabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
-                  {t(actionType === "mint" ? "Mint" : "Burn")}
+                  {actionType === "mint" ? t("Mint") : t("Burn")}
                 </Button>
               )}
             </VStack>

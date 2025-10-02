@@ -45,7 +45,7 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                     color={"white"}
                     fontSize={28}
                     fontWeight={700}>
-                    {t("VeBetterDAO")} <br /> {t("Governance")}
+                    {t("VeBetter")} <br /> {t("Governance")}
                   </Text>
 
                   <NFTWithRings image={imageData?.image ?? notFoundImage} tokenID={tokenID} />
@@ -74,7 +74,7 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                 </VStack>
               </Dialog.Body>
               <Dialog.Footer justifyContent={"center"} pb={{ base: 14, md: 20 }}>
-                <ShareButtons descriptionEncoded="As%20a%20Voter%20in%20VeBetterDAO%2C%20I%E2%80%99ve%20just%20minted%20my%20GM%20Earth%20NFT.%20%F0%9F%8C%8D%0A%0AGet%20yours%20here%20%F0%9F%91%89%20%20https%3A%2F%2Fgovernance.vebetterdao.org%2F%0A%0A%23GalaxyMember%20%23VeBetterDAO" />
+                <ShareButtons descriptionEncoded="As%20a%20Voter%20in%20VeBetter%2C%20I%E2%80%99ve%20just%20minted%20my%20GM%20Earth%20NFT.%20%F0%9F%8C%8D%0A%0AGet%20yours%20here%20%F0%9F%91%89%20%20https%3A%2F%2Fgovernance.vebetterdao.org%2F%0A%0A%23GalaxyMember%20%23VeBetter" />
               </Dialog.Footer>
             </Dialog.Content>
           </Card.Body>

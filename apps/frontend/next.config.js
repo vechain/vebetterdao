@@ -15,6 +15,7 @@ const nextConfig = {
       "@vechain/vebetterdao-contracts/*",
       "react-icons/*",
       "@iconscout/react-unicons",
+      "iconoir-react",
     ],
     turbo: {
       rules: {
@@ -25,9 +26,9 @@ const nextConfig = {
       },
     },
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  typescript: { ignoreBuildErrors: true },
+  swcMinify: true,
+  compress: true,
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

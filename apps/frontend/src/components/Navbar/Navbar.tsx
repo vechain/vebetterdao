@@ -1,14 +1,13 @@
 "use client"
 import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
 import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
+import { useHideOnScroll } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
-import { useHideOnScroll } from "@/hooks"
 
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
@@ -39,11 +38,9 @@ export const Navbar: React.FC = () => {
     return routesToRender
   }, [routesToRender])
 
-  const bg = useColorModeValue("#F7F7F7", "#131313")
-  const borderColor = useColorModeValue("#EEEEEE", "#2D2D2F")
   return (
     <Box
-      bg={bg}
+      bg={isLargerThan1200 ? "chakra-body-bg" : "bg.primary"}
       px={0}
       position={"sticky"}
       top={0}
@@ -52,10 +49,7 @@ export const Navbar: React.FC = () => {
       w={"full"}
       transition="transform 0.3s ease-in-out"
       transform={isNavbarVisible ? undefined : "translateY(-100%)"}>
-      <HStack
-        justify={"space-between"}
-        p={isLargerThan1200 ? "16px 48px" : "8px 20px"}
-        borderBottom={`1px solid ${borderColor}`}>
+      <HStack justify={"space-between"} p={isLargerThan1200 ? "16px 48px" : "8px 20px"}>
         {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (

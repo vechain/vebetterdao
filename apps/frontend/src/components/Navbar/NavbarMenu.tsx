@@ -1,8 +1,9 @@
-import { Box, Button, HStack, Icon, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+"use client"
+import { Button, Icon, HoverCard, Portal, Text, useMediaQuery, VStack, Collapsible, HStack } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
 import { Route } from "./Routes"
-import { FaChevronRight } from "react-icons/fa6"
-import { useTranslation } from "react-i18next"
+import { FaChevronDown } from "react-icons/fa6"
 import { motion } from "framer-motion"
 
 type Props = {
@@ -10,27 +11,18 @@ type Props = {
   routesToRender: Route[]
 }
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { opacity: 1, x: 0 },
-}
-
-const MotionHStack = motion(HStack)
 const MotionVStack = motion(VStack)
 
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
   if (typeof route.onClick === "string") {
     if (route.onClick.startsWith("/profile")) return pathname === "/profile"
+    if (route?.subRoutes) {
+      // If it has subroutes, it's selected if any of its subroutes are selected
+      return route.subRoutes.some(
+        subRoute => typeof subRoute.onClick === "string" && pathname.startsWith(subRoute.onClick),
+      )
+    }
     return pathname.startsWith(route.onClick)
   }
   return false
@@ -45,81 +37,200 @@ const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () 
   }
   onMenuClick?.()
 }
+const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
+  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <HoverCard.Root
+      positioning={{ placement: "bottom-start" }}
+      openDelay={100}
+      closeDelay={150}
+      open={isOpen}
+      onOpenChange={e => setIsOpen(e.open)}>
+      <HoverCard.Trigger asChild>
+        <Button
+          w={{ base: "full", md: "auto" }}
+          colorScheme={selected ? "primary" : "gray"}
+          variant={selected ? "primaryAction" : "ghost"}
+          rounded="full">
+          <Text fontSize="sm" fontWeight={selected ? "bold" : "normal"}>
+            {route.name}
+          </Text>
+          <Icon
+            size="xs"
+            as={FaChevronDown}
+            transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+            transition="transform 0.2s"
+            transformOrigin="center"
+            width="12px"
+            height="12px"
+            flexShrink={0}
+          />
+        </Button>
+      </HoverCard.Trigger>
+      <Portal>
+        <HoverCard.Positioner>
+          <HoverCard.Content mt={"12px"} minW="400px" borderRadius="2xl" p={2} gap={0}>
+            <VStack align="stretch" w="full" gap="2">
+              {route.subRoutes?.map(subRoute => {
+                return (
+                  <VStack
+                    key={subRoute.name}
+                    textAlign="start"
+                    alignItems="flex-start"
+                    cursor="pointer"
+                    borderRadius="2xl"
+                    p={3}
+                    color={"text.subtle"}
+                    _hover={{
+                      color: "text.default",
+                    }}
+                    onClick={() => {
+                      handleClick(subRoute, router)()
+                      setIsOpen(false)
+                    }}>
+                    <Text fontSize={"md"}>{subRoute.name}</Text>
+                    <Text fontSize={"sm"}>{subRoute.description}</Text>
+                  </VStack>
+                )
+              })}
+            </VStack>
+          </HoverCard.Content>
+        </HoverCard.Positioner>
+      </Portal>
+    </HoverCard.Root>
+  )
+}
+
+const MobileAccordionWithSubRoutes = ({
+  route,
+  selected,
+  onMenuClick,
+}: {
+  route: Route
+  selected: boolean
+  onMenuClick?: () => void
+}) => {
+  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(selected)
+
+  return (
+    <VStack w="full" align="stretch" p={0}>
+      <Collapsible.Root open={isOpen} onOpenChange={e => setIsOpen(e.open)}>
+        <Collapsible.Trigger asChild>
+          <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
+            <HStack w="full" gap={3}>
+              <Icon as={route.icon} color="text.subtle" size={"2xl"} />
+              <Text fontSize="lg">{route.name}</Text>
+            </HStack>
+            <Icon
+              size="xs"
+              as={FaChevronDown}
+              transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+              transition="transform 0.2s"
+              transformOrigin="center"
+              width="12px"
+              height="12px"
+              flexShrink={0}
+            />
+          </Button>
+        </Collapsible.Trigger>
+        <Collapsible.Content p="1">
+          <VStack w="full" align="stretch" pt={5} pl={12}>
+            {route.subRoutes?.map(subRoute => {
+              return (
+                <Button
+                  key={subRoute.name}
+                  variant="ghost"
+                  w="full"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="flex-start"
+                  flexDirection="column"
+                  textAlign="left"
+                  onClick={handleClick(subRoute, router, onMenuClick)}>
+                  <Text fontSize="sm">{subRoute.name}</Text>
+                </Button>
+              )
+            })}
+          </VStack>
+        </Collapsible.Content>
+      </Collapsible.Root>
+    </VStack>
+  )
+}
 
 export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
-  const { t } = useTranslation()
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])
+
+  const renderRoute = (route: Route) => {
+    if (route.component) return route.component
+
+    const hasSubRoutes = route?.subRoutes?.length
+    const selected = isSelected(route, pathname)
+    const onClick = handleClick(route, router, onMenuClick)
+
+    // Desktop rendering
+    if (isLargerThan1200) {
+      if (hasSubRoutes) {
+        return <DesktopButtonWithSubRoutes key={route.name} route={route} selected={selected} />
+      }
+
+      const fontWeight = selected ? 600 : 400
+      return (
+        <Button
+          border="none"
+          colorPalette={selected ? "primary" : "gray"}
+          rounded={"full"}
+          w={["full", "full", "auto"]}
+          key={route.name}
+          variant={selected ? "primaryAction" : "ghost"}
+          onClick={onClick}
+          size="md"
+          fontWeight={fontWeight}
+          fontSize="sm"
+          data-testid={selected ? "current-section" : ""}>
+          {route.name}
+        </Button>
+      )
+    }
+
+    // Mobile rendering
+    if (hasSubRoutes) {
+      return (
+        <MobileAccordionWithSubRoutes key={route.name} route={route} selected={selected} onMenuClick={onMenuClick} />
+      )
+    }
+
+    return (
+      <Button
+        variant="ghost"
+        w={"full"}
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="center"
+        key={route.name}
+        onClick={onClick}
+        data-testid={selected ? "current-section" : ""}
+        gap={4}>
+        <Icon as={route.icon} color="text.subtle" size={"xl"} />
+        <Text textAlign="left" fontSize="lg">
+          {route.name}
+        </Text>
+      </Button>
+    )
+  }
 
   return (
     <>
       {isLargerThan1200 ? (
-        // Render desktop menu without animations
-        routesToRender.map(route => {
-          if (route.component) return route.component
-
-          const selected = isSelected(route, pathname)
-          const onClick = handleClick(route, router, onMenuClick)
-
-          return (
-            <Button
-              border="none"
-              colorPalette={selected ? "primary" : "gray"}
-              rounded={"full"}
-              w={["full", "full", "auto"]}
-              key={route.name}
-              variant={selected ? "primaryAction" : "ghost"}
-              onClick={onClick}
-              size="md"
-              fontWeight="semibold"
-              fontSize="md"
-              data-testid={selected ? "current-section" : ""}>
-              <Icon as={route.icon} boxSize={4} />
-              {route.name}
-            </Button>
-          )
-        })
+        routesToRender.map(renderRoute)
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" variants={containerVariants} gap={0}>
-          {routesToRender.map((route, index) => {
-            if (route.component) return route.component
-
-            const selected = isSelected(route, pathname)
-            const bgColor = selected ? "rgba(0, 76, 252, 1)" : "transparent"
-            const textColor = selected ? "white" : "inherit"
-            const onClick = handleClick(route, router, onMenuClick)
-
-            return (
-              <MotionHStack
-                key={route.name}
-                w={"full"}
-                borderRadius={9}
-                bgColor={bgColor}
-                p={4}
-                color={textColor}
-                mt={index === 0 ? 4 : 0}
-                justifyContent={"space-between"}
-                onClick={onClick}
-                // Apply animation variants
-                variants={itemVariants}>
-                <HStack alignItems={"flex-start"}>
-                  <Box p={0.5}>
-                    <Icon as={route.icon} />
-                  </Box>
-                  <VStack alignItems={"start"} gap={0}>
-                    <Text fontSize={16} fontWeight={600}>
-                      {route.name}
-                    </Text>
-                    <Text fontSize={13} fontWeight={400}>
-                      {t(route.description as any)}
-                    </Text>
-                  </VStack>
-                </HStack>
-                {!selected && <FaChevronRight size={16} />}
-              </MotionHStack>
-            )
-          })}
+        <MotionVStack initial={"hidden"} animate="visible" gap={7} pt={5} w="full">
+          {routesToRender.map(renderRoute)}
         </MotionVStack>
       )}
     </>

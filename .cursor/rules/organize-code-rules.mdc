@@ -1,0 +1,146 @@
+# React Component Organization Rules
+
+## Code Organization Structure
+
+When organizing React components, follow this exact structure:
+
+### 1. Import Organization
+
+- Group imports by category WITHOUT section comments
+- Order: Third-party libraries → Local imports (API/hooks, utils, types, components)
+- Keep related imports together
+- Remove unused imports
+
+### 2. Component Body Structure
+
+Organize component internals with these sections and comments:
+
+```typescript
+export const ComponentName: React.FC<Props> = ({ prop1, prop2 }) => {
+  // ==========================================
+  // HOOKS
+  // ==========================================
+  // All React hooks and custom hooks grouped together
+
+  // ==========================================
+  // COMPUTED VALUES & CONSTANTS
+  // ==========================================
+  // All derived values, memoized calculations, constants
+
+  // ==========================================
+  // MEMOIZED COMPONENTS (if any)
+  // ==========================================
+  // Performance-optimized component instances
+
+  // ==========================================
+  // RENDER
+  // ==========================================
+  return (
+    // JSX with descriptive comments for major UI sections
+  )
+}
+```
+
+### 3. Variable Placement Analysis
+
+When encountering variables in components:
+
+- **Hooks section**: useState, useEffect, custom hooks, refs
+- **Computed values section**: useMemo, useCallback, derived values, constants
+- **Add TODO**: If variables could be better placed, suggest moving with: `// TODO: Consider moving [variable] to [section] section`
+
+### 4. UI Comments
+
+Add brief descriptive comments for major UI sections:
+
+- `{/* Header section */}`
+- `{/* Main content */}`
+- `{/* Sidebar */}`
+- `{/* Footer */}`
+
+### 5. Component Abstraction
+
+When identifying repeated patterns:
+
+- Extract to reusable components
+- Follow same organization structure
+- Create proper prop interfaces
+- Add to appropriate import section
+
+### 6. Code Quality Checks
+
+- Remove unused imports and variables
+- Ensure consistent spacing
+- Group related functionality
+- Suggest performance optimizations with memoization
+
+## Example Application
+
+**Before:**
+
+```typescript
+import { useState, useMemo } from "react"
+import { Button } from "@chakra-ui/react"
+import { useApi } from "@/api"
+import { SomeType } from "@/types"
+
+export const MyComponent = () => {
+  const [count, setCount] = useState(0)
+  const { data } = useApi()
+  const isEven = count % 2 === 0
+  const memoizedValue = useMemo(() => data?.length || 0, [data])
+
+  return <div>...</div>
+}
+```
+
+**After:**
+
+```typescript
+import { Button } from "@chakra-ui/react"
+import { useState, useMemo } from "react"
+
+import { useApi } from "@/api"
+import { SomeType } from "@/types"
+
+export const MyComponent = () => {
+  // ==========================================
+  // HOOKS
+  // ==========================================
+  const [count, setCount] = useState(0)
+  const { data } = useApi()
+
+  // ==========================================
+  // COMPUTED VALUES & CONSTANTS
+  // ==========================================
+  const isEven = count % 2 === 0
+  const memoizedValue = useMemo(() => data?.length || 0, [data])
+
+  // ==========================================
+  // RENDER
+  // ==========================================
+  return (
+    <div>
+      {/* Main content */}
+      ...
+    </div>
+  )
+}
+```
+
+## Automatic Suggestions
+
+When analyzing code, provide TODO comments for:
+
+- Variables that could be moved between sections
+- Opportunities for component abstraction
+- Performance optimization possibilities
+- Import cleanup opportunities
+
+Example TODO format:
+
+```typescript
+// TODO: Consider moving 'isEven' to COMPUTED VALUES & CONSTANTS section
+// TODO: Extract repeated button pattern into reusable component
+// TODO: Memoize this component to prevent unnecessary re-renders
+```
