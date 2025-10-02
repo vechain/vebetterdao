@@ -156,27 +156,10 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
             <VStack align="stretch" gap={8}>
               {/* Mobile */}
               {isMobile ? (
-                <Tabs.Root defaultValue="session" w="full" colorPalette="blue" fitted>
+                <Tabs.Root defaultValue="session" w="full" fitted>
                   <Tabs.List>
-                    <Tabs.Trigger
-                      value="session"
-                      color="text"
-                      _selected={{
-                        color: "#004CFC",
-                        fontWeight: "800",
-                      }}>
-                      {t("Session")}
-                    </Tabs.Trigger>
-                    <Tabs.Trigger
-                      value="timeline"
-                      color="text.subtle"
-                      fontWeight="semibold"
-                      _selected={{
-                        color: "#004CFC",
-                        fontWeight: "800",
-                      }}>
-                      {t("Timeline")}
-                    </Tabs.Trigger>
+                    <Tabs.Trigger value="session">{t("Session")}</Tabs.Trigger>
+                    <Tabs.Trigger value="timeline">{t("Timeline")}</Tabs.Trigger>
                   </Tabs.List>
                   <Tabs.Content value="session" pt={6}>
                     <VStack align="stretch" gap={8}>

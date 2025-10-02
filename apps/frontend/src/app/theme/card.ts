@@ -10,6 +10,7 @@ export const cardSlotRecipe = defineSlotRecipe({
       borderRadius: "2xl",
       rounded: "xl",
       border: "0",
+      transition: "all 0.2s ease-in-out",
     },
     body: { p: "0" },
     header: { p: "0", pb: "4" },
@@ -29,7 +30,14 @@ export const cardSlotRecipe = defineSlotRecipe({
         root: {
           bg: "card.subtle",
           _hover: { bg: "card.hover" },
-          transition: "all 0.2s ease-in-out",
+        },
+      },
+      action: {
+        root: {
+          bg: "card.default",
+          _hover: { bg: "card.hover" },
+          border: "sm",
+          borderColor: "border.secondary",
         },
       },
     },

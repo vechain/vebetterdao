@@ -16,6 +16,7 @@ import { headingRecipe } from "./heading"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
 import { textRecipe } from "./text"
+import { tabsSlotRecipe } from "./tabs"
 
 const config = defineConfig({
   preflight: true,
@@ -64,6 +65,7 @@ const config = defineConfig({
       checkbox: checkboxSlotRecipe,
       radioGroup: radioGroupSlotRecipe,
       table: tableSlotRecipe,
+      tabs: tabsSlotRecipe,
     },
 
     keyframes: {

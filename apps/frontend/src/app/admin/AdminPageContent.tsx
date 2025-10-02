@@ -49,14 +49,7 @@ export const AdminPageContent = () => {
     permissions?.isAdminOfX2EarnCreator || permissions?.isMinterOfX2EarnCreator || permissions?.isBurnerOfX2EarnCreator
   const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember
   return (
-    <Tabs.Root
-      w={"full"}
-      variant="subtle"
-      data-testid="admin-page"
-      colorPalette="blue"
-      lazyMount
-      defaultValue="emissions"
-      fitted>
+    <Tabs.Root w={"full"} data-testid="admin-page" lazyMount defaultValue="emissions" fitted>
       <Tabs.Indicator rounded="full" />
       <Tabs.List
         sm={{ gapX: 1 }}
