@@ -1,29 +1,30 @@
 import { useProposalClaimableUserDeposits } from "@/api"
+import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { GrantsProposalCard } from "@/app/grants/components"
 import { JoinCommunity, MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import { useBreakpoints, useDebounce } from "@/hooks"
+import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
+import { AnalyticsUtils } from "@/utils"
 import {
-  VStack,
-  HStack,
-  Heading,
   Box,
   Button,
+  createListCollection,
+  Heading,
+  HStack,
   Spinner,
   Text,
   useDisclosure,
-  createListCollection,
+  VStack,
 } from "@chakra-ui/react"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { RequirementModal, ClaimDeposits, CreateProposalCard, NoProposalsCard } from "./components"
-import { useWallet, useWalletModal } from "@vechain/vechain-kit"
+
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
-import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
-import { GrantsProposalCard } from "@/app/grants/components"
-import { useDebounce, useBreakpoints } from "@/hooks"
+import { ClaimDeposits, CreateProposalCard, NoProposalsCard, RequirementModal } from "./components"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -50,7 +51,7 @@ export const ProposalsPageContent = () => {
         { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
         { label: t("Support phase"), value: ProposalFilter.SupportPhase },
         { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
-        { label: t("Cancelled"), value: StateFilter.Canceled },
+        { label: t("Cancelled"), value: ProposalFilter.FailedStates },
       ],
     })
   }, [t])
