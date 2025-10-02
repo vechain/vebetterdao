@@ -26,14 +26,13 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       {!!routesToRender.length && (
         <Box position="absolute" left="50%" transform="translateX(-50%)" zIndex={1}>
           <HStack
-            gap={4}
-            justifyContent={"center"}
-            borderRadius={"full"}
-            borderWidth={1}
-            borderColor={"rgba(0,0,0, 0.06)"}
-            bg={"light-contrast-on-card-bg"}
-            py={2}
-            px={4}>
+            gap={2}
+            justifyContent="center"
+            borderRadius="full"
+            border="sm"
+            borderColor="border.secondary"
+            bg="bg.primary"
+            p={2}>
             <NavbarMenu routesToRender={routesToRender} />
           </HStack>
         </Box>

@@ -45,6 +45,12 @@ export const buttonRecipe = defineRecipe({
         _disabled: { bg: "actions.primary.disabled" },
         transition: "all 0.2s ease-in-out",
       },
+      ghost: {
+        bg: "transparent",
+        _hover: { bg: "card.hover" },
+        _disabled: { bg: "actions.primary.disabled" },
+        transition: "all 0.2s ease-in-out",
+      },
     },
 
     // size: {},

@@ -40,7 +40,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <Box
-      bg={isLargerThan1200 ? "chakra-body-bg" : "bg.primary"}
+      bg="bg.secondary"
       px={0}
       position={"sticky"}
       top={0}

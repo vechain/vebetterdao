@@ -79,7 +79,7 @@ export const CreatorApplyNow = () => {
                 variant="secondary"
                 alignSelf="center"
                 fontSize={{ base: "14px" }}
-                fontWeight={600}
+                fontWeight="semibold"
                 borderRadius="full"
                 onClick={onOpen}
                 w={{ base: "80%", md: "auto" }}>

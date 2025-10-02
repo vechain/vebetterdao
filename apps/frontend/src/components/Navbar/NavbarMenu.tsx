@@ -49,11 +49,7 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
       open={isOpen}
       onOpenChange={e => setIsOpen(e.open)}>
       <HoverCard.Trigger asChild>
-        <Button
-          w={{ base: "full", md: "auto" }}
-          colorScheme={selected ? "primary" : "gray"}
-          variant={selected ? "primary" : "subtle"}
-          rounded="full">
+        <Button w={{ base: "full", md: "auto" }} variant={selected ? "subtle" : "ghost"} rounded="full">
           <Text fontSize="sm" fontWeight={selected ? "bold" : "normal"}>
             {route.name}
           </Text>
@@ -183,16 +179,17 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
       return (
         <Button
           border="none"
-          colorPalette={selected ? "primary" : "gray"}
           rounded={"full"}
           w={["full", "full", "auto"]}
           key={route.name}
-          variant={selected ? "primary" : "subtle"}
+          variant={selected ? "subtle" : "ghost"}
           onClick={onClick}
-          size="md"
+          size="sm"
           fontWeight={fontWeight}
           fontSize="sm"
-          data-testid={selected ? "current-section" : ""}>
+          data-testid={selected ? "current-section" : ""}
+          px="4"
+          py="2">
           {route.name}
         </Button>
       )
@@ -208,6 +205,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
     return (
       <Button
         variant="ghost"
+        size="sm"
         w={"full"}
         display="flex"
         justifyContent="flex-start"
@@ -229,7 +227,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
       {isLargerThan1200 ? (
         routesToRender.map(renderRoute)
       ) : (
-        <MotionVStack initial={"hidden"} animate="visible" gap={7} pt={5} w="full">
+        <MotionVStack initial={"hidden"} animate="visible" gap="2" pt={5} w="full">
           {routesToRender.map(renderRoute)}
         </MotionVStack>
       )}

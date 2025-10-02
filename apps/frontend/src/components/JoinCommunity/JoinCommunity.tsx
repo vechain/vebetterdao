@@ -29,7 +29,7 @@ export const JoinCommunity = () => {
         />
         <VStack alignItems={"flex-start"}>
           <Icon as={HandshakeIcon} boxSize={32} color="brand.primary" />
-          <Text fontSize={15} fontWeight={600} color={"#1E1E1E"}>
+          <Text fontSize={15} fontWeight="semibold" color={"#1E1E1E"}>
             {t("Seeking Guidance or Advice?")}
           </Text>
           <Text textStyle="3xl" fontWeight="bold">
