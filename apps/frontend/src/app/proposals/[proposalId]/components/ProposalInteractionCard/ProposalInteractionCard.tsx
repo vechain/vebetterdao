@@ -144,7 +144,7 @@ export const ProposalInteractionCard = ({
     }
 
     if (proposal?.state === ProposalState.Active) {
-      return !hasUserAlreadyVoted && userVotingPower > 0
+      return !hasUserAlreadyVoted
     }
 
     if (proposal?.state === ProposalState.Pending && proposal?.type === GrantsProposalType.Grant) {
@@ -168,7 +168,6 @@ export const ProposalInteractionCard = ({
     isExecutable,
     currentUserCanQueueOrExecute,
     hasUserAlreadyVoted,
-    userVotingPower,
     proposalDepositReached,
   ])
 
@@ -182,7 +181,7 @@ export const ProposalInteractionCard = ({
 
     // If it's voting phase AND: User has voted OR User cannot vote
     if (proposal?.state === ProposalState.Active) {
-      return hasUserAlreadyVoted || userVotingPower === 0
+      return hasUserAlreadyVoted || userVotingPower < 1
     }
 
     // If it's support phase AND: User has no balance OR Maximum support reached
