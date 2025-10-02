@@ -40,7 +40,7 @@ export const HowGrantWorks = () => {
   ]
 
   return (
-    <Card.Root variant="subtle" px={2}>
+    <Card.Root variant="primary">
       <CardHeader>
         <Heading size="lg">{t("How grant application works?")}</Heading>
       </CardHeader>

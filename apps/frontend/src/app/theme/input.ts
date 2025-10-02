@@ -2,7 +2,7 @@ import { defineRecipe, defineSlotRecipe } from "@chakra-ui/react"
 import { numberInputAnatomy } from "@chakra-ui/react/anatomy"
 
 export const inputRecipe = defineRecipe({
-  base: { rounded: "md", bg: "bg.primary" },
+  base: { rounded: "md", bg: "bg.primary", borderColor: "border.primary" },
   variants: {
     variant: {
       amountInput: {
@@ -20,6 +20,10 @@ export const inputRecipe = defineRecipe({
           bg: "transparent",
         },
         bg: "transparent",
+      },
+
+      outline: {
+        borderColor: "border.primary",
       },
     },
   },

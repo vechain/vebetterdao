@@ -32,7 +32,6 @@ export const FormCheckbox = <T extends FieldValues>({
             checked={Boolean(field.value)}
             onCheckedChange={({ checked }) => field.onChange(Boolean(checked))}
             onBlur={onBlur}
-            colorPalette="blue"
             size="md">
             <Checkbox.HiddenInput />
             <Checkbox.Control>

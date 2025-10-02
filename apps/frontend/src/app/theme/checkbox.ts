@@ -3,9 +3,7 @@ import { checkboxAnatomy } from "@chakra-ui/react/anatomy"
 
 export const checkboxSlotRecipe = defineSlotRecipe({
   slots: checkboxAnatomy.keys(),
-  defaultVariants: {
-    variant: "base",
-  },
+  defaultVariants: { variant: "base" },
   variants: {
     variant: {
       base: {

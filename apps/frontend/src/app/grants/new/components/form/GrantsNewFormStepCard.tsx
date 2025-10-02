@@ -296,7 +296,7 @@ export const GrantsNewFormStepCard = () => {
 
   return (
     <Card.Root>
-      <Card.Body px={{ base: 3, md: 8 }}>
+      <Card.Body>
         <form ref={formRef} onSubmit={handleSubmit(onSubmit, onError)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
             <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />

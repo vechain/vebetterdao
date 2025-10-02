@@ -8,7 +8,7 @@ type CountdownUnitProps = {
 
 const CountdownUnit = ({ value, label, bgColor }: CountdownUnitProps) => {
   return (
-    <Card.Root w="full" {...(bgColor ? { bg: bgColor } : {})}>
+    <Card.Root w="full" p="3" {...(bgColor ? { bg: bgColor } : {})}>
       <Card.Body textAlign="center">
         <Text textStyle="lg">{Math.max(0, value)}</Text>
         <Text textStyle="xs" color="text.subtle" textAlign="center">

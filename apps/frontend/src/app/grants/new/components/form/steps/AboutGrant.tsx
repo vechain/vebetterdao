@@ -390,7 +390,7 @@ export const AboutGrant = ({
                     </Text>
                   </VStack>
 
-                  <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
+                  <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6} px="1">
                     <GridItem w="full">
                       <FormSocialConnectButton
                         label={twitterUsername ? twitterUsername : t("Connect X")}

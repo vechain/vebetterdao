@@ -122,7 +122,7 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
         </Skeleton>
       </GridItem>
       <GridItem colSpan={{ base: 5, md: 1 }}>
-        <VStack align="start" gap={3}>
+        <VStack align="start" gap="1.5">
           <Text textStyle="sm" color="text.subtle">
             {t("Support ends in")}
           </Text>
@@ -131,7 +131,7 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
               days={daysLeft}
               hours={hoursLeft}
               minutes={minutesLeft}
-              {...(hasFewDaysLeft ? { bgColor: "warning.subtle" } : {})}
+              bgColor={hasFewDaysLeft ? "status.warning.subtle" : "card.default"}
             />
           </HStack>
         </VStack>
