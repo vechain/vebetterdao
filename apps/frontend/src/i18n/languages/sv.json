@@ -1989,5 +1989,6 @@
   "Cancel {{proposalType}}": "Avbryt {{proposalType}}",
   "Are you sure you want to cancel this {{proposalType}}": "Är du säker på att du vill avbryta denna {{proposalType}}",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Om du avbryter nu kommer ditt bidrag att tas bort och inte visas i nästa röstomgång. När omgången börjar kommer avbokning inte längre vara möjlig.",
-  "Showing": "Visar"
+  "Showing": "Visar",
+  "Search by proposal name": "Sök efter förslagsnamn"
 }

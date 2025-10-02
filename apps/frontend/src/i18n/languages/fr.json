@@ -1989,5 +1989,6 @@
   "Cancel {{proposalType}}": "Annuler {{proposalType}}",
   "Are you sure you want to cancel this {{proposalType}}": "Êtes-vous sûr de vouloir annuler ce {{proposalType}}",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Si vous annulez maintenant, votre subvention sera supprimée et n'apparaîtra pas dans le prochain tour de vote. Une fois le tour commencé, l'annulation ne sera plus possible.",
-  "Showing": "Affichage"
+  "Showing": "Affichage",
+  "Search by proposal name": "Rechercher par nom de proposition"
 }

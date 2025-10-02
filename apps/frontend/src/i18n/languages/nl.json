@@ -1989,5 +1989,7 @@
   "Cancel {{proposalType}}": "Annuleer {{proposalType}}",
   "Are you sure you want to cancel this {{proposalType}}": "Weet u zeker dat u deze {{proposalType}} wilt annuleren?",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Als u nu annuleert, wordt uw subsidie verwijderd en verschijnt deze niet in de volgende stemronde. Zodra de ronde begint, is annuleren niet meer mogelijk.",
-  "Showing": "Weergeven"
+  "Showing": "Weergeven",
+  "To support and vote for your favourite projects  Apps through Grants and for Proposals, you first need B3TR tokens.": "Om uw favoriete projecten en apps te ondersteunen en erop te stemmen via subsidies en voorstellen, heeft u eerst B3TR-tokens nodig.",
+  "Search by proposal name": "Zoek op voorstelnaam"
 }

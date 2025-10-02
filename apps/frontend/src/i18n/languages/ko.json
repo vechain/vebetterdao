@@ -1989,5 +1989,6 @@
   "Cancel {{proposalType}}": "{{proposalType}} 취소",
   "Are you sure you want to cancel this {{proposalType}}": "정말로 이 {{proposalType}}을(를) 취소하시겠습니까",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "지금 취소하시면 귀하의 보조금은 삭제되며 다음 투표 라운드에 나타나지 않습니다. 라운드가 시작되면 취소가 불가능합니다.",
-  "Showing": "표시 중"
+  "Showing": "표시 중",
+  "Search by proposal name": "제안 이름으로 검색"
 }
