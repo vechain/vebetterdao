@@ -31,7 +31,6 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
   const { data: currentRoundDeadline } = useCurrentAllocationsRoundDeadline()
   const currentRoundDeadlineDate = useEstimateBlockTimestamp({ blockNumber: currentRoundDeadline })
   const { data: canStartInNextRound, isLoading: isCanStartInNextRoundLoading } = useCanProposalStartInNextRound()
-
   const options = useMemo(() => {
     if (!currentRoundId) return []
 
@@ -50,7 +49,8 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
     Array.from({ length: 2 }, (_, index) => {
       const incrementFactor = canStartInNextRound ? index + 1 : index + 2
       const roundId = baseRoundId + incrementFactor
-      const deadline = dayjs(currentRoundDeadlineDate).add(incrementFactor, "week")
+      const weekIncrementFactor = Math.max(incrementFactor - 1, 0)
+      const deadline = dayjs(currentRoundDeadlineDate).add(weekIncrementFactor, "week")
       optionsArray.push({
         id: roundId,
         label: `${t("From today")} - ${deadline.format("DD/MM/YYYY")}`,
