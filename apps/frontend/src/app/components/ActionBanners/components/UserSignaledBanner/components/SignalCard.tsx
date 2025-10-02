@@ -21,7 +21,7 @@ export const SignalCard = ({ appName, reason }: Props) => {
                 </Text>
               </HStack>
               {reason && (
-                <Text textStyle={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+                <Text textStyle={"xs"} color={"#6A6A6A"}>
                   {reason}
                 </Text>
               )}

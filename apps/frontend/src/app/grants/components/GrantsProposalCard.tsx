@@ -106,7 +106,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
         <Stack
           direction={{ base: "column", md: "row" }}
           w="full"
-          fontSize={{ base: "14px", md: "16px" }}
+          textStyle={{ base: "sm", md: "md" }}
           justify={{ base: "flex-start" }}
           gap={{ base: 3, md: 2 }}
           align={{ base: "flex-start", md: "center" }}>
@@ -119,10 +119,10 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
               <>
                 <HStack gap={2} minW="fit-content">
                   <Icon as={B3trIcon} color="actions.primary.default" boxSize={{ base: 4, md: 5 }} />
-                  <Text fontSize={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
+                  <Text textStyle={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
                     {humanNumber(grantProposal.grantAmountRequested, grantProposal.grantAmountRequested, "B3TR")}
                   </Text>
-                  <Text display={{ base: "none", lg: "block" }} fontSize={{ base: "sm", lg: "md" }}>
+                  <Text display={{ base: "none", lg: "block" }} textStyle={{ base: "sm", lg: "md" }}>
                     {"•"} {grantProposal.grantType === "dapp" ? "App" : "Tooling"}
                   </Text>
                 </HStack>
@@ -170,7 +170,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
               )}
             </HStack>
             {timeLeftDisplay && (
-              <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
+              <Text textStyle="xxs" alignSelf="flex-start" color="text.subtle" pl={2}>
                 {t("Ends: {{endDate}}", { endDate: timeLeftDisplay })}{" "}
               </Text>
             )}
@@ -186,7 +186,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
                 depositReached={depositReached ?? false}
               />
               {timeLeftDisplay ? (
-                <Text fontSize="14px" color="text.subtle">
+                <Text textStyle="md" color="text.subtle">
                   {t("Ends: {{endDate}}", {
                     endDate: timeLeftDisplay,
                   })}

@@ -51,7 +51,7 @@ export const GmCard = ({
 
                   {plusCount > 0 && (
                     <Avatar.Root rounded="lg" border="1px solid #E5EEFF" background="status.info.primary">
-                      <Avatar.Fallback color="white" fontSize="12px">{`+${plusCount}`}</Avatar.Fallback>
+                      <Avatar.Fallback color="white" textStyle="xxs">{`+${plusCount}`}</Avatar.Fallback>
                     </Avatar.Root>
                   )}
                 </AvatarGroup>

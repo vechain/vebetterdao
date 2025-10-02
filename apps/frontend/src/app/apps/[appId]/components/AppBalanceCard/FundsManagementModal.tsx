@@ -219,7 +219,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                         p={"20px"}
                         pl={"20px"}
                         w={"full"}>
-                        <Text fontWeight="500">
+                        <Text fontWeight="semibold">
                           {t(activeTab === "balance-to-rewards" ? "From Balance" : "From Rewards Pool")}
                         </Text>
                         <HStack>
@@ -290,7 +290,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
                           alignItems={"flex-start"}
                           borderBottomWidth={2}
                           borderColor={"rgba(213, 213, 213, 1)"}>
-                          <Text fontWeight="500">
+                          <Text fontWeight="semibold">
                             {t(activeTab === "balance-to-rewards" ? "To Rewards Pool" : "To Balance")}
                           </Text>
                           <Input

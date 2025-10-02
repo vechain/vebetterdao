@@ -108,7 +108,7 @@ const CalendarBody = ({
       {/* Day Headers */}
       {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
         <Box key={day} textAlign="center">
-          <Text fontSize="xs" fontWeight="medium" color="#D9D9D9">
+          <Text textStyle="xs" color="#D9D9D9">
             {day}
           </Text>
         </Box>
@@ -141,8 +141,7 @@ const CalendarBody = ({
             p="0"
             disabled={!isSelectable}
             unstyled
-            fontSize={isMobile ? "2xs" : "xs"}
-            fontWeight="medium"
+            textStyle={isMobile ? "2xs" : "xs"}
             bg={bgColor}
             color={textColor}
             borderRadius="md"
@@ -327,20 +326,20 @@ export const FormDateInput = ({
       {/* Always render label container for consistent alignment */}
       <HStack justify="space-between" w="full" minH="5" mb={description ? 0 : 2}>
         {label ? (
-          <Field.Label fontSize="sm" fontWeight="medium" htmlFor={register.name}>
+          <Field.Label textStyle="sm" htmlFor={register.name}>
             {label}
           </Field.Label>
         ) : (
           <Box /> // Empty box to maintain space
         )}
         {isOptional && (
-          <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+          <Text textStyle="sm" color="text.subtle">
             {"Optional"}
           </Text>
         )}
       </HStack>
       {description && (
-        <Text fontSize="xs" color="gray.500" mb={2}>
+        <Text textStyle="xs" color="gray.500" mb={2}>
           {description}
         </Text>
       )}

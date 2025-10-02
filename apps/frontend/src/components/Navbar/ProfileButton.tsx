@@ -58,9 +58,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
               <WalletIcon size={"3.5rem"} />
             </Flex>
             <VStack align="stretch" color="white">
-              <Text textStyle="md" fontWeight={"400"}>
-                {t("Connect your wallet to see your profile")}
-              </Text>
+              <Text textStyle="md">{t("Connect your wallet to see your profile")}</Text>
             </VStack>
           </HStack>
           <Button
@@ -82,12 +80,12 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
         <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
         <VStack align={"flex-start"} gap={2}>
           <HStack>
-            <Text fontSize={18} fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {domain ?? humanAddress(account?.address ?? "", 4, 6)}
             </Text>
             <FaChevronRight size={16} />
           </HStack>
-          <Text fontSize={14} color={"#6A6A6A"}>
+          <Text textStyle="sm" color={"#6A6A6A"}>
             {t("View profile")}
           </Text>
         </VStack>

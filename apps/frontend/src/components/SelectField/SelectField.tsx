@@ -68,7 +68,7 @@ export const SelectField = ({
                             </Checkbox.Control>
                           </Checkbox.Root>
                         )}
-                        <Text fontSize="14px">{option.label}</Text>
+                        <Text textStyle="md">{option.label}</Text>
                       </HStack>
                     </Select.Item>
                   )
@@ -77,7 +77,7 @@ export const SelectField = ({
             </Select.Context>
             {showReset ? (
               <Select.ClearTrigger alignSelf="flex-start">
-                <Text color="actions.primary.default" fontWeight="500" fontSize="14px" cursor="pointer" py={2}>
+                <Text color="actions.primary.default" fontWeight="semibold" textStyle="md" cursor="pointer" py={2}>
                   {t("Reset")}
                 </Text>
               </Select.ClearTrigger>

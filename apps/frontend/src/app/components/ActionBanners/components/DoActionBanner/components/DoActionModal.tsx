@@ -24,7 +24,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
   return (
     <BaseModal isOpen={doActionModal.open || false} onClose={doActionModal.onClose || (() => {})}>
       <VStack align="stretch" gap="2">
-        <Heading size={"2xl"} fontWeight={700}>
+        <Heading size={"2xl"} fontWeight="bold">
           {t("You're not eligible to vote yet.")}
         </Heading>
         <Text textStyle="xl">{t("To be able to vote on the next round’s allocations and proposals")}</Text>

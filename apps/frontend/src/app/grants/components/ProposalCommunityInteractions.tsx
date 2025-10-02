@@ -46,11 +46,7 @@ export const ProposalCommunityInteractions = ({
     const heartColor = hasUserDeposited ? "actions.primary.default" : "icon.subtle"
 
     return (
-      <HStack
-        key={`${proposalId}-depositPercentage`}
-        fontSize={{ base: "15px", md: "17px" }}
-        gap={1}
-        color={heartColor}>
+      <HStack key={`${proposalId}-depositPercentage`} textStyle={{ base: "sm", md: "md" }} gap={1} color={heartColor}>
         <Icon as={heartIcon} boxSize={5} />
         <Text>{`${formattedDepositPercentage}%`}</Text>
       </HStack>
@@ -59,17 +55,17 @@ export const ProposalCommunityInteractions = ({
 
   return (
     <HStack gap={{ base: "2", md: "4" }}>
-      <HStack key={`${proposalId}-votesFor`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={forColor}>
+      <HStack key={`${proposalId}-votesFor`} gap={1} color={forColor}>
         <Icon as={thumbsUpIcon} boxSize={5} />
-        <Text>{`${Math.floor(votesFor ?? 0)}%`}</Text>
+        <Text textStyle={{ base: "sm", md: "md" }}>{`${Math.floor(votesFor ?? 0)}%`}</Text>
       </HStack>
-      <HStack key={`${proposalId}-votesAgainst`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={againstColor}>
+      <HStack key={`${proposalId}-votesAgainst`} gap={1} color={againstColor}>
         <Icon as={thumbsDownIcon} boxSize={5} />
-        <Text>{`${Math.floor(votesAgainst ?? 0)}%`}</Text>
+        <Text textStyle={{ base: "sm", md: "md" }}>{`${Math.floor(votesAgainst ?? 0)}%`}</Text>
       </HStack>
-      <HStack key={`${proposalId}-votesAbstain`} fontSize={{ base: "14px", md: "16px" }} gap={1} color={abstainColor}>
+      <HStack key={`${proposalId}-votesAbstain`} gap={1} color={abstainColor}>
         <Icon as={circleIcon} fontWeight="bold" boxSize={5} />
-        <Text>{`${Math.floor(votesAbstain ?? 0)}%`}</Text>
+        <Text textStyle={{ base: "sm", md: "md" }}>{`${Math.floor(votesAbstain ?? 0)}%`}</Text>
       </HStack>
     </HStack>
   )

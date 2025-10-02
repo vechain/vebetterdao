@@ -1,4 +1,4 @@
-import { HStack, VStack, Text } from "@chakra-ui/react"
+import { HStack, VStack, Text, Heading } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { ProposalBox } from "."
@@ -24,12 +24,12 @@ export const PreviewCreatedProposals = ({
   return (
     <VStack w={"full"}>
       <HStack w={"full"} justifyContent={"space-between"} mb={{ base: 2, md: 4 }}>
-        <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"}>
+        <Heading size={{ base: "lg", md: "xl" }} fontWeight={"bold"}>
           {isCreatedProposals ? t("Created Proposals") : t("Voted Proposals")}
-        </Text>
+        </Heading>
         {isMoreProposals && (
           <HStack color={"#004CFC"} cursor={"pointer"} onClick={onSeeAllProposals}>
-            <Text fontSize={{ base: 14, md: 16 }}>{t("See All")}</Text>
+            <Text textStyle={{ base: "sm", md: "md" }}>{t("See All")}</Text>
             <FiArrowUpRight size={16} />
           </HStack>
         )}

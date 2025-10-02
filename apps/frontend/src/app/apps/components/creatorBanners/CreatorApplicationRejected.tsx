@@ -54,14 +54,14 @@ export const CreatorApplicationRejected = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://support.vechain.org/support/home"
-                fontSize="14px"
+                textStyle="md"
                 fontWeight="semibold"
                 color="#004CFC">
                 {t("Contact support")}
               </Link>
               <Button
                 alignSelf="center"
-                fontSize="14px"
+                textStyle="md"
                 variant="primary"
                 borderRadius="full"
                 maxW="150px"

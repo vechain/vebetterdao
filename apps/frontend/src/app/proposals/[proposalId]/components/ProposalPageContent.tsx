@@ -161,7 +161,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
                     <Tabs.Trigger
                       value="session"
                       color="text"
-                      fontWeight="400"
                       _selected={{
                         color: "#004CFC",
                         fontWeight: "800",
@@ -171,7 +170,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter })
                     <Tabs.Trigger
                       value="timeline"
                       color="text.subtle"
-                      fontWeight="600"
+                      fontWeight="semibold"
                       _selected={{
                         color: "#004CFC",
                         fontWeight: "800",

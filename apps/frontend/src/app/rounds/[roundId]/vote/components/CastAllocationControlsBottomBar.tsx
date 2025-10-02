@@ -49,7 +49,6 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
             flex={1}
             borderRadius={"16px"}
             size="lg"
-            fontSize="18px"
             data-testid="continue"
             variant="primary"
             onClick={onContinue}>
@@ -78,7 +77,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
           <UilArrowLeft />
           {t("Go back")}
         </Button>
-        <Button flex={1} size="lg" fontSize="18px" data-testid="continue" variant="primary" onClick={onContinue}>
+        <Button flex={1} size="lg" data-testid="continue" variant="primary" onClick={onContinue}>
           {t("Continue")}
           <UilArrowRight />
         </Button>

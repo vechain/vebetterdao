@@ -43,7 +43,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="xl" fontWeight="700">
+              <Heading textStyle="xl" fontWeight="bold">
                 {t(isConnectedUser ? "Your Voting Qualification" : "Voting qualification")}
               </Heading>
               {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
@@ -53,7 +53,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                 </Button>
               )}
             </HStack>
-            <Text fontSize="md">
+            <Text textStyle="md">
               {isConnectedUser &&
                 t(
                   "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",

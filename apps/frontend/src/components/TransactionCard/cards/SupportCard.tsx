@@ -44,7 +44,7 @@ export const SupportCard = ({ transaction }: Props) => {
                   {t("proposal")}
                 </Text>
               </HStack>
-              <Text textStyle={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+              <Text textStyle={"xs"} color={"#6A6A6A"}>
                 {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>

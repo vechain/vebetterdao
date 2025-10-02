@@ -152,7 +152,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                     {/* Milestone header */}
                     <VStack align="flex-start" gap={"16px"} pb={"16px"}>
                       <Accordion.ItemTrigger py={1} display="flex" justifyContent="space-between" w="full">
-                        <Text fontSize="lg" fontWeight={"semibold"}>
+                        <Text textStyle="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
                         {milestone.milestone?.durationFrom &&

@@ -182,7 +182,7 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
             <Flex align="center" justify={"center"} p={["8", "8", "12"]} bg="#F8F8F8" rounded="2xl" mt="2">
               <VStack align="center" gap={2} maxW="27rem" textAlign={"center"}>
                 <UilSearch size={searchIconSize} color="#757575" />
-                <Heading textStyle="xl" color="#757575" fontWeight={"500"}>
+                <Heading textStyle="xl" color="#757575" fontWeight="semibold">
                   {t("You’re not endorsing any app")}
                 </Heading>
                 {xNode.isXNodeDelegator ? (

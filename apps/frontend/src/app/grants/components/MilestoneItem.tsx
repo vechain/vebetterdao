@@ -41,14 +41,14 @@ const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType;
     <Icon as={icon} boxSize={4} color="icon.subtle" />
     <HStack w="full">
       <VStack w="full" align="flex-start">
-        <Text fontSize="sm" fontWeight={"semibold"}>
+        <Text textStyle="sm" fontWeight={"semibold"}>
           {title}
         </Text>
 
         {value && (
           <Text
             w="full"
-            fontSize="sm"
+            textStyle="sm"
             fontWeight={"regular"}
             lineHeight={"1.5"}
             wordBreak="break-word"

@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
         borderTopWidth={1}
         py={8}>
         <VStack align={"start"}>
-          <Text fontWeight={400} fontSize="14px" color="#8c8c8c">
+          <Text textStyle="md" color="#8c8c8c">
             {t("{{currentYear}} VeBetter. All rights reserved.", { currentYear })}
           </Text>
           <Text textStyle="sm" color="#8c8c8c">
@@ -87,7 +87,7 @@ export const Footer: React.FC = () => {
             {t("Terms & Conditions")}
           </Text>
         </Link>
-        <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" mt={6}>
+        <Text textStyle="md" lineHeight="17px" color="#8c8c8c" mt={6}>
           {t("{{currentYear}} VeBetter. All rights reserved.", { currentYear })}
         </Text>
         <Text textStyle="sm" color="#8c8c8c">

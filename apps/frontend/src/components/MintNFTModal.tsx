@@ -42,8 +42,8 @@ export const MintNFTModal = ({ isOpen, onClose, tokenID }: Props) => {
                     textAlign={"center"}
                     data-testid={"gmnft-token-id"}
                     color={"white"}
-                    fontSize={28}
-                    fontWeight={700}>
+                    textStyle="3xl"
+                    fontWeight="bold">
                     {t("VeBetter")} <br /> {t("Governance")}
                   </Text>
 

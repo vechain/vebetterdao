@@ -40,13 +40,13 @@ export const FormCheckbox = <T extends FieldValues>({
             </Checkbox.Control>
             <Checkbox.Label>
               {typeof label === "string" ? (
-                <Text fontWeight="500" fontSize={{ base: "xs", sm: "xs", md: "sm" }}>
+                <Text fontWeight="semibold" textStyle={{ base: "xs", sm: "xs", md: "sm" }}>
                   {label}
                 </Text>
               ) : (
                 label
               )}
-              <Text fontSize={{ base: "xs", sm: "xs", md: "sm" }}>{description}</Text>
+              <Text textStyle={{ base: "xs", md: "sm" }}>{description}</Text>
             </Checkbox.Label>
           </Checkbox.Root>
           {error && <Field.ErrorText>{error}</Field.ErrorText>}

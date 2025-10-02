@@ -27,7 +27,7 @@ export const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
 
           return (
             <React.Fragment key={item.label}>
-              <Breadcrumb.Item fontSize="lg">
+              <Breadcrumb.Item textStyle="lg">
                 <Breadcrumb.Link asChild aria-current={isCurrentPage ? "page" : undefined}>
                   <Link href={item.href}>
                     <Text fontWeight={fontWeight} color={color}>

@@ -201,7 +201,7 @@ export const AboutGrant = ({
       <Accordion.Root multiple w="full" defaultValue={["company-details", "project-details", "outcomes"]} spaceY={4}>
         <Accordion.Item value="company-details" pb={5}>
           <Accordion.ItemTrigger>
-            <Text fontSize="lg" fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {t("Company details")}
             </Text>
           </Accordion.ItemTrigger>
@@ -333,7 +333,7 @@ export const AboutGrant = ({
         </Accordion.Item>
         <Accordion.Item value="project-details" pb={5}>
           <Accordion.ItemTrigger>
-            <Text fontSize="lg" fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {t("Grant details")}
             </Text>
           </Accordion.ItemTrigger>
@@ -382,10 +382,10 @@ export const AboutGrant = ({
               <GridItem colSpan={{ base: 1, md: 2 }}>
                 <VStack gap={6} align="stretch" w="full">
                   <VStack align="flex-start" gap={1}>
-                    <Text fontSize="lg" fontWeight="semibold">
+                    <Text textStyle="lg" fontWeight="semibold">
                       {t("Connect accounts")}
                     </Text>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text textStyle="sm" color="gray.500">
                       {t("Please connect an account from your company, project, or your personal account")}
                     </Text>
                   </VStack>
@@ -501,7 +501,7 @@ export const AboutGrant = ({
         </Accordion.Item>
         <Accordion.Item value="outcomes" pb={5}>
           <Accordion.ItemTrigger>
-            <Text fontSize="lg" fontWeight="semibold">
+            <Text textStyle="lg" fontWeight="semibold">
               {t("Outcomes")}
             </Text>
           </Accordion.ItemTrigger>
@@ -636,10 +636,8 @@ export const AboutGrant = ({
                 <GridItem colSpan={{ base: 1, md: 2 }}>
                   <Field.Root invalid={!!errors.outcomesAttachment?.message}>
                     <HStack justify="space-between" w="full">
-                      <Field.Label fontSize="sm" fontWeight="medium">
-                        {t("Attachments")}
-                      </Field.Label>
-                      <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+                      <Field.Label textStyle="sm">{t("Attachments")}</Field.Label>
+                      <Text textStyle="sm" color="text.subtle">
                         {"Optional"}
                       </Text>
                     </HStack>

@@ -77,20 +77,20 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                 onClick={() => handleGrantTypeChange(type)}>
                 <CardBody>
                   <VStack align="flex-start" gap={4}>
-                    <Text fontSize="xl" fontWeight="bold">
+                    <Text textStyle="xl" fontWeight="bold">
                       {info.title}
                     </Text>
                     <VStack w="full" justify="space-between" align="flex-start">
-                      <Text fontSize="2xl" fontWeight="bold" color="#004CFC">
+                      <Text textStyle="2xl" fontWeight="bold" color="#004CFC">
                         {t("Up to {{amount}}", { amount: info.amount })}
                       </Text>
                       <Text color="gray.600">{info.duration}</Text>
                     </VStack>
-                    <Text fontSize="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
+                    <Text textStyle="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
                       {info.description}
                     </Text>
                     <Text color="gray.600">{info.target}</Text>
-                    <Text fontSize="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
+                    <Text textStyle="lg" fontWeight="semibold" display={{ base: "none", md: "block" }}>
                       {t("Apply if you are building")}
                     </Text>
                     <List.Root gap={2} display={{ base: "none", md: "block" }}>

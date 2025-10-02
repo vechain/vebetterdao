@@ -96,7 +96,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
         <Card.Header>
           <HStack gap={2}>
             <Icon as={Calendar} boxSize={5} />
-            <Heading fontSize={"20px"} fontWeight={700}>
+            <Heading size="xl" fontWeight="bold">
               {t("Timeline")}
             </Heading>
           </HStack>
@@ -124,10 +124,10 @@ export const ProposalTimeline = ({ proposal }: Props) => {
                   </Steps.Indicator>
                   <Steps.Separator />
                   <VStack align="start" flex={1}>
-                    <Text fontSize="sm" color={currentStep === index ? "text.strong" : "text.subtle"}>
+                    <Text textStyle="sm" color={currentStep === index ? "text.strong" : "text.subtle"}>
                       {step.label}
                     </Text>
-                    <Text fontSize="xs" color="text.subtle">
+                    <Text textStyle="xs" color="text.subtle">
                       {step.description}
                     </Text>
                   </VStack>

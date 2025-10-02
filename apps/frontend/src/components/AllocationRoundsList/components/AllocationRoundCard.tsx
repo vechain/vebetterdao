@@ -75,7 +75,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                       })}
                     </Heading>
                   </HStack>
-                  <HStack w="fit-content" justify="space-between" textStyle="xs" fontWeight={400}>
+                  <HStack w="fit-content" justify="space-between" textStyle="xs">
                     <Skeleton loading={isLoading}>
                       <Text>
                         {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}

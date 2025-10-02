@@ -97,9 +97,7 @@ export const DashboardAllocationRounds = () => {
         </HStack>
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack gap={4} w="full">
-          <Heading fontSize="24px" fontWeight={400}>
-            {t("Proposals and Grants looking for support and approval")}
-          </Heading>
+          <Heading size="2xl">{t("Proposals and Grants looking for support and approval")}</Heading>
 
           {!!sortedProposals.length ? (
             <VStack gap={4} w="full">

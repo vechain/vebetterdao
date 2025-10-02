@@ -52,7 +52,7 @@ export const HowGrantWorks = () => {
                 <Heading size="md" color="text.default">
                   {`${index + 1}. ${item.heading}`}
                 </Heading>
-                <Text color="text.subtle" fontSize="sm">
+                <Text color="text.subtle" textStyle="sm">
                   {item.description}
                 </Text>
               </VStack>

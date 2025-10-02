@@ -80,7 +80,6 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
                 <Tabs.Trigger
                   value="overview"
                   color="text"
-                  fontWeight="400"
                   _selected={{
                     color: "#004CFC",
                     fontWeight: "800",
@@ -90,7 +89,7 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
                 <Tabs.Trigger
                   value="milestones"
                   color="text.subtle"
-                  fontWeight="600"
+                  fontWeight="semibold"
                   _selected={{
                     color: "#004CFC",
                     fontWeight: "800",

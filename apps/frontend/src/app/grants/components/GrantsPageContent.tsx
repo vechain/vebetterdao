@@ -223,7 +223,7 @@ export const GrantsPageContent = () => {
                 fontWeight={500}
                 color="primary.500"
                 px={0}
-                fontSize={{ base: "xs", lg: "md" }}
+                textStyle={{ base: "xs", lg: "md" }}
                 onClick={onOpen}>
                 <Icon as={UilInfoCircle} boxSize={4} />
                 {!isMobile && t("More info")}
@@ -240,7 +240,7 @@ export const GrantsPageContent = () => {
                 size="md"
                 w={{ base: "48%", md: "auto" }}
                 rounded="full">
-                <Link href="grants/manage" fontSize={"md"}>
+                <Link href="grants/manage" textStyle={"md"}>
                   {t("My grants")}
                 </Link>
               </Button>

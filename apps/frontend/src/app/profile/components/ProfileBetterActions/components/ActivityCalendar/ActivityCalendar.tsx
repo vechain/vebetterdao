@@ -133,7 +133,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
             <Grid templateColumns="repeat(7, 1fr)" gap={1}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
-                  <Text textStyle="xs" fontWeight="medium" color="gray.500">
+                  <Text textStyle="xs" color="gray.500">
                     {day}
                   </Text>
                 </Box>
@@ -158,7 +158,6 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                       h="full"
                       disabled={isDisabled}
                       textStyle="sm"
-                      fontWeight="medium"
                       bg={getActivityColor(activityNumber)}
                       color={getActivityFontColor(activityNumber)}
                       borderRadius="md"

@@ -72,12 +72,12 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
                 <Alert.Title
                   color="#D23F63"
                   ml={2}
-                  fontSize="14px"
+                  textStyle="md"
                   fontWeight="semibold"
                   data-testid={"round-error-msg"}>
                   {t("Quorum was not reached for this round")}
                 </Alert.Title>
-                <Alert.Description color="#D23F63" ml={2} fontSize="14px">
+                <Alert.Description color="#D23F63" ml={2} textStyle="md">
                   {t("B3TR allocation will be distributed according to the votes of the previous round")}
                 </Alert.Description>
               </Alert.Content>

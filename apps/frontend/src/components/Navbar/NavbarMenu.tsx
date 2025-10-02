@@ -50,7 +50,7 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
       onOpenChange={e => setIsOpen(e.open)}>
       <HoverCard.Trigger asChild>
         <Button w={{ base: "full", md: "auto" }} variant={selected ? "subtle" : "ghost"} rounded="full">
-          <Text fontSize="sm" fontWeight={selected ? "bold" : "normal"}>
+          <Text textStyle="sm" fontWeight={selected ? "bold" : "normal"}>
             {route.name}
           </Text>
           <Icon
@@ -86,8 +86,8 @@ const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selecte
                       handleClick(subRoute, router)()
                       setIsOpen(false)
                     }}>
-                    <Text fontSize={"md"}>{subRoute.name}</Text>
-                    <Text fontSize={"sm"}>{subRoute.description}</Text>
+                    <Text textStyle={"md"}>{subRoute.name}</Text>
+                    <Text textStyle={"sm"}>{subRoute.description}</Text>
                   </VStack>
                 )
               })}
@@ -118,7 +118,7 @@ const MobileAccordionWithSubRoutes = ({
           <Button variant="ghost" _expanded={{ bg: "transparent" }} w="full">
             <HStack w="full" gap={3}>
               <Icon as={route.icon} color="text.subtle" size={"2xl"} />
-              <Text fontSize="lg">{route.name}</Text>
+              <Text textStyle="lg">{route.name}</Text>
             </HStack>
             <Icon
               size="xs"
@@ -146,7 +146,7 @@ const MobileAccordionWithSubRoutes = ({
                   flexDirection="column"
                   textAlign="left"
                   onClick={handleClick(subRoute, router, onMenuClick)}>
-                  <Text fontSize="sm">{subRoute.name}</Text>
+                  <Text textStyle="sm">{subRoute.name}</Text>
                 </Button>
               )
             })}
@@ -186,7 +186,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           onClick={onClick}
           size="sm"
           fontWeight={fontWeight}
-          fontSize="sm"
+          textStyle="sm"
           data-testid={selected ? "current-section" : ""}
           px="4"
           py="2">
@@ -215,7 +215,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         data-testid={selected ? "current-section" : ""}
         gap={4}>
         <Icon as={route.icon} color="text.subtle" size={"xl"} />
-        <Text textAlign="left" fontSize="lg">
+        <Text textAlign="left" textStyle="lg">
           {route.name}
         </Text>
       </Button>

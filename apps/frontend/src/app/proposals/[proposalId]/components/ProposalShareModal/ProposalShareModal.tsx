@@ -88,10 +88,10 @@ export const ProposalShareModal = ({
                   />
                 </Box>
                 <VStack>
-                  <Heading fontSize="28px" fontWeight={700}>
+                  <Heading size="3xl" fontWeight="bold">
                     {t("Share this {{proposalType}}", { proposalType: proposalTypeText })}
                   </Heading>
-                  <Text fontSize="16px" fontWeight={400} color={"text.subtle"} textAlign={"center"}>
+                  <Text textStyle="lg" color={"text.subtle"} textAlign={"center"}>
                     {t("Share the {{proposalType}} on social media and invite people to vote", {
                       proposalType: proposalTypeText,
                     })}
@@ -111,7 +111,7 @@ export const ProposalShareModal = ({
                     color="#004CFC"
                     onClick={handleCopyLink}>
                     <UilLink size="18px" />
-                    <Text fontSize="18px" fontWeight={500}>
+                    <Text textStyle="lg" fontWeight={500}>
                       {t("Copy link to {{proposalType}}", { proposalType: proposalTypeText })}
                     </Text>
                   </HStack>

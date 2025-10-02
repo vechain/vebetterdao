@@ -70,8 +70,8 @@ export const MobileFilterDrawer = ({
             borderRadius="full"
             minW="20px"
             h="20px"
-            fontSize="xs"
-            fontWeight="600"
+            textStyle="xs"
+            fontWeight="semibold"
             display="flex"
             alignItems="center"
             justifyContent="center">
@@ -83,7 +83,7 @@ export const MobileFilterDrawer = ({
       <BaseModal isOpen={isOpen} onClose={handleClose} ariaTitle={placeholder} ariaDescription="Filter options">
         <VStack align="stretch" gap={6} w="full">
           {/* Header */}
-          <Text fontSize="md" fontWeight="bold">
+          <Text textStyle="md" fontWeight="bold">
             {placeholder}
           </Text>
 
@@ -102,7 +102,7 @@ export const MobileFilterDrawer = ({
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                   </Checkbox.Root>
-                  <Text fontSize="md">{option.label}</Text>
+                  <Text textStyle="md">{option.label}</Text>
                 </HStack>
               )
             })}

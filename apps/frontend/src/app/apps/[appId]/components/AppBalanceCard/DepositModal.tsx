@@ -142,7 +142,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
               <Skeleton loading={isAppBalanceLoading}>
-                <Text textStyle={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
+                <Text textStyle={{ base: "2xl", md: "xl" }} fontWeight="semibold">
                   {FormattingUtils.humanNumber(Number(appBalanceScaled))}
                 </Text>
               </Skeleton>

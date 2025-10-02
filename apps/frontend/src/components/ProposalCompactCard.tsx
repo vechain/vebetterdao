@@ -29,7 +29,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     if (proposal.state === ProposalState.Pending) {
       return (
         <Skeleton loading={!supportEndDate}>
-          <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+          <Text textStyle="sm" color={"gray.500"}>
             {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
           </Text>
         </Skeleton>
@@ -37,7 +37,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     }
     if (proposal.state === ProposalState.DepositNotMet) {
       return (
-        <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+        <Text textStyle="sm" color={"gray.500"}>
           {t("Vote didn't start")}
         </Text>
       )

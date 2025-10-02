@@ -113,7 +113,7 @@ Props) => {
                 </HStack>
               </Skeleton>
               <Skeleton loading={appVotes === undefined} textAlign={"right"}>
-                <Text textStyle={["xs", "sm"]} fontWeight={"400"} color="text.subtle">
+                <Text textStyle={["xs", "sm"]} color="text.subtle">
                   {t("voted by")}{" "}
                   <span style={{ fontWeight: 600 }}>
                     {appVotes} {t("wallets")}

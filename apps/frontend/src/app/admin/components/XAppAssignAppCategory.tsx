@@ -195,7 +195,7 @@ export const XAppAssignAppCategory = () => {
                           </VStack>
 
                           <VStack align="flex-start" gap={3}>
-                            <Text textStyle="sm" fontWeight="medium">
+                            <Text textStyle="sm">
                               {t("Selected Categories ({{count}}/{{max}})", {
                                 count: selectedCategories.length,
                                 max: MAX_CATEGORIES,

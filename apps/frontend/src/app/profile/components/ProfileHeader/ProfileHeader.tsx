@@ -40,7 +40,7 @@ export const ProfileHeader = ({ address }: Props) => {
               gap={1}>
               <Heading textStyle="xl">{humanDomain(domain ?? "", 15)}</Heading>
               <HStack gap={2}>
-                <Text textStyle="xl" fontWeight="500">
+                <Text textStyle="xl" fontWeight="semibold">
                   {humanAddress(address ?? "", 6, 4)}
                 </Text>
 

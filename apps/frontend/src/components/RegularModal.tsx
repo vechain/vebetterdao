@@ -47,7 +47,7 @@ export const RegularModal = ({
             {(ariaTitle || ariaDescription) && (
               <Dialog.Header display="flex" alignItems="center" px={8} py={10} position="relative">
                 {ariaTitle && (
-                  <Dialog.Title fontSize="2xl" textAlign="start">
+                  <Dialog.Title textStyle="2xl" textAlign="start">
                     {ariaTitle}
                   </Dialog.Title>
                 )}

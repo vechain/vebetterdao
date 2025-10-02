@@ -192,10 +192,10 @@ export const RoundInfoBottomSheet = () => {
           </VStack>
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
-              <Heading fontSize="18px" fontWeight={700}>
+              <Heading size="lg" fontWeight="bold">
                 {t("Proposals and Grants looking for support and approval")}
               </Heading>
-              <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
+              <Text textStyle="xxs" color="#6A6A6A">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
               </Text>
             </VStack>

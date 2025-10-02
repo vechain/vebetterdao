@@ -233,7 +233,7 @@ export const DatePicker = ({
             <Grid templateColumns="repeat(7, 1fr)" gap={1}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
-                  <Text textStyle="xs" fontWeight="medium" color="#D9D9D9">
+                  <Text textStyle="xs" color="#D9D9D9">
                     {day}
                   </Text>
                 </Box>
@@ -264,7 +264,6 @@ export const DatePicker = ({
                     disabled={!isSelectable}
                     unstyled
                     textStyle={isMobile ? "2xs" : "xs"}
-                    fontWeight="medium"
                     bg={isStartOrEnd ? "#004CFC" : isInRange ? "#E0E9FE" : "transparent"}
                     color={isStartOrEnd ? "white" : "inherit"}
                     borderRadius="md"
@@ -290,7 +289,7 @@ export const DatePicker = ({
 
             {/* Reminder to select an end date */}
             {variant === "range" && tempStartDate && !tempEndDate && (
-              <Text fontSize="sm" color="#D9D9D9" textAlign="center">
+              <Text textStyle="sm" color="#D9D9D9" textAlign="center">
                 {t("Select end date")}
               </Text>
             )}

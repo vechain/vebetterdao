@@ -45,7 +45,7 @@ export const SwapCard = ({ transaction, vot3ToB3tr }: Props) => {
                   {vot3ToB3tr ? "VOT3" : "B3TR"} {t("to")} {vot3ToB3tr ? "B3TR" : "VOT3"}
                 </Text>
               </HStack>
-              <Text textStyle={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+              <Text textStyle={"xs"} color={"#6A6A6A"}>
                 {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>

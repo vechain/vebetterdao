@@ -85,7 +85,7 @@ export const ProposalsPageContent = () => {
                   onClick={onNewClick}
                   buttonText={t("Create proposal")}
                   description={
-                    <Text fontSize={16} fontWeight={400} mt={2}>
+                    <Text textStyle="md" mt={2}>
                       {t("Have an idea for something that could improve the experience in VeBetter? ")}{" "}
                       <b style={{ color: "contrast-fg-on-muted" }}>{t("Create a proposal")}</b>{" "}
                       {t("and let the community vote to make it happen!")}

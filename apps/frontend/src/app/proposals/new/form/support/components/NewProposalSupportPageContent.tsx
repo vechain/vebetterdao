@@ -80,7 +80,7 @@ export const NewProposalSupportPageContent = () => {
                   }}
                   endElement={
                     <Skeleton loading={thresholdLoading}>
-                      <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500" fontWeight={400}>
+                      <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500">
                         {`/ ${compactFormatter.format(Number(threshold))}`}
                       </Heading>
                     </Skeleton>

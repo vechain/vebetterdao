@@ -22,7 +22,7 @@ export const NoLinkedAccount = ({ address }: Props) => {
     <Flex align="center" justify="center" w="full" minH="80">
       <VStack gap={4}>
         <PeopleIcon color="#757575" size="105" />
-        <Heading textStyle="xl" fontWeight="500" textAlign="center">
+        <Heading textStyle="xl" fontWeight="semibold" textAlign="center">
           {isConnectedUser ? t("You have no linked accounts") : t("No linked accounts")}
         </Heading>
         <Text textStyle="sm" color="#757575" textAlign="center">

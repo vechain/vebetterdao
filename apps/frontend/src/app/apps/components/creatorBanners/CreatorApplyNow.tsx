@@ -61,7 +61,7 @@ export const CreatorApplyNow = () => {
                 align={{ base: "center", md: "end" }}
                 justify={{ base: "center", md: "end" }}
                 py={isMobile ? 4 : 2}>
-                <Heading fontWeight={700} fontSize={"17px"}>
+                <Heading fontWeight="bold" size={"lg"}>
                   {t("Do you have an app to join the VeBetter DAO ecosystem?")}
                 </Heading>
               </Stack>
@@ -78,7 +78,7 @@ export const CreatorApplyNow = () => {
               <Button
                 variant="secondary"
                 alignSelf="center"
-                fontSize={{ base: "14px" }}
+                textStyle="md"
                 fontWeight="semibold"
                 borderRadius="full"
                 onClick={onOpen}

@@ -85,7 +85,7 @@ const VotingResultContent = ({
   return (
     <Stack direction={{ base: "column", md: "row" }} w="full" align="stretch" gap={4}>
       <VStack bg="bg.subtle" p={5} borderRadius="16px" gap={4}>
-        <Text fontSize="md" fontWeight="semibold" alignSelf="flex-start">
+        <Text textStyle="md" fontWeight="semibold" alignSelf="flex-start">
           {"Votes"}
         </Text>
         <MulticolorBar segments={progressBarSegments} />
@@ -132,7 +132,7 @@ const VotingResultContent = ({
         </Table.Root>
       </VStack>
       <VStack bg="bg.subtle" p={5} borderRadius="16px">
-        <Text fontSize="md" fontWeight="semibold" alignSelf="flex-start">
+        <Text textStyle="md" fontWeight="semibold" alignSelf="flex-start">
           {"Quorum"}
         </Text>
         <ChartQuorum
@@ -175,20 +175,20 @@ const SupportResultContent = ({
           <HStack justify="space-between" w="full">
             <HStack>
               <Icon as={HeartSolidIcon} color="success.primary" boxSize={5} />
-              <Text fontSize="md" color="text.subtle">
+              <Text textStyle="md" color="text.subtle">
                 {t("{{percentage}}% (your support)", { percentage: userSupportPercentage.toFixed(2) })}
               </Text>
             </HStack>
-            <Text fontSize="md" color="text.subtle">
+            <Text textStyle="md" color="text.subtle">
               {humanNumber(formatEther(userDeposits), userDeposits, "VOT3")}
             </Text>
           </HStack>
         )}
         <HStack justify="space-between" w="full">
-          <Text fontSize="md" color="text.subtle">
+          <Text textStyle="md" color="text.subtle">
             {"Supporters"}
           </Text>
-          <Text fontSize="md" color="text.subtle">
+          <Text textStyle="md" color="text.subtle">
             {totalSupporters}
           </Text>
         </HStack>
@@ -243,7 +243,7 @@ const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot 
           </PieChart>
         </ResponsiveContainer>
         <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color={isQuorumReached ? "success.primary" : "gray.700"}>
+          <Text textStyle="2xl" fontWeight="bold" color={isQuorumReached ? "success.primary" : "gray.700"}>
             {`${percentageFilled}%`}
           </Text>
         </Box>
@@ -251,7 +251,7 @@ const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot 
       {isQuorumReached && (
         <HStack justifyContent="center" w="full" textWrap={"nowrap"}>
           <Icon as={UilCheckCircle} color="success.primary" boxSize={5} />
-          <Text fontSize="xs" fontWeight="semibold">
+          <Text textStyle="xs" fontWeight="semibold">
             <Trans
               i18nKey="Minimum <Link>quorum</Link> (30%) reached"
               components={{

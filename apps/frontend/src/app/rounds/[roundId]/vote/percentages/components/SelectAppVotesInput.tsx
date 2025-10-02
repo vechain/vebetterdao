@@ -89,7 +89,6 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
           {totalVotesAvailable && !error ? (
             <Field.HelperText
               data-testid={`${appMetadata?.name}-vote-estimated-votes`}
-              fontWeight={400}
               textStyle="md"
               color="text.subtle">
               {t("=~ {{value}} votes", {
@@ -100,7 +99,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
               })}
             </Field.HelperText>
           ) : (
-            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} fontWeight={400} textStyle="md">
+            <Field.ErrorText data-testid={`${appMetadata?.name}-vote-error`} textStyle="md">
               {error}
             </Field.ErrorText>
           )}

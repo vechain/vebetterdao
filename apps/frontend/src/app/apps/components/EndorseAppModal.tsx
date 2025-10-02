@@ -73,7 +73,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         onClose()
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading size="xl" fontWeight={700}>
+        <Heading size="xl" fontWeight="bold">
           {t("Endorse {{appName}} app", { appName: xApp?.name })}
         </Heading>
 
@@ -133,7 +133,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
             </VStack>
           </RadioGroup.Root>
 
-          <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+          <Text textStyle="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
             {t("Current app score: {{score}}", { score: appScore })}
             <br />
             {t("App score after endorsement: {{score}}", { score: newScore })}

@@ -45,7 +45,7 @@ export const DistributionStrategyModal = ({
           <Skeleton loading={distributorsLoading} w="full">
             {distributors?.length > 0 ? (
               <VStack align="stretch" w="full">
-                <Text textStyle="md" fontWeight={"500"}>
+                <Text textStyle="md" fontWeight="semibold">
                   {t("Reward distributors")}
                 </Text>
                 {distributors?.map((distributor: string) => (

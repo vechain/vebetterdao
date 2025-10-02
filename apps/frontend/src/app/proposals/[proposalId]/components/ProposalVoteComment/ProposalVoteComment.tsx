@@ -28,9 +28,11 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
     <Card.Root key={vote.voter} variant="primary" p={"32px"} borderRadius={"16px"}>
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"top"}>
-          <HStack fontSize={"lg"} fontWeight={"semibold"}>
+          <HStack fontWeight={"semibold"}>
             <Icon as={voteLabel[voteType].icon} color={voteLabel[voteType].color} boxSize={5} />
-            <Text color={voteLabel[voteType].color}>{voteLabel[voteType].label}</Text>
+            <Text textStyle={"lg"} color={voteLabel[voteType].color}>
+              {voteLabel[voteType].label}
+            </Text>
           </HStack>
           <Text color={"text.subtle"}>{dayjs(vote.blockTimestamp * 1000).fromNow()}</Text>
         </HStack>

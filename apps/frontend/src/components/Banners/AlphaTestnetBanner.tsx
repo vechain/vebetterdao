@@ -73,8 +73,7 @@ export const AlphaTestnetBanner = () => {
             textStyle={["sm", "md"]}
             color="secondary.500"
             whiteSpace="nowrap"
-            textTransform={"uppercase"}
-            fontWeight={"400"}>
+            textTransform={"uppercase"}>
             {text}
           </Text>
         ))}

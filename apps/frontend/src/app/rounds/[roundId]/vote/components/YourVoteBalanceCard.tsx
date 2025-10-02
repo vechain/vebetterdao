@@ -66,7 +66,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
           </HStack>
         </VStack>
         {isDesktop && !isQuadraticFundingDisabled && (
-          <Box textStyle="sm" color={"#6A6A6A"} fontWeight={400}>
+          <Box textStyle="sm" color={"#6A6A6A"}>
             <Text fontWeight="semibold">{t("We use the quadratic formula to calculate the results")}</Text>
             <Text>
               {t(

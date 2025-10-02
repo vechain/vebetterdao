@@ -122,7 +122,7 @@ export const GrantsProposalDraftCard = ({ proposal }: GrantsProposalDraftCardPro
         <Stack
           direction={{ base: "column", md: "row" }}
           w="full"
-          fontSize={{ base: "14px", md: "16px" }}
+          textStyle={{ base: "sm", md: "md" }}
           justify={{ base: "flex-start" }}
           gap={{ base: 3, md: 2 }}
           align={{ base: "flex-start", md: "center" }}>
@@ -133,7 +133,7 @@ export const GrantsProposalDraftCard = ({ proposal }: GrantsProposalDraftCardPro
             w={{ base: "full", md: "auto" }}>
             <HStack gap={2} minW="fit-content">
               <Icon as={B3trIcon} color="actions.primary.default" boxSize={{ base: 4, md: 5 }} />
-              <Text fontSize={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
+              <Text textStyle={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
                 {humanNumber(grantAmountRequested, grantAmountRequested, "B3TR")}
               </Text>
               <Text display={{ base: "none", lg: "block" }} fontSize={{ base: "sm", lg: "md" }}>
@@ -143,10 +143,10 @@ export const GrantsProposalDraftCard = ({ proposal }: GrantsProposalDraftCardPro
             <Separator orientation="vertical" h="16px" />
             <HStack gap="1">
               <Icon as={Clock} color="text.subtle" boxSize="4" />
-              <Text fontSize="sm" color="text.subtle">
+              <Text textStyle="sm" color="text.subtle">
                 {t("grant application")}
               </Text>
-              <Text fontSize="sm" fontWeight="semibold" color="text.subtle">
+              <Text textStyle="sm" fontWeight="semibold" color="text.subtle">
                 {`${completionPercentage}%`}
               </Text>
             </HStack>

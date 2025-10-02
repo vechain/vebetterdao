@@ -59,14 +59,14 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
           <NFTEarthIcon />
         </Icon>
         <VStack align="stretch" gap={6}>
-          <Heading alignSelf="center" fontSize="28px">
+          <Heading alignSelf="center" size="3xl">
             {isGrants ? t("To apply for a grant, you must") : t("To apply for a proposal, you must")}
           </Heading>
 
           {!hasNft ? (
             <List.Root as="ol" gap={2}>
               <List.Item>
-                <Text fontWeight={400}>
+                <Text>
                   <Trans
                     i18nKey="Get a <b>Galaxy Member - {{gmName}} NFT</b>. You can upgrade your NFT to GM {{gmName}} NFT or buy it."
                     values={{ gmName: gmNfts[Math.max(Number(gmRequired) - 1, 0)]?.name ?? "Moon" }}
@@ -86,7 +86,7 @@ export const RequirementModal = ({ isOpen = false, onClose = () => {}, hasNft, i
               )}
             </List.Root>
           ) : (
-            <Text fontWeight={400}>
+            <Text>
               <Trans
                 i18nKey="Have a discussion about your proposal on the <b>VeChain Discourse</b> forum at least 3 days before submitting it on VeBetter."
                 components={{ b: <Text as="span" fontWeight="bold" /> }}
