@@ -70,7 +70,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   },
 
   [ProposalState.DepositNotMet]: {
-    text: "Declined",
+    text: "Cancelled",
     icon: Prohibition,
     variant: "declined",
   },
