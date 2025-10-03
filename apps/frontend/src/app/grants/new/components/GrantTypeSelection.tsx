@@ -70,10 +70,10 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
               <Card.Root
                 key={type}
                 variant="primary"
-                cursor="pointer"
-                borderColor={value === type ? "#004CFC" : notSelectedBorder}
-                boxShadow={value === type ? "0px 0px 16px 0px rgba(0, 76, 252, 0.35)" : undefined}
-                _hover={{ borderColor: "#004CFC" }}
+                as="button"
+                borderColor={value === type ? "actions.tertiary.default" : notSelectedBorder}
+                boxShadow={value === type ? "0px 0px 16px 0px var(--vbd-colors-actions-tertiary-default)" : undefined}
+                _hover={{ borderColor: "actions.tertiary.default" }}
                 onClick={() => handleGrantTypeChange(type)}>
                 <CardBody>
                   <VStack align="flex-start" gap={4}>
@@ -81,7 +81,7 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                       {info.title}
                     </Text>
                     <VStack w="full" justify="space-between" align="flex-start">
-                      <Text textStyle="2xl" fontWeight="bold" color="#004CFC">
+                      <Text textStyle="2xl" fontWeight="bold" color="actions.tertiary.default">
                         {t("Up to {{amount}}", { amount: info.amount })}
                       </Text>
                       <Text color="gray.600">{info.duration}</Text>
@@ -96,7 +96,7 @@ export const GrantTypeSelection = ({ control, setValue, setData }: GrantTypeSele
                     <List.Root gap={2} display={{ base: "none", md: "block" }}>
                       {info.requirements.map(req => (
                         <List.Item key={req} display="flex" alignItems="center">
-                          <List.Indicator asChild color="#004CFC">
+                          <List.Indicator asChild color="actions.tertiary.default">
                             <Icon as={BsCheck} />
                           </List.Indicator>
                           <Text color="gray.600">{req}</Text>

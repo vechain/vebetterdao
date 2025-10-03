@@ -47,7 +47,7 @@ export const UserTransactions = ({ address }: Props) => {
                 )}
               </>
             ) : (
-              <EmptyState size="sm" title={t("No transactions found")} icon={<FiAlertCircle />} />
+              <EmptyState bg="transparent" size="sm" title={t("No transactions found")} icon={<FiAlertCircle />} />
             )}
           </VStack>
         </Card.Body>

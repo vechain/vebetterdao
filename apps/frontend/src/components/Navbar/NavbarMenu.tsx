@@ -175,7 +175,6 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         return <DesktopButtonWithSubRoutes key={route.name} route={route} selected={selected} />
       }
 
-      const fontWeight = selected ? 600 : 400
       return (
         <Button
           border="none"
@@ -185,7 +184,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           variant={selected ? "subtle" : "ghost"}
           onClick={onClick}
           size="sm"
-          fontWeight={fontWeight}
+          fontWeight={selected ? "bold" : "normal"}
           textStyle="sm"
           data-testid={selected ? "current-section" : ""}
           px="4"

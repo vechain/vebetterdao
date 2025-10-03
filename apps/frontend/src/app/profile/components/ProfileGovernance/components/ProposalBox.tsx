@@ -26,7 +26,7 @@ export const ProposalBox = ({ proposalId, metadata }: Props) => {
 
   return (
     <LinkBox asChild>
-      <Card.Root w={"full"} variant="subtle">
+      <Card.Root w={"full"} variant="subtle" p="3">
         <Card.Body display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
           <VStack w={"full"} alignItems={"start"} gap={2}>
             <ProposalStatusBadge

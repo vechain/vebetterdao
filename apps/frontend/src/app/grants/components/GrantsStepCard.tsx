@@ -111,11 +111,11 @@ export const GrantsStepsCard = ({
               <Heading size="sm" textStyle="heading">
                 {currentStep.heading}
               </Heading>
-              <List.Root pl={5} textStyle="sm" gap={2} color="gray.600" textAlign="left">
+              <List.Root variant="plain" pl={5} textStyle="sm" gap={2} textAlign="left">
                 {currentStep.listItems.map((item, index) => (
-                  <List.Item key={`${item}-${index}`}>
-                    <List.Indicator color="#004CFC">
-                      <Icon as={BsCheck} />
+                  <List.Item key={`${item}-${index}`} color="text.subtle">
+                    <List.Indicator asChild color="actions.tertiary.default">
+                      <Icon boxSize="6" as={BsCheck} />
                     </List.Indicator>
                     {item}
                   </List.Item>

@@ -9,7 +9,7 @@ import {
 } from "./components"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
-import { HandPlantIcon, VoteBoxIcon } from "@/components"
+import { VoteBoxIcon } from "@/components"
 import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV"
 import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
@@ -20,7 +20,9 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { useUserCreatedProposal } from "@/hooks/proposals/common"
 import { useWallet } from "@vechain/vechain-kit"
-import { VStack } from "@chakra-ui/react"
+import { Button, Icon, VStack, Card } from "@chakra-ui/react"
+import { EmptyState } from "@/components/ui/empty-state"
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
 
 enum ListView {
   ALL,
@@ -122,16 +124,28 @@ export const ProfileGovernance = ({ address }: Props) => {
               onSeeAllProposals={onSeeAllVotedProposals}
             />
           ) : (
-            <EmptyStateGovernance
-              title={t("Voted Proposals")}
-              description={t("{{subject}} voted proposals will appear here.", {
-                subject: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}`,
-              })}
-              buttonText={t("Explore governance")}
-              illustration={<HandPlantIcon color="rgba(117, 117, 117, 1)" />}
-              buttonIcon={FaScaleBalanced}
-              onClick={onExploreGovernance}
-            />
+            <Card.Root variant="primary" w="full">
+              <Card.Title textStyle="xl">{t("Voted Proposals")}</Card.Title>
+              <Card.Body asChild>
+                <EmptyState
+                  title={t("Voted Proposals")}
+                  description={t("{{subject}} voted proposals will appear here.", {
+                    subject: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}`,
+                  })}
+                  icon={
+                    <Icon boxSize={20} color="actions.secondary.text-lighter">
+                      <HandPlantIcon color="rgba(117, 117, 117, 1)" />
+                    </Icon>
+                  }>
+                  <Button rounded={"full"} variant={"primary"} onClick={() => router.push("/apps")}>
+                    <Icon color="actions.secondary.text-lighter">
+                      <FaScaleBalanced />
+                    </Icon>
+                    {t("Explore governance")}
+                  </Button>
+                </EmptyState>
+              </Card.Body>
+            </Card.Root>
           )}
           {isFirstTopVotedAppsAvailable ? (
             <TopVotedApps

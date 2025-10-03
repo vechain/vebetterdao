@@ -1,6 +1,6 @@
 import { VStack, Icon, Text, Link, Tabs } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useCallback, useEffect, useState } from "react"
+import { useMemo, useCallback, useEffect } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
@@ -33,7 +33,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
-  const [initialTab, setInitialTab] = useState<Tab | undefined>()
 
   const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
   const parsedAddress = address ?? account?.address ?? ""
@@ -43,22 +42,16 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     if (!parsedAddress) {
       router.push("/error")
     }
+  }, [parsedAddress, router])
 
-    if (!initialTab) {
-      // Get the initial tab from the URL
-      const getInitialTab = () => {
-        const tabFromURL = searchParams.get("tab")
-        const isValidTab = Object.values(Tab).includes(tabFromURL as Tab)
-        if (tabFromURL && isValidTab) {
-          return tabFromURL as Tab
-        }
-        return Tab.Balance
-      }
-
-      const initialTab = getInitialTab()
-      setInitialTab(initialTab)
+  const getInitialTab = useCallback(() => {
+    const tabFromURL = searchParams.get("tab")
+    const isValidTab = Object.values(Tab).includes(tabFromURL as Tab)
+    if (tabFromURL && isValidTab) {
+      return tabFromURL as Tab
     }
-  }, [initialTab, parsedAddress, router, searchParams])
+    return Tab.Balance
+  }, [searchParams])
 
   const tabs = useMemo(
     () => [
@@ -136,7 +129,7 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
       <ProfileHeader address={parsedAddress} />
       <Tabs.Root
         size="lg"
-        defaultValue={Tab.Balance}
+        defaultValue={getInitialTab()}
         lazyMount
         onValueChange={tab => handleTabChange(tab.value as Tab)}>
         <Tabs.List justifyContent="space-around" scrollbar="hidden" overflow="scroll">

@@ -27,7 +27,7 @@ export const AppVotedBox = ({ appVoted }: Props) => {
   return (
     <Button
       h="auto"
-      p="12px"
+      p="3"
       display={"flex"}
       alignItems={"stretch"}
       variant="subtle"

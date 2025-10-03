@@ -23,8 +23,6 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
   const { isPerson } = useCanUserVote(address, delegateeAddress)
 
-  const border = isPerson ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
-
   const descriptionLabel = useMemo(() => {
     return isConnectedUser
       ? t("Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens")
@@ -38,7 +36,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   if (isPendingDelegationsLoading) return null
 
   return (
-    <Card.Root variant="primary" rounded="xl" w="full" border={border}>
+    <Card.Root variant="primary" rounded="xl" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">

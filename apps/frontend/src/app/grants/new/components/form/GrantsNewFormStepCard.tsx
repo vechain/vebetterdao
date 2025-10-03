@@ -295,7 +295,7 @@ export const GrantsNewFormStepCard = () => {
   // ============================================================================
 
   return (
-    <Card.Root p="8">
+    <Card.Root p={{ base: "6", md: "8" }}>
       <Card.Body>
         <form ref={formRef} onSubmit={handleSubmit(onSubmit, onError)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
