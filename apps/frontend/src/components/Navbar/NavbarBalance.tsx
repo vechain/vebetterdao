@@ -1,7 +1,9 @@
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 import { Flex, HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+
+import { useColorModeValue } from "../ui/color-mode"
 import { BalancePill } from "./BalancePill"
 
 const compactFormatter = getCompactFormatter(1)
@@ -10,7 +12,7 @@ export const NavbarBalance = () => {
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useGetVot3Balance(account?.address ?? undefined)
-
+  const vot3PillColor = useColorModeValue("text.default", "text.alt") //TODO: Fix this in dark mode changes
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
 
   if (!account?.address) {
@@ -34,7 +36,7 @@ export const NavbarBalance = () => {
         <BalancePill variant="vot3">
           <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color="text.default" fontWeight={600}>
+            <Text color={vot3PillColor} fontWeight={600}>
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
           </Flex>
