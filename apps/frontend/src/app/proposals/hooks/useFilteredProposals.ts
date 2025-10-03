@@ -35,9 +35,9 @@ export const useFilteredProposals = (
     if (!proposalsWithStateAndDeposit?.length) return []
 
     // Use default filter if no filter is selected
-    const activeFilter = !selectedFilter || selectedFilter.length === 0 ? defaultFilter : selectedFilter
+    const activeFilter = !selectedFilter || selectedFilter?.length === 0 ? defaultFilter : selectedFilter
 
-    if (!activeFilter || activeFilter.length === 0) return proposalsWithStateAndDeposit
+    if (!activeFilter || activeFilter?.length === 0) return proposalsWithStateAndDeposit
 
     // Create filter condition mapping
     const getFilterCondition = (
