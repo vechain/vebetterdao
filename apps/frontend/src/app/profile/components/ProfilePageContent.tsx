@@ -1,6 +1,6 @@
-import { VStack, HStack, Button, Box, Icon, Text, Link } from "@chakra-ui/react"
+import { VStack, Icon, Text, Link, Tabs } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useCallback, memo, useState, useEffect } from "react"
+import { useMemo, useCallback, useEffect, useState } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
@@ -29,34 +29,11 @@ interface ProfilePageContentProps {
   address?: string
 }
 
-interface TabContentProps {
-  tab: Tab
-  address: string
-}
-
-const TabContent = memo(function TabContent({ tab, address }: TabContentProps) {
-  switch (tab) {
-    case Tab.Balance:
-      return <ProfileBalance address={address} />
-    case Tab.BetterActions:
-      return <ProfileBetterActions address={address} />
-    case Tab.Governance:
-      return <ProfileGovernance address={address} />
-    case Tab.LinkedAccounts:
-      return <ProfileLinkedAcounts address={address} />
-    case Tab.GM:
-      return <ProfileGMLevel address={address} />
-    case Tab.Nodes:
-      return <ProfileNodes address={address} />
-    default:
-      return null
-  }
-})
-
 export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
+  const [initialTab, setInitialTab] = useState<Tab | undefined>()
 
   const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
   const parsedAddress = address ?? account?.address ?? ""
@@ -66,18 +43,22 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
     if (!parsedAddress) {
       router.push("/error")
     }
-  }, [parsedAddress, router])
 
-  // Get the initial tab from the URL
-  const getInitialTab = useCallback(() => {
-    const tabFromURL = searchParams.get("tab")
-    const isValidTab = Object.values(Tab).includes(tabFromURL as Tab)
-    if (tabFromURL && isValidTab) {
-      return tabFromURL as Tab
+    if (!initialTab) {
+      // Get the initial tab from the URL
+      const getInitialTab = () => {
+        const tabFromURL = searchParams.get("tab")
+        const isValidTab = Object.values(Tab).includes(tabFromURL as Tab)
+        if (tabFromURL && isValidTab) {
+          return tabFromURL as Tab
+        }
+        return Tab.Balance
+      }
+
+      const initialTab = getInitialTab()
+      setInitialTab(initialTab)
     }
-    return Tab.Balance
-  }, [searchParams])
-  const [activeTab, setActiveTab] = useState(getInitialTab)
+  }, [initialTab, parsedAddress, router, searchParams])
 
   const tabs = useMemo(
     () => [
@@ -135,7 +116,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const handleTabChange = useCallback(
     (tab: Tab) => {
       updateURLWithTab(tab)
-      setActiveTab(tab)
       trackTabChange(tab)
     },
     [updateURLWithTab],
@@ -154,31 +134,37 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
         </Link>
       )}
       <ProfileHeader address={parsedAddress} />
-      <Box
-        w="full"
-        overflowX="auto"
-        whiteSpace="nowrap"
-        css={{
-          "&::-webkit-scrollbar": { display: "none" },
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}>
-        <HStack gap="0" minWidth="max-content" justifyContent="space-between" flexWrap="nowrap">
+      <Tabs.Root
+        size="lg"
+        defaultValue={Tab.Balance}
+        lazyMount
+        onValueChange={tab => handleTabChange(tab.value as Tab)}>
+        <Tabs.List justifyContent="space-around" scrollbar="hidden" overflow="scroll">
           {tabs.map(({ tab, label }) => (
-            <Button
-              key={tab}
-              variant="ghost"
-              rounded="none"
-              borderBottom={activeTab === tab ? "2px solid var(--vbd-colors-brand-primary)" : "none"}
-              textStyle={["xs", "xs", "md"]}
-              onClick={() => handleTabChange(tab)}>
+            <Tabs.Trigger key={tab} value={tab} flexShrink={0}>
               {label}
-            </Button>
+            </Tabs.Trigger>
           ))}
-        </HStack>
-      </Box>
-
-      <TabContent tab={activeTab} address={parsedAddress} />
+        </Tabs.List>
+        <Tabs.Content value={Tab.Balance}>
+          <ProfileBalance address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.BetterActions}>
+          <ProfileBetterActions address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.Governance}>
+          <ProfileGovernance address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.LinkedAccounts}>
+          <ProfileLinkedAcounts address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.GM}>
+          <ProfileGMLevel address={parsedAddress} />
+        </Tabs.Content>
+        <Tabs.Content value={Tab.Nodes}>
+          <ProfileNodes address={parsedAddress} />
+        </Tabs.Content>
+      </Tabs.Root>
     </VStack>
   )
 }

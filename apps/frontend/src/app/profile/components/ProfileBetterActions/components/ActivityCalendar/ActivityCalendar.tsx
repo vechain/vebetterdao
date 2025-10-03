@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react"
-import { Box, Button, Card, Flex, Grid, Heading, HStack, Skeleton, Text, VStack, useMediaQuery } from "@chakra-ui/react"
+import { Box, Button, Card, Flex, Heading, HStack, VStack, useMediaQuery, SimpleGrid, Text } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -108,7 +108,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
         onClose={() => setSelectedDate(undefined)}
         date={selectedDate}
       />
-      <Card.Root w="full" variant="primary">
+      <Card.Root w="full" variant="primary" padding={{ base: "3", md: "6" }}>
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <Flex justify="space-between" align="center">
@@ -130,7 +130,7 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
               </Button>
             </Flex>
 
-            <Grid templateColumns="repeat(7, 1fr)" gap={1}>
+            <SimpleGrid templateColumns="repeat(7, 1fr)" gap={{ base: "0.5", md: "1" }}>
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                 <Box key={day} textAlign="center">
                   <Text textStyle="xs" color="gray.500">
@@ -150,26 +150,24 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                 const isDisabled = isFutureDay || currentMonthOverviewQuery.isLoading || activityNumber === 0
 
                 return (
-                  <Skeleton key={day} h="10" loading={currentMonthOverviewQuery.isLoading}>
-                    <Button
-                      key={day}
-                      onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
-                      w="full"
-                      h="full"
-                      disabled={isDisabled}
-                      textStyle="sm"
-                      bg={getActivityColor(activityNumber)}
-                      color={getActivityFontColor(activityNumber)}
-                      borderRadius="md"
-                      border="md"
-                      borderColor={isToday ? "border.inverted" : "transparent"}
-                      _hover={{ opacity: isDisabled ? 1 : 0.8 }}>
-                      {day}
-                    </Button>
-                  </Skeleton>
+                  <Button
+                    key={day}
+                    textStyle={{ base: "2xs", sm: "xs", md: "md" }}
+                    onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
+                    w="full"
+                    h="full"
+                    disabled={isDisabled}
+                    bg={getActivityColor(activityNumber)}
+                    color={getActivityFontColor(activityNumber)}
+                    borderRadius="md"
+                    border="md"
+                    borderColor={isToday ? "border.inverted" : "transparent"}
+                    _hover={{ opacity: isDisabled ? 1 : 0.8 }}>
+                    {day}
+                  </Button>
                 )
               })}
-            </Grid>
+            </SimpleGrid>
             <HStack justify="center" gap={2} wrap="wrap">
               {legendItems.map(item => (
                 <HStack key={item.label} gap={1}>

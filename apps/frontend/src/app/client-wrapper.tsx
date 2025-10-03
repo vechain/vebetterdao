@@ -69,7 +69,7 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
         <Flex flex={1}>
           <Container
             flex={1}
-            mt={4}
+            my={{ base: 4, md: 10 }}
             px={4}
             maxW="breakpoint-xl"
             display={"flex"}

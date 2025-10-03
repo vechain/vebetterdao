@@ -20,6 +20,7 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { useUserCreatedProposal } from "@/hooks/proposals/common"
 import { useWallet } from "@vechain/vechain-kit"
+import { VStack } from "@chakra-ui/react"
 
 enum ListView {
   ALL,
@@ -102,7 +103,7 @@ export const ProfileGovernance = ({ address }: Props) => {
   switch (listView) {
     case ListView.ALL:
       return (
-        <>
+        <VStack gap="8" w="full">
           <PendingDelegationDelegateePOV address={address} isConnectedUser={isConnectedUser} />
           <CurrentDelegation address={address} isConnectedUser={isConnectedUser} />
           <VotingQualification address={address} isConnectedUser={isConnectedUser} />
@@ -150,7 +151,7 @@ export const ProfileGovernance = ({ address }: Props) => {
               onClick={onExploreGovernance}
             />
           )}
-        </>
+        </VStack>
       )
     case ListView.CREATED:
       return <PaginatedProposals proposals={createdProposals ?? []} goBack={onGoBack} />

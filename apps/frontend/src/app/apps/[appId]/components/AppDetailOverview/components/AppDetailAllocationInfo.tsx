@@ -12,7 +12,7 @@ export const AppDetailAllocationInfo = () => {
 
   const { t } = useTranslation()
   return (
-    <Card.Root variant="subtle" h={"full"} rounded="8px" flex={1.5} borderWidth={1}>
+    <Card.Root bg="card.subtle" h={"full"} rounded="8px" flex={1.5}>
       <Card.Body gap={6}>
         <VStack alignItems={"stretch"} gap={0}>
           <HStack>
