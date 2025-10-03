@@ -1990,5 +1990,6 @@
   "Are you sure you want to cancel this {{proposalType}}": "Sind Sie sicher, dass Sie diese {{proposalType}} abbrechen möchten?",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Wenn Sie jetzt abbrechen, wird Ihr Förderantrag entfernt und erscheint nicht in der nächsten Abstimmungsrunde. Sobald die Runde beginnt, ist eine Stornierung nicht mehr möglich.",
   "Showing": "Anzeigen",
-  "Search by proposal name": "Nach Vorschlagsnamen suchen"
+  "Search by proposal name": "Nach Vorschlagsnamen suchen",
+  "Created": "Erstellt"
 }

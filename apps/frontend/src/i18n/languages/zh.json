@@ -1990,5 +1990,6 @@
   "Are you sure you want to cancel this {{proposalType}}": "您确定要取消此{{proposalType}}吗",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "如果您现在取消，您的资助将被移除，并且不会出现在下一个投票轮次中。一旦轮次开始，将无法再取消。",
   "Showing": "显示",
-  "Search by proposal name": "按提案名称搜索"
+  "Search by proposal name": "按提案名称搜索",
+  "Created": "创建"
 }
