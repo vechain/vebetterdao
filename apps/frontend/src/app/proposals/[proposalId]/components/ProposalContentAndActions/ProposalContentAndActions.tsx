@@ -1,3 +1,4 @@
+import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
 import { FileAttachmentPreview } from "@/app/grants/components"
@@ -7,7 +8,7 @@ import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunct
 import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
-import { Alert, Box, Grid, GridItem, IconButton, Image, VStack } from "@chakra-ui/react"
+import { Alert, Box, Grid, GridItem, IconButton, Image, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { getConfig } from "@repo/config"
 import MDEditor from "@uiw/react-md-editor"
@@ -101,6 +102,13 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
           <CollapsibleSection title={t("Company details")} defaultOpen={true}>
             <CollapsibleSectionItem title={t("Name")} value={proposal?.companyName} />
             <CollapsibleSectionItem title={t("Registration number / VAT")} value={proposal?.companyRegisteredNumber} />
+
+            {proposal?.grantsReceiverAddress ? (
+              <VStack align="flex-start" w="full" gap={0}>
+                <Text fontWeight="semibold">{t("Receiver Address")}</Text>
+                <AddressWithProfilePicture address={proposal?.grantsReceiverAddress} />
+              </VStack>
+            ) : null}
             {proposal?.companyEmail || proposal?.companyTelegram ? (
               <VStack py={2} align="flex-start" w="full">
                 {proposal?.companyEmail ? (
