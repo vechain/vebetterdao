@@ -45,7 +45,17 @@ import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
 
 const pageSize = 10
-
+//All filters except Canceled
+const defaultFilter = [
+  ProposalFilter.ApprovalPhase, //Active and Succeeded
+  ProposalFilter.SupportPhase, //Pending
+  StateFilter.Defeated,
+  StateFilter.Queued,
+  StateFilter.Executed,
+  StateFilter.DepositNotMet,
+  StateFilter.InDevelopment,
+  StateFilter.Completed,
+]
 enum GrantsStep {
   SUBMIT_APPLICATION = "SUBMIT_APPLICATION",
   GET_SUPPORT = "GET_SUPPORT",
@@ -132,12 +142,18 @@ export const GrantsPageContent = () => {
   const { hasMetProposalCriteria } = useMetProposalCriteria(ProposalType.GRANT)
 
   const { selectedFilter, setSelectedFilter } = useProposalFilters()
+
   const {
     data: { enrichedGrantProposals } = { enrichedGrantProposals: [] },
     isLoading: isLoadingEnrichedGrantProposals,
   } = useProposalEnriched()
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
+
+  const { filteredProposals } = useFilteredProposals(
+    selectedFilter,
+    searchedProposals as GrantProposalEnriched[],
+    defaultFilter,
+  )
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const visibleProposal = filteredProposals?.slice(startRange, endRange)
