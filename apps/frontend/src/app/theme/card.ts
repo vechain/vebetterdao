@@ -12,9 +12,9 @@ export const cardSlotRecipe = defineSlotRecipe({
       border: "0",
       transition: "all 0.2s ease-in-out",
     },
-    body: { p: "0" },
-    header: { p: "0", pb: "4" },
-    footer: { p: "0" },
+    body: { padding: "0" },
+    header: { padding: "0", pb: "4" },
+    footer: { padding: "0" },
   },
 
   variants: {

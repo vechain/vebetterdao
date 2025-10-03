@@ -23,9 +23,6 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
   const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
 
-  // ==========================================
-  // COMPUTED VALUES & CONSTANTS
-  // ==========================================
   const proposerAddress = proposal?.proposerAddress ?? ""
   const hasUserVoted = !!userVoteEvent?.hasVoted
 
@@ -33,9 +30,6 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
 
-  // ==========================================
-  // COMPONENTS
-  // ==========================================
   const HeaderContent = () => (
     <VStack align="flex-start" w="full">
       {/* Status badge and proposer info */}
@@ -62,12 +56,9 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
     </VStack>
   )
 
-  // ==========================================
-  // RENDER
-  // ==========================================
   return (
-    <Card.Root variant="primary" w="full" borderRadius={"16px"}>
-      <Card.Body p={"32px"}>
+    <Card.Root variant="primary" w="full" p="8">
+      <Card.Body>
         <VStack gap={7} align="flex-start" w="full">
           {/* Header section with status badge, proposer info, and title */}
           <HeaderContent />

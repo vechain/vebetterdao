@@ -7,6 +7,7 @@ import { dialogSlotRecipe } from "./dialog"
 import { popoverSlotRecipe } from "./popover"
 import { radioGroupSlotRecipe } from "./radio-group"
 import { selectSlotRecipe } from "./select"
+import { skeletonRecipe } from "./skeleton"
 import { stepsSlotRecipe } from "./steps"
 import { tableSlotRecipe } from "./table"
 
@@ -50,6 +51,7 @@ const config = defineConfig({
       button: buttonRecipe,
       input: inputRecipe,
       badge: badgeRecipe,
+      skeleton: skeletonRecipe,
       text: textRecipe,
     },
 
