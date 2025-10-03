@@ -73,7 +73,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
       return [
         {
           label: t("Cancelled"),
-          state: [ProposalState.Canceled],
+          state: [ProposalState.DepositNotMet],
         },
       ]
     }
