@@ -322,10 +322,8 @@ export const ProposalInteractionCard = ({
 
   return (
     <>
-      {/* ===== MAIN CARD ===== */}
       <Skeleton loading={isLoading}>
-        <Card.Root gap={"0px"} variant="primary">
-          {/* Card Header - Countdown Timer */}
+        <Card.Root gap="0" variant="primary">
           <Card.Header as={HStack}>
             <Icon as={TbClockHour8} boxSize={5} />
             <Card.Title p={0} gap={0}>
@@ -333,14 +331,12 @@ export const ProposalInteractionCard = ({
             </Card.Title>
           </Card.Header>
 
-          <Card.Body gap={"32px"} p={"32px"}>
-            {/* Countdown Display */}
+          <Card.Body gap="8">
             <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
 
             <Separator />
 
-            <VStack w="full" gap={"24px"} align={"stretch"}>
-              {/* Results Section Header */}
+            <VStack w="full" gap="6" align={"stretch"}>
               <HStack justify="space-between">
                 <HStack>
                   <Icon as={FiBarChart2} boxSize={5} />
@@ -351,7 +347,7 @@ export const ProposalInteractionCard = ({
                 </Button>
               </HStack>
               {/* Progress Bar and Results Display */}
-              <VStack gap={"16px"}>
+              <VStack gap="4">
                 <MulticolorBar segments={progressBarSegments} />
                 <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
               </VStack>

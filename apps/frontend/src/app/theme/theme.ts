@@ -7,7 +7,6 @@ import { dialogSlotRecipe } from "./dialog"
 import { popoverSlotRecipe } from "./popover"
 import { radioGroupSlotRecipe } from "./radio-group"
 import { selectSlotRecipe } from "./select"
-import { skeletonRecipe } from "./skeleton"
 import { stepsSlotRecipe } from "./steps"
 import { tableSlotRecipe } from "./table"
 
@@ -18,6 +17,8 @@ import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
 import { textRecipe } from "./text"
 import { tabsSlotRecipe } from "./tabs"
+import { skeletonRecipe } from "./skeleton"
+import { separatorRecipe } from "./separator"
 
 const config = defineConfig({
   preflight: true,
@@ -52,6 +53,7 @@ const config = defineConfig({
       input: inputRecipe,
       badge: badgeRecipe,
       skeleton: skeletonRecipe,
+      separator: separatorRecipe,
       text: textRecipe,
     },
 
