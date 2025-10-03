@@ -36,7 +36,7 @@ export const NavbarBalance = () => {
         <BalancePill variant="vot3">
           <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color={vot3PillColor} fontWeight={600}>
+            <Text color="black" fontWeight={600}>
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
           </Flex>
