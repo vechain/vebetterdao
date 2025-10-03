@@ -66,7 +66,7 @@ export const GrantsPageContent = () => {
         { label: t("Support phase"), value: ProposalFilter.SupportPhase },
         { label: t("In development"), value: StateFilter.InDevelopment },
         { label: t("Completed"), value: StateFilter.Completed },
-        { label: t("Cancelled"), value: StateFilter.Canceled },
+        { label: t("Cancelled"), value: ProposalFilter.FailedStates },
       ],
     })
   }, [t])
