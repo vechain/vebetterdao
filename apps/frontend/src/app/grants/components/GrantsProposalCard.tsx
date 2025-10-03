@@ -70,7 +70,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
   }, [endsAt, isSupportOrVotingPhase])
 
   return (
-    <LinkBox>
+    <LinkBox asChild>
       <Card.Root variant="action" w="full">
         <LinkOverlay href={`/${variant === "grant" ? "grants" : "proposals"}/${proposal.id}`}>
           <VStack w="full" gap={4} alignItems="flex-start">
