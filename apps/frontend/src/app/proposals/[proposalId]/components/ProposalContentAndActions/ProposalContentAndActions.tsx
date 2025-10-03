@@ -9,25 +9,25 @@ import { ProposalFormAction } from "@/store"
 import { removeTitleHeading } from "@/utils"
 import { Alert, Box, Grid, GridItem, IconButton, Image, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
 import MDEditor from "@uiw/react-md-editor"
 import { Link, Linkedin } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AiOutlineDiscord } from "react-icons/ai"
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuMail } from "react-icons/lu"
 import { RiTelegram2Line } from "react-icons/ri"
-
 import { A11y, Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
+
+import { SocialLink } from "../SocialLink"
+
 import "@/app/theme/swiper-custom.css"
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
-
-import { SocialLink } from "../SocialLink"
-import { getConfig } from "@repo/config"
-import { FaArrowRight, FaArrowLeft } from "react-icons/fa"
 
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
@@ -143,6 +143,7 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
               <CollapsibleSectionItem title={t("Solution")} value={proposal?.solutionDescription} />
               <CollapsibleSectionItem title={t("Execution plan")} value={proposal?.highLevelRoadmap} />
               <CollapsibleSectionItem title={t("Target user")} value={proposal?.targetUsers} />
+              <CollapsibleSectionItem title={t("Revenue model")} value={proposal?.revenueModel} />
               <CollapsibleSectionItem
                 title={t("Competitive edge / Differentiation factor")}
                 value={proposal?.competitiveEdge}
