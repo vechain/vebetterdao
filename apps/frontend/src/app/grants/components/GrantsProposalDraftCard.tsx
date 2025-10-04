@@ -1,13 +1,13 @@
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
-import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack, Button } from "@chakra-ui/react"
+import { useGrantProposalFormStore } from "@/store"
+import { Button, Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
+import { humanNumber } from "@repo/utils/FormattingUtils"
+import { Clock } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { Clock } from "iconoir-react"
 
 import { DeleteGrantProposalModal } from "./DeleteGrantProposalModal"
-import { useGrantProposalFormStore } from "@/store"
-import { humanNumber } from "@repo/utils/FormattingUtils"
 
 type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T]
 
@@ -108,7 +108,7 @@ export const GrantsProposalDraftCard = ({ proposal }: GrantsProposalDraftCardPro
 
   const editGrantProposal = () => {
     setData(proposal as unknown as GrantFormData, 1)
-    router.push(`/proposals/grants/new`)
+    router.push(`/grants/new`)
   }
 
   const grantAmountRequested = proposal.milestones.reduce((acc, milestone) => acc + milestone.fundingAmount, 0)

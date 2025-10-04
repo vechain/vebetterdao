@@ -1,13 +1,13 @@
 import { useIsDepositReached, useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
-import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
-import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
-import { Card, Heading, HStack, Tabs, VStack } from "@chakra-ui/react"
+import { MilestonesActions } from "@/app/grants/components"
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { Card, Tabs, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 import { ProposalContentAndActions } from "../ProposalContentAndActions"
-import { MilestonesActions } from "@/app/grants/components"
+import { ProposalOverviewHeader } from "../ProposalOverviewHeader"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
@@ -15,13 +15,11 @@ type ProposalOverviewProps = {
 }
 
 export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
-  // ==========================================
-  // HOOKS
-  // ==========================================
   const { account } = useWallet()
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
   const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
+  const { isMobile } = useBreakpoints()
 
   const proposerAddress = proposal?.proposerAddress ?? ""
   const hasUserVoted = !!userVoteEvent?.hasVoted
@@ -30,42 +28,21 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
 
-  const HeaderContent = () => (
-    <VStack align="flex-start" w="full">
-      {/* Status badge and proposer info */}
-      <HStack justify={"space-between"} align={"flex-start"} w="full">
-        <GrantsProposalStatusBadge
-          state={proposal?.state ?? ProposalState.Pending}
-          hasUserSupported={hasUserDeposited}
-          hasUserVoted={hasUserVoted}
-          depositReached={depositReached ?? false}
-        />
-
-        <AddressWithProfilePicture address={proposerAddress} />
-      </HStack>
-
-      {/* Proposal title */}
-      <Heading
-        w="full"
-        wordBreak="break-word"
-        overflowWrap="break-word"
-        size={["2xl", "4xl"]}
-        py={{ base: "4", md: "10" }}>
-        {proposal?.title}
-      </Heading>
-    </VStack>
-  )
-
   return (
     <Card.Root variant="primary" w="full" p="8">
       <Card.Body>
         <VStack gap={7} align="flex-start" w="full">
-          {/* Header section with status badge, proposer info, and title */}
-          <HeaderContent />
+          {!isMobile && proposal && (
+            <ProposalOverviewHeader
+              proposal={proposal}
+              hasUserDeposited={hasUserDeposited}
+              hasUserVoted={hasUserVoted}
+              depositReached={!!depositReached}
+              proposerAddress={proposerAddress}
+            />
+          )}
 
-          {/* Content section: Tabbed interface for grants, direct content for regular proposals */}
           {isGrant ? (
-            /* Grant proposals: Overview and Milestones tabs */
             <Tabs.Root spaceY={7} defaultValue="overview" w="full" fitted lazyMount unmountOnExit>
               <Tabs.List>
                 <Tabs.Trigger value="overview">{"Overview"}</Tabs.Trigger>
@@ -79,7 +56,6 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
               </Tabs.Content>
             </Tabs.Root>
           ) : (
-            /* Regular proposals: Direct content display */
             <ProposalContentAndActions proposal={proposal} />
           )}
         </VStack>

@@ -45,7 +45,7 @@ export const GrantsStepsCard = ({
   const goToNext = useCallback(() => {
     // Trigger button shrink animation before step change
     if (currentStepIndex === 0 && !isMobile) {
-      animate(scope.current, { width: "120px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
+      animate(scope.current, { width: "32" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
     }
     setCurrentStepIndex(prev => prev + 1)
   }, [currentStepIndex, isMobile, animate, scope])
@@ -69,15 +69,29 @@ export const GrantsStepsCard = ({
   const { hasMetProposalCriteria } = useMetProposalCriteria()
 
   const handleApply = useCallback(() => {
+    if (!isLastStep) {
+      return goToNext()
+    }
     if (!account?.address) {
       return openWalletModal()
     }
 
     if (!hasMetProposalCriteria) {
+      //Close step modal to open requirement modal
+      onClose()
       return openRequirementModal()
     }
     router.push("/grants/new")
-  }, [account?.address, hasMetProposalCriteria, router, openWalletModal, openRequirementModal])
+  }, [
+    isLastStep,
+    account?.address,
+    hasMetProposalCriteria,
+    router,
+    goToNext,
+    openWalletModal,
+    onClose,
+    openRequirementModal,
+  ])
 
   if (!currentStep) {
     return null
@@ -122,13 +136,19 @@ export const GrantsStepsCard = ({
                 ))}
               </List.Root>
               <HStack w="full" justifyContent="flex-start" pt={5}>
-                <Button variant="primary" w="full" onClick={isLastStep ? handleApply : goToNext}>
+                <Button variant="primary" w="full" onClick={handleApply}>
                   {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>
             </VStack>
           </Box>
         </Steps.Root>
+        <RequirementModal
+          isOpen={isRequirementModalOpen}
+          onClose={closeRequirementModal}
+          hasNft={hasMetProposalCriteria}
+          isGrants
+        />
       </BaseBottomSheet>
     )
   }
@@ -177,14 +197,14 @@ export const GrantsStepsCard = ({
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.4, ease: [0.25, 0.25, 0.25, 0.2] }}>
-                      <Button variant="secondary" w="120px" onClick={goToPrevious}>
+                      <Button variant="secondary" w="32" onClick={goToPrevious}>
                         {t("Back")}
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <Button ref={scope} variant="primary" onClick={isLastStep ? handleApply : goToNext} w="120px">
+                <Button ref={scope} variant="primary" onClick={handleApply} w="32">
                   {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>

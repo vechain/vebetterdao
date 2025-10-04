@@ -9,6 +9,8 @@ export enum ProposalFilter {
   UpcomingVoting = "Upcoming voting",
   ApprovalPhase = "Approval phase",
   SupportPhase = "Support phase",
+  StandardProposalCompleted = "Standard proposal completed",
+  FailedStates = "Failed states",
 }
 
 export enum StateFilter {

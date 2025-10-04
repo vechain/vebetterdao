@@ -46,6 +46,12 @@ export const useFilteredProposals = (
       [ProposalFilter.ApprovalPhase]:
         proposal.state === ProposalState.Active || proposal.state === ProposalState.Succeeded,
       [ProposalFilter.SupportPhase]: proposal.state === ProposalState.Pending,
+      [ProposalFilter.StandardProposalCompleted]:
+        proposal.state === ProposalState.Completed || proposal.state === ProposalState.Executed,
+      [ProposalFilter.FailedStates]:
+        proposal.state === ProposalState.Canceled ||
+        proposal.state === ProposalState.Defeated ||
+        proposal.state === ProposalState.DepositNotMet,
       // StateFilter values
       [StateFilter.Canceled]: proposal.state === ProposalState.Canceled,
       [StateFilter.Defeated]: proposal.state === ProposalState.Defeated,

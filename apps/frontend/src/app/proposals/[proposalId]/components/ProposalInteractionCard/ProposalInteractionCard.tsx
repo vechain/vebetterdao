@@ -29,20 +29,19 @@ import {
   useQueueProposal,
 } from "@/hooks"
 import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
-import { Button, Card, Heading, HStack, VStack, Icon, Separator, Skeleton } from "@chakra-ui/react"
+import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
+import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiBarChart2 } from "react-icons/fi"
-import { TbClockHour8 } from "react-icons/tb"
 
+import { ProposalCancelModal } from "../ProposalCancelModal"
 import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges"
-import { ProposalCancelModal } from "../ProposalCancelModal"
 
 export const ProposalInteractionCard = ({
   proposal,
@@ -249,7 +248,11 @@ export const ProposalInteractionCard = ({
   }, [proposalVotesQueryData?.votes])
 
   const progressBarSegments = useMemo(() => {
-    if (proposal?.state === ProposalState.Pending || proposal?.state === ProposalState.DepositNotMet) {
+    if (
+      proposal?.state === ProposalState.Pending ||
+      proposal?.state === ProposalState.DepositNotMet ||
+      proposal?.state === ProposalState.Canceled
+    ) {
       return [
         {
           percentage: Number(percentageSupported ?? 0),
@@ -320,26 +323,42 @@ export const ProposalInteractionCard = ({
     setIsSupportModalOpen(false)
   }, [])
 
+  const showCountdownBoxes = useMemo(() => {
+    const disabledStates = [
+      ProposalState.Canceled,
+      ProposalState.Defeated,
+      ProposalState.DepositNotMet,
+      ProposalState.Succeeded,
+      ProposalState.Queued,
+      ProposalState.Executed,
+    ]
+
+    return !disabledStates.includes(proposal?.state ?? ProposalState.Pending)
+  }, [proposal?.state])
+
   return (
     <>
       <Skeleton loading={isLoading}>
-        <Card.Root gap="0" variant="primary">
-          <Card.Header as={HStack}>
-            <Icon as={TbClockHour8} boxSize={5} />
-            <Card.Title p={0} gap={0}>
-              <Heading>{t("Ends in")}</Heading>
-            </Card.Title>
-          </Card.Header>
-
+        <Card.Root gap={"0"} variant="primary">
           <Card.Body gap="8">
-            <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
-
-            <Separator />
+            {showCountdownBoxes && (
+              <>
+                <HStack>
+                  <Icon as={Clock} boxSize={5} />
+                  <Card.Title p={0} gap={0}>
+                    <Heading>{t("Ends in")}</Heading>
+                  </Card.Title>
+                </HStack>
+                {/* Countdown Display */}
+                <CountdownBoxes days={daysLeft} hours={hoursLeft} minutes={minutesLeft} />
+                <Separator />
+              </>
+            )}
 
             <VStack w="full" gap="6" align={"stretch"}>
               <HStack justify="space-between">
                 <HStack>
-                  <Icon as={FiBarChart2} boxSize={5} />
+                  <Icon as={Reports} boxSize={5} />
                   <Heading>{t("Results")}</Heading>
                 </HStack>
                 <Button variant="plain" color="actions.tertiary.default" onClick={() => setIsResultsModalOpen(true)}>

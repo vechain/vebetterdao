@@ -1,22 +1,13 @@
-import { AddressUtils } from "@/utils"
 import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
-import AppUtils from "@/utils/AppUtils"
 import { GrantFormData } from "@/hooks/proposals/grants/types"
-import { t } from "i18next"
+import { AddressUtils } from "@/utils"
+import AppUtils from "@/utils/AppUtils"
 import dayjs from "dayjs"
+import { t } from "i18next"
 
 export const patternUrlCheck = {
   value: /^https?:\/\/.+/,
   message: t("Please enter a valid URL starting with http:// or https://"),
-}
-
-export const validateUrl = (value: string, fieldName: string) => {
-  try {
-    new URL(value)
-    return true
-  } catch {
-    return t("Invalid {{fieldName}}", { fieldName })
-  }
 }
 
 export const validateEmail = (value: string, fieldName: string) => {
@@ -29,7 +20,7 @@ export const validateAppId = (value: string, fieldName: string) => {
 }
 
 export const genericValidation = (value: string, fieldName: string) => {
-  return (value && AddressUtils.isValid(value)) || t("Invalid {{fieldName}}", { fieldName })
+  return !!value || t("Invalid {{fieldName}}", { fieldName })
 }
 
 export const validateMilestoneAmount = (value: number, grantType: string) => {

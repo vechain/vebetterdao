@@ -1,32 +1,62 @@
 import { useProposalClaimableUserDeposits } from "@/api"
-import { JoinCommunity } from "@/components"
-import { VStack, Box, Spinner, Text, useDisclosure, Card, Grid } from "@chakra-ui/react"
-import { useCallback } from "react"
-import { useTranslation } from "react-i18next"
-import { RequirementModal, ClaimDeposits, CreateProposalCard, NoProposalsCard, ProposalFilters } from "./components"
-import { useWallet, useWalletModal } from "@vechain/vechain-kit"
-import { useFilteredProposals } from "../hooks/useFilteredProposals"
-import { useProposalFilters } from "@/store"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
-import { ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { useProposalEnriched } from "@/hooks/proposals/common"
 import { GrantsProposalCard } from "@/app/grants/components"
+import { JoinCommunity, MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import { useBreakpoints, useDebounce } from "@/hooks"
+import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store"
+import { AnalyticsUtils } from "@/utils"
+import {
+  Grid,
+  Card,
+  Box,
+  Button,
+  createListCollection,
+  HStack,
+  Spinner,
+  Text,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useFilteredProposals } from "../hooks/useFilteredProposals"
+import { ClaimDeposits, CreateProposalCard, NoProposalsCard, RequirementModal } from "./components"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()
   const { t } = useTranslation()
   const { open: isRequirementModalOpen, onOpen: openRequirementModal, onClose: closeRequirementModal } = useDisclosure()
-  const { selectedFilter } = useProposalFilters()
-  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] } } = useProposalEnriched()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter, enrichedStandardProposals)
+  const { data: { enrichedStandardProposals } = { enrichedStandardProposals: [] }, isLoading } = useProposalEnriched()
   const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
-
   const { hasMetProposalCriteria } = useMetProposalCriteria()
+  const { selectedFilter, setSelectedFilter } = useProposalFilters()
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+  const searchedProposals = useProposalSearch(enrichedStandardProposals, debouncedSearchTerm)
+  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as ProposalEnriched[])
+
+  const filterOptions = useMemo(() => {
+    return createListCollection({
+      items: [
+        { label: t("Approval phase"), value: ProposalFilter.ApprovalPhase },
+        { label: t("Support phase"), value: ProposalFilter.SupportPhase },
+        { label: t("Completed"), value: ProposalFilter.StandardProposalCompleted },
+        { label: t("Cancelled"), value: ProposalFilter.FailedStates },
+      ],
+    })
+  }, [t])
+
+  const { isMobile } = useBreakpoints()
+
   const onNewClick = useCallback(() => {
     if (!account?.address) {
       open()
@@ -61,9 +91,15 @@ export const ProposalsPageContent = () => {
             flexDirection="row"
             alignItems="flex-start"
             justifyContent="space-between">
-            <Card.Title textStyle={{ base: "2xl", md: "3xl" }}> {t("Proposals")}</Card.Title>
+            <Card.Title textStyle={{ base: "2xl", md: "3xl" }} fontWeight="bold">
+              {t("Proposals")}
+            </Card.Title>
 
-            <ProposalFilters />
+            {filteredProposals.length > 0 && (
+              <Button hideFrom="md" onClick={onNewClick} variant={"primary"}>
+                {t("Create proposal")}
+              </Button>
+            )}
           </Card.Header>
           <Card.Body>
             <VStack
@@ -72,6 +108,35 @@ export const ProposalsPageContent = () => {
               alignSelf={"flex-start"}
               gap={4}
               w={{ base: "full", md: undefined }}>
+              <HStack w="full" gap={4}>
+                <SearchField
+                  inputProps={{ minW: "200px", flex: 1 }}
+                  placeholder={t("Search by proposal name")}
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  disabled={!enrichedStandardProposals?.length}
+                />
+
+                {isMobile ? (
+                  <MobileFilterDrawer
+                    options={filterOptions}
+                    selectedValues={selectedFilter}
+                    onApply={setSelectedFilter}
+                    placeholder={t("Filter statuses")}
+                  />
+                ) : (
+                  <SelectField
+                    w="25%"
+                    placeholder={t("Status")}
+                    options={filterOptions}
+                    defaultValue={[]}
+                    showReset
+                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                    isMultiOption
+                  />
+                )}
+              </HStack>
+
               {filteredProposals.map(proposal => (
                 <GrantsProposalCard
                   key={proposal.id}

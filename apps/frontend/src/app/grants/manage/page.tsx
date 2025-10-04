@@ -86,8 +86,8 @@ export default function GrantsNew() {
             )
           ) : (
             <EmptyState title={t("No grants proposal found")}>
-              <Button variant="primary" size="md">
-                {t("Apply for grant")}
+              <Button asChild variant="primary" size="md">
+                <Link href="/grants/new">{t("Apply for grant")}</Link>
               </Button>
             </EmptyState>
           )}

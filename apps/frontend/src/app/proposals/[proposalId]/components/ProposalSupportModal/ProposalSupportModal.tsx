@@ -11,9 +11,9 @@ import { Button, Heading, HStack, Icon, Image, Input, InputGroup, Text, VStack }
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
 import { ethers } from "ethers"
+import { Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FiBarChart2 } from "react-icons/fi"
 
 type Props = {
   isSupportModalOpen: boolean
@@ -189,7 +189,7 @@ export const ProposalSupportModal = ({
         </VStack>
         {/* Results Header */}
         <HStack>
-          <Icon as={FiBarChart2} boxSize={5} />
+          <Icon as={Reports} boxSize={5} />
           <Heading size="md">{t("Results")}</Heading>
         </HStack>
 

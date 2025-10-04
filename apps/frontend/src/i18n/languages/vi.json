@@ -1989,5 +1989,7 @@
   "Cancel {{proposalType}}": "Hủy {{proposalType}}",
   "Are you sure you want to cancel this {{proposalType}}": "Bạn có chắc chắn muốn hủy {{proposalType}} này không",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Nếu bạn hủy bây giờ, khoản tài trợ của bạn sẽ bị loại bỏ và sẽ không xuất hiện trong vòng bỏ phiếu tiếp theo. Sau khi vòng bắt đầu, sẽ không thể hủy bỏ.",
-  "Showing": "Hiển thị"
+  "Showing": "Hiển thị",
+  "Search by proposal name": "Tìm kiếm theo tên đề xuất",
+  "Created": "Đã tạo"
 }

@@ -1,0 +1,26 @@
+import { useMetProposalCriteria } from "@/api/contracts/governance"
+import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
+
+/**
+ * This hook is used to guard the grants page.
+ * It checks if the user has the required data to access the page.
+ * If the user does not have the required data, it redirects the user to the grants page.
+ */
+export const useNewGrantPageGuard = () => {
+  const { account } = useWallet()
+  const { hasMetProposalCriteria, isLoading } = useMetProposalCriteria()
+
+  const isVisitAuthorized = useMemo(() => {
+    if (isLoading) return true // Allow visit while loading
+    if (!account?.address || !hasMetProposalCriteria) return false
+    return true
+  }, [account?.address, hasMetProposalCriteria, isLoading])
+
+  const redirectPath = useMemo(() => {
+    if (!account?.address || !hasMetProposalCriteria) return "/grants"
+    return "/grants/new"
+  }, [account?.address, hasMetProposalCriteria])
+
+  return { isVisitAuthorized, redirectPath, isLoading }
+}

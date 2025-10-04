@@ -1989,5 +1989,7 @@
   "Cancel {{proposalType}}": "{{proposalType}} रद्द करें",
   "Are you sure you want to cancel this {{proposalType}}": "क्या आप वाकई इस {{proposalType}} को रद्द करना चाहते हैं",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "यदि आप अभी रद्द करते हैं, तो आपका अनुदान हटाया जाएगा और अगली मतदान राउंड में प्रकट नहीं होगा। एक बार राउंड शुरू होने पर, रद्द करना संभव नहीं होगा।",
-  "Showing": "दिखा रहा है"
+  "Showing": "दिखा रहा है",
+  "Search by proposal name": "प्रस्ताव के नाम से खोजें",
+  "Created": "सृजित"
 }
