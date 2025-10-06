@@ -10,10 +10,11 @@ import { getTestKeys, SeedStrategy } from "../../../../../contracts/scripts/help
 import { castVoteOnBehalfOfMultiClauses, claimRewardForUser, configureAutoVoting } from "./methods/auto-voting"
 import { getOrCreateSeededAccounts } from "./seededAccounts"
 import { getAllEligibleApps, waitForRoundStart } from "../.."
+import { isRegisteredRelayer, registerRelayer } from "./methods/relayers"
 
-const NUM_VOTERS = 10
-const ACCT_OFFSET = 30
-const SEED_STRATEGY = SeedStrategy.RANDOM
+const ACCT_OFFSET = 5 // Leave the first 5 accounts for admin, relayers, etc.
+const NUM_VOTERS = 5
+const SEED_STRATEGY = SeedStrategy.FIXED // All seeded accounts have 500 VOT3
 
 const simulateRound = async () => {
   console.log("🚀 Starting round simulation for auto-voting: cast and claim rewards on behalf of users")
@@ -21,8 +22,17 @@ const simulateRound = async () => {
 
   const config = getConfig()
   const thorClient = ThorClient.at(config.nodeUrl)
-  const accounts = getTestKeys(NUM_VOTERS + 1)
-  const admin = accounts[0] // admin is also registered as a relayer
+  const accounts = getTestKeys(NUM_VOTERS + 1) // 5 voters + 1 admin
+  const defaultAdmin = accounts[0]
+  const relayer = accounts[1]
+
+  const isRegistered = await isRegisteredRelayer(thorClient, config, relayer)
+  if (!isRegistered) {
+    console.log("Relayer not registered, registering:", relayer.address.toString())
+    await registerRelayer(thorClient, config, relayer, defaultAdmin)
+  } else {
+    console.log("Relayer already registered: ", relayer.address.toString())
+  }
 
   const { accounts: seedAccounts, isGenerated } = await getOrCreateSeededAccounts(
     NUM_VOTERS,
@@ -37,7 +47,7 @@ const simulateRound = async () => {
   if (isGenerated) {
     console.log("⏳ Starting a new round (in order to snapshot voting power)")
     await waitForRoundStart(thorClient, config)
-    await distributeEmissions(config.emissionsContractAddress, admin)
+    await distributeEmissions(config.emissionsContractAddress, defaultAdmin)
   }
 
   const appIds = await getAllEligibleApps(thorClient, config)
@@ -49,9 +59,9 @@ const simulateRound = async () => {
   console.log("🤖 Phase 1: Configuring auto-voting")
   await configureAutoVoting(thorClient, config, NUM_VOTERS, seedAccounts, appIds)
 
-  console.log("🗳️  Phase 2: Starting a new round (in order to snapshot auto-voting status)")
+  console.log("🗳️  Phase 2: Starting a new round")
   await waitForRoundStart(thorClient, config)
-  await distributeEmissions(config.emissionsContractAddress, admin)
+  await distributeEmissions(config.emissionsContractAddress, defaultAdmin)
 
   const currentRoundId = await getCurrentRoundId(thorClient, config.xAllocationVotingContractAddress)
   console.log(`🎯 Round ID: ${currentRoundId}`)
@@ -63,7 +73,7 @@ const simulateRound = async () => {
       config,
       seedAccounts.map(sa => sa.key),
       parseInt(currentRoundId as string),
-      admin,
+      relayer,
     )
     console.log(`✅ Successfully cast votes for all ${seedAccounts.length} accounts`)
   } catch (error) {
@@ -73,11 +83,11 @@ const simulateRound = async () => {
 
   console.log(`Waiting for the ${currentRoundId} round to end...`)
   await waitForRoundStart(thorClient, config)
-  await distributeEmissions(config.emissionsContractAddress, admin)
+  await distributeEmissions(config.emissionsContractAddress, defaultAdmin)
 
   console.log(`🤖 Phase 4: Claiming rewards for ${seedAccounts.length} accounts...)`)
   for (const seedAccount of seedAccounts) {
-    await claimRewardForUser(thorClient, config, seedAccount.key, admin, parseInt(currentRoundId as string))
+    await claimRewardForUser(thorClient, config, seedAccount.key, relayer, parseInt(currentRoundId as string))
     console.log(`✅ Successfully claimed reward for ${seedAccount.key.address.toString()}`)
   }
 

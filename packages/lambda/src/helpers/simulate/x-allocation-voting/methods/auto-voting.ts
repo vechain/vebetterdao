@@ -25,7 +25,7 @@ export const toggleAutoVotingAndSelectApps = async (
     Clause.callFunction(
       Address.of(config.xAllocationVotingContractAddress),
       ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("toggleAutoVoting"),
-      [],
+      [account.address.toString()],
     ),
   )
 

@@ -16,7 +16,8 @@
     "simulate:local:x-allocation-voting-seeded-accounts": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/seededAccounts.ts",
     "simulate:local:x-allocation-voting": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateRoundCastVote.ts",
     "simulate:local:x-allocation-voting-on-behalf": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateRoundCastVoteOnBehalf.ts",
-    "simulate:local:x-allocation-voting-gas": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateGas.ts"
+    "simulate:local:x-allocation-voting-gas": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateGas.ts",
+    "simulate:local:x-allocation-voting-relayer-claim-rewards": "NEXT_PUBLIC_APP_ENV=local npx ts-node src/helpers/simulate/x-allocation-voting/simulateRelayerClaimRewards.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.556.0",

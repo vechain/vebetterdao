@@ -182,9 +182,9 @@ export const getOrCreateSeededAccounts = async (
 if (require.main === module) {
   const main = async () => {
     try {
-      const NUM_VOTERS = 10
-      const ACCT_OFFSET = 30
-      const SEED_STRATEGY = SeedStrategy.RANDOM
+      const NUM_VOTERS = 5
+      const ACCT_OFFSET = 5
+      const SEED_STRATEGY = SeedStrategy.FIXED
 
       await generateAndSaveSeededAccounts(NUM_VOTERS, ACCT_OFFSET, SEED_STRATEGY)
     } catch (error) {
