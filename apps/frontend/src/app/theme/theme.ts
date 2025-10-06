@@ -222,7 +222,7 @@ const config = defineConfig({
           blue: { value: { base: "{colors.blue.200}", _dark: "{colors.blue.900}" } },
           green: { value: { base: "#B1F16C", _dark: "#383F31" } },
           yellow: { value: { base: "#FFD979", _dark: "#54441A" } },
-          "dashboard-tokens": { value: { base: "{colors.blue.900}", _dark: "#0153F2" } },
+          "dashboard-tokens": { value: { base: "#0153F2", _dark: "{colors.blue.900}" } },
         },
         card: {
           default: { value: { base: "white", _dark: "{colors.gray.900}" } },

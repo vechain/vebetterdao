@@ -38,6 +38,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
       <Card.Root
         w="full"
         variant="subtle"
+        border="sm"
+        borderColor={isActive ? "border.active" : "border.secondary"}
         fill="icon.default"
         rounded="lg"
         data-testid={`round-card-#${roundId}`}
