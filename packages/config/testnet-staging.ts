@@ -77,6 +77,9 @@ const config: AppConfig = {
     passportSignalingLogicAddress: "0x68482ad6d4546bccd68862d345ef57facd2e02c6",
     passportWhitelistAndBlacklistLogicAddress: "0x45feba7af9219ad26967b2db82d6ef9297219881",
   },
+  xAllocationVotingLibraries: {
+    autoVotingLogicAddress: "0x0000000000000000000000000000000000000000",
+  },
   externalContractIntegrations: {
     vetDomainsContractAddress: "0xE27C72E252D5C3B2daf871aB7628F29370438589",
   },

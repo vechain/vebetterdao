@@ -30,6 +30,10 @@ type PassportLibraries = {
   passportWhitelistAndBlacklistLogicAddress: string
 }
 
+type XAllocationVotingLibraries = {
+  autoVotingLogicAddress: string
+}
+
 type ExternalContractIntegrations = {
   // Vet Domains Contract: https://docs.vet.domains/Developers/Contracts/Verification/#verified-contract
   vetDomainsContractAddress: string
@@ -59,6 +63,7 @@ export type AppConfig = {
   veBetterPassportContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   passportLibraries: PassportLibraries
+  xAllocationVotingLibraries: XAllocationVotingLibraries
   b3trMultiSigAddress?: string
   stargateNFTContractAddress: string
   grantsManagerContractAddress: string
