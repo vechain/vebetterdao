@@ -1,4 +1,3 @@
-export * from "./ProposalsFilters"
 export * from "./CreateProposalCard"
 export * from "./ClaimDeposits"
 export * from "./NoProposalsCard"
