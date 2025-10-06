@@ -81,12 +81,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
         {isClickable && (
           <Card.Footer p="0">
             <HStack gap="4" w="full" justifyContent={!isMobile ? "flex-start" : "center"}>
-              <Button
-                variant="ghost"
-                color="actions.tertiary.default"
-                w="7rem"
-                disabled={gm?.isSelected}
-                onClick={handleSelectGM}>
+              <Button variant="secondary" w="7rem" disabled={gm?.isSelected} onClick={handleSelectGM}>
                 {t(gm?.isSelected ? "Active" : "Activate")}
               </Button>
 

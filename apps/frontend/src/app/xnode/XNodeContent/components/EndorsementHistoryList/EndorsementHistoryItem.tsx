@@ -18,7 +18,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
   const eventTimestamp = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
 
   return (
-    <HStack>
+    <HStack gap="4">
       <Box position="relative">
         <Image src={logo?.image} alt="endorsed-app" w="12" h="12" rounded="xl" />
         <Box position="absolute" bottom="-6px" right="-6px" bg="white" rounded="full" zIndex={1}>

@@ -1,4 +1,4 @@
-import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
+import { Card, VStack, Heading, Text, Button, useDisclosure, HStack, Stack, Icon } from "@chakra-ui/react"
 import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
@@ -34,7 +34,7 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
-            <Heading textStyle="lg">{t("Node Management")}</Heading>
+            <Heading textStyle="xl">{t("Node Management")}</Heading>
             {isXNodeDelegated ? (
               <Text textStyle="sm">
                 {isXNodeDelegator ? t("Node is currently managed by:") : t("Node managed for:")}
@@ -60,8 +60,8 @@ export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
               onRevoke={revokeModal.onOpen}
             />
           ) : (
-            <Button variant="ghost" color="actions.tertiary.default" onClick={delegateModal.onOpen}>
-              <UilArrowUpRight color="#004CFC" />
+            <Button ml="auto" maxW="fit-content" variant="secondary" onClick={delegateModal.onOpen}>
+              <Icon as={UilArrowUpRight} color="actions.secondary.text" />
               {t("Add node manager")}
             </Button>
           )}

@@ -9,7 +9,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
   const { image: xNodeImage, name: xNodeName, nodeType, xNodePoints, isXNodeDelegator, isXNodeDelegatee } = xNode
 
   return (
-    <Card.Root>
+    <Card.Root variant="primary" p="0">
       <Image
         src={"/assets/backgrounds/xnode-page-background.webp"}
         alt="gm-nft-header"
@@ -45,7 +45,7 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
               {nodeType}
             </Text>
 
-            <Text fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
+            <Text color="white" fontWeight="bold" lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
               {xNodeName}
             </Text>
 
@@ -56,10 +56,10 @@ export const XNodePageHeader = ({ xNode }: { xNode: UserNode }) => {
                 </HStack>
               )}
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
+                <Text color="white" textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
                   {xNodePoints}
                 </Text>
-                <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
+                <Text color="white" textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
                   {t("points to endorse")}
                 </Text>
               </HStack>

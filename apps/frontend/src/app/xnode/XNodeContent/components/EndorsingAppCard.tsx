@@ -25,6 +25,7 @@ import {
   useBreakpointValue,
   useDisclosure,
   VStack,
+  Icon,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
@@ -80,8 +81,8 @@ export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading textStyle="lg">{t("Endorsed app")}</Heading>
-              {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
+              <Heading textStyle="xl">{t("Endorsed app")}</Heading>
+              {!isEndorsingApp && <Icon as={UilInfoCircle} color="actions.tertiary.default" />}
             </HStack>
             {!isEndorsingApp && (
               <Text textStyle="sm">
