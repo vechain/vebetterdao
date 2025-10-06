@@ -63,7 +63,8 @@ export const StepModal = <T extends string>({
         p: 0,
       }}
       showCloseButton={false}
-      isCloseable={true}>
+      isCloseable={true}
+      modalProps={{ closeOnInteractOutside: false }}>
       <Flex position="relative" h="60px" alignItems="center">
         {!isFirstStep && !disableBackButton ? (
           <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>

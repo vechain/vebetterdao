@@ -23,7 +23,7 @@ export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
   }, [isB3TR])
 
   const bgColor = useMemo(() => {
-    return isB3TR ? "b3tr-balance-bg" : "vot3-balance-bg"
+    return isB3TR ? "banner.blue" : "banner.green"
   }, [isB3TR])
 
   return (

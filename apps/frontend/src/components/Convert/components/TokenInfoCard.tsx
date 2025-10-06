@@ -12,7 +12,7 @@ type Props = {
 export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }) => {
   const { t } = useTranslation()
   const bgColor = useMemo(() => {
-    return isB3TRToVOT3 ? "rgba(177, 241, 108, 1)" : "rgba(12, 37, 88, 1)"
+    return isB3TRToVOT3 ? "banner.green" : "banner.blue"
   }, [isB3TRToVOT3])
 
   const title = useMemo(() => {
@@ -32,10 +32,6 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       </Text>
     )
   }, [isB3TRToVOT3, t])
-
-  const color = useMemo(() => {
-    return isB3TRToVOT3 ? "#252525" : "#ffffff"
-  }, [isB3TRToVOT3])
 
   const buttonText = useMemo(() => {
     return isB3TRToVOT3 ? t("Get VOT3") : t("Get B3TR")
@@ -63,7 +59,6 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       gap={{ base: 2, md: 5 }}
       maxW={"360px"}
       h={"full"}
-      color={color}
       borderRadius={"8px"}>
       {isB3TRToVOT3 ? (
         <Image src="/assets/tokens/b3tr-to-vot3.webp" alt="B3TR to VOT3" h={{ base: "50px", md: "87px" }} w="auto" />
