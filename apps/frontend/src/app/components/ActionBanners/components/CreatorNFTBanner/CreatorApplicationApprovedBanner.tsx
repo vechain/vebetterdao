@@ -26,20 +26,4 @@ export const CreatorApplicationApprovedBanner = () => {
       }
     />
   )
-
-  // return (
-  //   <GenericBanner
-  //     title={title}
-  //     titleColor="#3A5798"
-  //     description={description}
-  //     descriptionColor="#0C2D75"
-  //     logoSrc="/assets/images/creator-nft.webp"
-  //     backgroundColor="#C8DDFF"
-  //     backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
-  //     buttonLabel={doAction}
-  //     onButtonClick={navigateToSubmitAppForm}
-  //     buttonvariant="primary"
-  //     buttonIcon={<UilArrowRight />}
-  //   />
-  // )
 }
