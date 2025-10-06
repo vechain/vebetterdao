@@ -123,6 +123,7 @@ export const AllApps = ({
         {headingComponent && <Box flexShrink={0}>{headingComponent}</Box>}
         <HStack w="full" flexDir="row-reverse" gap={4} ml={headingComponent ? "auto" : 0}>
           <HStack gap={2}>
+            <SortingMenu sortOption={sortOption} onSortChange={onSortChange} />
             <FilteringMenu
               selectedCategories={selectedCategories}
               statusFilter={statusFilter}
@@ -131,7 +132,6 @@ export const AllApps = ({
               onCategoryChange={handleCategoryChange}
               onStatusFilterChange={setStatusFilter}
             />
-            <SortingMenu sortOption={sortOption} onSortChange={onSortChange} />
           </HStack>
           <InputGroup
             w={headingComponent ? "300px" : "full"}
@@ -142,8 +142,11 @@ export const AllApps = ({
             inputMode="search">
             <Input
               h={12}
+              bg="bg.primary"
+              border="sm"
+              borderColor="border.primary"
               variant="outline"
-              rounded="0.5rem"
+              borderRadius="xl"
               placeholder="Search apps..."
               _placeholder={{ color: "text.subtle" }}
               value={searchQuery}

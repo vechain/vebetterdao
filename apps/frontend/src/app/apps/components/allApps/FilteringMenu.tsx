@@ -26,7 +26,14 @@ export const FilteringMenu = ({
   return (
     <Menu.Root closeOnSelect={false} positioning={{ placement: "bottom" }} lazyMount>
       <Menu.Trigger>
-        <IconButton size="xl" rounded="full" aria-label={t("Filters")} variant="outline">
+        <IconButton
+          size="xl"
+          rounded="full"
+          aria-label={t("Filters")}
+          variant="outline"
+          bgColor="bg.primary"
+          border="sm"
+          borderColor="border.primary">
           <UilFilter />
         </IconButton>
 

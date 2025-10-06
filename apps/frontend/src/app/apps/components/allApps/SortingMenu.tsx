@@ -14,7 +14,15 @@ export const SortingMenu = ({ sortOption, onSortChange }: Props) => {
   return (
     <Menu.Root closeOnSelect={true} positioning={{ placement: "bottom-end" }}>
       <Menu.Trigger asChild>
-        <IconButton variant="outline" rounded="full" aria-label={t("Sort by")} borderRadius={"24px"} size="xl">
+        <IconButton
+          variant="outline"
+          rounded="full"
+          aria-label={t("Sort by")}
+          borderRadius={"24px"}
+          size="xl"
+          bgColor="bg.primary"
+          border="sm"
+          borderColor="border.primary">
           <UilSortAmountDown />
         </IconButton>
       </Menu.Trigger>
