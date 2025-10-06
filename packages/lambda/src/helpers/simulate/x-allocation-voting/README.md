@@ -6,7 +6,7 @@ This directory contains simulation tools for testing the X-Allocation Voting sys
 
 ## Overview
 
-The simulation tools provide comprehensive testing capabilities for:
+The simulation tools provide testing for:
 
 - **Auto-voting configuration and execution**
 - **Relayer registration and reward claiming**
@@ -16,10 +16,13 @@ The simulation tools provide comprehensive testing capabilities for:
 
 ## Usage Examples
 
-### Basic Auto-voting Simulation
+### Auto-voting Simulation
 
 ```bash
-# cd packages/lambda
+# Navigate to
+cd packages/lambda
+
+# Run
 yarn simulate:local:x-allocation-voting-on-behalf
 ```
 
@@ -36,6 +39,7 @@ START: Auto-Voting Round Simulation
 │
 ├─ Setup Voter Accounts
 │   ├─ Get/create 5 seeded accounts (500 VOT3 each)
+│   ├─ Store voter information in seededAccounts.json
 │   └─ If newly generated accounts:
 │       ├─ Start new round (snapshot voting power)
 │       └─ Distribute emissions
@@ -174,6 +178,9 @@ Relayer management functions:
 
 - `registerRelayer()`: Register a new relayer
 - `isRegisteredRelayer()`: Check relayer registration status
+- `isRoundRewardsClaimableForRelayer()`: Check if round rewards are claimable for a relayer
+- `rewardsClaimableForRelayer()`: Get the amount of claimable rewards for a relayer in a specific round
+- `claimRewardForRelayer()`: Claim rewards for a relayer for a specific round
 
 ### 🧪 Additional Simulation Scripts
 
