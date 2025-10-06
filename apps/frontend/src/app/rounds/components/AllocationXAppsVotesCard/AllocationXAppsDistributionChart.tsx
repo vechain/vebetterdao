@@ -8,7 +8,6 @@ import {
 } from "@/api"
 import { B3TRIcon, DotSymbol } from "@/components"
 import { VStack, Heading, Text, Box, Skeleton, Stack, HStack } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -58,29 +57,24 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
     }
   }, [totalBaseAmount, totalEarningsWithoutBase, totalDistributed])
 
-  const votingRewardsColor = useColorModeValue("#225EED", "#225EED")
-  const appsColor = useColorModeValue("#5FA5F9", "#5FA5F9")
-
   const baseAmountsInfo = useMemo(() => {
     return [
       {
         amount: totalBaseAmount,
         isLoading: baseAmountLoading || xAppsLoading,
         percentage: baseAmountsPercentage.baseAmount,
-        color: votingRewardsColor,
+        color: "status.info.primary",
         label: "base allocation",
       },
       {
         amount: totalEarningsWithoutBase,
         isLoading: baseAmountLoading || forecastedEarningsQuery.isLoading,
         percentage: baseAmountsPercentage.votesAmount,
-        color: appsColor,
+        color: "graph.4",
         label: "votes allocation",
       },
     ]
   }, [
-    appsColor,
-    votingRewardsColor,
     baseAmountLoading,
     xAppsLoading,
     totalBaseAmount,

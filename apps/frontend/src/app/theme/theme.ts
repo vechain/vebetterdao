@@ -160,6 +160,17 @@ const config = defineConfig({
 
     semanticTokens: {
       colors: {
+        // for the places use "colorPalette"
+        blue: {
+          contrast: { value: { _light: "white", _dark: "white" } },
+          fg: { value: { _light: "{colors.blue.700}", _dark: "{colors.blue.300}" } },
+          subtle: { value: { _light: "{colors.blue.100}", _dark: "{colors.blue.900}" } },
+          muted: { value: { _light: "{colors.blue.200}", _dark: "{colors.blue.800}" } },
+          emphasized: { value: { _light: "{colors.blue.300}", _dark: "{colors.blue.700}" } },
+          solid: { value: { _light: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+          focusRing: { value: { _light: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
+        },
+
         brand: {
           primary: { value: { base: "{colors.blue.600}", _dark: "white" } },
           secondary: { value: { base: "#B1F16C", _dark: "#B4EA82" } },
@@ -211,7 +222,7 @@ const config = defineConfig({
           blue: { value: { base: "{colors.blue.200}", _dark: "{colors.blue.900}" } },
           green: { value: { base: "#B1F16C", _dark: "#383F31" } },
           yellow: { value: { base: "#FFD979", _dark: "#54441A" } },
-          "dashboard-tokens": { value: { base: "#0153F2", _dark: "#0153F2" } },
+          "dashboard-tokens": { value: { base: "{colors.blue.900}", _dark: "#0153F2" } },
         },
         card: {
           default: { value: { base: "white", _dark: "{colors.gray.900}" } },

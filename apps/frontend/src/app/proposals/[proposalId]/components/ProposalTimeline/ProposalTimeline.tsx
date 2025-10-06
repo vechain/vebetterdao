@@ -265,7 +265,7 @@ export const ProposalTimeline = ({ proposal }: Props) => {
           w="full"
           step={currentStep}
           colorPalette={invalidState ? "red" : "blue"}
-          variant="primaryVertical">
+          variant="primary">
           <Steps.List>
             {timelineSteps.map((step, index) => (
               <Steps.Item key={`timeline-step-${step.state}`} index={index} minH={20}>

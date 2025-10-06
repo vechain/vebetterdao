@@ -1,7 +1,7 @@
 import { useProposalClaimableUserDeposits } from "@/api"
 import { useMetProposalCriteria } from "@/api/contracts/governance"
 import { GrantsProposalCard } from "@/app/grants/components"
-import { JoinCommunity, MobileFilterDrawer, SearchField, SelectField } from "@/components"
+import { MobileFilterDrawer, SearchField, SelectField } from "@/components"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { useBreakpoints, useDebounce } from "@/hooks"
 import { useProposalEnriched, useProposalSearch } from "@/hooks/proposals/common"
@@ -167,12 +167,10 @@ export const ProposalsPageContent = () => {
             <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
           )}
           {filteredProposals.length > 0 && <CreateProposalCard />}
-          <JoinCommunity />
         </VStack>
 
         <VStack hideFrom="md" mt={2} w={"full"}>
           {filteredProposals.length > 0 && <CreateProposalCard />}
-          <JoinCommunity />
         </VStack>
         <RequirementModal
           isOpen={isRequirementModalOpen}

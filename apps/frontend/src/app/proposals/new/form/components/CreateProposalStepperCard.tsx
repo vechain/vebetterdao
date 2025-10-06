@@ -70,7 +70,7 @@ export const CreateProposalStepperCard = () => {
       </Card.Header>
       <Card.Body pt={4}>
         <Steps.Root
-          variant={"primaryVertical"}
+          variant={"primary"}
           size="xs"
           step={step}
           onStepChange={e => setStep(e.step)}

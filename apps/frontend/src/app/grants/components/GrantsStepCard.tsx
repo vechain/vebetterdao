@@ -179,7 +179,7 @@ export const GrantsStepsCard = ({
                     {currentStep.listItems.length > 0 ? (
                       <List.Root pl={2} textStyle="sm" listStyle="disc">
                         {currentStep?.listItems?.map(item => (
-                          <List.Item key={item} fontWeight="semibold" color="text.subtle">
+                          <List.Item key={item} color="text.subtle">
                             {item}
                           </List.Item>
                         ))}

@@ -35,7 +35,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
     return (
       <Flex
         borderRadius={"lg"}
-        bg="#004CFC"
+        bg="actions.tertiary.default"
         w={"100%"}
         align="center"
         justify="center"
@@ -85,7 +85,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
             </Text>
             <FaChevronRight size={16} />
           </HStack>
-          <Text textStyle="sm" color={"#6A6A6A"}>
+          <Text textStyle="sm" color="text.subtle">
             {t("View profile")}
           </Text>
         </VStack>

@@ -64,20 +64,25 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
       <Card.Body>
         <VStack gap={12} align={"flex-start"} w="full">
           {roundInfo.state === 1 && (
-            <Alert.Root status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
+            <Alert.Root
+              status="error"
+              borderRadius="16px"
+              border="sm"
+              borderColor="status.negative.primary"
+              bg="status.negative.subtle">
               <Alert.Indicator>
                 <UilInfoCircle size={"36px"} color="#D23F63" />
               </Alert.Indicator>
               <Alert.Content>
                 <Alert.Title
-                  color="#D23F63"
+                  color="status.negative.primary"
                   ml={2}
                   textStyle="md"
                   fontWeight="semibold"
                   data-testid={"round-error-msg"}>
                   {t("Quorum was not reached for this round")}
                 </Alert.Title>
-                <Alert.Description color="#D23F63" ml={2} textStyle="md">
+                <Alert.Description color="status.negative.primary" ml={2} textStyle="md">
                   {t("B3TR allocation will be distributed according to the votes of the previous round")}
                 </Alert.Description>
               </Alert.Content>

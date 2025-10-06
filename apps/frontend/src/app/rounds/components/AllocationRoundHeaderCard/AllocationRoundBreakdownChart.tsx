@@ -4,18 +4,14 @@ import { VStack, HStack, Heading, Text, Box, Card, Skeleton, useMediaQuery } fro
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useColorMode } from "@/components/ui/color-mode"
 
 const compactFormatter = getCompactFormatter(2)
 
-type Props = {
-  roundId: string
-}
+type Props = { roundId: string }
 
 export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
-  const { colorMode } = useColorMode()
 
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
 
@@ -38,39 +34,34 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     }
   }, [totalDistributed, roundAmount])
 
-  const treasuryColor = colorMode === "light" ? "#203A87" : "#203A87"
-  const votingRewardsColor = colorMode === "light" ? "#225EED" : "#225EED"
-  const appsColor = colorMode === "light" ? "#5FA5F9" : "#5FA5F9"
-  const gmColor = colorMode === "light" ? "#4A6FA5" : "#4A6FA5"
-
   const baseAmountsInfo = useMemo(() => {
     return [
       {
         amount: roundAmount?.treasury,
         percentage: baseAmountsPercentage.treasury,
-        color: treasuryColor,
+        color: "graph.1",
         label: t("treasury"),
       },
       {
         amount: roundAmount?.voteXAllocations,
         percentage: baseAmountsPercentage.voteXAllocations, // goes to Apps
-        color: votingRewardsColor,
+        color: "graph.2",
         label: t("app rewards"),
       },
       {
         amount: roundAmount?.voteX2Earn,
         percentage: baseAmountsPercentage.voteX2Earn, // goes to users voting on x2earn apps
-        color: appsColor,
+        color: "graph.3",
         label: t("voting rewards"),
       },
       {
         amount: roundAmount?.gm,
         percentage: baseAmountsPercentage.gm,
-        color: gmColor,
+        color: "graph.4",
         label: t("gm rewards"),
       },
     ]
-  }, [baseAmountsPercentage, roundAmount, treasuryColor, votingRewardsColor, appsColor, gmColor, t])
+  }, [baseAmountsPercentage, roundAmount, t])
 
   const Wrapper = useCallback(
     ({ children }: { children: React.ReactNode }) => {

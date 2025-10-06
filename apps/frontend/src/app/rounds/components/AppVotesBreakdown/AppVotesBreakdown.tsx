@@ -131,7 +131,7 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
               <Skeleton loading={vote.isRest ? false : logoLoading}>
                 {vote.isRest ? (
                   <Flex boxSize={"32px"} borderRadius="9px" bg="gray.100" justify={"center"} align={"center"}>
-                    <Text textStyle="md" fontWeight="semibold" data-testid="app-rest-vote">
+                    <Text color="black" textStyle="md" fontWeight="semibold" data-testid="app-rest-vote">
                       {t("+{{value}}", { value: vote.restNumber })}
                     </Text>
                   </Flex>

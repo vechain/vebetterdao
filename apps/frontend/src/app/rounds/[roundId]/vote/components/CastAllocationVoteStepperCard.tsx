@@ -50,7 +50,7 @@ export const CastAllocationVoteStepperCard = () => {
           onStepChange={e => setStep(e.step)}
           count={steps.length}
           orientation={isDesktop ? "vertical" : "horizontal"}
-          variant="primaryVertical"
+          variant="primary"
           gap={0}
           height={isDesktop ? height : "auto"}>
           <Steps.List>

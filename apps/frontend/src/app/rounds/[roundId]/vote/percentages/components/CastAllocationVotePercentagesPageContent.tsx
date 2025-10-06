@@ -189,7 +189,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
                 />
               </Text>
             ) : (
-              <Text textStyle={"md"} color={isFullyDistributed ? "#3DBA67" : "#252525"}>
+              <Text textStyle={"md"} color={isFullyDistributed ? "status.positive.primary" : "text.subtle"}>
                 <Trans
                   i18nKey={"{{amount}}% distributed"}
                   values={{ amount: percentageDistributed.toFixed(2) }}

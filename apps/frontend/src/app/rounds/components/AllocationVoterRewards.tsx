@@ -1,5 +1,5 @@
 import { useAllocationsRound, useAllocationsRoundState, useRoundReward } from "@/api"
-import { Box, Button, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
@@ -8,6 +8,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { Gift } from "iconoir-react"
 
 type Props = {
   roundId: string
@@ -142,7 +143,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       overflow={"clip"}>
       <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
       <VStack alignItems={"flex-start"}>
-        <Image src="/assets/icons/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
+        <Icon as={Gift} boxSize="16" color="icon.default" />
         <Text textStyle="2xl" fontWeight="bold">
           {t("Voting rewards")}
         </Text>
@@ -156,12 +157,10 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           loading={isRoundRewardLoading}
           onClick={handleClaim}
           variant={"primary"}
-          borderRadius={"full"}
           w={"full"}
-          bg={canClaim ? "primary" : "#abb0b0"}
-          color={canClaim ? "white" : "black"}>
-          {!isFinished ? <FaRegClock /> : undefined}
-          <Text textStyle={{ base: "sm", md: "md" }}>{buttonText}</Text>
+          textStyle={{ base: "sm", md: "md" }}>
+          {!isFinished ? <Icon as={FaRegClock} color="icon.default" /> : undefined}
+          {buttonText}
         </Button>
       </VStack>
     </Box>

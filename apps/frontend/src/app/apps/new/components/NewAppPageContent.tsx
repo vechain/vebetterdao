@@ -1,4 +1,3 @@
-import { JoinCommunity } from "@/components"
 import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -77,9 +76,6 @@ export const NewAppPageContent = () => {
             </VStack>
           </Card.Body>
         </Card.Root>
-      </GridItem>
-      <GridItem colSpan={1}>
-        <JoinCommunity />
       </GridItem>
     </Grid>
   )

@@ -60,6 +60,7 @@ Props) => {
     return appVoteResult?.[0]?.voters
   }, [roundAppVotes, data.app])
 
+  // TODO: color mode
   const baseProgressColor = "rgba(208, 248, 164, 1)"
   const trackProgressColor = "rgba(154, 222, 78, 1)"
 
@@ -91,7 +92,7 @@ Props) => {
               <Heading
                 size="md"
                 fontWeight="semibold"
-                color="#6DCB09"
+                color="status.positive.primary"
                 data-testid={`${appMetadata?.name}-votes-percentage`}>
                 {t("{{percentage}}%", {
                   percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
@@ -138,7 +139,7 @@ Props) => {
           />
         </Box>
         {showMaxAllocation && (
-          <Text color={"#3DBA67"} textStyle={["xs", "sm"]} fontWeight="semibold" alignSelf={"flex-end"}>
+          <Text color={"status.positive.primary"} textStyle={["xs", "sm"]} fontWeight="semibold" alignSelf={"flex-end"}>
             {t("Max allocation reached!")}
           </Text>
         )}

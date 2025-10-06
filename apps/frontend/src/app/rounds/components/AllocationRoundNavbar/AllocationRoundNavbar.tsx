@@ -43,7 +43,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     router.push(`/rounds/${nextRound}`)
   }
 
-  const bgColor = data.state === 0 ? "banner.green" : "gray.200"
+  const bgColor = data.state === 0 ? "banner.green" : "bg.primary"
 
   // State to store the client width
   const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
@@ -83,13 +83,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
           px={20}>
           <Button
             data-testid="prev-round-button"
-            color="actions.tertiary.default"
+            color="icon.default"
             size="sm"
             variant={"plain"}
             aria-label="Go to previous round"
             disabled={prevButtonDisabled}
             onClick={goToPreviousRound}>
-            <FaArrowLeft />
+            <Icon as={FaArrowLeft} color="icon.default" />
             {t("Previous round")}
           </Button>
 
@@ -113,12 +113,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             data-testid="next-round-button"
             variant={"plain"}
             size="sm"
-            color="actions.tertiary.default"
+            color="icon.default"
             aria-label="Go to next round"
             disabled={nextButtonDisabled}
             onClick={goToNextRound}>
             {t("Next round")}
-            <FaArrowRight />
+
+            <Icon as={FaArrowRight} color="icon.default" />
           </Button>
         </Container>
       </HStack>
@@ -136,7 +137,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       data-testid={`allocation-round-${roundId}-nav-mobile`}>
       <IconButton
         data-testid="prev-round-button"
-        color="actions.tertiary.default"
+        color="icon.default"
         variant={"ghost"}
         disabled={prevButtonDisabled}
         onClick={goToPreviousRound}
@@ -146,7 +147,9 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       <VStack w="full">
         <HStack gap={4}>
           <Skeleton loading={isLoading}>
-            <Heading size="xl">{t("Round #{{round}}", { round: data?.roundId ?? 0 })}</Heading>
+            <Heading size="xl" color="text.default">
+              {t("Round #{{round}}", { round: data?.roundId ?? 0 })}
+            </Heading>
           </Skeleton>
           <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
         </HStack>
@@ -163,7 +166,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
       </VStack>
       <IconButton
         data-testid="next-round-button"
-        color="actions.tertiary.default"
+        color="icon.default"
         variant={"ghost"}
         aria-label="Go to next round"
         onClick={goToNextRound}

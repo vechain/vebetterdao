@@ -90,11 +90,10 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
       step={step}
       count={steps.length}
       orientation="vertical"
-      colorPalette="primary"
       gap="0"
       height="200px"
       mt={4}
-      variant="primaryVertical">
+      variant="primary">
       <Steps.List>
         {steps.map((step, index) => (
           <Steps.Item key={`allocation-round-session-step-${uuid()}`} index={index}>

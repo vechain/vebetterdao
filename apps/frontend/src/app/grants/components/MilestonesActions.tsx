@@ -122,7 +122,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         h="full"
         step={currentStep}
         colorPalette="blue"
-        variant="primaryVertical"
+        variant="primary"
         pt={{ base: "0", md: "40px" }}>
         <Steps.List flex={1}>
           <Accordion.Root

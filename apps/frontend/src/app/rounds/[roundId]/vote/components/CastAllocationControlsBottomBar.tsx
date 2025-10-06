@@ -25,7 +25,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         left={0}
         py={"16px"}
         px={"20px"}
-        bg="profile-bg"
+        bg="bg.primary"
         zIndex={2}
         boxShadow={"0px -8px 16px 0px #00000014"}>
         {helperText}
@@ -34,24 +34,11 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
           justify={["space-between", "space-between", "flex-end"]}
           gap={4}
           w={["full", "full", "auto"]}>
-          <Button
-            borderRadius={"16px"}
-            flex={1}
-            size="lg"
-            data-testid="go-back"
-            variant="ghost"
-            color="actions.tertiary.default"
-            onClick={router.back}>
+          <Button flex={1} size="lg" data-testid="go-back" variant="secondary" onClick={router.back}>
             <UilArrowLeft />
             {t("Go back")}
           </Button>
-          <Button
-            flex={1}
-            borderRadius={"16px"}
-            size="lg"
-            data-testid="continue"
-            variant="primary"
-            onClick={onContinue}>
+          <Button flex={1} size="lg" data-testid="continue" variant="primary" onClick={onContinue}>
             {t("Continue")}
             <UilArrowRight />
           </Button>
