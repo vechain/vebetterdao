@@ -15,7 +15,7 @@ import {
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
-import { IconButton } from "@chakra-ui/react"
+import { IconButton, Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -237,39 +237,41 @@ export const ActionBanner = () => {
   if (slides.length === 0) return null
 
   return (
-    <Swiper
-      modules={[A11y, Navigation]}
-      spaceBetween={20} // Space between slides
-      slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
-      navigation={{
-        nextEl: ".custom-swiper-button-next",
-        prevEl: ".custom-swiper-button-prev",
-      }}
-      pagination={{ clickable: true }}
-      scrollbar={{ draggable: true }}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        display: "flex",
-      }}>
-      {slides.map(slide => (
-        <SwiperSlide
-          key={`slide-${slide?.key}`}
-          className="slide"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-            position: "relative",
-            overflow: "hidden",
-          }}>
-          {slide}
-        </SwiperSlide>
-      ))}
+    <Box position="relative">
+      <Swiper
+        modules={[A11y, Navigation]}
+        spaceBetween={20} // Space between slides
+        slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
+        navigation={{
+          nextEl: ".custom-swiper-button-next",
+          prevEl: ".custom-swiper-button-prev",
+        }}
+        pagination={{ clickable: true }}
+        scrollbar={{ draggable: true }}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+          display: "flex",
+        }}>
+        {slides.map(slide => (
+          <SwiperSlide
+            key={`slide-${slide?.key}`}
+            className="slide"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "100%",
+              position: "relative",
+              overflow: "hidden",
+            }}>
+            {slide}
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
       <IconButton
         className="custom-swiper-button-prev"
@@ -278,9 +280,9 @@ export const ActionBanner = () => {
         zIndex={2} // Ensure it's above the slides
         variant="subtle"
         color="actions.tertiary.default"
-        left={5}
+        left={0}
         top={"50%"}
-        transform={"translateY(-50%)"}
+        transform={"translate(-50%, -50%)"}
         aria-label="Prev slide">
         <FaChevronLeft />
       </IconButton>
@@ -292,12 +294,12 @@ export const ActionBanner = () => {
         zIndex={2} // Ensure it's above the slides
         variant="subtle"
         color="actions.tertiary.default"
-        right={5}
+        right={0}
         top={"50%"}
-        transform={"translateY(-50%)"}
+        transform={"translate(50%,-50%)"}
         aria-label="Next slide">
         <FaChevronRight />
       </IconButton>
-    </Swiper>
+    </Box>
   )
 }

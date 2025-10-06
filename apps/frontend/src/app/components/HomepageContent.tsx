@@ -20,7 +20,7 @@ export const HomePageContent = () => {
         maxW="full"
         alignItems={"flex-start"}
         data-testid="form-proposal-layout">
-        <GridItem colSpan={[1, 1, 3]} display="grid">
+        <GridItem colSpan={[1, 1, 3]} overflow={{ base: "hidden", md: "unset" }}>
           <ActionBanner />
         </GridItem>
         <GridItem colSpan={[1, 1, 3]}>
