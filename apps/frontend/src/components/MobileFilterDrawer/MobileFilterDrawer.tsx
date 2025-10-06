@@ -53,12 +53,14 @@ export const MobileFilterDrawer = ({
       <Button
         size="md"
         variant="outline"
-        borderRadius="lg"
-        p={3}
+        rounded="full"
         minW="auto"
         aspectRatio="1"
         onClick={handleOpen}
-        position="relative">
+        position="relative"
+        bg="bg.primary"
+        border="sm"
+        borderColor="border.primary">
         <Icon as={UilFilter} boxSize={5} />
         {selectedCount > 0 && (
           <Text
