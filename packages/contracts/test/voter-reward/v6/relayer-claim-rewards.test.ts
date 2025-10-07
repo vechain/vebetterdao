@@ -77,6 +77,10 @@ describe("VoterRewards V6 - @shard10b", function () {
       await emissions.connect(minterAccount).start()
     })
 
+    it("should return the correct version", async function () {
+      expect(await voterRewards.version()).to.equal("6")
+    })
+
     it("should take a fee when a relayer claims for a user with auto-voting enabled", async function () {
       // Create a test app
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
@@ -195,7 +199,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       expect(userBalanceAfter - initialUserBalance).to.equal(userTotalReward)
     })
 
-    it("should revert when user claims their own rewards if auto-voting is enabled", async function () {
+    it("should revert when user claims their own rewards during early access period if auto-voting is enabled", async function () {
       // Create a test app
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
@@ -223,7 +227,7 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       // User claims their own rewards
       await expect(voterRewards.connect(user).claimReward(roundId, user.address)).to.be.revertedWith(
-        "RelayerRewardsPool: caller is not a registered relayer during early access period",
+        "VoterRewards: auto-voting users cannot claim their own rewards during early access period",
       )
     })
 
@@ -592,16 +596,6 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       // Verify relayer2 gets no rewards since they performed no successful actions
       expect(await relayerRewardsPool.claimableRewards(relayer2.address, roundId)).to.equal(0)
-    })
-  })
-
-  describe("Version", function () {
-    beforeEach(async function () {
-      await setupContracts()
-    })
-
-    it("should return the correct version", async function () {
-      expect(await voterRewards.version()).to.equal("6")
     })
   })
 })
