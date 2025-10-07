@@ -1,5 +1,5 @@
 import { useAllocationsRound, useAllocationsRoundState } from "@/api"
-import { HStack, Icon, Skeleton, Text, TextProps } from "@chakra-ui/react"
+import { BadgeProps, Badge as ChakraBadge, Icon, Skeleton } from "@chakra-ui/react"
 import { ReactNode, useMemo } from "react"
 import { DotSymbol } from "../DotSymbol"
 import { FaThumbsUp } from "react-icons/fa6"
@@ -8,9 +8,8 @@ import { useTranslation } from "react-i18next"
 type Props = {
   roundId: string
   renderIcon?: boolean
-  textProps?: TextProps
 }
-export const AllocationStateBadge = ({ roundId, renderIcon = true, textProps = {} }: Props) => {
+export const AllocationStateBadge = ({ roundId, renderIcon = true }: Props) => {
   const { t } = useTranslation()
   const { data, isLoading, error } = useAllocationsRoundState(roundId)
   const { data: allocationRound } = useAllocationsRound(roundId)
@@ -21,61 +20,41 @@ export const AllocationStateBadge = ({ roundId, renderIcon = true, textProps = {
   if (isLoading)
     return (
       <Skeleton>
-        <Badge
-          text={t("loading")}
-          icon={renderIcon ? <DotSymbol size={4} color="status.negative.primary" /> : undefined}
-        />
+        <Badge variant="neutral" text={t("loading")} icon={renderIcon ? <DotSymbol size={4} /> : undefined} />
       </Skeleton>
     )
   if (error || data === undefined)
     return (
       <Badge
-        textProps={{
-          color: "status.negative.primary",
-          ...textProps,
-        }}
+        variant="negative"
         text={t("Error getting state")}
-        icon={renderIcon ? <DotSymbol size={4} color="status.negative.primary" /> : undefined}
+        icon={renderIcon ? <DotSymbol size={4} /> : undefined}
       />
     )
 
   if (isActive)
     return (
       <Badge
-        textProps={{
-          color: "status.positive.strong",
-          ...textProps,
-        }}
+        variant="info"
         text={t("Active now")}
-        icon={renderIcon ? <DotSymbol pulse size={2} color={"status.positive.strong"} /> : undefined}
+        icon={renderIcon ? <DotSymbol pulse size={2} color="status.info.strong" /> : undefined}
       />
     )
   if (!isActive)
     return (
       <Badge
-        textProps={{
-          color: "status.positive.primary",
-          ...textProps,
-        }}
+        variant="neutral"
         text={t("Concluded")}
-        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} color="status.positive.primary" /> : undefined}
+        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} /> : undefined}
       />
     )
 }
 
-type BadgeProps = {
-  icon?: ReactNode
-  text: string
-  textProps?: TextProps
-}
-
-export const Badge = ({ icon, text, textProps }: BadgeProps) => {
+export const Badge = ({ icon, variant, text }: { icon?: ReactNode; text: string; variant: BadgeProps["variant"] }) => {
   return (
-    <HStack gap="1" align="center" rounded="full" p="0">
-      {icon}
-      <Text textStyle="xs" fontWeight="semibold" {...textProps} data-testid={`round-status`}>
-        {text}
-      </Text>
-    </HStack>
+    <ChakraBadge variant={variant} fontWeight="semibold">
+      {icon && icon}
+      {text}
+    </ChakraBadge>
   )
 }

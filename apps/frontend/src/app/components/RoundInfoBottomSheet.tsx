@@ -153,7 +153,6 @@ export const RoundInfoBottomSheet = () => {
                   <AllocationStateBadge
                     roundId={allocationRound.roundId ?? ""}
                     data-testid={"round-#" + allocationRound.roundId + "-status"}
-                    renderIcon={true}
                   />
                   <Text textStyle="sm" fontWeight="semibold">
                     {t("#{{round}} allocation round", { round: allocationRound.roundId })}

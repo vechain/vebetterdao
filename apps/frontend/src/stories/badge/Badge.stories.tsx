@@ -9,7 +9,7 @@ const meta = {
 
 export default meta
 
-const variants = ["warning", "info", "error", "neutral", "success", "outline"] as const
+const variants = ["warning", "info", "negative", "neutral", "positive", "outline"] as const
 
 export const Default = () => (
   <VStack alignItems="flex-start" gap="4">

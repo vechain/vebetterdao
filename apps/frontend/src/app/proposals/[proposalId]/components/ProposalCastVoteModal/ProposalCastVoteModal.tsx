@@ -25,7 +25,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
         id: "1",
         title: "Approve",
         icon: ThumbsUpIcon,
-        iconColor: "status.success.primary",
+        iconColor: "status.positive.primary",
       },
       {
         id: "2",
@@ -37,7 +37,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
         id: "0",
         title: "Against",
         icon: ThumbsDownIcon,
-        iconColor: "status.error.primary",
+        iconColor: "status.negative.primary",
       },
     ],
     [],

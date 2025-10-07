@@ -221,7 +221,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
-        color: "success.primary",
+        color: "status.positive.primary",
         icon: ThumbsUpIcon,
       },
       {
@@ -231,7 +231,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
-        color: "warning.primary",
+        color: "status.warning.primary",
         icon: AbstainIcon,
       },
       {
@@ -241,7 +241,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
-        color: "error.primary",
+        color: "status.negative.primary",
         icon: ThumbsDownIcon,
       },
     ]
@@ -256,7 +256,7 @@ export const ProposalInteractionCard = ({
       return [
         {
           percentage: Number(percentageSupported ?? 0),
-          color: "success.primary",
+          color: "status.positive.primary",
           icon: userDeposits ? HeartSolidIcon : HeartIcon,
         },
       ]

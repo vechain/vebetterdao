@@ -19,8 +19,8 @@ type Props = {
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { id: proposalId, description } = proposal
-  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
+  const { id: proposalId, ipfsDescription } = proposal
+  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(ipfsDescription))
   const { supportEndDate } = useProposalInteractionDates(proposalId)
 
   const { t } = useTranslation()
@@ -55,7 +55,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
         />
       )
     }
-  }, [proposalId, proposal.state, supportEndDate])
+  }, [proposal.state, account?.address, supportEndDate, t, proposalId])
 
   return (
     <LinkBox asChild>
@@ -79,7 +79,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
                       flex={2.5}
                       mr={{ base: 0, md: 10 }}
                       alignSelf={"flex-start"}>
-                      <VStack>
+                      <VStack alignItems="flex-start">
                         <Text textStyle={"sm"} fontWeight="semibold">
                           {proposalMetadata.data?.title}
                         </Text>

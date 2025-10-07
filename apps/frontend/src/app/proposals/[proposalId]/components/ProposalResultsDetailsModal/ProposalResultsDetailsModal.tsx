@@ -174,7 +174,7 @@ const SupportResultContent = ({
         {userSupportPercentage > 0 && (
           <HStack justify="space-between" w="full">
             <HStack>
-              <Icon as={HeartSolidIcon} color="success.primary" boxSize={5} />
+              <Icon as={HeartSolidIcon} color="status.positive.primary" boxSize={5} />
               <Text textStyle="md" color="text.subtle">
                 {t("{{percentage}}% (your support)", { percentage: userSupportPercentage.toFixed(2) })}
               </Text>
@@ -243,14 +243,14 @@ const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot 
           </PieChart>
         </ResponsiveContainer>
         <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)" textAlign="center">
-          <Text textStyle="2xl" fontWeight="bold" color={isQuorumReached ? "success.primary" : "gray.700"}>
+          <Text textStyle="2xl" fontWeight="bold" color={isQuorumReached ? "status.positive.primary" : "gray.700"}>
             {`${percentageFilled}%`}
           </Text>
         </Box>
       </Box>
       {isQuorumReached && (
         <HStack justifyContent="center" w="full" textWrap={"nowrap"}>
-          <Icon as={UilCheckCircle} color="success.primary" boxSize={5} />
+          <Icon as={UilCheckCircle} color="status.positive.primary" boxSize={5} />
           <Text textStyle="xs" fontWeight="semibold">
             <Trans
               i18nKey="Minimum <Link>quorum</Link> (30%) reached"

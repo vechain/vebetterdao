@@ -6,11 +6,11 @@ import { FaRegHeart } from "react-icons/fa6"
 import { DotSymbol } from "@/components"
 import { TFunction } from "i18next"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { ReactNode } from "react"
 
 type Props = {
   proposalId: string
   renderIcon?: boolean
-  renderBadge?: boolean
   proposalState?: ProposalState
   badgeProps?: BadgeProps
 }
@@ -23,104 +23,83 @@ const getProposalBadgeDetails = ({
   t: TFunction
   proposalState?: ProposalState
   isDepositReached?: boolean
-}) => {
+}): { text: string; icon: ReactNode; variant: BadgeProps["variant"] } => {
   switch (proposalState) {
     case ProposalState.Succeeded:
       return {
         text: t("Approved"),
-        icon: <Icon as={UilCheck} boxSize={4} color={"secondary.strong"} />,
-        color: "brand.secondary",
-        bgColor: "status.positive.subtle",
+        icon: <Icon as={UilCheck} boxSize={4} />,
+        variant: "positive",
       }
     case ProposalState.Canceled:
       return {
         text: t("Canceled"),
-        icon: <Icon as={UilBan} boxSize={4} color={"status.negative.primary"} />,
-        color: "status.negative.primary",
-        bgColor: "status.negative.subtle",
+        icon: <Icon as={UilBan} boxSize={4} />,
+        variant: "negative",
       }
     case ProposalState.DepositNotMet:
       return {
         text: t("Support not reached"),
-        icon: <Icon as={FaRegHeart} boxSize={4} color={"status.negative.primary"} />,
-        color: "status.negative.primary",
-        bgColor: "status.negative.subtle",
+        icon: <Icon as={FaRegHeart} boxSize={4} />,
+        variant: "negative",
       }
     case ProposalState.Pending:
       if (isDepositReached) {
         return {
           text: t("Upcoming voting"),
-          icon: <Icon as={UilClockEight} boxSize={4} color={"brand.primary"} />,
-          color: "brand.primary",
-          bgColor: "status.positive.subtle",
+          icon: <Icon as={UilClockEight} boxSize={4} />,
+          variant: "positive",
         }
       }
       return {
         text: t("Looking for support"),
-        icon: <Icon as={FaRegHeart} boxSize={4} color={"status.warning.primary"} />,
-        color: "status.warning.primary",
-        bgColor: "status.warning.subtle",
+        icon: <Icon as={FaRegHeart} boxSize={4} />,
+        variant: "warning",
       }
     case ProposalState.Active:
       return {
         text: t("Active now"),
-        icon: <DotSymbol pulse size={2} color="brand.secondary-subtle" />,
-        color: "brand.secondary-subtle",
-        bgColor: "brand.secondary-strong",
+        icon: <DotSymbol pulse size={2} color="status.info.strong" />,
+        variant: "info",
       }
     case ProposalState.Defeated:
       return {
         text: t("Ended and rejected"),
-        icon: <Icon as={UilThumbsDown} boxSize={4} color={"status.negative.primary"} />,
-        color: "status.negative.primary",
-        bgColor: "#F8F8F8",
+        icon: <Icon as={UilThumbsDown} boxSize={4} />,
+        variant: "negative",
       }
     case ProposalState.Queued:
       return {
         text: t("Ended and queued"),
-        icon: <Icon as={UilThumbsUp} boxSize={4} color={"brand.primary"} />,
-        color: "brand.primary",
-        bgColor: "status.positive.subtle",
+        icon: <Icon as={UilThumbsUp} boxSize={4} />,
+        variant: "positive",
       }
     case ProposalState.Executed:
       return {
         text: t("Ended and executed"),
-        icon: <Icon as={UilCheck} boxSize={4} color={"secondary.strong"} />,
-        color: "secondary.strong",
-        bgColor: "status.positive.subtle",
+        icon: <Icon as={UilCheck} boxSize={4} />,
+        variant: "positive",
       }
     default:
       return {
-        text: undefined,
-        icon: undefined,
-        color: undefined,
+        text: "",
+        icon: "",
+        variant: "neutral",
       }
   }
 }
 
-export const ProposalStatusBadge = ({
-  proposalId,
-  renderIcon = true,
-  renderBadge = true,
-  proposalState,
-  badgeProps,
-}: Props) => {
+export const ProposalStatusBadge = ({ proposalId, renderIcon = true, proposalState, badgeProps }: Props) => {
   const { data: isDepositReached, isLoading: isDepositReachedLoading } = useIsDepositReached(proposalId)
   const { t } = useTranslation()
 
-  const { text, color, bgColor, icon } = getProposalBadgeDetails({ t, proposalState, isDepositReached })
+  const { text, variant, icon } = getProposalBadgeDetails({ t, proposalState, isDepositReached })
 
   if (!text || !icon) return null
 
   return (
     <Skeleton loading={!!isDepositReachedLoading}>
-      <Badge
-        variant={renderBadge ? "solid" : "plain"}
-        rounded="full"
-        p={renderBadge ? "4px 8px" : "0"}
-        color={color}
-        bg={renderBadge ? bgColor : "transparent"}
-        {...badgeProps}>
+      <Badge variant={variant} rounded="full" {...badgeProps}>
         {renderIcon && icon}
         {text}
       </Badge>

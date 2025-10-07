@@ -32,9 +32,9 @@ export const badgeRecipe = defineRecipe({
     variant: {
       warning: { bg: "status.warning.subtle", color: "status.warning.strong" },
       info: { bg: "status.info.subtle", color: "status.info.strong" },
-      error: { bg: "status.negative.subtle", color: "status.negative.strong" },
+      negative: { bg: "status.negative.subtle", color: "status.negative.strong" },
       neutral: { bg: "status.neutral.subtle", color: "status.neutral.strong" },
-      success: { bg: "status.positive.subtle", color: "status.positive.strong" },
+      positive: { bg: "status.positive.subtle", color: "status.positive.strong" },
       outline: { bg: "transparent", borderColor: "border.secondary" },
     },
   },

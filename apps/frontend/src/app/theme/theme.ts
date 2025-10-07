@@ -30,6 +30,7 @@ const config = defineConfig({
     },
   },
 
+  // TODO: use this to force using tokens
   // strictTokens: true,
 
   theme: {

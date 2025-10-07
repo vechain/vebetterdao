@@ -15,9 +15,9 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
 
   const voteLabel = {
-    FOR: { icon: ThumbsUpIcon, label: t("Approved"), color: "success.primary" },
-    ABSTAIN: { icon: AbstainIcon, label: t("Abstain"), color: "warning.primary" },
-    AGAINST: { icon: ThumbsDownIcon, label: t("Against"), color: "error.primary" },
+    FOR: { icon: ThumbsUpIcon, label: t("Approved"), color: "status.positive.primary" },
+    ABSTAIN: { icon: AbstainIcon, label: t("Abstain"), color: "status.warning.primary" },
+    AGAINST: { icon: ThumbsDownIcon, label: t("Against"), color: "status.negative.primary" },
   }
 
   const voteType = vote.support

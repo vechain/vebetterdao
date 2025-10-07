@@ -3,7 +3,7 @@ import HeartIcon from "@/components/Icons/svg/heart.svg"
 import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
+import { Badge, BadgeProps, Icon } from "@chakra-ui/react"
 import { Prohibition } from "iconoir-react"
 import { useMemo } from "react"
 import { FaRegCircleCheck } from "react-icons/fa6"
@@ -45,17 +45,17 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   [ProposalState.Canceled]: {
     text: "Cancelled",
     icon: Prohibition,
-    variant: "error",
+    variant: "negative",
   },
   [ProposalState.Defeated]: {
     text: "Cancelled",
     icon: Prohibition,
-    variant: "error",
+    variant: "negative",
   },
   [ProposalState.Succeeded]: {
     text: "Approved",
     icon: ThumbsUpSolidIcon,
-    variant: "success",
+    variant: "positive",
   },
   [ProposalState.Queued]: {
     text: "Queued",
@@ -72,7 +72,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   [ProposalState.DepositNotMet]: {
     text: "Cancelled",
     icon: Prohibition,
-    variant: "error",
+    variant: "negative",
   },
 
   [ProposalState.InDevelopment]: {
@@ -84,7 +84,7 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
   [ProposalState.Completed]: {
     text: "Completed",
     icon: FaRegCircleCheck,
-    variant: "success",
+    variant: "neutral",
   },
 }
 
@@ -125,17 +125,15 @@ export const GrantsProposalStatusBadge = ({
 
   const variant = useMemo(() => {
     if (state === ProposalState.Pending && depositReached) {
-      return "success"
+      return "positive"
     }
     return config.variant
   }, [state, config, depositReached])
 
   return (
-    <Badge variant={variant}>
-      <HStack textAlign="center" justifyContent="center" alignItems="center">
-        <Icon as={selectedIcon} boxSize={4} />
-        <Text fontWeight="semibold"> {text}</Text>
-      </HStack>
+    <Badge variant={variant} fontWeight="semibold">
+      <Icon as={selectedIcon} boxSize={4} />
+      {text}
     </Badge>
   )
 }

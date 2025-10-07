@@ -179,7 +179,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
                 {error}
               </Text>
             ) : showWarning ? (
-              <Text textStyle={"md"} color="success.primary">
+              <Text textStyle={"md"} color="status.positive.primary">
                 <Trans
                   t={t}
                   i18nKey={
