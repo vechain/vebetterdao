@@ -170,6 +170,15 @@ const config = defineConfig({
           solid: { value: { _light: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
           focusRing: { value: { _light: "{colors.blue.600}", _dark: "{colors.blue.400}" } },
         },
+        red: {
+          contrast: { value: { _light: "white", _dark: "white" } },
+          fg: { value: { _light: "{colors.red.400}", _dark: "{colors.red.300}" } },
+          subtle: { value: { _light: "{colors.red.100}", _dark: "{colors.red.900}" } },
+          muted: { value: { _light: "{colors.red.200}", _dark: "{colors.red.800}" } },
+          emphasized: { value: { _light: "{colors.red.300}", _dark: "{colors.red.700}" } },
+          solid: { value: { _light: "{colors.red.600}", _dark: "{colors.red.400}" } },
+          focusRing: { value: { _light: "{colors.red.400}", _dark: "{colors.red.400}" } },
+        },
 
         brand: {
           primary: { value: { base: "{colors.blue.600}", _dark: "white" } },

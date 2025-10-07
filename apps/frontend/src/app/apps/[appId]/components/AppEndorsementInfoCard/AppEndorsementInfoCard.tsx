@@ -150,8 +150,10 @@ export const AppEndorsementInfoCard = ({
         <Link asChild>
           <Button
             key="removeEndorsementButton"
-            variant="plain"
-            color="red.300"
+            rounded="xl"
+            mt="4"
+            variant="outline"
+            colorPalette="red"
             textStyle="md"
             fontWeight="semibold"
             onClick={onOpenUnendorsementModal}

@@ -1500,5 +1500,6 @@
   "Showing": "Showing",
   "You have reached the maximum GM NFT level.": "You have reached the maximum GM NFT level.",
   "Search by proposal name": "Search by proposal name",
-  "Created": "Created"
+  "Created": "Created",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Removing your endorsement from an app may result in it no longer being selected for allocations."
 }

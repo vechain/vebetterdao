@@ -1,14 +1,13 @@
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { Text, HStack, VStack, Skeleton } from "@chakra-ui/react"
-import { UilCheck, UilCopy } from "@iconscout/react-unicons"
-import { useCallback, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import dayjs from "dayjs"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useGetNodeManager } from "@/hooks"
+import { Clipboard } from "@/components/ui/clipboard"
 
 type Props = {
   event: AppEndorsedEvent
@@ -19,7 +18,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
 
   // Retrieve the nodeId, blockNumber, and endorsed from the event
   const { nodeId, blockNumber, endorsed: isEndorsing } = event
-  const isEndorsingColor = isEndorsing ? "#3DBA67" : "#C84968"
+  const isEndorsingColor = isEndorsing ? "status.positive.primary" : "status.negative.primary"
 
   // Obtain address managing the node, which is not necessarily the same as the event txOrigin
   const { data: endorserAddress, isLoading: endorserAddressLoading } = useGetNodeManager(nodeId)
@@ -31,24 +30,15 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
   const endorsementEpoch = useEstimateBlockTimestamp({ blockNumber })
   const endorsingDate = dayjs(endorsementEpoch).format("MMM D, YYYY")
 
-  // Allow users to copy endorser addresses on history list to clipboard
-  const [showCopiedLink, setShowCopiedLink] = useState(false)
-  const handleCopyEndorserAddress = useCallback(async () => {
-    await navigator.clipboard.writeText(endorserAddress ?? "")
-    setShowCopiedLink(true)
-    setTimeout(() => {
-      setShowCopiedLink(false)
-    }, 2000)
-  }, [endorserAddress])
-
   const { data: vnsData } = useVechainDomain(endorserAddress)
   const domain = vnsData?.domain
   return (
     <HStack
       p={2}
       borderRadius={"16px"}
-      border="none"
-      borderBottom={"1px solid #EFEFEF"}
+      border="sm"
+      bg="bg.primary"
+      borderColor="border.secondary"
       w={"full"}
       alignItems={"center"}
       justify={"space-between"}>
@@ -56,11 +46,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
         <Skeleton loading={endorserAddressLoading}>
           <HStack>
             <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress ?? "", 6, 3)}</Text>
-            {showCopiedLink ? (
-              <UilCheck size={"18px"} color="#6DCB09" />
-            ) : (
-              <UilCopy size={"18px"} color="text.subtle" onClick={handleCopyEndorserAddress} cursor="pointer" />
-            )}
+            <Clipboard value={endorserAddress || ""} />
           </HStack>
         </Skeleton>
 

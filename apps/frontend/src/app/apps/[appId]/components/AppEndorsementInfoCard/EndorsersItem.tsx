@@ -64,7 +64,14 @@ export const EndorsersItem = ({
   const domain = vnsData?.domain
 
   return (
-    <HStack p={"12px"} borderRadius={"16px"} boxShadow="sm" w={"full"} alignItems={"center"} justify={"space-between"}>
+    <HStack
+      p={"12px"}
+      borderRadius={"16px"}
+      border="sm"
+      borderColor="border.secondary"
+      w={"full"}
+      alignItems={"center"}
+      justify={"space-between"}>
       <HStack alignItems={"center"} gap={4}>
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
         <VStack align="start" justify={"center"} gap={0}>

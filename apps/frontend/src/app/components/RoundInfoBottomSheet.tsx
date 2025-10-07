@@ -14,16 +14,15 @@ import {
 import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 import { Trans, useTranslation } from "react-i18next"
 import { AllocationStateBadge, B3TRIcon, ProposalCompactCard } from "@/components"
-import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import NextLink from "next/link"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
 
@@ -78,12 +77,12 @@ export const RoundInfoBottomSheet = () => {
           zIndex={2}>
           <Box>
             <Skeleton loading={isCardLoading}>
-              <Heading size={"xl"} color="black" fontWeight="normal">
+              <Heading size={"xl"} color="text.default" fontWeight="normal">
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
             <Skeleton loading={isCardLoading}>
-              <Text textStyle={"sm"} color="black">
+              <Text textStyle={"sm"}>
                 {t("{{from}} to {{to}}", {
                   from: allocationRound.voteStartTimestamp?.format("MMM D"),
                   to: allocationRound.voteEndTimestamp?.format("MMM D"),
@@ -111,7 +110,7 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading size={"xl"} fontWeight="normal" color="#252525">
+                <Heading size={"xl"} fontWeight="normal" color="text.default">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
@@ -142,11 +141,12 @@ export const RoundInfoBottomSheet = () => {
             </VStack>
             <VStack
               w="full"
-              border="1px hover-contrast-bg solid"
+              border="sm"
+              borderColor="border.secondary"
               align={"flex-start"}
-              bg="info-bg"
+              bg="bg.primary"
               p="12px"
-              borderRadius={"md"}
+              borderRadius={"xl"}
               gap={4}>
               <HStack w="full" justify="space-between">
                 <VStack gap={2} align={"flex-start"}>
@@ -172,19 +172,12 @@ export const RoundInfoBottomSheet = () => {
                 </VStack>
               </HStack>
               <SimpleGrid w="full" columns={canVote ? 2 : 1} gap={4}>
-                <Button
-                  onClick={() => router.push(`/rounds/${allocationRound.roundId}`)}
-                  variant="ghost"
-                  color="actions.tertiary.default"
-                  rounded={"full"}>
-                  {t("See More")}
+                <Button asChild variant="secondary" rounded={"full"}>
+                  <NextLink href={`/rounds/${allocationRound.roundId}`}>{t("See More")}</NextLink>
                 </Button>
                 {canVote && (
-                  <Button
-                    variant="primary"
-                    onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
-                    rounded={"full"}>
-                    {t("Vote now")}
+                  <Button asChild variant="primary" rounded={"full"}>
+                    <NextLink href={`/rounds/${allocationRound.roundId}/vote`}>{t("Vote now")}</NextLink>
                   </Button>
                 )}
               </SimpleGrid>

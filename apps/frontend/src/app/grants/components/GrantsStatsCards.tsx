@@ -14,7 +14,6 @@ interface StatsCardProps {
 const StatsCard = ({ icon, value, label }: StatsCardProps) => (
   <Card.Root
     variant="primary"
-    borderColor="border.secondary"
     flex={{ base: "0 0 40%", lg: "1 0 calc(30% - 10px)" }}
     flexDirection="row"
     alignItems="center"

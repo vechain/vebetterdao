@@ -154,7 +154,13 @@ export const GrantsStepsCard = ({
   }
 
   return (
-    <Card.Root display={isOpen ? "block" : "none"} w="full" h="full" borderRadius="xl" overflow="hidden">
+    <Card.Root
+      variant="primary"
+      display={isOpen ? "block" : "none"}
+      w="full"
+      h="full"
+      borderRadius="xl"
+      overflow="hidden">
       <Steps.Root step={currentStepIndex} count={steps.length}>
         <Flex h="full">
           <Box flex="1">

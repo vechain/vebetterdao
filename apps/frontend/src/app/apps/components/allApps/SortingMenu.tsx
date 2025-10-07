@@ -18,7 +18,6 @@ export const SortingMenu = ({ sortOption, onSortChange }: Props) => {
           variant="outline"
           rounded="full"
           aria-label={t("Sort by")}
-          borderRadius={"24px"}
           size="xl"
           bgColor="bg.primary"
           border="sm"
@@ -28,33 +27,21 @@ export const SortingMenu = ({ sortOption, onSortChange }: Props) => {
       </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content
-            minW="100px"
-            shadow="lg"
-            borderRadius={"24px"}
-            p={2}
-            bg="info-bg"
-            borderColor="contrast-border"
-            borderWidth="1px">
+          <Menu.Content minW="100px" shadow="lg" borderRadius="xl" p={2}>
             {sortOptions.map(option => (
               <Menu.Item
                 key={option.id}
                 value={option.id}
                 onClick={() => onSortChange(option.id)}
+                cursor="pointer"
                 role="group"
-                borderRadius={"16px"}
-                bg={sortOption === option.id && sortOption !== "default" ? "info-bg" : undefined}
-                _hover={{
-                  bg: "hover-contrast-bg",
-                  color: "contrast-fg-on-muted",
-                  transition: "all 0.3s ease-in-out",
-                }}>
+                borderRadius="xl">
                 <HStack justifyContent="space-between" w="full">
                   <VStack align="flex-start" gap={0}>
                     <Text fontWeight={sortOption === option.id && sortOption !== "default" ? "semibold" : "normal"}>
                       {option.label}
                     </Text>
-                    <Text textStyle="xs" color="gray.500">
+                    <Text textStyle="xs" color="text.subtle">
                       {option.description}
                     </Text>
                   </VStack>

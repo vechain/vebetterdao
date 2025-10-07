@@ -1,4 +1,4 @@
-import { HStack, IconButton, Link } from "@chakra-ui/react"
+import { HStack, Icon, IconButton, Link } from "@chakra-ui/react"
 import { FaDiscord, FaLinkedin, FaMedium, FaTelegram, FaYoutube } from "react-icons/fa6"
 import { RiTwitterXFill } from "react-icons/ri"
 
@@ -35,11 +35,12 @@ export const AppDetailSocials = ({ socialUrls }: { socialUrls: Social[] }) => {
           <Link key={socialUrl.name} href={socialUrl.url} target="_blank" rel="noreferrer">
             <IconButton
               aria-label={socialUrl.name}
-              border="1px solid #EFEFEF"
-              bg="#FFFFFF"
+              border="sm"
+              borderColor="border.secondary"
+              bg="white"
               rounded="full"
               _hover={{ bg: "#FBFBFB" }}>
-              <SocialIcon size={"16px"} color={socialIconColor} />
+              <Icon as={SocialIcon} boxSize={"16px"} color={socialIconColor} />
             </IconButton>
           </Link>
         )

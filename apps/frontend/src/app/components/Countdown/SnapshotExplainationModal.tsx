@@ -1,4 +1,4 @@
-import { Dialog, Heading, VStack, Text, Image, Box, Button, Portal, CloseButton, Card } from "@chakra-ui/react"
+import { Dialog, Heading, VStack, Text, Image, Box, Button, Portal, CloseButton, Card, Link } from "@chakra-ui/react"
 import { t } from "i18next"
 
 interface Props {
@@ -21,16 +21,6 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
       image: "/assets/icons/claim-b3tr-icon.webp",
     },
   ]
-
-  const LINK_TO_DOCS = () => {
-    window.open("https://docs.vebetterdao.org/vebetterdao/x2earn-allocations", "_blank", "noopener")
-  }
-
-  const renderStep = (step: number) => (
-    <Text textStyle="xs" color={"#6A6A6A"}>
-      {t("STEP {{value}}", { value: step })}
-    </Text>
-  )
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"lg"}>
@@ -61,29 +51,36 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                   justifyContent={"space-between"}
                   alignItems={"flex-start"}
                   gap={[2, 2, 4]}>
-                  {steps.map(step => (
+                  {steps.map((step, index) => (
                     <Card.Root
                       key={step.title}
                       flexDirection={"row"}
-                      variant="subtle"
                       w="full"
                       alignItems="center"
                       p={2}
-                      bg={"info-bg"}
-                      borderRadius={"9px"}>
+                      bg={"card.subtle"}
+                      borderRadius={"lg"}>
                       <Box boxSize={["70px", "100px"]} alignItems={"start"}>
                         <Image boxSize={["70px", "100px"]} src={step.image} alt={step.title} />
                       </Box>
                       <VStack gap={0} alignItems={"start"} p={1}>
-                        {renderStep(1)}
+                        <Text textStyle="xs" color={"#6A6A6A"}>
+                          {t("STEP {{value}}", { value: index + 1 })}
+                        </Text>
+
                         <Text textStyle={["xs", "md"]}>{step.title}</Text>
                       </VStack>
                     </Card.Root>
                   ))}
                 </VStack>
 
-                <Button variant="primary" w={"full"} onClick={LINK_TO_DOCS}>
-                  {t("Learn more")}
+                <Button asChild variant="primary" w={"full"}>
+                  <Link
+                    href="https://docs.vebetterdao.org/vebetterdao/x2earn-allocations"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {t("Learn more")}
+                  </Link>
                 </Button>
               </VStack>
             </Dialog.Body>

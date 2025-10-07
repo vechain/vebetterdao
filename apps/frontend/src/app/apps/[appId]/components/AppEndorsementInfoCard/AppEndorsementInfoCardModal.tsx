@@ -113,18 +113,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
             </Stack>
             <Separator hideFrom="md" w="full" />
-            <Card.Root
-              variant="subtle"
-              bg="info-bg"
-              rounded={"16px"}
-              p={{
-                base: 0,
-                lg: 4,
-              }}
-              gap={4}
-              w={"full"}
-              height={["auto", "auto", "40vh"]}
-              overflowY="auto">
+            <Card.Root variant="primary" p="4" gap={4} w={"full"} height={["auto", "auto", "40vh"]} overflowY="auto">
               <Card.Header p={0}>
                 <Heading size="xl" alignSelf="flex-start">
                   {t("Endorsers")}
@@ -204,8 +193,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }
           </VStack>
           <Separator hideFrom="md" w="full" />
           <Card.Root
-            variant="subtle"
-            bg="info-bg"
+            bg="bg.primary"
             flex={1}
             p={4}
             rounded={"16px"}

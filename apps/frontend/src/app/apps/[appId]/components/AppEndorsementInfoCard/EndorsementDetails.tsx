@@ -52,7 +52,7 @@ export const EndorsementDetails = ({
       {isUserAppEndorser && (
         <VStack gap={0} alignItems="center">
           <Skeleton loading={isUserNodesLoading}>
-            <Text textStyle={"2xl"} fontWeight="bold" color="#004CFC">
+            <Text textStyle={"2xl"} fontWeight="bold" color="status.info.primary">
               {yourScore}
             </Text>
           </Skeleton>
