@@ -14,6 +14,15 @@ The simulation tools provide testing for:
 - **Gas estimation for voting operations**
 - **End-to-end round simulation**
 
+## Prerequisite
+
+Ensure the followings contracts up to date and deployed on your local:
+
+- XAllocationVoting (v8)
+- VoterRewards (v6)
+- RelayerRewardsPool (v1)
+- VOT3 (v2)
+
 ## Usage Examples
 
 ### Auto-voting Simulation
