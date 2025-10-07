@@ -207,7 +207,7 @@ abstract contract XAllocationVotingGovernor is
    */
   function getAndValidateVotingPower(address account, uint256 timepoint) public view returns (uint256, bool) {
     uint256 voterAvailableVotes = getTotalVotingPower(account, timepoint);
-    bool isValid = voterAvailableVotes > 1 ether;
+    bool isValid = voterAvailableVotes >= 1 ether;
     return (voterAvailableVotes, isValid);
   }
 
