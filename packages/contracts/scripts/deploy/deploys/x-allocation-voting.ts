@@ -3,6 +3,7 @@ import { XAllocationVoting } from "../../../typechain-types"
 import { getConfig } from "@repo/config"
 import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { ethers } from "hardhat"
+import { autoVotingLibraries } from "../../libraries/autoVotingLibraries"
 
 /**
  * This script is used to deploy the XAllocationVoting contract that is not associated with contracts.
@@ -26,6 +27,8 @@ export async function main() {
   const emissionsAddress = ethers.ZeroAddress
   const x2EarnAppsAddress = ethers.ZeroAddress
   const veBetterPassportAddress = ethers.ZeroAddress
+
+  const { AutoVotingLogic } = await autoVotingLibraries()
 
   const xAllocationVoting = (await deployAndInitializeLatest(
     "XAllocationVoting",
@@ -55,7 +58,9 @@ export async function main() {
         args: [veBetterPassportAddress],
       },
     ],
-    {},
+    {
+      AutoVotingLogic: await AutoVotingLogic.getAddress(),
+    },
     true,
   )) as XAllocationVoting
 

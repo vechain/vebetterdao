@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
 import { VOT3 } from "../../../../typechain-types"
+import { ethers } from "hardhat"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -12,9 +13,23 @@ async function main() {
 
   console.log(`Upgrading VOT3 contract at address: ${config.vot3ContractAddress} on network: ${config.network.name}`)
 
-  const vot3v2 = (await upgradeProxy("VOT3V1", "VOT3", config.vot3ContractAddress, [], {
-    version: 2,
-  })) as VOT3
+  const xAllocationVoting = await ethers.getContractAt("XAllocationVoting", config.xAllocationVotingContractAddress)
+  const xAllocationVotingVersion = await xAllocationVoting.version()
+  if (parseInt(xAllocationVotingVersion) !== 8) {
+    console.log(`XAllocationVoting version is not 8: ${xAllocationVotingVersion}`)
+    console.log("Please upgrade XAllocationVoting contract to v8 first")
+    process.exit(1)
+  }
+
+  const vot3v2 = (await upgradeProxy(
+    "VOT3V1",
+    "VOT3",
+    config.vot3ContractAddress,
+    [config.xAllocationVotingContractAddress],
+    {
+      version: 2,
+    },
+  )) as VOT3
 
   console.log(`VOT3 upgraded`)
 
