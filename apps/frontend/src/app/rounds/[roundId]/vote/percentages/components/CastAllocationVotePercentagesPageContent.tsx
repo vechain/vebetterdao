@@ -7,7 +7,7 @@ import {
   useVotingThreshold,
   useRoundXApps,
 } from "@/api"
-import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Card, Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
@@ -16,7 +16,6 @@ import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { SelectAppVotesInput } from "./SelectAppVotesInput"
 import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
-import { ResponsiveCard } from "@/components"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
@@ -141,9 +140,9 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   if (!shouldSeeThePage) return null
 
   return (
-    <ResponsiveCard>
-      <VStack w="full" gap={8} align={"flex-start"}>
-        <Heading size={["2xl", "2xl", "4xl"]}>{t("Assign percentage of VOT3 to the apps")}</Heading>
+    <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
+      <VStack w="full" gap={4} align="flex-start">
+        <Heading size={["xl", "xl", "2xl"]}>{t("Assign percentage of VOT3 to the apps")}</Heading>
         <Text textStyle={"md"} color="text.subtle">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
@@ -200,6 +199,6 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           }
         />
       </VStack>
-    </ResponsiveCard>
+    </Card.Root>
   )
 }

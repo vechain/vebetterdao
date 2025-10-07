@@ -33,7 +33,7 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
       px={[4, 4, "24px"]}
       borderRadius={"16px"}
       w="full"
-      bg="light-contrast-on-card-bg">
+      bg="bg.primary">
       <HStack gap={[2, 2, 3]} align="center" flex={1}>
         <Skeleton loading={isLogoLoading}>
           <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"64px"} borderRadius="9px" />
@@ -53,11 +53,8 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
             <Input
               borderRadius={"12px"}
               borderWidth={1}
-              borderColor={"#D5D5D5"}
-              bg="#FFFFFF"
               data-testid={`${appMetadata?.name}-vote-input`}
               w="full"
-              color="text.subtle"
               placeholder="0"
               value={vote.value}
               onChange={e => {

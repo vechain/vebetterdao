@@ -1,9 +1,9 @@
 "use client"
 import { useAllocationsRound, useIsQuadraticFundingDisabled, useTotalVotesOnBlock } from "@/api"
-import { ResponsiveCard, VOT3Icon } from "@/components"
+import { VOT3Icon } from "@/components"
 import { Tooltip } from "@/components/ui/tooltip"
 import { useBreakpoints } from "@/hooks"
-import { VStack, Heading, Box, HStack, Skeleton, Text, Icon } from "@chakra-ui/react"
+import { Card, VStack, Heading, Box, HStack, Skeleton, Text, Icon } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -32,11 +32,11 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   const { data: isQuadraticFundingDisabled } = useIsQuadraticFundingDisabled()
 
   return (
-    <ResponsiveCard>
-      <VStack gap={8} align="flex-start">
-        {isDesktop && <Heading size="2xl">{t("Your V0T3 balance")}</Heading>}
+    <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
+      <VStack gap={4} align="flex-start">
+        {isDesktop && <Heading size="xl">{t("Your V0T3 balance")}</Heading>}
         <VStack w="full" align="flex-start">
-          <HStack gap={2}>
+          <HStack gap={2} alignItems="center">
             <VOT3Icon boxSize={["28px"]} colorVariant="dark" />
             <Skeleton loading={votesAtSnapshotLoading}>
               <Heading size="3xl">{compactFormatter.format(Number(votesAtSnapshot))}</Heading>
@@ -76,6 +76,6 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
           </Box>
         )}
       </VStack>
-    </ResponsiveCard>
+    </Card.Root>
   )
 }

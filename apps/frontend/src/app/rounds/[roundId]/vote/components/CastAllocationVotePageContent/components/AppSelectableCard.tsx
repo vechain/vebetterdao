@@ -14,7 +14,13 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   return (
-    <CheckboxCard.Root w="full" colorPalette="blue" checked={isSelected} onCheckedChange={() => onSelect()}>
+    <CheckboxCard.Root
+      w="full"
+      colorPalette="blue"
+      borderColor="border.primary"
+      checked={isSelected}
+      onCheckedChange={() => onSelect()}
+      cursor="pointer">
       <CheckboxCard.HiddenInput />
       <CheckboxCard.Control alignItems="center">
         <CheckboxCard.Label>

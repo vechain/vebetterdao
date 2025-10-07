@@ -7,14 +7,13 @@ import {
   useRoundXApps,
   useTotalVotesOnBlock,
 } from "@/api"
-import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Card, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
-import { ResponsiveCard } from "@/components"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
 import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -133,9 +132,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     <>
       <SeeVoteDetailsModal roundId={roundId} votes={votes} isOpen={seeAllModal.open} onClose={seeAllModal.onClose} />
 
-      <ResponsiveCard>
+      <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
         <VStack w="full" gap={8} align={"flex-start"}>
-          <Heading size={["2xl", "2xl", "4xl"]} data-testid={"voting-confirmation-page-title"}>
+          <Heading size={["xl", "xl", "2xl"]} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
           <Text textStyle={"md"} color="text.subtle">
@@ -143,7 +142,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               "Make sure that the apps you selected and the distribution percentages are right. If something’s wrong, you can go back and modify it.",
             )}
           </Text>
-          <ResponsiveCard cardProps={{ variant: "primary" }}>
+          <Card.Root bg={{ base: "transparent", md: "card.subtle" }} px={{ base: "0", md: "6" }} w="full">
             <VStack flex={1} w="full" gap={8} align={"flex-start"}>
               <VStack gap={2} align="flex-start" w="full">
                 <HStack w="full" justify="space-between">
@@ -167,7 +166,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
               </VStack>
               <AppVotesBreakdown votes={parsedVotes} />
             </VStack>
-          </ResponsiveCard>
+          </Card.Root>
 
           <CastAllocationControlsBottomBar
             onContinue={onContinue}
@@ -178,7 +177,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
             }
           />
         </VStack>
-      </ResponsiveCard>
+      </Card.Root>
     </>
   )
 }

@@ -1,7 +1,6 @@
 "use client"
-import { ResponsiveCard } from "@/components"
 import { useBreakpoints } from "@/hooks"
-import { Box, Circle, Heading, Steps, VStack } from "@chakra-ui/react"
+import { Box, Card, Circle, Heading, Steps, VStack } from "@chakra-ui/react"
 import { useParams, usePathname } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -40,9 +39,9 @@ export const CastAllocationVoteStepperCard = () => {
   }, [steps])
 
   return (
-    <ResponsiveCard>
-      <VStack gap={8} w="full" align={"flex-start"}>
-        {isDesktop && <Heading size="2xl">{t("Progress")}</Heading>}
+    <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
+      <VStack gap={4} w="full" align={"flex-start"}>
+        {isDesktop && <Heading size="xl">{t("Progress")}</Heading>}
         <Steps.Root
           w="full"
           size="sm"
@@ -89,6 +88,6 @@ export const CastAllocationVoteStepperCard = () => {
           </Steps.List>
         </Steps.Root>
       </VStack>
-    </ResponsiveCard>
+    </Card.Root>
   )
 }
