@@ -29,6 +29,8 @@ export const cardSlotRecipe = defineSlotRecipe({
       subtle: {
         root: {
           bg: "card.subtle",
+          border: "sm", // 1px
+          borderColor: "border.secondary",
           _hover: { bg: "card.hover" },
         },
       },
