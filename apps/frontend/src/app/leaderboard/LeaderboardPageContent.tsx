@@ -4,7 +4,7 @@ import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, T
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
@@ -12,7 +12,6 @@ import InfiniteScroll from "react-infinite-scroll-component"
 type Props = { roundId: string }
 export const LeaderboardPageContent = ({ roundId }: Props) => {
   const { account } = useWallet()
-  const router = useRouter()
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
@@ -84,7 +83,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
             <Heading size="md">{t("Not enough data for the week")}</Heading>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
+            <Text textStyle="sm" color="text.subtle" textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
           </VStack>
@@ -137,31 +136,24 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           pos="fixed"
           bottom={0}
           w="full"
-          bg="white"
-          boxShadow="0px -1px 9px 0px rgba(0, 0, 0, 0.08);"
+          bg="bg.primary"
           p={4}
           zIndex={2}
           left={0}
           right={0}
           borderTopWidth={1}
-          borderColor="gray.200">
+          borderColor="border.secondary">
           <VStack w="full" maxW={"breakpoint-md"} mx="auto" align="stretch">
             <LeaderboardRankingComponent ranking={yourRaking} isYourRanking={true} />
           </VStack>
         </VStack>
       )}
       <VStack gap={8} align="flex-start" w="full">
-        <Button
-          px={0}
-          variant="plain"
-          color="primary"
-          _hover={{
-            textDecoration: "underline",
-          }}
-          size="sm"
-          onClick={() => router.push("/")}>
-          <FaAngleLeft />
-          {t("Go back")}
+        <Button px={0} variant="plain" color="actions.tertiary.default" size="sm" asChild>
+          <NextLink href="/">
+            <FaAngleLeft />
+            {t("Go back")}
+          </NextLink>
         </Button>
         <HStack justify={"space-between"} w="full">
           <IconButton
@@ -169,13 +161,13 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             size={"lg"}
             aria-label="Next round"
             variant="plain"
-            color="primary"
+            color="actions.tertiary.default"
             disabled={isFirstRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
             <Icon as={FaAngleLeft} boxSize={5} />
           </IconButton>
 
-          <Heading size={{ base: "md", lg: "xl" }} fontWeight="bold">
+          <Heading size={{ base: "md", lg: "xl" }}>
             {t("Round {{id}} leaderboard", {
               id: selectedRoundId ?? "",
             })}
@@ -186,7 +178,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             size={"lg"}
             aria-label="Next round"
             variant="plain"
-            color="primary"
+            color="actions.tertiary.default"
             disabled={isLastRound}
             onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
             <Icon as={FaAngleRight} boxSize={5} />

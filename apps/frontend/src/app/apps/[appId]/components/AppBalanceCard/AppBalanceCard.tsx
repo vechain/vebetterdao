@@ -91,7 +91,7 @@ export const AppBalanceCard = () => {
                     </Text>
                   }>
                   <span>
-                    <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
+                    <Icon as={FiInfo} color="logo" position={"relative"} />
                   </span>
                 </Tooltip>
               </HStack>
@@ -105,7 +105,7 @@ export const AppBalanceCard = () => {
                 mt={1}
                 disabled={!isAppAdminOrTreasuryAddress}
                 onClick={onOpenDepositOrWithdraw}
-                variant={"primaryAction"}
+                variant={"primary"}
                 borderRadius={"full"}
                 w={"full"}>
                 {t("Transfer")}
@@ -123,7 +123,7 @@ export const AppBalanceCard = () => {
                 <Text textStyle="md">{t("Rewards Pool")}</Text>
                 <Tooltip content={<Text>{t("Amount of B3TR available for rewards distribution")}</Text>}>
                   <span>
-                    <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
+                    <Icon as={FiInfo} color="logo" position={"relative"} />
                   </span>
                 </Tooltip>
               </HStack>
@@ -136,11 +136,10 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"flex-end"} gap={0}>
               <Button
                 mt={1}
+                colorPalette={isPaused ? "red" : undefined}
                 disabled={!isAppAdmin}
                 onClick={onOpenManagementCenter}
-                variant={isPaused ? "dangerFilledTonal" : "primaryAction"}
-                color={isPaused ? "#C84968" : "white"}
-                borderRadius={"full"}
+                variant={isPaused ? "solid" : "primary"}
                 w={"full"}>
                 {isPaused ? t("Resume") : t("Manage")}
               </Button>
@@ -150,10 +149,10 @@ export const AppBalanceCard = () => {
             <Separator borderColor="#E2E8F0" />
           </Box>
           <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
-            <Text fontSize="md" fontWeight={500} color="#004CFC">
+            <Text textStyle="md" fontWeight="semibold" color="brand.primary">
               {t("View history")}
             </Text>
-            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />
+            <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="actions.tertiary.default" cursor="pointer" />
           </HStack>
           {!isAppAdmin && (
             <GenericAlert

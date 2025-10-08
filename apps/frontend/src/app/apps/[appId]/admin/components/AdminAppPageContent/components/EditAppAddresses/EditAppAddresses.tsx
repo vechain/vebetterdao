@@ -47,14 +47,14 @@ export const EditAppAddresses = ({ form }: Props) => {
 
   return (
     <VStack align="stretch" gap="32px">
-      <Text color="#D23F63" fontSize={"24px"} fontWeight={700}>
+      <Text color="#D23F63" textStyle="2xl" fontWeight="bold">
         {t("Sensitive parameters")}
       </Text>
       <VStack align="stretch">
-        <Text fontSize="md" fontWeight={"800"}>
+        <Text textStyle="md" fontWeight={"800"}>
           {t("Treasury address")}
         </Text>
-        <Text fontSize="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
+        <Text textStyle="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
         <WalletAddressInput
           onAddressResolved={handleTeamWalletAddressResolved}
           disabled={!editTeamWalletAddress}
@@ -66,14 +66,15 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editTeamWalletAddress ? null : (
               <Button
-                variant="primaryGhost"
+                variant="ghost"
+                color="actions.tertiary.default"
                 bg="#FFFFFF"
                 borderY="1px solid #f4f6f9"
                 borderRight="1px solid #f4f6f9"
                 onClick={modalEditTeamWalletAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
-                fontWeight={500}>
+                fontWeight="semibold">
                 <UilPen size="16px" />
                 {t("Edit")}
               </Button>
@@ -82,10 +83,10 @@ export const EditAppAddresses = ({ form }: Props) => {
         />
       </VStack>
       <VStack align="stretch">
-        <Text fontSize="md" fontWeight={"800"}>
+        <Text textStyle="md" fontWeight={"800"}>
           {t("Admin address")}
         </Text>
-        <Text fontSize="sm">
+        <Text textStyle="sm">
           {t(
             "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
           )}
@@ -101,14 +102,15 @@ export const EditAppAddresses = ({ form }: Props) => {
             },
             endElement: editAdminAddress ? null : (
               <Button
-                variant="primaryGhost"
+                variant="ghost"
+                color="actions.tertiary.default"
                 bg="#FFFFFF"
                 borderY="1px solid #f4f6f9"
                 borderRight="1px solid #f4f6f9"
                 onClick={modalEditAdminAddress.onOpen}
                 rounded="8px"
                 roundedLeft={0}
-                fontWeight={500}>
+                fontWeight="semibold">
                 <UilPen size="16px" />
                 {t("Edit")}
               </Button>

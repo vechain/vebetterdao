@@ -25,14 +25,14 @@ export const ResultsDisplay = ({ proposalId, segments, helperText }: ResultsDisp
         <>
           <HStack key={`${proposalId}-${segment.color}`} {...segmentProps}>
             <Icon as={segment.icon} boxSize={5} color={segment.color} />
-            <Text fontSize="md" color="text.subtle">
+            <Text textStyle="md" color="text.subtle">
               {`${Math.floor(segment.percentage)}%`}
             </Text>
           </HStack>
         </>
       ))}
       {helperText && (
-        <Text fontSize="md" color="text.subtle">
+        <Text textStyle="md" color="text.subtle">
           {helperText}
         </Text>
       )}

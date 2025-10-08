@@ -69,9 +69,7 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Heading fontSize="24px" fontWeight="700">
-        {t("Featured Image")}
-      </Heading>
+      <Heading size="2xl">{t("Featured Image")}</Heading>
       <Flex w={computedWidth} h="76px" position={"relative"} rounded="12px" mt={4}>
         <Image
           src={featuredImage ?? notFoundImage}
@@ -98,11 +96,11 @@ export const EditVeWorldFeatureImage = ({ form }: Props) => {
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
           <IconButton aria-label="Edit featured image" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
-            <UilPen color="#FFFFFF" />
+            <UilPen color="white" />
           </IconButton>
         </Flex>
       </Flex>
-      <Text fontSize={14} color={invalidFormat ? "red" : "gray"} pt={0}>
+      <Text textStyle="sm" color={invalidFormat ? "red" : "gray"} pt={0}>
         {invalidFormat ? invalidMessage : <VeWorldFeaturedImageGuidelines />}
       </Text>
     </VStack>

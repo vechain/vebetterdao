@@ -14,16 +14,15 @@ import {
 import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 import { Trans, useTranslation } from "react-i18next"
 import { AllocationStateBadge, B3TRIcon, ProposalCompactCard } from "@/components"
-import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import NextLink from "next/link"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
 
@@ -68,8 +67,8 @@ export const RoundInfoBottomSheet = () => {
           bottom={0}
           left={0}
           right={0}
-          bg="#B1F16C"
-          color="#000000"
+          bg="brand.secondary"
+          color="white"
           py={5}
           px={4}
           borderTopRadius="20px"
@@ -78,12 +77,12 @@ export const RoundInfoBottomSheet = () => {
           zIndex={2}>
           <Box>
             <Skeleton loading={isCardLoading}>
-              <Heading fontSize={"20px"} fontWeight={400}>
+              <Heading size={"xl"} color="text.default" fontWeight="normal">
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
             <Skeleton loading={isCardLoading}>
-              <Text fontSize={"14px"} fontWeight={400}>
+              <Text textStyle={"sm"}>
                 {t("{{from}} to {{to}}", {
                   from: allocationRound.voteStartTimestamp?.format("MMM D"),
                   to: allocationRound.voteEndTimestamp?.format("MMM D"),
@@ -111,12 +110,12 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading fontSize={"20px"} fontWeight={400} color="#252525">
+                <Heading size={"xl"} fontWeight="normal" color="text.default">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
               <Skeleton loading={isCardLoading}>
-                <Text fontSize={"14px"} fontWeight={400}>
+                <Text textStyle={"sm"}>
                   {t("{{from}} to {{to}}", {
                     from: allocationRound.voteStartTimestamp?.format("MMM D"),
                     to: allocationRound.voteEndTimestamp?.format("MMM D"),
@@ -135,30 +134,27 @@ export const RoundInfoBottomSheet = () => {
           </HStack>
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
-              <Heading fontSize="18px" fontWeight={700}>
-                {t("Allocations voting")}
-              </Heading>
-              <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
+              <Heading size="lg">{t("Allocations voting")}</Heading>
+              <Text textStyle="xs" color="text.subtle">
                 {t("Each week, you can vote for your favorite apps to help distribute resources among them!")}
               </Text>
             </VStack>
             <VStack
               w="full"
-              border="1px hover-contrast-bg solid"
+              border="sm"
+              borderColor="border.secondary"
               align={"flex-start"}
-              bg="info-bg"
+              bg="bg.primary"
               p="12px"
-              borderRadius={"md"}
+              borderRadius={"xl"}
               gap={4}>
               <HStack w="full" justify="space-between">
                 <VStack gap={2} align={"flex-start"}>
                   <AllocationStateBadge
                     roundId={allocationRound.roundId ?? ""}
                     data-testid={"round-#" + allocationRound.roundId + "-status"}
-                    renderBadge={false}
-                    renderIcon={true}
                   />
-                  <Text fontSize="14px" fontWeight={600}>
+                  <Text textStyle="sm" fontWeight="semibold">
                     {t("#{{round}} allocation round", { round: allocationRound.roundId })}
                   </Text>
                 </VStack>
@@ -166,29 +162,21 @@ export const RoundInfoBottomSheet = () => {
                   <HStack gap={1} align="center">
                     <B3TRIcon boxSize="16px" colorVariant="dark" />
                     <Skeleton loading={amountsLoading}>
-                      <Heading fontSize="16x" fontWeight={700}>
-                        {getCompactFormatter(2).format(totalAmount)}
-                      </Heading>
+                      <Heading size="md">{getCompactFormatter(2).format(totalAmount)}</Heading>
                     </Skeleton>
                   </HStack>
-                  <Text fontSize="10px" color="#6A6A6A">
+                  <Text textStyle="xxs" color="text.subtle">
                     {t("Total to distribute")}
                   </Text>
                 </VStack>
               </HStack>
               <SimpleGrid w="full" columns={canVote ? 2 : 1} gap={4}>
-                <Button
-                  onClick={() => router.push(`/rounds/${allocationRound.roundId}`)}
-                  variant="primarySubtle"
-                  rounded={"full"}>
-                  {t("See More")}
+                <Button asChild variant="secondary" rounded={"full"}>
+                  <NextLink href={`/rounds/${allocationRound.roundId}`}>{t("See More")}</NextLink>
                 </Button>
                 {canVote && (
-                  <Button
-                    variant="primaryAction"
-                    onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
-                    rounded={"full"}>
-                    {t("Vote now")}
+                  <Button asChild variant="primary" rounded={"full"}>
+                    <NextLink href={`/rounds/${allocationRound.roundId}/vote`}>{t("Vote now")}</NextLink>
                   </Button>
                 )}
               </SimpleGrid>
@@ -196,10 +184,10 @@ export const RoundInfoBottomSheet = () => {
           </VStack>
           <VStack gap={4} w="full" align="flex-start">
             <VStack gap={2} w="full" align="flex-start">
-              <Heading fontSize="18px" fontWeight={700}>
+              <Heading size="lg" fontWeight="bold">
                 {t("Proposals and Grants looking for support and approval")}
               </Heading>
-              <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
+              <Text textStyle="xxs" color="#6A6A6A">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
               </Text>
             </VStack>

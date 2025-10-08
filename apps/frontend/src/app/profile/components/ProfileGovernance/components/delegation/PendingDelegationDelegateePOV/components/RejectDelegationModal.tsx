@@ -26,18 +26,18 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
-          <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
+          <ExclamationTriangle color="status.negative.primary" size={triangleSize} />
+          <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to reject the Voting Qualification delegation?")}
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You’re rejecting it from")}</Text>
-          <Text fontSize="sm">{delegator}</Text>
+          <Text fontWeight="semibold">{t("You’re rejecting it from")}</Text>
+          <Text textStyle="sm">{delegator}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
+          <Box color="status.negative.primary" textStyle="sm">
             <Alert.Title as="span">
               {t("You will not be able to vote using delegator's Voting Qualification")}
             </Alert.Title>
@@ -45,10 +45,10 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleDelegate}>
+          <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={handleClose}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

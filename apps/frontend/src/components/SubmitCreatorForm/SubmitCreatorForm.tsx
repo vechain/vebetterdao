@@ -190,7 +190,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
       <Card.Body w="full" p={{ base: 2, md: 6 }}>
         <VStack gap={4} w="full">
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={6}>
+            <Heading size="xl" pb={6}>
               {t("App Information")}
             </Heading>
             <VStack w="full" gap={4} align="stretch">
@@ -272,7 +272,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               />
               <Field.Root invalid={!!errors.adminWalletAddress}>
                 <Field.Label>{t("Creator NFT Wallet Address")}</Field.Label>
-                <Text fontSize="xs" color="gray.500" mb={2}>
+                <Text textStyle="xs" color="gray.500" mb={2}>
                   {t("The wallet address where you will receive your Creator NFT")}
                 </Text>
                 <WalletAddressInput
@@ -287,12 +287,12 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
             </VStack>
           </Card.Root>
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={6}>
+            <Heading size="xl" pb={6}>
               {t("Your Information")}
             </Heading>
             <VStack w="full" gap={4} align="stretch">
               <Field.Root invalid={!!errors.githubUsername}>
-                <Field.Label fontSize="md">{t("GitHub Username")}</Field.Label>
+                <Field.Label textStyle="md">{t("GitHub Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
@@ -307,7 +307,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
               </Field.Root>
 
               <Field.Root invalid={!!errors.twitterUsername}>
-                <Field.Label fontSize="md">{t("X Username")}</Field.Label>
+                <Field.Label textStyle="md">{t("X Username")}</Field.Label>
                 <Button
                   backgroundColor={"black"}
                   color={"white"}
@@ -353,7 +353,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
           </Card.Root>
 
           <Card.Root w="full" alignItems="start" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={4}>
+            <Heading size="xl" pb={4}>
               {t("Testing Requirements")}
             </Heading>
             <VStack w="full" gap={4} align="stretch">
@@ -395,7 +395,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
             </VStack>
           </Card.Root>
           <Card.Root w="full" borderRadius="xl" borderColor="gray.200" p={4}>
-            <Heading size="xl" fontWeight="bold" pb={4}>
+            <Heading size="xl" pb={4}>
               {t("Security Requirements")}
             </Heading>
             <VStack align="start" gap={3}>
@@ -416,7 +416,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
       </Card.Body>
       <Card.Footer display={"flex"} flexDir={"column"} w="full" alignItems="center" justifyContent="center">
         <Button
-          variant="primaryAction"
+          variant="primary"
           disabled={Object.keys(errors).length > 0}
           type="submit"
           w="full"

@@ -62,13 +62,13 @@ export const ErrorModalContent = ({
               target="_blank"
               rel="noopener noreferrer"
               color="gray.500"
-              fontSize={"14px"}
+              textStyle="sm"
               textDecoration={"underline"}>
               {t("View it on the explorer")}
             </Link>
           )}
           {showTryAgainButton && (
-            <Button variant={"outline"} fontWeight={700} w="full" onClick={onTryAgain}>
+            <Button variant={"outline"} w="full" onClick={onTryAgain}>
               {t("Try again")}
             </Button>
           )}

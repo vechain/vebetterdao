@@ -1,12 +1,11 @@
 "use client"
 import { useCanUserVote, useRoundXApps } from "@/api"
-import { Heading, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
-import { ResponsiveCard } from "@/components"
 import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottomBar"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
@@ -73,12 +72,10 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   if (!shouldSeeThePage.data) return null
 
   return (
-    <ResponsiveCard>
-      <VStack w="full" gap={8} align={"flex-start"}>
-        <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
-          {t("Select the apps you want to vote")}
-        </Heading>
-        <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">
+    <Card.Root bg={{ base: "transparent", md: "bg.primary" }} px={{ base: "0", md: "6" }} w="full">
+      <VStack w="full" gap={4} align={"flex-start"}>
+        <Heading size={["xl", "xl", "2xl"]}>{t("Select the apps you want to vote")}</Heading>
+        <Text textStyle={"md"} color="text.subtle">
           {t(
             "The apps you vote will receive a B3TR allocation to distribute among its users as rewards for completing sustainable actions. Select your favorite apps to add them to your vote.",
           )}
@@ -95,17 +92,17 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
           onContinue={onContinue}
           helperText={
             onContinueError ? (
-              <Text fontSize={"16px"} fontWeight={600} color="#C84968">
+              <Text textStyle={"md"} fontWeight="semibold" color="status.negative.primary">
                 {onContinueError}
               </Text>
             ) : (
-              <Text fontSize={"16px"} fontWeight={400}>
+              <Text textStyle={"md"}>
                 <Trans i18nKey={"{{amount}} selected apps"} values={{ amount: selectedApps?.length ?? 0 }} t={t} />
               </Text>
             )
           }
         />
       </VStack>
-    </ResponsiveCard>
+    </Card.Root>
   )
 }

@@ -625,7 +625,8 @@
   "Pending request": "Pending request",
   "CAST YOUR VOTE NOW! ⚖️": "CAST YOUR VOTE NOW! ⚖️",
   "It’s time to make your voice heard in this round and earn exciting rewards!": "It’s time to make your voice heard in this round and earn exciting rewards!",
-  "CLAIM YOUR REWARDS NOW! 💰": "CLAIM YOUR REWARDS NOW! 💰",
+  "CLAIM YOUR REWARDS": "CLAIM YOUR REWARDS",
+  "Claim your rewards": "Claim your rewards",
   "Congratulations! You have B3TR to claim for casting your vote in governance.": "Congratulations! You have B3TR to claim for casting your vote in governance.",
   "TIME TO STEP UP! 🏃🏼‍♂️": "TIME TO STEP UP! 🏃🏼‍♂️",
   "Complete Better Actions in our apps and unlock your right to vote. Make your impact count!": "Complete Better Actions in our apps and unlock your right to vote. Make your impact count!",
@@ -1041,7 +1042,7 @@
   "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.": "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
   "Next snapshot": "Next snapshot",
   "You have been signalled": "You have been signalled",
-  "You have been signalled by <em>{{appSignals}}</em>.": "You have been signalled by <em>{{appSignals}}</em>.",
+  "You have been signalled by": "You have been signalled by",
   "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.",
   "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue or you can file an appeal by clicking on the button below.": "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue or you can file an appeal by clicking on the button below.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.",
@@ -1497,6 +1498,8 @@
   "Are you sure you want to cancel this {{proposalType}}": "Are you sure you want to cancel this {{proposalType}}",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.",
   "Showing": "Showing",
+  "You have reached the maximum GM NFT level.": "You have reached the maximum GM NFT level.",
   "Search by proposal name": "Search by proposal name",
-  "Created": "Created"
+  "Created": "Created",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Removing your endorsement from an app may result in it no longer being selected for allocations."
 }

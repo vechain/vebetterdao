@@ -57,7 +57,7 @@ export const RegisterUserAction = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Register user participation")}</Heading>
-        <Text fontSize="sm">
+        <Text textStyle="sm">
           {t("Register an action for a user for a specific app. Optionally, for a specific round too")}
         </Text>
       </Card.Header>

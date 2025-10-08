@@ -11,7 +11,7 @@ export const FormAccordionSection = ({ title, customTitle, children }: FormAccor
     <Accordion.Item borderTop="none" value={title || "section"}>
       <Accordion.ItemTrigger w="full" py={4} textAlign="left" justifyContent="space-between">
         {customTitle || (
-          <Text fontSize="lg" fontWeight="semibold">
+          <Text textStyle="lg" fontWeight="semibold">
             {title}
           </Text>
         )}

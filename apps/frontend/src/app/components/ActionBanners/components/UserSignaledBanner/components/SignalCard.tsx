@@ -7,7 +7,7 @@ type Props = {
 }
 export const SignalCard = ({ appName, reason }: Props) => {
   return (
-    <Card.Root variant={"filledSmall"} w="full">
+    <Card.Root size="sm" variant={"primary"} w="full">
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>
@@ -16,12 +16,12 @@ export const SignalCard = ({ appName, reason }: Props) => {
             </Flex>
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
-                <Text fontSize={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {appName}
                 </Text>
               </HStack>
               {reason && (
-                <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+                <Text textStyle={"xs"} color={"#6A6A6A"}>
                   {reason}
                 </Text>
               )}

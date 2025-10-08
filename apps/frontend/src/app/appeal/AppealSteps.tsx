@@ -20,6 +20,7 @@ import {
   signalResetActions,
   signaledAfterKYC,
 } from "@/constants"
+import NextLink from "next/link"
 
 export const AppealSteps = () => {
   const router = useRouter()
@@ -205,8 +206,8 @@ export const AppealSteps = () => {
       return (
         <Text>
           {step.description}{" "}
-          <Link color="blue.500" href={step.linkUrl} textDecoration="underline">
-            {step.linkText}
+          <Link color="blue.500" asChild textDecoration="underline">
+            <NextLink href={step.linkUrl}>{step.linkText}</NextLink>
           </Link>
         </Text>
       )
@@ -254,7 +255,7 @@ export const AppealSteps = () => {
       {userSignaledCount >= 1 && hasSuccessfulReset && (
         <VStack align="stretch" gap={2}>
           <Alert.Root status="warning" size="md" borderRadius="16px">
-            <Box lineHeight={"1.20rem"} fontSize="md" color="#F29B32">
+            <Box textStyle="md" color="status.positive.primary">
               <Alert.Title>
                 {
                   "You have been flagged again after your KYC. Please reach out to the app admin that flagged you to restore your access."

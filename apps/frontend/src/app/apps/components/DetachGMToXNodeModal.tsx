@@ -44,17 +44,17 @@ export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }
           <CloseButton />
         </Dialog.CloseTrigger>
         <Dialog.Header>
-          <Heading fontSize="xl">{t("Detach Node from GM NFT")}</Heading>
+          <Heading textStyle="xl">{t("Detach Node from GM NFT")}</Heading>
         </Dialog.Header>
         {levelAfterDetach && gmLevel !== levelAfterDetach && (
           <Dialog.Body>
             <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
               <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
-              <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
+              <Text color={"rgba(200, 73, 104, 1)"} textStyle="sm">
                 <Trans
                   i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
                   values={{ level: levelAfterDetach }}
-                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                  components={{ bold: <Text as="span" fontWeight="semibold" /> }}
                 />
               </Text>
             </HStack>
@@ -62,10 +62,10 @@ export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }
         )}
         <Dialog.Footer w="full">
           <VStack alignItems="stretch" w="full">
-            <Button variant={"primaryAction"} w={"full"} onClick={handleDetachment}>
+            <Button variant={"primary"} w={"full"} onClick={handleDetachment}>
               {t("Detach my Node")}
             </Button>
-            <Button variant={"primaryGhost"} w={"full"} onClick={handleClose}>
+            <Button variant="ghost" color="actions.tertiary.default" w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

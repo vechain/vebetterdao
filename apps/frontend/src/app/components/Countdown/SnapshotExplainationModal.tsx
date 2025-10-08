@@ -1,4 +1,4 @@
-import { Dialog, Heading, VStack, Text, Image, Box, Button, Portal, CloseButton, Card } from "@chakra-ui/react"
+import { Dialog, Heading, VStack, Text, Image, Box, Button, Portal, CloseButton, Card, Link } from "@chakra-ui/react"
 import { t } from "i18next"
 
 interface Props {
@@ -22,16 +22,6 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
     },
   ]
 
-  const LINK_TO_DOCS = () => {
-    window.open("https://docs.vebetterdao.org/vebetterdao/x2earn-allocations", "_blank", "noopener")
-  }
-
-  const renderStep = (step: number) => (
-    <Text fontSize={10} color={"#6A6A6A"}>
-      {t("STEP {{value}}", { value: step })}
-    </Text>
-  )
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"lg"}>
       <Portal>
@@ -46,12 +36,12 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
             </Dialog.Header>
             <Dialog.Body alignItems={"center"}>
               <VStack alignItems={"center"} gap={8}>
-                <Text fontSize={["sm", "lg"]}>
+                <Text textStyle={["sm", "lg"]}>
                   {t(
                     "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
                   )}
                 </Text>
-                <Text fontSize={["sm", "lg"]}>
+                <Text textStyle={["sm", "lg"]}>
                   {t("Swap your B3TR for VOT3 before the snapshot to increase your voting power.")}
                 </Text>
 
@@ -61,31 +51,36 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                   justifyContent={"space-between"}
                   alignItems={"flex-start"}
                   gap={[2, 2, 4]}>
-                  {steps.map(step => (
+                  {steps.map((step, index) => (
                     <Card.Root
                       key={step.title}
                       flexDirection={"row"}
-                      variant="subtle"
                       w="full"
                       alignItems="center"
                       p={2}
-                      bg={"info-bg"}
-                      borderRadius={"9px"}>
+                      bg={"card.subtle"}
+                      borderRadius={"lg"}>
                       <Box boxSize={["70px", "100px"]} alignItems={"start"}>
                         <Image boxSize={["70px", "100px"]} src={step.image} alt={step.title} />
                       </Box>
                       <VStack gap={0} alignItems={"start"} p={1}>
-                        {renderStep(1)}
-                        <Text fontSize={["12px", "16px"]} fontWeight={700}>
-                          {step.title}
+                        <Text textStyle="xs" color={"#6A6A6A"}>
+                          {t("STEP {{value}}", { value: index + 1 })}
                         </Text>
+
+                        <Text textStyle={["xs", "md"]}>{step.title}</Text>
                       </VStack>
                     </Card.Root>
                   ))}
                 </VStack>
 
-                <Button variant="primaryAction" w={"full"} onClick={LINK_TO_DOCS}>
-                  {t("Learn more")}
+                <Button asChild variant="primary" w={"full"}>
+                  <Link
+                    href="https://docs.vebetterdao.org/vebetterdao/x2earn-allocations"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {t("Learn more")}
+                  </Link>
                 </Button>
               </VStack>
             </Dialog.Body>

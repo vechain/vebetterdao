@@ -27,7 +27,7 @@ export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, de
         <HStack gap={4}>
           <AddressIcon address={delegationAddress} w={12} h={12} rounded="full" />
           <VStack align="start">
-            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+            <Text fontWeight="semibold" textStyle={["sm", "sm", "lg"]}>
               {domain ?? humanAddress(delegationAddress, 4, 4)}
             </Text>
           </VStack>
@@ -40,11 +40,11 @@ export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, de
       </HStack>
       {isConnectedUser && (
         <HStack gap={4}>
-          <Button variant={"dangerGhost"} p={3} onClick={rejectDelegationModal.onOpen}>
-            <UilTimes color="#C84968" />
+          <Button colorPalette="red" variant={"ghost"} p={3} onClick={rejectDelegationModal.onOpen}>
+            <UilTimes color="status.negative.primary" />
             {t("Reject")}
           </Button>
-          <Button variant={"primaryGhost"} p={3} onClick={acceptDelegationModal.onOpen}>
+          <Button variant="ghost" color="actions.tertiary.default" p={3} onClick={acceptDelegationModal.onOpen}>
             <UilCheck color="#004CFC" />
             {t("Accept")}
           </Button>

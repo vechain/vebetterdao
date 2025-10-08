@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation"
+import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
 import { Alert, Box, Button, VStack, Code, Collapsible, useDisclosure, Text } from "@chakra-ui/react"
@@ -13,7 +13,6 @@ export const ResetingResult = ({
   resetingStatus: ResetStatus
   apiResponse: string | undefined
 }) => {
-  const router = useRouter()
   const { open: isOpen, onToggle } = useDisclosure()
   const { t } = useTranslation()
 
@@ -21,8 +20,8 @@ export const ResetingResult = ({
     <>
       {resetingStatus === RESET_STATUS.SUCCESS && (
         <VStack alignItems={"flex-start"} gap={2} mt={2}>
-          <Button variant="primaryAction" w="auto" onClick={() => router.push("/")}>
-            {t("Back to Dashboard")}
+          <Button asChild variant="primary" w="auto">
+            <NextLink href="/">{t("Back to Dashboard")}</NextLink>
           </Button>
         </VStack>
       )}
@@ -30,8 +29,8 @@ export const ResetingResult = ({
       {resetingStatus === RESET_STATUS.ERROR && (
         <VStack align="stretch" gap={2}>
           <Alert.Root status="error" size="md" borderRadius="16px">
-            <Alert.Indicator w={4} h={4} color="#C84968" />
-            <Box lineHeight={"1.20rem"} fontSize="md" color="#C84968">
+            <Alert.Indicator w={4} h={4} color="status.negative.primary" />
+            <Box textStyle="md" color="status.negative.primary">
               <Alert.Title>
                 {t("Unable to process request. Try refreshing or contact support.")}{" "}
                 <Button
@@ -50,7 +49,7 @@ export const ResetingResult = ({
 
               <Collapsible.Root open={isOpen}>
                 <Collapsible.Content mt={2} borderRadius="md" bg={"gray.50"} overflowX="auto">
-                  <Text fontSize="xs" p={2} fontWeight="bold" color={"gray.600"}>
+                  <Text textStyle="xs" p={2} fontWeight="bold" color={"gray.600"}>
                     {t("Error Details")}
                   </Text>
                   <Code
@@ -60,7 +59,7 @@ export const ResetingResult = ({
                     borderRadius="md"
                     bg={"gray.100"}
                     color={"black"}
-                    fontSize="xs">
+                    textStyle="xs">
                     {apiResponse}
                   </Code>
                 </Collapsible.Content>

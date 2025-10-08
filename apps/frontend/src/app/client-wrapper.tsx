@@ -68,12 +68,11 @@ export function ClientWrapper({ children }: { children: React.ReactNode }) {
         <Navbar />
         <Flex flex={1}>
           <Container
-            mt={{ base: 2, md: 10 }}
-            mb={[20, 20, 20]}
-            px={[4, 4, 4]}
+            flex={1}
+            my={{ base: 4, md: 10 }}
+            px={4}
             maxW="breakpoint-xl"
             display={"flex"}
-            flex={1}
             alignItems={"center"}
             justifyContent={"flex-start"}
             flexDirection={"column"}>

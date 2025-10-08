@@ -82,16 +82,16 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished, t])
 
   return (
-    <Card.Root w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">
+    <Card.Root w="full" borderRadius={"3xl"} variant="primary" data-testid="allocation-round-header-card">
       <Card.Body>
         <Stack direction={["column", "row"]} justify="space-between" gap={12} w="full" alignItems={"stretch"}>
           <VStack gap={4} align="flex-start" flex={2}>
             <VStack gap={2} align="flex-start">
               <Text
-                color="#6A6A6A"
-                fontSize="lg"
+                color="text.subtle"
+                textStyle="lg"
                 textTransform={"uppercase"}
-                fontWeight={600}
+                fontWeight="semibold"
                 data-testid="round-title">
                 {t("Round #{{round}}", {
                   round: roundId,
@@ -102,7 +102,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
             </VStack>
 
             <Skeleton loading={isLoading}>
-              <Text color="gray.500" fontSize={["sm", "md"]}>
+              <Text color="gray.500" textStyle={["sm", "md"]}>
                 {t(
                   "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.",
                 )}
@@ -120,35 +120,31 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 align={["flex-start", "flex-start", "center"]}>
                 <Box>
                   <Skeleton loading={roundStateLoading}>
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                       {isFinished ? t("Finished") : t("Finishes in")}
                     </Text>
                   </Skeleton>
                   <Skeleton loading={isLoading || roundStateLoading}>
                     <HStack gap={2}>
                       <Icon as={FaClock} boxSize={4} color="contrast-fg-on-muted" />
-                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                        {remainingTime}
-                      </Text>
+                      <Text textStyle={["lg", "lg", "md"]}>{remainingTime}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 <Box>
-                  <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                  <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                     {t("Participating")}
                   </Text>
                   <Skeleton loading={roundAppsLoading}>
                     <HStack gap={2}>
                       <Icon as={PiSquaresFourFill} boxSize={4} />
-                      <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                        {t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}
-                      </Text>
+                      <Text textStyle={["lg", "lg", "md"]}>{t("{{apps}} apps", { apps: roundApps?.length ?? 0 })}</Text>
                     </HStack>
                   </Skeleton>
                 </Box>
                 {!!account?.address && (
                   <Box data-testid="your-vote-box">
-                    <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
+                    <Text color="text.subtle" textStyle={["lg", "lg", "md"]}>
                       {t("Your vote")}
                     </Text>
                     <Skeleton loading={hasVotedLoading || userVotesLoading || votesAtSnapshotLoading}>
@@ -158,9 +154,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                         ) : (
                           <Icon as={MdHowToVote} boxSize={4} />
                         )}
-                        <Text fontSize={["lg", "lg", "md"]} fontWeight={400}>
-                          {yourVoteText}
-                        </Text>
+                        <Text textStyle={["lg", "lg", "md"]}>{yourVoteText}</Text>
                       </HStack>
                     </Skeleton>
                   </Box>
@@ -169,7 +163,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
               {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && !isFinished && (
                 <Button
                   data-testid="cast-your-vote-button"
-                  variant={"primaryAction"}
+                  variant={"primary"}
                   onClick={navigateToVote}
                   size={"lg"}
                   colorPalette={"primary"}

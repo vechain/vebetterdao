@@ -1,7 +1,7 @@
-import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { Button, Circle, Icon, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UserB3trActions, useXApps } from "@/api"
 import dayjs from "dayjs"
-import { LeafIcon } from "../../../Icons/LeafIcon"
+import { TbLeaf } from "react-icons/tb"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./components/ActionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -27,45 +27,41 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
   const actionModal = useDisclosure()
 
   return (
-    <Card.Root variant={"filledSmall"} w="full" onClick={actionModal.onOpen} cursor="pointer">
-      <Card.Body>
-        <HStack gap={3} w="full" justify="space-between">
-          <HStack gap={4}>
-            <Flex
-              w="fit-content"
-              h="fit-content"
-              p={2}
-              bg="#CDFF9F"
-              align="center"
-              justify="center"
-              borderRadius={"full"}>
-              <LeafIcon size={"1rem"} />
-            </Flex>
-            <VStack gap={0} align="stretch">
-              <HStack gap={0} flexWrap={"wrap"}>
-                <Text fontSize={"sm"} mr="1">
-                  {t("Better action on")}
-                </Text>
-                <Text fontSize={"sm"} fontWeight={600}>
-                  {getAppName(appId ?? "")}
-                </Text>
-              </HStack>
-              <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
-                {dayjs.unix(blockTimestamp ?? 0).fromNow()}
-              </Text>
-            </VStack>
-          </HStack>
-          <HStack gap={2}>
-            <Text fontWeight={600}>
-              {"+"}
-              {compactFormatter.format(Number(amountB3tr))}
-            </Text>
-            <Text fontWeight={400} fontSize={"sm"}>
-              {"B3TR"}
+    <>
+      <Button
+        variant="subtle"
+        onClick={actionModal.onOpen}
+        h="auto"
+        rounded="xl"
+        display="flex"
+        px={3}
+        py={2}
+        justifyContent="flex-start"
+        alignItems="center">
+        <Circle size={10} bg="brand.secondary-strong">
+          <Icon as={TbLeaf} color="brand.secondary" boxSize={4} />
+        </Circle>
+
+        <VStack gap={0} alignItems="flex-start" flex={1}>
+          <HStack gap={1} flexWrap={"wrap"}>
+            <Text textStyle={"sm"}>{t("Better action on")}</Text>
+            <Text textStyle={"sm"} fontWeight="semibold">
+              {getAppName(appId ?? "")}
             </Text>
           </HStack>
+          <Text textStyle={"xs"} color="text.subtle">
+            {dayjs.unix(blockTimestamp ?? 0).fromNow()}
+          </Text>
+        </VStack>
+
+        <HStack gap={0.5} alignItems="center">
+          <Text textStyle="md" fontWeight="semibold">
+            {"+"}
+            {compactFormatter.format(Number(amountB3tr))}
+          </Text>
+          <Text textStyle="sm">{"B3TR"}</Text>
         </HStack>
-      </Card.Body>
+      </Button>
       <ActionModal
         actionModal={actionModal}
         proof={proof}
@@ -74,6 +70,6 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
         blockTimestamp={blockTimestamp}
         b3trAmount={amountB3tr}
       />
-    </Card.Root>
+    </>
   )
 }

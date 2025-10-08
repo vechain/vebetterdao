@@ -49,22 +49,13 @@ export const darkPrimary = {
   active: "#004cfc",
 }
 
-export const lightSubtle = {
-  active: "#6A6A6A",
-}
-export const darkSubtle = {
-  active: "#979797",
-}
-
 export const lightThemeColors = {
   primary: lightPrimary,
   secondary: lighSecondary,
   tertiary: lightTertiary,
-  subtle: lightSubtle,
 }
 export const darkThemeColors = {
   primary: darkPrimary,
   secondary: lighSecondary,
   tertiary: lightTertiary,
-  subtle: darkSubtle,
 }

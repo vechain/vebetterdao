@@ -1,5 +1,5 @@
 import { CustomModalContent } from "@/components"
-import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, Icon } from "@chakra-ui/react"
 import { UilFileContract, UilPlus } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
@@ -66,13 +66,15 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
       <CustomModalContent>
         <Dialog.Body p={"40px"}>
           <VStack align="stretch" gap="32px">
-            <UilFileContract size="54px" color="#004CFC" />
-            <Heading fontSize="28px">{t("Add a new reward distributor")}</Heading>
+            <Icon color="logo" boxSize={14}>
+              <UilFileContract />
+            </Icon>
+            <Heading size="3xl">{t("Add a new reward distributor")}</Heading>
             <VStack align="stretch">
               <HStack justify={"space-between"}>
-                <Text fontSize="14px">{t("Contract or wallet address")}</Text>
+                <Text textStyle="sm">{t("Contract or wallet address")}</Text>
                 {distributorDomain && (
-                  <Text fontSize="14px" fontWeight={"600"}>
+                  <Text textStyle="sm" fontWeight="semibold">
                     {"@"}
                     {distributorDomain}
                   </Text>
@@ -94,13 +96,13 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
             </VStack>
             <VStack align="stretch">
               <Button
-                variant="primaryAction"
+                variant="primary"
                 disabled={!distributorAddress}
                 type="submit"
                 onClick={handleAddressFormSubmit(onSubmit)}>
                 {t("Add distributor")}
               </Button>
-              <Button variant="primaryGhost" onClick={handleClose}>
+              <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
                 {t("Cancel")}
               </Button>
             </VStack>
@@ -108,7 +110,7 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
         </Dialog.Body>
       </CustomModalContent>
       <Dialog.Trigger asChild>
-        <Button mt={4} onClick={onOpen} variant="primarySubtle" alignSelf={"flex-start"}>
+        <Button mt={4} onClick={onOpen} variant="ghost" color="actions.tertiary.default" alignSelf={"flex-start"}>
           <UilPlus size="14px" />
           {t("Add distributor")}
         </Button>

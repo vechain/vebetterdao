@@ -79,7 +79,7 @@ export const GrantsBanners = () => {
           hideBelow="md"
           pos={"absolute"}
           zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
+          variant={"subtle"}
           left={5}
           top={"50%"}
           transform={"translateY(-50%)"}
@@ -94,7 +94,7 @@ export const GrantsBanners = () => {
           hideBelow="md"
           pos={"absolute"}
           zIndex={2} // Ensure it's above the slides
-          variant={"primarySubtle"}
+          variant={"subtle"}
           right={5}
           top={"50%"}
           transform={"translateY(-50%)"}

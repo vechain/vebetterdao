@@ -62,7 +62,7 @@ export const AppDetailOverview = ({
     <>
       <VStack gap={4} align="stretch">
         {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body>
             <VStack align="stretch" gap={4}>
               <Skeleton loading={isBannerLoading}>
@@ -90,7 +90,7 @@ export const AppDetailOverview = ({
                           <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
                         </Skeleton>
                         <Skeleton loading={appMetadataLoading && !!appMetadata}>
-                          <Heading fontSize={"28px"} fontWeight={700}>
+                          <Heading size="3xl">
                             {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                           </Heading>
                         </Skeleton>
@@ -125,17 +125,17 @@ export const AppDetailOverview = ({
 
                       {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
                         <VStack align="stretch">
-                          <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+                          <Text textStyle={"sm"} color="text.subtle">
                             {t("Member since")}
                           </Text>
-                          <Text fontSize={"16px"} fontWeight={400}>
+                          <Text textStyle={"md"}>
                             {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
                           </Text>
                         </VStack>
                       )}
                       {appMetadata?.distribution_strategy ? (
                         <VStack align="flex-start" justify={"flex-start"}>
-                          <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+                          <Text textStyle={"sm"} color="text.subtle">
                             {t("Distribution Strategy")}
                           </Text>
                           <Button
@@ -144,7 +144,7 @@ export const AppDetailOverview = ({
                             p={0}
                             m={0}
                             variant={"ghost"}
-                            color="#6A6A6A"
+                            color="text.subtle"
                             onClick={() => {
                               onDistributionStrategyModalOpen()
                             }}>
@@ -164,9 +164,9 @@ export const AppDetailOverview = ({
                           <AdminAppPageButton />
                         </>
                       )}
-                      <Button flex={1} variant={"primaryAction"} onClick={goToWebsite}>
+                      <Button flex={1} variant={"primary"} onClick={goToWebsite}>
                         {t("Go to Website")}
-                        <UilArrowUpRight color="#FFFFFF" size={"16px"} />
+                        <UilArrowUpRight color="white" size={"16px"} />
                       </Button>
                       {isMobile && (
                         <>

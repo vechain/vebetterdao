@@ -28,10 +28,8 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>
       <CustomModalContent>
         <VStack gap={4} w="full" align="flex-start" p={"24px"}>
-          <Heading fontSize={"24px"} fontWeight={700}>
-            {t("Your votes")}
-          </Heading>
-          <Text fontSize="16px" fontWeight="400">
+          <Heading size="2xl">{t("Your votes")}</Heading>
+          <Text textStyle="md">
             <Trans
               i18nKey={"{{amount}} distributed among {{apps}} apps"}
               values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}

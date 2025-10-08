@@ -50,16 +50,16 @@ export const AdminPageContent = () => {
   const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember
   return (
     <Tabs.Root
-      w={"full"}
       variant="subtle"
-      data-testid="admin-page"
       colorPalette="blue"
+      w={"full"}
+      data-testid="admin-page"
       lazyMount
       defaultValue="emissions"
       fitted>
       <Tabs.Indicator rounded="full" />
       <Tabs.List
-        sm={{ gapX: 1 }}
+        sm={{ gapX: "1" }}
         overflowY="hidden"
         css={{
           scrollbarWidth: "none",
@@ -67,44 +67,18 @@ export const AdminPageContent = () => {
             display: "none",
           },
         }}>
-        <Tabs.Trigger minW="fit-content" value="emissions">
-          {"Emissions"}
-        </Tabs.Trigger>
-        {Number(currentRoundId) > 0 && (
-          <Tabs.Trigger minW="fit-content" value="allocation-rewards">
-            {"Allocation Rewards"}
-          </Tabs.Trigger>
-        )}
-        {permissions?.isAdminOfX2EarnApps && (
-          <Tabs.Trigger minW="fit-content" value="x2earn-apps">
-            {"X2Earn Apps"}
-          </Tabs.Trigger>
-        )}
-        <Tabs.Trigger minW="fit-content" value="utils">
-          {"Utils"}
-        </Tabs.Trigger>
-        <Tabs.Trigger minW="fit-content" value="contracts">
-          {"Contracts"}
-        </Tabs.Trigger>
-        {canSeePauseTab && (
-          <Tabs.Trigger minW="fit-content" value="pausing">
-            {"Pausing"}
-          </Tabs.Trigger>
-        )}
-        {canSeeVeBetterPassportTab && (
-          <Tabs.Trigger minW="fit-content" value="vebetter-passport">
-            {"VeBetter Passport"}
-          </Tabs.Trigger>
-        )}
-        {canSeeGalaxyMemberTab && (
-          <Tabs.Trigger minW="fit-content" value="galaxy-member">
-            {"Galaxy Member"}
-          </Tabs.Trigger>
-        )}
+        <Tabs.Trigger value="emissions">{"Emissions"}</Tabs.Trigger>
+        {Number(currentRoundId) > 0 && <Tabs.Trigger value="allocation-rewards">{"Allocation Rewards"}</Tabs.Trigger>}
+        {permissions?.isAdminOfX2EarnApps && <Tabs.Trigger value="x2earn-apps">{"X2Earn Apps"}</Tabs.Trigger>}
+        <Tabs.Trigger value="utils">{"Utils"}</Tabs.Trigger>
+        <Tabs.Trigger value="contracts">{"Contracts"}</Tabs.Trigger>
+        {canSeePauseTab && <Tabs.Trigger value="pausing">{"Pausing"}</Tabs.Trigger>}
+        {canSeeVeBetterPassportTab && <Tabs.Trigger value="vebetter-passport">{"VeBetter Passport"}</Tabs.Trigger>}
+        {canSeeGalaxyMemberTab && <Tabs.Trigger value="galaxy-member">{"Galaxy Member"}</Tabs.Trigger>}
       </Tabs.List>
 
       <Tabs.Content value="emissions">
-        <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+        <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
           <StartRoundCard />
           <GridItem />
         </Grid>
@@ -112,7 +86,7 @@ export const AdminPageContent = () => {
 
       {Number(currentRoundId) > 0 && (
         <Tabs.Content value="allocation-rewards">
-          <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+          <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
             <ClaimXAppAllocations />
             <BulkClaimXAppsAllocations />
           </Grid>
@@ -120,7 +94,7 @@ export const AdminPageContent = () => {
       )}
       {permissions?.isAdminOfX2EarnApps && (
         <Tabs.Content value="x2earn-apps">
-          <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+          <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
             <UpdateReceiverAddress />
             <UpdateAppsEligibility />
             <XAppCheckEndorsement />
@@ -130,7 +104,7 @@ export const AdminPageContent = () => {
       )}
 
       <Tabs.Content value="utils">
-        <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+        <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
           <B3trAllowance />
           <UpdateRoleCard />
           {canSeeX2EarnCreatorUtils ? <ManageCreatorsNFT /> : undefined}
@@ -154,7 +128,7 @@ export const AdminPageContent = () => {
       )}
       {canSeeGalaxyMemberTab && (
         <Tabs.Content value="galaxy-member">
-          <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+          <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap="6" w="full">
             <GMSetMaxLevel />
           </Grid>
         </Tabs.Content>

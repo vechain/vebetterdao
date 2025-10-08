@@ -1,5 +1,5 @@
 import { useAllocationPoolEvents } from "@/api"
-import { HStack, Heading, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { HStack, Heading, Image, Skeleton, Stat } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
@@ -45,34 +45,25 @@ export const LatestAllocationDetails = ({ appId }: { appId: string }) => {
 
   return (
     <Skeleton loading={isLoading} w={"full"}>
-      <HStack
-        bg={"light-contrast-on-card-bg"}
-        py={6}
-        px={3}
-        h="full"
-        w="full"
-        borderRadius={"2xl"}
-        justify={"space-between"}
-        alignItems={"center"}>
-        <VStack align="self-start" gap={0}>
-          <HStack>
-            <Image h="24px" w="24px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Heading fontSize="24px">{compactFormatter.format(lastRoundAllocationReceived)}</Heading>
-          </HStack>
-          <Text fontSize={"sm"} color={"gray.500"}>
-            {t("Latest allocation")}
-          </Text>
-        </VStack>
-
-        <VStack align="self-start" color={percentageChange >= 0 ? "#3DBA67" : "#C84968"} fontSize="14px" gap={0}>
-          <Text>
+      <Stat.Root>
+        <Stat.Label>{t("Latest allocation")}</Stat.Label>
+        <HStack alignItems="center" justifyContent="space-between">
+          <Stat.ValueText>
+            <HStack>
+              <Image aspectRatio="square" w="6" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
+              <Heading size="2xl" color="text.default">
+                {compactFormatter.format(lastRoundAllocationReceived)}
+              </Heading>
+            </HStack>
+          </Stat.ValueText>
+          <Stat.HelpText color={percentageChange >= 0 ? "status.positive.primary" : "status.negative.primary"}>
             {percentageChange >= 0 ? "+" : ""}
             {compactFormatter.format(percentageChange)}
-            {"% than "}
-          </Text>
-          <Text>{t("previous round")}</Text>
-        </VStack>
-      </HStack>
+            {"% than "} <br />
+            {t("previous round")}
+          </Stat.HelpText>
+        </HStack>
+      </Stat.Root>
     </Skeleton>
   )
 }

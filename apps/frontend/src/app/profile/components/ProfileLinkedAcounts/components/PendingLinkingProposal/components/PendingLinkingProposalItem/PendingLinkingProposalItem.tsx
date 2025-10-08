@@ -29,8 +29,8 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
             <HStack>
               {domain && (
                 <Text
-                  fontWeight="600"
-                  fontSize={["sm", "sm", "lg"]}
+                  fontWeight="semibold"
+                  textStyle={["sm", "sm", "lg"]}
                   borderRight={"1px solid"}
                   paddingRight={2}
                   lineClamp={1}
@@ -38,7 +38,7 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
                   {humanDomain(domain, 8, 4)}
                 </Text>
               )}
-              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} title={secondaryAccount}>
+              <Text fontWeight="semibold" textStyle={["sm", "sm", "lg"]} title={secondaryAccount}>
                 {humanAddress(secondaryAccount, 4, 4)}
               </Text>
             </HStack>
@@ -50,11 +50,11 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
       </HStack>
       {isConnectedUser && (
         <HStack gap={4}>
-          <Button variant={"dangerGhost"} flex={1} p={3} onClick={rejectLinkingModal.onOpen}>
-            <UilTimes color="#C84968" />
+          <Button colorPalette="red" variant={"ghost"} flex={1} p={3} onClick={rejectLinkingModal.onOpen}>
+            <UilTimes color="status.negative.primary" />
             {t("Reject")}
           </Button>
-          <Button variant={"primaryGhost"} flex={1} p={3} onClick={acceptLinkingModal.onOpen}>
+          <Button variant="ghost" color="actions.tertiary.default" flex={1} p={3} onClick={acceptLinkingModal.onOpen}>
             <UilCheck color="#004CFC" />
             {t("Accept")}
           </Button>

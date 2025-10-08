@@ -72,8 +72,6 @@ export const AppEndorsementInfoCard = ({
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
 
-  const lookForEndorsersButtonVariant = !shouldRenderEndorseButton ? "primaryAction" : "primarySubtle"
-
   const shouldDisableEndorsementButton = useMemo(() => {
     return (
       nodeEndorsingApp?.isXNodeDelegator || nodeEndorsingApp?.isXNodeOnCooldown || nodeEndorsingApp?.xNodePoints === 0
@@ -120,7 +118,7 @@ export const AppEndorsementInfoCard = ({
       buttonComponents.push(
         <Button
           key="endorseButton"
-          variant="primaryAction"
+          variant="primary"
           onClick={onOpenEndorsementModal}
           disabled={shouldDisableEndorsementButton}
           w="full">
@@ -140,7 +138,7 @@ export const AppEndorsementInfoCard = ({
           onClick={() =>
             AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
           }>
-          <Button w="full" variant={lookForEndorsersButtonVariant}>
+          <Button w="full" variant={shouldRenderEndorseButton ? "secondary" : "primary"}>
             {t("Look for endorsers")}
           </Button>
         </Link>,
@@ -152,9 +150,11 @@ export const AppEndorsementInfoCard = ({
         <Link asChild>
           <Button
             key="removeEndorsementButton"
-            variant="plain"
-            color="red.300"
-            fontSize="md"
+            rounded="xl"
+            mt="4"
+            variant="outline"
+            colorPalette="red"
+            textStyle="md"
             fontWeight="semibold"
             onClick={onOpenUnendorsementModal}
             w="full"
@@ -177,17 +177,20 @@ export const AppEndorsementInfoCard = ({
     onOpenEndorsementModal,
     shouldDisableEndorsementButton,
     totalXNodePoints,
-    lookForEndorsersButtonVariant,
     onOpenUnendorsementModal,
   ])
 
   return (
     <>
-      <Card.Root w={"full"} variant="baseWithBorder">
+      <Card.Root w={"full"} variant="primary">
         <Card.Header>
           <HStack justifyContent="space-between" alignItems="center" w="full">
             <Heading size="xl">{t("Endorsement")}</Heading>
-            <Link fontSize="16px" fontWeight={600} color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+            <Link
+              textStyle="md"
+              fontWeight="semibold"
+              color="actions.secondary.text-lighter"
+              onClick={onOpenEndorsementInfoModal}>
               {t("History")}
             </Link>
           </HStack>

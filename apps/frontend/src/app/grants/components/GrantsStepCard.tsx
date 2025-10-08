@@ -45,7 +45,7 @@ export const GrantsStepsCard = ({
   const goToNext = useCallback(() => {
     // Trigger button shrink animation before step change
     if (currentStepIndex === 0 && !isMobile) {
-      animate(scope.current, { width: "120px" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
+      animate(scope.current, { width: "32" }, { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] })
     }
     setCurrentStepIndex(prev => prev + 1)
   }, [currentStepIndex, isMobile, animate, scope])
@@ -98,65 +98,69 @@ export const GrantsStepsCard = ({
   }
   if (isMobile) {
     return (
-      <>
-        <BaseBottomSheet
-          isOpen={isOpen}
-          onClose={onClose}
-          ariaTitle={currentStep.title}
-          ariaDescription={currentStep.heading}
-          height="100%">
-          <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
-            <HStack w="full" justify="space-between" alignItems="center">
-              {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
-              <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
-              <UilTimes onClick={onClose} cursor="pointer" size={24} />
-            </HStack>
-            <Box pt={5}>
-              <VStack w="full" textAlign="center" gap={4}>
-                <Heading size="md" textStyle="heading">
-                  {currentStep.title}
-                </Heading>
-                <Image
-                  src={currentStep.image}
-                  alt={`Step ${currentStepIndex + 1}`}
-                  objectFit="contain"
-                  width={150}
-                  height={150}
-                />
-                <Heading size="sm" textStyle="heading">
-                  {currentStep.heading}
-                </Heading>
-                <List.Root pl={5} fontSize="sm" gap={2} color="gray.600" textAlign="left">
-                  {currentStep.listItems.map((item, index) => (
-                    <List.Item key={`${item}-${index}`}>
-                      <List.Indicator color="#004CFC">
-                        <Icon as={BsCheck} />
-                      </List.Indicator>
-                      {item}
-                    </List.Item>
-                  ))}
-                </List.Root>
-                <HStack w="full" justifyContent="flex-start" pt={5}>
-                  <Button variant="primaryAction" w="full" onClick={handleApply}>
-                    {isLastStep ? t("Apply") : t("Next")}
-                  </Button>
-                </HStack>
-              </VStack>
-            </Box>
-          </Steps.Root>
-        </BaseBottomSheet>
+      <BaseBottomSheet
+        isOpen={isOpen}
+        onClose={onClose}
+        ariaTitle={currentStep.title}
+        ariaDescription={currentStep.heading}
+        height="100%">
+        <Steps.Root step={currentStepIndex} count={steps.length} size="sm">
+          <HStack w="full" justify="space-between" alignItems="center">
+            {currentStepIndex > 0 && <UilArrowLeft onClick={goToPrevious} cursor="pointer" />}
+            <GrantsStepIndicator activeStep={currentStepIndex} steps={steps} />
+            <UilTimes onClick={onClose} cursor="pointer" size={24} />
+          </HStack>
+          <Box pt={5}>
+            <VStack w="full" textAlign="center" gap={4}>
+              <Heading size="md" textStyle="heading">
+                {currentStep.title}
+              </Heading>
+              <Image
+                src={currentStep.image}
+                alt={`Step ${currentStepIndex + 1}`}
+                objectFit="contain"
+                width={150}
+                height={150}
+              />
+              <Heading size="sm" textStyle="heading">
+                {currentStep.heading}
+              </Heading>
+              <List.Root variant="plain" pl={5} textStyle="sm" gap={2} textAlign="left">
+                {currentStep.listItems.map((item, index) => (
+                  <List.Item key={`${item}-${index}`} color="text.subtle">
+                    <List.Indicator asChild color="actions.tertiary.default">
+                      <Icon boxSize="6" as={BsCheck} />
+                    </List.Indicator>
+                    {item}
+                  </List.Item>
+                ))}
+              </List.Root>
+              <HStack w="full" justifyContent="flex-start" pt={5}>
+                <Button variant="primary" w="full" onClick={handleApply}>
+                  {isLastStep ? t("Apply") : t("Next")}
+                </Button>
+              </HStack>
+            </VStack>
+          </Box>
+        </Steps.Root>
         <RequirementModal
           isOpen={isRequirementModalOpen}
           onClose={closeRequirementModal}
           hasNft={hasMetProposalCriteria}
           isGrants
         />
-      </>
+      </BaseBottomSheet>
     )
   }
 
   return (
-    <Card.Root display={isOpen ? "block" : "none"} w="full" h="full" borderRadius="xl" overflow="hidden">
+    <Card.Root
+      variant="primary"
+      display={isOpen ? "block" : "none"}
+      w="full"
+      h="full"
+      borderRadius="xl"
+      overflow="hidden">
       <Steps.Root step={currentStepIndex} count={steps.length}>
         <Flex h="full">
           <Box flex="1">
@@ -165,7 +169,7 @@ export const GrantsStepsCard = ({
             </Box>
             <VStack gap={10} alignItems="flex-start" w="full" p={10}>
               <VStack alignItems="flex-start" w="full">
-                <Text fontSize="sm" fontWeight="bold" color="text.subtle">
+                <Text textStyle="sm" fontWeight="bold" color="text.subtle">
                   {currentStep.title}
                 </Text>
                 <motion.div
@@ -179,9 +183,9 @@ export const GrantsStepsCard = ({
                       {currentStep.heading}
                     </Heading>
                     {currentStep.listItems.length > 0 ? (
-                      <List.Root pl={2} fontSize="sm" listStyle="disc">
+                      <List.Root pl={2} textStyle="sm" listStyle="disc">
                         {currentStep?.listItems?.map(item => (
-                          <List.Item key={item} fontWeight="500" color="text.subtle">
+                          <List.Item key={item} color="text.subtle">
                             {item}
                           </List.Item>
                         ))}
@@ -199,14 +203,14 @@ export const GrantsStepsCard = ({
                       animate={{ opacity: 1, width: "auto" }}
                       exit={{ opacity: 0, width: 0 }}
                       transition={{ duration: 0.4, ease: [0.25, 0.25, 0.25, 0.2] }}>
-                      <Button variant="primarySubtle" w="120px" onClick={goToPrevious}>
+                      <Button variant="secondary" w="32" onClick={goToPrevious}>
                         {t("Back")}
                       </Button>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <Button ref={scope} variant="primaryAction" onClick={handleApply} w="120px">
+                <Button ref={scope} variant="primary" onClick={handleApply} w="32">
                   {isLastStep ? t("Apply") : t("Next")}
                 </Button>
               </HStack>

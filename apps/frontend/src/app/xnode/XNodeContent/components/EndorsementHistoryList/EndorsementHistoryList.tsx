@@ -17,12 +17,10 @@ export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
   const events = appEndorsedEvents?.slice(0, displayCount)
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
-        <VStack align="stretch" gap={6}>
-          <Heading fontSize="xl" fontWeight="700">
-            {t("Endorsement history")}
-          </Heading>
+        <VStack align="stretch" gap="6">
+          <Heading textStyle="xl">{t("Endorsement history")}</Heading>
 
           {events?.length ? (
             events.map(event => (
@@ -35,7 +33,7 @@ export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
             <Text>{t("No endorsement events")}</Text>
           )}
           {appEndorsedEvents && displayCount < appEndorsedEvents.length && (
-            <Button onClick={handleLoadMore} variant="primaryLink">
+            <Button onClick={handleLoadMore} variant="ghost" color="actions.tertiary.default">
               {t("Load more")}
             </Button>
           )}

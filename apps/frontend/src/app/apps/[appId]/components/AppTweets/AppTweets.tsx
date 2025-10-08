@@ -127,35 +127,33 @@ export const AppTweets = () => {
       />
       <VStack align="stretch" gap={4}>
         <HStack justify={"space-between"} flexWrap={"wrap"}>
-          <Heading fontSize={"36px"} fontWeight={700}>
-            {t("App updates")}
-          </Heading>
+          <Heading size="2xl">{t("App updates")}</Heading>
           {isAdminOrModerator && (
             <>
               {editMode ? (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-                  <Button variant="primaryGhost" onClick={handleCancelEdit}>
+                  <Button variant="ghost" color="actions.tertiary.default" onClick={handleCancelEdit}>
                     <UilTimes color="#004CFC" fontSize="16px" />
                     {t("Cancel")}
                   </Button>
                   <Button
-                    variant="primaryAction"
+                    variant="primary"
                     disabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
-                    <UilCheckCircle color="#FFFFFF" fontSize="16px" />
+                    <UilCheckCircle color="white" fontSize="16px" />
                     {t("Save changes")}
                   </Button>
                 </HStack>
               ) : (
                 <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
                   {!isListEmpty && (
-                    <Button variant="primaryGhost" onClick={handleEdit}>
+                    <Button variant="ghost" color="actions.tertiary.default" onClick={handleEdit}>
                       <UilPen color="#004CFC" fontSize="16px" />
                       {t("Edit feed")}
                     </Button>
                   )}
-                  <Button variant="primaryAction" onClick={onNewTweetModalOpen}>
-                    <UilPlus color="#FFFFFF" fontSize="16px" />
+                  <Button variant="primary" onClick={onNewTweetModalOpen}>
+                    <UilPlus color="white" fontSize="16px" />
                     {t("Add X post")}
                   </Button>
                 </HStack>
@@ -174,7 +172,7 @@ export const AppTweets = () => {
             <Card.Body>
               <VStack align={"center"} justify={"center"} w="full" minH="200px">
                 <OkHandIcon color="#757575" />
-                <Heading fontSize={"20px"} fontWeight={500} textAlign={"center"}>
+                <Heading size="xl" fontWeight="semibold" textAlign={"center"}>
                   {t("App will add updates here.")}
                 </Heading>
               </VStack>

@@ -21,7 +21,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
   }
 
   return (
-    <Card.Root variant={"base"} w={["70%", "60%"]} alignSelf={"center"} onClick={navigateToAppDetail}>
+    <Card.Root variant="primary" w={["70%", "60%"]} alignSelf={"center"} onClick={navigateToAppDetail}>
       <Box w="full" position={"relative"} h={[70, 150]}>
         <Image alt={`Banner for ${name}`} w="full" src={banner} h={"full"} objectFit={"cover"} borderTopRadius={"md"} />
         <Image
@@ -38,7 +38,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
       <Card.Body mt={5} px={[4, 6]}>
         <VStack w={"full"}>
           <HStack w={"full"} justifyContent={"space-between"} px={[1, 4]} pt={[1, 4]}>
-            <Text fontWeight={"700"} fontSize={[10, 20]}>
+            <Text fontWeight="bold" textStyle={["xxs", "xl"]}>
               {name ?? "Error loading name"}
             </Text>
 
@@ -46,7 +46,7 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
               as={UilArrowUpRight}
               bg={"rgba(224, 233, 254, 1)"}
               borderRadius={"full"}
-              color={"rgba(0, 76, 252, 1)"}
+              color="logo"
               boxSize={[6, 8]}
               p={1}
             />
@@ -60,18 +60,18 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             mt={6}
             justifyContent={"space-between"}>
             <VStack alignItems={"flex-start"}>
-              <Text fontSize={[10, 14]}>{t("Endorsement score")}</Text>
+              <Text textStyle={["xxs", "sm"]}>{t("Endorsement score")}</Text>
               <HStack alignItems={"flex-end"}>
-                <Text color={"rgba(0, 76, 252, 1)"} fontSize={[12, 20]} fontWeight={700}>
+                <Text color="brand.primary" textStyle={["xs", "xl"]} fontWeight="bold">
                   {"0"}
                 </Text>
-                <Text fontSize={12}>{"/ 100"}</Text>
+                <Text textStyle="xs">{"/ 100"}</Text>
               </HStack>
             </VStack>
             <VStack alignItems={"flex-start"}>
-              <Text fontSize={[10, 14]}>{t("Member since")}</Text>
+              <Text textStyle={["xxs", "sm"]}>{t("Member since")}</Text>
               <HStack alignItems={"flex-end"}>
-                <Text color={"#1E1E1E"} fontSize={[12, 20]} fontWeight={500}>
+                <Text color={"#1E1E1E"} textStyle={["xs", "xl"]} fontWeight="semibold">
                   {t("today")}
                   {" ✨"}
                 </Text>

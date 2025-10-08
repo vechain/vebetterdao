@@ -28,7 +28,7 @@ export const EndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: strin
           align={"center"}>
           <Text
             fontSize={`${(boxSize ?? 0) / 2}px`}
-            fontWeight={600}
+            fontWeight="semibold"
             data-testid="participating-add-more-apps"
             color={otherAppsTextColor}>
             {t("+{{value}}", { value: remainingEndorsers })}

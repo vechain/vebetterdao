@@ -117,13 +117,13 @@ export const CantVoteCard = () => {
   if (!cantVoteReasonText) return null
 
   return (
-    <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"}>
-      <Card.Body position="relative" overflow="hidden" borderRadius="xl" padding="4">
+    <Card.Root bg="#FFF3E5" border="1px solid #AF5F00" rounded="xl" w="full" h={"full"} p="4">
+      <Card.Body position="relative" overflow="hidden" borderRadius="xl" p="0">
         <VStack gap={0} w="full" align="flex-start">
           <HStack align={["flex-start", "flex-start", "center"]} position="relative" w="full" h="full">
             <UilInfoCircle size={36} color="#AF5F00" />
-            <VStack gap={2} w="full" align="flex-start">
-              <Text fontWeight="700" color="#AF5F00" as="span">
+            <VStack gap={0} w="full" align="flex-start">
+              <Text fontWeight="bold" color="#AF5F00" as="span">
                 {cantVoteReasonText?.title}
               </Text>
               <Stack

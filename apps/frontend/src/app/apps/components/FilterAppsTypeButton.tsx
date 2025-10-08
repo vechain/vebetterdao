@@ -27,7 +27,7 @@ export const FilterAppsTypeButton = ({ filterType, currentFilter, setFilter }: P
         transition: "all 0.3s",
       }}>
       <HStack gap={2}>
-        <Heading fontWeight={isActive ? 700 : 500} fontSize={"20px"}>
+        <Heading fontWeight={isActive ? 700 : 500} size={"xl"}>
           {t("{{value}}", { value: filterType })}
         </Heading>
       </HStack>

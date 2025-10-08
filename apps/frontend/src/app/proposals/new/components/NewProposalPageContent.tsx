@@ -50,10 +50,6 @@ export const NewProposalPageContent = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL))
   }, [router])
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
   useLayoutEffect(() => {
@@ -71,14 +67,12 @@ export const NewProposalPageContent = () => {
       w="full"
       data-testid="new-proposal-page">
       <GridItem colSpan={2}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body>
             <VStack gap={[6, 8]} align="flex-start">
               <VStack gap={[4, 6]} align="flex-start">
-                <Heading size={["xl", "2xl"]} fontWeight="bold">
-                  {t("Create a new proposal")}
-                </Heading>
-                <Text fontSize={["sm", "md"]}>
+                <Heading size={["xl", "2xl"]}>{t("Create a new proposal")}</Heading>
+                <Text textStyle={["sm", "md"]}>
                   {t(
                     "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
                   )}
@@ -99,10 +93,10 @@ export const NewProposalPageContent = () => {
               </Stack>
               <Stack direction={["column", "column", "row"]} w="full" justify={"space-between"} gap={8}>
                 <HStack justify={"flex-end"} gap={4} flex={1}>
-                  <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+                  <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                     {t("Go back")}
                   </Button>
-                  <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
+                  <Button data-testid="continue" variant="primary" onClick={onContinue}>
                     {t("Continue")}
                   </Button>
                 </HStack>

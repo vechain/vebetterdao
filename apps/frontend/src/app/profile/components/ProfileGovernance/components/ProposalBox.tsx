@@ -1,66 +1,50 @@
+import { ProposalMetadata, useProposalState } from "@/api"
 import { ProposalStatusBadge } from "@/components"
-import { Box, HStack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo } from "react"
+import { Card, Icon, LinkBox, LinkOverlay, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { IoIosArrowForward } from "react-icons/io"
-import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
-import { useIsDepositReached } from "@/api"
+import NextLink from "next/link"
 
 type Props = {
-  proposal: ProposalEnriched | GrantProposalEnriched
-  isLoading: boolean
+  proposalId: string
+  metadata?: ProposalMetadata
 }
 
-export const ProposalBox = ({ proposal, isLoading }: Props) => {
-  const router = useRouter()
+export const ProposalBox = ({ proposalId, metadata }: Props) => {
+  const { data: proposalState } = useProposalState(proposalId)
 
   const [isDesktop] = useMediaQuery(["(min-width: 500px)"])
-  const { data: isDepositReached } = useIsDepositReached(proposal?.id ?? "")
 
   const title = useMemo(() => {
-    if (!proposal?.title) return "Proposal title temporarily unavailable"
+    if (!metadata?.title) return "Proposal title temporarily unavailable"
 
-    if (isDesktop && proposal.title.length > 95) return proposal.title.slice(0, 95) + "..."
-    if (!isDesktop && proposal.title.length > 38) return proposal.title.slice(0, 38) + "..."
+    if (isDesktop && metadata.title.length > 95) return metadata.title.slice(0, 95) + "..."
+    if (!isDesktop && metadata.title.length > 38) return metadata.title.slice(0, 38) + "..."
 
-    return proposal.title
-  }, [proposal?.title, isDesktop])
-
-  const goToProposal = useCallback(() => {
-    router.push(`/proposals/${proposal.id}`)
-  }, [router, proposal.id])
-
-  if (isLoading || proposal.state === undefined) {
-    return null
-  }
+    return metadata.title
+  }, [metadata?.title, isDesktop])
 
   return (
-    <HStack
-      onClick={goToProposal}
-      w={"full"}
-      borderRadius={12}
-      cursor={"pointer"}
-      bg={"profile-bg"}
-      _hover={{
-        bg: "hover-contrast-bg",
-      }}
-      p={{ base: 3, md: 4 }}>
-      <VStack w={"full"} alignItems={"start"} gap={2}>
-        <ProposalStatusBadge
-          proposalState={proposal.state}
-          isDepositReached={isDepositReached ?? false}
-          textProps={{
-            fontSize: 12,
-          }}
-          proposalType={proposal.type}
-        />
-        <Text fontSize={14} fontWeight={"600"}>
-          {title}
-        </Text>
-      </VStack>
-      <Box boxSize={{ base: "16px", md: "24px" }} justifyContent={"center"} alignContent={"center"}>
-        <IoIosArrowForward />
-      </Box>
-    </HStack>
+    <LinkBox asChild>
+      <Card.Root w={"full"} variant="subtle" p="3">
+        <Card.Body display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
+          <VStack w={"full"} alignItems={"start"} gap={2}>
+            <ProposalStatusBadge
+              proposalId={proposalId}
+              proposalState={proposalState}
+              badgeProps={{ textStyle: "xs" }}
+            />
+            <LinkOverlay asChild>
+              <NextLink href={`/proposals/${proposalId}`}>
+                <Text textStyle="sm" fontWeight="semibold">
+                  {title}
+                </Text>
+              </NextLink>
+            </LinkOverlay>
+          </VStack>
+          <Icon as={IoIosArrowForward} boxSize={{ base: 4, md: 6 }} color="icon.default" />
+        </Card.Body>
+      </Card.Root>
+    </LinkBox>
   )
 }

@@ -28,7 +28,7 @@ export const ClaimTokensBanner = () => {
     return Number(ethers.formatEther(totalClaimableDeposits))
   }, [totalClaimableDeposits])
   return (
-    <Card.Root variant="baseWithBorder" borderRadius="xl" w="full" h="full" position="relative" overflow="hidden">
+    <Card.Root variant="primary" borderRadius="xl" w="full" h="full" position="relative" overflow="hidden">
       <Card.Body position="relative" zIndex={1} justifyContent="center" borderRadius="xl">
         <Box
           position="absolute"
@@ -70,7 +70,7 @@ export const ClaimTokensBanner = () => {
           </VStack>
 
           {/* Button - Bottom on mobile, Right on desktop */}
-          <Button variant="primarySubtle" onClick={handleClaim} borderRadius="full" w={{ base: "50%", md: "auto" }}>
+          <Button variant="secondary" onClick={handleClaim} borderRadius="full" w={{ base: "50%", md: "auto" }}>
             {t("Claim back")}
           </Button>
         </Stack>

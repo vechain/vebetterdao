@@ -234,25 +234,25 @@ export const EditAppPageContent = () => {
           flexDirection={["column", "row"]}
           justify={["flex-start", "space-between"]}
           align={["flex-start", "center"]}>
-          <HStack gap={4}>
-            <Field.Root invalid={!!errors.name}>
+          <HStack w="full" gap={4}>
+            <Field.Root w="full" invalid={!!errors.name}>
               <Input
+                fontWeight="semibold"
+                size="lg"
                 {...register("name", {
                   required: { value: true, message: t("Name required") },
                   minLength: { value: 3, message: t("Name must be at least 3 characters") },
                 })}
                 defaultValue={appMetadata?.name ?? ""}
-                fontSize={"28px"}
-                fontWeight={700}
               />
-              <Field.ErrorText fontSize={"12px"}>{errors?.name?.message ?? ""}</Field.ErrorText>
+              <Field.ErrorText textStyle="xs">{errors?.name?.message ?? ""}</Field.ErrorText>
             </Field.Root>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
-            <Button variant="primaryGhost" onClick={goToAppPage}>
+            <Button variant="ghost" color="actions.tertiary.default" onClick={goToAppPage}>
               {t("Cancel")}
             </Button>
-            <Button variant="primaryAction" type="submit" disabled={!isFormChanged}>
+            <Button variant="primary" type="submit" disabled={!isFormChanged}>
               <UilCheck size="16px" />
               {t("Save changes")}
             </Button>
@@ -266,7 +266,7 @@ export const EditAppPageContent = () => {
             <EditAppLogo form={form} />
 
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={16} fontWeight={500}>
+              <Text textStyle="md" fontWeight="semibold">
                 {t("Project URL")}
               </Text>
               <Field.Root invalid={!!errors.external_url}>
@@ -280,12 +280,12 @@ export const EditAppPageContent = () => {
                     },
                   })}
                 />
-                <Field.ErrorText fontSize={"12px"}>{errors?.external_url?.message ?? ""}</Field.ErrorText>
+                <Field.ErrorText textStyle="xs">{errors?.external_url?.message ?? ""}</Field.ErrorText>
               </Field.Root>
             </VStack>
 
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={16} fontWeight={500}>
+              <Text textStyle="md" fontWeight="semibold">
                 {t("Description")}
               </Text>
               <Field.Root invalid={!!errors.description}>
@@ -298,11 +298,11 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <Field.ErrorText fontSize={"12px"}>{errors?.description?.message ?? ""}</Field.ErrorText>
+                <Field.ErrorText textStyle="xs">{errors?.description?.message ?? ""}</Field.ErrorText>
               </Field.Root>
             </VStack>
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={16} fontWeight={500}>
+              <Text textStyle="md" fontWeight="semibold">
                 {t("Distribution Strategy")}
               </Text>
               <Field.Root invalid={!!errors.distribution_strategy}>
@@ -318,7 +318,7 @@ export const EditAppPageContent = () => {
                   resize="none"
                   h="140px"
                 />
-                <Field.ErrorText fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</Field.ErrorText>
+                <Field.ErrorText textStyle="xs">{errors?.distribution_strategy?.message ?? ""}</Field.ErrorText>
               </Field.Root>
             </VStack>
             <EditAppCategories form={form} />
@@ -330,10 +330,8 @@ export const EditAppPageContent = () => {
         <Separator />
 
         <VStack align={"flex-start"} gap={4}>
-          <Heading fontSize="24px" fontWeight="700">
-            {t("VeWorld assets")}
-          </Heading>
-          <Text fontSize={14} color={"gray"} pt={0}>
+          <Heading size="2xl">{t("VeWorld assets")}</Heading>
+          <Text textStyle="sm" color={"gray"} pt={0}>
             {t(
               "VeWorld assets are used to display the app in the VeWorld mobile wallet. Include them to make your app more engaging. ✨",
             )}

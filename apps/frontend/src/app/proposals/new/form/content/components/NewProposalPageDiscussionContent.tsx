@@ -66,9 +66,6 @@ export const NewProposalPageDiscussionContent = () => {
     },
     [setData, router, title, shortDescription, onMetadataUpload, control],
   )
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
 
   const resetMarkdownToDefault = useCallback(() => {
     const defaultMarkdown = updateMarkdownTemplatePlaceholders({
@@ -82,14 +79,12 @@ export const NewProposalPageDiscussionContent = () => {
   }, [setData, setValue, account?.address, title, shortDescription, actions])
 
   return (
-    <Card.Root w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
+    <Card.Root w="full" variant="primary" data-testid="new-proposal-content-page">
       <Card.Body py={8}>
         <VStack gap={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[4, 6]} align="flex-start">
-            <Heading size={["xl", "2xl"]} fontWeight="bold">
-              {t("Share more about your idea")}
-            </Heading>
-            <Text fontSize={["sm", "md"]} color="gray.500">
+            <Heading size={["xl", "2xl"]}>{t("Share more about your idea")}</Heading>
+            <Text textStyle={["sm", "md"]} color="gray.500">
               {t(
                 "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
               )}
@@ -136,23 +131,32 @@ export const NewProposalPageDiscussionContent = () => {
               {errors.markdownDescription ? (
                 <Field.ErrorText data-testid="form-error-message">{errors.markdownDescription.message}</Field.ErrorText>
               ) : (
-                <Field.HelperText color="gray.500" fontSize="sm">
+                <Field.HelperText color="gray.500" textStyle="sm">
                   {t("Make sure to replace all the placeholders with your own content.")}
                 </Field.HelperText>
               )}
-              <Button data-testid="reset-markdown" variant={"primaryLink"} onClick={resetMarkdownToDefault}>
+              <Button
+                data-testid="reset-markdown"
+                variant="plain"
+                color="actions.tertiary.default"
+                onClick={resetMarkdownToDefault}>
                 {t("Reset to default")}
               </Button>
             </Stack>
           </Field.Root>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack} disabled={isMetadataUploading}>
+            <Button
+              data-testid="go-back"
+              variant="ghost"
+              color="actions.tertiary.default"
+              onClick={router.back}
+              disabled={isMetadataUploading}>
               {t("Go back")}
             </Button>
             <Button
               data-testid="continue"
-              variant="primaryAction"
+              variant="primary"
               type="submit"
               disabled={isMetadataUploading}
               loading={isMetadataUploading}>

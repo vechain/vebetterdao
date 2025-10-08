@@ -98,10 +98,10 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
   return (
     <Grid templateColumns={{ base: 5, md: 5 }} w="full" gap={6}>
       <GridItem colSpan={5}>
-        <Text fontSize="lg" fontWeight="semibold">
+        <Text textStyle="lg" fontWeight="semibold">
           {t("Support deadline")}
         </Text>
-        <Text fontSize="sm" color="text.subtle">
+        <Text textStyle="sm" color="text.subtle">
           {t("Choose when support phase for your Grant must end.")}
         </Text>
       </GridItem>
@@ -122,8 +122,8 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
         </Skeleton>
       </GridItem>
       <GridItem colSpan={{ base: 5, md: 1 }}>
-        <VStack align="start" gap={3}>
-          <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+        <VStack align="start" gap="1.5">
+          <Text textStyle="sm" color="text.subtle">
             {t("Support ends in")}
           </Text>
           <HStack gap={2} w="full">
@@ -131,7 +131,7 @@ export const Schedule = ({ errors, control, watch, setData }: ScheduleProps) => 
               days={daysLeft}
               hours={hoursLeft}
               minutes={minutesLeft}
-              {...(hasFewDaysLeft ? { bgColor: "warning.subtle" } : {})}
+              bgColor={hasFewDaysLeft ? "status.warning.subtle" : "card.default"}
             />
           </HStack>
         </VStack>

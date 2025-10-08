@@ -16,22 +16,22 @@ export const ModalEditTeamWalletAddress = ({ handleEditTeamWalletAddress, onClos
         <Dialog.Body p={"40px"}>
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
-            <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+            <Heading size={["xl", "3xl"]} textAlign={"center"}>
               {t("Change team wallet address")}
             </Heading>
             <Box textAlign={"center"}>
-              <Text as="span" color="#6A6A6A">
+              <Text as="span" color="text.subtle">
                 {t("This address is where allocation funds are transferred. ")}
               </Text>
-              <Text as="span" fontWeight={600} color="#6A6A6A">
+              <Text as="span" fontWeight="semibold" color="text.subtle">
                 {t("Are you absolutely sure you want to edit it?")}
               </Text>
             </Box>
             <VStack align="center" gap="20px">
-              <Button variant="primaryAction" onClick={onClose}>
+              <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
-              <Button variant="dangerGhost" onClick={handleEditTeamWalletAddress}>
+              <Button variant="ghost" color="status.negative.primary" onClick={handleEditTeamWalletAddress}>
                 {t("Yes, I'm sure")}
               </Button>
             </VStack>

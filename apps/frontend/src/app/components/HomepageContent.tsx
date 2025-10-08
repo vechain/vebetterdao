@@ -20,7 +20,7 @@ export const HomePageContent = () => {
         maxW="full"
         alignItems={"flex-start"}
         data-testid="form-proposal-layout">
-        <GridItem colSpan={[1, 1, 3]} display="grid">
+        <GridItem colSpan={[1, 1, 3]} overflow={{ base: "hidden", md: "unset" }}>
           <ActionBanner />
         </GridItem>
         <GridItem colSpan={[1, 1, 3]}>
@@ -30,7 +30,8 @@ export const HomePageContent = () => {
           <VStack justifyContent="stretch" alignItems={"stretch"} gap={"32px"} data-testid="homepage">
             {isAboveMd && (
               <>
-                <CantVoteCard /> <DashboardAllocationRounds />
+                <CantVoteCard />
+                <DashboardAllocationRounds />
               </>
             )}
             <DashboardXApps />

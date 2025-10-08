@@ -14,14 +14,15 @@ export const GmEmptyStateCard = ({
       as={"button"}
       w="100%"
       height={"100%"}
-      gap={1}
-      rounded="12px"
+      gap="2"
+      rounded="xl"
       p="12px 16px"
       position="relative"
       flex={1}
       cursor={onCardClick ? "pointer" : "default"}
       onClick={onCardClick}
-      border="none">
+      border="none"
+      textAlign="left">
       <chakra.svg width="100%" height="100%" position="absolute" top={0} left={0} right={0} bottom={0}>
         <rect
           width="100%"
@@ -37,7 +38,7 @@ export const GmEmptyStateCard = ({
         />
       </chakra.svg>
       {icon}
-      <Text color={"#FFFFFF80"}>{text}</Text>
+      <Text color="transparency.800">{text}</Text>
     </HStack>
   )
 }

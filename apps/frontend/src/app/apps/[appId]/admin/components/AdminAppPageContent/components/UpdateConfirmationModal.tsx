@@ -65,19 +65,19 @@ export const UpdateConfirmationModal = ({
         <Dialog.Body px="40px" py="20px">
           <VStack align="center" gap="20px">
             <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 100, sm: 180 })} />
-            <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+            <Heading size={["xl", "3xl"]} textAlign={"center"}>
               {t("Just to be sure, you’re updating:")}
             </Heading>
             {isTeamWalletAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("Treasury address")}</Text>
+                  <Text fontWeight="semibold">{t("Treasury address")}</Text>
                   <HStack>
-                    <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
+                    <Text textStyle={"sm"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldTeamWalletAddress}
                     </Text>
                     <Text>{t("→")}</Text>
-                    <Text fontSize={"14px"}>{newTeamWalletAddress}</Text>
+                    <Text textStyle={"sm"}>{newTeamWalletAddress}</Text>
                   </HStack>
                 </VStack>
               </VStack>
@@ -86,13 +86,13 @@ export const UpdateConfirmationModal = ({
             {isAdminAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("Admin address")}</Text>
+                  <Text fontWeight="semibold">{t("Admin address")}</Text>
                   <HStack>
-                    <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
+                    <Text textStyle={"sm"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldAdminAddress}
                     </Text>
                     <Text>{t("→")}</Text>
-                    <Text fontSize={"14px"}>{newAdminAddress}</Text>
+                    <Text textStyle={"sm"}>{newAdminAddress}</Text>
                   </HStack>
                 </VStack>
                 <HStack rounded="16px" bg="#FCEEF1" p="16px 12px" color="#D23F63">
@@ -100,11 +100,11 @@ export const UpdateConfirmationModal = ({
                     <UilInfoCircle color="#D23F63" size="36px" />
                   </Box>
                   <Box display={"inline-block"}>
-                    <Text as="span" fontSize="14px" fontWeight={600}>
+                    <Text as="span" textStyle="sm" fontWeight="semibold">
                       {t("You will not be able to manage the app anymore.")}
                     </Text>
 
-                    <Text hideBelow="md" as="span" fontSize="14px">
+                    <Text hideBelow="md" as="span" textStyle="sm">
                       {t("This change is applied when the new address logs in.")}
                     </Text>
                   </Box>
@@ -113,10 +113,10 @@ export const UpdateConfirmationModal = ({
             )}
 
             <VStack alignItems="center" gap="20px" mt={"20px"}>
-              <Button variant="primaryAction" onClick={onClose}>
+              <Button variant="primary" onClick={onClose}>
                 {t("No, go back")}
               </Button>
-              <Button variant="dangerGhost" onClick={handleSubmit}>
+              <Button variant="ghost" color="status.negative.primary" onClick={handleSubmit}>
                 {t("Yes, I'm sure")}
               </Button>
             </VStack>

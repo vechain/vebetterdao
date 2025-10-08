@@ -71,7 +71,7 @@ export const GalaxyRewardsCalculator = () => {
   return (
     <Card.Root
       p={7}
-      variant="baseWithBorder"
+      variant="primary"
       alignItems="center"
       style={{
         backgroundImage: `url('/assets/backgrounds/stardust.webp')`,
@@ -96,7 +96,7 @@ export const GalaxyRewardsCalculator = () => {
           {/* ESTIMATE CARD */}
           <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
-              <Heading fontSize="x-large">{t("Potential Rewards")}</Heading>
+              <Heading size="xl">{t("Potential Rewards")}</Heading>
               <Tooltip
                 content={
                   <Text>
@@ -114,7 +114,7 @@ export const GalaxyRewardsCalculator = () => {
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
               <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-              <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+              <Text bg="transparent" fontWeight="semibold" px={2} w="full" textStyle="4xl">
                 {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
               </Text>
             </HStack>
@@ -124,7 +124,7 @@ export const GalaxyRewardsCalculator = () => {
           {/* ACTUAL CARD */}
           <Card.Root rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
             <HStack position="relative" justify="space-between">
-              <Heading fontSize="x-large">{t("Estimated Expected Rewards")}</Heading>
+              <Heading size="xl">{t("Estimated Expected Rewards")}</Heading>
               <Tooltip
                 content={
                   <Text>
@@ -143,7 +143,7 @@ export const GalaxyRewardsCalculator = () => {
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
               <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
 
-              <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+              <Text bg="transparent" fontWeight="semibold" px={2} w="full" textStyle="4xl">
                 {compactFormatter.format(Number(estimatedRewards?.currentRewards ?? 0))}
               </Text>
             </HStack>
@@ -151,7 +151,7 @@ export const GalaxyRewardsCalculator = () => {
           {/* END ACTUAL CARD */}
         </Stack>
       </Stack>
-      <Text fontSize="xs" color="white" textAlign="center"></Text>
+      <Text textStyle="xs" color="white" textAlign="center"></Text>
     </Card.Root>
   )
 }

@@ -1,17 +1,12 @@
-import { Image, ImageProps, VStack } from "@chakra-ui/react"
 import React from "react"
+import { VStack, Icon } from "@chakra-ui/react"
 
-type Props = {
-  beBetterProps?: ImageProps
-  veBetterProps?: ImageProps
-}
+import VBDLogo from "@/components/Icons/svg/vebetter-dao-logo.svg"
+import BeBetter from "@/components/Icons/svg/be-better.svg"
 
-/**
- * BeBetterVeBetterIcon displays the BeBetterVeBetter logo
- */
-export const BeBetterVeBetterIcon: React.FC<Props> = ({ veBetterProps, beBetterProps }) => (
+export const BeBetterVeBetterIcon = () => (
   <VStack gap={2} align="flex-start" w="full">
-    <Image src="/assets/icons/be_better.svg" {...beBetterProps} alt="be-better-image" />
-    <Image src="/assets/logos/vebetter_dark.svg" {...veBetterProps} alt="ve-better-image" />
+    <Icon as={BeBetter} w={48} color="icon.default" />
+    <Icon as={VBDLogo} w={56} color="icon.default" />
   </VStack>
 )

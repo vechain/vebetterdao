@@ -3,7 +3,7 @@ import HeartIcon from "@/components/Icons/svg/heart.svg"
 import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { Badge, BadgeProps, HStack, Icon, Text } from "@chakra-ui/react"
+import { Badge, BadgeProps, Icon } from "@chakra-ui/react"
 import { Prohibition } from "iconoir-react"
 import { useMemo } from "react"
 import { FaRegCircleCheck } from "react-icons/fa6"
@@ -34,57 +34,57 @@ const BADGE_CONFIG: { [key in ProposalState]: BadgeConfig } = {
     text: "Support phase",
     icon: HeartIcon,
     filledIcon: HeartSolidIcon,
-    variant: "support-phase",
+    variant: "warning",
   },
   [ProposalState.Active]: {
     text: "Approval phase",
     icon: ThumbsUpIcon,
     filledIcon: ThumbsUpSolidIcon,
-    variant: "approval-phase",
+    variant: "warning",
   },
   [ProposalState.Canceled]: {
     text: "Cancelled",
     icon: Prohibition,
-    variant: "declined",
+    variant: "negative",
   },
   [ProposalState.Defeated]: {
     text: "Cancelled",
     icon: Prohibition,
-    variant: "declined",
+    variant: "negative",
   },
   [ProposalState.Succeeded]: {
     text: "Approved",
     icon: ThumbsUpSolidIcon,
-    variant: "approved",
+    variant: "positive",
   },
   [ProposalState.Queued]: {
     text: "Queued",
     icon: IoIosCode,
-    variant: "in-development",
+    variant: "info",
   },
 
   [ProposalState.Executed]: {
     text: "Completed",
     icon: FaRegCircleCheck,
-    variant: "completed",
+    variant: "neutral",
   },
 
   [ProposalState.DepositNotMet]: {
     text: "Cancelled",
     icon: Prohibition,
-    variant: "declined",
+    variant: "negative",
   },
 
   [ProposalState.InDevelopment]: {
     text: "In development",
     icon: IoIosCode,
-    variant: "in-development",
+    variant: "info",
   },
 
   [ProposalState.Completed]: {
     text: "Completed",
     icon: FaRegCircleCheck,
-    variant: "completed",
+    variant: "neutral",
   },
 }
 
@@ -125,17 +125,15 @@ export const GrantsProposalStatusBadge = ({
 
   const variant = useMemo(() => {
     if (state === ProposalState.Pending && depositReached) {
-      return "approved"
+      return "positive"
     }
     return config.variant
   }, [state, config, depositReached])
 
   return (
-    <Badge variant={variant}>
-      <HStack textAlign="center" justifyContent="center" alignItems="center">
-        <Icon as={selectedIcon} boxSize={4} />
-        <Text fontWeight="semibold"> {text}</Text>
-      </HStack>
+    <Badge variant={variant} fontWeight="semibold">
+      <Icon as={selectedIcon} boxSize={4} />
+      {text}
     </Badge>
   )
 }

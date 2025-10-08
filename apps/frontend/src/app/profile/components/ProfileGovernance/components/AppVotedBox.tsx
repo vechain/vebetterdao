@@ -27,31 +27,31 @@ export const AppVotedBox = ({ appVoted }: Props) => {
   return (
     <Button
       h="auto"
-      p="12px"
+      p="3"
       display={"flex"}
       alignItems={"stretch"}
-      variant="outline"
+      variant="subtle"
       border="none"
       asChild
       onClick={goToApp}>
-      <Card.Root variant="base" w={"full"} borderRadius={12} justifyContent={"space-between"} p={{ base: 3, md: 4 }}>
-        <Card.Body p={0} flexDirection={"row"} alignItems={"stretch"} justifyContent={"space-between"}>
+      <Card.Root variant="subtle" w={"full"} borderRadius="xl" justifyContent={"space-between"} p={{ base: 3, md: 4 }}>
+        <Card.Body flexDirection={"row"} alignItems={"stretch"} justifyContent={"space-between"}>
           <HStack gap={2}>
             <Skeleton loading={isLogoLoading} boxSize={["48px", "48px", "48px"]}>
               <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
             </Skeleton>
-            <Text fontSize={14} fontWeight={"600"}>
+            <Text textStyle="sm" fontWeight="semibold">
               {appVoted.appName}
             </Text>
           </HStack>
           <VStack justifyContent={"center"} alignContent={"center"} gap={0}>
             <HStack>
               <Image src="/assets/logos/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
-              <Text fontSize={20} fontWeight={"700"}>
+              <Text textStyle="xl" fontWeight="bold">
                 {compactFormatter.format(appVoted.votes)}
               </Text>
             </HStack>
-            <Text color="#6A6A6A" fontSize={12} fontWeight={400}>
+            <Text color="text.subtle" textStyle="xs">
               {t("Total assigned")}
             </Text>
           </VStack>

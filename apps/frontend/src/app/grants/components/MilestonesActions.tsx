@@ -122,7 +122,7 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         h="full"
         step={currentStep}
         colorPalette="blue"
-        variant="primaryVertical"
+        variant="primary"
         pt={{ base: "0", md: "40px" }}>
         <Steps.List flex={1}>
           <Accordion.Root
@@ -152,14 +152,14 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
                     {/* Milestone header */}
                     <VStack align="flex-start" gap={"16px"} pb={"16px"}>
                       <Accordion.ItemTrigger py={1} display="flex" justifyContent="space-between" w="full">
-                        <Text fontSize="lg" fontWeight={"semibold"}>
+                        <Text textStyle="lg" fontWeight={"semibold"}>
                           {t("Milestone {{milestoneNumber}}", { milestoneNumber: index + 1 })}
                         </Text>
                         {milestone.milestone?.durationFrom &&
                           dayjs(milestone.milestone.durationFrom * 1000).isAfter(dayjs()) &&
                           compareAddresses(account?.address, proposal?.proposerAddress) && (
                             <Button
-                              variant="primarySubtle"
+                              variant="secondary"
                               size="sm"
                               loading={metadataUploading}
                               onClick={e => {

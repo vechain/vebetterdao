@@ -31,7 +31,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
       ariaDescription={`ActivityDayModal for ${date}`}
       modalBodyProps={{ maxH: "80vh", overflowY: "auto" }}>
       <VStack gap={3} align="stretch">
-        <Text fontWeight="600" color="#848484">
+        <Text fontWeight="semibold" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
         </Text>
         <InfiniteScroll

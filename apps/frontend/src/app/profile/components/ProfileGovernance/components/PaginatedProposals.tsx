@@ -1,4 +1,4 @@
-import { VStack, Spinner, Box, Button } from "@chakra-ui/react"
+import { VStack, Spinner, Box, Button, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useInfiniteScroll, usePagination } from "@/hooks"
 import { ProposalBox } from "./ProposalBox"
@@ -7,12 +7,11 @@ import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grant
 
 type PaginatedProposalsProps = {
   proposals: ProposalEnriched[] | GrantProposalEnriched[]
-  isLoading: boolean
   itemsPerPage?: number
   goBack: () => void
 }
 
-export const PaginatedProposals = ({ proposals, isLoading, itemsPerPage = 10, goBack }: PaginatedProposalsProps) => {
+export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: PaginatedProposalsProps) => {
   const { t } = useTranslation()
 
   const { currentItems, hasMore, loadMore, loading } = usePagination(proposals ?? [], itemsPerPage)
@@ -24,27 +23,41 @@ export const PaginatedProposals = ({ proposals, isLoading, itemsPerPage = 10, go
   })
 
   return (
-    <VStack w="full" gap={4}>
-      {/* Back Button */}
+    <Card.Root w="full" variant="primary">
+      <Card.Body gap={4}>
+        <Button
+          variant={"plain"}
+          color="actions.tertiary.default"
+          onClick={goBack}
+          size="sm"
+          alignItems="center"
+          alignSelf={"flex-start"}>
+          <FaAngleLeft />
+          {t("Go back")}
+        </Button>
 
-      <Button variant={"plain"} color="primary" onClick={goBack} size="sm" alignItems="center" alignSelf={"flex-start"}>
-        <FaAngleLeft />
-        {t("Go back")}
-      </Button>
+        {/* Proposals List */}
+        <VStack w="full" gap={4}>
+          {currentItems?.map(proposal => (
+            <ProposalBox
+              key={proposal.id}
+              proposalId={proposal.id}
+              metadata={{
+                title: proposal.title,
+                shortDescription: proposal.description,
+                markdownDescription: proposal.markdownDescription,
+              }}
+            />
+          ))}
+        </VStack>
 
-      {/* Proposals List */}
-      <VStack w="full" gap={4}>
-        {currentItems?.map(proposal => (
-          <ProposalBox key={proposal.id} proposal={proposal} isLoading={isLoading} />
-        ))}
-      </VStack>
-
-      {/* Sentinel Element */}
-      {hasMore && (
-        <Box id="infinite-scroll-sentinel" w="full" display="flex" justifyContent="center" mt={4}>
-          {loading && <Spinner color="#004CFC" />}
-        </Box>
-      )}
-    </VStack>
+        {/* Sentinel Element */}
+        {hasMore && (
+          <Box id="infinite-scroll-sentinel" w="full" display="flex" justifyContent="center" mt={4}>
+            {loading && <Spinner color="#004CFC" />}
+          </Box>
+        )}
+      </Card.Body>
+    </Card.Root>
   )
 }

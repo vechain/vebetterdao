@@ -17,7 +17,6 @@ import { useDraftGrantProposalStore } from "@/store"
 import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
 import Link from "next/link"
 import { HowToSupportCard } from "@/app/proposals"
-import { useRouter } from "next/navigation"
 
 const BreadcrumItems = [
   {
@@ -36,7 +35,6 @@ export default function GrantsNew() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isOpenConvertModal, setIsOpenConvertModal] = useState(false)
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-  const router = useRouter()
 
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] as GrantProposalEnriched[] } } =
     useProposalEnriched()
@@ -52,10 +50,6 @@ export default function GrantsNew() {
     return searchedProposals && searchedProposals.length > 0
   }, [searchedProposals])
 
-  const applyForGrant = () => {
-    router.push(`/grants/new`)
-  }
-
   return (
     <>
       <Grid alignItems="flex-start" w={"full"} gap={4} templateColumns={{ base: "1fr", md: "2fr 1fr" }}>
@@ -63,7 +57,7 @@ export default function GrantsNew() {
           <HStack justifyContent="space-between">
             <PageBreadcrumb items={BreadcrumItems} />
             {userHasGrantsProposal && (
-              <Button asChild variant="primaryAction" size="md">
+              <Button asChild variant="primary" size="md">
                 <Link href="/grants/new">{t("Apply for grant")}</Link>
               </Button>
             )}
@@ -92,8 +86,8 @@ export default function GrantsNew() {
             )
           ) : (
             <EmptyState title={t("No grants proposal found")}>
-              <Button variant="primaryAction" size="md" onClick={applyForGrant}>
-                {t("Apply for grant")}
+              <Button asChild variant="primary" size="md">
+                <Link href="/grants/new">{t("Apply for grant")}</Link>
               </Button>
             </EmptyState>
           )}

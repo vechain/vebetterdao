@@ -25,7 +25,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
         id: "1",
         title: "Approve",
         icon: ThumbsUpIcon,
-        iconColor: "status.success.primary",
+        iconColor: "status.positive.primary",
       },
       {
         id: "2",
@@ -37,7 +37,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
         id: "0",
         title: "Against",
         icon: ThumbsDownIcon,
-        iconColor: "status.error.primary",
+        iconColor: "status.negative.primary",
       },
     ],
     [],
@@ -72,7 +72,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
       <VStack w="full" align="stretch" gap={6}>
         {/* Modal Header */}
         <Heading size="lg">{"Vote on this grant"}</Heading>
-        <Text fontSize="sm" color="gray.600">
+        <Text textStyle="sm" color="gray.600">
           {" Select your vote"}
         </Text>
 
@@ -94,7 +94,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
                   <HStack justify="space-between">
                     <HStack gap={3}>
                       <Icon as={option.icon} color={option.iconColor} boxSize={5} />
-                      <Text fontWeight="medium">{option.title}</Text>
+                      <Text>{option.title}</Text>
                     </HStack>
                     <RadioGroup.Item value={option.id}>
                       <RadioGroup.ItemHiddenInput />
@@ -109,8 +109,8 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
 
         {/* Comment Section */}
         <VStack align="stretch" gap={2}>
-          <Text fontWeight="medium">{"Comment"}</Text>
-          <Text fontSize="sm" color="gray.500">
+          <Text>{"Comment"}</Text>
+          <Text textStyle="sm" color="gray.500">
             {"Optional"}
           </Text>
           <Textarea
@@ -124,7 +124,7 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
 
         {/* Vote Button */}
         <Button
-          variant="primaryAction"
+          variant="primary"
           w="full"
           disabled={!selectedVote || castVoteMutation.isTransactionPending}
           onClick={handleCastVote}>

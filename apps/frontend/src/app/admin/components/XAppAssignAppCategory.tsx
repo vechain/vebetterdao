@@ -122,7 +122,7 @@ export const XAppAssignAppCategory = () => {
       <Card.Root w={"full"}>
         <Card.Header>
           <Heading size="lg">{t("Assign App Categories")}</Heading>
-          <Text fontSize="sm" color="#6A6A6A" mt={2}>
+          <Text textStyle="sm" color="text.subtle" mt={2}>
             {t("Maximum {{max}} categories per app.", {
               max: MAX_CATEGORIES,
             })}
@@ -150,7 +150,7 @@ export const XAppAssignAppCategory = () => {
                     {t("Apps without categories: {{count}}", { count: appsWithoutCategories.length })}
                   </Text>
                   <HStack gap={2}>
-                    <Text fontSize="sm" color="#6A6A6A">
+                    <Text textStyle="sm" color="text.subtle">
                       {carouselIndex + 1} {"/"} {appsWithoutCategories.length}
                     </Text>
                     <IconButton
@@ -189,13 +189,13 @@ export const XAppAssignAppCategory = () => {
                           mx={1}>
                           <VStack align="flex-start" gap={1}>
                             <Text fontWeight="semibold">{app.name}</Text>
-                            <Text fontSize="xs" color="black">
+                            <Text textStyle="xs" color="black">
                               {app.id}
                             </Text>
                           </VStack>
 
                           <VStack align="flex-start" gap={3}>
-                            <Text fontSize="sm" fontWeight="medium">
+                            <Text textStyle="sm">
                               {t("Selected Categories ({{count}}/{{max}})", {
                                 count: selectedCategories.length,
                                 max: MAX_CATEGORIES,

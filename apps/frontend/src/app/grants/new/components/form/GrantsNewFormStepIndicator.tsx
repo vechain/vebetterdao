@@ -1,5 +1,5 @@
 import { Steps, Icon, useMediaQuery, Flex } from "@chakra-ui/react"
-import { FaCheck, FaChevronRight } from "react-icons/fa6"
+import { FaChevronRight } from "react-icons/fa6"
 
 import { GrantStep } from "./GrantsNewFormStepCard"
 
@@ -18,7 +18,8 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
         "scrollbar-width": "none",
       }}>
       <Steps.Root
-        variant="grants"
+        variant="subtle"
+        size="xs"
         step={activeStep}
         count={steps.length}
         display="flex"
@@ -33,9 +34,11 @@ export const GrantsNewFormStepIndicator = ({ activeStep, steps }: { activeStep: 
 
             return (
               <Steps.Item key={step.key} index={index}>
-                <Steps.Indicator boxSize={6}>
-                  <Steps.Status complete={<Icon as={FaCheck} boxSize={4} />} incomplete={<Steps.Number />} />
-                </Steps.Indicator>
+                <Steps.Indicator
+                  _current={{ bg: "actions.primary.default", color: "actions.primary.text" }}
+                  _complete={{ bg: "blue.100", color: "blue.500" }}
+                  _incomplete={{ bg: "card.subtle", color: "text.subtle" }}
+                />
 
                 {showStepTitle && (
                   <Steps.Title

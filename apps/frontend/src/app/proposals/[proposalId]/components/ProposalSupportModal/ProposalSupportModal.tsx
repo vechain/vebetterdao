@@ -172,7 +172,7 @@ export const ProposalSupportModal = ({
       <VStack w="full" align="stretch" gap={6}>
         {/* Amount Input Section */}
         <VStack align="stretch" gap={2}>
-          <Text fontWeight="medium">{"Amount"}</Text>
+          <Text>{"Amount"}</Text>
           <InputGroup
             endElement={
               <HStack>
@@ -183,13 +183,7 @@ export const ProposalSupportModal = ({
             <Input placeholder="0" size={"lg"} value={amount} onChange={handleChange} />
           </InputGroup>
           {/* Deposit Max Button */}
-          <Button
-            variant="plain"
-            color="blue.500"
-            fontSize="sm"
-            fontWeight="medium"
-            onClick={handleDepositMax}
-            alignSelf="flex-end">
+          <Button variant="plain" color="blue.500" textStyle="sm" onClick={handleDepositMax} alignSelf="flex-end">
             {"Deposit max"}
           </Button>
         </VStack>
@@ -215,7 +209,7 @@ export const ProposalSupportModal = ({
 
         {/* Support Button */}
         <Button
-          variant="primaryAction"
+          variant="primary"
           w="full"
           disabled={!Number(amount) || depositMutation.isTransactionPending}
           onClick={handleSupport}>

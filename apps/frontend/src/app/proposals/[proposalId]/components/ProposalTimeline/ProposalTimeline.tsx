@@ -247,59 +247,49 @@ export const ProposalTimeline = ({ proposal }: Props) => {
   }, [isGrant, proposal, proposalVotingRoundId, timelineSteps])
 
   return (
-    <>
-      <Card.Root variant="baseWithBorder" w="full" borderRadius={"3xl"} p={0} gap={0}>
-        <Card.Header>
-          <HStack gap={2}>
-            <Icon as={Calendar} boxSize={5} />
-            <Heading fontSize={"20px"} fontWeight={700}>
-              {t("Timeline")}
-            </Heading>
-          </HStack>
-        </Card.Header>
-        <Card.Body pb={0}>
-          <Steps.Root
-            orientation="vertical"
-            defaultStep={0}
-            count={timelineSteps.length}
-            size="sm"
-            w="full"
-            h="full"
-            step={currentStep}
-            colorPalette={invalidState ? "red" : "blue"}
-            variant="primaryVertical">
-            <Steps.List>
-              {timelineSteps.map((step: TimelineStep, index) => (
-                <Steps.Item key={`timeline-step-${step.state}`} index={index} minH={20}>
-                  <Steps.Indicator>
-                    <Steps.Status
-                      incomplete={<Circle bg={"actions.primary.default"} size="0" />}
-                      complete={<Circle bg={"actions.primary.default"} size="40%" />}
-                      current={<Circle bg={"actions.primary.default"} size="55%" />}
-                    />
-                  </Steps.Indicator>
-                  <Steps.Separator />
-                  <VStack
-                    align={timelineSteps.length === 1 ? "center" : "start"}
-                    justify="center"
-                    flex={1}
-                    w="full"
-                    h="30px">
-                    <Text fontSize="sm" color={currentStep === index ? "text.strong" : "text.subtle"}>
-                      {step.label}
-                    </Text>
-                    {step.description && (
-                      <Text fontSize="xs" color="text.subtle">
-                        {step.description}
-                      </Text>
-                    )}
-                  </VStack>
-                </Steps.Item>
-              ))}
-            </Steps.List>
-          </Steps.Root>
-        </Card.Body>
-      </Card.Root>
-    </>
+    <Card.Root variant="primary" w="full" p="6" gap={0}>
+      <Card.Header>
+        <HStack gap={2}>
+          <Icon as={Calendar} boxSize={5} />
+          <Heading size="xl" fontWeight="bold">
+            {t("Timeline")}
+          </Heading>
+        </HStack>
+      </Card.Header>
+      <Card.Body asChild>
+        <Steps.Root
+          orientation="vertical"
+          defaultStep={0}
+          count={timelineSteps.length}
+          size="sm"
+          w="full"
+          step={currentStep}
+          colorPalette={invalidState ? "red" : "blue"}
+          variant="primary">
+          <Steps.List>
+            {timelineSteps.map((step, index) => (
+              <Steps.Item key={`timeline-step-${step.state}`} index={index} minH={20}>
+                <Steps.Indicator>
+                  <Steps.Status
+                    incomplete={<Circle bg={"actions.primary.default"} size="0" />}
+                    complete={<Circle bg={"actions.primary.default"} size="40%" />}
+                    current={<Circle bg={"actions.primary.default"} size="55%" />}
+                  />
+                </Steps.Indicator>
+                <Steps.Separator />
+                <VStack align="start" flex={1}>
+                  <Text textStyle="sm" color={currentStep === index ? "text.strong" : "text.subtle"}>
+                    {step.label}
+                  </Text>
+                  <Text textStyle="xs" color="text.subtle">
+                    {step.description}
+                  </Text>
+                </VStack>
+              </Steps.Item>
+            ))}
+          </Steps.List>
+        </Steps.Root>
+      </Card.Body>
+    </Card.Root>
   )
 }

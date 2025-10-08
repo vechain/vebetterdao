@@ -1,4 +1,4 @@
-import { VStack, Card, Grid, GridItem } from "@chakra-ui/react"
+import { VStack, Grid, GridItem } from "@chakra-ui/react"
 import { GrantsNewFormStepCard } from "./form"
 import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
 import { HowGrantWorks } from "../components/form"
@@ -41,9 +41,7 @@ export const GrantsNewPageContent = () => {
           <GrantsNewFormStepCard />
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1 }}>
-          <Card.Root variant="base">
-            <HowGrantWorks />
-          </Card.Root>
+          <HowGrantWorks />
         </GridItem>
       </Grid>
     </VStack>
