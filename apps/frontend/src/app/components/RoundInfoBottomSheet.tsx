@@ -77,12 +77,12 @@ export const RoundInfoBottomSheet = () => {
           zIndex={2}>
           <Box>
             <Skeleton loading={isCardLoading}>
-              <Heading size={"xl"} color="text.default" fontWeight="normal">
+              <Heading size={"xl"} color="black" fontWeight="normal">
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
             <Skeleton loading={isCardLoading}>
-              <Text textStyle={"sm"}>
+              <Text textStyle={"sm"} color="black">
                 {t("{{from}} to {{to}}", {
                   from: allocationRound.voteStartTimestamp?.format("MMM D"),
                   to: allocationRound.voteEndTimestamp?.format("MMM D"),
@@ -110,12 +110,12 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading size={"xl"} fontWeight="normal" color="text.default">
+                <Heading size={"xl"} fontWeight="normal" color="black">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
               <Skeleton loading={isCardLoading}>
-                <Text textStyle={"sm"}>
+                <Text textStyle={"sm"} color="black">
                   {t("{{from}} to {{to}}", {
                     from: allocationRound.voteStartTimestamp?.format("MMM D"),
                     to: allocationRound.voteEndTimestamp?.format("MMM D"),
