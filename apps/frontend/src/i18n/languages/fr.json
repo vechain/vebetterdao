@@ -1991,5 +1991,8 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Si vous annulez maintenant, votre subvention sera supprimée et n'apparaîtra pas dans le prochain tour de vote. Une fois le tour commencé, l'annulation ne sera plus possible.",
   "Showing": "Affichage",
   "Search by proposal name": "Rechercher par nom de proposition",
-  "Created": "Créé"
+  "Created": "Créé",
+  "You have been signalled by": "Vous avez été signalé par",
+  "You have reached the maximum GM NFT level.": "Vous avez atteint le niveau maximum de GM NFT.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Retirer votre approbation d'une application peut entraîner sa non-sélection pour les allocations."
 }
