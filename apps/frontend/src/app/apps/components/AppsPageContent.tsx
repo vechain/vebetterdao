@@ -85,7 +85,7 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
-      <Card.Root variant="primary">
+      <Card.Root variant="primary" w="full">
         {!isAbove800 ? (
           <VStack alignItems={"flex-start"} gap={4} w="full">
             <Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>

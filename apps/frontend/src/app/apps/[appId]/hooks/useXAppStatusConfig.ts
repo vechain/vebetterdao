@@ -16,7 +16,7 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
     [XAppStatus.LOOKING_FOR_ENDORSEMENT]: {
       title: t("Looking for endorsement"),
       description: "This app needs to be endorsed by Node holders to qualify for allocation rounds.",
-      backgroundColor: "bg.primary",
+      backgroundColor: "status.positive.subtle",
       color: "status.positive.primary",
       icon: UilExclamationCircle,
     },
@@ -24,7 +24,7 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       title: t("Endorsed and active"),
       description:
         "This app has enough score and will participate in upcoming allocation rounds, if not already included.",
-      backgroundColor: "success.subtle",
+      backgroundColor: "status.positive.subtle",
       color: "status.positive.primary",
       icon: UilCheckCircle,
     },
@@ -32,14 +32,14 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       title: t("In grace period"),
       description:
         "This app lost its score and is in a 2-week grace period until {{gracePeriodEndDate}}. It will participate in allocation rounds during this time, but must be re-endorsed ahead of the round starting after that date to continue participating.",
-      backgroundColor: "warning.subtle",
+      backgroundColor: "status.warning.subtle",
       color: "status.warning.primary",
       icon: UilExclamationCircle,
     },
     [XAppStatus.UNENDORSED_NOT_ELIGIBLE]: {
       title: t("Endorsement lost"),
       description: "This app lost its score and will not participate in allocation rounds until it is endorsed again.",
-      backgroundColor: "error.subtle",
+      backgroundColor: "status.negative.subtle",
       color: "status.negative.primary",
       icon: UilExclamationCircle,
     },
