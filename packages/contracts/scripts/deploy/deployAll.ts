@@ -976,6 +976,13 @@ export async function deployAll(config: ContractsConfig) {
   await governor.connect(deployer).setGrantsManager(await grantsManager.getAddress())
   console.log("GrantsManager address set in B3TRGovernor contract")
 
+  //Update xAllocationVoting B3TRGovernor address
+  await xAllocationVoting
+    .connect(deployer)
+    .setB3TRGovernor(await governor.getAddress())
+    .then(async tx => await tx.wait())
+  console.log("B3TRGovernor address set in XAllocationVoting contract")
+
   // Grant Vote Registrar role to XAllocationVoting
   await voterRewards
     .connect(deployer)
