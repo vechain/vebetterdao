@@ -21,7 +21,7 @@ export const ClaimCard = ({ transaction }: Props) => {
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
-    <Card.Root size="sm" variant={"primary"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+    <Card.Root size="sm" variant="subtle" px={3} py={2} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>
