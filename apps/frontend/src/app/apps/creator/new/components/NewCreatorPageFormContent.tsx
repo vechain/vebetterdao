@@ -1,16 +1,17 @@
-import { Image, Stack, Text, useDisclosure, VStack, HStack, Card, Box, Heading } from "@chakra-ui/react"
-import { useForm } from "react-hook-form"
+import { creatorSubmissionQueryKey } from "@/api"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { SubmitCreatorForm, SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
+import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
+import { Box, Card, Heading, HStack, Image, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
+import { useWallet } from "@vechain/vechain-kit"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useTranslation } from "react-i18next"
 import { useEffect, useState } from "react"
-import { useWallet } from "@vechain/vechain-kit"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { SubmitCreatorFormData, SubmitCreatorForm } from "@/components/SubmitCreatorForm"
-import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
 import { CreatorApplicationModal } from "./CreatorApplicationModal"
-import { useQueryClient } from "@tanstack/react-query"
-import { creatorSubmissionQueryKey } from "@/api"
 
 export const NewCreatorPageFormContent = () => {
   const { register, reset, setValue, setError, watch, formState, control, handleSubmit, clearErrors } =
@@ -131,6 +132,8 @@ export const NewCreatorPageFormContent = () => {
               setError={setError}
               setValue={setValue}
               clearErrors={clearErrors}
+              resetForm={reset}
+              clearData={clearData}
             />
           </form>
         </Card.Root>

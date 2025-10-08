@@ -9,6 +9,7 @@ import {
   FieldErrors,
   UseFormClearErrors,
   UseFormRegister,
+  UseFormReset,
   UseFormSetError,
   UseFormSetValue,
   UseFormWatch,
@@ -46,9 +47,11 @@ type Props = {
   clearErrors: UseFormClearErrors<SubmitCreatorFormData>
   errors: FieldErrors<SubmitCreatorFormData>
   setValue: UseFormSetValue<SubmitCreatorFormData>
+  resetForm: UseFormReset<SubmitCreatorFormData>
+  clearData: () => void
 }
 
-export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }: Props) => {
+export const SubmitCreatorForm = ({ register, errors, setValue, watch, control, resetForm, clearData }: Props) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
 
@@ -183,6 +186,11 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
     if (value) {
       setData({ [field]: value })
     }
+  }
+  const handleResetForm = () => {
+    signOut({ redirect: false })
+    resetForm()
+    clearData()
   }
 
   return (
@@ -414,18 +422,20 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch, control }
           </Card.Root>
         </VStack>
       </Card.Body>
-      <Card.Footer display={"flex"} flexDir={"column"} w="full" alignItems="center" justifyContent="center">
+      <Card.Footer display={"flex"} flexDir={"row"} w="full" alignItems="center" justifyContent="center">
+        <Button
+          type="button"
+          onClick={handleResetForm}
+          variant="ghost"
+          color="actions.tertiary.default"
+          focusRingColor="actions.tertiary.default"
+          size="lg">
+          {t("Reset Form")}
+        </Button>
         <Button
           variant="primary"
           disabled={Object.keys(errors).length > 0}
           type="submit"
-          w="full"
-          px={10}
-          maxW={{
-            base: "100%",
-            sm: "80%",
-            md: "30%",
-          }}
           size="lg"
           borderRadius={"full"}>
           {t("Send Application")}
