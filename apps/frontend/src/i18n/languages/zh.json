@@ -1991,5 +1991,8 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "如果您现在取消，您的资助将被移除，并且不会出现在下一个投票轮次中。一旦轮次开始，将无法再取消。",
   "Showing": "显示",
   "Search by proposal name": "按提案名称搜索",
-  "Created": "创建"
+  "Created": "创建",
+  "You have been signalled by": "您已被...通知",
+  "You have reached the maximum GM NFT level.": "您已达到GM NFT的最高等级。",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "从应用程序中移除您的认可可能会导致其不再被选中进行分配。"
 }

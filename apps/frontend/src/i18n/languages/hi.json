@@ -1991,5 +1991,8 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "यदि आप अभी रद्द करते हैं, तो आपका अनुदान हटाया जाएगा और अगली मतदान राउंड में प्रकट नहीं होगा। एक बार राउंड शुरू होने पर, रद्द करना संभव नहीं होगा।",
   "Showing": "दिखा रहा है",
   "Search by proposal name": "प्रस्ताव के नाम से खोजें",
-  "Created": "सृजित"
+  "Created": "सृजित",
+  "You have been signalled by": "आपको संकेत मिला है",
+  "You have reached the maximum GM NFT level.": "आप अधिकतम जीएम एनएफटी स्तर तक पहुंच गए हैं।",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "किसी ऐप से अपनी समर्थन को हटाने से यह आवंटनों के लिए चुना नहीं जा सकता है।"
 }
