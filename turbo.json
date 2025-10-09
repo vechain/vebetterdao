@@ -39,7 +39,8 @@
     },
     "build": {
       "cache": true,
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": ["prepare-contracts"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
       "cache": false
