@@ -57,6 +57,8 @@
   "Email": "Email",
   "App Description": "App Description",
   "App Name": "App Name",
+  "Current Status": "Current Status",
+  "Status After Transaction": "Status After Transaction",
   "X Username": "X Username",
   "GitHub Username": "GitHub Username",
   "Submit Creator Form": "Submit Creator Form",
@@ -1502,5 +1504,12 @@
   "Search by proposal name": "Search by proposal name",
   "Created": "Created",
   "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Removing your endorsement from an app may result in it no longer being selected for allocations.",
-  "Reset Form": "Reset Form"
+  "Reset Form": "Reset Form",
+  "Apps eligible in next round": "Apps eligible in next round",
+  "App not found": "App not found:",
+  "Confirm Eligibility Change": "Confirm Eligibility Change",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?",
+  "eligible": "eligible",
+  "ineligible": "ineligible",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round."
 }
