@@ -399,6 +399,33 @@ contract RelayerRewardsPool is
     );
   }
 
+  /**
+   * @notice Get the B3TR contract address
+   * @return The B3TR contract address
+   */
+  function getB3trAddress() external view returns (address) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return address($.b3tr);
+  }
+
+  /**
+   * @notice Get the Emissions contract address
+   * @return The Emissions contract address
+   */
+  function getEmissionsAddress() external view returns (address) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return address($.emissions);
+  }
+
+  /**
+   * @notice Get the XAllocationVoting contract address
+   * @return The XAllocationVoting contract address
+   */
+  function getXAllocationVotingAddress() external view returns (address) {
+    RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
+    return address($.xAllocationVoting);
+  }
+
   // ----------------------- Actions -----------------------
 
   /**
