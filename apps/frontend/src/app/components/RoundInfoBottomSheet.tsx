@@ -115,7 +115,7 @@ export const RoundInfoBottomSheet = () => {
                 </Heading>
               </Skeleton>
               <Skeleton loading={isCardLoading}>
-                <Text textStyle={"sm"} color="black">
+                <Text textStyle={"sm"} color="text.default">
                   {t("{{from}} to {{to}}", {
                     from: allocationRound.voteStartTimestamp?.format("MMM D"),
                     to: allocationRound.voteEndTimestamp?.format("MMM D"),
