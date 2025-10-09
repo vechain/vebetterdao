@@ -1,23 +1,22 @@
-import { useTranslation } from "react-i18next"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { AddressIcon } from "@/components/AddressIcon"
-import { RemoveDelegationModal } from "./RemoveDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure, Badge } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
+import { RemoveDelegationModal } from "./RemoveDelegationModal"
+
+import { AddressIcon } from "@/components/AddressIcon"
 
 type Props = {
   delegationAddress: string
   isConnectedUser: boolean
 }
-
 export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const removeDelegationModal = useDisclosure()
-
   const { data: vnsData } = useVechainDomain(delegationAddress)
   const domain = vnsData?.domain
-
   return (
     <Stack
       direction={["column", "column", "row"]}

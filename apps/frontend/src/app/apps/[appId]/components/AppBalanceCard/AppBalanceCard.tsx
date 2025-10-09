@@ -14,32 +14,29 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import {
-  useAppAvailableFunds,
-  useAppRewardsBalance,
-  useIsRewardsPoolEnabled,
-  useIsDistributionPaused,
-} from "@/api/contracts/x2EarnRewardsPool"
-import { useIsAppAdmin } from "@/api"
+import { FiInfo } from "react-icons/fi"
+import { useMemo } from "react"
+import { FaArrowUpRightFromSquare } from "react-icons/fa6"
+import { useWallet } from "@vechain/vechain-kit"
 
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
+import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
+import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
+import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
 // Modal components
+import { GenericAlert } from "../../../../components/Alert/GenericAlert"
+
 import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
 import { TransferAppFundsModal } from "./TransferAppFundsModal"
 import { ManagementCenterModal } from "./ManagementCenterModal"
 
 import { Tooltip } from "@/components/ui/tooltip"
-import { FiInfo } from "react-icons/fi"
-import { useMemo } from "react"
-import { FaArrowUpRightFromSquare } from "react-icons/fa6"
-import { useWallet } from "@vechain/vechain-kit"
-import { GenericAlert } from "@/app/components/Alert"
 const compactFormatter = getCompactFormatter(4)
-
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const {
     open: isOpenRewardsPoolAccess,
     onOpen: onOpenRewardsPoolAccess,

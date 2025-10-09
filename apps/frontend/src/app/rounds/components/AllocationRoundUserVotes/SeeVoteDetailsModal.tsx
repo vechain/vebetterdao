@@ -1,9 +1,10 @@
-import { CustomModalContent } from "@/components"
 import { Heading, Dialog, Text, VStack } from "@chakra-ui/react"
-import { AppVotesHorizontalChart } from "../AllocationXAppsVotesCard/AppVotesHorizontalChart"
-import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
+
+import { AppVotesHorizontalChart } from "../AllocationXAppsVotesCard/AppVotesHorizontalChart"
+import { CustomModalContent } from "../../../../components/CustomModalContent"
 
 type Props = {
   roundId: string
@@ -15,12 +16,9 @@ type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-
   const sortedVotes = useMemo(() => votes.sort((a, b) => b.rawValue - a.rawValue), [votes])
   const totalVotesCast = useMemo(() => sortedVotes.reduce((acc, vote) => acc + vote.rawValue, 0), [sortedVotes])
   const totalAppsVoted = sortedVotes.length

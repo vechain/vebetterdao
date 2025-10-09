@@ -1,12 +1,11 @@
 import { getConfig } from "@repo/config"
-import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
 import { B3TR__factory } from "@vechain/vebetterdao-contracts"
+import { getCallClauseQueryKey, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 const abi = B3TR__factory.abi
 const address = getConfig().b3trContractAddress
 const method = "tokenDetails" as const
-
 export type TokenDetails = {
   name: string
   symbol: string
@@ -14,7 +13,6 @@ export type TokenDetails = {
   circulatingSupply: string
   totalSupply: string
 }
-
 export const getB3TrTokenDetailsQueryKey = () => getCallClauseQueryKey({ abi, address, method })
 export const useB3trTokenDetails = () => {
   return useCallClause({

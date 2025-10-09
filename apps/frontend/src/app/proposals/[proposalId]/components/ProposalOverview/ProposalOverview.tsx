@@ -1,33 +1,32 @@
-import { useIsDepositReached, useProposalUserDeposit, useUserSingleProposalVoteEvent } from "@/api"
-import { MilestonesActions } from "@/app/grants/components"
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
-import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { Card, Tabs, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { ProposalContentAndActions } from "../ProposalContentAndActions"
-import { ProposalOverviewHeader } from "../ProposalOverviewHeader"
+import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
+import { useProposalUserDeposit } from "../../../../../api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "../../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { MilestonesActions } from "../../../../grants/components/MilestonesActions"
+import { ProposalContentAndActions } from "../ProposalContentAndActions/ProposalContentAndActions"
+import { ProposalOverviewHeader } from "../ProposalOverviewHeader/ProposalOverviewHeader"
+
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewProps = {
   isGrant?: boolean
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
-
 export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) => {
   const { account } = useWallet()
   const { data: userDeposits } = useProposalUserDeposit(proposal?.id ?? "", account?.address ?? "")
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal?.id ?? "")
   const { data: depositReached } = useIsDepositReached(proposal?.id ?? "")
   const { isMobile } = useBreakpoints()
-
   const proposerAddress = proposal?.proposerAddress ?? ""
   const hasUserVoted = !!userVoteEvent?.hasVoted
-
   const hasUserDeposited = useMemo(() => {
     return BigInt(userDeposits ?? 0) > BigInt(0)
   }, [userDeposits])
-
   return (
     <Card.Root variant="primary" w="full" p="8">
       <Card.Body>
@@ -41,7 +40,6 @@ export const ProposalOverview = ({ isGrant, proposal }: ProposalOverviewProps) =
               proposerAddress={proposerAddress}
             />
           )}
-
           {isGrant ? (
             <Tabs.Root spaceY={7} defaultValue="overview" w="full" fitted lazyMount unmountOnExit>
               <Tabs.List>

@@ -12,16 +12,20 @@ import {
   CloseButton,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { CustomModalContent, B3TRIcon } from "@/components"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
-import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
-import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
+
+import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+
+import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {
   appId: string
@@ -29,7 +33,6 @@ export type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
 const containerVariants = {
   initial: {
     opacity: 0,

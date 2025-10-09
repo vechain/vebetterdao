@@ -1,41 +1,35 @@
-import { useB3trTokenDetails } from "@/api"
 import { Box, Card, HStack, Heading, Icon, Skeleton, SimpleGrid, Text, VStack } from "@chakra-ui/react"
-import { FormattingUtils } from "@repo/utils"
-import { useMemo } from "react"
-import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
-import { FiInfo } from "react-icons/fi"
+import { FormattingUtils } from "@repo/utils"
+import BigNumber from "bignumber.js"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useGetB3trBalance } from "@/hooks"
+import { FiInfo } from "react-icons/fi"
+
+import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
+import { useB3trTokenDetails } from "../../api/contracts/b3tr/hooks/useB3trTokenDetails"
+
 import { Tooltip } from "@/components/ui/tooltip"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()
-
   const { data: b3trTokenDetails } = useB3trTokenDetails()
   const { data: vot3ContractB3trBalance } = useGetB3trBalance(getConfig().vot3ContractAddress)
-
   const data = useMemo(() => {
     if (!b3trTokenDetails || !vot3ContractB3trBalance) return undefined
-
     const b3trCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply)
       .minus(vot3ContractB3trBalance?.scaled ?? 0)
       .toNumber()
-
     const vot3CirculatingSupply = new BigNumber(vot3ContractB3trBalance?.scaled ?? 0).toNumber()
-
     const totalCirculatingSupply = new BigNumber(b3trTokenDetails.circulatingSupply).toNumber()
-
     const b3trCirculatingSupplyPercentage = new BigNumber(b3trCirculatingSupply)
       .dividedBy(totalCirculatingSupply)
       .multipliedBy(100)
       .toNumber()
-
     const vot3CirculatingSupplyPercentage = new BigNumber(vot3CirculatingSupply)
       .dividedBy(totalCirculatingSupply)
       .multipliedBy(100)
       .toNumber()
-
     return {
       b3trCirculatingSupply: {
         name: "B3TR in circulation",

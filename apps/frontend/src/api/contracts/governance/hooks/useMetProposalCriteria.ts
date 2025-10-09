@@ -1,8 +1,10 @@
-import { useGMRequiredByProposalType } from "@/api/contracts/governance/hooks/useGMRequiredByProposalType"
-import { ProposalType } from "@/types"
-import { useMemo } from "react"
-import { useGetUserGMs } from "../../galaxyMember"
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
+
+import { ProposalType } from "../../../../types/proposals"
+
+import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMRequiredByProposalType } from "@/api/contracts/governance/hooks/useGMRequiredByProposalType"
 
 /**
  * Hook to get the GM level required by proposal type
@@ -12,11 +14,9 @@ import { useWallet } from "@vechain/vechain-kit"
 export const useMetProposalCriteria = (proposalType: ProposalType = ProposalType.STANDARD) => {
   const { account } = useWallet()
   const { data: gmRequired, isLoading: isLoadingGMRequired } = useGMRequiredByProposalType(proposalType)
-
   const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs(account?.address)
   const hasRequiredGM = useMemo(() => {
     return userGMs?.some(gm => Number(gm.tokenLevel) >= (gmRequired ?? 1))
   }, [userGMs, gmRequired])
-
   return { hasMetProposalCriteria: !!hasRequiredGM, isLoading: isLoadingGMRequired || isLoadingUserGMs }
 }

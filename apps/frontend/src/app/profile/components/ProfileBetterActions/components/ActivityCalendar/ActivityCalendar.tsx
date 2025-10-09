@@ -1,18 +1,19 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react"
 import { Box, Button, Card, Flex, Heading, HStack, VStack, useMediaQuery, SimpleGrid, Text } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ActivityDayModal } from "../../ActivityDayModal"
-import { useUserActionSummaryForDateRange } from "@/api"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { v4 as uuid } from "uuid"
+
+import { ActivityDayModal } from "../../ActivityDayModal"
+import { useUserActionSummaryForDateRange } from "../../../../../../api/indexer/actions/useUserActionSummaryForDateRange"
+
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)
 dayjs.updateLocale("en", {
   weekStart: 1,
 })
-
 type Props = {
   address: string
   setIsCalendarView: Dispatch<SetStateAction<boolean>>
@@ -22,20 +23,15 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   const today = dayjs()
   const [currentDate, setCurrentDate] = useState(today)
   const [isMobile] = useMediaQuery(["(max-width: 600px)"])
-
   const daysInMonth = currentDate.daysInMonth()
   const firstDayOfMonth = currentDate.startOf("month").day()
-
   const [selectedDate, setSelectedDate] = useState<string>()
-
   const startDate = currentDate.startOf("month").format("YYYY-MM-DD")
   const endDate = currentDate.endOf("month").format("YYYY-MM-DD")
-
   const currentMonthOverviewQuery = useUserActionSummaryForDateRange(address || "", {
     startDate,
     endDate,
   })
-
   useEffect(() => {
     // Fetch until there are no more pages left
     const fetchAllPages = async () => {
@@ -43,7 +39,6 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
         await currentMonthOverviewQuery.fetchNextPage()
       }
     }
-
     fetchAllPages()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate.toString()])

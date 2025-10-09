@@ -1,33 +1,29 @@
 import { Box, Image, Text, Button } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { ethers } from "ethers"
 import { useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { ethers } from "ethers"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { ProposalDeposit } from "@/api"
+
+import { ProposalDeposit } from "../../../../api/contracts/governance/utils/buildClaimDepositsTx"
+
 import { useWithdrawDeposits } from "@/hooks/useWithdrawDeposits"
 
 type Props = {
   totalClaimableDeposits: bigint
   claimableDeposits: ProposalDeposit[]
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Props) => {
   const { t } = useTranslation()
-
   const formattedDeposits = useMemo(() => {
     return Number(ethers.formatEther(totalClaimableDeposits))
   }, [totalClaimableDeposits])
-
   const { sendTransaction } = useWithdrawDeposits({
     proposalDeposits: claimableDeposits,
   })
-
   const handleClaim = useCallback(() => {
     sendTransaction()
   }, [sendTransaction])
-
   return (
     <Box
       bg={"contrast-on-dark-bg"}

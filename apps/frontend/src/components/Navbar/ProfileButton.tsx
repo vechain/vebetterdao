@@ -1,18 +1,18 @@
 import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
-import { AddressIcon } from "../AddressIcon"
-import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { FaChevronRight } from "react-icons/fa6"
-import { useTranslation } from "react-i18next"
+import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+import { FaChevronRight } from "react-icons/fa6"
+
 import { WalletIcon } from "../Icons/WalletIcon"
 import { VeBetterIcon } from "../Icons/VeBetterIcon"
+import { AddressIcon } from "../AddressIcon"
 
 type Props = {
   onMenuClose?: () => void
 }
-
 export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { account } = useWallet()
   const { data: vnsData } = useVechainDomain(account?.address)
@@ -20,17 +20,14 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { t } = useTranslation()
   const { open } = useWalletModal()
   const router = useRouter()
-
   const onClick = useCallback(() => {
     router.push("/profile")
     onMenuClose?.()
   }, [onMenuClose, router])
-
   const handleConnectWallet = useCallback(() => {
     open()
     onMenuClose?.()
   }, [open, onMenuClose])
-
   if (!account?.address)
     return (
       <Flex

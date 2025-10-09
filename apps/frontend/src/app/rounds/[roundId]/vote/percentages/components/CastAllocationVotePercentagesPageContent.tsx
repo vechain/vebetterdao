@@ -1,38 +1,38 @@
 "use client"
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useTotalVotesOnBlock,
-  useHasVotedInRound,
-  useVotingThreshold,
-  useRoundXApps,
-} from "@/api"
 import { Card, Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
-import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
-import { SelectAppVotesInput } from "./SelectAppVotesInput"
-import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
+
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+import {
+  useCastAllocationFormStore,
+  CastAllocationVoteFormData,
+} from "../../../../../../store/useCastAllocationFormStore"
+import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+
+import { SelectAppVotesInput } from "./SelectAppVotesInput"
 
 type Props = {
   roundId: string
 }
+
 export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const router = useRouter()
-
   const xAppsQuery = useRoundXApps(roundId)
-
   const { data: votes, setData: onVotesChange } = useCastAllocationFormStore()
-
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes

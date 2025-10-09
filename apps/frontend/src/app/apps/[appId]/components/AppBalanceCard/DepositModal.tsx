@@ -1,24 +1,28 @@
 import { Button, Card, HStack, Text, VStack, Dialog, Input, Skeleton, Icon, CloseButton } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
-import { useDepositToAppBalance, useGetB3trBalance } from "@/hooks"
-import { Controller, useForm } from "react-hook-form"
-import { CustomModalContent, B3TRIcon } from "@/components"
-import { Trans, useTranslation } from "react-i18next"
-import { motion } from "framer-motion"
-import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
-import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
+import { motion } from "framer-motion"
+import { useCallback, useMemo } from "react"
+import { Controller, useForm } from "react-hook-form"
+import { Trans, useTranslation } from "react-i18next"
+import { IoAddCircleOutline } from "react-icons/io5"
+
+import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
+import { useDepositToAppBalance } from "../../../../../hooks/useDepositToAppBalance"
+import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { useXApp } from "../../../../../api/contracts/xApps/hooks/useXApp"
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useXApp } from "@/api"
 
 export type Props = {
   appId: string
   isOpen: boolean
   onClose: () => void
 }
-
 const containerVariants = {
   initial: {
     opacity: 0,
@@ -33,13 +37,11 @@ const containerVariants = {
     },
   },
 }
-
 const layoutTransition = {
   type: "spring",
   stiffness: 300,
   damping: 24,
 }
-
 export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()

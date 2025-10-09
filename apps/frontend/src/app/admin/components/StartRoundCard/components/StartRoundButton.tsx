@@ -1,19 +1,19 @@
 import { VStack, Button, Text } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
+
+import { useCurrentRoundActiveState } from "../../../../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
+
 import { useStartRoundAndClaimWorkflow } from "@/hooks/useStartRoundAndClaimWorkflow"
-import { useCurrentRoundActiveState } from "@/api"
 
 interface StartRoundButtonProps {
   redirectTo?: string
   onSuccess?: () => void
 }
-
 export const StartRoundButton = ({ redirectTo, onSuccess }: StartRoundButtonProps) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { isCurrentRoundActive, currentRound, currentRoundId } = useCurrentRoundActiveState()
-
   const { sendTransaction, isTransactionPending, status, xAppsLeftCount } = useStartRoundAndClaimWorkflow({
     roundId: currentRoundId ?? "",
     onSuccess: () => {
@@ -23,21 +23,16 @@ export const StartRoundButton = ({ redirectTo, onSuccess }: StartRoundButtonProp
       }
     },
   })
-
   if (parseInt(currentRoundId ?? "0") < 1) return null
-
   const getButtonText = () => {
     if (isTransactionPending) {
       return t("Processing transaction...")
     }
-
     if (status === "success") {
       return t("Transaction completed!")
     }
-
     return t("Start new round & claim allocations")
   }
-
   return (
     <VStack alignItems="start" w="full" gap={4}>
       {xAppsLeftCount > 0 && (

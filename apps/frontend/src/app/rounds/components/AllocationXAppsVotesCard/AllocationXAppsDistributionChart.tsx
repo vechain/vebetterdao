@@ -1,16 +1,16 @@
-import {
-  useAllocationAmount,
-  useAllocationBaseAmount,
-  useAllocationVoters,
-  useMaxAllocationAmount,
-  useMultipleXAppRoundEarnings,
-  useRoundXApps,
-} from "@/api"
-import { B3TRIcon, DotSymbol } from "@/components"
 import { VStack, Heading, Text, Box, Skeleton, Stack, HStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useMultipleXAppRoundEarnings } from "../../../../api/contracts/xAllocationPool/hooks/useMultipleXAppRoundEarnings"
+import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useAllocationBaseAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationBaseAmount"
+import { useAllocationVoters } from "../../../../api/contracts/xAllocations/hooks/useAllocationVoters"
+import { useMaxAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useMaxAllocationAmount"
+import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { DotSymbol } from "../../../../components/DotSymbol"
+import { B3TRIcon } from "../../../../components/Icons/B3TRIcon"
 
 const compactFormatter = getCompactFormatter(2)
 const getSafeScaledPercentage = (percentage: number) => Math.min(percentage, 1) * 100
@@ -19,30 +19,22 @@ type Props = {
 }
 export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
   const { t } = useTranslation()
-
   //TODO: Handle error
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
-
   const { data: baseAmount, isLoading: baseAmountLoading } = useAllocationBaseAmount(roundId)
   const { data: maxAmount, isLoading: maxAmountLoading } = useMaxAllocationAmount(roundId)
-
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
-
   const forecastedEarningsQuery = useMultipleXAppRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
-
   const { data: voters, isLoading: votersLoading } = useAllocationVoters(roundId)
-
   const totalDistributed = useMemo(() => {
     if (!roundAmount) return 0
     return Number(roundAmount.voteXAllocations)
   }, [roundAmount])
-
   // the total baseAmount distributed in the round
   const totalBaseAmount = useMemo(() => {
     if (!baseAmount || !xApps?.length) return 0
     return Number(baseAmount) * xApps?.length
   }, [baseAmount, xApps])
-
   // the total amount of B3TR distributed in the round only votes
   const totalEarningsWithoutBase = useMemo(() => {
     if (!forecastedEarningsQuery.data || !baseAmount) return 0

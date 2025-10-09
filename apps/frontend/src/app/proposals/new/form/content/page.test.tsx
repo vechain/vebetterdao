@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest"
-import NewProposalPageDiscussion from "./page"
-import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
-import FormProposalLayout from "../layout"
-import { GovernanceProposalTemplate, removePlaceholders } from "@/constants"
 
+import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
+import FormProposalLayout from "../layout"
+import { GovernanceProposalTemplate, removePlaceholders } from "../../../../../constants/GovernanceProposalTemplate"
+
+import NewProposalPageDiscussion from "./page"
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -14,7 +15,6 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/content")
 
 describe("NewProposalContent", async () => {
@@ -44,7 +44,6 @@ describe("NewProposalContent", async () => {
       "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
     )
     await screen.findByText("Make sure to replace all the placeholders with your own content.")
-
     const goBack = await screen.findByTestId("go-back")
     const continueButton = await screen.findByTestId("continue")
     fireEvent.click(goBack)

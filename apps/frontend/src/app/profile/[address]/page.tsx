@@ -1,12 +1,13 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils, AddressUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import Custom404 from "@/app/not-found"
 import { useEffect } from "react"
 
+import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { isValid } from "../../../utils/AddressUtils/AddressUtils"
+
+import Custom404 from "@/app/not-found"
 const ProfilePageContent = dynamic(
   () => import("../components/ProfilePageContent").then(mod => mod.ProfilePageContent),
   {
@@ -18,18 +19,16 @@ const ProfilePageContent = dynamic(
     ),
   },
 )
-
 type Props = {
   params: {
     address: string
   }
 }
-
 export default function Profile({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage("Profile")
   }, [])
-  if (!AddressUtils.isValid(params.address)) {
+  if (!isValid(params.address)) {
     return <Custom404 />
   }
   return (

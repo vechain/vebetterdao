@@ -1,10 +1,12 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle } from "@/components"
-import { useRejectEntityLink } from "@/hooks"
+import { useTranslation } from "react-i18next"
+
+import { useRejectEntityLink } from "../../../../../../../../../hooks/useRejectEntityLink"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { BaseModal } from "@/components/BaseModal"
 
 export const RejectLinkingModal = ({
   modal,
@@ -16,18 +18,14 @@ export const RejectLinkingModal = ({
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const rejectLinking = useRejectEntityLink({})
-
   const handleDelegate = useCallback(() => {
     rejectLinking.sendTransaction({ entity: secondaryAccount })
   }, [rejectLinking, secondaryAccount])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-
   const handleClose = useCallback(() => {
     modal.onClose?.()
     rejectLinking.resetStatus()
   }, [modal, rejectLinking])
-
   return (
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack alignItems="stretch" gap={6}>

@@ -1,8 +1,12 @@
 import { VStack, Spinner, Box, Button, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useInfiniteScroll, usePagination } from "@/hooks"
-import { ProposalBox } from "./ProposalBox"
 import { FaAngleLeft } from "react-icons/fa"
+
+import { useInfiniteScroll } from "../../../../../hooks/useInfiniteScroll"
+import { usePagination } from "../../../../../hooks/usePagination"
+
+import { ProposalBox } from "./ProposalBox"
+
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type PaginatedProposalsProps = {
@@ -10,18 +14,14 @@ type PaginatedProposalsProps = {
   itemsPerPage?: number
   goBack: () => void
 }
-
 export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: PaginatedProposalsProps) => {
   const { t } = useTranslation()
-
   const { currentItems, hasMore, loadMore, loading } = usePagination(proposals ?? [], itemsPerPage)
-
   useInfiniteScroll({
     loading,
     hasMore,
     onLoadMore: loadMore,
   })
-
   return (
     <Card.Root w="full" variant="primary">
       <Card.Body gap={4}>
@@ -35,7 +35,6 @@ export const PaginatedProposals = ({ proposals, itemsPerPage = 10, goBack }: Pag
           <FaAngleLeft />
           {t("Go back")}
         </Button>
-
         {/* Proposals List */}
         <VStack w="full" gap={4}>
           {currentItems?.map(proposal => (

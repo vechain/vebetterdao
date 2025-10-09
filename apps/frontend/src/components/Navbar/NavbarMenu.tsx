@@ -2,17 +2,15 @@
 import { Button, Icon, HoverCard, Portal, Text, useMediaQuery, VStack, Collapsible, HStack } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
-import { Route } from "./Routes"
 import { FaChevronDown } from "react-icons/fa6"
 import { motion } from "framer-motion"
 
+import { Route } from "./Routes"
 type Props = {
   onMenuClick?: () => void
   routesToRender: Route[]
 }
-
 const MotionVStack = motion(VStack)
-
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
   if (typeof route.onClick === "string") {
@@ -27,7 +25,6 @@ const isSelected = (route: Route, pathname: string) => {
   }
   return false
 }
-
 const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () => {
   if (!route.onClick) return
   if (typeof route.onClick === "string") {
@@ -40,7 +37,6 @@ const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () 
 const DesktopButtonWithSubRoutes = ({ route, selected }: { route: Route; selected: boolean }) => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-
   return (
     <HoverCard.Root
       positioning={{ placement: "bottom-start" }}

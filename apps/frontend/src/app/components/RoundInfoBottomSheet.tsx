@@ -1,31 +1,30 @@
 "use client"
-
 import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton, SimpleGrid } from "@chakra-ui/react"
-import { BaseBottomSheet } from "@/components/BaseBottomSheet"
-import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
-import {
-  useAllocationAmount,
-  useAllocationsRoundState,
-  useCanUserVote,
-  useCurrentAllocationsRoundId,
-  useGetDelegatee,
-  useMostVotedAppsInRound,
-} from "@/api"
-import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 import { Trans, useTranslation } from "react-i18next"
-import { AllocationStateBadge, B3TRIcon, ProposalCompactCard } from "@/components"
-import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
-import { ProposalState } from "@/hooks/proposals/grants/types"
 import NextLink from "next/link"
 
+import { useAllocationAmount } from "../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useAllocationsRoundState } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useCanUserVote } from "../../api/contracts/governance/hooks/useCanUserVote"
+import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useGetDelegatee } from "../../api/contracts/vePassport/hooks/useGetDelegatee"
+import { useMostVotedAppsInRound } from "../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
+import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
+import { AllocationStateBadge } from "../../components/AllocationStateBadge/AllocationStateBadge"
+import { B3TRIcon } from "../../components/Icons/B3TRIcon"
+import { ProposalCompactCard } from "../../components/ProposalCompactCard"
+import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
+
+import { ProposalState } from "@/hooks/proposals/grants/types"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
-
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
   // First active, then looking for support (pending + deposit not met)
@@ -35,13 +34,10 @@ export const RoundInfoBottomSheet = () => {
         if (proposal.state === ProposalState.Active) return 1
         return 2 // Everything else
       }
-
       return getPriority(a) - getPriority(b)
     })
   }, [proposalsToRender])
-
   const { data: amounts, isLoading: amountsLoading } = useAllocationAmount(currentRoundId)
-
   const mostVotedAppsQuery = useMostVotedAppsInRound(currentRoundId)
 
   const { data: state } = useAllocationsRoundState(currentRoundId)

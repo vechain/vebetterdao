@@ -1,14 +1,14 @@
 import { getConfig } from "@repo/config"
-import { useCallback, useMemo } from "react"
 import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
-import { useBuildTransaction } from "@/hooks/useBuildTransaction"
-import {
-  getAppRewardsBalanceQueryKey,
-  getIsDistributionPausedQueryKey,
-  getIsRewardsPoolEnabledQueryKey,
-  getAppAvailableFundsQueryKey,
-} from "@/api/contracts/x2EarnRewardsPool"
+import { useCallback, useMemo } from "react"
+
+import { getAppAvailableFundsQueryKey } from "../getter/useAppAvailableFunds"
+import { getAppRewardsBalanceQueryKey } from "../getter/useAppRewardsBalance"
+import { getIsDistributionPausedQueryKey } from "../getter/useIsDistributionPaused"
+import { getIsRewardsPoolEnabledQueryKey } from "../getter/useIsRewardsPoolEnabled"
+
 import { buildClause } from "@/utils/buildClause"
+import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 
 /**
  * Pause distribution for a specific xApp
@@ -20,13 +20,10 @@ interface Props {
   isEnabled: boolean
   onSuccess?: () => void
 }
-
 const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
-
 export const useDistributionManagement = ({ xAppId, onSuccess, isEnabled }: Props) => {
   // build the clause and send the transaction
-
   const buildPauseClause = useCallback(() => {
     return [
       buildClause({
@@ -38,7 +35,6 @@ export const useDistributionManagement = ({ xAppId, onSuccess, isEnabled }: Prop
       }),
     ]
   }, [xAppId])
-
   const buildUnpauseClause = useCallback(() => {
     return [
       buildClause({

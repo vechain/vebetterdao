@@ -3,30 +3,28 @@ import { useCallback, useMemo } from "react"
 import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useUploadAppMetadata } from "./useUploadAppMetadata"
-import { getXAppsQueryKey } from "@/api"
 import { AppWithoutCategories } from "./useAppsWithoutCategories"
+
 import { XAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
-
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-
 export type AppCategoryAssignment = {
   app: AppWithoutCategories
   selectedCategories: string[]
 }
-
 type UseAdminAssignCategoriesProps = {
   onSuccess?: () => void
   onFailure?: () => void
 }
-
 export type UseAdminAssignCategoriesReturnValue = {
   assignCategories: (assignments: AppCategoryAssignment[]) => Promise<void>
   isUploading: boolean
   uploadError: Error | undefined
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
 /**
  * Hook for admin to assign categories to multiple apps in a single transaction
  * @param props onSuccess and onFailure callbacks
@@ -37,11 +35,9 @@ export const useAdminAssignCategories = ({
   onFailure,
 }: UseAdminAssignCategoriesProps): UseAdminAssignCategoriesReturnValue => {
   const { onMetadataUpload, metadataUploading, metadataUploadError } = useUploadAppMetadata()
-
   const buildClauses = useCallback(
     (metadataUris: { appId: string; metadataUri: string; appName: string; categories: string[] }[]) => {
       const clauses: EnhancedClause[] = []
-
       // Create clauses for updating app metadata
       for (const { appId, metadataUri, appName, categories } of metadataUris) {
         clauses.push({

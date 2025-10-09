@@ -1,5 +1,6 @@
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { useTranslation } from "react-i18next"
+
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 export const CreatorApplicationUnderReviewBanner = () => {
   const { t } = useTranslation()

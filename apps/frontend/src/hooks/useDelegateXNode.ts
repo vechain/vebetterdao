@@ -1,12 +1,17 @@
-import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
-import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
-import { buildClause } from "@/utils/buildClause"
 import { GalaxyMember__factory, NodeManagement__factory } from "@vechain/vebetterdao-contracts"
-import { getIsNodeHolderQueryKey, getLevelOfTokenQueryKey, getUserNodesQueryKey, UserNode } from "@/api"
+import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getIsNodeHolderQueryKey } from "../api/contracts/xNodes/useIsNodeHolder"
+import { UserNode, getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
+import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
+
+import { useBuildTransaction } from "./useBuildTransaction"
+
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
+import { buildClause } from "@/utils/buildClause"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
@@ -14,17 +19,14 @@ const GmInterface = GalaxyMember__factory.createInterface()
 const gmContractAddress = getConfig().galaxyMemberContractAddress
 const delegateMethod = "delegateNode"
 const detachMethod = "detachNode"
-
 type UseDelegateXNodeProps = {
   xNode: UserNode
   onSuccess?: () => void
 }
-
 type ClausesParams = {
   delegatee: string
   isAttachedToGM?: boolean
 }
-
 /**
  * Provides a React hook to delegate an XNode using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
@@ -35,7 +37,6 @@ type ClausesParams = {
 export const useDelegateXNode = ({ xNode, onSuccess }: UseDelegateXNodeProps) => {
   const { account } = useWallet()
   const attachedGMTokenId = xNode?.gmTokenIdAttachedToNode
-
   // Memoize the node data to prevent changes during transaction
   const nodeData = useMemo(
     () => ({

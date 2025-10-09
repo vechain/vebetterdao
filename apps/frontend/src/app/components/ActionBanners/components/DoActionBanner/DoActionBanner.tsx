@@ -1,24 +1,23 @@
 import { Button, useDisclosure } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { DoActionModal } from "./components/DoActionModal"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import { DoActionModal } from "./components/DoActionModal"
+
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
 
 export const DoActionBanner = () => {
   const { t } = useTranslation()
   const doActionModal = useDisclosure()
   const { isUserDelegatee, isLoading: isLoadingUserScore } = useUserScore()
-
   const description = useMemo(() => {
     if (isUserDelegatee)
       return t("Your delegator has to complete Better Actions in our apps and unlock your right to vote.")
     return t("Complete Better Actions in our apps and unlock your right to vote. Make your impact count!")
   }, [t, isUserDelegatee])
-
   if (isLoadingUserScore) return null
-
   return (
     <>
       <GenericBanner

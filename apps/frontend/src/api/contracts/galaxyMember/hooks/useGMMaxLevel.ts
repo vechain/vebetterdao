@@ -5,9 +5,7 @@ import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 const address = getConfig().galaxyMemberContractAddress
 const abi = GalaxyMember__factory.abi
 const method = "MAX_LEVEL" as const
-
 export const getGMMaxLevelQueryKey = () => getCallClauseQueryKey({ abi, address, method })
-
 /**
  * Hook to get the max level of the GM NFT.
  * @returns The max level of the GM NFT.

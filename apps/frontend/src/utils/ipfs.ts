@@ -12,7 +12,6 @@ export const validateIpfsUri = (uri: string): boolean => {
   const trimmedUri = uri.trim()
   return /^ipfs:\/\/[a-zA-Z0-9]+(\/[^/]+)*\/?$/.test(trimmedUri)
 }
-
 /**
  * Converts a CID to an IPFS native URL.
  *
@@ -24,7 +23,6 @@ export const validateIpfsUri = (uri: string): boolean => {
 export function toIPFSURL(cid: string, fileName?: string): string {
   return `ipfs://${cid}/${fileName ?? ""}`
 }
-
 /**
  * Uploads a blob to IPFS.
  * @param blob The Blob object to upload.
@@ -39,13 +37,10 @@ export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<st
       method: "POST",
       body: form,
     })
-
     if (!response.ok) {
       throw new Error(`Failed to upload blob to IPFS: ${response.status}`)
     }
-
     const { IpfsHash: ipfsHash } = (await response.json()) as { IpfsHash?: string }
-
     if (!ipfsHash) {
       throw new Error("IPFS pinning service response missing IpfsHash")
     }

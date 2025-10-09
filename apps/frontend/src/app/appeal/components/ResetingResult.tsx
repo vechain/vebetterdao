@@ -1,10 +1,10 @@
+import { Alert, Box, Button, VStack, Code, Collapsible, useDisclosure, Text } from "@chakra-ui/react"
+import { UilArrowUp, UilArrowDown } from "@iconscout/react-unicons"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
-import { Alert, Box, Button, VStack, Code, Collapsible, useDisclosure, Text } from "@chakra-ui/react"
-import { UilArrowUp, UilArrowDown } from "@iconscout/react-unicons"
-import { ResetStatus } from "../types"
-import { RESET_STATUS } from "../constants"
+import { ResetStatus } from "../types/resetStatus"
+import { RESET_STATUS } from "../constants/resetStatus"
 
 export const ResetingResult = ({
   resetingStatus,
@@ -15,7 +15,6 @@ export const ResetingResult = ({
 }) => {
   const { open: isOpen, onToggle } = useDisclosure()
   const { t } = useTranslation()
-
   return (
     <>
       {resetingStatus === RESET_STATUS.SUCCESS && (
@@ -25,7 +24,6 @@ export const ResetingResult = ({
           </Button>
         </VStack>
       )}
-
       {resetingStatus === RESET_STATUS.ERROR && (
         <VStack align="stretch" gap={2}>
           <Alert.Root status="error" size="md" borderRadius="16px">
@@ -42,7 +40,6 @@ export const ResetingResult = ({
                   color={"black"}
                   _hover={{ color: "black" }}>
                   {t("Show Details")}
-
                   {isOpen ? <UilArrowUp /> : <UilArrowDown />}
                 </Button>
               </Alert.Title>

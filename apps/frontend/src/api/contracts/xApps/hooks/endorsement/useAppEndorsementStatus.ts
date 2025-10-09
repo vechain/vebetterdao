@@ -1,12 +1,11 @@
-import {
-  useAppEndorsementScore,
-  useAppExists,
-  useEndorsementScoreThreshold,
-  useAppEligibleAtRoundStart,
-  useIsAppUnendorsed,
-  useAppIsBlackListed,
-} from "@/api"
-import { XAppStatus } from "@/types"
+import { XAppStatus } from "../../../../../types/appDetails"
+import { useAppExists } from "../useAppExists"
+import { useAppIsBlackListed } from "../useAppIsBlackListed"
+import { useEndorsementScoreThreshold } from "../useEndorsementScoreThreshold"
+
+import { useAppEligibleAtRoundStart } from "./useAppEligibleAtRoundStart"
+import { useAppEndorsementScore } from "./useAppEndorsementScore"
+import { useIsAppUnendorsed } from "./useIsAppUnendorsed"
 
 /**
  * Determine the current app endorsement status
@@ -36,15 +35,12 @@ const determineAppStatus = (
   ) {
     return XAppStatus.UNKNOWN
   }
-
   if (isBlacklisted) {
     return XAppStatus.BLACKLISTED
   }
-
   if (!appHasBeenIntoAllocationRounds) {
     return XAppStatus.LOOKING_FOR_ENDORSEMENT
   }
-
   if (isUnendorsed) {
     if (appEligibleAtRoundStart) {
       return XAppStatus.UNENDORSED_AND_ELIGIBLE

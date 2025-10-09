@@ -1,10 +1,14 @@
-import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/vechain-kit"
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
-import { useUserSignalEvents, useXApps } from "@/api"
 import { Text, useDisclosure, Button, Icon } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+import { useUserSignalEvents } from "../../../../../api/contracts/xApps/hooks/useUserSignalEvents"
+
 import { SignalModal } from "./components/SignalModal"
+
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 export const UserSignaledBanner = () => {
   const { t } = useTranslation()
@@ -13,12 +17,9 @@ export const UserSignaledBanner = () => {
     data: { activeSignalEvents },
   } = useUserSignalEvents(account?.address ?? "")
   const { data: apps } = useXApps()
-
   const { open: isOpen, onOpen, onClose } = useDisclosure()
-
   const allApps = apps?.allApps ?? []
   const signals = activeSignalEvents || []
-
   function getAppName(appId: string): string {
     const found = allApps.find(app => app.id === appId)
     return found ? found.name : "Unknown"
@@ -27,13 +28,10 @@ export const UserSignaledBanner = () => {
     ...signal,
     appName: getAppName(signal.appId),
   }))
-
   const appNames = [...new Set(enrichedSignals.map(({ appName }) => appName))]
-
   function formatAppNames(names: string[]): string {
     const MAX_LENGTH = 40
     const joined = names.join(", ")
-
     if (names.length > 3 || joined.length > MAX_LENGTH) {
       return "many apps"
     }

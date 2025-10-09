@@ -1,34 +1,31 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
-import { DotSymbol, ProposalCompactCard } from "@/components"
-import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { Button, Heading, HStack, Icon, Skeleton, Text, VStack, Card } from "@chakra-ui/react"
-
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
-import { NoActiveProposalCard } from "../NoActiveProposalCard"
+
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { DotSymbol } from "../../../../components/DotSymbol"
+import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
+import { NoActiveProposalCard } from "../NoActiveProposalCard"
+
 import { ProposalState } from "@/hooks/proposals/grants/types"
+import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
-
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
-
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
-
   useEffect(() => {
     if (currentRoundId && !selectedRoundId) {
       setSelectedRoundId(currentRoundId)
     }
   }, [currentRoundId, selectedRoundId])
-
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
-
   const { allocationRound, proposalsToRender } = useRoundProposals(selectedRoundId ?? "1")
   // First active, then looking for support (pending + deposit not met)
   const sortedProposals = useMemo(() => {
@@ -37,11 +34,9 @@ export const DashboardAllocationRounds = () => {
         if (proposal.state === ProposalState.Active) return 1
         return 2 // Everything else
       }
-
       return getPriority(a) - getPriority(b)
     })
   }, [proposalsToRender])
-
   return (
     <Card.Root variant="primary">
       <Card.Body gap="8">

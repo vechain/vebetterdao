@@ -1,16 +1,19 @@
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
-import { StepCard, StepCardProps } from "@/components/StepCard"
-import { useTranslation } from "react-i18next"
-import { useCallback, useLayoutEffect } from "react"
 import { TFunction } from "i18next"
+import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect } from "react"
+import { useTranslation } from "react-i18next"
+
 import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
-import SignIcon from "@/components/Icons/svg/sign.svg"
-import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
-import VoteIcon from "@/components/Icons/svg/vote.svg"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ButtonClickProperties, buttonClicked, buttonClickActions } from "../../../../constants/AnalyticsEvents"
+
 import ArrowRightIcon from "@/components/Icons/svg/arrow-right.svg"
+import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
+import SignIcon from "@/components/Icons/svg/sign.svg"
+import VoteIcon from "@/components/Icons/svg/vote.svg"
+import { StepCard, StepCardProps } from "@/components/StepCard"
+
 const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {
     stepIcon: SignIcon,
@@ -24,7 +27,6 @@ const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => 
     stepTitle: t("Look for support"),
     stepDescription: t("In order for your proposal to be voted on, it will have to have the support of the community."),
   },
-
   {
     stepIcon: VoteIcon,
     stepNumber: 3,

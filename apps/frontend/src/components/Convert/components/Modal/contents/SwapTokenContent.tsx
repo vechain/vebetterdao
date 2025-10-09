@@ -1,10 +1,11 @@
 import { Text, HStack, Flex, Button } from "@chakra-ui/react"
+import { TokenBalance } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { UseFormReturn } from "react-hook-form"
 import { FiInfo } from "react-icons/fi"
+
 import { TokenCards } from "../../TokenCards"
 import { BalanceInfo } from "../../BalanceInfo"
-import { TokenBalance } from "@vechain/vechain-kit"
 
 type Props = {
   amount: string
@@ -17,7 +18,6 @@ type Props = {
   vot3BalanceScaled: string
   disableSubmitButton: boolean
 }
-
 export const SwapTokenContent = ({
   amount,
   goToNextStep,
@@ -43,7 +43,6 @@ export const SwapTokenContent = ({
         <BalanceInfo isB3TR={true} balanceScaled={b3trBalanceScaled} />
         <BalanceInfo isB3TR={false} balanceScaled={vot3BalanceScaled} />
       </Flex>
-
       {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
         <HStack px={4} py={3} bg={"dark-contrast-on-card-bg"} borderRadius={8} mt={2}>
           <FiInfo size={36} color="text.subtle" />

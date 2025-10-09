@@ -1,7 +1,9 @@
 import { HStack, VStack, Text, Heading, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
-import { ProposalBox } from "."
+
+import { ProposalBox } from "./ProposalBox"
+
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type Props = {
@@ -10,7 +12,6 @@ type Props = {
   isCreatedProposals?: boolean
   onSeeAllProposals?: () => void
 }
-
 export const PreviewCreatedProposals = ({
   firstProposals,
   isCreatedProposals,
@@ -18,9 +19,7 @@ export const PreviewCreatedProposals = ({
   onSeeAllProposals,
 }: Props) => {
   const { t } = useTranslation()
-
   if (!firstProposals || firstProposals.length == 0) return null
-
   return (
     <Card.Root w={"full"} variant="primary">
       <Card.Body>

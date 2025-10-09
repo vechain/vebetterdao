@@ -1,16 +1,15 @@
-import { notFoundImage } from "@/constants"
 import { Avatar, Image, Skeleton, SkeletonProps } from "@chakra-ui/react"
-import { useXAppMetadata } from "@/api"
+
+import { useXAppMetadata } from "../../api/contracts/xApps/hooks/useXAppMetadata"
+
+import { notFoundImage } from "@/constants"
 
 type Props = {
   appId: string
 } & SkeletonProps
-
 export const AppImage = ({ appId, ...props }: Props) => {
   const { data: appMetadata, isLoading } = useXAppMetadata(appId)
-
   const borderRadius = props.borderRadius ?? "9px"
-
   return (
     <Skeleton asChild loading={isLoading} boxSize={props.boxSize} borderRadius={borderRadius} {...props}>
       <Avatar.Root border="none" rounded={props.borderRadius}>

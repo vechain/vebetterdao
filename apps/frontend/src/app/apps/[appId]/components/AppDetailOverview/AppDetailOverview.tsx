@@ -1,5 +1,4 @@
-import { notFoundImage } from "@/constants"
-import { XAppStatus } from "@/types"
+const notFoundImage = "/assets/images/image-not-found.webp"
 import {
   Button,
   Card,
@@ -18,17 +17,21 @@ import { UilArrowUpRight } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
+
+import { XAppStatus } from "../../../../../types/appDetails"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { AdminAppPageButton } from "./components/AdminAppPageButton"
+import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
+import { useCurrentAppLogo } from "../../hooks/useCurrentAppLogo"
+import { useCurrentAppBanner } from "../../hooks/useCurrentAppBanner"
+
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 import { DistributionStrategyModal } from "./components/DistributionStrategyModal"
-import { useBreakpoints } from "@/hooks"
-
+import { AdminAppPageButton } from "./components/AdminAppPageButton"
 export const AppDetailOverview = ({
   endorsementStatus,
   isEndorsementStatusLoading,

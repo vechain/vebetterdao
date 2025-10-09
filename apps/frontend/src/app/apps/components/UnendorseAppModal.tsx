@@ -1,12 +1,14 @@
-import { useGetUserNodes, useNodesEndorsedApps } from "@/api"
-import { BaseModal } from "@/components/BaseModal"
-
-import { useUnendorseApp } from "@/hooks"
 import { Text, Button, Image, Flex, Icon, VStack, Heading, Alert } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
+
+import { useUnendorseApp } from "../../../hooks/useUnendorseApp"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+
+import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
@@ -14,7 +16,6 @@ type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
 export type PropsEndorsement = {
   isUnendorsing?: boolean
   isEndorsing?: boolean
@@ -22,28 +23,23 @@ export type PropsEndorsement = {
   endorsedAppName?: string
   xNodeLevel?: number
 }
-
 export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
-
   const { data: nodes } = useGetUserNodes()
   const node = nodes?.allNodes?.find(node => node.nodeId === xNodeId)
   const { data: endorsedApps = [] } = useNodesEndorsedApps([xNodeId])
   const endorsedApp = endorsedApps[0]?.endorsedApp
-
   const handleSuccess = useCallback(() => {
     onClose()
   }, [onClose])
-
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,
     userAddress: account?.address ?? "",
     onSuccess: handleSuccess,
   })
-
   const handleUnendorsement = useCallback(() => {
     unendorseAppMutation.sendTransaction()
   }, [unendorseAppMutation])

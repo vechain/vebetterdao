@@ -1,12 +1,12 @@
 import { Alert, VStack } from "@chakra-ui/react"
+
+import { useCurrentRoundActiveState } from "../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
+
 import { StartRoundButton } from "@/app/admin/components/StartRoundCard/components/StartRoundButton"
-import { useCurrentRoundActiveState } from "@/api"
 
 export const StartNewRoundAlert = () => {
   const { isCurrentRoundActive } = useCurrentRoundActiveState()
-
   if (isCurrentRoundActive) return null
-
   return (
     <Alert.Root status="error">
       <VStack

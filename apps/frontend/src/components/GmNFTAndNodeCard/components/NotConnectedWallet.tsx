@@ -1,7 +1,9 @@
-import { ConnectWalletButton } from "@/components/ConnectWalletButton"
-import WalletIcon from "@/components/Icons/svg/wallet.svg"
 import { Card, Stack, Text, useMediaQuery, Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { ConnectWalletButton } from "../../ConnectWalletButton/ConnectWalletButton"
+
+import WalletIcon from "@/components/Icons/svg/wallet.svg"
 
 export const NotConnectedWallet = () => {
   const [isAbove1200] = useMediaQuery(["(min-width: 1200px)"])

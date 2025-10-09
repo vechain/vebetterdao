@@ -1,13 +1,10 @@
 // Getter for obtaining appIds of a given round
-
 import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
-
 const address = getConfig().xAllocationVotingContractAddress
 const abi = XAllocationVoting__factory.abi
 const method = "getAppIdsOfRound" as const
-
 /**
  * Returns the query key for fetching app IDs of a round.
  * @param roundId The round ID to get app IDs for
@@ -15,7 +12,6 @@ const method = "getAppIdsOfRound" as const
  */
 export const getAppIdsOfRoundQueryKey = (roundId?: number) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [BigInt(roundId || 0)] })
-
 /**
  * Hook to get the appIds participating in allocations for a given round
  * @param roundId The roundId to get app IDs for

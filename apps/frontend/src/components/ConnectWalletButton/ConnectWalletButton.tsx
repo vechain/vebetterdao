@@ -1,35 +1,32 @@
-import { AnalyticsUtils } from "@/utils"
 import { useMediaQuery, Box } from "@chakra-ui/react"
-import { useColorModeValue } from "@/components/ui/color-mode"
 import { keyframes } from "@emotion/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { useEffect } from "react"
+
+import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { useColorModeValue } from "@/components/ui/color-mode"
 
 const rotateAnimation = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 `
-
 type Props = {
   connectionVariant?: WalletButtonProps["connectionVariant"]
   buttonStyleProps?: WalletButtonProps["buttonStyle"]
 }
-
 export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {
   const { account, connection } = useWallet()
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
   const notLoggedIn = !account?.address
-
   const hoverBackground = useColorModeValue("#f8f8f8", "#2D2D2F")
   const textColor = useColorModeValue("#1A1A1A", "#E4E4E4")
-
   useEffect(() => {
     if (typeof window === "undefined" || !window?.localStorage) return
     if (connection.isConnected && account?.address) {
       // Get last logged address from localStorage
       const lastLoggedAddress = localStorage.getItem("last_logged_address")
-
       // Only log if this is a different address
       if (lastLoggedAddress !== account.address) {
         const connectionType = connection.isConnectedWithDappKit
@@ -37,11 +34,9 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
           : connection.isConnectedWithVeChain
             ? "VeChain"
             : "Ecosystem"
-
         AnalyticsUtils.trackEvent("Connection", {
           action: connectionType,
         })
-
         // Save current address to localStorage
         localStorage.setItem("last_logged_address", account.address)
       }

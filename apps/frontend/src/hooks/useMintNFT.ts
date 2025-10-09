@@ -1,22 +1,25 @@
-import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey, getUserGMsQueryKey } from "@/api"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
+import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getGMbalanceQueryKey } from "../api/contracts/galaxyMember/hooks/useGMbalance"
+import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getTokenIdByAccountQueryKey } from "../api/contracts/galaxyMember/hooks/useTokenIdByAccount"
+
+import { useBuildTransaction } from "./useBuildTransaction"
+
 import { buildClause } from "@/utils/buildClause"
-import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
-
 type useMintNFTProps = {
   onFailure?: () => void
   onSuccess?: () => void
   invalidateCache?: boolean
   transactionModalCustomUI?: TransactionCustomUI
 }
-
 /**
  * Hook to mint an NFT
  * @param onSuccess callback to call when the NFT is successfully minted
@@ -36,7 +39,6 @@ export const useMintNFT = ({ onFailure, onSuccess, transactionModalCustomUI }: u
       }),
     ]
   }, [])
-
   const refetchQueryKeys = useMemo(
     () => [
       getSelectedTokenIdQueryKey(account?.address),

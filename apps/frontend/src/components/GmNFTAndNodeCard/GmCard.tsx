@@ -1,7 +1,7 @@
 import { Avatar, Text, VStack, HStack, AvatarGroup, Card, LinkBox, LinkOverlay, Icon } from "@chakra-ui/react"
-import { FaChevronRight } from "react-icons/fa"
-import { useTranslation } from "react-i18next"
 import NextLink from "next/link"
+import { useTranslation } from "react-i18next"
+import { FaChevronRight } from "react-icons/fa"
 
 export const GmCard = ({
   title,
@@ -17,9 +17,7 @@ export const GmCard = ({
   href?: string
 }) => {
   const { t } = useTranslation()
-
   const plusCount = images?.length ? images?.length - 2 : 0
-
   return (
     <LinkBox flex={1}>
       <Card.Root bg="transparency.200" gap="2" p="4">

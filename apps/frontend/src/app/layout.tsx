@@ -1,7 +1,9 @@
 import { getConfig } from "@repo/config"
-import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 import { Metadata, Viewport } from "next"
+
 import { ClientWrapper } from "./client-wrapper"
+
+import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 
 // Get metadata of the platform
 const basePath = getConfig()?.basePath
@@ -10,12 +12,10 @@ const title = platformMetadata?.title
 const metadataDesc = platformMetadata?.description
 const imageUrl = `${basePath}${platformMetadata?.image}`
 const imageExtension = platformMetadata?.imageExtension
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1.0,
 }
-
 // Export proper metadata for the platform with template support
 export const metadata: Metadata = {
   title: title || "VeBetter Governance | Shape the Ecosystem and Earn B3TR Rewards",

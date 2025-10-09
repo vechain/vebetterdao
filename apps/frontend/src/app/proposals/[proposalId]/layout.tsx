@@ -1,30 +1,29 @@
-import { ProposalMetadata } from "@/api/contracts/governance/getProposalsEvents"
-import { getIpfsMetadata } from "@/api/ipfs"
-import { getNodeJsThorClient, toIPFSURL } from "@/utils"
-import { ResolvingMetadata, Metadata } from "next"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { ResolvingMetadata, Metadata } from "next"
+
+import { getIpfsMetadata } from "../../../api/ipfs/hooks/useIpfsMetadata"
+import { getNodeJsThorClient } from "../../../utils/getNodeJsThorClient"
+import { toIPFSURL } from "../../../utils/ipfs"
+
 import { Props } from "./page"
-import { getDefaultMetadata } from "@/utils/metadata"
-import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
+
 import { decodeEventLog } from "@/api/contracts/governance/getEvents"
+import { ProposalMetadata } from "@/api/contracts/governance/getProposalsEvents"
+import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
+import { getDefaultMetadata } from "@/utils/metadata"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
-
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   try {
     const id = params.proposalId
-
     if (!id) {
       return getDefaultMetadata()
     }
-
     const thor = await getNodeJsThorClient()
     const contract = thor.contracts.load(address, abi)
-
     const eventTopics = contract.getEventAbi("ProposalCreated")?.encodeFilterTopicsNoNull({ proposalId: id })
-
     const [rawProposalEvent] = await thor.logs.filterRawEventLogs({
       options: { limit: 1 },
       criteriaSet: [
@@ -35,13 +34,11 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
         },
       ],
     })
-
     const proposal = decodeEventLog(rawProposalEvent!, abi)
     if (proposal.decodedData?.eventName !== "ProposalCreated") {
       return getDefaultMetadata()
     }
     const proposalData = proposal.decodedData?.args
-
     const proposalDesc = proposalData?.description
     let proposalMetadata: ProposalMetadata | null = null
     if (proposalDesc) {

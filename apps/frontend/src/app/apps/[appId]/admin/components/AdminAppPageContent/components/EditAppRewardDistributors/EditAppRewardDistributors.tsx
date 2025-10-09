@@ -1,8 +1,10 @@
 import { Text, VStack } from "@chakra-ui/react"
+import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../AdminAppPageContent"
-import { useCallback } from "react"
+
 import { DistributorItem } from "./components/DistributorItem"
 import { AddRewardDistributorButton } from "./components/AddRewardDistributorButton"
 
@@ -12,7 +14,6 @@ interface Props {
 export const EditAppRewardDistributors = ({ form }: Props) => {
   const { t } = useTranslation()
   const distributors = form.watch("distributors")
-
   const handleDeleteDistributor = useCallback(
     (index: number) => () =>
       form.setValue(
@@ -21,7 +22,6 @@ export const EditAppRewardDistributors = ({ form }: Props) => {
       ),
     [form, distributors],
   )
-
   return (
     <VStack align="stretch">
       <Text textStyle="md" fontWeight={"800"}>

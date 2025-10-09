@@ -1,34 +1,33 @@
-import { BaseModal } from "../BaseModal"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { ReactNode, useMemo, useCallback } from "react"
 import { TransactionStatus } from "@vechain/vechain-kit"
-import { SuccessModalContent } from "./SuccessModalContent"
-import { ErrorModalContent } from "./ErrorModalContent"
-import { LoadingModalContent } from "./LoadingModalContent"
-import { UnknownModalContent } from "./UnknownModalContent"
+import { ReactNode, useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "../BaseModal"
+
+import { ErrorModalContent } from "./ErrorModalContent/ErrorModalContent"
+import { LoadingModalContent } from "./LoadingModalContent/LoadingModalContent"
+import { SuccessModalContent } from "./SuccessModalContent/SuccessModalContent"
+import { UnknownModalContent } from "./UnknownModalContent/UnknownModalContent"
+
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export const TransactionModal = () => {
   const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()
   const { t } = useTranslation()
-
   const canShowCloseButton = useMemo(() => {
     return transactionModalState?.status !== "pending" && transactionModalState?.status !== "waitingConfirmation"
   }, [transactionModalState?.status])
-
   const handleTryAgain = useCallback(async () => {
     if (transactionModalState?.tryAgain) {
       return await transactionModalState.tryAgain()
     }
   }, [transactionModalState])
-
   const getCustomUIProps = useCallback(
     (status: TransactionStatus) => {
       return transactionModalState?.customUI?.[status] || {}
     },
     [transactionModalState?.customUI],
   )
-
   const modalContent = useMemo(() => {
     const defaultContent = {
       pending: {
@@ -42,7 +41,6 @@ export const TransactionModal = () => {
         ),
       },
     }
-
     const statusComponentMap: Record<TransactionStatus, ReactNode> = {
       pending: <LoadingModalContent {...defaultContent.pending} {...getCustomUIProps("pending")} />,
       waitingConfirmation: <LoadingModalContent {...getCustomUIProps("waitingConfirmation")} />,

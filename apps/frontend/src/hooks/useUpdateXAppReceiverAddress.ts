@@ -1,13 +1,15 @@
-import { useCallback, useMemo } from "react"
-import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+
 import { useBuildTransaction } from "./useBuildTransaction"
+
 import { buildClause } from "@/utils/buildClause"
-import { getXAppsQueryKey } from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-
 type Props = {
   appId: string
   newAddress: string
@@ -35,12 +37,9 @@ export const useUpdateXAppReceiverAddress = ({
         comment: `Update xApp team wallet address to ${newAddress}`,
       }),
     ]
-
     return clauses
   }, [appId, newAddress])
-
   const refetchQueryKeys = useMemo(() => [getXAppsQueryKey()], [])
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

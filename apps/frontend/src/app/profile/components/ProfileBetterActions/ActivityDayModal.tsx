@@ -1,9 +1,11 @@
-import { useUsersB3trActions } from "@/api"
-import { BaseModal } from "@/components/BaseModal"
-import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 import { Center, Spinner, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import InfiniteScroll from "react-infinite-scroll-component"
+
+import { BetterActionCard } from "../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
+import { useUsersB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
+
+import { BaseModal } from "@/components/BaseModal"
 
 type Props = {
   isOpen: boolean
@@ -11,7 +13,6 @@ type Props = {
   date?: string
   address: string
 }
-
 export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   //get unix timestamps for the start and end of the day
   const startOfDay = date ? dayjs(date).startOf("day").unix() : undefined
@@ -20,9 +21,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
     ...(startOfDay && { after: startOfDay }),
     ...(endOfDay && { before: endOfDay }),
   })
-
   const actions = data?.pages.map(page => page.data).flat() ?? []
-
   return (
     <BaseModal
       isOpen={isOpen}

@@ -1,25 +1,28 @@
-import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
-import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getUserGMsQueryKey, getUserNodesQueryKey } from "@/api"
-import { buildClause } from "@/utils/buildClause"
-import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
-import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
+import { useCallback, useMemo } from "react"
+
+import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
+import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
+
+import { useBuildTransaction } from "./useBuildTransaction"
+
 import {
   getNodeIdAttachedQueryKey,
   useGetNodeIdAttached,
 } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
-
+import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
+import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
+import { buildClause } from "@/utils/buildClause"
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
-
 type Props = {
   gmId: string
   xNodeId: string
   onSuccess?: () => void
 }
-
 /**
  * Custom hook for attaching a Galaxy Member (GM) NFT to an XNode.
  *
@@ -32,7 +35,6 @@ type Props = {
  */
 export const useAttachGMToXNode = ({ gmId, xNodeId, onSuccess }: Props) => {
   const { data: currentNodeId } = useGetNodeIdAttached(gmId)
-
   const clauseBuilder = useCallback(() => {
     if (!xNodeId) {
       throw new Error("XNode ID is not available")

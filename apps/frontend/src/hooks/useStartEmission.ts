@@ -1,13 +1,16 @@
-import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey } from "@/api"
-import { useCallback, useMemo } from "react"
-import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
-import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { buildClause } from "@/utils/buildClause"
+import { Emissions__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getCurrentAllocationsRoundIdQueryKey } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { getAllocationsRoundsEventsQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 
-const EmissionsInterface = Emissions__factory.createInterface()
+import { buildClause } from "@/utils/buildClause"
 
+const EmissionsInterface = Emissions__factory.createInterface()
 type useStartEmissionsProps = {
   onSuccess?: () => void
 }
@@ -26,15 +29,12 @@ export const useStartEmission = ({ onSuccess }: useStartEmissionsProps) => {
         comment: "Start emissions",
       }),
     ]
-
     return clauses
   }, [])
-
   const refetchQueryKeys = useMemo(
     () => [getCurrentAllocationsRoundIdQueryKey(), getAllocationsRoundsEventsQueryKey(), currentBlockQueryKey()],
     [],
   )
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

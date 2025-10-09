@@ -1,9 +1,11 @@
-import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "@/constants"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
-import { AddressUtils } from "@/utils"
-import AppUtils from "@/utils/AppUtils"
 import dayjs from "dayjs"
 import { t } from "i18next"
+
+import { MAX_DAPP_GRANT_AMOUNT, MAX_TOOLING_GRANT_AMOUNT } from "../../constants/proposals"
+
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+import * as AddressUtils from "@/utils/AddressUtils/AddressUtils"
+import * as AppUtils from "@/utils/AppUtils/AppUtils"
 
 export const patternUrlCheck = {
   value: /^https?:\/\/.+/,

@@ -13,17 +13,23 @@ import {
   Button,
   CloseButton,
 } from "@chakra-ui/react"
-import { XApp, UnendorsedApp, useGetUserNodes, useNodesEndorsedApps } from "@/api"
+import { UilSearch } from "@iconscout/react-unicons"
+
+import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
+import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { UnendorsedAppCard } from "../UnendorsedAppCard"
 import { AppsEmptyState } from "../AppsEmptyState"
 import { CreatorBanner } from "../CreatorBanner"
-import { UilSearch } from "@iconscout/react-unicons"
-import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
+import { useAppsSorting } from "../../hooks/useAppsSorting"
+import { useAppsSearch } from "../../hooks/useAppsSearch"
+import { useAppsFiltering } from "../../hooks/useAppsFiltering"
+import { usePagination } from "../../../../hooks/usePagination"
+
 import { SortingMenu } from "./SortingMenu"
 import { FilteringMenu } from "./FilteringMenu"
 
-import { useAppsSorting, useAppsSearch, useAppsFiltering } from "../../hooks"
-import { usePagination } from "@/hooks"
+import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
 
 type Props = {
   currentActiveApps: XApp[]

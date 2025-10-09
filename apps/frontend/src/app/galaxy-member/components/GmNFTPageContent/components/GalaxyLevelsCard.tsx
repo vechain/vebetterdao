@@ -1,16 +1,18 @@
-import { useGetUserGMs, useGMMaxLevel, UserGM } from "@/api"
-import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { ToggleTip } from "@/components/ui/toggle-tip"
-import { gmNfts } from "@/constants/gmNfts"
 import { Button, Card, Flex, Heading, HStack, Image, SimpleGrid, VStack, Text, Icon } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { UserGM, useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
+
+import { ToggleTip } from "@/components/ui/toggle-tip"
+import { gmNfts } from "@/constants/gmNfts"
+
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(0)
-
 export const GalaxyLevelsCard = () => {
   const { data: userGms } = useGetUserGMs()
   const { data: maxGMLevel = 0 } = useGMMaxLevel()
@@ -30,7 +32,6 @@ export const GalaxyLevelsCard = () => {
     }
     return gmNfts.slice(maxGMLevel - 4, maxGMLevel)
   }, [tokenLevel, maxGMLevel])
-
   const getLevelText = (level: number, maxLevel: number, currentLevel: number) => {
     if (level === maxLevel) {
       return t("Max Level")
@@ -42,7 +43,6 @@ export const GalaxyLevelsCard = () => {
       b3trToUpgrade: compactFormatter.format(gmNfts[level - 1]?.b3trToUpgrade ?? 0),
     })
   }
-
   return (
     <Card.Root variant="primary">
       <Card.Body>

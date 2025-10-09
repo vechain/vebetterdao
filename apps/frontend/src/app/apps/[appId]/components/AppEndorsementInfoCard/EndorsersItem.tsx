@@ -1,17 +1,18 @@
-import { useRouter } from "next/navigation"
 import { Text, HStack, VStack, Box, Popover, Skeleton, Portal } from "@chakra-ui/react"
-import { Trans, useTranslation } from "react-i18next"
-import { AddressIcon } from "@/components/AddressIcon"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
-import dayjs from "dayjs"
-import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
-import { useState } from "react"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
+import { HiDotsVertical } from "react-icons/hi"
+
+import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { AddressIcon } from "@/components/AddressIcon"
 import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 type Props = {
   appId: string
@@ -23,7 +24,6 @@ type Props = {
   setSelectedEndorserNodeId: (value: string) => void
   setSelectedEndorserNodePoints: (value: string) => void
 }
-
 export const EndorsersItem = ({
   appId,
   isAppAdmin,
@@ -36,16 +36,13 @@ export const EndorsersItem = ({
 }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const { data: userNodes, isLoading: endorserNodesLoading } = useGetUserNodes(endorserAddress)
   const endorserNodeId = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.nodeId
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(endorserNodeId ?? "")
-
   // Find the first element in events (ie most recent) where the endorser endorsed the app
   const lastEndorsementEvent = endorsementEvents.find(event => event.nodeId === endorserNodeId && event.endorsed)
   const lastEndorsementEpoch = useEstimateBlockTimestamp({ blockNumber: lastEndorsementEvent?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementEpoch).fromNow()
-
   // Popover state
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 

@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
-import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
+
 import { getXAppMetadata } from "../getXAppMetadata"
-import { useXApps, XApp } from "@/api"
+import { XApp } from "../getXApps"
+
+import { useXApps } from "./useXApps"
+import { useXAppsMetadataBaseUri } from "./useXAppsMetadataBaseUri"
 
 export const getXAppsCategoriesQueryKey = (allApps: XApp[]) => ["xApps", allApps.map(app => app.id), "categories"]
-
 /**
  * Hook to fetch categories from all the xApps
  * @returns Array of categories for each xApp or []
@@ -12,14 +14,11 @@ export const getXAppsCategoriesQueryKey = (allApps: XApp[]) => ["xApps", allApps
 export const useXAppsCategories = () => {
   const { data: baseUri } = useXAppsMetadataBaseUri()
   const { data: apps } = useXApps()
-
   const allAppsWithCategories: Record<string, string[]> = {}
-
   return useQuery({
     queryKey: getXAppsCategoriesQueryKey(apps?.allApps || []),
     queryFn: async () => {
       if (!baseUri || !apps?.allApps) return {}
-
       const promises = apps?.allApps.map(async (app, index) => {
         try {
           const appDetails = apps?.allApps[index]
@@ -30,7 +29,6 @@ export const useXAppsCategories = () => {
           allAppsWithCategories[app.id] = []
         }
       })
-
       await Promise.all(promises)
       return allAppsWithCategories
     },

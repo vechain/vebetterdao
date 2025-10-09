@@ -12,7 +12,6 @@ interface SelectFieldProps
   isMultiOption?: boolean
   showReset?: boolean
 }
-
 export const SelectField = ({
   options,
   defaultValue,
@@ -24,7 +23,6 @@ export const SelectField = ({
   ...selectProps
 }: SelectFieldProps) => {
   const { t } = useTranslation()
-
   return (
     <Select.Root
       {...selectProps}

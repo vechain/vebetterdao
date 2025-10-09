@@ -1,13 +1,17 @@
-import { UseFormReturn } from "react-hook-form"
-import { EditAppForm } from ".."
 import { Flex, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { BANNER_UPLOAD_GUIDELINES, IMAGE_REQUIREMENTS, notFoundImage } from "@/constants"
+import { UseFormReturn } from "react-hook-form"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
-import { blobToBase64 } from "@/utils/BlobUtils"
-import { handleImageCompression } from "@/utils/imageListCompression"
 import { useTranslation } from "react-i18next"
+
+import { EditAppForm } from "../EditAppPageContent"
+import { IMAGE_REQUIREMENTS, BANNER_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
+
+import { handleImageCompression } from "@/utils/imageListCompression"
+import { blobToBase64 } from "@/utils/BlobUtils"
 import { toaster } from "@/components/ui/toaster"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
@@ -42,7 +46,6 @@ export const EditAppBanner = ({ form }: Props) => {
     },
     [form],
   )
-
   return (
     <VStack gap={2} align={"start"}>
       <Text textStyle="md" fontWeight="semibold">

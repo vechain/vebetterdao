@@ -1,11 +1,3 @@
-import { CustomModalContent } from "@/components"
-import { useGetUserGMs, UserNode } from "@/api"
-import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
-import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
-import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useAttachGMToXNode } from "@/hooks"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import {
   Alert,
   Box,
@@ -23,9 +15,20 @@ import { UilLink } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
+
+import { CustomModalContent } from "../../../components/CustomModalContent"
+import { useGetUserGMs } from "../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import { useAttachGMToXNode } from "../../../hooks/useAttachGMToXNode"
+import { useGetLevelAfterAttachingNode } from "../hooks/useGetLevelAfterAttachingNode"
+
+import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
+import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
+import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { Tooltip } from "@/components/ui/tooltip"
-import { useGetLevelAfterAttachingNode } from "../hooks/useGetLevelAfterAttachingNode"
 
 type Props = {
   gmId: string
@@ -33,16 +36,13 @@ type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
 export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-
   const { data: levelAfterAttaching } = useGetLevelAfterAttachingNode({
     tokenId: gmId,
     nodeTokenId: node?.nodeId ?? "",
   })
-
   const { data: userGMs, isLoading: isLoadingUserGMs } = useGetUserGMs()
   const gm = userGMs?.find(gm => gm.tokenId === gmId)
   const isNoAffectAttachment = gm ? String(gm?.tokenLevel) === levelAfterAttaching : true

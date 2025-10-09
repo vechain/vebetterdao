@@ -1,21 +1,20 @@
 import { Field, Icon, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { RiTwitterXFill } from "react-icons/ri"
 import { FaDiscord, FaMedium, FaTelegram, FaYoutube } from "react-icons/fa6"
-import { EditAppForm } from ".."
-import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
-import { useMemo } from "react"
-import { URL_REGEX } from "@/constants"
+import { RiTwitterXFill } from "react-icons/ri"
+
+import { EditAppForm } from "../EditAppPageContent"
+import { useCurrentAppMetadata } from "../../../../hooks/useCurrentAppMetadata"
+import { URL_REGEX } from "../../../../../../../constants/url"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>
 }
-
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
   return urls?.find(url => url.name === name)?.url || ""
 }
-
 export const EditAppSocialUrls = ({ form }: Props) => {
   const { t } = useTranslation()
   const {
@@ -28,7 +27,6 @@ export const EditAppSocialUrls = ({ form }: Props) => {
   const telegramUrl = findUrlByName(appMetadata?.social_urls, "Telegram")
   const youtubeUrl = findUrlByName(appMetadata?.social_urls, "Youtube")
   const mediumUrl = findUrlByName(appMetadata?.social_urls, "Medium")
-
   const inputData = useMemo(() => {
     return [
       {

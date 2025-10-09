@@ -1,24 +1,27 @@
-import { useAllocationsRound, useHasVotedInRound, useUserVotesInRound, useTotalVotesOnBlock } from "@/api"
 import { Button, Card, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useMemo } from "react"
-import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
-import { useWallet } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
-import BigNumber from "bignumber.js"
-import { scaledDivision } from "@/utils/MathUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
+import { ethers } from "ethers"
 import { t } from "i18next"
-import { FiArrowUpRight } from "react-icons/fi"
+import { useMemo } from "react"
 import { Trans } from "react-i18next"
+import { FiArrowUpRight } from "react-icons/fi"
+
+import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
+import { scaledDivision } from "../../../../utils/MathUtils/MathUtils"
+import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
+import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useTotalVotesOnBlock } from "../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+
 import { SeeVoteDetailsModal } from "./SeeVoteDetailsModal"
 
 type Props = {
   roundId: string
   minPercentageToNotMerge?: number
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 /**
  * This component displays the user's votes in the current round.
  * It shows the total votes cast by the user and the breakdown of votes among the apps.
@@ -27,9 +30,7 @@ const compactFormatter = getCompactFormatter(2)
  */
 export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: Props) => {
   const { account } = useWallet()
-
   const seeAllModal = useDisclosure()
-
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     roundInfo.voteStart ? Number(roundInfo.voteStart) : undefined,
@@ -37,12 +38,10 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
-
   const { data: castVotesEvent, isLoading: castVotesEventLoading } = useUserVotesInRound(
     roundId,
     account?.address ?? undefined,
   )
-
   const totalVotesCast = useMemo(
     () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
     [castVotesEvent],

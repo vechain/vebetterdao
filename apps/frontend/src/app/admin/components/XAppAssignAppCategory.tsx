@@ -16,18 +16,16 @@ import {
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
+
 import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
 import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 import { useColorModeValue } from "@/components/ui/color-mode"
-
 export const XAppAssignAppCategory = () => {
   const { t } = useTranslation()
   const [carouselIndex, setCarouselIndex] = useState(0)
   const [appCategories, setAppCategories] = useState<Record<string, string[]>>({})
-
   const { data: appsWithoutCategories, isLoading: isLoadingApps } = useAppsWithoutCategories()
-
   const { assignCategories, isUploading, uploadError, isTransactionPending } = useAdminAssignCategories({
     onSuccess: () => {
       setAppCategories({})
@@ -35,12 +33,10 @@ export const XAppAssignAppCategory = () => {
     },
     onFailure: () => {},
   })
-
   const handleToggleCategory = useCallback((appId: string, categoryId: string) => {
     setAppCategories(prev => {
       const currentCategories = prev[appId] || []
       const isSelected = currentCategories.includes(categoryId)
-
       if (isSelected) {
         return {
           ...prev,

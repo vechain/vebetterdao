@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest"
-import NewProposalRoundPage from "./page"
-import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
-import * as store from "@/store"
-import FormProposalLayout from "../layout"
-import * as hooks from "@/api"
 
+import { fireEvent, render, screen, waitFor } from "../../../../../../test"
+import FormProposalLayout from "../layout"
+
+import NewProposalRoundPage from "./page"
+
+import * as store from "@/store"
+import * as hooks from "@/api"
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -15,13 +17,10 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/round")
-
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 const spyOncurrentRoundId = vi.spyOn(hooks, "useCurrentAllocationsRoundId")
 const spyCanStartInNextRound = vi.spyOn(hooks, "useCanProposalStartInNextRound")
-
 describe("NewProposalRound", async () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -30,7 +29,6 @@ describe("NewProposalRound", async () => {
     spyOncurrentRoundId.mockClear()
     spyCanStartInNextRound.mockClear()
   })
-
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
     vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
@@ -41,10 +39,8 @@ describe("NewProposalRound", async () => {
         <NewProposalRoundPage />
       </FormProposalLayout>,
     )
-
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
-
   it("redirects to /proposals/new if one of the required fields is not available", async () => {
     //no title
     spyOnUseProposalFormStore.mockClear()

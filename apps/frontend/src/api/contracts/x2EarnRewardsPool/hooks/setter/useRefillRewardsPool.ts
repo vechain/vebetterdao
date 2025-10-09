@@ -1,24 +1,23 @@
 import { getConfig } from "@repo/config"
-import { useCallback, useMemo } from "react"
 import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
+import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
+import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
+import { getAppAvailableFundsQueryKey } from "../getter/useAppAvailableFunds"
+import { getAppRewardsBalanceQueryKey } from "../getter/useAppRewardsBalance"
+import { getIsRewardsPoolEnabledQueryKey } from "../getter/useIsRewardsPoolEnabled"
+
+import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
-import {
-  getAppAvailableFundsQueryKey,
-  getAppRewardsBalanceQueryKey,
-  getIsRewardsPoolEnabledQueryKey,
-} from "@/api/contracts/x2EarnRewardsPool"
+
 interface Props {
   xAppId: string
   amount: string
   onSuccess?: () => void
 }
-import { removingExcessDecimals } from "@/utils/MathUtils"
-import { ethers } from "ethers"
-import { buildClause } from "@/utils/buildClause"
-
 const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
-
 /** Hook to refill the  rewards pool (increasing or decreasing) balance by amount for a specific xApp
  * @param xAppId the xApp id
  * @param amount the amount of b3tr to decrease the rewards pool balance by
@@ -26,7 +25,6 @@ const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddres
  */
 export const useRefillRewardsPool = ({ xAppId, amount, onSuccess }: Props) => {
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
-
   const buildIncreaseRewardsPoolClause = useCallback(() => {
     return [
       buildClause({
@@ -38,7 +36,6 @@ export const useRefillRewardsPool = ({ xAppId, amount, onSuccess }: Props) => {
       }),
     ]
   }, [xAppId, amount, contractAmount])
-
   const buildDecreaseRewardsPoolClause = useCallback(() => {
     return [
       buildClause({

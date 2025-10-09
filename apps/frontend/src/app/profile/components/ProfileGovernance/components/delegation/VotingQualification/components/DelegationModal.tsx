@@ -11,36 +11,31 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useDelegatePassport } from "@/hooks/useDelegatePassport"
 import { useCallback, useMemo, useState } from "react"
-import { ExclamationTriangle } from "@/components"
-import { useAccountLinking } from "@/api"
-import { WalletAddressInput } from "@/app/components/Input"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { StepModal, type Step } from "@/components/StepModal"
 
+import { ExclamationTriangle } from "../../../../../../../../components/Icons/ExclamationTriangle"
+import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { WalletAddressInput } from "../../../../../../../components/Input/WalletAddressInput"
+import { StepModal, type Step } from "../../../../../../../../components/StepModal/StepModal"
+
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useDelegatePassport } from "@/hooks/useDelegatePassport"
 type FormData = {
   walletAddress: string
 }
-
 enum DelegationStep {
   ENTER_ADDRESS = "ENTER_ADDRESS",
   CONFIRM_DELEGATION = "CONFIRM_DELEGATION",
 }
-
 const STEP_COUNT = Object.keys(DelegationStep).length
-
 export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { handleSubmit, setValue, watch } = useForm<FormData>()
   const { isEntity } = useAccountLinking()
   const { open: isOpen = false, onClose } = modal
-
   const [step, setStep] = useState(0)
-
   const delegatee = watch("walletAddress")
-
   const goToNext = useCallback(() => {
     const nextStep = step + 1
     if (nextStep > STEP_COUNT) onClose?.()

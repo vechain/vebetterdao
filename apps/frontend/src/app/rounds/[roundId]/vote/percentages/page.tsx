@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { MotionVStack } from "../../../../../components/MotionVStack"
 const CastAllocationVotePercentagesPageContent = dynamic(
   () =>
     import("./components/CastAllocationVotePercentagesPageContent").then(
@@ -25,12 +24,10 @@ type Props = {
     roundId: string
   }
 }
-
 export default function CastAllocationVotePercentagesPage({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}/vote/percentages`)
   }, [params.roundId])
-
   return (
     <MotionVStack>
       <CastAllocationVotePercentagesPageContent roundId={params.roundId} />

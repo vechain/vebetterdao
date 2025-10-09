@@ -1,16 +1,17 @@
 import { Button, Card, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo } from "react"
-import BigNumber from "bignumber.js"
-import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
-import { FiArrowUpRight } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
-import { Transak, TransakConfig } from "@transak/transak-sdk"
 import { useQueryClient } from "@tanstack/react-query"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+import { Transak, TransakConfig } from "@transak/transak-sdk"
+import { getAccountBalanceQueryKey, useAccountBalance, useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { FiArrowUpRight } from "react-icons/fi"
+
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""
-
 const minVtho = 5
 export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
@@ -19,17 +20,13 @@ export const LowOnVthoCard: React.FC = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
   const { data: b3trBalance } = useGetB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useGetVot3Balance(account?.address ?? undefined)
-
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
-
     return b3trBalance.original !== "0" || vot3Balance.original !== "0"
   }, [b3trBalance, vot3Balance])
-
   const isLowOnVtho = useMemo(() => {
     return Number(balance?.energy ?? "0") < minVtho
   }, [balance])
-
   const labels = useMemo(() => {
     if (!balance) return
     const balanceNumber = new BigNumber(balance.energy ?? "0")
@@ -43,7 +40,6 @@ export const LowOnVthoCard: React.FC = () => {
       body: "You're running low on VTHO, used as gas in every transaction you complete in VeBetter, like voting, swapping tokens, etc.",
     }
   }, [balance])
-
   const transakConfig: TransakConfig = useMemo(
     () => ({
       apiKey,

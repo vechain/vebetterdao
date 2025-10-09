@@ -1,41 +1,35 @@
 import { Button, Card, Field, HStack, Heading, Input, InputGroup, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
-import { useProposalFormStore } from "@/store"
-import { VOT3Icon } from "@/components"
-import { useDepositThreshold } from "@/api"
-import { useWallet } from "@vechain/vechain-kit"
-import { useGetVot3Balance } from "@/hooks"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import { useGetVot3Balance } from "../../../../../../hooks/useGetVot3Balance"
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { VOT3Icon } from "../../../../../../components/Icons/VOT3Icon"
+import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
 
 type FormData = {
   amount: number
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 export const NewProposalSupportPageContent = () => {
   const router = useRouter()
-
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useGetVot3Balance(account?.address ?? undefined)
   const { data: threshold, isLoading: thresholdLoading } = useDepositThreshold()
   const { setData, depositAmount } = useProposalFormStore()
-
   const { register, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       amount: depositAmount ?? 0,
     },
   })
-
   const { errors } = formState
-
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ depositAmount: data.amount })

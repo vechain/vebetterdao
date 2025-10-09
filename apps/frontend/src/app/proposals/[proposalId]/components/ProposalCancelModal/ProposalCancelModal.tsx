@@ -1,7 +1,8 @@
-import { useCancelProposal } from "@/hooks/useCancelProposal"
 import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useCancelProposal } from "@/hooks/useCancelProposal"
 import { BaseModal } from "@/components/BaseModal"
 
 export const ProposalCancelModal = ({
@@ -16,16 +17,13 @@ export const ProposalCancelModal = ({
   onClose: () => void
 }) => {
   const { t } = useTranslation()
-
   const cancelProposalMutation = useCancelProposal({
     proposalId,
   })
-
   const handleCancelProposal = useCallback(() => {
     onClose()
     cancelProposalMutation.sendTransaction()
   }, [cancelProposalMutation, onClose])
-
   return (
     <BaseModal
       isOpen={isOpen}
@@ -40,7 +38,6 @@ export const ProposalCancelModal = ({
             {t("Are you sure you want to cancel this {{proposalType}}", { proposalType: proposalTypeText })}
           </Heading>
         </HStack>
-
         {/* Info Message */}
         <Text>
           {t(

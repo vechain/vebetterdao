@@ -1,6 +1,6 @@
-import { executeMultipleClausesCall, useThor, executeCallClause, useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, useThor, executeCallClause, useWallet } from "@vechain/vechain-kit"
 import {
   GalaxyMember__factory,
   StargateNFT__factory,
@@ -8,34 +8,27 @@ import {
 } from "@vechain/vebetterdao-contracts/typechain-types"
 import { useQuery } from "@tanstack/react-query"
 
-import { getIpfsMetadata } from "@/api/ipfs"
+import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
+import { useNodesEndorsementScore } from "../xApps/hooks/endorsement/useNodesEndorsementScore"
+
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
-import { notFoundImage } from "@/constants"
-import { useNodesEndorsementScore } from "@/api"
-
+const notFoundImage = "/assets/images/image-not-found.webp"
 const UNENDORSED_APP_ID = "0x0000000000000000000000000000000000000000000000000000000000000000"
-
 const address = getConfig().nodeManagementContractAddress as `0x${string}`
 const abi = NodeManagement__factory.abi
 const method = "getUserNodes" as const
-
 const stargateNFTAbi = StargateNFT__factory.abi
 const stargateNFTContractAddress = getConfig().stargateNFTContractAddress as `0x${string}`
-
 const x2EarnAppsAbi = X2EarnApps__factory.abi
 const x2EarnAppsAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
-
 const galaxyMemberAbi = GalaxyMember__factory.abi
 const galaxyMemberAddress = getConfig().galaxyMemberContractAddress as `0x${string}`
-
 interface StargateMetadata {
   name: string
   description: string
   image: string
 }
-
 export type NodeType = "XNODE" | "ECONOMIC NODE"
-
 export type UserNode = {
   nodeId: string
   nodeLevel: number

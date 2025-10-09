@@ -1,11 +1,14 @@
-import { useXAppMetadata } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
 import { Separator, HStack, Heading, IconButton, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
+
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
+
+import { notFoundImage } from "@/constants"
 
 type Props = {
   appId: string
@@ -13,7 +16,6 @@ type Props = {
   isModerator: boolean
   showSeparator?: boolean
 }
-
 export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false }: Props) => {
   const {
     data: appMetadata,
@@ -22,7 +24,6 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
     error: appMetadataError,
   } = useXAppMetadata(appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
   const role = useMemo(() => {
     if (isAdmin) {
       return "Admin"
@@ -32,7 +33,6 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
       return "Error"
     }
   }, [isAdmin, isModerator])
-
   return (
     <VStack alignItems={"start"} justify={"flex-start"} w={"full"} gap="4">
       <HStack gap="1" justifyContent={"space-between"} w={"full"}>
@@ -40,7 +40,6 @@ export const AppDetails = ({ appId, isAdmin, isModerator, showSeparator = false 
           <Skeleton loading={isLogoLoading} alignContent={"start"}>
             <Image aspectRatio="square" src={logo?.image ?? notFoundImage} alt={"logo"} boxSize="40px" rounded="lg" />
           </Skeleton>
-
           <Skeleton loading={appMetadataLoading} justifyContent={"end"}>
             <Heading size={"md"}>{appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}</Heading>
             <Text textStyle={"sm"} color="text.subtle">

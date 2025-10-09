@@ -1,11 +1,15 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId, useHasVotedInRound, useTotalVotesOnBlock } from "@/api"
 import { Button, Card, Grid, GridItem, Heading, Image, Text, useBreakpointValue, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { FiArrowUpRight } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
-import voteAnimation from "../../../../public/assets/animations/vote.json"
+import { useTranslation } from "react-i18next"
+import { FiArrowUpRight } from "react-icons/fi"
 import Lottie from "react-lottie"
+
+import { useHasVotedInRound } from "../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useTotalVotesOnBlock } from "../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import voteAnimation from "../../../../public/assets/animations/vote.json"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()
@@ -18,7 +22,6 @@ export const CastYourVoteCard: React.FC = () => {
     account?.address ?? "",
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
-
   const lottieSize = useBreakpointValue(
     {
       base: "109px",
@@ -30,19 +33,15 @@ export const CastYourVoteCard: React.FC = () => {
       fallback: "base",
     },
   )
-
   const {
     data: hasVoted,
     isLoading: hasVotedLoading,
     isError: hasVotingError,
   } = useHasVotedInRound(roundId, account?.address ?? undefined)
-
   const onClick = () => {
     router.push(`/rounds/${roundId}`)
   }
-
   const hasVotes = Number(votesAtSnapshot) > 0
-
   if (!account?.address || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
 
   return (

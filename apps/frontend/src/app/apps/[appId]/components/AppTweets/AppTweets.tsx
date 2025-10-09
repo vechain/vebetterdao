@@ -1,29 +1,31 @@
 import { Button, Card, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
+import { UilCheckCircle, UilPen, UilPlus, UilTimes } from "@iconscout/react-unicons"
+import { useParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { AddTweetModal } from "./components/AddTweetModal"
-import { TweetList } from "./components/TweetList"
-import { useCurrentAppMetadata } from "../../hooks"
-import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
-import { UilCheckCircle, UilPen, UilPlus, UilTimes } from "@iconscout/react-unicons"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { useParams } from "next/navigation"
-import { OkHandIcon } from "@/components"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
-import { StepModal } from "@/components/StepModal/StepModal"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import Lottie from "react-lottie"
-import "./components/tweetStyle.css"
 
+import { OkHandIcon } from "../../../../../components/Icons/OkHandIcon"
+import { useUpdateAppDetails } from "../../../../../hooks/useUpdateAppDetails"
+import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
+import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
+import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
+
+import { AddTweetModal } from "./components/AddTweetModal"
+import { TweetList } from "./components/TweetList/TweetList"
+
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import { StepModal } from "@/components/StepModal/StepModal"
+
+import "./components/tweetStyle.css"
 enum AppTweetsStep {
   UPLOADING = "UPLOADING",
 }
-
 export const AppTweets = () => {
   const [editMode, setEditMode] = useState(false)
   const { open: isNewTweetModalOpen, onOpen: onNewTweetModalOpen, onClose: onNewTweetModalClose } = useDisclosure()
-
   const { isAdminOrModerator } = useCurrentAppRole()
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
@@ -32,15 +34,12 @@ export const AppTweets = () => {
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
   const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
   const [tweets, setTweets] = useState<string[]>(metadataTweets)
-
   useEffect(() => {
     setTweets(metadataTweets)
   }, [metadataTweets])
-
   const handleEdit = useCallback(() => {
     setEditMode(true)
   }, [setEditMode])
-
   const handleCancelEdit = useCallback(() => {
     setEditMode(false)
     setTweets(metadataTweets)

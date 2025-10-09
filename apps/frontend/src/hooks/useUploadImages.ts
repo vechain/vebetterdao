@@ -2,19 +2,16 @@
 import { useState, useCallback, useEffect } from "react"
 import imageCompression, { Options as CompressOptions } from "browser-image-compression"
 import dayjs, { Dayjs } from "dayjs"
-
 export const imageCompressionOptions: CompressOptions = {
   maxSizeMB: 0.4,
   maxWidthOrHeight: 1920,
   useWebWorker: true,
 }
-
 export const compressImages = async (images: UploadedImage[]) => {
   const compressedImages: File[] = []
   try {
     for (const image of images) {
       console.info(`originalFile size ${image.file.size / 1024 / 1024} MB`)
-
       console.info("Mime: ", image.file.type)
       const parsedFile = await imageCompression(image.file, imageCompressionOptions)
       console.info(`compressFile size ${parsedFile.size / 1024 / 1024} MB`)
@@ -26,7 +23,6 @@ export const compressImages = async (images: UploadedImage[]) => {
     throw e
   }
 }
-
 type Props = {
   compressImages?: boolean
   defaultImages?: UploadedImage[]
@@ -37,14 +33,12 @@ type Props = {
  * @param param0  compressImages: boolean to indicate if the images should be compressed (default: true)
  * @returns  uploadedImages: array of uploaded images, setUploadedImages: function to set the uploaded images, onDrop: function to handle the drop event
  */
-
 export type UploadedImage = {
   file: File
   image: string
 }
 export const useUploadImages = ({ compressImages, defaultImages, requirePictureAfterDate }: Props) => {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(defaultImages ?? [])
-
   useEffect(() => {
     if (defaultImages) {
       setUploadedImages(defaultImages)

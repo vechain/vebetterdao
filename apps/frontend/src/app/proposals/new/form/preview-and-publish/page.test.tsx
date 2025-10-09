@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest"
-import NewProposalPreviewAndPublishPage from "./page"
-import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
-import * as store from "@/store"
-import * as hooks from "@/hooks"
-import * as apiHooks from "@/api"
+
+import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import FormProposalLayout from "../layout"
 import { transferAction } from "../../../../../../__mocks__/Actions"
 
+import NewProposalPreviewAndPublishPage from "./page"
+
+import * as store from "@/store"
+import * as hooks from "@/hooks"
+import * as apiHooks from "@/api"
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -17,32 +19,23 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 const mockOnMetadataUpload = vi.fn()
 const spyOnUseMetadataUpload = vi.spyOn(hooks, "useUploadProposalMetadata")
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/preview-and-publish")
-
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 const spyOnuseCreateProposal = vi.spyOn(hooks, "useCreateStandardProposal")
-
 const mockSendTransaction = vi.fn()
-
 const threshold = "1000"
-
 const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
-
 describe("NewProposalPreviewAndPublish", async () => {
   beforeEach(() => {
     vi.clearAllMocks()
     spyOnUseProposalFormStore.mockClear()
-
     spyOnUseMetadataUpload.mockReturnValue({
       onMetadataUpload: mockOnMetadataUpload.mockReturnValue("123"),
       metadataUploadError: undefined,
       metadataUploading: false,
     })
-
     //@ts-ignore
     spyOnThreshold.mockReturnValue({
       data: threshold,

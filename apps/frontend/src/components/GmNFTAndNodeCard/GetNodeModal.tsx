@@ -1,19 +1,16 @@
-import { useTranslation } from "react-i18next"
 import { Dialog, Button, Heading, Text, VStack, Image, Portal, SimpleGrid } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
 
 interface UpgradeGMModalProps {
   isOpen: boolean
   onClose: () => void
 }
-
 export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation()
-
   const onGetNodeClick = () => {
     onClose()
     window.open("http://app.stargate.vechain.org/", "_blank")
   }
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"2xl"}>
       <Portal>
@@ -23,7 +20,6 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
             <Dialog.Header>
               <VStack gap={4} align="flex-start">
                 <Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />
-
                 <Heading textStyle="2xl">{t("Become a node holder")}</Heading>
               </VStack>
             </Dialog.Header>
@@ -36,7 +32,6 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
                 )}
               </Text>
             </Dialog.Body>
-
             <Dialog.Footer w="full" px={4} pt={1}>
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} w="full">
                 <Button variant={"secondary"} onClick={onClose}>

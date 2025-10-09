@@ -1,19 +1,18 @@
-import { getIpfsMetadata } from "@/api/ipfs"
+import { getConfig } from "@repo/config"
 import { useQueries } from "@tanstack/react-query"
 import { GrantsManager__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
+import { executeCallClause, useThor } from "@vechain/vechain-kit"
 import BigNumber from "bignumber.js"
 import { formatEther } from "ethers"
 import { useMemo } from "react"
 
+import { getIpfsMetadata } from "../../../api/ipfs/hooks/useIpfsMetadata"
+
 import { GrantProposalEnriched, ProposalCreatedEvent, ProposalEnriched } from "./types"
-import { executeCallClause, useThor } from "@vechain/vechain-kit"
-import { getConfig } from "@repo/config"
 
 const abi = GrantsManager__factory.abi
 const contractAddress = getConfig().grantsManagerContractAddress
-
 const treasuryInterface = Treasury__factory.createInterface()
-
 const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
   if (!calldata) return BigNumber(0)
   const decodedData = treasuryInterface.decodeFunctionData("transferB3TR", calldata)
@@ -25,7 +24,6 @@ const getAndDecodeGrantAmount = (calldata?: `0x${string}`) => {
  * @returns The query key for fetching proposal metadata details
  */
 export const getAllProposalsMetadataQueryKey = () => ["proposalMetadataDetails", "ALL"]
-
 /**
  * Returns the query key for fetching individual grant proposal metadata.
  * @param proposalId The proposal ID
@@ -33,7 +31,6 @@ export const getAllProposalsMetadataQueryKey = () => ["proposalMetadataDetails",
  */
 export const getGrantProposalMetadataQueryKey = (proposalId: string, ipfsHash?: string) =>
   ipfsHash ? ["grantProposalMetadata", proposalId, ipfsHash] : ["grantProposalMetadata", proposalId]
-
 /**
  * Returns the query key for fetching individual standard proposal metadata.
  * @param proposalId The proposal ID
@@ -44,7 +41,6 @@ export const getStandardProposalMetadataQueryKey = (proposalId: string, ipfsHash
   proposalId,
   ipfsHash,
 ]
-
 export const getGrantProposalMetadataOrReturnDefault = (ipfsMetadata?: GrantProposalEnriched | undefined) => {
   return {
     //Metadata fields

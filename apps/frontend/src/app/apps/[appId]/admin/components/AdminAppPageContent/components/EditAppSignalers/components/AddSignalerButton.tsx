@@ -1,18 +1,18 @@
-import { CustomModalContent } from "@/components"
 import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, CloseButton } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../../AdminAppPageContent"
-import { useVechainDomain } from "@vechain/vechain-kit"
-import { WalletAddressInput } from "@/app/components/Input"
+import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
 
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }
-
 export const AddSignalerButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onClose, onOpen } = useDisclosure()
@@ -29,12 +29,10 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
     },
     [addressForm, editAdminForm, onClose],
   )
-
   const handleClose = useCallback(() => {
     addressForm.reset()
     onClose()
   }, [addressForm, onClose])
-
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>

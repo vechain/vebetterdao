@@ -1,6 +1,8 @@
 import { expect, test } from "vitest"
-import Allocations from "./page"
+
 import { render, screen } from "../../../test"
+
+import Allocations from "./page"
 
 test("Allocations", async () => {
   render(<Allocations />)

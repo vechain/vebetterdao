@@ -1,12 +1,11 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 const abi = VoterRewards__factory.abi
 const contractAddress = getConfig().voterRewardsContractAddress
 const method = "getReward" as const
-
 /**
  * Generates a query key for the getRoundReward query.
  *
@@ -21,7 +20,6 @@ export const getRoundRewardQueryKey = (roundId: string, address: string) =>
     method,
     args: [BigInt(roundId), address as `0x${string}`],
   })
-
 /**
  * useRoundReward is a custom hook that fetches the reward for a given round and voter.
  *

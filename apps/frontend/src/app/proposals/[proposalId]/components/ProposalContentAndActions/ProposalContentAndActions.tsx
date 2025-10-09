@@ -1,13 +1,3 @@
-import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import { CollapsibleSection } from "@/app/components/CollapsibleSection"
-import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
-import { FileAttachmentPreview } from "@/app/grants/components"
-import { ProposalExecutableActions } from "@/components/ProposalExecutableActions"
-import { useColorModeValue } from "@/components/ui/color-mode"
-import { getActionsFromTargetsAndCalldatas, GovernanceFeaturedContractsWithFunctions } from "@/constants"
-import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
-import { ProposalFormAction } from "@/store"
-import { removeTitleHeading } from "@/utils"
 import { Alert, Box, Grid, GridItem, IconButton, Image, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { getConfig } from "@repo/config"
@@ -23,27 +13,36 @@ import { RiTelegram2Line } from "react-icons/ri"
 import { A11y, Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import { SocialLink } from "../SocialLink"
+import { SocialLink } from "../SocialLink/SocialLink"
+import { FileAttachmentPreview } from "../../../../grants/components/FileAttachmentPreview"
+import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
+import { removeTitleHeading } from "../../../../../utils/MarkdownUtils/MarkdownUtils"
+import { ProposalFormAction } from "../../../../../store/useProposalFormStore"
+import {
+  GovernanceFeaturedContractsWithFunctions,
+  getActionsFromTargetsAndCalldatas,
+} from "../../../../../constants/GovernanceFeaturedFunctions"
+import { ProposalExecutableActions } from "../../../../../components/ProposalExecutableActions/ProposalExecutableActions"
+
+import { CollapsibleSection } from "@/app/components/CollapsibleSection"
+import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
+import { useColorModeValue } from "@/components/ui/color-mode"
+import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
 
 import "@/app/theme/swiper-custom.css"
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
-
 const isGrantProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal?.type === ProposalType.Grant
 }
-
 const isStandardProposal = (proposal?: ProposalEnriched | GrantProposalEnriched): proposal is ProposalEnriched => {
   return proposal?.type === ProposalType.Standard
 }
-
 type Props = {
   proposal?: ProposalEnriched | GrantProposalEnriched
 }
-
 const ipfs = getConfig().ipfsFetchingService
-
 export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
   // ==========================================
   // HOOKS

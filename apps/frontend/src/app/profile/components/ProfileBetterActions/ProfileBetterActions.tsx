@@ -1,9 +1,12 @@
 import { VStack } from "@chakra-ui/react"
-import { ActivityCalendar } from "./components/ActivityCalendar"
 import { useState } from "react"
+
+import { useCanUserVote } from "../../../../api/contracts/governance/hooks/useCanUserVote"
+
+import { ActivityCalendar } from "./components/ActivityCalendar/ActivityCalendar"
 import { ActivityList } from "./components/ActivityList"
+
 import { YourBetterActionsCard } from "@/app/components/YourBetterActionsCard"
-import { useCanUserVote } from "@/api"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 
 type Props = {

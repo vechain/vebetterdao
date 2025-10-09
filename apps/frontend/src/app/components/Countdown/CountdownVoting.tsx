@@ -1,21 +1,21 @@
-import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
 import { Text, HStack, useMediaQuery, Skeleton, Icon, Flex } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import Countdown from "react-countdown"
-import dayjs from "@/utils/dayjsConfig"
 import { FaRegClock } from "react-icons/fa"
+
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+
+import dayjs from "@/utils/dayjsConfig"
 
 interface CountdownProps {
   onOpen: () => void
 }
-
 export const CountdownVoting = ({ onOpen }: CountdownProps) => {
   const [isAbove500] = useMediaQuery(["(min-width: 500px)"])
-
   const { data: currentRoundId, isLoading: isCurrentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: allocationRound, isLoading: isCurrentRoundLoading } = useAllocationsRound(currentRoundId)
-
   const expiryTimestamp = useMemo(() => {
     // no round left, most likely in test mode
     if (allocationRound?.state === 1) {
@@ -25,16 +25,12 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
     if (allocationRound?.voteEndTimestamp?.isBefore(dayjs())) {
       return dayjs().add(7, "day").valueOf()
     }
-
     // For accuracy in the UI, we round to the nearest minute
     const endTime = allocationRound?.voteEndTimestamp?.toDate()
     return endTime
   }, [allocationRound?.voteEndTimestamp, allocationRound?.state])
-
   const countdownKey = `countdown-${allocationRound?.roundId ?? "initial"}`
-
   const isLoading = isCurrentRoundIdLoading || isCurrentRoundLoading || !allocationRound?.voteEndTimestamp
-
   // Show loading state
   if (isLoading) {
     return (

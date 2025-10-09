@@ -1,4 +1,4 @@
-import { AllApps } from "@/api"
+import { AllApps } from "@/api/contracts/xApps/getXApps"
 
 export const address = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 

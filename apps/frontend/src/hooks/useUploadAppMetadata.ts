@@ -1,10 +1,13 @@
 "use client"
 import { useCallback, useState } from "react"
-import { XAppMetadata } from "@/api"
-import { base64ToBlob } from "@/utils/BlobUtils"
 import JSZip from "jszip"
-import { uploadBlobToIPFS } from "@/utils"
+
+import { XAppMetadata } from "../api/contracts/xApps/getXAppMetadata"
+
+import { base64ToBlob } from "@/utils/BlobUtils"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
 import { IMAGE_REQUIREMENTS } from "@/constants/XAppsMedia"
+
 export type UseUploadAppMetadataReturnValue = {
   metadataUploading: boolean
   metadataUploadError: Error | undefined
@@ -17,7 +20,6 @@ export type UseUploadAppMetadataReturnValue = {
 export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
   const [metadataUploading, setMetadataUploading] = useState(false)
   const [metadataUploadError, setMetadataUploadError] = useState<Error>()
-
   const processImage = (base64Data: string, imageType: keyof typeof IMAGE_REQUIREMENTS, fileName: string) => {
     const config = IMAGE_REQUIREMENTS[imageType]
     const blob = base64ToBlob(base64Data.split(",")[1] ?? "", config.mimeType)
@@ -26,23 +28,18 @@ export const useUploadAppMetadata = (): UseUploadAppMetadataReturnValue => {
       path: `${fileName}.${config.extension}`,
     }
   }
-
   const onMetadataUpload = useCallback(async (metadata: XAppMetadata, transformImages = true) => {
     try {
       setMetadataUploading(true)
-
       if (transformImages) {
         const zip = new JSZip()
-
         // Create a 'media' folder inside the zip
         const mediaFolder = zip.folder("media") as JSZip
-
         // Convert base64 images to Blob and add to 'media' folder in the zip if they are defined
         if (metadata.logo) {
           const { blob, path } = processImage(metadata.logo, "logo", "logo")
           mediaFolder.file(path, blob)
         }
-
         if (metadata.banner) {
           const { blob, path } = processImage(metadata.banner, "banner", "banner")
           mediaFolder.file(path, blob)

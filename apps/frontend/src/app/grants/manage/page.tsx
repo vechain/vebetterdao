@@ -1,23 +1,24 @@
 "use client"
-
 import { Grid, GridItem, HStack, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
-import { ConvertModal, SearchField } from "@/components"
-import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
-import { useDebounce, useProposalSearch } from "@/hooks"
 import { useMemo, useState } from "react"
-import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
-
-import { GrantsProposalCard } from "../components/GrantsProposalCard"
 import { useWallet } from "@vechain/vechain-kit"
-import { EmptyState } from "@/components/ui/empty-state"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useDraftGrantProposalStore } from "@/store"
-import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
 import Link from "next/link"
-import { HowToSupportCard } from "@/app/proposals"
 
+import { ConvertModal } from "../../../components/Convert/components/Modal/ConvertModal"
+import { SearchField } from "../../../components/SearchField/SearchField"
+import { PageBreadcrumb } from "../../components/PageBreadcrumb/PageBreadcrumb"
+import { useDebounce } from "../../../hooks/useDebounce"
+import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { GrantsProposalCard } from "../components/GrantsProposalCard"
+import { useDraftGrantProposalStore } from "../../../store/useGrantProposalFormStore"
+import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
+import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
+
+import { EmptyState } from "@/components/ui/empty-state"
+import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
+import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 const BreadcrumItems = [
   {
     label: "Grants",
@@ -28,21 +29,18 @@ const BreadcrumItems = [
     href: "/grants/manage",
   },
 ]
-
 export default function GrantsNew() {
   const { account } = useWallet()
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState("")
   const [isOpenConvertModal, setIsOpenConvertModal] = useState(false)
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
-
   const { data: { enrichedGrantProposals } = { enrichedGrantProposals: [] as GrantProposalEnriched[] } } =
     useProposalEnriched()
   const { draftGrantProposals } = useDraftGrantProposalStore()
   const usersGrants = useMemo(() => {
     return enrichedGrantProposals.filter(proposal => compareAddresses(proposal.proposerAddress, account?.address))
   }, [enrichedGrantProposals, account?.address])
-
   const proposals = [...draftGrantProposals, ...usersGrants]
   const searchedProposals = useProposalSearch(proposals, debouncedSearchTerm)
 

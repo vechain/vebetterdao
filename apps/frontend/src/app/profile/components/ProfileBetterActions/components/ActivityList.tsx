@@ -1,46 +1,39 @@
-import { UserB3trActions, useUsersB3trActions } from "@/api"
-import InfiniteScroll from "react-infinite-scroll-component"
 import { VStack, Spinner, HStack, Heading, Button, Card, Text, Center } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { Dispatch, SetStateAction } from "react"
 import dayjs from "dayjs"
-import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
+import { Dispatch, SetStateAction } from "react"
+import { useTranslation } from "react-i18next"
+import InfiniteScroll from "react-infinite-scroll-component"
+
+import { BetterActionCard } from "../../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
+import { useUsersB3trActions, UserB3trActions } from "../../../../../api/indexer/actions/useUsersB3trActions"
 
 type Props = {
   setIsCalendarView: Dispatch<SetStateAction<boolean>>
   address: string
 }
-
 export const ActivityList = ({ address, setIsCalendarView }: Props) => {
   const { t } = useTranslation()
   const { data, fetchNextPage, hasNextPage } = useUsersB3trActions(address, { direction: "DESC" })
-
   const actions = data?.pages.map(page => page.data).flat() ?? []
-
   const handleSetCalendarView = () => {
     setIsCalendarView(true)
   }
-
   const groupActionsByDay = (actions: UserB3trActions) => {
     return actions.reduce<Record<string, UserB3trActions>>(
       (grouped, action) => {
         const day = dayjs.unix(action.blockTimestamp).format("YYYY-MM-DD")
-
         // Ensure the group for this day is initialized
         if (!grouped[day]) {
           grouped[day] = [] // This guarantees grouped[day] is always an array
         }
-
         // Now safely push into grouped[day]
         ;(grouped[day] as UserB3trActions).push(action)
-
         return grouped
       },
       {} as Record<string, UserB3trActions>,
     )
   }
   const groupedActions = groupActionsByDay(actions)
-
   return (
     <Card.Root w="full" variant="primary">
       <Card.Body>

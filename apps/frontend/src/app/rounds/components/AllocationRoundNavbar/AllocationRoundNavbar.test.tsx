@@ -1,10 +1,12 @@
-import * as apiHooks from "@/api"
 import dayjs from "dayjs"
-import { fireEvent, render, screen } from "../../../../../test"
-import { AllocationRoundNavbar } from "./AllocationRoundNavbar"
 import * as chakra from "@chakra-ui/react"
 import * as router from "next/navigation"
 
+import { fireEvent, render, screen } from "../../../../../test"
+
+import { AllocationRoundNavbar } from "./AllocationRoundNavbar"
+
+import * as apiHooks from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 export const mockedUsePathname = vi.fn()
 vi.mock("@chakra-ui/react", async () => {
   const actual = await vi.importActual("@chakra-ui/react")
@@ -13,7 +15,6 @@ vi.mock("@chakra-ui/react", async () => {
     useMediaQuery: vi.fn(() => [true]),
   }
 })
-
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -22,7 +23,6 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 const roundId = "1"
 describe("AllocationRoundNavbar", () => {
   const voteStart = dayjs().subtract(1, "day")
@@ -43,7 +43,6 @@ describe("AllocationRoundNavbar", () => {
       isError: false,
       error: null,
     })
-
     vi.useFakeTimers()
     vi.setSystemTime(dayjs().valueOf())
   })

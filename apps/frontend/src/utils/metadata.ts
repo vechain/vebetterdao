@@ -1,12 +1,12 @@
-import { Metadata } from "next"
-import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 import { getConfig } from "@repo/config"
+import { Metadata } from "next"
+
+import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
 
 export function getPageMetadata(pageKey: string): Metadata {
   const pageData = pagesMetadata[pageKey as keyof typeof pagesMetadata]
   const basePath = getConfig().basePath
   const pathname = pageData.path ? `${basePath}${pageData.path}` : `${basePath}`
-
   if (!pageData) {
     return {
       applicationName: APPLICATION_NAME,
@@ -14,7 +14,6 @@ export function getPageMetadata(pageKey: string): Metadata {
       description: "VeBetter - Governance platform for sustainability and Web3 impact",
     }
   }
-
   return {
     applicationName: APPLICATION_NAME,
     title: pageData.title,
@@ -44,7 +43,6 @@ export function getPageMetadata(pageKey: string): Metadata {
     },
   }
 }
-
 // Helper function for consistent fallback metadata
 export function getDefaultMetadata(): Metadata {
   return getPageMetadata("platform")

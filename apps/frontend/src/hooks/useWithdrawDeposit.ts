@@ -1,25 +1,25 @@
-import { getProposalUserDepositQueryKey, getProposalClaimableUserDepositsQueryKey } from "@/api"
-import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { buildClause } from "@/utils/buildClause"
+import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
+import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 
-const config = getConfig()
+import { buildClause } from "@/utils/buildClause"
 
+const config = getConfig()
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 const GOVERNANCE_CONTRACT = config.b3trGovernorAddress
-
 // const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
 // const suggestedMaxGas = 110712 * buffer
-
 type UseProposalVot3DepositProps = {
   proposalId: string
   onSuccess?: () => void
 }
-
 /**
  * Custom hook for withdrawing a deposit from a proposal.
  *
@@ -30,7 +30,6 @@ type UseProposalVot3DepositProps = {
  */
 export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3DepositProps) => {
   const { account } = useWallet()
-
   const clauseBuilder = useCallback(() => {
     if (!account?.address) throw new Error("address is required")
     return [
@@ -43,7 +42,6 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
       }),
     ]
   }, [account, proposalId])
-
   const refetchQueryKeys = useMemo(
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),

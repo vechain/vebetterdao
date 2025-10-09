@@ -1,5 +1,3 @@
-import { useProposalComments } from "@/api"
-import { SelectField } from "@/components"
 import { Center, createListCollection, Heading, HStack, Spinner, VStack } from "@chakra-ui/react"
 import { UilSortAmountDown } from "@iconscout/react-unicons"
 import { t } from "i18next"
@@ -7,6 +5,8 @@ import { useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 
 import { ProposalVoteComment } from "../ProposalVoteComment/ProposalVoteComment"
+import { SelectField } from "../../../../../components/SelectField/SelectField"
+import { useProposalComments } from "../../../../../api/indexer/proposals/useProposalComments"
 
 enum VoteType {
   FOR = "FOR",
@@ -14,11 +14,9 @@ enum VoteType {
   ABSTAIN = "ABSTAIN",
   ALL = "ALL",
 }
-
 type Props = {
   proposalId?: string
 }
-
 export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   const sortOptions = createListCollection({
     items: [
@@ -41,12 +39,9 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
     support: activeFilter !== VoteType.ALL ? activeFilter : undefined,
     direction: direction as "ASC" | "DESC",
   })
-
   const visibleComments = data?.pages.flatMap(page => page.data)
   const commentsCount = visibleComments?.length ?? 0
-
   if (!commentsCount || !proposalId) return null
-
   return (
     <VStack alignItems="stretch" gap={4}>
       <HStack justifyContent="space-between" w="full">

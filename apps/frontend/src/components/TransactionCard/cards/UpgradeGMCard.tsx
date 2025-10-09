@@ -1,25 +1,23 @@
-import { Transaction } from "@/api"
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilGlobe } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { ActionModal } from "./BetterActionCard"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
+import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
+import { Transaction } from "../../../api/indexer/transactions/useTransactions"
+
+import { ActionModal } from "./BetterActionCard/components/ActionModal"
 
 type Props = {
   transaction: Transaction
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 export const UpgradeGMCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
-
   const actionModal = useDisclosure()
   const { isConnectedUser } = useRetrieveProfilIdentity()
-
   return (
     <Card.Root size="sm" variant={"primary"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>

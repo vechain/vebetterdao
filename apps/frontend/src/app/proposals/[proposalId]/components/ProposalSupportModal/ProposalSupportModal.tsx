@@ -1,12 +1,3 @@
-import { useCurrentAllocationsRoundId } from "@/api"
-import { GenericAlert } from "@/app/components/Alert"
-import { MulticolorBar, ResultsDisplay } from "@/components"
-import { BaseModal } from "@/components/BaseModal"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
-import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { filterAmountInput } from "@/utils/filterAmountInput"
 import { Button, Heading, HStack, Icon, Image, Input, InputGroup, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { BigNumber } from "bignumber.js"
@@ -14,6 +5,18 @@ import { ethers } from "ethers"
 import { Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+import { GenericAlert } from "../../../../components/Alert/GenericAlert"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+
+import { filterAmountInput } from "@/utils/filterAmountInput"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import { BaseModal } from "@/components/BaseModal"
 
 type Props = {
   isSupportModalOpen: boolean
@@ -36,14 +39,11 @@ export const ProposalSupportModal = ({
   const { isTxModalOpen } = useTransactionModal()
   const [amount, setAmount] = useState("")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   // Get user's VOT3 balance and current deposits using hooks
   const { data: vot3Balance } = useGetVot3Balance(account?.address)
-
   const canClaimNextRound = useMemo(() => {
     return votingRoundId === Number(currentRoundId ?? 0) + 1
   }, [votingRoundId, currentRoundId])
-
   // Helper function to calculate accurate percentage using wei precision
   const getPercentage = useCallback((deposits: bigint, threshold: bigint) => {
     if (threshold === 0n) return 0

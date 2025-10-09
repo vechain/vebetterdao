@@ -9,12 +9,10 @@ import { GrantProposalEnriched, MilestoneState } from "./types"
 const address = getConfig().grantsManagerContractAddress
 const abi = GrantsManager__factory.abi
 const method = "milestoneState" as const
-
 /**
  * Query key for all milestone states of a proposal
  */
 export const getAllMilestoneStatesQueryKey = (proposalId?: string) => ["all-milestone-states", proposalId]
-
 /**
  * Hook to get all milestone states for a proposal using executeMultipleClausesCall
  * This efficiently fetches all milestone states in a single batch call
@@ -23,14 +21,12 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
   const thor = useThor()
   const milestones = useMemo(() => proposal?.milestones ?? [], [proposal?.milestones])
   const hasValidData = !!proposal?.id && milestones.length > 0
-
   return useQuery({
     queryKey: getAllMilestoneStatesQueryKey(proposal?.id),
     queryFn: async () => {
       if (!thor || !proposal?.id || milestones.length === 0) {
         return []
       }
-
       try {
         const calls = milestones.map(
           (_, index) =>
@@ -41,12 +37,10 @@ export const useAllMilestoneStates = (proposal?: GrantProposalEnriched) => {
               args: [BigInt(proposal.id), BigInt(index)],
             }) as const,
         )
-
         const results = await executeMultipleClausesCall({
           thor,
           calls,
         })
-
         return results.map((state, index) => ({
           state: (state as number) ?? MilestoneState.Pending,
           index,

@@ -1,13 +1,13 @@
 import { HStack, Text, Button, VStack, Box } from "@chakra-ui/react"
-import { useTranslation, Trans } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
-import { ExclamationTriangle } from "@/components"
-import {
-  useIsRewardsPoolEnabled,
-  useDistributionManagement,
-  useIsDistributionPaused,
-} from "@/api/contracts/x2EarnRewardsPool"
-import { StepModal, type Step } from "@/components/StepModal"
+import { useTranslation, Trans } from "react-i18next"
+
+import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
+import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
+import { useDistributionManagement } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useDistributionManagement"
+import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
+import { StepModal, type Step } from "../../../../../components/StepModal/StepModal"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export type Props = {
@@ -16,23 +16,18 @@ export type Props = {
   onClose: () => void
   b3trAppBalance?: string
 }
-
 enum ManagementStep {
   MANAGEMENT_OPTIONS = "MANAGEMENT_OPTIONS",
   CONFIRMATION = "CONFIRMATION",
 }
-
 const STEP_COUNT = Object.keys(ManagementStep).length
-
 export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const [actionToConfirm, setActionToConfirm] = useState<"enable" | "disable" | "pause" | "resume">()
-
   // Get the initial state from the hook
   const { data: isEnabled } = useIsRewardsPoolEnabled(appId)
   const { data: isPaused } = useIsDistributionPaused(appId)
   const { isTxModalOpen } = useTransactionModal()
-
   const [step, setStep] = useState(0)
   const goToNext = useCallback(() => {
     const nextStep = step + 1
@@ -44,7 +39,6 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
     if (prevStep < 1) onClose()
     else setStep(prevStep)
   }, [step, onClose])
-
   const handleClose = useCallback(() => {
     setStep(0)
     onClose()

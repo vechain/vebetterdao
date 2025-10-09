@@ -1,14 +1,11 @@
 import { getEnvMixPanel } from "@repo/config"
 import mixpanel, { Dict } from "mixpanel-browser"
 import * as uuid from "uuid"
-
 const MIX_PANEL_TOKEN = getEnvMixPanel()
 let isInitialized = false
-
 export interface Properties {
   [key: string]: unknown
 }
-
 /**
  * Initialise the analytics library with the mixpanel token
  */
@@ -20,14 +17,12 @@ export const initialise = () => {
       ignore_dnt: true,
     })
     mixpanel.identify(uuid.v4())
-
     isInitialized = true
     console.info("Mixpanel initialized")
   } else {
     console.warn("Analytics not enabled")
   }
 }
-
 /**
  *  Track an event
  * @param event  The name of the event
@@ -45,7 +40,6 @@ export const trackEvent = (event: string, properties?: Properties): void => {
     console.warn("Error tracking event", e)
   }
 }
-
 /**
  *  Track a page view
  * @param page  The name of the page
@@ -68,4 +62,5 @@ export const trackPage = (page: string, properties?: Dict): void => {
 export default {
   initialise,
   trackEvent,
+  trackPage,
 }

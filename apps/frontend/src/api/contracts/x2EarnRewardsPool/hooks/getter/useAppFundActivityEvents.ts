@@ -1,12 +1,12 @@
-import { useEvents } from "@/hooks"
-import { useMemo, useCallback } from "react"
-import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
+import { useMemo, useCallback } from "react"
+
+import { useEvents } from "../../../../../hooks/useEvents"
 
 const abi = X2EarnRewardsPool__factory.abi
 const contractAddress = getConfig().x2EarnRewardsPoolContractAddress
-
 export type AppFundActivityEvent = {
   appId: string
   amount: string
@@ -16,7 +16,6 @@ export type AppFundActivityEvent = {
   rewardsPoolBalance?: string
   txType: string
 }
-
 /**
  * Hook to get all the apps tx events such as:
  * Withdraw, Deposits, Reward Distribution, Rewards Pool Balance Updates
@@ -24,7 +23,6 @@ export type AppFundActivityEvent = {
  */
 export const useAppFundActivityEvents = (appId: string) => {
   const filterParams = { appId }
-
   const rawDepositEvents = useEvents({
     contractAddress,
     abi,
@@ -38,7 +36,6 @@ export const useAppFundActivityEvents = (appId: string) => {
       txType: "DEPOSIT",
     }),
   })
-
   const rawTeamWithdrawalEvents = useEvents({
     contractAddress,
     abi,

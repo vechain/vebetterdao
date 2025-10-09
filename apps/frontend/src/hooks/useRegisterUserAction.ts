@@ -1,14 +1,15 @@
-import { useCallback, useMemo } from "react"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { buildClause } from "@/utils/buildClause"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback, useMemo } from "react"
+
+import { getIsPersonQueryKey } from "../api/contracts/vePassport/hooks/useIsPerson"
+
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getIsPersonQueryKey } from "@/api"
+
+import { buildClause } from "@/utils/buildClause"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
-
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
-
 type Props = {
   address: string
   appId: string
@@ -17,7 +18,6 @@ type Props = {
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
-
 /**
  * Register a user action in the VeBetterPassport contract
  * @param {string} props.address - the address to register the action for
@@ -35,12 +35,9 @@ export const useRegisterUserAction = ({ address, appId, roundId, onSuccess }: Pr
       args: roundId ? [address, appId, roundId] : [address, appId],
       comment: `Register action for ${address} for app ${appId} in ${roundId ? `round ${roundId}` : "current round"}`,
     })
-
     return [clauses]
   }, [address, appId, roundId])
-
   const refetchQueryKeys = useMemo(() => [getIsPersonQueryKey(address)], [address])
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

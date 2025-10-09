@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
+import { MotionVStack } from "../../components/MotionVStack"
 const ProfilePageContent = dynamic(
   () => import("./components/ProfilePageContent").then(mod => mod.ProfilePageContent),
   {
@@ -17,12 +16,10 @@ const ProfilePageContent = dynamic(
     ),
   },
 )
-
 export default function Profile() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Profile")
   }, [])
-
   return (
     <MotionVStack>
       <ProfilePageContent />

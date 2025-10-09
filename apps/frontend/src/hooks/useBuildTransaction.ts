@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef } from "react"
-import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
+import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
+import { useCallback, useEffect, useMemo, useRef } from "react"
+
 import { useTransactionModal, TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 export type BuildTransactionProps<ClausesParams = void> = {
@@ -13,7 +14,6 @@ export type BuildTransactionProps<ClausesParams = void> = {
   transactionModalCustomUI?: TransactionCustomUI
   gasPadding?: number
 }
-
 /**
  * Custom hook for building and sending transactions.
  * @param clauseBuilder - A function that builds an array of enhanced clauses based on the provided parameters.
@@ -39,7 +39,6 @@ export const useBuildTransaction = <ClausesParams = void>({
   const queryClient = useQueryClient()
   const { setupModal, updateModal } = useTransactionModal()
   const lastReportedStatusRef = useRef<string | undefined>()
-
   /**
    * Callback function to be called when the transaction is successfully confirmed.
    * It cancels and refetches the specified queries if `invalidateCache` is `true`.

@@ -2,7 +2,6 @@ export enum FeatureFlag {
   GALAXY_MEMBER_UPGRADES = "galaxyMemberUpgrades",
   VECHAIN_KIT = "vechainKit",
 }
-
 type FeatureFlagConfig = Record<
   FeatureFlag,
   {
@@ -10,7 +9,6 @@ type FeatureFlagConfig = Record<
     comingSoonText?: string
   }
 >
-
 export const featureFlags: FeatureFlagConfig = {
   [FeatureFlag.GALAXY_MEMBER_UPGRADES]: {
     enabled: true,

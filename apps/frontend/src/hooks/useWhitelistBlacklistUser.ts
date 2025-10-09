@@ -1,20 +1,21 @@
-import { useCallback, useMemo } from "react"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { getIsBlacklistedQueryKey, getIsWhitelistedQueryKey } from "@/api"
-import { buildClause } from "@/utils/buildClause"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback, useMemo } from "react"
+
+import { getIsBlacklistedQueryKey } from "../api/contracts/vePassport/hooks/useIsBlacklisted"
+import { getIsWhitelistedQueryKey } from "../api/contracts/vePassport/hooks/useIsWhitelisted"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 
+import { buildClause } from "@/utils/buildClause"
+
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
-
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
-
 export enum UserStatus {
   NONE = "NONE",
   WHITELIST = "WHITELIST",
   BLACKLIST = "BLACKLIST",
 }
-
 type Props = {
   address: string
   currentStatus: UserStatus
@@ -22,7 +23,6 @@ type Props = {
   onSuccess?: () => void
   onSuccessMessageTitle?: string
 }
-
 /**
  * Whitelist, blacklist or remove a user from blacklist or whitelist in the VeBetterPassport contract
  *
@@ -42,7 +42,6 @@ export const useWhitelistBlacklistUser = ({ address, currentStatus, newStatus, o
         return currentStatus === UserStatus.WHITELIST ? "removeFromWhitelist" : "removeFromBlacklist"
     }
   }, [currentStatus, newStatus])
-
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,

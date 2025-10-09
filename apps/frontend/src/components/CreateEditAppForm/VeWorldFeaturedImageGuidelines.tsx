@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 export const VeWorldFeaturedImageGuidelines = () => {
   const { t } = useTranslation()
-
   return (
     <>
       {t("Recommended size: 720x720 (minimum).")}{" "}

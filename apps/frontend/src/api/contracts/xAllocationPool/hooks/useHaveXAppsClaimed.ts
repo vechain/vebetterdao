@@ -1,13 +1,11 @@
-import { useQuery } from "@tanstack/react-query"
 import { getConfig } from "@repo/config"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+import { useQuery } from "@tanstack/react-query"
 import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
-
 export const getHaveXAppsClaimedQueryKey = (roundId: string, appIds: string[]) => ["xAppsClaimed", roundId, , appIds]
-
 /**
  * Fetch if allocation was claimed of multiple xApps in an allocation round
  * @param appIds  the xApps to get the votes for
@@ -31,7 +29,6 @@ export const useHaveXAppsClaimed = (roundId: string, appIds: string[]) => {
             }) as const,
         ),
       })
-
       return res.map((claimed, index) => ({
         claimed,
         appId: appIds[index],

@@ -1,11 +1,11 @@
-import { OkHandIcon } from "@/components"
 import { VStack, Card, Heading, List } from "@chakra-ui/react"
 import { UilCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
+import { OkHandIcon } from "../../../components/Icons/OkHandIcon"
+
 export const AppsEmptyState = () => {
   const { t } = useTranslation()
-
   return (
     <Card.Root w="full">
       <Card.Body>
@@ -17,7 +17,6 @@ export const AppsEmptyState = () => {
               <List.Indicator asChild>
                 <UilCircle color="#757575" size={3} />
               </List.Indicator>
-
               {t("Try changing the filter")}
             </List.Item>
           </List.Root>

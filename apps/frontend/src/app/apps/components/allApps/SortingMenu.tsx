@@ -1,16 +1,15 @@
-import { useTranslation } from "react-i18next"
 import { IconButton, Menu, Text, HStack, VStack, Portal, Icon } from "@chakra-ui/react"
 import { UilSortAmountDown, UilCheck } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
+
 import { SortOption, sortOptions } from "@/types/appDetails"
 
 type Props = {
   sortOption: string
   onSortChange: (option: SortOption) => void
 }
-
 export const SortingMenu = ({ sortOption, onSortChange }: Props) => {
   const { t } = useTranslation()
-
   return (
     <Menu.Root closeOnSelect={true} positioning={{ placement: "bottom-end" }}>
       <Menu.Trigger asChild>

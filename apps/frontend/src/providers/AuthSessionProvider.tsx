@@ -10,7 +10,6 @@ const SessionProvider = dynamic(
     ssr: false,
   },
 )
-
 export const AuthSessionProvider = ({ children, session }: SessionProviderProps) => {
   return <SessionProvider session={session}>{children}</SessionProvider>
 }

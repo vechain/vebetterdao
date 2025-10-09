@@ -1,4 +1,3 @@
-import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
@@ -7,11 +6,11 @@ import { getAllMilestoneStatesQueryKey } from "./proposals/grants/useAllMileston
 import { getMilestoneStateQueryKey } from "./proposals/grants/useMilestoneState"
 import { useBuildTransaction } from "./useBuildTransaction"
 
+import { buildClause } from "@/utils/buildClause"
+
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const GrantsManagerInterface = GrantsManager__factory.createInterface()
-
 type Props = { proposalId: string; milestoneIndex: number; onSuccess?: () => void }
-
 /**
  * Hook to approve a Milestone
  * @param proposalId  the proposal id to approve
@@ -31,12 +30,10 @@ export const useApproveMilestone = ({ proposalId, milestoneIndex, onSuccess }: P
       }),
     ]
   }, [proposalId, milestoneIndex])
-
   const refetchQueryKeys = useMemo(
     () => [getAllMilestoneStatesQueryKey(proposalId), getMilestoneStateQueryKey(proposalId, milestoneIndex)],
     [proposalId, milestoneIndex],
   )
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

@@ -1,12 +1,15 @@
 import { Heading, Text, VStack, Link, Icon, Image, HStack, Flex, Button } from "@chakra-ui/react"
-import { ShareButtons } from "../../ShareButtons"
-import { ReactNode, useState } from "react"
 import { motion } from "framer-motion"
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+import { ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 import { MdArrowOutward } from "react-icons/md"
+
+import { ShareButtons } from "../../ShareButtons"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
+
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
 export type SuccessModalContentProps = {
   title?: ReactNode
   showSocialButtons?: boolean
@@ -15,7 +18,6 @@ export type SuccessModalContentProps = {
   isSuccessBeenTrack?: boolean
   onClose: () => void
 }
-
 const okHandVariants = {
   initial: { rotateY: 0 },
   animate: {
@@ -34,7 +36,6 @@ const okHandVariants = {
     },
   },
 }
-
 const MotionImage = motion(Image)
 /**
  * SuccessModalContent is a component that shows a success message with a lottie animation and share buttons

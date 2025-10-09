@@ -16,11 +16,13 @@ import { Icon as IconType, UilCheckCircle, UilExclamationCircle } from "@iconsco
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { WalletAddressInput } from "@/app/components/Input"
-import { useIsCreatorOfAnyApp, useAppsCountFromCreator } from "@/api"
 
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
+import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
+import { useAppsCountFromCreator } from "../../../api/contracts/xApps/hooks/useAppsCountFromCreator"
+
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
 type NFTFormInputs = {
   creatorWalletAddress: string
   tokenId: string
@@ -28,10 +30,8 @@ type NFTFormInputs = {
   actionType: string
   lookupCreatorAddress: string
 }
-
 export const ManageCreatorsNFT = () => {
   const { t } = useTranslation()
-
   const {
     register,
     handleSubmit,

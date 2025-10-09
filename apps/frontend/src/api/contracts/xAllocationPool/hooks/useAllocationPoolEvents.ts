@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/react-query"
-import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
-import { FilterCriteria } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
+import { FilterCriteria } from "@vechain/sdk-network"
 import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { decodeEventLog } from "../../governance"
+import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
+
+import { decodeEventLog } from "@/api/contracts/governance/getEvents"
 
 const abi = XAllocationPool__factory.abi
-
 export type AllocationRewardsClaimed = {
   appId: string
   roundId: string
@@ -17,7 +17,6 @@ export type AllocationRewardsClaimed = {
   teamAllocationAmount: string
   x2EarnRewardsPoolAmount: string
 }
-
 /**
  * Fetches all allocation pool events
  * @param {ThorClient} thor - The thor client
@@ -25,11 +24,9 @@ export type AllocationRewardsClaimed = {
  */
 export const getAllocationPoolEvents = async (thor: ThorClient) => {
   const xAllocationPoolContractAddress = getConfig().xAllocationPoolContractAddress
-
   const eventAbi = thor.contracts
     .load(xAllocationPoolContractAddress, XAllocationPool__factory.abi)
     .getEventAbi("AllocationRewardsClaimed")
-
   const filterCriteria: FilterCriteria[] = [
     {
       criteria: {
@@ -39,7 +36,6 @@ export const getAllocationPoolEvents = async (thor: ThorClient) => {
       eventAbi,
     },
   ]
-
   const events = (
     await getAllEventLogs({
       nodeUrl: getConfig().nodeUrl,

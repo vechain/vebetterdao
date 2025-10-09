@@ -1,46 +1,40 @@
-import { useB3TRGovernorPaused, useB3trPaused, useVot3Paused } from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account"
-import { useIsGMpaused } from "@/api/contracts/galaxyMember"
-import { usePauseContract } from "@/hooks"
 import { Button, HStack, VStack, Text, Card, Heading } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
+import { useB3trPaused } from "../../../api/contracts/b3tr/hooks/useB3trPaused"
+import { useIsGMpaused } from "../../../api/contracts/galaxyMember/hooks/useIsGMpaused"
+import { useB3TRGovernorPaused } from "../../../api/contracts/governance/hooks/useB3TRGovernorPaused"
+import { useVot3Paused } from "../../../api/contracts/vot3/hooks/useVot3Paused"
+import { usePauseContract } from "../../../hooks/usePauseContract"
+
 export const Pause: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
-
   const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
-
   const { data: isVot3Paused, isLoading: isVot3PausedLoading } = useVot3Paused()
-
   const { data: isB3trPaused, isLoading: isB3trPausedLoading } = useB3trPaused()
-
   const { data: isB3TRGovernorPaused, isLoading: isB3TRGovernorPausedLoading } = useB3TRGovernorPaused()
-
   const { pauseTxResult: pauseB3trTxResult, unpauseTxResult: unpauseB3trTxResult } = usePauseContract({
     contract: getConfig().b3trContractAddress,
     contractName: "B3TR",
   })
-
   const { pauseTxResult: pauseVot3TxResult, unpauseTxResult: unpauseVot3TxResult } = usePauseContract({
     contract: getConfig().vot3ContractAddress,
     contractName: "VOT3",
   })
-
   const { pauseTxResult: pauseGalaxyMemberTxResult, unpauseTxResult: unpauseGalaxyMemberTxResult } = usePauseContract({
     contract: getConfig().galaxyMemberContractAddress,
     contractName: "Galaxy Member",
   })
-
   const { pauseTxResult: pauseB3TRGovernorTxResult, unpauseTxResult: unpauseB3TRGovernorTxResult } = usePauseContract({
     contract: getConfig().b3trGovernorAddress,
     contractName: "B3TRGovernor",
   })
-
   const isToggleB3trPausedLoading =
     isB3trPausedLoading ||
     pauseB3trTxResult.isTransactionPending ||

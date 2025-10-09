@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { MotionVStack } from "../../../../../components/MotionVStack"
 const ConfirmCastAllocationVotePageContent = dynamic(
   () =>
     import("./components/ConfirmCastAllocationVotePageContent").then(mod => mod.ConfirmCastAllocationVotePageContent),
@@ -23,12 +22,10 @@ type Props = {
     roundId: string
   }
 }
-
 export default function CastAllocationVotePage({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}/vote/confirm`)
   }, [params.roundId])
-
   return (
     <MotionVStack>
       <ConfirmCastAllocationVotePageContent roundId={params.roundId} />

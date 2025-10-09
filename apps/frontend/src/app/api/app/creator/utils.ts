@@ -1,6 +1,8 @@
-import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
-import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
+import { SubmitCreatorFormData } from "../../../../components/SubmitCreatorForm/SubmitCreatorForm"
+
 import { Submission } from "./submission/route"
+
+import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
 
 // Type guard to check if an object is a complete SubmitCreatorFormData
 function isCompleteSubmitCreatorFormData(data: Partial<SubmitCreatorFormData>): data is SubmitCreatorFormData {
@@ -16,18 +18,14 @@ function isCompleteSubmitCreatorFormData(data: Partial<SubmitCreatorFormData>): 
     "testnetAppId",
     "securityActionVerification",
   ]
-
   return requiredFields.every(field => field in data && data[field] !== undefined && data[field] !== null)
 }
-
 // Function to check missing fields
 export const checkMissingFields = (data: Partial<SubmitCreatorFormData>): string[] | null => {
   if (isCompleteSubmitCreatorFormData(data)) {
     return null
   }
-
   const missingFields = Object.keys(data).filter(key => !data[key as keyof SubmitCreatorFormData])
-
   return missingFields.length > 0 ? missingFields : null
 }
 export const formatSubmission = (result: FreshdeskTicket, freshdeskClient: FreshdeskClient): Submission => {

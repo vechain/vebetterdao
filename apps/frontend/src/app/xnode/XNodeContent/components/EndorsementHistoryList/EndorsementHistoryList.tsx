@@ -1,27 +1,26 @@
-import { UserNode } from "@/api"
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { Text, Card, Heading, VStack, Button } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { useCallback, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+
+import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
+
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { data: appEndorsedEvents } = useAppEndorsedEvents({ nodeId: xNode.nodeId ?? undefined })
   const [displayCount, setDisplayCount] = useState(5)
-
   const handleLoadMore = useCallback(() => {
     setDisplayCount(prevCount => Math.min(prevCount + 5, appEndorsedEvents?.length || 0))
   }, [appEndorsedEvents])
-
   const events = appEndorsedEvents?.slice(0, displayCount)
-
   return (
     <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap="6">
           <Heading textStyle="xl">{t("Endorsement history")}</Heading>
-
           {events?.length ? (
             events.map(event => (
               <EndorsementHistoryItem

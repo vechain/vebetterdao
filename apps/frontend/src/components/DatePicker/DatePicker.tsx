@@ -18,13 +18,11 @@ import { FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
-
 // Starting the week on Monday
 dayjs.extend(updateLocale)
 dayjs.updateLocale("en", {
   weekStart: 1,
 })
-
 export type DatePickerProps = {
   // Start date in ISO format (YYYY-MM-DD)
   startDate?: string
@@ -41,7 +39,6 @@ export type DatePickerProps = {
   variant?: "range" | "single"
   value?: string
 }
-
 export const DatePicker = ({
   startDate = "",
   endDate = "",

@@ -1,13 +1,4 @@
 import {
-  XApp,
-  useMostVotedAppsInRound,
-  usePreviousAllocationRoundId,
-  useAppsEligibleInNextRound,
-  useXAppMetadata,
-} from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
-import {
   Card,
   HStack,
   Heading,
@@ -27,25 +18,29 @@ import { MdKeyboardArrowRight } from "react-icons/md"
 import { v4 as uuid } from "uuid"
 import NextLink from "next/link"
 
+import { usePreviousAllocationRoundId } from "../../api/contracts/xAllocations/hooks/usePreviousAllocationRoundId"
+import { XApp } from "../../api/contracts/xApps/getXApps"
+import { useAppsEligibleInNextRound } from "../../api/contracts/xApps/hooks/useAppsEligibleInNextRound"
+import { useMostVotedAppsInRound } from "../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
+import { useXAppMetadata } from "../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../api/ipfs/hooks/useIpfsImage"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
+
 type Props = {
   maxApps?: number
 }
-
 export const DashboardXApps = ({ maxApps = 4 }: Props) => {
   const { t } = useTranslation()
   // Apps are listed based on the votes they received in the previous round and are eligible in the next round
   const { data: previousRoundId } = usePreviousAllocationRoundId()
   const { data: allMostVotedXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
   const { data: eligibleAppsIds } = useAppsEligibleInNextRound()
-
   const xApps = useMemo(() => {
     return allMostVotedXApps?.filter(app => eligibleAppsIds?.includes(app.id)) ?? []
   }, [allMostVotedXApps, eligibleAppsIds])
-
   const slicedXApps = useMemo(() => xApps?.slice(0, maxApps), [xApps, maxApps])
-
   if (!slicedXApps?.length) return null
-
   return (
     <Card.Root variant="primary">
       <Card.Header pb={4}>

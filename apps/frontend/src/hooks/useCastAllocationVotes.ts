@@ -1,24 +1,24 @@
-import {
-  getAllocationVotersQueryKey,
-  getAllocationVotesQueryKey,
-  getHasVotedInRoundQueryKey,
-  getParticipatedInGovernanceQueryKey,
-  getUserVotesInRoundQueryKey,
-  getXAppRoundEarningsQueryKey,
-  getXAppsSharesQueryKey,
-} from "@/api"
-import { useCallback, useMemo } from "react"
-import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
+import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
+import { getParticipatedInGovernanceQueryKey } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
+import { getXAppRoundEarningsQueryKey } from "../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
+import { getAllocationVotersQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVoters"
+import { getAllocationVotesQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVotes"
+import { getHasVotedInRoundQueryKey } from "../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { getUserVotesInRoundQueryKey } from "../api/contracts/xApps/hooks/useUserVotesInRound"
+import { getXAppsSharesQueryKey } from "../api/contracts/xApps/hooks/useXAppShares"
+
 import { useBuildTransaction } from "./useBuildTransaction"
+
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 //Extra 15% to mitigate low gas estimation when voting on a large number of apps
 //Check https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1752523695772269
 const GAS_PADDING = 0.15
-
 /**
  * CastAllocationVotesProps is the type of the data to send to the castAllocationVotes hook
  * id is the id of the app to vote
@@ -28,16 +28,13 @@ export type CastAllocationVotesProps = {
   appId: string
   votes: number
 }[]
-
 type useCastAllocationVotesProps = {
   roundId: string
   onSuccess?: () => void
   onSuccessMessageTitle?: string
   transactionModalCustomUI?: TransactionCustomUI
 }
-
 const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
-
 /**
  * Hook to cast votes to one or more apps in a round
  * This hook will send a vote transaction to the blockchain and wait for the txConfirmation

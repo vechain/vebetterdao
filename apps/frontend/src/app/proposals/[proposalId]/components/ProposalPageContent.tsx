@@ -1,32 +1,32 @@
-import {
-  useIsDepositReached,
-  useProposalInteractionDates,
-  useProposalUserDeposit,
-  useUserSingleProposalVoteEvent,
-} from "@/api"
-import { PageBreadcrumb } from "@/app/components/PageBreadcrumb"
-import { useBreakpoints, useProposalEnrichedById } from "@/hooks"
-import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 import { Grid, GridItem, HStack, Icon, IconButton, Skeleton, Tabs, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilShareAlt } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
-import { useEffect, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ProposalInteractionCard } from "./ProposalInteractionCard"
-import { ProposalOverview } from "./ProposalOverview"
+import { useIsDepositReached } from "../../../../api/contracts/governance/hooks/useIsDepositReached"
+import { useProposalInteractionDates } from "../../../../api/contracts/governance/hooks/useProposalInteractionDates"
+import { useProposalUserDeposit } from "../../../../api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useProposalEnrichedById } from "../../../../hooks/proposals/common/useProposalEnrichedById"
+import { useBreakpoints } from "../../../../hooks/useBreakpoints"
+import { PageBreadcrumb } from "../../../components/PageBreadcrumb/PageBreadcrumb"
+
+import { ProposalInteractionCard } from "./ProposalInteractionCard/ProposalInteractionCard"
+import { ProposalOverview } from "./ProposalOverview/ProposalOverview"
+import { ProposalOverviewHeader } from "./ProposalOverviewHeader/ProposalOverviewHeader"
 import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
-import { ProposalTimeline } from "./ProposalTimeline"
+import { ProposalTimeline } from "./ProposalTimeline/ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
-import { ProposalOverviewHeader } from "./ProposalOverviewHeader"
-import { useWallet } from "@vechain/vechain-kit"
+
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string
   typeFilter?: "proposal" | "grant"
 }
-
 export const ProposalPageContent: React.FC<Props> = ({ proposalId, typeFilter }) => {
   // ==========================================
   // HOOKS

@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { MotionVStack } from "../../../components/MotionVStack"
 const AllocationRoundContent = dynamic(
   () => import("./AllocationRoundContent").then(mod => mod.AllocationRoundContent),
   {
@@ -22,12 +21,10 @@ type Props = {
     roundId: string
   }
 }
-
 export default function Round({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}`)
   }, [params.roundId])
-
   return (
     <MotionVStack>
       <AllocationRoundContent roundId={params.roundId} />

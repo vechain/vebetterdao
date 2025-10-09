@@ -1,18 +1,13 @@
 "use client"
-
 import { Stack, VStack, StackProps } from "@chakra-ui/react"
 import { motion, MotionProps } from "framer-motion"
-
 type MotionVStackProps = StackProps & MotionProps
-
 type Props = {
   children: React.ReactNode
   renderInnerStack?: boolean
 } & MotionVStackProps
-
 export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps }: Props) => {
   const MotionVStack = motion(VStack)
-
   if (renderInnerStack)
     return (
       <MotionVStack
@@ -36,7 +31,6 @@ export const MotionVStack = ({ children, renderInnerStack = true, ...otherProps 
         </Stack>
       </MotionVStack>
     )
-
   return (
     <MotionVStack
       w="full"

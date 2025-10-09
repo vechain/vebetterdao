@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from "next/server"
-import { AddressUtils } from "@/utils"
+import * as AddressUtils from "@repo/utils/AddressUtils"
 import { getServerSession } from "next-auth"
-import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
-import FreshdeskClient, { FreshdeskTicketBody } from "@/utils/FreshDeskClient"
+
+import { SubmitCreatorFormData } from "../../../../components/SubmitCreatorForm/SubmitCreatorForm"
 import { authOptions } from "../../auth/[...nextauth]/options"
+
 import { checkMissingFields, humanizeSummary } from "./utils"
 
+import FreshdeskClient, { FreshdeskTicketBody } from "@/utils/FreshDeskClient"
 // Handle POST request
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session) {
     return NextResponse.json({ error: "Access Denied" }, { status: 403 })
   }
-
   if (!process.env.FRESHDESK_API_TOKEN || !process.env.FRESHDESK_DOMAIN || !process.env.FRESHDESK_GROUP_ID) {
     console.warn("API: Missing environment variables for Freshdesk")
     return NextResponse.json({ error: "Missing environment variables" }, { status: 500 })
   }
-
   try {
     const data: Partial<SubmitCreatorFormData> = await request.json()
-
     // Validate required fields
     if (checkMissingFields(data)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
     if (!data?.securityActionVerification) {
       return NextResponse.json({ error: "Security action verification is required" }, { status: 400 })
     }
-
     const {
       appName,
       adminEmail,

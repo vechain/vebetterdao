@@ -1,26 +1,28 @@
-import {
-  useAllocationsRound,
-  useAppEndorsers,
-  useCurrentAllocationsRoundId,
-  useIsAppAdmin,
-  useIsAppModerator,
-} from "@/api"
-import { XAppStatus } from "@/types"
 import { Button, Card, Heading, HStack, Link, Skeleton, Stack, VStack, useDisclosure } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+
+import { useAllocationsRound } from "../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { useIsAppModerator } from "../../../../../api/contracts/xApps/hooks/useIsAppModerator"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../constants/AnalyticsEvents"
+import { DISCORD_URL } from "../../../../../constants/links"
+import { XAppStatus } from "../../../../../types/appDetails"
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { GenericAlert } from "../../../../components/Alert/GenericAlert"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { useWallet } from "@vechain/vechain-kit"
-import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
-import { EndorsementDetails } from "./EndorsementDetails"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import dayjs from "dayjs"
-import { GenericAlert } from "@/app/components/Alert"
-import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
-import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
+import { EndorsementDetails } from "./EndorsementDetails"
+import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
+
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 
 type Props = {
   endorsementScore?: string
@@ -28,7 +30,6 @@ type Props = {
   endorsementThreshold?: string
   isEndorsementStatusLoading: boolean
 }
-
 export const AppEndorsementInfoCard = ({
   endorsementScore,
   endorsementStatus,
@@ -38,7 +39,6 @@ export const AppEndorsementInfoCard = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
-
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

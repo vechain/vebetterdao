@@ -1,16 +1,20 @@
-import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
 import { VStack, Grid, GridItem, Heading, Text, Button, Image, Box } from "@chakra-ui/react"
-import { useForm } from "react-hook-form"
-import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
-import { useTranslation } from "react-i18next"
-import { useSubmitNewApp, useUploadAppMetadata } from "@/hooks"
 import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import { PreviewAppCard } from "./PreviewAppCard"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { ethers } from "ethers"
-import { useCreatorSubmission } from "@/api"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
+import { useSubmitNewApp } from "../../../../../hooks/useSubmitNewApp"
+import { CreateEditAppFormData, CreateEditAppForm } from "../../../../../components/CreateEditAppForm/CreateEditAppForm"
+import { useCreatorSubmission } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
+
+import { PreviewAppCard } from "./PreviewAppCard"
+
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 
 export const NewAppPageFormContent = () => {
   const router = useRouter()
@@ -18,13 +22,10 @@ export const NewAppPageFormContent = () => {
   const { account } = useWallet()
   const { data: submission } = useCreatorSubmission(account?.address ?? "")
   const { onMetadataUpload } = useUploadAppMetadata() //TODO: Add this to review modal before sending transaction
-
   const { data: hasCreatorNft } = useHasCreatorNFT(account?.address ?? "")
   const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
   const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
-
   const latestSubmission = submission?.submissions[0]
-
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
@@ -39,9 +40,7 @@ export const NewAppPageFormContent = () => {
         categories: [],
       },
     })
-
   const { errors } = formState
-
   useEffect(() => {
     //Users without Creator NFT should be redirected to home
     if (!!account?.address && !hasCreatorNft) router.push("/")

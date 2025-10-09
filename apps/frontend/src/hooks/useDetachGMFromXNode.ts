@@ -1,27 +1,25 @@
-import { useCallback, useMemo } from "react"
-import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { useBuildTransaction } from "./useBuildTransaction"
-import {
-  getLevelOfTokenQueryKey,
-  getNFTMetadataUriQueryKey,
-  getUserGMsQueryKey,
-  getUserNodesQueryKey,
-  useGetUserGMs,
-} from "@/api"
-import { buildClause } from "@/utils/buildClause"
+import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getUserGMsQueryKey, useGetUserGMs } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
+import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
+
+import { useBuildTransaction } from "./useBuildTransaction"
+
+import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
-
 type Props = {
   xNodeId: string
   onSuccess?: () => void
 }
-
 /**
  * Custom hook for detaching a Galaxy Member (GM) NFT from an XNode.
  *
@@ -37,12 +35,10 @@ type Props = {
 export const useDetachGMFromXNode = ({ xNodeId, onSuccess }: Props) => {
   const { data: userGms } = useGetUserGMs()
   const attachedGMTokenId = userGms?.find(gm => gm.nodeIdAttached === xNodeId)?.tokenId
-
   const clauseBuilder = useCallback(() => {
     if (!xNodeId) {
       throw new Error("XNode ID is not available")
     }
-
     if (!attachedGMTokenId) {
       throw new Error("GM NFT ID is not available")
     }

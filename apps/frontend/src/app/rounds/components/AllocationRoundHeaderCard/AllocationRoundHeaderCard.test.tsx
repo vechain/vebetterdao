@@ -1,19 +1,19 @@
-import { fireEvent, render, screen } from "../../../../../test"
-import { AllocationRoundHeaderCard } from "./AllocationRoundHeaderCard"
-import * as apiHooks from "../../../../api"
 import * as vechainKit from "@vechain/vechain-kit"
 import * as router from "next/navigation"
 import dayjs from "dayjs"
-import { APPS } from "../../../../../__mocks__/Apps"
 import { ethers } from "ethers"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
+import { APPS } from "../../../../../__mocks__/Apps"
+import * as apiHooks from "../../../../api"
+import { fireEvent, render, screen } from "../../../../../test"
+
+import { AllocationRoundHeaderCard } from "./AllocationRoundHeaderCard"
 const spyOnUserAllocationRound = vi.spyOn(apiHooks, "useAllocationsRound")
 const spyOnUserAllocationRoundState = vi.spyOn(apiHooks, "useAllocationsRoundState")
 const spyOnHasVotedInRound = vi.spyOn(apiHooks, "useHasVotedInRound")
 const spyOnUserVotesInRound = vi.spyOn(apiHooks, "useUserVotesInRound")
 const spyOnRoundXApps = vi.spyOn(apiHooks, "useRoundXApps")
-
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -22,7 +22,6 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 type TestPageRenderParams = {
   roundId: string
   shouldRenderCastButton: boolean
@@ -39,10 +38,8 @@ const testPageRender = async ({
   voteEndTimestamp,
 }: TestPageRenderParams) => {
   const isRoundFinished = dayjs().isAfter(voteEndTimestamp)
-
   await screen.findByTestId("allocation-round-header-card")
   await screen.findByTestId("allocation-round-breakdown-chart")
-
   await screen.findByText(`Round #${roundId}`)
   await screen.findByText(`Allocations`)
   if (shouldRenderVotesBox) {

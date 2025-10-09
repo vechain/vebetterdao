@@ -1,6 +1,8 @@
 import { expect, test } from "vitest"
-import Proposals from "./page"
+
 import { render, screen } from "../../../test"
+
+import Proposals from "./page"
 
 test("Proposals", async () => {
   render(<Proposals />)

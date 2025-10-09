@@ -1,8 +1,3 @@
-import { CustomModalContent } from "@/components"
-import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { ProposalType } from "@/hooks/proposals/grants/types"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { Box, CloseButton, Dialog, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { UilCheckCircle, UilLink } from "@iconscout/react-unicons"
 import { motion } from "framer-motion"
@@ -10,7 +5,14 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
 
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
+
 import shareIconAnimation from "./shareIconAnimation.json"
+
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { ProposalType } from "@/hooks/proposals/grants/types"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 
 const containerVariants = {
   initial: {
@@ -24,7 +26,6 @@ const containerVariants = {
     },
   },
 }
-
 export const ProposalShareModal = ({
   proposalId,
   proposalType,

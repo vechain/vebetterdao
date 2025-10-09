@@ -1,8 +1,10 @@
-import { ConnectWalletButton } from "@/components"
-import { EmptyState } from "@/components/ui/empty-state"
 import { Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaWallet } from "react-icons/fa"
+
+import { ConnectWalletButton } from "../../components/ConnectWalletButton/ConnectWalletButton"
+
+import { EmptyState } from "@/components/ui/empty-state"
 import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
 
 export const NoAccountActionCard = () => {

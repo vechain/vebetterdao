@@ -1,19 +1,23 @@
-import { getXAppMetadata, useXApps, getXAppMetadataQueryKey, useXAppsMetadataBaseUri } from "@/api"
-import { getIpfsImage, getIpfsImageQueryKey } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
-import { CastAllocationVoteFormData } from "@/store"
 import { Box, Flex, HStack, Image, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
 
+import { getXAppMetadata } from "../../../../api/contracts/xApps/getXAppMetadata"
+import { getXAppMetadataQueryKey } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useXApps } from "../../../../api/contracts/xApps/hooks/useXApps"
+import { useXAppsMetadataBaseUri } from "../../../../api/contracts/xApps/hooks/useXAppsMetadataBaseUri"
+import { getIpfsImage, getIpfsImageQueryKey } from "../../../../api/ipfs/hooks/useIpfsImage"
+import { CastAllocationVoteFormData } from "../../../../store/useCastAllocationFormStore"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
+
 export type AppVotesBreakdownProps = {
   votes: CastAllocationVoteFormData[]
   isLoading?: boolean
   minPercentageToNotMerge?: number
 }
-
 /**
  * This component displays the votes breakdown for the apps.
  * It shows the percentage of votes allocated to each app.
@@ -26,21 +30,17 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
   const { data: baseUri } = useXAppsMetadataBaseUri()
   const { data: xApps } = useXApps()
   const x2EarnApps = xApps?.allApps
-
   const totalVotes = (() => {
     const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
     if (rawValue >= 99.99 && rawValue < 100) return 100
     return rawValue
   })()
   const isCompletedAllocated = totalVotes >= 100
-
   const isOverDistributed = totalVotes > 100
-
   const getLinesColor = (index: number) => {
     if (isOverDistributed) return `orange.${index + 1}00`
     return `green.${index + 1}00`
   }
-
   const getLineWidth = (voteValue: number) => {
     if (isOverDistributed) return (voteValue / totalVotes) * 100
     return voteValue

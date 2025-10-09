@@ -15,14 +15,23 @@
       {
         "args": "all",
         "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
         "destructuredArrayIgnorePattern": "^_"
       }
     ],
-    "no-duplicate-imports": "error",
     "no-console": [
       "error",
       {
         "allow": ["error", "warn", "info"]
+      }
+    ],
+    "no-duplicate-imports": "error",
+    "import/no-named-as-default-member": 0,
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
+        "newlines-between": "always"
       }
     ]
   },

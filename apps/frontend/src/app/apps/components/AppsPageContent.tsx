@@ -1,14 +1,22 @@
-import { useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps, useGetUserNodes, useNodesEndorsedApps } from "@/api"
-import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box, HStack, useMediaQuery, Card } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
+
+import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
+import { useSortXappAlphabetically } from "../../../api/contracts/xApps/hooks/useSortXappAlphabetically"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { AppsBanner } from "../../../components/Banners/AppsBanner"
+import { JoinB3TRAppsBanner } from "../../../components/Banners/JoinB3TRAppsBanner"
+
+import { AppsDisclaimer } from "./AppsDisclaimer"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
-import { AllApps } from "./allApps/AllApps"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
-import { AppsDisclaimer } from "./AppsDisclaimer"
+import { AllApps } from "./allApps/AllApps"
+
 import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
-import { useWallet } from "@vechain/vechain-kit"
 
 export type XAppInformations = {
   key?: string
@@ -18,26 +26,21 @@ export type XAppInformations = {
   variant?: string
   status?: string
 }
-
 export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const [isAbove800] = useMediaQuery(["(min-width: 800px)"])
-
   const { data: nodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const { data: endorsedApps, isLoading: isEndorsedAppsLoading } = useNodesEndorsedApps(
     nodes?.allNodes?.map(node => node.nodeId) ?? [],
   )
   const isXNodeLoading = isUserNodesLoading || isEndorsedAppsLoading
   const isEndorsingApp = !!endorsedApps?.length && endorsedApps?.length > 0
-
   const { data: xAppsNotSorted, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
   const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
-
   const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
   const { data: xApps } = useSortXappAlphabetically(xAppsNotSorted)
-
   // New apps looking for endorsement
   const newLookingForEndorsementApps = xApps?.newLookingForEndorsement ?? []
   const hasLookingForEndorsementApps = newLookingForEndorsementApps.length > 0

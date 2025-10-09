@@ -1,6 +1,10 @@
 import { useState, useMemo } from "react"
-import { AllApps, useXAppsCategories } from "@/api"
+
+import { AllApps } from "../../../api/contracts/xApps/getXApps"
+import { useXAppsCategories } from "../../../api/contracts/xApps/hooks/useXAppsCategories"
+
 import { SortedAppsWithStatus } from "./useAppsSorting"
+
 import {
   FILTER_ACTIVE_APPS,
   FILTER_NEW_APPS,
@@ -8,7 +12,6 @@ import {
   FILTER_ENDORSEMENT_LOST,
   SortOption,
 } from "@/types/appDetails"
-
 /**
  * Hook for filtering apps by status, category, and search query
  * @param sortedApp Sorted app collections
@@ -19,9 +22,7 @@ import {
 export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: SortOption, searchQuery: string) {
   const [statusFilter, setStatusFilter] = useState(FILTER_ACTIVE_APPS)
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
-
   const { data: appCategories } = useXAppsCategories()
-
   const filteredAppsByStatus = useMemo(() => {
     let apps: AllApps[] = []
     switch (statusFilter) {
@@ -40,7 +41,6 @@ export function useAppsFiltering(sortedApp: SortedAppsWithStatus, sortOption: So
       default:
         apps = sortedApp[sortOption].currentActiveApps
     }
-
     // In case of search query change, filter again
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()

@@ -1,36 +1,32 @@
-import { useAllocationsRound, useAllocationsRoundState, useRoundReward } from "@/api"
 import { Box, Button, Icon, Image, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
-import { FaRegClock } from "react-icons/fa"
-import { useClaimReward } from "@/hooks/useClaimReward"
-import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { useWallet } from "@vechain/vechain-kit"
 import { Gift } from "iconoir-react"
+import { useCallback, useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
+import { FaRegClock } from "react-icons/fa"
+
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
+import { useAllocationsRoundState } from "../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useRoundReward } from "../../../api/contracts/rewards/hooks/useVotingRoundReward"
+
+import { useClaimReward } from "@/hooks/useClaimReward"
 
 type Props = {
   roundId: string
   hasVoted?: boolean
 }
-
 const DECIMAL_PLACES = 4
-
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
-
 export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const { data: roundState } = useAllocationsRoundState(roundId)
-
   const { account } = useWallet()
-
   const { data: allocationRound } = useAllocationsRound(roundId)
-
   const { data: roundReward, isLoading: isRoundRewardLoading } = useRoundReward(account?.address ?? "", roundId)
-
   const { t } = useTranslation()
-
   const { sendTransaction } = useClaimReward({
     roundId,
     transactionModalCustomUI: {
@@ -39,7 +35,6 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       error: { title: t("Error claiming rewards!") },
     },
   })
-
   const handleClaim = useCallback(() => {
     sendTransaction()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))

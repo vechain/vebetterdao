@@ -1,11 +1,13 @@
-import { useB3trAllowance } from "@/api"
-import { useB3trApprove, useGetB3trBalance } from "@/hooks"
 import { VStack, HStack, Button, Field, InputGroup, Input, NumberInput, Card, Heading, Text } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { WalletAddressInput } from "@/app/components/Input"
+
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useB3trApprove } from "../../../hooks/useB3trApprove"
+import { useB3trAllowance } from "../../../api/contracts/b3tr/hooks/useB3trAllowance"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
@@ -14,7 +16,6 @@ export const B3trAllowance = () => {
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
   const { t } = useTranslation()
-
   const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(
     account?.address ?? undefined,
     spender,
@@ -22,28 +23,21 @@ export const B3trAllowance = () => {
   const allowedAmountScaled = useMemo(() => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
-
   const { sendTransaction, isTransactionPending, status } = useB3trApprove({
     spender: spender ?? "",
     amount: amount ?? 0,
   })
-
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(spender)
   }, [spender])
-
   const isAmountValid = useMemo(() => {
     if (b3trBalance === undefined) return false
-
     return parseInt(amount) <= parseInt(b3trBalance?.scaled)
   }, [amount, b3trBalance])
-
   const isFormValid = useMemo(() => isValidAddress && isAmountValid, [isValidAddress, isAmountValid])
-
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
-
       if (!isValidAddress) return
       sendTransaction()
     },

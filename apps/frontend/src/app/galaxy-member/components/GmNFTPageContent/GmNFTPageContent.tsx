@@ -11,16 +11,20 @@ import {
   Avatar,
   Badge,
 } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+import { useState } from "react"
+
+import { UserNode, useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
-import { UserNode, useGetUserGMs, useGetUserNodes } from "@/api"
-import { useTranslation } from "react-i18next"
-import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
-import { useState } from "react"
-import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+
 import { Tooltip } from "@/components/ui/tooltip"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 
 export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()

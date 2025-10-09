@@ -1,4 +1,3 @@
-import { CustomModalContent } from "@/components"
 import {
   Button,
   Field,
@@ -16,14 +15,14 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { AdminAppForm } from "../../../AdminAppPageContent"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { WalletAddressInput } from "@/app/components/Input"
 
+import { AdminAppForm } from "../../../AdminAppPageContent"
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }
-
 export const AddModeratorButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onClose, onOpen } = useDisclosure()
@@ -40,12 +39,10 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
     },
     [addressForm, editAdminForm, onClose],
   )
-
   const handleClose = useCallback(() => {
     addressForm.reset()
     onClose()
   }, [addressForm, onClose])
-
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && handleClose()}>

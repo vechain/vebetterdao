@@ -1,19 +1,20 @@
-import NewProposalSupport from "./page"
-import FormProposalLayout from "../layout"
-import * as store from "@/store"
 import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
-import * as apiHooks from "@/api"
-import * as hooks from "@/hooks"
-import { render, waitFor } from "../../../../../../test"
 import { vi } from "vitest"
 import { fireEvent, screen } from "@testing-library/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
+import { render, waitFor } from "../../../../../../test"
+import FormProposalLayout from "../layout"
+
+import NewProposalSupport from "./page"
+
+import * as hooks from "@/hooks"
+import * as apiHooks from "@/api"
+import * as store from "@/store"
 /**
  * Check for the existence of the functions listed in the dev contracts
  */
-
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -22,24 +23,18 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/support")
 const spyOnVot3Balance = vi.spyOn(hooks, "useGetVot3Balance")
 const spyOnThreshold = vi.spyOn(apiHooks, "useDepositThreshold")
-
 const compactFormatter = getCompactFormatter(2)
-
 const vot3Amount = "100"
 const threshold = "1000"
-
 describe("NewProposalSupport", async () => {
   beforeEach(() => {
     // vi.clearAllMocks()
     mockRouterPush.mockClear()
     spyOnUseProposalFormStore.mockClear()
-
     //@ts-ignore
     spyOnVot3Balance.mockReturnValue({
       data: {

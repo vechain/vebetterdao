@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { B3TRIcon, CustomModalContent, FeatureFlagWrapper } from "@/components"
 import {
   Button,
   Box,
@@ -19,10 +18,18 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { getLevelGradient, useNextLevelImage } from "@/api"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
-import { gmNfts } from "@/constants/gmNfts"
+
+import { B3TRIcon } from "../../../components/Icons/B3TRIcon"
+import { CustomModalContent } from "../../../components/CustomModalContent"
+import { FeatureFlagWrapper } from "../../../components/FeatureFlagWrapper"
+import { getLevelGradient } from "../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { useNextLevelImage } from "../../../api/contracts/galaxyMember/hooks/useNextLevelImage"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import { FeatureFlag } from "../../../constants/featureFlag"
+
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { gmNfts } from "@/constants/gmNfts"
+
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
   gmLevel: string

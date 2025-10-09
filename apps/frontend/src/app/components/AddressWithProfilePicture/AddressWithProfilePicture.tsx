@@ -1,5 +1,3 @@
-import { AddressIcon } from "@/components/AddressIcon"
-import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { HStack, LinkBox, Text } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
@@ -7,11 +5,13 @@ import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+import { AddressIcon } from "@/components/AddressIcon"
+
 type Props = {
   address: string
   truncateAddress?: boolean
 }
-
 export const AddressWithProfilePicture = ({ address, truncateAddress = true }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -19,7 +19,6 @@ export const AddressWithProfilePicture = ({ address, truncateAddress = true }: P
   const { isMobile } = useBreakpoints()
   const { data: vechainDomain } = useVechainDomain(address)
   const isConnectedUser = compareAddresses(address, account?.address ?? "")
-
   const digitsBeforeEllipsis = truncateAddress ? (isMobile ? 8 : 10) : 25
   const digitsAfterEllipsis = truncateAddress ? (isMobile ? 6 : 4) : 25
   const displayAddress = truncateAddress
@@ -27,7 +26,6 @@ export const AddressWithProfilePicture = ({ address, truncateAddress = true }: P
       ? humanDomain(vechainDomain.domain, digitsBeforeEllipsis, digitsAfterEllipsis)
       : humanAddress(address ?? "", digitsBeforeEllipsis, digitsAfterEllipsis)
     : vechainDomain?.domain || address
-
   const handleClick = (e: React.MouseEvent<any>) => {
     e.stopPropagation()
     router.push(`/profile/${address}`)

@@ -1,24 +1,22 @@
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 import { VStack, Image, Text, Button } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { AnalyticsUtils } from "@/utils"
+
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
 
 type Props = {
   isB3TRToVOT3: boolean
   setIsB3TRToVOT3: (isB3TRToVOT3: boolean) => void
 }
-
 export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }) => {
   const { t } = useTranslation()
   const bgColor = useMemo(() => {
     return isB3TRToVOT3 ? "banner.green" : "banner.blue"
   }, [isB3TRToVOT3])
-
   const title = useMemo(() => {
     return isB3TRToVOT3 ? t("Turn your B3TR into VOT3") : t("Turn your VOT3 into B3TR")
   }, [isB3TRToVOT3, t])
-
   const description = useMemo(() => {
     return isB3TRToVOT3 ? (
       <Text textStyle={{ base: "sm", md: "md" }}>
@@ -32,15 +30,12 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       </Text>
     )
   }, [isB3TRToVOT3, t])
-
   const buttonText = useMemo(() => {
     return isB3TRToVOT3 ? t("Get VOT3") : t("Get B3TR")
   }, [isB3TRToVOT3, t])
-
   const handleButtonClick = useCallback(() => {
     setIsB3TRToVOT3(isB3TRToVOT3)
   }, [isB3TRToVOT3, setIsB3TRToVOT3])
-
   const buttonClickProperties = (isB3TRToVOT3: boolean) => {
     const action = isB3TRToVOT3 ? ButtonClickProperties.GET_VOT3 : ButtonClickProperties.GET_B3TR
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(action))

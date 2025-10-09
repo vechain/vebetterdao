@@ -1,11 +1,14 @@
-import { useAppsEligibleInNextRound, useXApps } from "@/api"
-import { useSetVotingEligibility } from "@/hooks"
 import { VStack, Field, Heading, Card, Switch, HStack, Separator, Text, Button, List } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { Check } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
-import { BaseModal } from "@/components/BaseModal"
 import { useTranslation, Trans } from "react-i18next"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+
+import { useSetVotingEligibility } from "../../../hooks/useSetVotingEligibility"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useAppsEligibleInNextRound } from "../../../api/contracts/xApps/hooks/useAppsEligibleInNextRound"
+
+import { BaseModal } from "@/components/BaseModal"
 
 // Types
 interface AppEligibilityData {
@@ -13,19 +16,16 @@ interface AppEligibilityData {
   name: string
   eligible: boolean
 }
-
 interface SetVotingEligibilityData {
   appId: string
   desiredEligibility: boolean
   appName: string
 }
-
 interface AppEligibilityProps {
   app: AppEligibilityData
   isLoading: boolean
   onEligibilityChange: (id: string) => void
 }
-
 // Components
 const AppEligibilitySwitch = ({ app, isLoading, onEligibilityChange }: AppEligibilityProps) => {
   return (

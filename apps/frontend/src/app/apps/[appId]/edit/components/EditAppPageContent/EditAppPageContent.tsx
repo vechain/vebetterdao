@@ -11,40 +11,41 @@ import {
   useDisclosure,
   Heading,
 } from "@chakra-ui/react"
-import { URL_REGEX } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { useCallback, useEffect } from "react"
 import { UilCheck } from "@iconscout/react-unicons"
+import { useParams, useRouter } from "next/navigation"
+import { useWallet } from "@vechain/vechain-kit"
+import Lottie from "react-lottie"
+
+import { URL_REGEX } from "../../../../../../constants/url"
+import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
+import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+import { useCurrentAppLogo } from "../../../hooks/useCurrentAppLogo"
+import { useCurrentAppBanner } from "../../../hooks/useCurrentAppBanner"
+import { useCurrentAppVeWorldBanner } from "../../../hooks/useCurrentAppVeWorldBanner"
+import { useCurrentAppVeWorldFeaturedImage } from "../../../hooks/useCurrentAppVeWorldFeaturedImage"
+import { useCurrentAppRole } from "../../../hooks/useCurrentAppRole"
+import { useUpdateAppDetails } from "../../../../../../hooks/useUpdateAppDetails"
+import { useUploadAppMetadata } from "../../../../../../hooks/useUploadAppMetadata"
+import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
+
 import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
-import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
-import {
-  useCurrentAppBanner,
-  useCurrentAppLogo,
-  useCurrentAppMetadata,
-  useCurrentAppRole,
-  useCurrentAppVeWorldBanner,
-  useCurrentAppVeWorldFeaturedImage,
-} from "../../../hooks"
+import { EditAppCategories } from "./components/EditAppCategories/EditAppCategories"
 import { EditAppBanner } from "./components/EditAppBanner"
-import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
 import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { useAccountPermissions } from "@/api/contracts/account"
-import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
 import { EditVeWorldFeatureImage } from "./components/EditVeWorldFeatureImage"
-import { EditAppCategories } from "./components/EditAppCategories"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { StepModal } from "@/components/StepModal/StepModal"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import Lottie from "react-lottie"
-import { DEPRECATED_IDS } from "@/types/appDetails"
 
+import { DEPRECATED_IDS } from "@/types/appDetails"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { StepModal } from "@/components/StepModal/StepModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type EditAppForm = {
   name: string
   external_url: string

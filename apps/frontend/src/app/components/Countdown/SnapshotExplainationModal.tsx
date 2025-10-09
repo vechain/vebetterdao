@@ -5,7 +5,6 @@ interface Props {
   isOpen: boolean
   onClose: () => void
 }
-
 export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
   const steps = [
     {
@@ -21,7 +20,6 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
       image: "/assets/icons/claim-b3tr-icon.webp",
     },
   ]
-
   return (
     <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"lg"}>
       <Portal>
@@ -44,7 +42,6 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
                 <Text textStyle={["sm", "lg"]}>
                   {t("Swap your B3TR for VOT3 before the snapshot to increase your voting power.")}
                 </Text>
-
                 <VStack
                   w={"full"}
                   h={"full"}

@@ -1,8 +1,9 @@
-import { render } from "../../../../../test"
-import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
-import * as apiHooks from "../../../../api"
 import * as chakra from "@chakra-ui/react"
 
+import { render } from "../../../../../test"
+import * as apiHooks from "../../../../api"
+
+import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 vi.mock("@chakra-ui/react", async () => {
   const actual = await vi.importActual("@chakra-ui/react")
   return {
@@ -10,7 +11,6 @@ vi.mock("@chakra-ui/react", async () => {
     useMediaQuery: vi.fn(() => [true]),
   }
 })
-
 const spyOnUseAllocationAmount = vi.spyOn(apiHooks, "useAllocationAmount")
 describe("AllocationRoundBreakdownChart", () => {
   it("mobile - loading - should render correctly", async () => {
@@ -21,7 +21,6 @@ describe("AllocationRoundBreakdownChart", () => {
     await screen.findByTestId("allocation-round-breakdown-chart")
     await screen.findByText("Total allocation to distribute") //should render the loading text
   }) //loading - should render correctly
-
   it("desktop - not loading with data - should render correctly", async () => {
     vi.spyOn(chakra, "useMediaQuery").mockReturnValueOnce([true])
     //@ts-ignore

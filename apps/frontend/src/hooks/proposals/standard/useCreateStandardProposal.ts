@@ -1,23 +1,22 @@
-import { useCallback, useMemo } from "react"
-import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
-import { ethers } from "ethers"
-import { B3TRGovernor__factory, VOT3__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
-import {
-  getProposalsEventsQueryKey,
-  getProposalClaimableUserDepositsQueryKey,
-  getAllProposalsStateQueryKey,
-} from "@/api"
-import { useBuildTransaction, getEventsKey } from "@/hooks"
+import { B3TRGovernor__factory, VOT3__factory } from "@vechain/vebetterdao-contracts"
+import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useCallback, useMemo } from "react"
+
+import { getAllProposalsStateQueryKey } from "../../../api/contracts/governance/hooks/useAllProposalsState"
+import { getProposalClaimableUserDepositsQueryKey } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { getProposalsEventsQueryKey } from "../../../api/contracts/governance/hooks/useProposalsEvents"
+import { useBuildTransaction } from "../../useBuildTransaction"
+import { getEventsKey } from "../../useEvents"
 import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
+
 import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
-
 const vot3Interface = VOT3__factory.createInterface()
-
 /**
  * Represent a single action to be exeuted in case the proposal is successful
  * This is equal to a smart contract call to the given function with the given params
@@ -33,12 +32,10 @@ export type useCreateStandardProposalProps = {
   onSuccess?: () => void
   transactionModalCustomUI?: TransactionCustomUI
 }
-
 export type ReducedActions = {
   contractsAddress: string[]
   calldatas: string[]
 }
-
 type BuildClausesProps = {
   description: string
   actions: ProposalAction[]

@@ -1,28 +1,25 @@
-import {
-  getHasVotedQueryKey,
-  getIsProposalQuorumReachedQueryKey,
-  getProposalsEventsQueryKey,
-  getProposalVotesQueryKey,
-  getUserProposalsVoteEventsQueryKey,
-} from "@/api"
-import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { getHasVotedQueryKey } from "../api/contracts/governance/hooks/useHasVotedInProposals"
+import { getIsProposalQuorumReachedQueryKey } from "../api/contracts/governance/hooks/useIsProposalQuorumReached"
+import { getProposalsEventsQueryKey } from "../api/contracts/governance/hooks/useProposalsEvents"
+import { getUserProposalsVoteEventsQueryKey } from "../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { getProposalVotesQueryKey } from "../api/indexer/proposals/useProposalVotes"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 
-const GovernorInterface = B3TRGovernor__factory.createInterface()
+import { buildClause } from "@/utils/buildClause"
 
+const GovernorInterface = B3TRGovernor__factory.createInterface()
 type ClausesProps = {
   proposalId: string
   vote: string
   comment: string
 }
-
 type Props = { proposalId: string; onSuccess?: () => void }
-
 /**
  * Custom hook for casting a vote on a proposal.
  *
@@ -43,7 +40,6 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
       }),
     ]
   }, [])
-
   const refetchQueryKeys = useMemo(
     () => [
       getHasVotedQueryKey([proposalId], account?.address ?? undefined),

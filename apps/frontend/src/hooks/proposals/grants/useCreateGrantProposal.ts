@@ -1,27 +1,26 @@
-import {
-  getAllProposalsStateQueryKey,
-  getProposalClaimableUserDepositsQueryKey,
-  getProposalsEventsQueryKey,
-} from "@/api"
-import { useBuildTransaction, getEventsKey } from "@/hooks"
-import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, Treasury__factory } from "@vechain/vebetterdao-contracts"
 import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { getAllProposalsStateQueryKey } from "../../../api/contracts/governance/hooks/useAllProposalsState"
+import { getProposalClaimableUserDepositsQueryKey } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { getProposalsEventsQueryKey } from "../../../api/contracts/governance/hooks/useProposalsEvents"
+import { useBuildTransaction } from "../../useBuildTransaction"
+import { getEventsKey } from "../../useEvents"
+import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
+
 import { GrantFormData } from "./types"
+
+import { buildClause } from "@/utils/buildClause"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const governorContractAddress = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
-
 const treasuryAddress = getConfig().treasuryContractAddress
 const treasuryInterface = Treasury__factory.createInterface()
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
-
 type BuildClausesProps = {
   metadataIpfsCID: string
   milestonesIpfsCID: string
@@ -37,7 +36,6 @@ export type useCreateGrantProposalProps = {
   onSuccess?: () => void
   transactionModalCustomUI?: TransactionCustomUI
 }
-
 /**
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
  * @param description The description of the proposal

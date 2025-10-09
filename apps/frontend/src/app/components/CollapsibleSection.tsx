@@ -1,5 +1,6 @@
-import { useBreakpoints } from "@/hooks"
 import { Accordion, Heading, HStack, Separator, VStack } from "@chakra-ui/react"
+
+import { useBreakpoints } from "../../hooks/useBreakpoints"
 
 export const CollapsibleSection = ({
   title,
@@ -13,7 +14,6 @@ export const CollapsibleSection = ({
   showSeparator?: boolean
 }) => {
   const { isMobile } = useBreakpoints()
-
   if (!isMobile) {
     return (
       <>
@@ -27,7 +27,6 @@ export const CollapsibleSection = ({
       </>
     )
   }
-
   return (
     <>
       <Accordion.Root w="full" multiple defaultValue={defaultOpen ? [`section-${title}`] : []}>

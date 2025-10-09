@@ -1,17 +1,16 @@
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { Button, Icon } from "@chakra-ui/react"
 import { UilArrowRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+
 export const CreatorApplicationRejectedBanner = () => {
   const { t } = useTranslation()
-
   const router = useRouter()
   const navigateToCreatorForm = () => {
     return router.push("/apps/creator/new")
   }
-
   return (
     <GenericBanner
       variant="warning"

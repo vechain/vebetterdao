@@ -1,10 +1,17 @@
-import { useIsGrantRejected, useProposalInteractionDates } from "@/api"
-import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks"
 import { Card, Circle, Heading, HStack, Icon, Steps, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
+
+import {
+  GrantProposalEnriched,
+  ProposalEnriched,
+  ProposalState,
+  ProposalType,
+} from "../../../../../hooks/proposals/grants/types"
+import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
+import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 
 type CustomState = ProposalState | "Created"
 type TimelineStep = {
@@ -18,31 +25,23 @@ type Props = {
 //TODO: This should be fixed by the smart contract logic
 //This is a temporary fix to show the correct timeline for the proposals
 const maxVotingRoundCompleted = 48
-
 export const ProposalTimeline = ({ proposal }: Props) => {
   const { supportEndDate, votingEndDate, hasValidDates, isLoading } = useProposalInteractionDates(proposal?.id ?? "")
   const { data: isGrantRejected } = useIsGrantRejected(proposal?.id ?? "")
   const proposalCreatedAt = proposal?.createdAt ?? 0
   const proposalVotingRoundId = proposal?.votingRoundId ?? 1
   const isGrant = proposal?.type === ProposalType.Grant
-
   ///Scenario 1: Grant completed
   // support -> approval -> in development -> completed
-
   // Scenario 2: Grant defeated
   // support -> approval -> Cancelled
-
   // Scenario 4: Grant cancelled
   // support -> cancelled
-
   // Scenario 5: Grant deposit not met
   // support -> cancelled
-
   //==============================================================
-
   // Scenario 3: Grant in development
   // support -> approval -> in development
-
   // Scenario 6: Grant rejected
   // support -> approval -> in development -> cancelled
 

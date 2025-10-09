@@ -1,7 +1,6 @@
 const PREFIX = "0x"
 const PREFIX_REGEX = /^0[xX]/
 const HEX_REGEX = /^(0[xX])?[a-fA-F0-9]+$/
-
 /**
  * Returns the provied hex string with the hex prefix removed.
  * If the prefix doesn't exist the hex is returned unmodified
@@ -13,7 +12,6 @@ export const removePrefix = (hex: string): string => {
   validate(hex)
   return hex.replace(PREFIX_REGEX, "")
 }
-
 /**
  * Returns the provided hex string with the hex prefix added.
  * If the prefix already exists the string is returned unmodified.
@@ -26,7 +24,6 @@ export const addPrefix = (hex: string): string => {
   validate(hex)
   return PREFIX_REGEX.test(hex) ? hex.replace(PREFIX_REGEX, PREFIX) : `${PREFIX}${hex}`
 }
-
 /**
  * Validate the hex string. Throws an Error if not valid
  * @param hex - the input hex string
@@ -35,7 +32,6 @@ export const addPrefix = (hex: string): string => {
 export const validate = (hex: string) => {
   if (!isValid(hex)) throw Error(`Provided hex value is not valid ${hex}`)
 }
-
 /**
  * Check if input string is valid
  * @param hex - the input hex string
@@ -44,7 +40,6 @@ export const validate = (hex: string) => {
 export const isValid = (hex: string): boolean => {
   return HEX_REGEX.test(hex)
 }
-
 /**
  * Generate a random hex string of the defined length
  * @param size - the length of the random hex output

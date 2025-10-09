@@ -1,17 +1,19 @@
 /* eslint-disable react/jsx-no-literals */
-import { useXApps, UserB3trActions } from "@/api"
 import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
-import { BaseModal } from "@/components/BaseModal"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
+
+import { UserB3trActions } from "../../../../../api/indexer/actions/useUsersB3trActions"
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+
+import { BaseModal } from "@/components/BaseModal"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 const compactFormatter = getCompactFormatter(2)
-
 type Props = {
   actionModal: UseDisclosureProps
   proof?: UserB3trActions[number]["proof"]
@@ -21,15 +23,12 @@ type Props = {
   b3trAmount?: number
   txId?: string
 }
-
 export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNumber, b3trAmount, txId }: Props) => {
   const { data: apps } = useXApps()
   const { t } = useTranslation()
-
   const app = useMemo(() => {
     return apps?.allApps.find(app => app.id === (appId ?? ""))
   }, [apps, appId])
-
   const isTweet = useMemo(() => {
     try {
       const url = new URL(proof?.proof?.link ?? "")
@@ -39,7 +38,6 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
       return false
     }
   }, [proof?.proof?.link])
-
   const tweetId = useMemo(() => {
     if (isTweet) {
       const match = proof?.proof?.link?.match(/\/status\/(\d+)/)

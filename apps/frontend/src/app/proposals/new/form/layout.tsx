@@ -1,11 +1,10 @@
 "use client"
-
-import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { MotionVStack } from "../../../../components/MotionVStack"
 const ClientFormLayoutContent = dynamic(
   () => import("./components/ClientFormLayoutContent").then(mod => mod.ClientFormLayoutContent),
   {
@@ -17,7 +16,6 @@ const ClientFormLayoutContent = dynamic(
     ),
   },
 )
-
 type Props = {
   children: React.ReactNode
 }
@@ -25,7 +23,6 @@ export default function FormProposalLayout({ children }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage("NewProposal/preview")
   }, [])
-
   return (
     <MotionVStack>
       <ClientFormLayoutContent>{children}</ClientFormLayoutContent>

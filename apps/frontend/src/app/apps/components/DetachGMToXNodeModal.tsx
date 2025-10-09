@@ -1,13 +1,15 @@
-import { CustomModalContent } from "@/components"
-import { useDetachGMFromXNode } from "@/hooks"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { Dialog, VStack, Heading, Text, Button, HStack, CloseButton } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { CustomModalContent } from "../../../components/CustomModalContent"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import { useDetachGMFromXNode } from "../../../hooks/useDetachGMFromXNode"
 import { useGetLevelAfterDetachingNode } from "../hooks/useGetLevelAfterDetachingNode"
+
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
   gmId: string
@@ -16,27 +18,21 @@ type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
 export const DetachGMToXNodeModal = ({ gmId, gmLevel, xNodeId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-
   const { data: levelAfterDetach } = useGetLevelAfterDetachingNode(gmId)
-
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
-
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
     xNodeId,
     onSuccess: handleClose,
   })
-
   const handleDetachment = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHED_GM_FROM_XNODE))
     detachGMFromXNodeMutation.sendTransaction()
   }, [detachGMFromXNodeMutation])
-
   return (
     <Dialog.Root open={isOpen && !isTxModalOpen} onOpenChange={details => !details.open && handleClose()}>
       <CustomModalContent p={{ base: 3, md: 5 }}>

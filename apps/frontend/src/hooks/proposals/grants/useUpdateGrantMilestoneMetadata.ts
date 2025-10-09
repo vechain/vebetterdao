@@ -1,14 +1,14 @@
 "use client"
-
-import { useBuildTransaction } from "@/hooks/useBuildTransaction"
-import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 
+import { getGrantProposalMetadataQueryKey } from "./useStandardOrGrantProposalDetails"
+
+import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { buildClause } from "@/utils/buildClause"
+
 const grantsManagerContractAddress = getConfig().grantsManagerContractAddress
 const grantsManagerInterface = GrantsManager__factory.createInterface()
-
-import { getGrantProposalMetadataQueryKey } from "./useStandardOrGrantProposalDetails"
 
 export const useUpdateGrantMilestoneMetadata = (proposalId: string) => {
   return useBuildTransaction<string>({

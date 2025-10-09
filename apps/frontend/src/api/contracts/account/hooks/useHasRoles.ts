@@ -1,18 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+
 import { getBytes32Role } from "./useHasRole"
 
 const abi = AccessControl__factory.abi
 const method = "hasRole" as const
-
 const hasRolesQueryKey = (roles: string[], contractAddress: string, address: string) => [
   "hasRoles",
   contractAddress,
   address,
   roles,
 ]
-
 /**
  *  Hook to check if the user has a list of specific roles
  * @param roles  the roles to check (will be converted to bytes32)
@@ -22,7 +21,6 @@ const hasRolesQueryKey = (roles: string[], contractAddress: string, address: str
  */
 export const useHasRoles = (roles: string[], contractAddress: string, address: string) => {
   const thor = useThor()
-
   return useQuery({
     queryKey: hasRolesQueryKey(roles, contractAddress, address),
     queryFn: async () => {

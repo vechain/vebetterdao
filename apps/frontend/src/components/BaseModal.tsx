@@ -1,4 +1,5 @@
 import { useMediaQuery, Dialog, Portal, CloseButton } from "@chakra-ui/react"
+
 import { BaseBottomSheet } from "./BaseBottomSheet"
 
 type Props = {
@@ -26,7 +27,6 @@ export const BaseModal = ({
   isCloseable = true,
 }: Props) => {
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
-
   if (isDesktop)
     return (
       <Dialog.Root

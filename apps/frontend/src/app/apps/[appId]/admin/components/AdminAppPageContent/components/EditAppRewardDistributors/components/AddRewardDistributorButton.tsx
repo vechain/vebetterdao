@@ -1,18 +1,18 @@
-import { CustomModalContent } from "@/components"
 import { Button, Field, HStack, Heading, Dialog, Text, VStack, useDisclosure, Icon } from "@chakra-ui/react"
 import { UilFileContract, UilPlus } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { useForm, UseFormSetValue, UseFormGetValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../../AdminAppPageContent"
-import { WalletAddressInput } from "@/app/components/Input"
+import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
 
 type Props = {
   getValues: UseFormGetValues<AdminAppForm>
   setValue: UseFormSetValue<AdminAppForm>
 }
-
 export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onClose, onOpen } = useDisclosure()
@@ -25,24 +25,20 @@ export const AddRewardDistributorButton = ({ getValues, setValue }: Props) => {
     distributorAddress: string
     distributorDomain: string
   }>()
-
   const distributorAddress = watch("distributorAddress")
   const distributorDomain = watch("distributorDomain")
-
   const handleAddressResolved = useCallback(
     (address?: string) => {
       setAddressFormValue("distributorAddress", address ?? "")
     },
     [setAddressFormValue],
   )
-
   const handleDomainResolved = useCallback(
     (domain?: string) => {
       setAddressFormValue("distributorDomain", domain ?? "")
     },
     [setAddressFormValue],
   )
-
   const onSubmit = useCallback(
     (data: { distributorAddress: string }) => {
       setValue("distributors", [...getValues("distributors"), data.distributorAddress])

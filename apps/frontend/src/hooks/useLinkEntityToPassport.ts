@@ -1,36 +1,34 @@
-import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
-import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
-import { buildClause } from "@/utils/buildClause"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
-import { getPendingLinkingsQueryKey } from "@/api"
+import { useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { getPendingLinkingsQueryKey } from "../api/contracts/vePassport/hooks/useGetPendingLinkings"
+
+import { useBuildTransaction } from "./useBuildTransaction"
+
+import { buildClause } from "@/utils/buildClause"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress
 const method = "linkEntityToPassport"
-
 type UseLinkEntityToPassportProps = {
   onSuccess?: () => void
 }
-
 type ClausesParams = {
   passport: string
 }
-
 /**
  * Provides a React hook to link an entity to a passport using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
  */
 export const useLinkEntityToPassport = ({ onSuccess }: UseLinkEntityToPassportProps) => {
   const { account } = useWallet()
-
   const clauseBuilder = useCallback(
     ({ passport }: ClausesParams) => {
       if (!account?.address) throw new Error("Account is required")
       if (!isValid(passport)) throw new Error("Invalid passport address")
-
       return [
         buildClause({
           to: passportContractAddress,
@@ -43,7 +41,6 @@ export const useLinkEntityToPassport = ({ onSuccess }: UseLinkEntityToPassportPr
     },
     [account?.address],
   )
-
   const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account?.address)], [account?.address])
 
   return useBuildTransaction<ClausesParams>({

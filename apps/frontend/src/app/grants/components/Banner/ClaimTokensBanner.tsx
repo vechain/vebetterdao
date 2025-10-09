@@ -1,6 +1,3 @@
-import { useProposalClaimableUserDeposits } from "@/api/contracts/governance/hooks"
-import VOT3Icon from "@/components/Icons/svg/vot3.svg"
-import { useWithdrawDeposits } from "@/hooks"
 import { Box, Button, Card, Heading, Stack, Icon, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -8,22 +5,23 @@ import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter(2)
+import { useWithdrawDeposits } from "../../../../hooks/useWithdrawDeposits"
+import { useProposalClaimableUserDeposits } from "../../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 
+import VOT3Icon from "@/components/Icons/svg/vot3.svg"
+
+const compactFormatter = getCompactFormatter(2)
 export const ClaimTokensBanner = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const { data: { totalClaimableDeposits, claimableDeposits } = { totalClaimableDeposits: 0, claimableDeposits: [] } } =
     useProposalClaimableUserDeposits(account?.address ?? "")
-
   const { sendTransaction } = useWithdrawDeposits({
     proposalDeposits: claimableDeposits,
   })
-
   const handleClaim = useCallback(() => {
     sendTransaction()
   }, [sendTransaction])
-
   const formattedDeposits = useMemo(() => {
     return Number(ethers.formatEther(totalClaimableDeposits))
   }, [totalClaimableDeposits])
@@ -41,7 +39,6 @@ export const ClaimTokensBanner = () => {
           scale={{ base: "0.8", md: "1" }}
           bgRepeat="no-repeat"
         />
-
         <Stack
           direction={{ base: "column", md: "row" }}
           align={{ base: "left", md: "center" }}

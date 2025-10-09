@@ -1,15 +1,16 @@
-import { useCurrentAllocationsRoundId, useUserActionOverview, useUserActionLeaderboard } from "@/api"
-
 import { Card, Separator, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack, Link } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-
 import { useWallet } from "@vechain/vechain-kit"
-
+import NextLink from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
-import NextLink from "next/link"
+
+import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
+import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
+import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+
+import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 
 export const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
@@ -18,31 +19,24 @@ export const MockLeaderboard = [
   { position: 4, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 70 },
   { position: 5, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 60 },
 ]
-
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
-
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
-
   const isLastRound = selectedRoundId === roundId
   const isFirstRound = selectedRoundId === "1"
-
   useEffect(() => {
     if (roundId && !selectedRoundId) {
       setSelectedRoundId(roundId)
     }
   }, [roundId, selectedRoundId])
-
   const userRoundOverview = useUserActionOverview(account?.address ?? "", {
     roundId: selectedRoundId ? Number(selectedRoundId) : undefined,
   })
-
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
-
   const yourRanking = useMemo(() => {
     if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined

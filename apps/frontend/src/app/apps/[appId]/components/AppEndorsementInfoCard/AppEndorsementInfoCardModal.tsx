@@ -1,11 +1,7 @@
-import { useAppEndorsers, useAppEndorsementStatus, useIsAppAdmin, UserNode } from "@/api"
-import { EndorsersItem } from "./EndorsersItem"
-import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { normalize } from "@repo/utils/HexUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
 import { UilTrash } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { normalize } from "@repo/utils/HexUtils"
 import {
   VStack,
   HStack,
@@ -22,23 +18,30 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation, Trans } from "react-i18next"
 import { useMemo, useState } from "react"
-import { BaseModal } from "@/components/BaseModal"
 import { useWallet } from "@vechain/vechain-kit"
+
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+
+import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
+import { EndorsersItem } from "./EndorsersItem"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
 
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { BaseModal } from "@/components/BaseModal"
 type Props = {
   isOpen: boolean
   onClose: () => void
   appId: string
   userNode?: UserNode
 }
-
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userNode }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })

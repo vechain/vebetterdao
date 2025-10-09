@@ -1,16 +1,15 @@
-import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { getXApps, getXAppsQueryKey } from "@/api"
-
 import { getConfig } from "@repo/config"
-
+import { useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+
+import { getXApps } from "../getXApps"
+
+import { getXAppsQueryKey } from "./useXApps"
 
 const abi = X2EarnApps__factory.abi
 const contractAddress = getConfig().x2EarnAppsContractAddress as `0x${string}`
-
 export const getAccountAppPermissionsQueryKey = (address?: string) => ["ACCOUNT_APP_PERMISSIONS", address]
-
 type AccountAppPermissions = Record<
   string,
   {
@@ -18,11 +17,9 @@ type AccountAppPermissions = Record<
     isModerator: boolean
   }
 >
-
 export const useAccountAppPermissions = (address?: string): UseQueryResult<AccountAppPermissions> => {
   const thor = useThor()
   const queryClient = useQueryClient()
-
   return useQuery({
     queryKey: getAccountAppPermissionsQueryKey(address ?? ""),
     enabled: !!address,

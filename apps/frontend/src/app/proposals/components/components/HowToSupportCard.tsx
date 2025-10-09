@@ -1,10 +1,12 @@
-import { VOTING_POWER_DOCS_LINK } from "@/constants/links"
-import { useGetVot3Balance } from "@/hooks"
 import { Button, Card, Heading, Link, Text } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
+
+import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
+
+import { VOTING_POWER_DOCS_LINK } from "@/constants/links"
 
 export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: () => void }) => {
   const { t } = useTranslation()
@@ -12,17 +14,14 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
   const { account } = useWallet()
   const { open: openWalletModal } = useWalletModal()
   const { data: userVot3Balance } = useGetVot3Balance(account?.address)
-
   const userHasNoTokens = useMemo(() => {
     return userVot3Balance?.original === "0"
   }, [userVot3Balance])
-
   const buttonText = userHasNoTokens ? t("See apps") : t("Get voting power")
   const buttonOnClick = useCallback(() => {
     if (!account?.address) {
       return openWalletModal()
     }
-
     if (userHasNoTokens) {
       return router.push("/apps")
     }
@@ -32,7 +31,6 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
     <Card.Root w="full" variant="primary" p="8">
       <Card.Body gap={4}>
         <Heading size="md">{t("How to support Grant and Proposal?")}</Heading>
-
         {userHasNoTokens ? (
           <>
             <Text color="text.subtle" textStyle="sm">

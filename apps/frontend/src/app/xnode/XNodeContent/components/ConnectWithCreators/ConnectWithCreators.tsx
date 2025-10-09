@@ -1,17 +1,18 @@
 import { Box, Button, HStack, Image, Link, Text, VStack, Icon } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
+import { useTranslation } from "react-i18next"
+
+import { DISCORD_URL } from "../../../../../constants/links"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../constants/AnalyticsEvents"
+
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 
 export const ConnectWithCreators = () => {
   const { t } = useTranslation()
-
   const onJoinClick = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
   }, [])
-
   return (
     <Box bgColor={"#B1F16C"} p={6} w={"full"} borderRadius={16} position={"relative"} overflow={"clip"}>
       <Image

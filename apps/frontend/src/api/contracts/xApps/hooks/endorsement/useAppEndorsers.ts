@@ -5,13 +5,11 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const address = getConfig().x2EarnAppsContractAddress
 const abi = X2EarnApps__factory.abi
 const method = "getEndorsers" as const
-
 /**
  * Get the query key for the list of endorsers for an app
  */
 export const getEndorsersQueryKey = (appId: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [appId as `0x${string}`] })
-
 /**
  *  Hook to get the list of endorsers for an app
  * @returns The endorsers for an app

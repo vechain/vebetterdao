@@ -1,9 +1,10 @@
-import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-import { useSetGMMaxLevel } from "@/hooks/useSetGMMaxLevel"
 import { Button, Card, Field, Heading, InputGroup, NumberInput, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
+import { useSetGMMaxLevel } from "@/hooks/useSetGMMaxLevel"
+import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 
 export const GMSetMaxLevel = () => {
   const { t } = useTranslation()
@@ -19,10 +20,8 @@ export const GMSetMaxLevel = () => {
   } = useForm<GMSetMaxLevelInput>({
     defaultValues: { newMaxLevel: 1 },
   })
-
   const GM_MAX_LEVEL_ALLOWED = 10 //Currently setting max level allowed to 10
   const GM_MIN_LEVEL_ALLOWED = 1
-
   const newMaxLevel = watch("newMaxLevel")
   const { resetStatus, sendTransaction, isTransactionPending } = useSetGMMaxLevel({
     maxLevel: newMaxLevel,
@@ -30,7 +29,6 @@ export const GMSetMaxLevel = () => {
       resetStatus()
     },
   })
-
   const onSubmit = useCallback(() => {
     resetStatus()
     sendTransaction()
@@ -44,7 +42,6 @@ export const GMSetMaxLevel = () => {
       newMaxLevel <= GM_MAX_LEVEL_ALLOWED,
     [currentMaxLevel, newMaxLevel],
   )
-
   return (
     <Card.Root>
       <Card.Header>

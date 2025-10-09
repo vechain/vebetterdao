@@ -1,49 +1,46 @@
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useCanUserVote,
-  useTotalVotesOnBlock,
-  useHasVotedInRound,
-  useUserVotesInRound,
-  useVotingThreshold,
-  useRoundXApps,
-} from "@/api"
-import { AllocationStateBadge, VOT3Icon } from "@/components"
 import { Box, Button, Card, Separator, HStack, Heading, Icon, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 import { MdHowToVote } from "react-icons/md"
 import { PiSquaresFourFill } from "react-icons/pi"
-import { ethers } from "ethers"
-import { useTranslation } from "react-i18next"
+
+import { useCanUserVote } from "../../../../api/contracts/governance/hooks/useCanUserVote"
+import { useTotalVotesOnBlock } from "../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVotingThreshold } from "../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useRoundXApps } from "../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
+import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
+import { VOT3Icon } from "../../../../components/Icons/VOT3Icon"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
-import { useRouter } from "next/navigation"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
   roundId: string
 }
-
 export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const { account } = useWallet()
   const { data, isLoading } = useAllocationsRound(roundId)
-
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account?.address ?? undefined)
-
   const totalVotesAtSnapshotQuery = useTotalVotesOnBlock(
     data?.voteStart ? Number(data.voteStart) : undefined,
     account?.address ?? "",
   )
   const votesAtSnapshot = totalVotesAtSnapshotQuery.data?.totalVotesWithDeposits
   const votesAtSnapshotLoading = totalVotesAtSnapshotQuery.isLoading
-
   const { data: threshold } = useVotingThreshold()
 
   const totalVotesCast = useMemo(() => {

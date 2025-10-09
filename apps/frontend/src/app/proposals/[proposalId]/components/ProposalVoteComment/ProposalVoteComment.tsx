@@ -1,29 +1,26 @@
-import { ProposalComment } from "@/api"
-import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import AbstainIcon from "@/components/Icons/svg/abstain.svg"
-import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { Card, HStack, Icon, Separator, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter(2)
+import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
+import { ProposalComment } from "../../../../../api/indexer/proposals/useProposalComments"
 
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+
+const compactFormatter = getCompactFormatter(2)
 export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
-
   const voteLabel = {
     FOR: { icon: ThumbsUpIcon, label: t("Approved"), color: "status.positive.primary" },
     ABSTAIN: { icon: AbstainIcon, label: t("Abstain"), color: "status.warning.primary" },
     AGAINST: { icon: ThumbsDownIcon, label: t("Against"), color: "status.negative.primary" },
   }
-
   const voteType = vote.support
-
   const votePower = ethers.formatEther(BigInt(vote.power || 0))
-
   return (
     <Card.Root key={vote.voter} variant="primary" p={"32px"} borderRadius={"16px"}>
       <VStack alignItems="stretch" gap={4}>

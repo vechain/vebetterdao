@@ -1,20 +1,19 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
-import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
-import { ethers } from "ethers"
 import { getConfig } from "@repo/config"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts"
+import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
+import { ethers } from "ethers"
+
 import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
-
 export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string[]) => [
   "xApps",
   appIds,
   "totalEarnings",
   roundIds,
 ]
-
 // Helper function to chunk an array into smaller arrays
 const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
   const chunks: T[][] = []
@@ -23,7 +22,6 @@ const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
   }
   return chunks
 }
-
 /**
  *  Total earnings of multiple xApps in multiple rounds
  * @param appIds  the ids of the xApps
@@ -33,19 +31,15 @@ const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string[]) => {
   const thor = useThor()
   const queryClient = useQueryClient()
-
   return useQuery({
     queryKey: getXAppsTotalEarningsQueryKey(roundIds, appIds),
     queryFn: async () => {
       const results: Record<string, { amount: number; appId: string }> = {}
-
       appIds.forEach(appId => {
         results[appId] = { amount: 0, appId }
       })
-
       const BATCH_SIZE = 10
       const roundBatches = chunkArray(roundIds, BATCH_SIZE)
-
       for (const roundBatch of roundBatches) {
         const res = await executeMultipleClausesCall({
           thor,

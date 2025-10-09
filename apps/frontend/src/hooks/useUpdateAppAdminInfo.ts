@@ -1,21 +1,20 @@
-import { useCallback, useMemo } from "react"
-import { X2EarnApps__factory, VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { buildClause } from "@/utils/buildClause"
+import { X2EarnApps__factory, VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback, useMemo } from "react"
+
+import { getAppAdminQueryKey } from "../api/contracts/xApps/hooks/useAppAdmin"
+import { getAppCreatorsQueryKey } from "../api/contracts/xApps/hooks/useAppCreators"
+import { getAppModeratorsQueryKey } from "../api/contracts/xApps/hooks/useAppModerators"
+import { getAppRewardDistributorsQueryKey } from "../api/contracts/xApps/hooks/useAppRewardDistributors"
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+
 import { useBuildTransaction } from "./useBuildTransaction"
-import {
-  getAppAdminQueryKey,
-  getAppCreatorsQueryKey,
-  getAppModeratorsQueryKey,
-  getAppRewardDistributorsQueryKey,
-  getXAppsQueryKey,
-} from "@/api"
+
+import { buildClause } from "@/utils/buildClause"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
-
 type Props = { appId: string; onSuccess?: () => void }
-
 type ClausesProps = {
   appId: string
   adminAddress?: string
@@ -29,13 +28,11 @@ type ClausesProps = {
   signalersToBeAdded?: string[]
   signalersToBeRemoved?: string[]
 }
-
 /**
  * Custom hook to update the app admin info.
  * @returns An object containing the transaction state and the function to update the app admin info.
  * @param appId The app ID.
  */
-
 export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
   const clauseBuilder = useCallback(
     ({

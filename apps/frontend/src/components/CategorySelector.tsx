@@ -26,14 +26,13 @@ import {
 } from "@chakra-ui/react"
 import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
-import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 
+import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 type CategoryType = {
   id: string
   name: string
   color: string
 }
-
 type CategorySelectorProps<T extends FieldValues> = {
   fieldName: Path<T>
   register: UseFormRegister<T>
@@ -44,7 +43,6 @@ type CategorySelectorProps<T extends FieldValues> = {
   categories?: CategoryType[]
   registerOptions?: RegisterOptions<T, Path<T>>
 }
-
 export const CategorySelector = <T extends FieldValues>({
   fieldName,
   register,

@@ -1,8 +1,12 @@
 "use client"
 import { useQuery } from "@tanstack/react-query"
-import { useXApps, useXAppsMetadataBaseUri, getXAppMetadata, XApp } from "@/api"
-import { DEPRECATED_IDS } from "@/types/appDetails"
 
+import { useXApps } from "../api/contracts/xApps/hooks/useXApps"
+import { useXAppsMetadataBaseUri } from "../api/contracts/xApps/hooks/useXAppsMetadataBaseUri"
+import { getXAppMetadata } from "../api/contracts/xApps/getXAppMetadata"
+import { XApp } from "../api/contracts/xApps/getXApps"
+
+import { DEPRECATED_IDS } from "@/types/appDetails"
 export type AppWithoutCategories = XApp & {
   metadata?: {
     name: string
@@ -19,13 +23,11 @@ export type AppWithoutCategories = XApp & {
     categories: string[]
   }
 }
-
 export const getAppsWithoutCategoriesQueryKey = (allApps: XApp[]) => [
   "xApps",
   allApps.map(app => app.id),
   "withoutCategories",
 ]
-
 /**
  * Hook to fetch apps that have no categories assigned
  * @returns Array of apps without categories
@@ -33,14 +35,11 @@ export const getAppsWithoutCategoriesQueryKey = (allApps: XApp[]) => [
 export const useAppsWithoutCategories = () => {
   const { data: baseUri } = useXAppsMetadataBaseUri()
   const { data: apps } = useXApps()
-
   return useQuery({
     queryKey: getAppsWithoutCategoriesQueryKey(apps?.allApps || []),
     queryFn: async (): Promise<AppWithoutCategories[]> => {
       if (!baseUri || !apps?.allApps) return []
-
       const appsWithoutCategories: AppWithoutCategories[] = []
-
       const promises = apps.allApps.map(async app => {
         try {
           const metadata = await getXAppMetadata(`${baseUri}${app.metadataURI}`)

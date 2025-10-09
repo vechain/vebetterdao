@@ -1,18 +1,4 @@
 import {
-  useAllocationsRound,
-  useAppEndorsementStatus,
-  useAppEndorsers,
-  useCurrentAllocationsRoundId,
-  UserNode,
-  useNodesEndorsedApps,
-} from "@/api"
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
-import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { GenericAlert } from "@/app/components/Alert"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import {
   Button,
   Card,
   Separator,
@@ -34,15 +20,25 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { GenericAlert } from "../../../components/Alert/GenericAlert"
+
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
+import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 export const EndorsingAppCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
   const isEndorsingApp = !!xNode.endorsedAppId
-
   const { data: endorsedApps } = useNodesEndorsedApps([xNode.nodeId])
   const endorsedApp = endorsedApps?.[0]?.endorsedApp
-
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(xNode.endorsedAppId ?? "")
   // get app status and score

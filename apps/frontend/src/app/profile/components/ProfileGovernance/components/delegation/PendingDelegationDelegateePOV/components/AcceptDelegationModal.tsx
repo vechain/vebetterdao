@@ -1,31 +1,28 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useCallback } from "react"
-import { ExclamationTriangle } from "@/components"
-import { useAcceptDelegation } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { useAcceptDelegation } from "../../../../../../../../hooks/useAcceptDelegation"
+import { ExclamationTriangle } from "../../../../../../../../components/Icons/ExclamationTriangle"
+
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { BaseModal } from "@/components/BaseModal"
 
 export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const { data: vnsData } = useVechainDomain(delegator ?? "")
   const delegatorName = vnsData?.domain
-
   const acceptDelegation = useAcceptDelegation({})
-
   const handleDelegate = useCallback(() => {
     acceptDelegation.sendTransaction({ delegator })
   }, [acceptDelegation, delegator])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-
   const handleClose = useCallback(() => {
     modal.onClose?.()
     acceptDelegation.resetStatus()
   }, [modal, acceptDelegation])
-
   return (
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>

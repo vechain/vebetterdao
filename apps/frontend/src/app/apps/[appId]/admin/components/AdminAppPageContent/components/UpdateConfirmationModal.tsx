@@ -1,13 +1,16 @@
-import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { Box, Button, HStack, Heading, Dialog, Text, VStack, Separator, useBreakpointValue } from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../AdminAppPageContent"
-import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
-import { useCallback } from "react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useCurrentAppAdmin } from "../../../../hooks/useCurrentAppAdmin"
+import { ExclamationTriangle } from "../../../../../../../components/Icons/ExclamationTriangle"
+import { CustomModalContent } from "../../../../../../../components/CustomModalContent"
+
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
-import { UilInfoCircle } from "@iconscout/react-unicons"
 
 type Props = {
   onClose: () => void
@@ -17,7 +20,6 @@ type Props = {
   isAdminAddressChanged: boolean
   isTeamWalletAddressChanged: boolean
 }
-
 export const UpdateConfirmationModal = ({
   onClose,
   open,
@@ -29,12 +31,10 @@ export const UpdateConfirmationModal = ({
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { admin } = useCurrentAppAdmin()
-
   const handleSubmit = useCallback(() => {
     onSubmit()
     onClose()
   }, [onClose, onSubmit])
-
   const oldTeamWalletAddress = useBreakpointValue({
     base: humanAddress(app?.teamWalletAddress || "", 6, 4),
     sm: humanAddress(app?.teamWalletAddress || "", 10, 12),
@@ -43,7 +43,6 @@ export const UpdateConfirmationModal = ({
     base: humanAddress(form.getValues("teamWalletAddress"), 6, 4),
     sm: humanAddress(form.getValues("teamWalletAddress"), 10, 12),
   })
-
   const oldAdminAddress = useBreakpointValue({
     base: humanAddress(admin || "", 6, 4),
     sm: humanAddress(admin || "", 10, 12),
