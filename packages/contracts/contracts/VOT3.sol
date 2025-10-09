@@ -221,9 +221,7 @@ contract VOT3 is
 
       if (balanceAfterTransfer < 1 ether) {
         VOT3Storage storage $ = _getVOT3Storage();
-        if (
-          address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(from)
-        ) {
+        if (address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabled(from)) {
           $.xAllocationVoting.toggleAutoVoting(from);
         }
       }
@@ -276,6 +274,12 @@ contract VOT3 is
   function getPastQuadraticVotingPower(address account, uint256 timepoint) public view returns (uint256) {
     // scaling by 1e9 so that number retuned is 1e18
     return Math.sqrt(getPastVotes(account, timepoint)) * 1e9;
+  }
+
+  /// @notice Get the XAllocationVoting contract.
+  function getXAllocationVotingAddress() external view returns (address) {
+    VOT3Storage storage $ = _getVOT3Storage();
+    return address($.xAllocationVoting);
   }
 
   /// @notice Returns the version of the contract

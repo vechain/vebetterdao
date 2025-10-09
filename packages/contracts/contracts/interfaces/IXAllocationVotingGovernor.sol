@@ -306,10 +306,25 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
 
   /**
    * @dev Check if autovoting is enabled for an account
+   * @param user The address to check
+   * @return Whether autovoting is enabled for the account
+   */
+  function isUserAutoVotingEnabled(address user) external view returns (bool);
+
+  /**
+   * @dev Check if autovoting is enabled for an account
    * @param account The address to check
    * @return Whether autovoting is enabled for the account
    */
-  function isUserAutoVotingEnabledForCurrentCycle(address account) external view returns (bool);
+  function isUserAutoVotingEnabledInCurrentRound(address account) external view returns (bool);
+
+  /**
+   * @dev Check if autovoting is enabled for an account at a specific round
+   * @param account The address to check
+   * @param roundId The round id to check
+   * @return Whether autovoting is enabled for the account at the specific round
+   */
+  function isUserAutoVotingEnabledForRound(address account, uint256 roundId) external view returns (bool);
 
   /**
    * @dev Check if autovoting is enabled for an account at a specific timepoint

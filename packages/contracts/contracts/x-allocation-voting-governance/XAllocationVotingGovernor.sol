@@ -126,7 +126,7 @@ abstract contract XAllocationVotingGovernor is
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
     require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
-    if (this.isUserAutoVotingEnabledForCurrentCycle(_msgSender())) {
+    if (this.isUserAutoVotingEnabledInCurrentRound(_msgSender())) {
       revert AutoVotingEnabled(_msgSender());
     }
 
@@ -142,7 +142,7 @@ abstract contract XAllocationVotingGovernor is
    * @notice Reverts if autovoting is not enabled for the voter.
    */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
-    if (!this.isUserAutoVotingEnabledForCurrentCycle(voter)) {
+    if (!this.isUserAutoVotingEnabledInCurrentRound(voter)) {
       revert AutoVotingNotEnabled(voter);
     }
 
