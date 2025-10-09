@@ -8,6 +8,7 @@ if (typeof self === "undefined") {
 const nextConfig = {
   experimental: {
     optimizePackageImports: [
+      "@vechain/vebetterdao-contracts",
       "@vechain/dapp-kit-react",
       "@vechain/vechain-kit",
       "@chakra-ui-react",
