@@ -30,36 +30,34 @@ export const GetFreeNFTModal: React.FC<GetFreeNFTModalProps> = ({ isOpen, onClos
                 <Icon boxSize="80px" color="bg.inverted">
                   <NFTEarthIcon />
                 </Icon>
-                <Heading fontSize="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
+                <Heading size="2xl">{t("Get Galaxy Member - Earth NFT")}</Heading>
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>
-              <Text fontSize={["16px"]}>
+              <Text textStyle="md">
                 {t(
                   "A GM Earth NFT is your entry pass into DAO governance and rewards. It gives you access to extra features, and you can later upgrade it to boost your rewards with multipliers.",
                 )}
               </Text>
               <br />
-              <Text fontSize={["16px"]} fontWeight={700}>
-                {t("How to Get One (Free):")}
-              </Text>
+              <Text textStyle="md">{t("How to Get One (Free):")}</Text>
               <Box as="ol">
                 {listItems.map((item, index) => (
                   // eslint-disable-next-line react/no-array-index-key
                   <li key={`get-free-nft-${index}`}>{item}</li>
                 ))}
               </Box>
-              <Text fontSize={["16px"]}>
+              <Text textStyle="md">
                 {t("Once minted, you can keep it as-is or upgrade it (paid) to unlock other DAO features.")}
               </Text>
             </Dialog.Body>
 
             <Dialog.Footer w="full" px={4} pt={1}>
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} w="full">
-                <Button variant={"whiteAction"} color={"#004CFC"} w={"full"} onClick={onClose}>
+                <Button variant="secondary" w={"full"} onClick={onClose}>
                   {t("Maybe later")}
                 </Button>
-                <Button variant={"primaryAction"} w={"full"} onClick={onCtaClick}>
+                <Button variant={"primary"} w={"full"} onClick={onCtaClick}>
                   {t("Get free NFT")}
                 </Button>
               </SimpleGrid>

@@ -1,4 +1,5 @@
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { Button, Icon } from "@chakra-ui/react"
 import { UilArrowRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -11,23 +12,18 @@ export const CreatorApplicationApprovedBanner = () => {
     router.push("/apps/new/form")
   }
 
-  const title = t("CREATOR'S NFT RECEIVED")
-  const description = t("Your Creator application was approved. Submit your app!")
-  const doAction = t("Submit app")
-
   return (
     <GenericBanner
-      title={title}
-      titleColor="#3A5798"
-      description={description}
-      descriptionColor="#0C2D75"
+      variant="info"
+      title={t("CREATOR'S NFT RECEIVED")}
+      description={t("Your Creator application was approved. Submit your app!")}
       logoSrc="/assets/images/creator-nft.webp"
-      backgroundColor="#C8DDFF"
-      backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
-      buttonLabel={doAction}
-      onButtonClick={navigateToSubmitAppForm}
-      buttonVariant="primaryAction"
-      buttonIcon={<UilArrowRight />}
+      cta={
+        <Button onClick={navigateToSubmitAppForm} variant="primary">
+          <Icon as={UilArrowRight} color="white" />
+          {t("Submit app")}
+        </Button>
+      }
     />
   )
 }

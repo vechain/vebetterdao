@@ -36,7 +36,7 @@ export const ParticipationScoreThreshold = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Participation score threshold")}</Heading>
-        <Text fontSize="sm">{t("Change the minimum participation score required to be considered a person.")}</Text>
+        <Text textStyle="sm">{t("Change the minimum participation score required to be considered a person.")}</Text>
       </Card.Header>
       <Card.Body>
         <form onSubmit={handleSubmit}>

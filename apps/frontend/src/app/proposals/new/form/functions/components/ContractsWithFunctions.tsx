@@ -76,7 +76,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
     <VStack key={contract.name} gap={4} align="flex-start" w="full">
       <Box>
         <Heading size="md">{contract.name}</Heading>
-        <Text fontSize="sm" fontWeight={400} color={"gray.500"}>
+        <Text textStyle="sm" color={"gray.500"}>
           {contract.description}
         </Text>
       </Box>
@@ -91,7 +91,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
               data-testid={`function-card__${contract.name}_${func.name}`}
               borderRadius={"xl"}
               w="full"
-              variant="baseWithBorder"
+              variant="primary"
               key={`${contract.name}-${func.name}`}
               _hover={{
                 borderColor: "primary.200",
@@ -111,12 +111,10 @@ export const ContractsWithFunctions: React.FC<Props> = ({
               <Card.Body>
                 <HStack w="full" justify={"space-between"}>
                   <VStack gap={0} align={"flex-start"}>
-                    <Heading size="md" fontWeight={600}>
+                    <Heading size="md" fontWeight="semibold">
                       {func.name}
                     </Heading>
-                    <Text fontSize="sm" fontWeight={400}>
-                      {func.description}
-                    </Text>
+                    <Text textStyle="sm">{func.description}</Text>
                   </VStack>
                   <Checkbox.Root pointerEvents={"none"} size="lg" colorPalette="primary" checked={isSelected}>
                     <Checkbox.Control />

@@ -23,8 +23,6 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
   const { isPerson } = useCanUserVote(address, delegateeAddress)
 
-  const border = isPerson ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
-
   const descriptionLabel = useMemo(() => {
     return isConnectedUser
       ? t("Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens")
@@ -38,22 +36,22 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   if (isPendingDelegationsLoading) return null
 
   return (
-    <Card.Root borderRadius="xl" w="full" border={border}>
+    <Card.Root variant="primary" rounded="xl" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="xl" fontWeight="700">
+              <Heading textStyle="xl" fontWeight="bold">
                 {t(isConnectedUser ? "Your Voting Qualification" : "Voting qualification")}
               </Heading>
               {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
-                <Button variant={"primaryGhost"} onClick={delegationModal.onOpen} size="sm">
+                <Button variant={"ghost"} color="actions.tertiary.default" onClick={delegationModal.onOpen} size="sm">
                   <UilArrowUpRight />
                   {t("Delegate")}
                 </Button>
               )}
             </HStack>
-            <Text fontSize="md">
+            <Text textStyle="md">
               {isConnectedUser &&
                 t(
                   "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",

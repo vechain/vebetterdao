@@ -1,79 +1,56 @@
 import { defineSlotRecipe } from "@chakra-ui/react"
+import { alertAnatomy } from "@chakra-ui/react/anatomy"
 
 export const alertSlotRecipe = defineSlotRecipe({
-  slots: ["root", "indicator", "title", "description"],
+  slots: alertAnatomy.keys(),
   base: {
     root: {
-      borderRadius: "8px",
-      border: "1px solid",
-      my: 3,
-      p: 4,
-      display: "flex",
-      flexDirection: "column",
-      gap: 3,
-    },
-    indicator: {
-      boxSize: 7,
-      flexShrink: 0,
-    },
-    title: {
-      fontWeight: 600,
-      fontSize: "md",
+      rounded: "lg",
+      border: "sm",
     },
   },
   variants: {
     status: {
-      warning: {
+      info: {
         root: {
-          bg: "warning.subtle",
-          borderColor: "warning.primary",
+          bg: "status.info.subtle",
+          borderColor: "status.info.primary",
+          color: "status.info.strong",
         },
         indicator: {
-          color: "warning.strong",
-        },
-        title: {
-          color: "warning.strong",
+          color: "status.info.strong",
         },
       },
-      error: {
+      warning: {
         root: {
-          bg: "error.subtle",
-          borderColor: "error.primary",
+          bg: "status.warning.subtle",
+          borderColor: "status.warning.primary",
+          color: "status.warning.strong",
         },
         indicator: {
-          color: "error.strong",
-        },
-        title: {
-          color: "error.strong",
+          color: "status.warning.strong",
         },
       },
       success: {
         root: {
-          bg: "success.subtle",
-          borderColor: "success.primary",
+          bg: "status.positive.subtle",
+          borderColor: "status.positive.primary",
+          color: "status.positive.strong",
         },
         indicator: {
-          color: "success.strong",
-        },
-        title: {
-          color: "success.strong",
+          color: "status.positive.strong",
         },
       },
-      info: {
+      error: {
         root: {
-          bg: "info.subtle",
-          borderColor: "info.primary",
+          bg: "status.negative.subtle",
+          borderColor: "status.negative.primary",
+          color: "status.negative.strong",
         },
         indicator: {
-          color: "info.strong",
-        },
-        title: {
-          color: "info.strong",
+          color: "status.negative.strong",
         },
       },
     },
-  },
-  defaultVariants: {
-    status: "info",
   },
 })

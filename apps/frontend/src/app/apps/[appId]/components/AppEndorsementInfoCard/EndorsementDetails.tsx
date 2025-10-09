@@ -38,13 +38,13 @@ export const EndorsementDetails = ({
       <VStack gap={0} alignItems="center">
         <Skeleton loading={isEndorsementStatusLoading}>
           <HStack gap={1} alignItems="flex-end">
-            <Text fontSize={"24px"} fontWeight="700" color={color}>
+            <Text textStyle={"2xl"} fontWeight="bold" color={color}>
               {endorsementScore}
             </Text>
-            <Text fontSize={"14px"} color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
+            <Text textStyle={"sm"} color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
           </HStack>
         </Skeleton>
-        <Text fontSize="12px" color="#6A6A6A">
+        <Text textStyle="xs" color="text.subtle">
           {t("Total score")}
         </Text>
       </VStack>
@@ -52,11 +52,11 @@ export const EndorsementDetails = ({
       {isUserAppEndorser && (
         <VStack gap={0} alignItems="center">
           <Skeleton loading={isUserNodesLoading}>
-            <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
+            <Text textStyle={"2xl"} fontWeight="bold" color="status.info.primary">
               {yourScore}
             </Text>
           </Skeleton>
-          <Text fontSize="12px" color="#6A6A6A">
+          <Text textStyle="xs" color="text.subtle">
             {t("Your score")}
           </Text>
         </VStack>
@@ -66,12 +66,12 @@ export const EndorsementDetails = ({
         <Skeleton loading={isAppEndorsersLoading}>
           <HStack>
             {endorsers && endorsers.length > 0 && <EndorsersIcon endorsers={endorsers} />}
-            <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
+            <Text textStyle={"xl"} fontWeight="bold" color="actions.secondary.text-lighter">
               {endorsers?.length}
             </Text>
           </HStack>
         </Skeleton>
-        <Text fontSize="12px" color="#6A6A6A">
+        <Text textStyle="xs" color="text.subtle">
           {t("Users endorsing")}
         </Text>
       </VStack>

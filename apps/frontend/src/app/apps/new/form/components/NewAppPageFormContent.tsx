@@ -114,9 +114,7 @@ export const NewAppPageFormContent = () => {
         </GridItem>
         <GridItem colSpan={[3, 3, 1]} minH={0} minW={0}>
           <VStack gap={4} w="full" align={"flex-start"} position="sticky" top={100} right={0}>
-            <Heading size="xl" fontWeight="bold">
-              {t("App preview")}
-            </Heading>
+            <Heading size="xl">{t("App preview")}</Heading>
             <AppPreviewDetailCard app={watch()} />
           </VStack>
         </GridItem>
@@ -128,15 +126,13 @@ export const NewAppPageFormContent = () => {
     return (
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "3fr 4fr"]} gap={6} w="full" mt={6}>
         <VStack alignItems={"flex-start"} order={[2, 2, 1]}>
-          <Text fontSize={[24, 36]} fontWeight={700}>
-            {t("Congratulations, Your App is part of VeBetter DAO!")}
-          </Text>
-          <Text fontSize={[14, 16]} fontWeight={400}>
+          <Text textStyle={["2xl", "4xl"]}>{t("Congratulations, Your App is part of VeBetter DAO!")}</Text>
+          <Text textStyle={["sm", "md"]}>
             {t(
               "Now, to qualify for allocations and have founding from the community, you have to gain endorsements from X-node holders to reach 100 points.",
             )}
           </Text>
-          <Button variant="primaryAction" onClick={onVisitAppPage} mt={6} w={"full"}>
+          <Button variant="primary" onClick={onVisitAppPage} mt={6} w={"full"}>
             {t("Visit your app page")}
           </Button>
         </VStack>

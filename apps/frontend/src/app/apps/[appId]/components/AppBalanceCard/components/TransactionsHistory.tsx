@@ -95,15 +95,15 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
             color: "blue.500",
             cursor: "pointer",
           }}
-          fontSize={isMobile ? 12 : 14}
-          fontWeight={"600"}
+          textStyle={isMobile ? "xs" : "sm"}
+          fontWeight="semibold"
           cursor={"pointer"}
           onClick={() => seeTx(txId)}>
           {title}
         </Text>
-        <Text fontSize={isMobile ? 12 : 14}>{dayjs(timestampTxs).format("DD/MM/YY")}</Text>
+        <Text textStyle={isMobile ? "xs" : "sm"}>{dayjs(timestampTxs).format("DD/MM/YY")}</Text>
       </VStack>
-      <Text fontSize={isMobile ? 12 : 14} fontWeight={"600"} onClick={() => seeTx(txId)}>
+      <Text textStyle={isMobile ? "xs" : "sm"} fontWeight="semibold" onClick={() => seeTx(txId)}>
         {amount}
       </Text>
     </HStack>

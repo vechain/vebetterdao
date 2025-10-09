@@ -1,24 +1,18 @@
 import { defineSlotRecipe } from "@chakra-ui/react"
+import { popoverAnatomy } from "@chakra-ui/react/anatomy"
 
 export const popoverSlotRecipe = defineSlotRecipe({
   className: "popover",
-  slots: ["content", "body", "header", "footer", "arrow", "arrowTip"],
+  slots: popoverAnatomy.keys(),
   base: {
     content: {
       rounded: "2xl",
       border: "none",
       boxShadow: "lg",
-      bg: {
-        base: "white",
-        _dark: "bg.primary", // Using theme color instead of hardcoded value
-      },
+      bg: { base: "white", _dark: "bg.primary" },
     },
-    body: {
-      p: 2,
-    },
-    arrow: {
-      "--arrow-size": "8px",
-    },
+    body: { p: 2 },
+    arrow: { "--arrow-size": "8px" },
     arrowTip: {
       borderTopColor: {
         base: "white",
@@ -30,34 +24,20 @@ export const popoverSlotRecipe = defineSlotRecipe({
       },
     },
   },
-  defaultVariants: {
-    size: "md",
-  },
+  defaultVariants: { size: "md" },
   variants: {
     size: {
       sm: {
-        content: {
-          fontSize: "sm",
-        },
-        body: {
-          p: 1.5,
-        },
+        content: { textStyle: "sm" },
+        body: { p: 1.5 },
       },
       md: {
-        content: {
-          fontSize: "md",
-        },
-        body: {
-          p: 2,
-        },
+        content: { textStyle: "md" },
+        body: { p: 2 },
       },
       lg: {
-        content: {
-          fontSize: "lg",
-        },
-        body: {
-          p: 3,
-        },
+        content: { textStyle: "lg" },
+        body: { p: 3 },
       },
     },
   },

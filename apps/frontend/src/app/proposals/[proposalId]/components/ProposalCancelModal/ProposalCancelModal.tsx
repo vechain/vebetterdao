@@ -50,7 +50,7 @@ export const ProposalCancelModal = ({
 
         {/* Support Button */}
         <Button
-          variant="dangerFilled"
+          colorPalette="red"
           w={{ base: "full", md: "160px" }}
           alignSelf="flex-end"
           onClick={handleCancelProposal}>

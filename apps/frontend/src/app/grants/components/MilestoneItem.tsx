@@ -41,18 +41,19 @@ const MilestoneItemContent = ({ icon, title, value }: { icon: React.ElementType;
     <Icon as={icon} boxSize={4} color="icon.subtle" />
     <HStack w="full">
       <VStack w="full" align="flex-start">
-        <Text fontSize="sm" fontWeight={"semibold"}>
+        <Text textStyle="sm" fontWeight={"semibold"}>
           {title}
         </Text>
 
         {value && (
           <Text
             w="full"
-            fontSize="sm"
+            textStyle="sm"
             fontWeight={"regular"}
             lineHeight={"1.5"}
             wordBreak="break-word"
-            overflowWrap="break-word">
+            overflowWrap="break-word"
+            whiteSpace="pre-wrap">
             {value}
           </Text>
         )}
@@ -222,7 +223,7 @@ export const MilestoneItem = ({
           <Button variant="secondary" onClick={handleReject}>
             {t("Reject")}
           </Button>
-          <Button variant="primaryAction" onClick={handleApprove}>
+          <Button variant="primary" onClick={handleApprove}>
             {t("Approve & Fund")}
           </Button>
         </HStack>
@@ -231,7 +232,7 @@ export const MilestoneItem = ({
       {/* Grant receiver actions (claim) - available on any approved milestone */}
       {shouldShowClaimAction && (
         <HStack w="full">
-          <Button variant="primaryAction" onClick={handleClaim}>
+          <Button variant="primary" onClick={handleClaim}>
             {t("Claim Reward")}
           </Button>
         </HStack>

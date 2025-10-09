@@ -45,7 +45,7 @@ export const EditAppBanner = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("Banner")}
       </Text>
       <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px">
@@ -74,11 +74,11 @@ export const EditAppBanner = ({ form }: Props) => {
           _hover={{ bg: "#00000033" }}
           onClick={handleClickEdit}>
           <IconButton aria-label="Edit banner" rounded={"full"} bg={"#00000033"} _hover={{ bg: "#00000033" }}>
-            <UilPen color="#FFFFFF" />
+            <UilPen color="white" />
           </IconButton>
         </Flex>
       </Flex>
-      <Text fontSize={14} color={"gray"} pt={0}>
+      <Text textStyle="sm" color={"gray"} pt={0}>
         {t(BANNER_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>

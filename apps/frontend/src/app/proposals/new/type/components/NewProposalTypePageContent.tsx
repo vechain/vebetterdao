@@ -51,10 +51,6 @@ export const NewProposalTypePageContent = () => {
     }
   }, [router, selectedRoute, clearData])
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   //redirect the user to the beginning of the form if the required data is missing
   // this happens in case the user tries to access this page directly
   useLayoutEffect(() => {
@@ -72,12 +68,10 @@ export const NewProposalTypePageContent = () => {
       w="full"
       data-testid="new-proposal-type-page">
       <GridItem colSpan={2}>
-        <Card.Root variant="baseWithBorder">
+        <Card.Root variant="primary">
           <Card.Body py={8}>
             <VStack gap={8} align="flex-start">
-              <Heading size={["xl", "2xl"]} fontWeight="bold">
-                {t("Select proposal type")}
-              </Heading>
+              <Heading size={["xl", "2xl"]}>{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" gap={4}>
                 {Steps(t).map(step => (
                   <CheckableCard
@@ -92,10 +86,10 @@ export const NewProposalTypePageContent = () => {
                 ))}
               </Stack>
               <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-                <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+                <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                   {t("Go back")}
                 </Button>
-                <Button data-testid="continue" variant="primaryAction" onClick={onContinue}>
+                <Button data-testid="continue" variant="primary" onClick={onContinue}>
                   {t("Continue")}
                 </Button>
               </HStack>

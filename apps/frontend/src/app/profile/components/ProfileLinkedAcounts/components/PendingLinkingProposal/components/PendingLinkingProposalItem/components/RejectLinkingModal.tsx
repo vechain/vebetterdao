@@ -32,27 +32,27 @@ export const RejectLinkingModal = ({
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack alignItems="stretch" gap={6}>
         <VStack justifyContent="center" alignItems="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
-          <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
+          <ExclamationTriangle color="status.negative.primary" size={triangleSize} />
+          <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to reject the linking proposal?")}
           </Heading>
         </VStack>
         <VStack alignItems="stretch">
-          <Text fontWeight="600">{t("You’re rejecting it from")}</Text>
-          <Text fontSize="sm">{secondaryAccount}</Text>
+          <Text fontWeight="semibold">{t("You’re rejecting it from")}</Text>
+          <Text textStyle="sm">{secondaryAccount}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
+          <Box color="status.negative.primary" textStyle="sm">
             <Alert.Title as="span">{t("You will not able to use the actions performed in this address.")}</Alert.Title>
             <Alert.Description as="span">{t("once you have rejected the linking proposal.")}</Alert.Description>
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleDelegate}>
+          <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={handleClose}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

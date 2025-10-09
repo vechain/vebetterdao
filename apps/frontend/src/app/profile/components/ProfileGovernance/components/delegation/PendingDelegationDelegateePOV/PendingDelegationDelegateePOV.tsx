@@ -15,16 +15,14 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
   if (isPendingDelegationsLoading || !pendingDelegations?.length) return null
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="xl" fontWeight="700">
-                {t("Pending delegations for voting qualification")}
-              </Heading>
+              <Heading textStyle="xl">{t("Pending delegations for voting qualification")}</Heading>
             </HStack>
-            <Text color="#6A6A6A" fontSize="md">
+            <Text color="text.subtle" textStyle="md">
               {t("While this account keeps their qualification, you’ll be able to use it to vote.")}
             </Text>
           </VStack>

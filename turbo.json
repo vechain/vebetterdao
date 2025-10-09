@@ -1,6 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", ".env"],
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
@@ -33,12 +32,6 @@
     "DISCORD_CLIENT_SECRET"
   ],
   "tasks": {
-    "install": {
-      "dependsOn": ["@vechain/vebetterdao-contracts#install", "^compile"]
-    },
-    "@vechain/vebetterdao-contracts#install": {
-      "cache": false
-    },
     "build": {
       "cache": true,
       "dependsOn": ["@vechain/vebetterdao-contracts#compile", "@repo/config#check-or-generate-local-config"],

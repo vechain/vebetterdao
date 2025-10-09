@@ -50,7 +50,7 @@ export const UnknownModalContent = ({
       </motion.div>
       <VStack gap={4}>
         {description && (
-          <Text fontSize={"14px"} textAlign={"center"}>
+          <Text textStyle={"sm"} textAlign={"center"}>
             {description}
           </Text>
         )}
@@ -60,7 +60,7 @@ export const UnknownModalContent = ({
             target="_blank"
             rel="noopener noreferrer"
             color="gray.500"
-            fontSize={"14px"}
+            textStyle="sm"
             textDecoration={"underline"}>
             {t("View it on the explorer")}
           </Link>

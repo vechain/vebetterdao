@@ -31,7 +31,7 @@ export const StepBoxes = ({
 }: StepBoxesProps) => {
   const borderColor = status === XAppsCreationStepStatus.ACTIVE ? "#004CFC" : "transparent"
   const IconComponent = stepIcon[type]
-  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "#000000"
+  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "black"
 
   return (
     <Stack
@@ -67,12 +67,12 @@ export const StepBoxes = ({
           <IconComponent size={124} color={iconColor} />
         </HStack>
         <VStack alignItems="start" w="full">
-          <Text fontSize="12px" color="#6A6A6A" lineHeight={"1px"}>
+          <Text textStyle="xs" color="text.subtle">
             {stepText}
           </Text>
           <Heading size={["md", "sm", "sm"]}>{title}</Heading>
         </VStack>
-        <Text fontSize="14px" color="#6A6A6A" w="full">
+        <Text textStyle="sm" color="text.subtle" w="full">
           {description}
         </Text>
       </Stack>

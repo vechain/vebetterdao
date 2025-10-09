@@ -96,7 +96,7 @@ export const UpdateRoleCard = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("Update Address Role")}</Heading>
-        <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
+        <Text textStyle="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
       </Card.Header>
 
       <Card.Body>
@@ -167,7 +167,7 @@ export const UpdateRoleCard = () => {
                 {userAlreadyHasRole ? (
                   <Badge
                     textTransform="none"
-                    fontSize="sm"
+                    textStyle="sm"
                     display="flex"
                     alignItems="center"
                     borderRadius="12px"
@@ -186,7 +186,7 @@ export const UpdateRoleCard = () => {
                 ) : (
                   <Badge
                     textTransform="none"
-                    fontSize="sm"
+                    textStyle="sm"
                     display="flex"
                     alignItems="center"
                     borderRadius="12px"

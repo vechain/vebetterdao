@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
+import NextLink from "next/link"
 
 export const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
@@ -101,9 +102,9 @@ export const Leaderboard = () => {
             p={4}
             h="full"
             zIndex={2}
-            bg="rgba(255, 255, 255, 0.6)">
+            bg="transparency.100">
             <Heading size="md">{t("Not enough data for the week")}</Heading>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
+            <Text textStyle="sm" color="text.subtle" textAlign={"center"}>
               {t("Leaderboard is available since the integration of sustainability proofs 🥇")}
             </Text>
           </VStack>
@@ -129,7 +130,7 @@ export const Leaderboard = () => {
     AddressUtils.compareAddresses(ranking.address, account?.address ?? ""),
   )
   return (
-    <Card.Root w="full" variant={"baseWithBorder"}>
+    <Card.Root w="full" variant="primary">
       <Card.Body>
         <VStack gap={6} align="stretch" h="full">
           <VStack gap={2} align="stretch">
@@ -139,7 +140,7 @@ export const Leaderboard = () => {
                 boxSize={6}
                 aria-label="Next round"
                 variant="ghost"
-                color="primary"
+                color="actions.secondary.text-lighter"
                 disabled={isFirstRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
                 <Icon as={FaAngleLeft} boxSize={5} />
@@ -156,13 +157,13 @@ export const Leaderboard = () => {
                 boxSize={6}
                 aria-label="Next round"
                 variant="ghost"
-                color="primary"
+                color="actions.secondary.text-lighter"
                 disabled={isLastRound}
                 onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
                 <Icon as={FaAngleRight} boxSize={5} />
               </IconButton>
             </HStack>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
+            <Text textStyle="sm" color="text.subtle">
               {t(
                 "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨",
               )}
@@ -172,20 +173,13 @@ export const Leaderboard = () => {
             {renderRankings}
             {!isRankingInTop5 && yourRanking && (
               <>
-                <Separator w="full" h={1} />
+                <Separator w="full" h={1} color="border.secondary" />
                 {yourRanking && <LeaderboardRankingComponent ranking={yourRanking} isYourRanking />}
               </>
             )}
           </VStack>
-          <Separator w="full" h={1} />
-          <Link
-            href={`/leaderboard/${selectedRoundId}`}
-            variant={"plain"}
-            color="primary"
-            _hover={{ textDecoration: "underline" }}
-            fontWeight="semibold"
-            mx="auto">
-            {t("See full leaderboard")}
+          <Link asChild color="actions.tertiary.default" fontWeight="semibold" alignSelf="center">
+            <NextLink href={`/leaderboard/${selectedRoundId}`}>{t("See full leaderboard")}</NextLink>
           </Link>
         </VStack>
       </Card.Body>

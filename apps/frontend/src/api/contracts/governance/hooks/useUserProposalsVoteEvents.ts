@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
 import { useWallet, useThor } from "@vechain/vechain-kit"
-import { VoteType } from "../utils/buildCastVoteTx"
+import { VoteType } from "@/types/voting"
 
 /**
  * Map numeric support values to VoteType enum

@@ -2,7 +2,7 @@ import { useGetUserNodes, useNodesEndorsedApps } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
-import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
+import { Text, Button, Image, Flex, Icon, VStack, Heading, Alert } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -64,7 +64,7 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
         size: "lg",
       }}>
       <VStack gap={6} align="flex-start" w="full">
-        <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
+        <Heading textStyle="2xl">{t("Remove endorsement")}</Heading>
 
         <Flex position="relative" alignSelf={"center"}>
           <Image
@@ -82,30 +82,28 @@ export const UnendorseAppModal = ({ xNodeId, isOpen, onClose }: Props) => {
             py={0.5}
             bg="white"
             borderRadius="full"
-            fontSize="2xl"
-            color="#D23F63"
-            fontWeight="700">
+            textStyle="2xl"
+            color="status.negative.primary">
             {"-"}
             {node?.xNodePoints}
           </Text>
         </Flex>
-        <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} gap={4}>
-          <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
-          <Box color="#AF5F00">
-            <Text fontSize={"16px"} as="span">
-              {t("Removing your endorsement from an app may result in it")}
-            </Text>{" "}
-            <Text fontSize={"16px"} as="span" fontWeight="600">
-              {t("no longer being selected for allocations.")}
-            </Text>
-          </Box>
-        </HStack>
 
+        <Alert.Root status="error" borderRadius={"lg"}>
+          <Alert.Indicator asChild>
+            <Icon as={FaClock} boxSize={"36px"} color="status.negative.primary" />
+          </Alert.Indicator>
+          <Alert.Content>
+            <Alert.Title>
+              {t("Removing your endorsement from an app may result in it no longer being selected for allocations.")}
+            </Alert.Title>
+          </Alert.Content>
+        </Alert.Root>
         <VStack align="stretch" w="full">
-          <Button variant={"dangerFilled"} w={"full"} onClick={handleUnendorsement}>
+          <Button colorPalette="red" w={"full"} onClick={handleUnendorsement}>
             {t("Unendorse now")}
           </Button>
-          <Button variant={"primaryGhost"} w={"full"} onClick={onClose}>
+          <Button variant="ghost" color="actions.tertiary.default" w={"full"} onClick={onClose}>
             {t("Cancel")}
           </Button>
         </VStack>

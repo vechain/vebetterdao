@@ -1,4 +1,5 @@
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { Button, Icon } from "@chakra-ui/react"
 import { UilArrowRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
@@ -11,21 +12,18 @@ export const CreatorApplicationRejectedBanner = () => {
     return router.push("/apps/creator/new")
   }
 
-  const title = t("CREATOR APPLICATION REJECTED")
-  const description = t("Your Creator's NFT application was rejected")
-  const doAction = t("Apply again")
-
   return (
     <GenericBanner
-      title={title}
-      description={description}
+      variant="warning"
+      title={t("CREATOR APPLICATION REJECTED")}
+      description={t("Your Creator's NFT application was rejected")}
       logoSrc="/assets/mascot/mascot-warning-head.webp"
-      backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
-      backgroundColor="#FFD979"
-      buttonLabel={doAction}
-      onButtonClick={navigateToCreatorForm}
-      buttonVariant="primaryAction"
-      buttonIcon={<UilArrowRight />}
+      cta={
+        <Button onClick={navigateToCreatorForm} variant="primary">
+          <Icon as={UilArrowRight} color="white" />
+          {t("Apply again")}
+        </Button>
+      }
     />
   )
 }

@@ -25,10 +25,6 @@ export const PublishAndPreviewPageContent = () => {
 
   const { data: threshold } = useDepositThreshold()
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   // We call the hashProposal function to precalculate the proposal id
   // so we can redirect the user to the proposal page after the tx is confirmed
   const { data: expectedProposalId } = useHashProposal(
@@ -108,12 +104,10 @@ export const PublishAndPreviewPageContent = () => {
   ])
 
   return (
-    <Card.Root w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
+    <Card.Root w="full" data-testid="new-proposal-preview-page" variant="primary">
       <Card.Body py={8}>
         <VStack gap={8} align="flex-start" separator={<Separator />}>
-          <Heading size={["xl", "2xl"]} fontWeight="bold">
-            {t("Check your proposal before publishing")}
-          </Heading>
+          <Heading size={["xl", "2xl"]}>{t("Check your proposal before publishing")}</Heading>
           <MDEditor.Markdown
             source={markdownDescription}
             style={{
@@ -160,10 +154,10 @@ export const PublishAndPreviewPageContent = () => {
           </VStack>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+            <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
               {t("Go back")}
             </Button>
-            <Button data-testid="publish" variant="primaryAction" onClick={onSubmit}>
+            <Button data-testid="publish" variant="primary" onClick={onSubmit}>
               {t("Publish")}
             </Button>
           </HStack>

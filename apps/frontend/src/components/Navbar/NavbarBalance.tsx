@@ -1,7 +1,8 @@
+import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
 import { Flex, HStack, Image, Skeleton, Text, useMediaQuery } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { useGetB3trBalance, useGetVot3Balance } from "@/hooks"
+
 import { BalancePill } from "./BalancePill"
 
 const compactFormatter = getCompactFormatter(1)
@@ -25,7 +26,7 @@ export const NavbarBalance = () => {
         <BalancePill variant="b3tr">
           <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
-            <Text color="actions.primary.text" fontWeight={600}>
+            <Text color="actions.primary.text" fontWeight="semibold">
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
           </Flex>
@@ -34,7 +35,7 @@ export const NavbarBalance = () => {
         <BalancePill variant="vot3">
           <Flex align="center" justify="center" px={1} gap="0.25rem">
             <Image aspectRatio={1} h="20px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
-            <Text color="text.default" fontWeight={600}>
+            <Text color="black" fontWeight="semibold">
               {compactFormatter.format(Number(vot3Balance?.scaled ?? 0))}
             </Text>
           </Flex>

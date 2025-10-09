@@ -91,7 +91,7 @@ export const TransactionsContent = ({ address }: Props) => {
   }, [router])
 
   return (
-    <Card.Root w={"full"} variant={"baseWithBorder"}>
+    <Card.Root w={"full"} variant="primary">
       <Card.Body>
         <VStack gap={6} align="stretch">
           <HStack color="#004CFC" cursor="pointer" onClick={handleGoBack} mb="2">
@@ -135,7 +135,7 @@ export const TransactionsContent = ({ address }: Props) => {
               {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (
                   <VStack key={day} gap={3} align="stretch">
-                    <Text fontWeight="600" color="#848484">
+                    <Text fontWeight="semibold" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {transactions.map((transaction: any) => (

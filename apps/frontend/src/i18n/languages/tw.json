@@ -1991,5 +1991,9 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "如果您现在取消，您的资助将被删除，并且不会出现在下一个投票轮次中。一旦轮次开始，就无法再取消。",
   "Showing": "显示",
   "Core Web3 features and sustainability (sutainable proofs) live on VeChain": "核心的 Web3 功能和可持續性（可持續證明）在唯鏈上運行",
-  "Search by proposal name": "按提案名稱搜索"
+  "Search by proposal name": "按提案名稱搜索",
+  "Created": "已建立",
+  "You have been signalled by": "您已被通知",
+  "You have reached the maximum GM NFT level.": "您已達到GM NFT的最高級別。",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "從應用程式中移除您的認可可能會導致其不再被選中進行分配。"
 }

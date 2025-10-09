@@ -36,6 +36,7 @@ const nextConfig = {
     })
     return config
   },
+  rewrites: () => [{ source: "/storybook", destination: "/storybook/index.html" }],
 }
 
 const withBundleAnalyzer = require("@next/bundle-analyzer")({

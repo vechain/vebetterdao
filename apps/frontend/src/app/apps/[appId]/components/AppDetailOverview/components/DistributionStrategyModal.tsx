@@ -26,7 +26,7 @@ export const DistributionStrategyModal = ({
 
         <VStack gap={3}>
           <Heading
-            fontSize={{
+            textStyle={{
               base: "xl",
               md: "2xl",
             }}>
@@ -34,7 +34,7 @@ export const DistributionStrategyModal = ({
           </Heading>
 
           <Text
-            fontSize={{
+            textStyle={{
               base: "md",
               md: "lg",
             }}
@@ -45,7 +45,7 @@ export const DistributionStrategyModal = ({
           <Skeleton loading={distributorsLoading} w="full">
             {distributors?.length > 0 ? (
               <VStack align="stretch" w="full">
-                <Text fontSize="md" fontWeight={"500"}>
+                <Text textStyle="md" fontWeight="semibold">
                   {t("Reward distributors")}
                 </Text>
                 {distributors?.map((distributor: string) => (

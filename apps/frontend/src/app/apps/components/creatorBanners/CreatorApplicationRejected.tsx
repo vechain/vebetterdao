@@ -13,7 +13,7 @@ export const CreatorApplicationRejected = () => {
   return (
     <>
       <Card.Root
-        variant={"baseWithBorder"}
+        variant="primary"
         w="full"
         maxW="100%"
         style={{
@@ -36,10 +36,8 @@ export const CreatorApplicationRejected = () => {
               />
 
               <Stack w={{ base: "full", md: "90%", lg: "80%" }} align="flex-start" justify="center">
-                <Heading fontWeight={700} fontSize={{ base: "15px", md: "15px" }}>
-                  {t("Your Creator's NFT application was rejected")}
-                </Heading>
-                <Text fontSize={{ base: "14px", md: "14px" }} color="#6A6A6A" fontWeight={400}>
+                <Heading size="sm">{t("Your Creator's NFT application was rejected")}</Heading>
+                <Text textStyle="sm" color="text.subtle">
                   {t("You're not cleared to receive a Creator's NFT")}
                 </Text>
               </Stack>
@@ -56,15 +54,15 @@ export const CreatorApplicationRejected = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://support.vechain.org/support/home"
-                fontSize="14px"
-                fontWeight={600}
+                textStyle="md"
+                fontWeight="semibold"
                 color="#004CFC">
                 {t("Contact support")}
               </Link>
               <Button
                 alignSelf="center"
-                fontSize="14px"
-                variant="primaryAction"
+                textStyle="md"
+                variant="primary"
                 borderRadius="full"
                 maxW="150px"
                 onClick={onOpen}

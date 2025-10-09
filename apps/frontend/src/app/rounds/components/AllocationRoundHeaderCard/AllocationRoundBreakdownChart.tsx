@@ -4,18 +4,14 @@ import { VStack, HStack, Heading, Text, Box, Card, Skeleton, useMediaQuery } fro
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { useColorMode } from "@/components/ui/color-mode"
 
 const compactFormatter = getCompactFormatter(2)
 
-type Props = {
-  roundId: string
-}
+type Props = { roundId: string }
 
 export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const [isDesktop] = useMediaQuery(["(min-width: 800px)"])
-  const { colorMode } = useColorMode()
 
   const { data: roundAmount, isLoading: roundAmountLoading } = useAllocationAmount(roundId)
 
@@ -38,45 +34,40 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
     }
   }, [totalDistributed, roundAmount])
 
-  const treasuryColor = colorMode === "light" ? "#203A87" : "#203A87"
-  const votingRewardsColor = colorMode === "light" ? "#225EED" : "#225EED"
-  const appsColor = colorMode === "light" ? "#5FA5F9" : "#5FA5F9"
-  const gmColor = colorMode === "light" ? "#4A6FA5" : "#4A6FA5"
-
   const baseAmountsInfo = useMemo(() => {
     return [
       {
         amount: roundAmount?.treasury,
         percentage: baseAmountsPercentage.treasury,
-        color: treasuryColor,
+        color: "graph.1",
         label: t("treasury"),
       },
       {
         amount: roundAmount?.voteXAllocations,
         percentage: baseAmountsPercentage.voteXAllocations, // goes to Apps
-        color: votingRewardsColor,
+        color: "graph.2",
         label: t("app rewards"),
       },
       {
         amount: roundAmount?.voteX2Earn,
         percentage: baseAmountsPercentage.voteX2Earn, // goes to users voting on x2earn apps
-        color: appsColor,
+        color: "graph.3",
         label: t("voting rewards"),
       },
       {
         amount: roundAmount?.gm,
         percentage: baseAmountsPercentage.gm,
-        color: gmColor,
+        color: "graph.4",
         label: t("gm rewards"),
       },
     ]
-  }, [baseAmountsPercentage, roundAmount, treasuryColor, votingRewardsColor, appsColor, gmColor, t])
+  }, [baseAmountsPercentage, roundAmount, t])
 
   const Wrapper = useCallback(
     ({ children }: { children: React.ReactNode }) => {
       if (isDesktop)
         return (
-          <Card.Root variant="filled" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
+          <Card.Root variant="primary" w="full" flex={1} data-testid="allocation-round-breakdown-chart">
             <Card.Body as={VStack} justifyContent={"space-between"}>
               {children}
             </Card.Body>
@@ -97,12 +88,10 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
         <HStack gap={3} align="center">
           <B3TRIcon boxSize="36px" colorVariant="dark" />
           <Skeleton loading={roundAmountLoading}>
-            <Heading fontSize="36px" fontWeight={700}>
-              {compactFormatter.format(totalDistributed)}
-            </Heading>
+            <Heading size="4xl">{compactFormatter.format(totalDistributed)}</Heading>
           </Skeleton>
         </HStack>
-        <Text fontSize="md" color="#6A6A6A">
+        <Text textStyle="md" color="text.subtle">
           {t("Total allocation to distribute")}
         </Text>
       </Box>
@@ -137,10 +126,10 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
           <Skeleton loading={roundAmountLoading} key={`allocation-chart-amount-${info.amount}-${info.color}`} w="full">
             <HStack w="full" gap={1}>
               <DotSymbol size={4} color={info.color} />
-              <Text ml={1} fontSize="md" fontWeight={600}>
+              <Text ml={1} textStyle="md" fontWeight="semibold">
                 {compactFormatter.format(Number(info.amount))}
               </Text>
-              <Text fontSize="md">
+              <Text textStyle="md">
                 {t("({{percentage}}%) as {{label}}", {
                   percentage: info.percentage.toLocaleString("en", {
                     minimumFractionDigits: 2,

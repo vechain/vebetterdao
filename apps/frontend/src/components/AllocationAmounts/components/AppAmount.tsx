@@ -1,10 +1,11 @@
-import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Card, Flex, HStack, Image, LinkBox, LinkOverlay, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import { B3TRIcon } from "@/components/Icons"
 import { useXAppMetadata } from "@/api"
+import NextLink from "next/link"
 
 type Props = {
   xAppId?: string
@@ -17,32 +18,46 @@ const compactFormatter = getCompactFormatter()
 export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
   const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
   return (
-    <HStack justify={"space-between"} alignItems={"center"}>
-      <HStack gap={3}>
-        <Skeleton loading={isLogoLoading || isLoading}>
-          <Image src={logo?.image ?? notFoundImage} alt={appMetadata?.name} boxSize={"32px"} borderRadius="9px" />
-        </Skeleton>
-        <Skeleton loading={appMetadataLoading || isLoading}>
-          <Text fontWeight={"600"} fontSize={"16px"}>
-            {appMetadata?.name}
-          </Text>
-        </Skeleton>
-      </HStack>
-      <VStack gap={0} alignItems={"flex-end"}>
-        <Skeleton loading={isLoading}>
-          <HStack alignItems={"center"} gap={1}>
-            <Text fontSize="20px" fontWeight={700}>
-              {compactFormatter.format(Number(amount))}
-            </Text>
-            <B3TRIcon boxSize={"20px"} colorVariant="dark" />
-          </HStack>
-        </Skeleton>
-        <Text fontSize={"12px"} fontWeight={400} color="#6A6A6A">
-          {t("received")}
-        </Text>
-      </VStack>
-    </HStack>
+    <LinkBox flex={1}>
+      <LinkOverlay asChild>
+        <NextLink href={`/apps/${xAppId}`}>
+          <Card.Root variant="subtle" p="4">
+            <Card.Body>
+              <Flex gap={3} alignItems="center">
+                <Skeleton loading={isLogoLoading || isLoading}>
+                  <Image
+                    src={logo?.image ?? notFoundImage}
+                    alt={appMetadata?.name}
+                    boxSize={"32px"}
+                    borderRadius="9px"
+                  />
+                </Skeleton>
+                <Skeleton flex={1} loading={appMetadataLoading || isLoading}>
+                  <Text flex={1} fontWeight="semibold" textStyle="md" lineClamp={1}>
+                    {appMetadata?.name}
+                  </Text>
+                </Skeleton>
+
+                <VStack gap={0} alignItems={"flex-end"}>
+                  <Skeleton loading={isLoading}>
+                    <HStack alignItems={"center"} gap={1}>
+                      <Text textStyle="lg" fontWeight="bold">
+                        {compactFormatter.format(Number(amount))}
+                      </Text>
+                      <B3TRIcon boxSize={"20px"} colorVariant="dark" />
+                    </HStack>
+                  </Skeleton>
+
+                  <Text textStyle={"xs"} color="text.subtle">
+                    {t("received")}
+                  </Text>
+                </VStack>
+              </Flex>
+            </Card.Body>
+          </Card.Root>
+        </NextLink>
+      </LinkOverlay>
+    </LinkBox>
   )
 }

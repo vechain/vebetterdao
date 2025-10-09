@@ -79,11 +79,11 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
         </video>
       )
 
-    if (proof?.proof?.text) return <Text fontSize="sm">{proof?.proof?.text}</Text>
+    if (proof?.proof?.text) return <Text textStyle="sm">{proof?.proof?.text}</Text>
 
     return (
       <Link href={proof?.proof?.link} target="_blank" rel="noopener noreferrer">
-        <Text fontSize="sm">{proof?.proof?.link}</Text>
+        <Text textStyle="sm">{proof?.proof?.link}</Text>
       </Link>
     )
   }, [proof, isTweet, tweet])
@@ -93,24 +93,23 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
       isOpen={actionModal.open ?? false}
       onClose={actionModal.onClose ?? (() => {})}
       ariaTitle="ActionModal"
-      ariaDescription="ActionModal">
+      ariaDescription="ActionModal"
+      showCloseButton>
       <VStack align="stretch" gap={4}>
-        <Text fontSize="sm" color="black" bg="#F8F8F8" py={1} px={3} borderRadius="full" alignSelf="flex-start">
+        <Text textStyle="sm" color="black" bg="#F8F8F8" py={1} px={3} borderRadius="full" alignSelf="flex-start">
           {dayjs.unix(blockTimestamp ?? 0).fromNow()}
         </Text>
         {b3trAmount && (
-          <Card.Root variant="filled">
+          <Card.Root variant="primary">
             <Card.Body p={4}>
               <VStack align="stretch" gap={1}>
                 <HStack>
-                  <Heading fontSize="3xl" fontWeight="bold">
-                    {compactFormatter.format(Number(b3trAmount ?? 0))}
-                  </Heading>
+                  <Heading textStyle="3xl">{compactFormatter.format(Number(b3trAmount ?? 0))}</Heading>
                   <Image h="30px" w="30px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
                 </HStack>
                 <HStack gap={1}>
-                  <Heading fontSize="md">{t("Better action on")}</Heading>
-                  <Heading fontSize="md" fontWeight="600">
+                  <Heading textStyle="md">{t("Better action on")}</Heading>
+                  <Heading textStyle="md" fontWeight="semibold">
                     {app?.name}
                   </Heading>
                 </HStack>
@@ -120,18 +119,18 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
         )}
         {isProof && (
           <VStack align="stretch" gap={2}>
-            <Heading fontSize="lg">{t("Sustainability proof")}</Heading>
+            <Heading textStyle="lg">{t("Sustainability proof")}</Heading>
             <VStack align="stretch" gap={2}>
-              <Text fontSize="sm">{proof?.description}</Text>
+              <Text textStyle="sm">{proof?.description}</Text>
               {renderProof}
             </VStack>
           </VStack>
         )}
         <VStack align="stretch" gap={4}>
-          <Heading fontSize="lg">{t("Transaction information")}</Heading>
+          <Heading textStyle="lg">{t("Transaction information")}</Heading>
           <HStack justify="space-between">
-            <Text fontWeight="600">{t("Block")}</Text>
-            <Text color="#6A6A6A">{blockNumber}</Text>
+            <Text fontWeight="semibold">{t("Block")}</Text>
+            <Text color="text.subtle">{blockNumber}</Text>
           </HStack>
         </VStack>
         {txId && (
@@ -146,9 +145,9 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
             w={"full"}
             alignItems={"center"}
             mt={4}
-            color={"rgba(0, 76, 252, 1)"}
+            color="brand.primary"
             cursor={"pointer"}>
-            <Text fontSize={16} fontWeight={500}>
+            <Text textStyle="md" fontWeight="semibold">
               {t("See more details on")} Vechain Stats
             </Text>
             <UilArrowUpRight size={16} />

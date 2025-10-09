@@ -1,14 +1,12 @@
-"use client"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { VeBetterDaoLogo } from "../VeBetterDaoLogo"
+import NextLink from "next/link"
+import { Icon, Link } from "@chakra-ui/react"
 
-export const NavbarLogo = () => {
-  const pathname = usePathname()
-  const isHome = pathname === "/"
-  return (
-    <Link href={isHome ? "" : "/"}>
-      <VeBetterDaoLogo />
-    </Link>
-  )
-}
+import VBDLogo from "@/components/Icons/svg/vebetter-dao-logo.svg"
+
+export const NavbarLogo = () => (
+  <Link asChild>
+    <NextLink href={"/"}>
+      <Icon w="32" as={VBDLogo} color="icon.default" />
+    </NextLink>
+  </Link>
+)

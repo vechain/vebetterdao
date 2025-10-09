@@ -21,7 +21,7 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
   const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
-    <Card.Root variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
+    <Card.Root size="sm" variant={"primary"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>
         <HStack gap={3} w="full" justify="space-between">
           <HStack gap={4}>
@@ -37,26 +37,24 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
             </Flex>
             <VStack gap={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
-                <Text fontSize={"sm"} mr="1">
+                <Text textStyle={"sm"} mr="1">
                   {isConnectedUser ? t("You upgraded a") : t("Upgraded a")}
                 </Text>
-                <Text fontSize={"sm"} fontWeight={600}>
+                <Text textStyle={"sm"} fontWeight="semibold">
                   {t("GM NFT")}
                 </Text>
               </HStack>
-              <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
+              <Text textStyle={"xs"} color={"#6A6A6A"}>
                 {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>
           </HStack>
           <VStack gap={0} align="stretch">
             <HStack gap={2}>
-              <Text fontWeight={600}>
+              <Text fontWeight="semibold">
                 {compactFormatter.format(Number(ethers.formatEther(transaction?.value ?? 0)))}
               </Text>
-              <Text fontWeight={400} fontSize={"sm"}>
-                {"B3TR"}
-              </Text>
+              <Text textStyle="sm">{"B3TR"}</Text>
             </HStack>
           </VStack>
         </HStack>

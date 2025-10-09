@@ -1,25 +1,35 @@
 import { ConnectWalletButton } from "@/components"
-import { Image, Text, VStack } from "@chakra-ui/react"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Icon } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaWallet } from "react-icons/fa"
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
 
 export const NoAccountActionCard = () => {
   const { t } = useTranslation()
   return (
-    <VStack gap={4} bg="light-contrast-on-card-bg" align="center" w="full" borderRadius="md" py="16px" px="28px">
-      <Image src="/assets/icons/hand-plant.svg" boxSize={"78px"} color="#757575" alt="No proposals" />
-      <Text fontSize={"16px"} fontWeight={500} color={"#757575"} textAlign="center">
-        {t("Create or connect a wallet to start doing Better Actions")}
-      </Text>
+    <EmptyState
+      size="sm"
+      bg="transparent"
+      icon={
+        <Icon boxSize={20} color="actions.tertiary.default">
+          <HandPlantIcon />
+        </Icon>
+      }
+      title={t("Create or connect a wallet to start doing Better Actions")}>
       <ConnectWalletButton
         connectionVariant="modal"
         buttonStyleProps={{
-          bg: "#E0E9FE",
-          textColor: "#004CFC",
-          px: 10,
           leftIcon: <FaWallet />,
+          px: "10",
+          rounded: "full",
+          color: "var(--vbd-colors-actions-primary-text)",
+          bgColor: "var(--vbd-colors-actions-primary-default)",
+          _hover: { bg: "var(--vbd-colors-actions-primary-hover)" },
+          _disabled: { bg: "var(--vbd-colors-actions-primary-disabled)" },
+          _focus: { bg: "var(--vbd-colors-actions-primary-pressed)" },
         }}
       />
-    </VStack>
+    </EmptyState>
   )
 }

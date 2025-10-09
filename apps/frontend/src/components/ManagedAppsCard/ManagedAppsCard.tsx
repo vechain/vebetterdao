@@ -32,22 +32,22 @@ export const ManagedAppsCard = () => {
   if (!userAppRoles || userAppRoles.length < 1) return null
 
   return (
-    <Card.Root w="full" variant="baseWithBorder">
+    <Card.Root w="full" variant="primary">
       <Card.Body>
-        <VStack gap={4} align="flex-start" w={"full"}>
+        <VStack gap="4" align="flex-start" w={"full"}>
           <HStack justifyContent={"space-between"} w="full">
-            <Heading fontSize="24px">{t("Managed apps")}</Heading>
+            <Heading size="xl">{t("Managed apps")}</Heading>
 
             {userAppRoles.length > 1 && (
               <HStack justifyContent={"flex-end"}>
-                <Button variant="ghost" colorPalette="primary" onClick={onOpen}>
+                <Button variant="ghost" onClick={onOpen}>
                   {t("See all") + ` (${userAppRoles.length})`}
                 </Button>
               </HStack>
             )}
           </HStack>
 
-          <VStack gap={8} w="full" align="flex-start" justify={"stretch"}>
+          <VStack gap="8" w="full" align="flex-start" justify={"stretch"}>
             {userAppRoles[0] && (
               <AppDetails
                 appId={userAppRoles[0].appId}

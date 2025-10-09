@@ -1,5 +1,11 @@
 import { ComponentType } from "react"
 
+export enum VoteType {
+  VOTE_AGAINST = "AGAINST",
+  VOTE_FOR = "FOR",
+  ABSTAIN = "ABSTAIN",
+}
+
 export interface VotingSegment {
   // Core data
   option: string

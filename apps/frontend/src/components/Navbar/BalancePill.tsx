@@ -3,7 +3,7 @@ import { PropsWithChildren } from "react"
 
 export const BalancePill = ({ variant, children }: PropsWithChildren<{ variant: "b3tr" | "vot3" }>) => {
   const [isDesktop] = useMediaQuery(["(min-width: 1060px)"])
-  const fill = variant === "b3tr" ? "#004CFC" : "#B1F16C"
+  const fill = variant === "b3tr" ? "actions.primary.default" : "brand.secondary"
   const pillHeight = isDesktop ? "34px" : "26px"
 
   return (

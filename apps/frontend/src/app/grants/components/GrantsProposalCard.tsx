@@ -15,12 +15,12 @@ import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@ch
 import { formatTimeLeft, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
-import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
+import { useRouter } from "next/navigation"
 
 type GrantsProposalCardProps = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }
@@ -33,10 +33,6 @@ const isGrantProposal = (proposal: GrantProposalEnriched | ProposalEnriched): pr
 }
 
 export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsProposalCardProps) => {
-  // ==========================================
-  // HOOKS
-  // ==========================================
-  const router = useRouter()
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
@@ -46,10 +42,8 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
   const { supportEndDate, votingEndDate } = useProposalInteractionDates(proposal.id)
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal.id)
   const { data: depositReached } = useIsDepositReached(proposal.id ?? "")
+  const router = useRouter()
 
-  // ==========================================
-  // COMPUTED VALUES & CONSTANTS
-  // ==========================================
   const communityDepositPercentage =
     (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
 
@@ -77,36 +71,21 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
     return formatTimeLeft(endsAt)
   }, [endsAt, isSupportOrVotingPhase])
 
-  // ==========================================
-  // EVENT HANDLERS
-  // ==========================================
-  const goToGrants = () => {
-    router.push(`/${variant === "grant" ? "grants" : "proposals"}/${proposal.id}`)
-  }
-
-  // ==========================================
-  // RENDER
-  // ==========================================
   return (
     <Card.Root
+      as="button"
+      variant="action"
       w="full"
-      borderColor="border.secondary"
-      borderWidth="1px"
-      p={{ base: 5, md: 7 }}
-      _hover={{ bg: "gray.50", _dark: { bg: "#000000" } }}
-      cursor="pointer"
-      onClick={goToGrants}>
+      onClick={() => router.push(`/${variant === "grant" ? "grants" : "proposals"}/${proposal.id}`)}>
       <VStack w="full" gap={4} alignItems="flex-start">
-        {/* Header Section */}
         <Heading size={{ base: "lg", lg: "md" }} wordBreak="break-word" flexWrap="wrap">
           {proposal.title}
         </Heading>
 
-        {/* Grant Information & Proposer Section */}
         <Stack
           direction={{ base: "column", md: "row" }}
           w="full"
-          fontSize={{ base: "14px", md: "16px" }}
+          textStyle={{ base: "sm", md: "md" }}
           justify={{ base: "flex-start" }}
           gap={{ base: 3, md: 2 }}
           align={{ base: "flex-start", md: "center" }}>
@@ -119,10 +98,10 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
               <>
                 <HStack gap={2} minW="fit-content">
                   <Icon as={B3trIcon} color="actions.primary.default" boxSize={{ base: 4, md: 5 }} />
-                  <Text fontSize={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
+                  <Text textStyle={{ base: "sm", lg: "md" }} whiteSpace="nowrap">
                     {humanNumber(grantProposal.grantAmountRequested, grantProposal.grantAmountRequested, "B3TR")}
                   </Text>
-                  <Text display={{ base: "none", lg: "block" }} fontSize={{ base: "sm", lg: "md" }}>
+                  <Text display={{ base: "none", lg: "block" }} textStyle={{ base: "sm", lg: "md" }}>
                     {"•"} {grantProposal.grantType === "dapp" ? "App" : "Tooling"}
                   </Text>
                 </HStack>
@@ -145,9 +124,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
 
         <Separator w="full" h={1} color="border.secondary" />
 
-        {/* Footer Section */}
         {isMobile ? (
-          // Mobile Layout
           <VStack w="full" gap={2}>
             <HStack w="full" justifyContent="space-between">
               <GrantsProposalStatusBadge
@@ -170,13 +147,12 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
               )}
             </HStack>
             {timeLeftDisplay && (
-              <Text fontSize="12px" alignSelf="flex-start" color="text.subtle" pl={2}>
+              <Text textStyle="xxs" alignSelf="flex-start" color="text.subtle" pl={2}>
                 {t("Ends: {{endDate}}", { endDate: timeLeftDisplay })}{" "}
               </Text>
             )}
           </VStack>
         ) : (
-          // Desktop Layout
           <HStack w="full" justifyContent="space-between">
             <HStack gap={4}>
               <GrantsProposalStatusBadge
@@ -186,7 +162,7 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
                 depositReached={depositReached ?? false}
               />
               {timeLeftDisplay ? (
-                <Text fontSize="14px" color="text.subtle">
+                <Text textStyle="md" color="text.subtle">
                   {t("Ends: {{endDate}}", {
                     endDate: timeLeftDisplay,
                   })}

@@ -1,15 +1,17 @@
-import { indexerQueryClient } from "../api"
 import { paths } from "../schema"
+
+import { indexerQueryClient } from "../api"
 
 type UserB3trActionsQuery = paths["/api/v1/b3tr/actions/users/{wallet}"]["get"]
 
-type UserB3trActionsQueryOptions = UserB3trActionsQuery["parameters"]["query"]
+//TODO: UNCOMMENT THIS WHEN THE INDEXER IS FIXED
+// type UserB3trActionsQueryOptions = UserB3trActionsQuery["parameters"]["query"]
 
 type UserB3trActionsQueryResponse = UserB3trActionsQuery["responses"]["200"]["content"]["*/*"]
 
 export type UserB3trActions = UserB3trActionsQueryResponse["data"]
 
-export const useUsersB3trActions = (wallet: string, queryOptions: UserB3trActionsQueryOptions) => {
+export const useUsersB3trActions = (wallet: string, queryOptions: any) => {
   return indexerQueryClient.useInfiniteQuery(
     "get",
     "/api/v1/b3tr/actions/users/{wallet}",

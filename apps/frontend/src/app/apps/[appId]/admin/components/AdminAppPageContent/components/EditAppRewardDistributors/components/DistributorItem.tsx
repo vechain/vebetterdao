@@ -37,22 +37,22 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
             <Dialog.Body p={"40px"}>
               <VStack align="center" gap="20px">
                 <ExclamationTriangle color="#D23F63" size={iconSize} />
-                <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+                <Heading size={["xl", "3xl"]} textAlign={"center"}>
                   {t("Delete {{address}} as reward distributor?", {
                     address: domain ?? humanAddress(distributor, 4, 4),
                   })}
                 </Heading>
-                <Text color="#6A6A6A" textAlign={"center"}>
+                <Text color="text.subtle" textAlign={"center"}>
                   {t("This address won't be able to distribute rewards anymore.")}
                 </Text>
-                <Text color="#6A6A6A" textAlign={"center"}>
+                <Text color="text.subtle" textAlign={"center"}>
                   {`Account: ${domain ?? humanAddress(distributor, 8, 6)}`}
                 </Text>
                 <VStack align="center" gap="20px" mt="20px">
-                  <Button variant="primaryAction" onClick={onClose}>
+                  <Button variant="primary" onClick={onClose}>
                     {t("Cancel")}
                   </Button>
-                  <Button variant="dangerGhost" onClick={handleDeleteDistributor}>
+                  <Button variant="ghost" color="status.negative.primary" onClick={handleDeleteDistributor}>
                     {t("Yes, remove")}
                   </Button>
                 </VStack>
@@ -66,16 +66,16 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         <HStack hideBelow="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
           <VStack align="stretch" gap={0}>
-            <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+            <Text textStyle={"xs"} color="text.subtle" fontWeight="semibold">
               {domain}
             </Text>
-            <Text fontSize={"14px"} color="#6A6A6A">
+            <Text textStyle={"sm"} color="text.subtle">
               {distributor}
             </Text>
           </VStack>
         </HStack>
         {isDeleteable && (
-          <Button variant="dangerGhost" onClick={onOpen}>
+          <Button variant="ghost" color="status.negative.primary" onClick={onOpen}>
             <UilTrash size={"14px"} color="#D23F63" />
             {t("Remove")}
           </Button>
@@ -84,12 +84,12 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         {/* Mobile view */}
         <HStack hideFrom="md">
           <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
-          <Text fontSize={"14px"} color="#6A6A6A">
+          <Text textStyle={"sm"} color="text.subtle">
             {humanAddress(distributor, 8, 6)}
           </Text>
         </HStack>
         {isDeleteable && (
-          <IconButton variant="dangerGhost" aria-label="Remove" onClick={onOpen}>
+          <IconButton variant="ghost" color="status.negative.primary" aria-label="Remove" onClick={onOpen}>
             <UilTrash size={"14px"} color="#D23F63" />
           </IconButton>
         )}

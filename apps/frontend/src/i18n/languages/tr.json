@@ -1990,5 +1990,9 @@
   "Are you sure you want to cancel this {{proposalType}}": "Bu {{proposalType}} iptal etmek istediğinizden emin misiniz?",
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "Şimdi iptal ederseniz, hibeniz kaldırılacak ve bir sonraki oylama turunda görünmeyecektir. Tur başladıktan sonra iptal artık mümkün olmayacaktır.",
   "Showing": "Gösteriliyor",
-  "Search by proposal name": "Teklif adına göre ara"
+  "Search by proposal name": "Teklif adına göre ara",
+  "Created": "Oluşturuldu",
+  "You have been signalled by": "Tarafından sinyal aldınız",
+  "You have reached the maximum GM NFT level.": "Maksimum GM NFT seviyesine ulaştınız.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Bir uygulamadan onayınızı kaldırmak, artık tahsisatlar için seçilmemesiyle sonuçlanabilir."
 }

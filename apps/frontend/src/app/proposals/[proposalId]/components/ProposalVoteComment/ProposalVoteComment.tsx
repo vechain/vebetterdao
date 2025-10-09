@@ -15,9 +15,9 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
 
   const voteLabel = {
-    FOR: { icon: ThumbsUpIcon, label: t("Approved"), color: "success.primary" },
-    ABSTAIN: { icon: AbstainIcon, label: t("Abstain"), color: "warning.primary" },
-    AGAINST: { icon: ThumbsDownIcon, label: t("Against"), color: "error.primary" },
+    FOR: { icon: ThumbsUpIcon, label: t("Approved"), color: "status.positive.primary" },
+    ABSTAIN: { icon: AbstainIcon, label: t("Abstain"), color: "status.warning.primary" },
+    AGAINST: { icon: ThumbsDownIcon, label: t("Against"), color: "status.negative.primary" },
   }
 
   const voteType = vote.support
@@ -25,12 +25,14 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const votePower = ethers.formatEther(BigInt(vote.power || 0))
 
   return (
-    <Card.Root key={vote.voter} variant="baseWithBorder" p={"32px"} borderRadius={"16px"}>
+    <Card.Root key={vote.voter} variant="primary" p={"32px"} borderRadius={"16px"}>
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"top"}>
-          <HStack fontSize={"lg"} fontWeight={"semibold"}>
+          <HStack fontWeight={"semibold"}>
             <Icon as={voteLabel[voteType].icon} color={voteLabel[voteType].color} boxSize={5} />
-            <Text color={voteLabel[voteType].color}>{voteLabel[voteType].label}</Text>
+            <Text textStyle={"lg"} color={voteLabel[voteType].color}>
+              {voteLabel[voteType].label}
+            </Text>
           </HStack>
           <Text color={"text.subtle"}>{dayjs(vote.blockTimestamp * 1000).fromNow()}</Text>
         </HStack>

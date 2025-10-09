@@ -1,5 +1,17 @@
 import { XApp } from "@/api"
-import { Button, Card, Field, Heading, Image, Text, InputGroup, Stack, VStack } from "@chakra-ui/react"
+import { WalletAddressInput } from "@/app/components/Input"
+import { CategorySelector } from "@/components/CategorySelector"
+import {
+  AVG_PHONE_WIDTH,
+  BANNER_UPLOAD_GUIDELINES,
+  LOGO_UPLOAD_GUIDELINES,
+  notFoundImage,
+  VE_WOLRD_SCALING_FACTOR,
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
+} from "@/constants"
+import { blobToBase64 } from "@/utils/BlobUtils"
+import { Button, Card, Field, Heading, Image, InputGroup, Stack, Text, VStack } from "@chakra-ui/react"
+import { ChangeEvent, useCallback, useRef } from "react"
 import {
   Control,
   Controller,
@@ -10,23 +22,11 @@ import {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form"
-import { AddressIcon } from "../AddressIcon"
-import { UploadFileButton } from "../UploadFileButton"
-import { ChangeEvent, useCallback, useRef } from "react"
-import {
-  BANNER_UPLOAD_GUIDELINES,
-  LOGO_UPLOAD_GUIDELINES,
-  VEWORLD_BANNER_UPLOAD_GUIDELINES,
-  AVG_PHONE_WIDTH,
-  notFoundImage,
-  VE_WOLRD_SCALING_FACTOR,
-} from "@/constants"
-import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
-import { WalletAddressInput } from "@/app/components/Input"
-import { AddressUtils } from "@/utils"
-import { FormItem } from "../CustomFormFields"
-import { CategorySelector } from "@/components/CategorySelector"
+
+import { AddressIcon } from "../AddressIcon"
+import { FormItem, genericValidation, patternUrlCheck } from "../CustomFormFields"
+import { UploadFileButton } from "../UploadFileButton"
 import { VeWorldFeaturedImageGuidelines } from "./VeWorldFeaturedImageGuidelines"
 
 // Validate image uploads with size and type
@@ -139,24 +139,11 @@ export const CreateEditAppForm = ({
 
   const treasuryWalletAddress = watch("treasuryWalletAddress")
   const adminWalletAddress = watch("adminWalletAddress")
-  const validateUrl = (value: string, fieldName: string) => {
-    try {
-      new URL(value)
-      return true
-    } catch {
-      return t("Invalid {{fieldName}}", { fieldName })
-    }
-  }
 
-  const genericValidation = (value: string, fieldName: string) => {
-    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
-  }
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="3xl" fontWeight="bold">
-          {isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}
-        </Heading>
+        <Heading size="3xl">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} w="full">
@@ -204,7 +191,7 @@ export const CreateEditAppForm = ({
               ...register("projectUrl", {
                 required: "Project URL is required",
                 maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
-                validate: value => validateUrl(value, t("Project URL")),
+                pattern: patternUrlCheck,
               }),
             }}
             error={errors.projectUrl?.message}
@@ -246,7 +233,7 @@ export const CreateEditAppForm = ({
 
           <Field.Root invalid={!treasuryWalletAddress}>
             <Field.Label>{t("Treasury address")}</Field.Label>
-            <Text fontSize="xs" color="gray.500" mb={2}>
+            <Text textStyle="xs" color="gray.500" mb={2}>
               {t(`The wallet address where you will receive your app's B3TR`)}
             </Text>
             <InputGroup>
@@ -272,7 +259,7 @@ export const CreateEditAppForm = ({
 
           <Field.Root invalid={!adminWalletAddress}>
             <Field.Label>{t("Admin address")}</Field.Label>
-            <Text fontSize="xs" color="gray.500" mb={2}>
+            <Text textStyle="xs" color="gray.500" mb={2}>
               {t("The wallet address which will be used to manage your app")}
             </Text>
             <InputGroup>

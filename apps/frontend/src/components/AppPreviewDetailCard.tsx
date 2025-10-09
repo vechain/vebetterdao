@@ -46,7 +46,7 @@ export const AppPreviewDetailCard = ({
   }, [isMobile, openMobileOptions, isMobileOptionsOpen, closeMobileOptions, app])
 
   return (
-    <Card.Root variant={"baseWithBorder"} w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Body>
         <VStack w="full" gap={4} align="flex-start">
           <Skeleton asChild w="full" h={200} loading={!!isBannerLoading} rounded={"3xl"}>
@@ -72,7 +72,7 @@ export const AppPreviewDetailCard = ({
           </HStack>
 
           <Skeleton loading={appMetadataLoading} w={["full", "70%"]}>
-            <Text fontSize={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
+            <Text textStyle={"md"}>{app?.description ?? appMetadataError?.message ?? "Error loading description"}</Text>
           </Skeleton>
           <AppDetailSocials socialUrls={[]} />
         </VStack>

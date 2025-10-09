@@ -10,6 +10,7 @@ export const tableSlotRecipe = defineSlotRecipe({
     variant: {
       base: {
         cell: {
+          // TODO: dark-mode check if this is needed
           bg: "transparent",
         },
       },

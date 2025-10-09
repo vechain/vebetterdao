@@ -53,12 +53,14 @@ export const MobileFilterDrawer = ({
       <Button
         size="md"
         variant="outline"
-        borderRadius="lg"
-        p={3}
+        rounded="full"
         minW="auto"
         aspectRatio="1"
         onClick={handleOpen}
-        position="relative">
+        position="relative"
+        bg="bg.primary"
+        border="sm"
+        borderColor="border.primary">
         <Icon as={UilFilter} boxSize={5} />
         {selectedCount > 0 && (
           <Text
@@ -70,8 +72,8 @@ export const MobileFilterDrawer = ({
             borderRadius="full"
             minW="20px"
             h="20px"
-            fontSize="xs"
-            fontWeight="600"
+            textStyle="xs"
+            fontWeight="semibold"
             display="flex"
             alignItems="center"
             justifyContent="center">
@@ -80,11 +82,10 @@ export const MobileFilterDrawer = ({
         )}
       </Button>
 
-      {/* Filter Modal */}
       <BaseModal isOpen={isOpen} onClose={handleClose} ariaTitle={placeholder} ariaDescription="Filter options">
         <VStack align="stretch" gap={6} w="full">
           {/* Header */}
-          <Text fontSize="md" fontWeight="bold">
+          <Text textStyle="md" fontWeight="bold">
             {placeholder}
           </Text>
 
@@ -103,7 +104,7 @@ export const MobileFilterDrawer = ({
                       <Checkbox.Indicator />
                     </Checkbox.Control>
                   </Checkbox.Root>
-                  <Text fontSize="md">{option.label}</Text>
+                  <Text textStyle="md">{option.label}</Text>
                 </HStack>
               )
             })}
@@ -114,7 +115,7 @@ export const MobileFilterDrawer = ({
             <Button variant="secondary" flex={1} onClick={handleReset}>
               {t("Reset")}
             </Button>
-            <Button variant="primaryAction" flex={1} onClick={handleApply}>
+            <Button variant="primary" flex={1} onClick={handleApply}>
               {t("Apply")}
             </Button>
           </HStack>

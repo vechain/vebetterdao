@@ -76,7 +76,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
 
   return (
     <VStack align="flex-start" gap={4} width="full">
-      <Text fontSize={16} fontWeight={500}>
+      <Text textStyle="md" fontWeight="semibold">
         {t("App Categories")}
       </Text>
 
@@ -89,7 +89,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             <Tag.Root
               key={categoryId}
               size="lg"
-              fontSize="14px"
+              textStyle="sm"
               borderRadius="full"
               variant="solid"
               backgroundColor={category.color}
@@ -113,7 +113,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
             positioning={{ placement: "bottom-start" }}
             closeOnInteractOutside={true}>
             <Popover.Trigger asChild>
-              <Button onClick={() => setOpen(true)} variant="outline" fontSize="14px" borderRadius="full" size="sm">
+              <Button onClick={() => setOpen(true)} variant="outline" textStyle="sm" borderRadius="full" size="sm">
                 <FaPlus />
                 {t("Add Category")}
               </Button>
@@ -123,7 +123,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
                 <Popover.Content width="300px" maxH="400px" overflowY="auto">
                   <Popover.Body p={3}>
                     <VStack gap={3} align="stretch">
-                      <InputGroup startElement={<FaSearch color="#6A6A6A" />}>
+                      <InputGroup startElement={<FaSearch color="text.subtle" />}>
                         <Input
                           size="md"
                           placeholder={t("Find a category")}
@@ -134,7 +134,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
                       </InputGroup>
 
                       {filteredCategories.length === 0 ? (
-                        <Text textAlign="center" py={2} color="#6A6A6A">
+                        <Text textAlign="center" py={2} color="text.subtle">
                           {t("No categories found")}
                         </Text>
                       ) : (
@@ -167,7 +167,7 @@ export const EditAppCategories = ({ form }: EditAppCategoriesProps) => {
       </HStack>
 
       {selectedCategories.length === 0 && (
-        <Text color="#6A6A6A" fontSize="sm">
+        <Text color="text.subtle" textStyle="sm">
           {t("No categories selected. Select up to 2 categories.")}
         </Text>
       )}

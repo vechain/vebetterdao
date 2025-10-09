@@ -31,7 +31,7 @@ export const ConnectWithCreators = () => {
           </Text>
         </HStack>
         <Link href={DISCORD_URL} target="_blank" rel="noopener noreferrer" w={"full"} onClick={onJoinClick}>
-          <Button w={"full"} variant={"primaryAction"}>
+          <Button w={"full"} variant={"primary"}>
             {t("Connect with Creators")}
           </Button>
         </Link>

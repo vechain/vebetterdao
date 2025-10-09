@@ -33,7 +33,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
       <VStack align="stretch" gap={6}>
         <VStack align="stretch">
           <HStack justify="space-between">
-            <Heading fontSize="xl" fontWeight="700">
+            <Heading textStyle="xl">
               {t(
                 isConnectedUser
                   ? "You’ve requested to delegate your qualification"
@@ -41,7 +41,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
               )}
             </Heading>
           </HStack>
-          <Text color="#6A6A6A" fontSize="md">
+          <Text color="text.subtle" textStyle="md">
             {t(
               isConnectedUser
                 ? "You are not currently able to vote due other user is using your Voting Qualification."
@@ -59,15 +59,15 @@ export const DelegatorDelegations = ({ address }: Props) => {
           <HStack gap={4}>
             <AddressIcon address={delegateeAddress} w={12} h={12} rounded="full" />
             <VStack align="start" gap={0}>
-              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+              <Text fontWeight="semibold" textStyle={["sm", "sm", "lg"]}>
                 {delegateeDomain ? humanDomain(delegateeDomain, 4, 26) : humanAddress(delegateeAddress, 4, 4)}
               </Text>
             </VStack>
           </HStack>
           <HStack>
             {isConnectedUser && (
-              <Button variant={"dangerGhost"} p={3} onClick={revokeDelegationModal.onOpen}>
-                <UilTimes color="#C84968" />
+              <Button variant={"ghost"} colorPalette="red" p={3} onClick={revokeDelegationModal.onOpen}>
+                <UilTimes color="status.negative.primary" />
                 {t("Remove delegation")}
               </Button>
             )}
