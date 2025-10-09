@@ -1,3 +1,4 @@
+"use cache"
 export * from "./AddressButton"
 export * from "./GenerateFunctionToCallParamsInput"
 export * from "./Navbar"

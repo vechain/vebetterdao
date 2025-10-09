@@ -1,3 +1,4 @@
+"use cache"
 import AddressUtils from "./AddressUtils"
 import AnalyticsUtils from "./AnalyticsUtils"
 import HexUtils from "./HexUtils"
