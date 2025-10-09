@@ -215,19 +215,15 @@ contract VOT3 is
     address to,
     uint256 amount
   ) internal override(ERC20Upgradeable, ERC20VotesUpgradeable, ERC20PausableUpgradeable) {
-    // Toggle off if the transfer would leave the sender with less than 1 VOT3 while autovoting is enabled
-    if (from != address(0)) {
-      uint256 balanceAfterTransfer = balanceOf(from) - amount;
+    super._update(from, to, amount);
 
-      if (balanceAfterTransfer < 1 ether) {
-        VOT3Storage storage $ = _getVOT3Storage();
-        if (address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabled(from)) {
-          $.xAllocationVoting.toggleAutoVoting(from);
-        }
+    // Toggle off if the transfer would leave the sender with less than 1 VOT3 while autovoting is enabled
+    if (from != address(0) && balanceOf(from) < 1 ether) {
+      VOT3Storage storage $ = _getVOT3Storage();
+      if (address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabled(from)) {
+        $.xAllocationVoting.toggleAutoVoting(from);
       }
     }
-
-    super._update(from, to, amount);
 
     // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
     if (to != address(0) && !isContract(to) && delegates(to) == address(0)) {
