@@ -24,7 +24,7 @@
     "src/components/GenerateFunctionToCallParamsInput",
     "dist/types/**/*.ts"
   ],
-  "exclude": ["node_modules"],
+  "exclude": [".next", "node_modules"],
   "ts-node": {
     // these options are overrides used only by ts-node
     "compilerOptions": {
