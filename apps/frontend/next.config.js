@@ -7,7 +7,6 @@ if (typeof self === "undefined") {
 
 const nextConfig = {
   experimental: {
-    useCache: true,
     optimizePackageImports: [
       "@vechain/dapp-kit-react",
       "@vechain/vechain-kit",
@@ -28,7 +27,7 @@ const nextConfig = {
   },
   swcMinify: true,
   compress: true,
-  transpilePackages: ["@vechain/vebetterdao-contracts"],
+  transpilePackages: ["express", "ts-node"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
