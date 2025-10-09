@@ -271,10 +271,6 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
-    "test:coverage:fe": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
     "test:coverage:solidity": {
       "cache": false,
       "dependsOn": ["^@repo/config#check-or-generate-local-config"]
