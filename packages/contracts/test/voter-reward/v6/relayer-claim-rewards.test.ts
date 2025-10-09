@@ -106,7 +106,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       const voteWeight = await relayerRewardsPool.getVoteWeight()
       await expect(txVote)
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 1, voteWeight)
+        .withArgs(relayer1.address, user.address, roundId, 1, voteWeight)
 
       // Wait for the round to end
       await waitForRoundToEnd(roundId)
@@ -131,7 +131,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       // Relayer action registered in pool and fee deposited
       await expect(tx)
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 2, claimWeight)
+        .withArgs(relayer1.address, user.address, roundId, 2, claimWeight)
       await expect(tx)
         .to.emit(relayerRewardsPool, "RewardsDeposited")
         .withArgs(roundId, expectedFee, initialPoolTotal + expectedFee)
@@ -256,7 +256,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       const voteWeight = await relayerRewardsPool.getVoteWeight()
       await expect(txVote)
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 1, voteWeight)
+        .withArgs(relayer1.address, user.address, roundId, 1, voteWeight)
 
       // Cast vote for user1 manually
       await xAllocationVoting.connect(user1).castVote(roundId, [app1Id], [ethers.parseEther("1000")])
@@ -291,7 +291,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       // Action should be registered in the pool and fee deposited
       await expect(tx)
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 2, claimWeight)
+        .withArgs(relayer1.address, user.address, roundId, 2, claimWeight)
       await expect(tx)
         .to.emit(relayerRewardsPool, "RewardsDeposited")
         .withArgs(roundId, expectedFee, initialPoolTotal + expectedFee)
@@ -359,7 +359,7 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       await expect(tx1)
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 2, claimWeight) // 2nd action for relayer1
+        .withArgs(relayer1.address, user.address, roundId, 2, claimWeight) // 2nd action for relayer1
 
       // Relayer2 claims for user1 (earns CLAIM action)
       const user1Fee = await voterRewards.getFee(roundId, user1.address)
@@ -367,7 +367,7 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       await expect(tx2)
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer2.address, roundId, 2, claimWeight) // 2nd action for relayer2
+        .withArgs(relayer2.address, user1.address, roundId, 2, claimWeight) // 2nd action for relayer2
 
       // Check that fees were deposited to the pool
       const poolTotalAfterClaims = await relayerRewardsPool.getTotalRewards(roundId)

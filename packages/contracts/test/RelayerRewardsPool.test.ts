@@ -370,17 +370,17 @@ describe("RelayerRewardsPool - @shard18", function () {
       const claimWeight = await relayerRewardsPool.getClaimWeight()
 
       // Register a VOTE action
-      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0)) // 0 = VOTE
+      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0)) // 0 = VOTE
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 1, voteWeight)
+        .withArgs(relayer1.address, user1.address, roundId, 1, voteWeight)
 
       expect(await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)).to.equal(1)
       expect(await relayerRewardsPool.totalRelayerWeightedActions(relayer1.address, roundId)).to.equal(voteWeight)
 
       // Register a CLAIM action
-      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1)) // 1 = CLAIM
+      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1)) // 1 = CLAIM
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, roundId, 2, claimWeight)
+        .withArgs(relayer1.address, user1.address, roundId, 2, claimWeight)
 
       expect(await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)).to.equal(2)
       expect(await relayerRewardsPool.totalRelayerWeightedActions(relayer1.address, roundId)).to.equal(
@@ -391,7 +391,9 @@ describe("RelayerRewardsPool - @shard18", function () {
     it("should revert registering action for zero address", async function () {
       const roundId = 1
 
-      await expect(relayerRewardsPool.connect(owner).registerRelayerAction(ethers.ZeroAddress, roundId, 0))
+      await expect(
+        relayerRewardsPool.connect(owner).registerRelayerAction(ethers.ZeroAddress, user1.address, roundId, 0),
+      )
         .to.be.revertedWithCustomError(relayerRewardsPool, "InvalidParameter")
         .withArgs("relayer")
     })
@@ -404,7 +406,7 @@ describe("RelayerRewardsPool - @shard18", function () {
       )
 
       await expect(
-        relayerRewardsPool.connect(user1).registerRelayerAction(relayer1.address, roundId, 0),
+        relayerRewardsPool.connect(user1).registerRelayerAction(relayer1.address, user1.address, roundId, 0),
       ).to.be.revertedWith("RelayerRewardsPool: caller must have admin or pool admin role")
     })
   })
@@ -481,15 +483,15 @@ describe("RelayerRewardsPool - @shard18", function () {
       await relayerRewardsPool.connect(owner).deposit(rewardAmount, roundId)
 
       // Each relayer completes exactly half the required actions (2 users worth each)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
 
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, user2.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, user2.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, user2.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, user2.address, roundId, 1) // CLAIM
     })
 
     it("should calculate claimable rewards correctly", async function () {
@@ -583,8 +585,12 @@ describe("RelayerRewardsPool - @shard18", function () {
       await relayerRewardsPool.connect(owner).setTotalActionsForRound(incompleteRoundId, totalAutoVotingUsers)
 
       // Only register SOME actions (not all required)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 1) // CLAIM
 
       // Verify round is not claimable
       expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
@@ -607,8 +613,12 @@ describe("RelayerRewardsPool - @shard18", function () {
       await relayerRewardsPool.connect(owner).setTotalActionsForRound(incompleteRoundId, totalAutoVotingUsers)
 
       // Only register SOME actions (not all required)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 1) // CLAIM
 
       await waitForNextCycle(emissions)
 
@@ -635,15 +645,23 @@ describe("RelayerRewardsPool - @shard18", function () {
       expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
 
       // Complete half the actions
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 1) // CLAIM
 
       // Still not claimable (only half completed)
       expect(await relayerRewardsPool.isRewardClaimable(incompleteRoundId)).to.be.false
 
       // Complete all actions
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, incompleteRoundId, 1) // CLAIM
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 0) // VOTE
+      await relayerRewardsPool
+        .connect(owner)
+        .registerRelayerAction(relayer1.address, user1.address, incompleteRoundId, 1) // CLAIM
 
       // Now should be claimable
       await waitForNextCycle(emissions)
@@ -680,12 +698,12 @@ describe("RelayerRewardsPool - @shard18", function () {
       await relayerRewardsPool.connect(owner).deposit(rewardAmount, roundId)
 
       // Relayer1 does more VOTE actions (higher weight)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE (weight 3)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE (weight 3)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE (weight 3)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE (weight 3)
 
       // Relayer2 does CLAIM actions (lower weight)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM (weight 1)
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, roundId, 1) // CLAIM (weight 1)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, user2.address, roundId, 1) // CLAIM (weight 1)
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer2.address, user2.address, roundId, 1) // CLAIM (weight 1)
 
       await waitForNextCycle(emissions)
 
@@ -845,10 +863,10 @@ describe("RelayerRewardsPool - @shard18", function () {
       await relayerRewardsPool.connect(owner).setTotalActionsForRound(roundId, totalAutoVotingUsers)
 
       // Register some actions for half the original users
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 0) // VOTE
-      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user1.address, roundId, 1) // CLAIM
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 0) // VOTE
+      await relayerRewardsPool.connect(owner).registerRelayerAction(relayer1.address, user2.address, roundId, 1) // CLAIM
 
       // Before reduction, round should not be complete
       await waitForNextCycle(emissions)

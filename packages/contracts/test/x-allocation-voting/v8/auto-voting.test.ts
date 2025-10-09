@@ -944,7 +944,7 @@ describe("AutoVoting - @shard14b", function () {
         .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
         .withArgs(user.address, round3, [app1Id], [ethers.parseEther("100")])
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, round3, 1, await relayerRewardsPool.getVoteWeight())
+        .withArgs(relayer1.address, user.address, round3, 1, await relayerRewardsPool.getVoteWeight())
 
       /**
        * Since we only have 1 user participating, total rewards is 2M B3TR
@@ -964,7 +964,7 @@ describe("AutoVoting - @shard14b", function () {
         .to.emit(voterRewards, "RewardClaimedV2")
         .withArgs(round3, user.address, reward, "0")
         .to.emit(relayerRewardsPool, "RelayerActionRegistered")
-        .withArgs(relayer1.address, round3, 2, await relayerRewardsPool.getClaimWeight())
+        .withArgs(relayer1.address, user.address, round3, 2, await relayerRewardsPool.getClaimWeight())
         .to.emit(relayerRewardsPool, "RewardsDeposited")
         .withArgs(round3, fee, await relayerRewardsPool.getTotalRewards(round3))
 
