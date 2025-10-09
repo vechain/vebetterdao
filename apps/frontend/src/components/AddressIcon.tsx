@@ -22,6 +22,7 @@ const Picasso: React.FC<IPicasso> = ({ address, ...props }) => {
   return (
     <Image
       data-cy={`address-icon-${address}`}
+      alt={props?.alt || `address-icon-${address}`}
       objectFit={"cover"}
       src={avatar && !isLoadingAvatar ? avatar : getPicassoImgSrc(address ?? "")}
       h={"100%"}
