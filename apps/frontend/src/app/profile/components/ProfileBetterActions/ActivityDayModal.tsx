@@ -44,16 +44,18 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
               <Spinner size="md" mt={4} alignSelf="center" />
             </Center>
           }>
-          {actions.map(action => (
-            <BetterActionCard
-              key={`action-day-${action.appId}-${action.blockTimestamp}-${action.blockNumber}`}
-              amountB3tr={action.amount}
-              appId={action.appId}
-              blockNumber={action.blockNumber}
-              blockTimestamp={action.blockTimestamp}
-              proof={action.proof}
-            />
-          ))}
+          <VStack gap="4">
+            {actions.map(action => (
+              <BetterActionCard
+                key={`action-day-${action.appId}-${action.blockTimestamp}-${action.blockNumber}`}
+                amountB3tr={action.amount}
+                appId={action.appId}
+                blockNumber={action.blockNumber}
+                blockTimestamp={action.blockTimestamp}
+                proof={action.proof}
+              />
+            ))}
+          </VStack>
         </InfiniteScroll>
       </VStack>
     </BaseModal>

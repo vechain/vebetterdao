@@ -110,12 +110,12 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading size={"xl"} fontWeight="normal" color="black">
+                <Heading size={"xl"} fontWeight="normal" color="text.default">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
               <Skeleton loading={isCardLoading}>
-                <Text textStyle={"sm"} color="black">
+                <Text textStyle={"sm"} color="text.default">
                   {t("{{from}} to {{to}}", {
                     from: allocationRound.voteStartTimestamp?.format("MMM D"),
                     to: allocationRound.voteEndTimestamp?.format("MMM D"),

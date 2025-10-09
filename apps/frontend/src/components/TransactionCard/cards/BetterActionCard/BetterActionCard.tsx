@@ -30,7 +30,10 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
     <>
       <Button
         variant="subtle"
+        border="sm"
+        borderColor="border.secondary"
         onClick={actionModal.onOpen}
+        w="full"
         h="auto"
         rounded="xl"
         display="flex"
