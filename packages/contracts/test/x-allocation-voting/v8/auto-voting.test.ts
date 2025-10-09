@@ -104,7 +104,7 @@ describe("AutoVoting - @shard14b", function () {
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
 
       // Wait for the next cycle to be distributable
       await waitForNextCycle(emissions)
@@ -116,7 +116,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(Number(cycle1)).to.be.greaterThan(Number(initialCycle))
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id]) // The user must set his preferences again to be able to vote after autovoting is disabled
       expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([app1Id])
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
     })
 
     it("should set and get user voting preferences", async function () {
@@ -206,18 +206,18 @@ describe("AutoVoting - @shard14b", function () {
       await xAllocationVoting.connect(user2).toggleAutoVoting(user2.address)
 
       // Still disabled until the next cycle
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user1.address)).to.be.false
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user2.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user1.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.false
       expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(0)
 
       // Wait for the next cycle to be distributable
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.true
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user1.address)).to.be.true
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user2.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user1.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.true
       expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(3)
 
       await xAllocationVoting.connect(user2).toggleAutoVoting(user2.address)
@@ -227,7 +227,7 @@ describe("AutoVoting - @shard14b", function () {
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user2.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user2.address)).to.be.false
       expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(2)
     })
 
@@ -244,12 +244,12 @@ describe("AutoVoting - @shard14b", function () {
       // Set preferences first then enable autovoting
       await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
       expect(await vot3.version()).to.equal("2")
 
       // Transfer 99.5 VOT3 which would leave user with 0.5 VOT3 (below 1 VOT3)
@@ -257,18 +257,30 @@ describe("AutoVoting - @shard14b", function () {
       await vot3.connect(user).transfer(recipient.address, ethers.parseEther("99.5"))
       expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.5"))
 
-      // // Still enabled in current cycle
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.true
+      // Verify autovoting is now disabled (using current status, not round snapshot)
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
 
-      // Wait for next cycle for autovoting to be disabled
+      // Test multiple transfers with low balance - should NOT revert
+      // Transfer 0.1 VOT3 more (user still has 0.4 VOT3, still below 1 VOT3)
+      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("0.1"))
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.4"))
+      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.6"))
+
+      // Another transfer - should still work without reverting
+      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("0.1"))
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.3"))
+      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.7"))
+
+      // Wait for next cycle for round snapshot to update
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      // Verify autovoting is now disabled
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      // Verify autovoting is disabled in both current status and round snapshot
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
 
       // Verify final balances
-      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.5"))
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.3"))
     })
 
     it("revert if app preferences are empty before enabling autovoting", async function () {
@@ -321,7 +333,7 @@ describe("AutoVoting - @shard14b", function () {
 
       // Enable auto-voting mid-cycle
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
 
       // Wait for the next cycle to be distributable
       await waitForNextCycle(emissions)
@@ -332,7 +344,7 @@ describe("AutoVoting - @shard14b", function () {
       const cycle1EmissionBlock = await emissions.lastEmissionBlock()
 
       expect(Number(cycle1)).to.be.greaterThan(Number(initialCycle))
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
 
       // User disables auto-voting mid-cycle
       await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
@@ -346,7 +358,7 @@ describe("AutoVoting - @shard14b", function () {
       const cycle2EmissionBlock = await emissions.lastEmissionBlock()
 
       expect(Number(cycle2)).to.be.greaterThan(Number(cycle1))
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -357,7 +369,7 @@ describe("AutoVoting - @shard14b", function () {
 
       // Verify cycle has advanced
       expect(Number(cycle3)).to.be.greaterThan(Number(cycle2))
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
 
       // It should be disabled at the start of the initial cycle
       expect(await xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(user.address, initialEmissionBlock)).to.be.false
@@ -382,7 +394,7 @@ describe("AutoVoting - @shard14b", function () {
       )
     })
 
-    it("should revert non-relayers from claiming rewards for auto-voting users", async function () {
+    it("should revert non-relayers from claiming rewards during early access period for auto-voting users", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await x2EarnApps
         .connect(owner)
@@ -417,13 +429,52 @@ describe("AutoVoting - @shard14b", function () {
       // Manual user can be claimed by anyone
       await expect(voterRewards.connect(nonRelayer).claimReward(roundId, manualUser.address)).to.not.be.reverted
 
+      // Early access period is still active
+      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.true
+
       // Auto user cannot be claimed by non-relayer
       await expect(voterRewards.connect(nonRelayer).claimReward(roundId, autoUser.address)).to.be.revertedWith(
         "RelayerRewardsPool: caller is not a registered relayer during early access period",
       )
 
-      // Auto user can be claimed by registered relayer
+      // Auto user can be claimed by registered relayer during early access period
       await expect(voterRewards.connect(relayer1).claimReward(roundId, autoUser.address)).to.not.be.reverted
+    })
+
+    it("should allow auto-voting users to claim rewards for themselves after early access period", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await endorseApp(app1Id, otherAccounts[0])
+
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      const autoUser = user1
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting(autoUser.address)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Cast auto vote
+      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser, roundId)
+      await waitForRoundToEnd(roundId)
+
+      // Set early access period to 5 blocks to make it expire quickly
+      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(5)
+
+      // Verify early access period has ended
+      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.false
+
+      // Auto user should now be able to claim their own rewards
+      await expect(voterRewards.connect(autoUser).claimReward(roundId, autoUser.address)).to.not.be.reverted
     })
   })
 
@@ -710,7 +761,7 @@ describe("AutoVoting - @shard14b", function () {
 
       // Verify user preferences were cleared and auto-voting is disabled
       expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([])
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
     })
 
     it("should filter out apps that become unendorsed during autovoting", async function () {
@@ -849,7 +900,7 @@ describe("AutoVoting - @shard14b", function () {
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
 
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.false
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
       expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([])
 
       await waitForNextCycle(emissions)
@@ -884,7 +935,7 @@ describe("AutoVoting - @shard14b", function () {
         .withArgs(round3, totalAutoVotingUsers, totalActions, totalWeightedActions, numRelayers)
 
       const finalPreferences = await xAllocationVoting.getUserVotingPreferences(user.address)
-      expect(await xAllocationVoting.isUserAutoVotingEnabledForCurrentCycle(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
       expect(finalPreferences).to.deep.equal([app1Id])
 
       await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user, round3))
