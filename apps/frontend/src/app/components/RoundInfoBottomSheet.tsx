@@ -110,7 +110,7 @@ export const RoundInfoBottomSheet = () => {
           <HStack gap={4} justify="space-between" w="full">
             <Box>
               <Skeleton loading={roundLoading}>
-                <Heading size={"xl"} fontWeight="normal" color="text.default">
+                <Heading size={"xl"} fontWeight="normal" color="black">
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>

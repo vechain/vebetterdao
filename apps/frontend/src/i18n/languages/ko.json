@@ -1991,5 +1991,8 @@
   "If you cancel now, your grant will be removed and won’t appear in the next voting round. Once the round begins, cancellation will no longer be possible.": "지금 취소하시면 귀하의 보조금은 삭제되며 다음 투표 라운드에 나타나지 않습니다. 라운드가 시작되면 취소가 불가능합니다.",
   "Showing": "표시 중",
   "Search by proposal name": "제안 이름으로 검색",
-  "Created": "생성됨"
+  "Created": "생성됨",
+  "You have been signalled by": "당신은 다음에 의해 신호를 받았습니다",
+  "You have reached the maximum GM NFT level.": "최고 GM NFT 레벨에 도달했습니다.",
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "앱에서 승인서를 제거하면 더 이상 할당을 선택하지 못할 수 있습니다."
 }
