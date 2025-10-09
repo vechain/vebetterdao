@@ -2,14 +2,14 @@ import { TransactionStatus } from "@vechain/vechain-kit"
 import { ReactNode, useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { BaseModal } from "../BaseModal"
 
 import { ErrorModalContent } from "./ErrorModalContent/ErrorModalContent"
 import { LoadingModalContent } from "./LoadingModalContent/LoadingModalContent"
 import { SuccessModalContent } from "./SuccessModalContent/SuccessModalContent"
 import { UnknownModalContent } from "./UnknownModalContent/UnknownModalContent"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export const TransactionModal = () => {
   const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()

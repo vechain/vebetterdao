@@ -6,8 +6,8 @@ import NextLink from "next/link"
 import { useParams } from "next/navigation"
 import { useMemo } from "react"
 
-import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"
 import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
+import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"
 
 export const AdminAppPageButton = () => {
   const { appId } = useParams()

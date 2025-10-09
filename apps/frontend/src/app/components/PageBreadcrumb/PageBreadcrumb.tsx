@@ -1,8 +1,8 @@
 "use client"
-import React from "react"
 import { Breadcrumb, Text } from "@chakra-ui/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import React from "react"
 import { BsChevronRight } from "react-icons/bs"
 type PageBreadcrumbProps = {
   items: {

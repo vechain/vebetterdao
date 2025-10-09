@@ -2,8 +2,8 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useMemo } from "react"
 
-import { ProposalType, ProposalCreatedEvent } from "../grants/types"
 import { useEvents } from "../../useEvents"
+import { ProposalType, ProposalCreatedEvent } from "../grants/types"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi

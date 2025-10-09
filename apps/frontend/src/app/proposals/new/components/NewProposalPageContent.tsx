@@ -4,15 +4,15 @@ import { useRouter } from "next/navigation"
 import { useCallback, useLayoutEffect } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
-import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { ButtonClickProperties, buttonClicked, buttonClickActions } from "../../../../constants/AnalyticsEvents"
-
 import ArrowRightIcon from "@/components/Icons/svg/arrow-right.svg"
 import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 import SignIcon from "@/components/Icons/svg/sign.svg"
 import VoteIcon from "@/components/Icons/svg/vote.svg"
 import { StepCard, StepCardProps } from "@/components/StepCard"
+
+import { ButtonClickProperties, buttonClicked, buttonClickActions } from "../../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
 
 const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {

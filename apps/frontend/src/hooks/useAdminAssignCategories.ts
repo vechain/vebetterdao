@@ -1,16 +1,17 @@
 "use client"
-import { useCallback, useMemo } from "react"
-import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+
+import { XAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 
 import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
 
+import { AppWithoutCategories } from "./useAppsWithoutCategories"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useUploadAppMetadata } from "./useUploadAppMetadata"
-import { AppWithoutCategories } from "./useAppsWithoutCategories"
 
-import { XAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 export type AppCategoryAssignment = {
   app: AppWithoutCategories

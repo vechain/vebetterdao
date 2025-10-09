@@ -4,11 +4,11 @@ import { Check } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation, Trans } from "react-i18next"
 
-import { useSetVotingEligibility } from "../../../hooks/useSetVotingEligibility"
-import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-import { useAppsEligibleInNextRound } from "../../../api/contracts/xApps/hooks/useAppsEligibleInNextRound"
-
 import { BaseModal } from "@/components/BaseModal"
+
+import { useAppsEligibleInNextRound } from "../../../api/contracts/xApps/hooks/useAppsEligibleInNextRound"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useSetVotingEligibility } from "../../../hooks/useSetVotingEligibility"
 
 // Types
 interface AppEligibilityData {

@@ -11,20 +11,20 @@ import {
   Avatar,
   Badge,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
-import { UserNode, useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { Tooltip } from "@/components/ui/tooltip"
+
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { UserNode, useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
 
-import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
+import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { GmPoolAmountCard } from "./components/GmPoolAmountCard"
-
-import { Tooltip } from "@/components/ui/tooltip"
-import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 
 export const GmNFTPageContent = ({ gmId }: { gmId: string }) => {
   const { t } = useTranslation()

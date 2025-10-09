@@ -3,8 +3,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 
-import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
 import { useGetB3trBalance } from "../../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
 
 /**
  * return the total balance of Vot3 + B3tr

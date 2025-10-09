@@ -19,9 +19,9 @@ import {
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { UseFormRegisterReturn, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { LuCalendar } from "react-icons/lu"
 //TODO: This input needs a optimization, it's not efficient with those lots of calculations and state updates
 // Starting the week on Monday

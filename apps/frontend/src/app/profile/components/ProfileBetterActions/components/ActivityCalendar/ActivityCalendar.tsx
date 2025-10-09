@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { v4 as uuid } from "uuid"
 
-import { ActivityDayModal } from "../../ActivityDayModal"
 import { useUserActionSummaryForDateRange } from "../../../../../../api/indexer/actions/useUserActionSummaryForDateRange"
+import { ActivityDayModal } from "../../ActivityDayModal"
 
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)

@@ -1,6 +1,6 @@
-import { AllApps } from "../../../api/contracts/xApps/getXApps"
-
 import dayjs from "@/utils/dayjsConfig"
+
+import { AllApps } from "../../../api/contracts/xApps/getXApps"
 
 export function sortByCreationDate(apps: AllApps[]): AllApps[] {
   return [...apps].sort((a, b) => dayjs(b.createdAtTimestamp).diff(dayjs(a.createdAtTimestamp)))

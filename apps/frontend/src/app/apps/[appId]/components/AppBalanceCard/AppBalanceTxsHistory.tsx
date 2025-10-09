@@ -12,12 +12,12 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { FaSync } from "react-icons/fa"
 
-import { DatePicker } from "../../../../../components/DatePicker/DatePicker"
 import { useAppFundActivityEvents } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
+import { DatePicker } from "../../../../../components/DatePicker/DatePicker"
 
 import { TransactionsHistory } from "./components/TransactionsHistory"
 export type Props = {

@@ -5,8 +5,8 @@ import { useVechainDomain, useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
 
 type Props = {
   address: string

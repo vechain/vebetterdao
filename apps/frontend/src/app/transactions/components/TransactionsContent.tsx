@@ -6,11 +6,11 @@ import { useTranslation } from "react-i18next"
 import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
 
-import { TransactionType } from "../../../constants/transactions"
-import { TransactionCard } from "../../../components/TransactionCard/TransactionCard"
-import { useTransactions } from "../../../api/indexer/transactions/useTransactions"
-
 import { TransactionEvent } from "@/api/indexer/transactions/useTransactions"
+
+import { useTransactions } from "../../../api/indexer/transactions/useTransactions"
+import { TransactionCard } from "../../../components/TransactionCard/TransactionCard"
+import { TransactionType } from "../../../constants/transactions"
 
 type Props = {
   address: string

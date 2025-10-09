@@ -2,11 +2,11 @@ import { Center, Spinner, VStack } from "@chakra-ui/react"
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 
+import { useTweets } from "@/api/twitter/hooks/useTweets"
+
 import { useCurrentAppMetadata } from "../../../../hooks/useCurrentAppMetadata"
 
 import { TweetCard } from "./components/TweetCard"
-
-import { useTweets } from "@/api/twitter/hooks/useTweets"
 
 type Props = {
   editMode: boolean

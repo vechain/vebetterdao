@@ -4,6 +4,8 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet, useAccountBalance } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { AddressButton } from "@/components/AddressButton"
+
 import { useHasRoles } from "../../../api/contracts/account/hooks/useHasRoles"
 import { useContractVersion } from "../../../api/contracts/common/useContractVersion"
 import { B3TRIcon } from "../../../components/Icons/B3TRIcon"
@@ -13,8 +15,6 @@ import { VTHOIcon } from "../../../components/Icons/VTHOIcon"
 import { getContractByAddress } from "../../../constants/contractList"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
-
-import { AddressButton } from "@/components/AddressButton"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)

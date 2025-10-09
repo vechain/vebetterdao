@@ -4,12 +4,12 @@ import { useVechainDomain } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { Trans, useTranslation } from "react-i18next"
 
-import { useGetNodeManager } from "../../../../../hooks/useNodeManager"
-
-import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { Clipboard } from "@/components/ui/clipboard"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { Clipboard } from "@/components/ui/clipboard"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
+
+import { useGetNodeManager } from "../../../../../hooks/useNodeManager"
 
 type Props = {
   event: AppEndorsedEvent

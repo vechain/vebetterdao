@@ -3,12 +3,12 @@ import { Box, HStack, useMediaQuery } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
+import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
 import { useHideOnScroll } from "../../hooks/useHideOnScroll"
 
-import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
+import { MobileNavBar } from "./MobileNavbar"
 import { Routes } from "./Routes"
 export const Navbar: React.FC = () => {
   const [isLargerThan1200] = useMediaQuery(["(min-width: 1200px)"])

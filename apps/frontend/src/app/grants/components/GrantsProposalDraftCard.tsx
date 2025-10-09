@@ -4,12 +4,12 @@ import { Clock } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+
 import { useGrantProposalFormStore } from "../../../store/useGrantProposalFormStore"
 
 import { DeleteGrantProposalModal } from "./DeleteGrantProposalModal"
-
-import { GrantFormData } from "@/hooks/proposals/grants/types"
-import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 
 const requiredGrantFieldKeys = [
   "grantType",

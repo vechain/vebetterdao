@@ -4,11 +4,11 @@ import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { WalletAddressInput } from "../../../../../../components/Input/WalletAddressInput"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
 import { BaseModal } from "@/components/BaseModal"
+import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { WalletAddressInput } from "../../../../../../components/Input/WalletAddressInput"
 
 type FormData = {
   accountToConnect: string

@@ -5,14 +5,14 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
 
-import { B3TRIcon } from "../../Icons/B3TRIcon"
-import { AllocationStateBadge } from "../../AllocationStateBadge/AllocationStateBadge"
-import { useMostVotedAppsInRound } from "../../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
-import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { useAllocationAmount } from "../../../api/contracts/xAllocations/hooks/useAllocationAmount"
-
 import { DotSymbol } from "@/components/DotSymbol"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+
+import { useAllocationAmount } from "../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useMostVotedAppsInRound } from "../../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
+import { AllocationStateBadge } from "../../AllocationStateBadge/AllocationStateBadge"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   roundId: string

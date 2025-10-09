@@ -1,12 +1,12 @@
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import * as vechainKit from "@vechain/vechain-kit"
-import * as router from "next/navigation"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import * as router from "next/navigation"
 
 import { APPS } from "../../../../../__mocks__/Apps"
-import * as apiHooks from "../../../../api"
 import { fireEvent, render, screen } from "../../../../../test"
+import * as apiHooks from "../../../../api"
 
 import { AllocationRoundHeaderCard } from "./AllocationRoundHeaderCard"
 const spyOnUserAllocationRound = vi.spyOn(apiHooks, "useAllocationsRound")

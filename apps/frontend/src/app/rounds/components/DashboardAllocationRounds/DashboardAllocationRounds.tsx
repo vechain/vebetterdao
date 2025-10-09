@@ -3,15 +3,15 @@ import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
+import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
+import { ProposalState } from "@/hooks/proposals/grants/types"
+
 import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { DotSymbol } from "../../../../components/DotSymbol"
 import { ProposalCompactCard } from "../../../../components/ProposalCompactCard"
 import { useRoundProposals } from "../../hooks/useRoundProposals"
 import { NoActiveProposalCard } from "../NoActiveProposalCard"
-
-import { ProposalState } from "@/hooks/proposals/grants/types"
-import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()

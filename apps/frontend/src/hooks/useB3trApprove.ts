@@ -1,11 +1,11 @@
 import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
+
 import { buildB3trApprovesTx } from "../api/contracts/b3tr/utils/buildB3trApprovesTx"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
 
 type useB3trApproveProps = {
   spender: string

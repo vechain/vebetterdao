@@ -3,8 +3,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 const XNodeContent = dynamic(() => import("../XNodeContent/XNodeContent").then(mod => mod.XNodeContent), {
   ssr: false,
   loading: () => (

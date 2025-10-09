@@ -3,6 +3,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+
 import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
 import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
@@ -10,13 +12,11 @@ import { useBreakpoints } from "../../hooks/useBreakpoints"
 import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
 import { GmActionButton } from "../GmActionButton"
 
+import { NotConnectedWallet } from "./components/NotConnectedWallet"
+import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 import { GetNodeModal } from "./GetNodeModal"
 import { GmCard } from "./GmCard"
 import { GmEmptyStateCard } from "./GmEmptyStateCard"
-import { NotConnectedWallet } from "./components/NotConnectedWallet"
-import { SwapB3trVot3 } from "./components/SwapB3trVot3"
-
-import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()

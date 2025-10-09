@@ -1,17 +1,17 @@
 "use client"
 import { Container, Flex, VStack } from "@chakra-ui/react"
-import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
-import { useEffect } from "react"
 import { datadogRum } from "@datadog/browser-rum"
+import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
 import dynamic from "next/dynamic"
-
-import { TransactionModal } from "../components/TransactionModal/TransactionModal"
-import AnalyticsUtils from "../utils/AnalyticsUtils/AnalyticsUtils"
-import { Footer } from "../components/Footer/Footer"
-
-import { Providers } from "./providers"
+import { useEffect } from "react"
 
 import { Toaster } from "@/components/ui/toaster"
+
+import { Footer } from "../components/Footer/Footer"
+import { TransactionModal } from "../components/TransactionModal/TransactionModal"
+import AnalyticsUtils from "../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { Providers } from "./providers"
 
 import "@/i18n"
 

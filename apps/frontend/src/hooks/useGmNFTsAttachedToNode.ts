@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query"
 import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 
-import { getIpfsMetadata } from "../api/ipfs/hooks/useIpfsMetadata"
-import { getIpfsImage, IpfsImage } from "../api/ipfs/hooks/useIpfsImage"
-
-import { gmNfts } from "@/constants/gmNfts"
-import { notFoundImage } from "@/constants"
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
+import { notFoundImage } from "@/constants"
+import { gmNfts } from "@/constants/gmNfts"
+
+import { getIpfsImage, IpfsImage } from "../api/ipfs/hooks/useIpfsImage"
+import { getIpfsMetadata } from "../api/ipfs/hooks/useIpfsMetadata"
 
 const galaxyMemberAbi = GalaxyMember__factory.abi
 const galaxyMemberAddress = getConfig().galaxyMemberContractAddress as `0x${string}`

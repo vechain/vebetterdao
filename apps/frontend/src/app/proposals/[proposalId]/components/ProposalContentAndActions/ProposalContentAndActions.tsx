@@ -13,21 +13,21 @@ import { RiTelegram2Line } from "react-icons/ri"
 import { A11y, Navigation, Pagination } from "swiper/modules"
 import { Swiper, SwiperSlide } from "swiper/react"
 
-import { SocialLink } from "../SocialLink/SocialLink"
-import { FileAttachmentPreview } from "../../../../grants/components/FileAttachmentPreview"
-import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
-import { removeTitleHeading } from "../../../../../utils/MarkdownUtils/MarkdownUtils"
-import { ProposalFormAction } from "../../../../../store/useProposalFormStore"
-import {
-  GovernanceFeaturedContractsWithFunctions,
-  getActionsFromTargetsAndCalldatas,
-} from "../../../../../constants/GovernanceFeaturedFunctions"
-import { ProposalExecutableActions } from "../../../../../components/ProposalExecutableActions/ProposalExecutableActions"
-
 import { CollapsibleSection } from "@/app/components/CollapsibleSection"
 import { CollapsibleSectionItem } from "@/app/components/CollapsibleSectionItem"
 import { useColorModeValue } from "@/components/ui/color-mode"
 import { AttachmentFile, GrantProposalEnriched, ProposalEnriched, ProposalType } from "@/hooks/proposals/grants/types"
+
+import { ProposalExecutableActions } from "../../../../../components/ProposalExecutableActions/ProposalExecutableActions"
+import {
+  GovernanceFeaturedContractsWithFunctions,
+  getActionsFromTargetsAndCalldatas,
+} from "../../../../../constants/GovernanceFeaturedFunctions"
+import { ProposalFormAction } from "../../../../../store/useProposalFormStore"
+import { removeTitleHeading } from "../../../../../utils/MarkdownUtils/MarkdownUtils"
+import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
+import { FileAttachmentPreview } from "../../../../grants/components/FileAttachmentPreview"
+import { SocialLink } from "../SocialLink/SocialLink"
 
 import "@/app/theme/swiper-custom.css"
 import "swiper/css"

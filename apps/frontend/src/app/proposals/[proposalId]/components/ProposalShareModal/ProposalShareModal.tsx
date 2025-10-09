@@ -5,14 +5,14 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
 
+import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import { ProposalType } from "@/hooks/proposals/grants/types"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { CustomModalContent } from "../../../../../components/CustomModalContent"
 
 import shareIconAnimation from "./shareIconAnimation.json"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { ProposalType } from "@/hooks/proposals/grants/types"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 
 const containerVariants = {
   initial: {

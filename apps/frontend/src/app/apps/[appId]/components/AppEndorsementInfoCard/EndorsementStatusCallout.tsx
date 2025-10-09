@@ -3,12 +3,12 @@ import { UilExclamationCircle } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { Trans, useTranslation } from "react-i18next"
 
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
 import { useGracePeriodEvent } from "../../../../../api/contracts/xApps/hooks/useGracePeriodEvent"
 import { XAppStatus } from "../../../../../types/appDetails"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useXAppStatusConfig } from "../../hooks/useXAppStatusConfig"
-
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 
 type Props = {
   endorsementStatus: XAppStatus

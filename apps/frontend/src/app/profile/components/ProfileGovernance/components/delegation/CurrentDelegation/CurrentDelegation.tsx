@@ -4,13 +4,13 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { QualificationBadge } from "../QualificationBadges"
-import { useGetDelegator } from "../../../../../../../api/contracts/vePassport/hooks/useGetDelegator"
+import { AddressIcon } from "@/components/AddressIcon"
+
 import { useCanUserVote } from "../../../../../../../api/contracts/governance/hooks/useCanUserVote"
+import { useGetDelegator } from "../../../../../../../api/contracts/vePassport/hooks/useGetDelegator"
+import { QualificationBadge } from "../QualificationBadges"
 
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
-
-import { AddressIcon } from "@/components/AddressIcon"
 
 type Props = {
   address: string

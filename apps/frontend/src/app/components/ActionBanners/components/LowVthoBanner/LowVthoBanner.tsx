@@ -2,8 +2,8 @@ import { Button, Icon } from "@chakra-ui/react"
 import { UilArrowRight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
-import { useBuyVtho } from "@/hooks/useTransak"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+import { useBuyVtho } from "@/hooks/useTransak"
 
 export const LowVthoBanner = () => {
   const { t } = useTranslation()

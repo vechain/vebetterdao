@@ -3,8 +3,8 @@ import { VStack, Spinner } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { MotionVStack } from "../../../components/MotionVStack"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 const AppDetailPageContent = dynamic(
   () => import("./components/AppDetailPageContent").then(mod => mod.AppDetailPageContent),
   {

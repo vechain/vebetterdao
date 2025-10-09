@@ -8,11 +8,11 @@ import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { HiDotsVertical } from "react-icons/hi"
 
-import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
-import { AddressIcon } from "@/components/AddressIcon"
-import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { AddressIcon } from "@/components/AddressIcon"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 
 type Props = {
   appId: string

@@ -2,13 +2,13 @@ import { HStack, Text, Button, VStack, Box } from "@chakra-ui/react"
 import { useCallback, useState, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
 import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
 import { useDistributionManagement } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useDistributionManagement"
 import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
 import { StepModal, type Step } from "../../../../../components/StepModal/StepModal"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export type Props = {
   appId: string

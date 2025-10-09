@@ -6,13 +6,13 @@ import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+
 import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 
-import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
-import { DelegationAlert } from "./DelegationAlert"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
-
-import { AddressIcon } from "@/components/AddressIcon"
+import { DelegationAlert } from "./DelegationAlert"
+import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 
 export const DelegateXNodeCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()

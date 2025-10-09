@@ -1,8 +1,8 @@
 import { Card, VStack } from "@chakra-ui/react"
 
-import { UserTransactions } from "./components/UserTransactions"
-
 import { SwapB3trVot3 } from "@/components/GmNFTAndNodeCard/components/SwapB3trVot3"
+
+import { UserTransactions } from "./components/UserTransactions"
 
 type Props = {
   address: string

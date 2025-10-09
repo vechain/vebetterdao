@@ -1,8 +1,8 @@
 import { Avatar, Image, Skeleton, SkeletonProps } from "@chakra-ui/react"
 
-import { useXAppMetadata } from "../../api/contracts/xApps/hooks/useXAppMetadata"
-
 import { notFoundImage } from "@/constants"
+
+import { useXAppMetadata } from "../../api/contracts/xApps/hooks/useXAppMetadata"
 
 type Props = {
   appId: string

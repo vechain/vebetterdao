@@ -11,22 +11,23 @@ import {
   NativeSelect,
   CloseButton,
 } from "@chakra-ui/react"
+import { FormattingUtils } from "@repo/utils"
+import { motion } from "framer-motion"
 import { useCallback, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { motion } from "framer-motion"
 import { IoWalletOutline } from "react-icons/io5"
-import { FormattingUtils } from "@repo/utils"
 
-import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { CustomModalContent } from "../../../../../components/CustomModalContent"
 import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
-import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useWithdrawAppBalance } from "../../../../../hooks/useWithdrawAppBalance"
 
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
 
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {
   appId: string
   teamWalletAddress: string

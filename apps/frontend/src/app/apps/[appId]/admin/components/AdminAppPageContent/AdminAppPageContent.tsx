@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
+import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
+
 import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
 import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"
 import { useCurrentAppCreators } from "../../../hooks/useCurrentAppCreators"
@@ -21,8 +23,6 @@ import { EditAppModerators } from "./components/EditAppModerators/EditAppModerat
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors/EditAppRewardDistributors"
 import { EditAppSignalers } from "./components/EditAppSignalers/EditAppSignalers"
 import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
-
-import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
 
 export type AdminAppForm = {
   adminAddress: string

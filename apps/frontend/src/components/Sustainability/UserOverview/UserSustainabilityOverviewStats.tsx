@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 import { TbLeaf } from "react-icons/tb"
 
-import { useUserActionOverview } from "../../../api/indexer/actions/useUserActionOverview"
-
 import B3TRIcon from "@/components/Icons/svg/b3tr.svg"
+
+import { useUserActionOverview } from "../../../api/indexer/actions/useUserActionOverview"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)

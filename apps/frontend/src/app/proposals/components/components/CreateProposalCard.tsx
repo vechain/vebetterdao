@@ -3,13 +3,13 @@ import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import ProposalIcon from "@/components/Icons/svg/proposal.svg"
+
 import { useMetProposalCriteria } from "../../../../api/contracts/governance/hooks/useMetProposalCriteria"
 import { ButtonClickProperties, buttonClicked, buttonClickActions } from "../../../../constants/AnalyticsEvents"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { RequirementModal } from "./RequirementModal"
-
-import ProposalIcon from "@/components/Icons/svg/proposal.svg"
 
 export const CreateProposalCard = () => {
   const { account } = useWallet()

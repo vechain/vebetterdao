@@ -3,13 +3,13 @@ import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { buildClause } from "@/utils/buildClause"
+
 import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
 import { getAppAvailableFundsQueryKey } from "../getter/useAppAvailableFunds"
 import { getAppRewardsBalanceQueryKey } from "../getter/useAppRewardsBalance"
 import { getIsRewardsPoolEnabledQueryKey } from "../getter/useIsRewardsPoolEnabled"
-
-import { buildClause } from "@/utils/buildClause"
-import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 
 interface Props {
   xAppId: string

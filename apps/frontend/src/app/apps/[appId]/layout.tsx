@@ -1,18 +1,18 @@
 import { getConfig } from "@repo/config"
-import { Metadata, ResolvingMetadata } from "next"
-//Need precise import to avoid having dapp-kit imported and indexed somewhere
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { Metadata, ResolvingMetadata } from "next"
+//Need precise import to avoid having dapp-kit imported and indexed somewhere
+
+import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
+import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
+import { getDefaultMetadata } from "@/utils/metadata"
 
 import { XApp } from "../../../api/contracts/xApps/getXApps"
 import { getNodeJsThorClient } from "../../../utils/getNodeJsThorClient"
 import { convertUriToUrl } from "../../../utils/uri"
 
 import { Props } from "./page"
-
-import { getDefaultMetadata } from "@/utils/metadata"
-import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
-import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress

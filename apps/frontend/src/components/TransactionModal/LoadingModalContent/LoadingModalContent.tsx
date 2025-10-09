@@ -3,9 +3,9 @@ import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
 
-import loadingAnimation from "./loading.json"
-
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import loadingAnimation from "./loading.json"
 
 export type LoadingModalContentProps = {
   title?: ReactNode

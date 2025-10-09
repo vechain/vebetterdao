@@ -2,13 +2,13 @@ import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
+import { useBuildTransaction } from "@/hooks/useBuildTransaction"
+import { buildClause } from "@/utils/buildClause"
+
 import { getAppAvailableFundsQueryKey } from "../getter/useAppAvailableFunds"
 import { getAppRewardsBalanceQueryKey } from "../getter/useAppRewardsBalance"
 import { getIsDistributionPausedQueryKey } from "../getter/useIsDistributionPaused"
 import { getIsRewardsPoolEnabledQueryKey } from "../getter/useIsRewardsPoolEnabled"
-
-import { buildClause } from "@/utils/buildClause"
-import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 
 /**
  * Pause distribution for a specific xApp

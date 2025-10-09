@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { GenericBanner } from "../../Banners/GenericBanner"
 import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { GenericBanner } from "../../Banners/GenericBanner"
 
 export const CastVoteBanner = () => {
   const { t } = useTranslation()

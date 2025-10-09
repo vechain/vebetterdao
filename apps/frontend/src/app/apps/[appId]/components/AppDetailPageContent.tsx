@@ -2,6 +2,8 @@ import { Grid, GridItem, Stack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+
 import { useAppEndorsementStatus } from "../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
 import { useIsAppAdmin } from "../../../../api/contracts/xApps/hooks/useIsAppAdmin"
 import { useIsAppModerator } from "../../../../api/contracts/xApps/hooks/useIsAppModerator"
@@ -13,8 +15,6 @@ import { AppDetailOverview } from "./AppDetailOverview/AppDetailOverview"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets/AppTweets"
-
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()

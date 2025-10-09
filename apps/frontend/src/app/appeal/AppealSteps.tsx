@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { queryClient } from "../../api/QueryProvider"
 import { useUserBotSignals } from "../../api/contracts/vePassport/hooks/useUserBotSignals"
 import { useUserSignalEvents } from "../../api/contracts/xApps/hooks/useUserSignalEvents"
 import { useXApps } from "../../api/contracts/xApps/hooks/useXApps"
+import { queryClient } from "../../api/QueryProvider"
 import {
   linkClickActions,
   LinkClickProperties,

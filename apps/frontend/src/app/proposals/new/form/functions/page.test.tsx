@@ -1,8 +1,10 @@
-import { fireEvent, render, waitFor } from "@testing-library/react"
-import * as router from "next/navigation"
-import * as vechainKit from "@vechain/vechain-kit"
-import { vi } from "vitest"
 import { EnvConfig, AppEnv } from "@repo/config/contracts"
+import { fireEvent, render, waitFor } from "@testing-library/react"
+import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { vi } from "vitest"
+
+import * as store from "@/store"
 
 import { screen } from "../../../../../../test"
 import { getEnvWhitelistedContractsWithFunctions } from "../../../../../constants/GovernanceFeaturedFunctions"
@@ -10,7 +12,6 @@ import FormProposalLayout from "../layout"
 
 import NewProposalFunctions from "./page"
 
-import * as store from "@/store"
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 /**
  * Check for the existence of the functions listed in the dev contracts

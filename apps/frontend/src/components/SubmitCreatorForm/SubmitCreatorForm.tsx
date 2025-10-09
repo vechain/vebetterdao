@@ -15,11 +15,11 @@ import {
 import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
 
-import { useCreatorSubmissionFormStore } from "../../store/useCreatorSubmissionFormStore"
 import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
-import { genericValidation, patternUrlCheck, validateAppId, validateEmail } from "../CustomFormFields/validators"
+import { useCreatorSubmissionFormStore } from "../../store/useCreatorSubmissionFormStore"
 import { FormCheckbox } from "../CustomFormFields/FormCheckbox"
 import { FormItem } from "../CustomFormFields/FormItem"
+import { genericValidation, patternUrlCheck, validateAppId, validateEmail } from "../CustomFormFields/validators"
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string

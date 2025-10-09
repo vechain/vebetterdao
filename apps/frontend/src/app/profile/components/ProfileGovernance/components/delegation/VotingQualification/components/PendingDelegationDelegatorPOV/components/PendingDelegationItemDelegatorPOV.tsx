@@ -4,9 +4,9 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { RemoveDelegationModal } from "./RemoveDelegationModal"
-
 import { AddressIcon } from "@/components/AddressIcon"
+
+import { RemoveDelegationModal } from "./RemoveDelegationModal"
 
 type Props = {
   delegationAddress: string

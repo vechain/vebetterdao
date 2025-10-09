@@ -3,6 +3,8 @@ import { Emissions__factory, XAllocationPool__factory } from "@vechain/vebetterd
 import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getHasXAppClaimedQueryKey } from "../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
@@ -17,8 +19,6 @@ import { getRoundXAppsQueryKey, useRoundXApps } from "../api/contracts/xApps/hoo
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
-
-import { buildClause } from "@/utils/buildClause"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 const XAllocationPoolInterface = XAllocationPool__factory.createInterface()

@@ -2,20 +2,11 @@ import { Button, Card, HStack, Stack, VStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { Treasury__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
-import { signOut, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { signOut, useSession } from "next-auth/react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { SubmitErrorHandler, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-
-import { GrantTypeSelection } from "../GrantTypeSelection"
-import { useGrantProposalFormStore, useDraftGrantProposalStore } from "../../../../../store/useGrantProposalFormStore"
-import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-
-import { Schedule } from "./steps/Schedule"
-import { Milestones } from "./steps/Milestones"
-import { AboutGrant } from "./steps/AboutGrant"
-import { GrantsNewFormStepIndicator } from "./GrantsNewFormStepIndicator"
 
 import { useHashProposal } from "@/api/contracts/governance/hooks/useHashProposal"
 import { toaster } from "@/components/ui/toaster"
@@ -23,6 +14,15 @@ import { GrantFormData } from "@/hooks/proposals/grants/types"
 import { useCreateGrantProposal } from "@/hooks/proposals/grants/useCreateGrantProposal"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
 import { GRANT_PROPOSAL_FORM_STORE_NAME } from "@/store/useGrantProposalFormStore"
+
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useGrantProposalFormStore, useDraftGrantProposalStore } from "../../../../../store/useGrantProposalFormStore"
+import { GrantTypeSelection } from "../GrantTypeSelection"
+
+import { GrantsNewFormStepIndicator } from "./GrantsNewFormStepIndicator"
+import { AboutGrant } from "./steps/AboutGrant"
+import { Milestones } from "./steps/Milestones"
+import { Schedule } from "./steps/Schedule"
 
 // ============================================================================
 // TYPES AND CONSTANTS

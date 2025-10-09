@@ -2,11 +2,11 @@ import { Text, Card, Heading, VStack, Button } from "@chakra-ui/react"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+
 import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
-
-import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 export const EndorsementHistoryList = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()

@@ -2,12 +2,12 @@ import { Heading, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointV
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { BaseModal } from "@/components/BaseModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
 import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
 import { useRevokeXNodeDelegation } from "../../../../../hooks/useRevokeXNodeDelegation"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { BaseModal } from "@/components/BaseModal"
 
 export const RevokeXNodeDelegationModal = ({ xNode, modal }: { xNode: UserNode; modal: UseDisclosureProps }) => {
   const { t } = useTranslation()

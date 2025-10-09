@@ -1,7 +1,7 @@
 const notFoundImage = "/assets/images/image-not-found.webp"
 import { Box, Card, HStack, Image, VStack, Text, Icon } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 type Props = {
   name?: string

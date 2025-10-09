@@ -4,16 +4,16 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+import { LeafIcon } from "@/components/Icons/LeafIcon"
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+
 import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
 import { useUserActionCurrentRoundOverview } from "../../../../../../../../api/indexer/actions/useUserActionOverview"
 
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
 import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
-
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
-import { LeafIcon } from "@/components/Icons/LeafIcon"
-import { AddressIcon } from "@/components/AddressIcon"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {

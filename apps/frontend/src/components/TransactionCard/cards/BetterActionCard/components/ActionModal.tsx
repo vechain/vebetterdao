@@ -1,17 +1,17 @@
 /* eslint-disable react/jsx-no-literals */
 import { VStack, HStack, Text, Card, Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
-
-import { UserB3trActions } from "../../../../../api/indexer/actions/useUsersB3trActions"
-import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
 
 import { BaseModal } from "@/components/BaseModal"
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+import { UserB3trActions } from "../../../../../api/indexer/actions/useUsersB3trActions"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {

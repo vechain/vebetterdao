@@ -5,8 +5,8 @@ import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 
-import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { Transaction } from "../../../api/indexer/transactions/useTransactions"
+import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
 
 import { ActionModal } from "./BetterActionCard/components/ActionModal"
 

@@ -4,8 +4,8 @@ import { Dispatch, SetStateAction } from "react"
 import { useTranslation } from "react-i18next"
 import InfiniteScroll from "react-infinite-scroll-component"
 
-import { BetterActionCard } from "../../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
 import { useUsersB3trActions, UserB3trActions } from "../../../../../api/indexer/actions/useUsersB3trActions"
+import { BetterActionCard } from "../../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
 
 type Props = {
   setIsCalendarView: Dispatch<SetStateAction<boolean>>

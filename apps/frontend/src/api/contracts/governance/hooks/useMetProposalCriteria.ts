@@ -1,10 +1,10 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { ProposalType } from "../../../../types/proposals"
-
 import { useGetUserGMs } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGMRequiredByProposalType } from "@/api/contracts/governance/hooks/useGMRequiredByProposalType"
+
+import { ProposalType } from "../../../../types/proposals"
 
 /**
  * Hook to get the GM level required by proposal type

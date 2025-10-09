@@ -1,9 +1,9 @@
 import { Heading, HStack, VStack } from "@chakra-ui/react"
 
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+
 import { GrantsProposalStatusBadge } from "../../../../../components/Proposal/Grants/GrantsProposalStatusBadge"
 import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
-
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewHeaderProps = {
   proposal: ProposalEnriched | GrantProposalEnriched

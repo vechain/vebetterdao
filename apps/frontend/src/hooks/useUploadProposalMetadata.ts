@@ -1,9 +1,9 @@
 "use client"
 import { useCallback, useState } from "react"
 
-import { ProposalMetadata } from "../api/contracts/governance/getProposalsEvents"
-
 import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+import { ProposalMetadata } from "../api/contracts/governance/getProposalsEvents"
 
 /**
  * Uploads proposal metadata to IPFS.

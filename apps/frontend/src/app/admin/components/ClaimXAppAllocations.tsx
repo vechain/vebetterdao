@@ -14,11 +14,11 @@ import {
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useHasXAppClaimed } from "../../../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
+import { useXAppRoundEarnings } from "../../../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useHasXAppClaimed } from "../../../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-import { useXAppRoundEarnings } from "../../../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
 import { useClaimXAppsAllocations } from "../../../hooks/useClaimXAppsAllocations"
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()

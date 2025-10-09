@@ -7,11 +7,11 @@ import { useEffect, useMemo, useState } from "react"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
 
-import { LeaderboardRankingComponent } from "../../components/Leaderboard/LeaderboardRankingComponent"
-import { MockLeaderboard } from "../../components/Leaderboard/Leaderboard"
-import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
-import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
 import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
+import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
+import { MockLeaderboard } from "../../components/Leaderboard/Leaderboard"
+import { LeaderboardRankingComponent } from "../../components/Leaderboard/LeaderboardRankingComponent"
 
 type Props = { roundId: string }
 export const LeaderboardPageContent = ({ roundId }: Props) => {

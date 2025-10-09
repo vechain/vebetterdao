@@ -4,11 +4,11 @@ import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterd
 import { useWallet, executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
+import { gmNfts } from "@/constants/gmNfts"
+
 import { getIpfsMetadata } from "../../../ipfs/hooks/useIpfsMetadata"
 
 import { NFTMetadata } from "./useNFTImage"
-
-import { gmNfts } from "@/constants/gmNfts"
 
 const notFoundImage = "/assets/images/image-not-found.webp"
 const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress

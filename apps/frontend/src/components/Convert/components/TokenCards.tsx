@@ -5,9 +5,9 @@ import { useCallback, useEffect, useMemo } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { B3TRIcon } from "../../Icons/B3TRIcon"
-import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   amount: string

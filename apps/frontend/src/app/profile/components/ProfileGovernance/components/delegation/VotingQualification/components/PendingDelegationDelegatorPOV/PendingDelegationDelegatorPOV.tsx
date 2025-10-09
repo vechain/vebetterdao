@@ -3,9 +3,9 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { PendingDelegationItemDelegatorPOV } from "./components/PendingDelegationItemDelegatorPOV"
-
 import { useGetPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
+
+import { PendingDelegationItemDelegatorPOV } from "./components/PendingDelegationItemDelegatorPOV"
 
 type Props = {
   address: string

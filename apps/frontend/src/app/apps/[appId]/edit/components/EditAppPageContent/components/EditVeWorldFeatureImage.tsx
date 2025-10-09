@@ -1,17 +1,17 @@
 import { Flex, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { UseFormReturn } from "react-hook-form"
-import { useCallback, useEffect, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-
-import { EditAppForm } from "../EditAppPageContent"
-import { validateImage } from "../../../../../../../utils/ImageValidation"
-import { IMAGE_REQUIREMENTS, VE_WOLRD_SCALING_FACTOR, AVG_PHONE_WIDTH } from "../../../../../../../constants/XAppsMedia"
-import { VeWorldFeaturedImageGuidelines } from "../../../../../../../components/CreateEditAppForm/VeWorldFeaturedImageGuidelines"
 
 import { toaster } from "@/components/ui/toaster"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
+
+import { VeWorldFeaturedImageGuidelines } from "../../../../../../../components/CreateEditAppForm/VeWorldFeaturedImageGuidelines"
+import { IMAGE_REQUIREMENTS, VE_WOLRD_SCALING_FACTOR, AVG_PHONE_WIDTH } from "../../../../../../../constants/XAppsMedia"
+import { validateImage } from "../../../../../../../utils/ImageValidation"
+import { EditAppForm } from "../EditAppPageContent"
 
 const notFoundImage = "/assets/images/image-not-found.webp"
 

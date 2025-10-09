@@ -6,9 +6,9 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
-import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
-import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
 import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useUserActionLeaderboard } from "../../api/indexer/actions/useUserActionLeaderboard"
+import { useUserActionOverview } from "../../api/indexer/actions/useUserActionOverview"
 
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 

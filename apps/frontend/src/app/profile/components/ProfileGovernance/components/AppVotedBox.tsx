@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
-import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
-import { AppVotesGiven } from "../../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
-
 import { notFoundImage } from "@/constants"
+
+import { AppVotesGiven } from "../../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
 
 type Props = {
   appVoted: AppVotesGiven

@@ -2,15 +2,15 @@ import { Card, Tabs, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
+import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+
 import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalUserDeposit } from "../../../../../api/contracts/governance/hooks/useProposalUserDeposit"
 import { useUserSingleProposalVoteEvent } from "../../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { MilestonesActions } from "../../../../grants/components/MilestonesActions"
 import { ProposalContentAndActions } from "../ProposalContentAndActions/ProposalContentAndActions"
 import { ProposalOverviewHeader } from "../ProposalOverviewHeader/ProposalOverviewHeader"
-
-import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { GrantProposalEnriched, ProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type ProposalOverviewProps = {
   isGrant?: boolean

@@ -1,10 +1,5 @@
 import { useMemo, useState, useCallback, useEffect } from "react"
 
-import { XApp, UnendorsedApp, AllApps } from "../../../api/contracts/xApps/getXApps"
-import { sortByCreationDate, sortAlphabetically, sortByRewards } from "../utils/sortingFunctions"
-
-import { useAppsSustainabilityData } from "./useAppsSustainabilityData"
-
 import {
   FILTER_ENDORSEMENT_LOST,
   FILTER_GRACE_PERIOD,
@@ -12,6 +7,11 @@ import {
   SortOption,
   FILTER_ACTIVE_APPS,
 } from "@/types/appDetails"
+
+import { XApp, UnendorsedApp, AllApps } from "../../../api/contracts/xApps/getXApps"
+import { sortByCreationDate, sortAlphabetically, sortByRewards } from "../utils/sortingFunctions"
+
+import { useAppsSustainabilityData } from "./useAppsSustainabilityData"
 
 export const DEFAULT_SORT_OPTION: SortOption = "default"
 

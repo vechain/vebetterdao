@@ -6,9 +6,9 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 
-import { WalletIcon } from "../Icons/WalletIcon"
-import { VeBetterIcon } from "../Icons/VeBetterIcon"
 import { AddressIcon } from "../AddressIcon"
+import { VeBetterIcon } from "../Icons/VeBetterIcon"
+import { WalletIcon } from "../Icons/WalletIcon"
 
 type Props = {
   onMenuClose?: () => void

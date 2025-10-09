@@ -3,12 +3,12 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 
-import { useRemoveNodeEndorsement } from "../../../../../hooks/useRemoveNodeEndorsement"
-import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
-import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
-
 import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
+import { useRemoveNodeEndorsement } from "../../../../../hooks/useRemoveNodeEndorsement"
 
 type Props = {
   isOpen: boolean

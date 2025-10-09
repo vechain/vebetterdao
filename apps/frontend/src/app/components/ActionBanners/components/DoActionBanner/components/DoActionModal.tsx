@@ -5,8 +5,8 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 
-import { BaseModal } from "@/components/BaseModal"
 import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
+import { BaseModal } from "@/components/BaseModal"
 
 const VEPASSPORT_DOCS_URL = "https://docs.vebetterdao.org/vepassport/vepassport"
 type Props = {

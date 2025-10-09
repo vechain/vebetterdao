@@ -2,6 +2,8 @@ import { VStack, Heading, Text, Box, HStack, useMediaQuery, Card } from "@chakra
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
+
 import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
 import { useSortXappAlphabetically } from "../../../api/contracts/xApps/hooks/useSortXappAlphabetically"
@@ -10,13 +12,11 @@ import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { AppsBanner } from "../../../components/Banners/AppsBanner"
 import { JoinB3TRAppsBanner } from "../../../components/Banners/JoinB3TRAppsBanner"
 
+import { AllApps } from "./allApps/AllApps"
 import { AppsDisclaimer } from "./AppsDisclaimer"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
-import { AllApps } from "./allApps/AllApps"
-
-import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
 
 export type XAppInformations = {
   key?: string

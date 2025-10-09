@@ -2,8 +2,8 @@ import { Button, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaQuestionCircle } from "react-icons/fa"
 
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 type Props = {
   isFullWidth?: boolean

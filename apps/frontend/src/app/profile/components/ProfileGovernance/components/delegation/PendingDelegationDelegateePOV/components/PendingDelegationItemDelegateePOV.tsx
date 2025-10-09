@@ -4,13 +4,13 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { QualificationBadge } from "../../QualificationBadges"
-import { useCanUserVote } from "../../../../../../../../api/contracts/governance/hooks/useCanUserVote"
-
-import { RejectDelegationModal } from "./RejectDelegationModal"
-import { AcceptDelegationModal } from "./AcceptDelegationModal"
-
 import { AddressIcon } from "@/components/AddressIcon"
+
+import { useCanUserVote } from "../../../../../../../../api/contracts/governance/hooks/useCanUserVote"
+import { QualificationBadge } from "../../QualificationBadges"
+
+import { AcceptDelegationModal } from "./AcceptDelegationModal"
+import { RejectDelegationModal } from "./RejectDelegationModal"
 
 type Props = { address: string; isConnectedUser: boolean; delegationAddress: string }
 export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, delegationAddress }: Props) => {

@@ -1,12 +1,12 @@
 import { Card, Dialog, Text, VStack, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import { NFTWithRings } from "./GmNFT/components/NFTwithRings"
-
 import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { ShareButtons } from "@/components/ShareButtons"
 import { notFoundImage } from "@/constants"
+
+import { NFTWithRings } from "./GmNFT/components/NFTwithRings"
 
 type Props = {
   isOpen: boolean

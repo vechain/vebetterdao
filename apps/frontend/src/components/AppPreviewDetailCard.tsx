@@ -2,14 +2,14 @@ import { useDisclosure, IconButton, Card, VStack, Skeleton, HStack, Heading, Tex
 import { useCallback } from "react"
 import { FaEllipsisVertical } from "react-icons/fa6"
 
-import { useBreakpoints } from "../hooks/useBreakpoints"
-
-import { CreateEditAppFormData } from "./CreateEditAppForm/CreateEditAppForm"
-
 import { AppDetailSocials } from "@/app/apps/[appId]/components/AppDetailOverview/components/AppDetailSocials"
 import { AppCardOptionsDesktopMenu } from "@/app/apps/components/AppCardOptionsDesktopMenu"
 import { AppCardOptionsMobileModal } from "@/app/apps/components/AppCardOptionsMobileModal"
 import { notFoundImage } from "@/constants"
+
+import { useBreakpoints } from "../hooks/useBreakpoints"
+
+import { CreateEditAppFormData } from "./CreateEditAppForm/CreateEditAppForm"
 
 type Props = {
   app: CreateEditAppFormData

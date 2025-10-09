@@ -6,17 +6,17 @@ import { Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { GenericAlert } from "../../../../components/Alert/GenericAlert"
-import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
-import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
-import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-
-import { filterAmountInput } from "@/utils/filterAmountInput"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
-import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
 import { BaseModal } from "@/components/BaseModal"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import { useGetVot3Balance } from "@/hooks/useGetVot3Balance"
+import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { filterAmountInput } from "@/utils/filterAmountInput"
+
+import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import { GenericAlert } from "../../../../components/Alert/GenericAlert"
 
 type Props = {
   isSupportModalOpen: boolean

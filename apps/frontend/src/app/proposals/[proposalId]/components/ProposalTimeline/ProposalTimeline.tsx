@@ -4,14 +4,14 @@ import { t } from "i18next"
 import { Calendar } from "iconoir-react"
 import { useMemo } from "react"
 
+import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
+import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
 import {
   GrantProposalEnriched,
   ProposalEnriched,
   ProposalState,
   ProposalType,
 } from "../../../../../hooks/proposals/grants/types"
-import { useProposalInteractionDates } from "../../../../../api/contracts/governance/hooks/useProposalInteractionDates"
-import { useIsGrantRejected } from "../../../../../api/contracts/governance/hooks/useIsGrantRejected"
 
 type CustomState = ProposalState | "Created"
 type TimelineStep = {

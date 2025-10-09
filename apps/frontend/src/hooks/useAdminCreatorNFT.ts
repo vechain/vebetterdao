@@ -3,10 +3,10 @@ import { X2EarnCreator__factory } from "@vechain/vebetterdao-contracts/typechain
 import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { buildClause } from "@/utils/buildClause"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const X2EarnCreatorNftInterface = X2EarnCreator__factory.createInterface()
 type Props = { walletAddress: string; tokenId: string; onSuccess?: () => void; invalidateCache?: boolean }

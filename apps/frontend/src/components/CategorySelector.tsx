@@ -1,13 +1,3 @@
-import { useEffect, useState } from "react"
-import {
-  UseFormRegister,
-  UseFormSetValue,
-  UseFormWatch,
-  Path,
-  FieldValues,
-  RegisterOptions,
-  PathValue,
-} from "react-hook-form"
 import {
   Box,
   Text,
@@ -24,8 +14,18 @@ import {
   TagCloseTrigger,
   Portal,
 } from "@chakra-ui/react"
-import { FaSearch, FaPlus } from "react-icons/fa"
+import { useEffect, useState } from "react"
+import {
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+  Path,
+  FieldValues,
+  RegisterOptions,
+  PathValue,
+} from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { FaSearch, FaPlus } from "react-icons/fa"
 
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 type CategoryType = {

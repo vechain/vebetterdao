@@ -14,17 +14,17 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useCallback, useState, useMemo, useEffect } from "react"
-import { HiMiniArrowsUpDown } from "react-icons/hi2"
 import BigNumber from "bignumber.js"
+import { useCallback, useState, useMemo, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { HiMiniArrowsUpDown } from "react-icons/hi2"
 
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
 import { useRefillRewardsPool } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useRefillRewardsPool"
 import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
-import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
 import { filterAmountInput } from "../../../../../utils/filterAmountInput"
+import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
 type Props = {
   appId: string
   isOpen: boolean

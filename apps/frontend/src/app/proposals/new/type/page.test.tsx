@@ -1,7 +1,7 @@
-import { describe, expect, vi } from "vitest"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
 import { useTranslation } from "react-i18next"
+import { describe, expect, vi } from "vitest"
 
 import { fireEvent, render, renderHook, screen, waitFor } from "../../../../../test"
 

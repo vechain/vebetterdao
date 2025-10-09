@@ -3,12 +3,12 @@ import NextLink from "next/link"
 import { useMemo } from "react"
 import { FiArrowUpRight } from "react-icons/fi"
 
-import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { notFoundImage } from "@/constants"
+
 import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
 
 import { LatestAllocationDetails } from "./LatestAllocationDetails"
-
-import { notFoundImage } from "@/constants"
 
 type Props = {
   appId: string

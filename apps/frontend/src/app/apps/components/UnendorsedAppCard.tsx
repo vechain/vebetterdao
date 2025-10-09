@@ -13,19 +13,20 @@ import {
   LinkBox,
   LinkOverlay,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
-import { useTranslation } from "react-i18next"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import NextLink from "next/link"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
+import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 
 import { useAppEndorsementStatus } from "../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
-import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
 const notFoundImage = "/assets/images/image-not-found.webp"
 import { useXAppStatusConfig } from "../[appId]/hooks/useXAppStatusConfig"
 
-import NewAppIcon from "@/components/Icons/svg/new-app.svg"
 type Props = {
   appId: string
   isNewApp: boolean

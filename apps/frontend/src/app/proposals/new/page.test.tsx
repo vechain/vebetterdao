@@ -1,6 +1,6 @@
-import { describe, expect } from "vitest"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { describe, expect } from "vitest"
 
 import { fireEvent, render, screen, waitFor } from "../../../../test"
 

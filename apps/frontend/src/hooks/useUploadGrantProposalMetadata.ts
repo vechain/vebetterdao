@@ -1,9 +1,9 @@
 "use client"
 import { useCallback, useState } from "react"
 
-import { GrantFormData } from "./proposals/grants/types"
-
 import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+import { GrantFormData } from "./proposals/grants/types"
 
 type UploadData = (GrantFormData & { title?: string; shortDescription?: string }) | GrantFormData["milestones"]
 /**

@@ -5,10 +5,10 @@ import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-import { useWithdrawDeposits } from "../../../../hooks/useWithdrawDeposits"
-import { useProposalClaimableUserDeposits } from "../../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
-
 import VOT3Icon from "@/components/Icons/svg/vot3.svg"
+
+import { useProposalClaimableUserDeposits } from "../../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { useWithdrawDeposits } from "../../../../hooks/useWithdrawDeposits"
 
 const compactFormatter = getCompactFormatter(2)
 export const ClaimTokensBanner = () => {

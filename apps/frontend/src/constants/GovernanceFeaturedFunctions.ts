@@ -1,3 +1,7 @@
+import { getConfig, getContractsConfig } from "@repo/config"
+import { EnvConfig } from "@repo/config/contracts"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
 import {
   B3TRGovernorJson,
   TimeLockContractJson,
@@ -5,11 +9,7 @@ import {
   TreasuryContractJson,
   X2EarnAppsJson,
 } from "@vechain/vebetterdao-contracts"
-import { getConfig, getContractsConfig } from "@repo/config"
 import { abi } from "thor-devkit"
-import { JsonContractType, resolveAbiFunctionFromCalldata } from "@repo/utils/ContractUtils"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { EnvConfig } from "@repo/config/contracts"
 
 import { ProposalFormAction } from "../store/useProposalFormStore"
 const config = getConfig()

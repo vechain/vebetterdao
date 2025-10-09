@@ -3,8 +3,8 @@ import { UilClock } from "@iconscout/react-unicons"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 
-import { ProposalSessionVot3 } from "./components/ProposalSessionVot3/ProposalSessionVot3"
 import { ProposalQuorumStatus } from "./components/ProposalQuorumStatus/ProposalQuorumStatus"
+import { ProposalSessionVot3 } from "./components/ProposalSessionVot3/ProposalSessionVot3"
 
 type Props = {
   quorumQuery: UseQueryResult<string, unknown>

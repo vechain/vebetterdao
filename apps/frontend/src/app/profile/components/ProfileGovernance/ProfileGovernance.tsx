@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 
+import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
+
 import { useUserProposalsVoteEvents } from "../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
 import { useUserVotedProposals } from "../../../../api/contracts/governance/hooks/useUserVotedProposals"
 import { useUserTopVotedApps } from "../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
@@ -15,17 +18,14 @@ import { useUserCreatedProposal } from "../../../../hooks/proposals/common/useUs
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { useRetrieveProfilIdentity } from "../utils/useRetrieveProfilIdentity"
 
+import { CurrentDelegation } from "./components/delegation/CurrentDelegation/CurrentDelegation"
+import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV/PendingDelegationDelegateePOV"
+import { VotingQualification } from "./components/delegation/VotingQualification/VotingQualification"
 import { EmptyStateGovernance } from "./components/EmptyStateGovernance"
 import { PaginatedProposals } from "./components/PaginatedProposals"
 import { PaginatedTopVotedApps } from "./components/PaginatedTopVotedApps"
 import { PreviewCreatedProposals } from "./components/PreviewCreatedProposals"
 import { TopVotedApps } from "./components/TopVotedApps"
-import { CurrentDelegation } from "./components/delegation/CurrentDelegation/CurrentDelegation"
-import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV/PendingDelegationDelegateePOV"
-import { VotingQualification } from "./components/delegation/VotingQualification/VotingQualification"
-
-import { EmptyState } from "@/components/ui/empty-state"
-import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
 
 enum ListView {
   ALL,

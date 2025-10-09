@@ -2,11 +2,11 @@ import { Box, Button, HStack, Image, Link, Text, VStack, Icon } from "@chakra-ui
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { DISCORD_URL } from "../../../../../constants/links"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../constants/AnalyticsEvents"
-
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../constants/AnalyticsEvents"
+import { DISCORD_URL } from "../../../../../constants/links"
 
 export const ConnectWithCreators = () => {
   const { t } = useTranslation()

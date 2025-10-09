@@ -2,11 +2,11 @@ import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreak
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useRejectEntityLink } from "../../../../../../../../../hooks/useRejectEntityLink"
-import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { BaseModal } from "@/components/BaseModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+import { useRejectEntityLink } from "../../../../../../../../../hooks/useRejectEntityLink"
 
 export const RejectLinkingModal = ({
   modal,

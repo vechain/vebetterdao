@@ -6,6 +6,14 @@ import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
+
 import { useGetProposalDeposits } from "../../../../../api/contracts/governance/hooks/useGetProposalDeposits"
 import { useHasVotedInProposals } from "../../../../../api/contracts/governance/hooks/useHasVotedInProposals"
 import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
@@ -35,14 +43,6 @@ import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVote
 import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
 import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
 import { UserInteractionBadges } from "../UserInteractionBadges/UserInteractionBadges"
-
-import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
-import AbstainIcon from "@/components/Icons/svg/abstain.svg"
-import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
 
 export const ProposalInteractionCard = ({
   proposal,

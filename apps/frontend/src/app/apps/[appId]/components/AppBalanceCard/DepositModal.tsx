@@ -7,16 +7,16 @@ import { Controller, useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { IoAddCircleOutline } from "react-icons/io5"
 
-import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
-import { useDepositToAppBalance } from "../../../../../hooks/useDepositToAppBalance"
-import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
-import { CustomModalContent } from "../../../../../components/CustomModalContent"
-import { useXApp } from "../../../../../api/contracts/xApps/hooks/useXApp"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useXApp } from "../../../../../api/contracts/xApps/hooks/useXApp"
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { B3TRIcon } from "../../../../../components/Icons/B3TRIcon"
+import { useDepositToAppBalance } from "../../../../../hooks/useDepositToAppBalance"
+import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
 
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export type Props = {
   appId: string

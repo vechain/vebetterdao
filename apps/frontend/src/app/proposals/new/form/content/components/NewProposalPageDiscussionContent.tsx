@@ -1,22 +1,22 @@
 import "@uiw/react-md-editor/markdown-editor.css"
 import { Box, Button, Card, Field, HStack, Heading, Stack, Text, VStack, useMediaQuery } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
-import dynamic from "next/dynamic"
-import rehypeSanitize from "rehype-sanitize"
-import { useTranslation } from "react-i18next"
 import { Controller, useForm } from "react-hook-form"
-import { useWallet } from "@vechain/vechain-kit"
+import { useTranslation } from "react-i18next"
+import rehypeSanitize from "rehype-sanitize"
 
-import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants/AnalyticsEvents"
+
 import {
   updateMarkdownTemplatePlaceholders,
   validateProposalTemplate,
 } from "../../../../../../constants/GovernanceProposalTemplate"
-import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { useUploadProposalMetadata } from "../../../../../../hooks/useUploadProposalMetadata"
-
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants/AnalyticsEvents"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 type FormData = {

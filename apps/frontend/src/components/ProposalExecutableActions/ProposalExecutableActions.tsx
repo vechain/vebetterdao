@@ -5,11 +5,11 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { abi } from "thor-devkit"
 
-import { ProposalFormAction } from "../../store/useProposalFormStore"
-
 import { ExecutableFunctionCard } from "@/app/proposals/new/form/functions/details/components/ExecutableFunctionCard"
 // This is to reuse the same components of the form. This is a read-only version of the form
 import { FormData as NewProposalFormData } from "@/app/proposals/new/form/functions/details/components/NewProposalForm"
+
+import { ProposalFormAction } from "../../store/useProposalFormStore"
 
 type Props = {
   actions: ProposalFormAction[]

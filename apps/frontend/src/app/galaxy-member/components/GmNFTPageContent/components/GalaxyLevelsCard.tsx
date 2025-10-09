@@ -4,12 +4,12 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
-import { UserGM, useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { useGMMaxLevel } from "../../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
-
 import { ToggleTip } from "@/components/ui/toggle-tip"
 import { gmNfts } from "@/constants/gmNfts"
+
+import { UserGM, useGetUserGMs } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(0)

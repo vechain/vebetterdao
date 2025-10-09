@@ -3,10 +3,10 @@ import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa"
 
-import { useBreakpoints } from "../../../../hooks/useBreakpoints"
-
-import { ConditionalWrapper } from "@/components/ConditionalWrapper"
 import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
+import { ConditionalWrapper } from "@/components/ConditionalWrapper"
+
+import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
 export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()

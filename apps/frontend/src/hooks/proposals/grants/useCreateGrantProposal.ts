@@ -4,6 +4,9 @@ import { EnhancedClause, useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { buildClause } from "@/utils/buildClause"
+
 import { getAllProposalsStateQueryKey } from "../../../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalClaimableUserDepositsQueryKey } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalsEventsQueryKey } from "../../../api/contracts/governance/hooks/useProposalsEvents"
@@ -12,9 +15,6 @@ import { getEventsKey } from "../../useEvents"
 import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
 
 import { GrantFormData } from "./types"
-
-import { buildClause } from "@/utils/buildClause"
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const governorContractAddress = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()

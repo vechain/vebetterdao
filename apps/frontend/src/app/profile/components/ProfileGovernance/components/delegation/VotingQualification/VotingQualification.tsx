@@ -3,6 +3,8 @@ import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
+
 import { useCanUserVote } from "../../../../../../../api/contracts/governance/hooks/useCanUserVote"
 import { useGetDelegatee } from "../../../../../../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useGetPendingDelegationsDelegateePOV } from "../../../../../../../api/contracts/vePassport/hooks/useGetPendingDelegationsDelegateePOV"
@@ -10,8 +12,6 @@ import { useGetPendingDelegationsDelegateePOV } from "../../../../../../../api/c
 import { DelegationModal } from "./components/DelegationModal"
 import { DelegatorDelegations } from "./components/DelegatorDelegations/DelegatorDelegations"
 import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV/PendingDelegationDelegatorPOV"
-
-import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
 
 type Props = {
   address: string

@@ -7,10 +7,10 @@ import { useMemo, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
-import { useAccessControl } from "../../../hooks/useAccessControl"
-import { CONTRACT_LIST } from "../../../constants/contractList"
 import { useHasRole } from "../../../api/contracts/account/hooks/useHasRole"
+import { CONTRACT_LIST } from "../../../constants/contractList"
+import { useAccessControl } from "../../../hooks/useAccessControl"
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
 
 type UpdateRoleCardInput = {
   contract?: string

@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { describe, expect, it } from "vitest"
 
 import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
-import FormProposalLayout from "../layout"
 import { GovernanceProposalTemplate, removePlaceholders } from "../../../../../constants/GovernanceProposalTemplate"
+import FormProposalLayout from "../layout"
 
 import NewProposalPageDiscussion from "./page"
 const mockRouterPush = vi.fn()

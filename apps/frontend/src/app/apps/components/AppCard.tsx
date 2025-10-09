@@ -2,6 +2,8 @@ import { Card, VStack, HStack, Skeleton, IconButton, Image, Text, Box, useDisclo
 import { useRouter } from "next/navigation"
 import { FaEllipsisVertical } from "react-icons/fa6"
 
+import { notFoundImage } from "@/constants"
+
 import { XApp } from "../../../api/contracts/xApps/getXApps"
 import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
@@ -10,8 +12,6 @@ import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { AppCardInnerDetails } from "./AppCardInnerDetails"
 import { AppCardOptionsDesktopMenu } from "./AppCardOptionsDesktopMenu"
 import { AppCardOptionsMobileModal } from "./AppCardOptionsMobileModal"
-
-import { notFoundImage } from "@/constants"
 
 type Props = { xApp: XApp }
 export const AppCard = ({ xApp }: Props) => {

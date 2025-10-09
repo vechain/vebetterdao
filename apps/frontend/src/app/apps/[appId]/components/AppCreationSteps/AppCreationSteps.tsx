@@ -3,13 +3,13 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 
+import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
+
 import { useIsAppUnendorsed } from "../../../../../api/contracts/xApps/hooks/endorsement/useIsAppUnendorsed"
 import { useEndorsementScoreThreshold } from "../../../../../api/contracts/xApps/hooks/useEndorsementScoreThreshold"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 import { StepBoxes } from "./components/StepBoxes"
-
-import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
 
 export const AppCreationSteps = () => {
   const { t } = useTranslation()

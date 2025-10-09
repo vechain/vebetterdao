@@ -3,8 +3,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
 import { MotionVStack } from "../../components/MotionVStack"
+import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
 const ProfilePageContent = dynamic(
   () => import("./components/ProfilePageContent").then(mod => mod.ProfilePageContent),
   {

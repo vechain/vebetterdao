@@ -4,14 +4,14 @@ import { useCallback, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
+import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
+
 import { WalletAddressInput } from "../../../../../../../components/Input/WalletAddressInput"
 import { useCurrentAppAdmin } from "../../../../../hooks/useCurrentAppAdmin"
 import { AdminAppForm } from "../../AdminAppPageContent"
 
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
 import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
-
-import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
 type Props = { form: UseFormReturn<AdminAppForm> }
 export const EditAppAddresses = ({ form }: Props) => {

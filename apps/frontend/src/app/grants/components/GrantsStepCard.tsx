@@ -1,21 +1,22 @@
 /* eslint-disable react/no-array-index-key */
 import { Box, Button, Card, Flex, Heading, HStack, Icon, List, Steps, Text, VStack } from "@chakra-ui/react"
 import { UilArrowLeft, UilTimes } from "@iconscout/react-unicons"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { motion, AnimatePresence, useAnimate } from "framer-motion"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
-import { useWallet, useWalletModal } from "@vechain/vechain-kit"
-
-import { RequirementModal } from "../../proposals/components/components/RequirementModal"
-import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
-
-import { GrantsStepIndicator } from "./GrantsStepIndicator"
 
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { useBreakpoints } from "@/hooks/useBreakpoints"
+
+import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { RequirementModal } from "../../proposals/components/components/RequirementModal"
+
+import { GrantsStepIndicator } from "./GrantsStepIndicator"
+
 export type Step = {
   key: string
   title: string

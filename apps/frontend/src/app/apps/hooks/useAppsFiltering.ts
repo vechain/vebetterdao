@@ -1,10 +1,5 @@
 import { useState, useMemo } from "react"
 
-import { AllApps } from "../../../api/contracts/xApps/getXApps"
-import { useXAppsCategories } from "../../../api/contracts/xApps/hooks/useXAppsCategories"
-
-import { SortedAppsWithStatus } from "./useAppsSorting"
-
 import {
   FILTER_ACTIVE_APPS,
   FILTER_NEW_APPS,
@@ -12,6 +7,12 @@ import {
   FILTER_ENDORSEMENT_LOST,
   SortOption,
 } from "@/types/appDetails"
+
+import { AllApps } from "../../../api/contracts/xApps/getXApps"
+import { useXAppsCategories } from "../../../api/contracts/xApps/hooks/useXAppsCategories"
+
+import { SortedAppsWithStatus } from "./useAppsSorting"
+
 /**
  * Hook for filtering apps by status, category, and search query
  * @param sortedApp Sorted app collections

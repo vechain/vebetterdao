@@ -2,11 +2,11 @@ import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreak
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ExclamationTriangle } from "../../../../../../../../../../components/Icons/ExclamationTriangle"
-
 import { BaseModal } from "@/components/BaseModal"
 import { useRemovePendingDelegationDelegatorPOV } from "@/hooks/useRemovePendingDelegationDelegatorPOV"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../../../components/Icons/ExclamationTriangle"
 
 export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosureProps; delegatee: string }) => {
   const { t } = useTranslation()

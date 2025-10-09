@@ -3,12 +3,12 @@ import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
+import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
+
 import { getXAppMetadataQueryKey } from "../api/contracts/xApps/hooks/useXAppMetadata"
+import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type useUpdateAppDetailsProps = {

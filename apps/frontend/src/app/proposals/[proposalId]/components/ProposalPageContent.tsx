@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 
+import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+
 import { useIsDepositReached } from "../../../../api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalInteractionDates } from "../../../../api/contracts/governance/hooks/useProposalInteractionDates"
 import { useProposalUserDeposit } from "../../../../api/contracts/governance/hooks/useProposalUserDeposit"
@@ -20,8 +22,6 @@ import { ProposalOverviewHeader } from "./ProposalOverviewHeader/ProposalOvervie
 import { ProposalShareModal } from "./ProposalShareModal/ProposalShareModal"
 import { ProposalTimeline } from "./ProposalTimeline/ProposalTimeline"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList/ProposalVoteCommentList"
-
-import { ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
 
 type Props = {
   proposalId: string

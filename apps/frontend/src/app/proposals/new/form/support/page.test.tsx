@@ -1,17 +1,18 @@
-import * as router from "next/navigation"
-import * as vechainKit from "@vechain/vechain-kit"
-import { vi } from "vitest"
-import { fireEvent, screen } from "@testing-library/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { fireEvent, screen } from "@testing-library/react"
+import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { vi } from "vitest"
+
+import * as apiHooks from "@/api"
+import * as hooks from "@/hooks"
+import * as store from "@/store"
 
 import { render, waitFor } from "../../../../../../test"
 import FormProposalLayout from "../layout"
 
 import NewProposalSupport from "./page"
 
-import * as hooks from "@/hooks"
-import * as apiHooks from "@/api"
-import * as store from "@/store"
 /**
  * Check for the existence of the functions listed in the dev contracts
  */

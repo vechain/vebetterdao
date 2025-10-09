@@ -3,11 +3,11 @@ import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { EnhancedClause } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getAppsEligibleInNextRoundQueryKey } from "../api/contracts/xApps/hooks/useAppsEligibleInNextRound"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type BuildClausesProps = {

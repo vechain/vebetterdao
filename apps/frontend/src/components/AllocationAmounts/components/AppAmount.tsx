@@ -3,11 +3,11 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 import NextLink from "next/link"
 
-import { B3TRIcon } from "../../Icons/B3TRIcon"
-import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
-import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
-
 import { notFoundImage } from "@/constants"
+
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   xAppId?: string

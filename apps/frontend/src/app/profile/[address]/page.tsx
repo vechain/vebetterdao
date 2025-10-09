@@ -3,11 +3,12 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-import { MotionVStack } from "../../../components/MotionVStack"
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { isValid } from "../../../utils/AddressUtils/AddressUtils"
-
 import Custom404 from "@/app/not-found"
+
+import { MotionVStack } from "../../../components/MotionVStack"
+import { isValid } from "../../../utils/AddressUtils/AddressUtils"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 const ProfilePageContent = dynamic(
   () => import("../components/ProfilePageContent").then(mod => mod.ProfilePageContent),
   {

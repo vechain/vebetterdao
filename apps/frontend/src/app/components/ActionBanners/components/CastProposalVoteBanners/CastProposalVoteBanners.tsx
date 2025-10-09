@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { toIPFSURL } from "../../../../../utils/ipfs"
-import { useIpfsMetadata } from "../../../../../api/ipfs/hooks/useIpfsMetadata"
-import { ProposalMetadata } from "../../../../../api/contracts/governance/getProposalsEvents"
-
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+
+import { ProposalMetadata } from "../../../../../api/contracts/governance/getProposalsEvents"
+import { useIpfsMetadata } from "../../../../../api/ipfs/hooks/useIpfsMetadata"
+import { toIPFSURL } from "../../../../../utils/ipfs"
 
 type Props = {
   id: string

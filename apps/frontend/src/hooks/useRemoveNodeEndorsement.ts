@@ -3,6 +3,9 @@ import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { buildClause } from "@/utils/buildClause"
+
 import { getIsBlacklistedQueryKey } from "../api/contracts/vePassport/hooks/useIsBlacklisted"
 import { getAppEndorsementScoreQueryKey } from "../api/contracts/xApps/hooks/endorsement/useAppEndorsementScore"
 import { getEndorsersQueryKey } from "../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
@@ -13,9 +16,6 @@ import { getXAppsQueryKey } from "../api/contracts/xApps/hooks/useXApps"
 import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
-import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 type Props = { appId?: string; nodeId?: string; onSuccess?: () => void }

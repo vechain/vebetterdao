@@ -2,10 +2,10 @@
 import { getConfig } from "@repo/config"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 
-import { getGrantProposalMetadataQueryKey } from "./useStandardOrGrantProposalDetails"
-
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
+
+import { getGrantProposalMetadataQueryKey } from "./useStandardOrGrantProposalDetails"
 
 const grantsManagerContractAddress = getConfig().grantsManagerContractAddress
 const grantsManagerInterface = GrantsManager__factory.createInterface()

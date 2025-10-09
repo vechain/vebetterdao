@@ -2,10 +2,10 @@ import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback } from "react"
 
-import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 import { getGMMaxLevelQueryKey } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { buildClause } from "@/utils/buildClause"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = { maxLevel: number; onSuccess?: () => void }

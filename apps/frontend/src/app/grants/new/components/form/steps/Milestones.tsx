@@ -29,21 +29,21 @@ import {
 import { Trans, useTranslation } from "react-i18next"
 import { LuArrowRight } from "react-icons/lu"
 
-import { useMilestoneMinimumAmount } from "../../../../../../hooks/proposals/grants/useMilestoneMinimumAmount"
-import { MAX_TOOLING_GRANT_AMOUNT, MAX_DAPP_GRANT_AMOUNT } from "../../../../../../constants/proposals"
-import { FormMoneyInput } from "../../../../../../components/CustomFormFields/FormMoneyInput"
-import { FormItem } from "../../../../../../components/CustomFormFields/FormItem"
-import { GenericAlert } from "../../../../../components/Alert/GenericAlert"
-
-import { GrantFormData } from "@/hooks/proposals/grants/types"
-import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
+import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
+import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
 import {
   validateMilestoneAmountTotal,
   validateMilestoneEndDate,
   validateMilestoneStartDate,
 } from "@/components/CustomFormFields/validators"
-import { FormDateInput } from "@/components/CustomFormFields/FormDateInput"
-import { FormCheckbox } from "@/components/CustomFormFields/FormCheckbox"
+import { GRANT_TERMS_AND_CONDITIONS_LINK } from "@/constants/links"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+
+import { FormItem } from "../../../../../../components/CustomFormFields/FormItem"
+import { FormMoneyInput } from "../../../../../../components/CustomFormFields/FormMoneyInput"
+import { MAX_TOOLING_GRANT_AMOUNT, MAX_DAPP_GRANT_AMOUNT } from "../../../../../../constants/proposals"
+import { useMilestoneMinimumAmount } from "../../../../../../hooks/proposals/grants/useMilestoneMinimumAmount"
+import { GenericAlert } from "../../../../../components/Alert/GenericAlert"
 
 // ============================================================================
 // Constants & Utilities

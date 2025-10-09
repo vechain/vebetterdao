@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react"
 
-import { useAllProposalsDepositReached } from "../../../api/contracts/governance/hooks/useAllProposalsDepositReached"
-
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { ProposalFilter, StateFilter } from "@/store/useProposalFilters"
+
+import { useAllProposalsDepositReached } from "../../../api/contracts/governance/hooks/useAllProposalsDepositReached"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.

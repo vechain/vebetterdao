@@ -4,8 +4,8 @@ import { useCurrentBlock } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 
-import { useProposalSnapshot } from "./useProposalSnapshot"
 import { useProposalDeadline } from "./useProposalDeadline"
+import { useProposalSnapshot } from "./useProposalSnapshot"
 
 const blockTime = getConfig().network.blockTime
 export const getProposalInteractionDatesQueryKey = (proposalId: string) => ["proposal-interaction-dates", proposalId]

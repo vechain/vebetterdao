@@ -24,28 +24,29 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LuChevronLeft, LuChevronRight, LuFileText } from "react-icons/lu"
 
-import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
+
+import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
 import { ConvertModal } from "../../../components/Convert/components/Modal/ConvertModal"
 import { EmptyStateCard } from "../../../components/EmptyStateCard"
 import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
 import { SearchField } from "../../../components/SearchField/SearchField"
 import { SelectField } from "../../../components/SelectField/SelectField"
-import { GrantProposalEnriched, ProposalState } from "../../../hooks/proposals/grants/types"
-import { useBreakpoints } from "../../../hooks/useBreakpoints"
-import { useDebounce } from "../../../hooks/useDebounce"
-import { useMilestoneClaimedEvents } from "../../../hooks/proposals/grants/useMilestoneClaimedEvents"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { GrantProposalEnriched, ProposalState } from "../../../hooks/proposals/grants/types"
+import { useMilestoneClaimedEvents } from "../../../hooks/proposals/grants/useMilestoneClaimedEvents"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
+import { useDebounce } from "../../../hooks/useDebounce"
 import { ProposalType } from "../../../types/proposals"
-import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
 
-import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsBanners } from "./Banner/GrantsBanners"
+import { GrantsProposalCard } from "./GrantsProposalCard"
 import { GrantsStatsCards } from "./GrantsStatsCards"
 import { GrantsStepsCard } from "./GrantsStepCard"
 
-import { ProposalFilter, StateFilter, useProposalFilters } from "@/store/useProposalFilters"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 const pageSize = 10
 
 enum GrantsStep {

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { buildQueryString } from "../../utils/buildQueryString"
-
 import { SubmissionsResponse } from "@/app/api/app/creator/submission/route"
+
+import { buildQueryString } from "../../utils/buildQueryString"
 
 export const creatorSubmissionQueryKey = (walletAddress: string) => ["FETCH_CREATOR_SUBMISSION", walletAddress]
 /**

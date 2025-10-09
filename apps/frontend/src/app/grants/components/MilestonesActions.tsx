@@ -7,14 +7,14 @@ import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
+import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
+import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
+import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
+
 import { GenericAlert } from "../../components/Alert/GenericAlert"
 
 import { MilestoneItem } from "./MilestoneItem"
-
-import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
-import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
-import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
-import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================

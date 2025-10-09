@@ -1,16 +1,16 @@
 import { Box, Circle, Flex, Image, Input, Text, VStack } from "@chakra-ui/react"
-import { UseFormReturn } from "react-hook-form"
-import { useCallback, useRef, useState } from "react"
 import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useRef, useState } from "react"
+import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { EditAppForm } from "../EditAppPageContent"
-import { validateImage } from "../../../../../../../utils/ImageValidation"
-import { IMAGE_REQUIREMENTS, LOGO_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
-
-import { handleImageCompression } from "@/utils/imageListCompression"
-import { blobToBase64 } from "@/utils/BlobUtils"
 import { toaster } from "@/components/ui/toaster"
+import { blobToBase64 } from "@/utils/BlobUtils"
+import { handleImageCompression } from "@/utils/imageListCompression"
+
+import { IMAGE_REQUIREMENTS, LOGO_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
+import { validateImage } from "../../../../../../../utils/ImageValidation"
+import { EditAppForm } from "../EditAppPageContent"
 
 const notFoundImage = "/assets/images/image-not-found.webp"
 

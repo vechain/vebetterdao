@@ -3,14 +3,14 @@ import { NodeManagement__factory, GalaxyMember__factory } from "@vechain/vebette
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
+import { buildClause } from "@/utils/buildClause"
+
 import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
 import { getUserNodesQueryKey, UserNode } from "../api/contracts/xNodes/useGetUserNodes"
 import { getIsNodeHolderQueryKey } from "../api/contracts/xNodes/useIsNodeHolder"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
-import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const GmInterface = GalaxyMember__factory.createInterface()

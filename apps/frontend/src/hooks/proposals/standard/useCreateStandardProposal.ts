@@ -5,14 +5,14 @@ import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+
 import { getAllProposalsStateQueryKey } from "../../../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalClaimableUserDepositsQueryKey } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getProposalsEventsQueryKey } from "../../../api/contracts/governance/hooks/useProposalsEvents"
 import { useBuildTransaction } from "../../useBuildTransaction"
 import { getEventsKey } from "../../useEvents"
 import { getAllProposalsMetadataQueryKey } from "../grants/useStandardOrGrantProposalDetails"
-
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()

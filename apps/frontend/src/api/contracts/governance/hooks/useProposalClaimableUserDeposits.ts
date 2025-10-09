@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { useThor, executeMultipleClausesCall } from "@vechain/vechain-kit"
 
-import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
-import { useProposalEnriched } from "../../../../hooks/proposals/common/useProposalEnriched"
-
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+
+import { useProposalEnriched } from "../../../../hooks/proposals/common/useProposalEnriched"
+import { ProposalFilter, StateFilter } from "../../../../store/useProposalFilters"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi

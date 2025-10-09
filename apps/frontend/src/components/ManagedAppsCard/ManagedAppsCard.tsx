@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 
 import { useAccountAppPermissions } from "../../api/contracts/xApps/hooks/useAccountAppPermissions"
 
-import { AppDetails } from "./components/AppDetails"
 import { AllManagedAppsModal, AppAdministrationRole } from "./components/AllManagedAppsModal"
+import { AppDetails } from "./components/AppDetails"
 
 export const ManagedAppsCard = () => {
   const { t } = useTranslation()

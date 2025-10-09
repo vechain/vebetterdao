@@ -3,9 +3,9 @@ import { useCurrentBlock } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 
-import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
 import { RoundCreated, useAllocationsRoundsEvents } from "./useAllocationsRoundsEvents"
 import { RoundState, useAllocationsRoundState } from "./useAllocationsRoundState"
+import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
 
 export type AllocationRoundWithState = RoundCreated & {
   state?: keyof typeof RoundState

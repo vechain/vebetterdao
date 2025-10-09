@@ -1,6 +1,6 @@
-import { GMLevelOverview } from "../../../indexer/gm/useGMLevelsOverview"
-
 import { gmNfts } from "@/constants/gmNfts"
+
+import { GMLevelOverview } from "../../../indexer/gm/useGMLevelsOverview"
 
 type PotentialRewards = {
   potentialRewards: number

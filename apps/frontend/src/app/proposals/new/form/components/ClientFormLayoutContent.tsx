@@ -1,7 +1,7 @@
 "use client"
 import { Grid, GridItem } from "@chakra-ui/react"
-import { useLayoutEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useLayoutEffect } from "react"
 
 import { useNewProposalPageGuard } from "../hooks/useNewProposalPageGuard"
 

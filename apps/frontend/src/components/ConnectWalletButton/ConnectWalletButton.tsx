@@ -3,9 +3,9 @@ import { keyframes } from "@emotion/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 
-import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
-
 import { useColorModeValue } from "@/components/ui/color-mode"
+
+import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
 
 const rotateAnimation = keyframes`
   0% { background-position: 0% 50%; }

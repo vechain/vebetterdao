@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 
 import { AdminAppForm } from "../../AdminAppPageContent"
 
-import { ModeratorItem } from "./components/ModeratorItem"
 import { AddModeratorButton } from "./components/AddModeratorButton"
+import { ModeratorItem } from "./components/ModeratorItem"
 
 interface Props {
   form: UseFormReturn<AdminAppForm>

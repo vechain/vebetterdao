@@ -1,8 +1,8 @@
 import { Box, Flex, HStack, Image, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { useQueries } from "@tanstack/react-query"
+import BigNumber from "bignumber.js"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import BigNumber from "bignumber.js"
 
 import { getXAppMetadata } from "../../../../api/contracts/xApps/getXAppMetadata"
 import { getXAppMetadataQueryKey } from "../../../../api/contracts/xApps/hooks/useXAppMetadata"

@@ -2,16 +2,16 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { ResolvingMetadata, Metadata } from "next"
 
+import { decodeEventLog } from "@/api/contracts/governance/getEvents"
+import { ProposalMetadata } from "@/api/contracts/governance/getProposalsEvents"
+import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
+import { getDefaultMetadata } from "@/utils/metadata"
+
 import { getIpfsMetadata } from "../../../api/ipfs/hooks/useIpfsMetadata"
 import { getNodeJsThorClient } from "../../../utils/getNodeJsThorClient"
 import { toIPFSURL } from "../../../utils/ipfs"
 
 import { Props } from "./page"
-
-import { decodeEventLog } from "@/api/contracts/governance/getEvents"
-import { ProposalMetadata } from "@/api/contracts/governance/getProposalsEvents"
-import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
-import { getDefaultMetadata } from "@/utils/metadata"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`

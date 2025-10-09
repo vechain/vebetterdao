@@ -1,15 +1,16 @@
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
 import { vi } from "vitest"
 
+import * as store from "@/store"
+
+import { address } from "../../../../../../../__mocks__"
+import { transferAction } from "../../../../../../../__mocks__/Actions"
 import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
 import FormProposalLayout from "../../layout"
-import { transferAction } from "../../../../../../../__mocks__/Actions"
-import { address } from "../../../../../../../__mocks__"
 
 import NewProposalFunctionsDetails from "./page"
 
-import * as store from "@/store"
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 /**
  * Check for the existence of the functions listed in the dev contracts

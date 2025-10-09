@@ -4,9 +4,9 @@ import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 
-import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
-
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
 
 interface NewApp {
   name: string

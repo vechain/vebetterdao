@@ -20,8 +20,8 @@
  *   markerPosition={75}
  * />
  */
-import React from "react"
 import { Box } from "@chakra-ui/react"
+import React from "react"
 interface MulticolorBarSegment {
   percentage: number
   color: string

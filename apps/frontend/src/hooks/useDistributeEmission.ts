@@ -3,6 +3,8 @@ import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { getAllocationAmountQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationAmount"
@@ -14,8 +16,6 @@ import {
 import { getRoundXAppsQueryKey } from "../api/contracts/xApps/hooks/useRoundXApps"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 type useDistributeEmissionsProps = {

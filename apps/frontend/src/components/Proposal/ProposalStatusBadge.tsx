@@ -5,10 +5,10 @@ import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 
-import { DotSymbol } from "../DotSymbol"
-import { useIsDepositReached } from "../../api/contracts/governance/hooks/useIsDepositReached"
-
 import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { useIsDepositReached } from "../../api/contracts/governance/hooks/useIsDepositReached"
+import { DotSymbol } from "../DotSymbol"
 
 type Props = {
   proposalId: string

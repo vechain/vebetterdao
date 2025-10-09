@@ -3,13 +3,6 @@ import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
-import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
-import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
-
-import { useBuildTransaction } from "./useBuildTransaction"
-
 import {
   getNodeIdAttachedQueryKey,
   useGetNodeIdAttached,
@@ -17,6 +10,14 @@ import {
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { buildClause } from "@/utils/buildClause"
+
+import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
+import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+import { getUserNodesQueryKey } from "../api/contracts/xNodes/useGetUserNodes"
+
+import { useBuildTransaction } from "./useBuildTransaction"
+
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = {
   gmId: string

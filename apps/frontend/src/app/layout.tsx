@@ -1,9 +1,9 @@
 import { getConfig } from "@repo/config"
 import { Metadata, Viewport } from "next"
 
-import { ClientWrapper } from "./client-wrapper"
-
 import { APPLICATION_NAME, IMAGE_DIMENSION, pagesMetadata } from "@/metadata/pages"
+
+import { ClientWrapper } from "./client-wrapper"
 
 // Get metadata of the platform
 const basePath = getConfig()?.basePath

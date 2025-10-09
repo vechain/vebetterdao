@@ -2,9 +2,9 @@ import { HStack, VStack, Text, Heading, Card, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
-import { ProposalBox } from "./ProposalBox"
-
 import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+
+import { ProposalBox } from "./ProposalBox"
 
 type Props = {
   firstProposals?: ProposalEnriched[] | GrantProposalEnriched[]

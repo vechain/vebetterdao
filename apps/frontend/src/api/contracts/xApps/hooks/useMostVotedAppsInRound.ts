@@ -3,8 +3,8 @@ import { useMemo } from "react"
 import { XApp } from "../getXApps"
 
 import { useRoundXApps } from "./useRoundXApps"
-import { useXAppsShares } from "./useXAppShares"
 import { useXApps } from "./useXApps"
+import { useXAppsShares } from "./useXAppShares"
 
 export type MostVotedAppsInRoundReturnType = {
   percentage: number

@@ -4,10 +4,10 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiAlertCircle } from "react-icons/fi"
 
-import { TransactionCard } from "../../../../../components/TransactionCard/TransactionCard"
-import { useTransactions } from "../../../../../api/indexer/transactions/useTransactions"
-
 import { EmptyState } from "@/components/ui/empty-state"
+
+import { useTransactions } from "../../../../../api/indexer/transactions/useTransactions"
+import { TransactionCard } from "../../../../../components/TransactionCard/TransactionCard"
 
 type Props = {
   address: string

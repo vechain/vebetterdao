@@ -6,15 +6,15 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
-import { useSubmitNewApp } from "../../../../../hooks/useSubmitNewApp"
-import { CreateEditAppFormData, CreateEditAppForm } from "../../../../../components/CreateEditAppForm/CreateEditAppForm"
-import { useCreatorSubmission } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
-
-import { PreviewAppCard } from "./PreviewAppCard"
-
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
+
+import { useCreatorSubmission } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
+import { CreateEditAppFormData, CreateEditAppForm } from "../../../../../components/CreateEditAppForm/CreateEditAppForm"
+import { useSubmitNewApp } from "../../../../../hooks/useSubmitNewApp"
+import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
+
+import { PreviewAppCard } from "./PreviewAppCard"
 
 export const NewAppPageFormContent = () => {
   const router = useRouter()

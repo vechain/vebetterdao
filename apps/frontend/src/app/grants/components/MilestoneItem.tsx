@@ -8,14 +8,14 @@ import { Calendar } from "iconoir-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { DatePicker } from "../../../components/DatePicker/DatePicker"
-import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
-
-import { useRejectGrant } from "@/hooks/useRejectGrant"
-import { useClaimMilestone } from "@/hooks/useClaimMilestone"
-import { useApproveMilestone } from "@/hooks/useApproveMilestone"
-import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
 import B3trIcon from "@/components/Icons/svg/b3tr.svg"
+import { GrantProposalEnriched, MilestoneState, ProposalState } from "@/hooks/proposals/grants/types"
+import { useApproveMilestone } from "@/hooks/useApproveMilestone"
+import { useClaimMilestone } from "@/hooks/useClaimMilestone"
+import { useRejectGrant } from "@/hooks/useRejectGrant"
+
+import { useAccountPermissions } from "../../../api/contracts/account/hooks/useAccountPermissions"
+import { DatePicker } from "../../../components/DatePicker/DatePicker"
 
 type MilestoneWithState = {
   milestone?: {

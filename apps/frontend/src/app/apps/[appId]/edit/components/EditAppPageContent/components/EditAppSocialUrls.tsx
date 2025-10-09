@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next"
 import { FaDiscord, FaMedium, FaTelegram, FaYoutube } from "react-icons/fa6"
 import { RiTwitterXFill } from "react-icons/ri"
 
-import { EditAppForm } from "../EditAppPageContent"
-import { useCurrentAppMetadata } from "../../../../hooks/useCurrentAppMetadata"
 import { URL_REGEX } from "../../../../../../../constants/url"
+import { useCurrentAppMetadata } from "../../../../hooks/useCurrentAppMetadata"
+import { EditAppForm } from "../EditAppPageContent"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>

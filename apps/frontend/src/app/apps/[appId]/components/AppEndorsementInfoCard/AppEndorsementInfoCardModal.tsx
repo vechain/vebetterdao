@@ -1,7 +1,3 @@
-import { UilTrash } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { normalize } from "@repo/utils/HexUtils"
 import {
   VStack,
   HStack,
@@ -16,23 +12,28 @@ import {
   Flex,
   Card,
 } from "@chakra-ui/react"
-import { useTranslation, Trans } from "react-i18next"
-import { useMemo, useState } from "react"
+import { UilTrash } from "@iconscout/react-unicons"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { normalize } from "@repo/utils/HexUtils"
 import { useWallet } from "@vechain/vechain-kit"
-
-import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
-import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
-import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
-import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
-
-import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
-import { EndorsersItem } from "./EndorsersItem"
-import { EndorsementDetails } from "./EndorsementDetails"
-import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
-import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
+import { useMemo, useState } from "react"
+import { useTranslation, Trans } from "react-i18next"
 
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { BaseModal } from "@/components/BaseModal"
+
+import { useAppEndorsementStatus } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsementStatus"
+import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
+import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
+import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+
+import { EndorsementDetails } from "./EndorsementDetails"
+import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
+import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
+import { EndorsersItem } from "./EndorsersItem"
+import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
+
 type Props = {
   isOpen: boolean
   onClose: () => void

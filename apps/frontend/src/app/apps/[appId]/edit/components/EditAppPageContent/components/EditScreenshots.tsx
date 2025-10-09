@@ -5,13 +5,13 @@ import { ChangeEvent, useCallback, useRef, useState } from "react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { EditAppForm } from "../EditAppPageContent"
-import { validateImage } from "../../../../../../../utils/ImageValidation"
-import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
-
-import { imageListCompression } from "@/utils/imageListCompression"
-import { blobToBase64 } from "@/utils/BlobUtils"
 import { toaster } from "@/components/ui/toaster"
+import { blobToBase64 } from "@/utils/BlobUtils"
+import { imageListCompression } from "@/utils/imageListCompression"
+
+import { IMAGE_REQUIREMENTS, SCREENSHOT_UPLOAD_GUIDELINES } from "../../../../../../../constants/XAppsMedia"
+import { validateImage } from "../../../../../../../utils/ImageValidation"
+import { EditAppForm } from "../EditAppPageContent"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>

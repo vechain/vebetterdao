@@ -4,12 +4,12 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useVotingThreshold } from "../../api/contracts/governance/hooks/useVotingThreshold"
-import { useGetVotesOnBlock } from "../../api/contracts/governance/hooks/useVotesOnBlock"
-import { useUserSingleProposalVoteEvent } from "../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
-import { useProposalSnapshot } from "../../api/contracts/governance/hooks/useProposalSnapshot"
-
 import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { useProposalSnapshot } from "../../api/contracts/governance/hooks/useProposalSnapshot"
+import { useUserSingleProposalVoteEvent } from "../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useGetVotesOnBlock } from "../../api/contracts/governance/hooks/useVotesOnBlock"
+import { useVotingThreshold } from "../../api/contracts/governance/hooks/useVotingThreshold"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"

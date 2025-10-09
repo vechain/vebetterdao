@@ -2,11 +2,11 @@ import { VStack, Button, Field, Heading, NativeSelect, HStack, Text, Card } from
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useCheckEndorsement } from "@/hooks/useCheckEndorsement"
+
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
-
-import { useCheckEndorsement } from "@/hooks/useCheckEndorsement"
 
 export const XAppCheckEndorsement = () => {
   const [appId, setAppId] = useState<string | undefined>()

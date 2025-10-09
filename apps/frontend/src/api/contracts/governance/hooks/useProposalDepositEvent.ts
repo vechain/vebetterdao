@@ -3,9 +3,9 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useMemo } from "react"
 
-import { useProposalsEvents } from "./useProposalsEvents"
-
 import { useProposalEnrichedById } from "@/hooks/proposals/common/useProposalEnrichedById"
+
+import { useProposalsEvents } from "./useProposalsEvents"
 
 /**
  * Hook to get the proposal deposit event

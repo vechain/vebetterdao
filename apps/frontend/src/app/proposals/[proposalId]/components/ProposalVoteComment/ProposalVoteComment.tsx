@@ -4,12 +4,12 @@ import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 
-import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
-import { ProposalComment } from "../../../../../api/indexer/proposals/useProposalComments"
-
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+
+import { ProposalComment } from "../../../../../api/indexer/proposals/useProposalComments"
+import { AddressWithProfilePicture } from "../../../../components/AddressWithProfilePicture/AddressWithProfilePicture"
 
 const compactFormatter = getCompactFormatter(2)
 export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {

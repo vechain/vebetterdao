@@ -1,10 +1,10 @@
 import { AddressUtils } from "@repo/utils"
 import { NextRequest, NextResponse } from "next/server"
 
-import { formatSubmission } from "../utils"
-
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
+
+import { formatSubmission } from "../utils"
 
 export interface Submission {
   id: number

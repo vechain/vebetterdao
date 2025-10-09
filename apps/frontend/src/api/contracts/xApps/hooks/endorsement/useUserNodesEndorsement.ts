@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
 
-import { useXAppsMetadataBaseUri } from "../useXAppsMetadataBaseUri"
-import { isNewApp, XApp, XAppWithMetadata } from "../../getXApps"
 import { getXAppMetadata } from "../../getXAppMetadata"
+import { isNewApp, XApp, XAppWithMetadata } from "../../getXApps"
+import { useXAppsMetadataBaseUri } from "../useXAppsMetadataBaseUri"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`

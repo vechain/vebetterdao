@@ -18,20 +18,20 @@ import dayjs from "dayjs"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { XAppStatus } from "../../../../../types/appDetails"
-import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
-import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
-import { useCurrentAppLogo } from "../../hooks/useCurrentAppLogo"
+import { XAppStatus } from "../../../../../types/appDetails"
 import { useCurrentAppBanner } from "../../hooks/useCurrentAppBanner"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { useCurrentAppLogo } from "../../hooks/useCurrentAppLogo"
+import { useCurrentAppMetadata } from "../../hooks/useCurrentAppMetadata"
+import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 
+import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
-import { EditAppPageButton } from "./components/EditAppPageButton"
 import { DistributionStrategyModal } from "./components/DistributionStrategyModal"
-import { AdminAppPageButton } from "./components/AdminAppPageButton"
+import { EditAppPageButton } from "./components/EditAppPageButton"
 export const AppDetailOverview = ({
   endorsementStatus,
   isEndorsementStatusLoading,

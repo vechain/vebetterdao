@@ -14,8 +14,8 @@ import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useRegisterUserAction } from "../../../../../hooks/useRegisterUserAction"
 import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+import { useRegisterUserAction } from "../../../../../hooks/useRegisterUserAction"
 import { WalletAddressInput } from "../../../../components/Input/WalletAddressInput"
 export const RegisterUserAction = () => {
   const [user, setUser] = useState<string>("")

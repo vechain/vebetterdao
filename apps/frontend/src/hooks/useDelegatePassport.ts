@@ -4,11 +4,11 @@ import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
-import { getPendingDelegationsQueryKeyDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 import { getPendingDelegationsQueryKeyDelegateePOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegateePOV"
+import { getPendingDelegationsQueryKeyDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
+import { buildClause } from "@/utils/buildClause"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress

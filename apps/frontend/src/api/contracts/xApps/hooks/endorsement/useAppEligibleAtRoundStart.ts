@@ -2,8 +2,8 @@ import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { useCallClause, getCallClauseQueryKey } from "@vechain/vechain-kit"
 
-import { useCurrentAllocationsRoundId } from "../../../xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAllocationRoundSnapshot } from "../../../xAllocations/hooks/useAllocationRoundSnapshot"
+import { useCurrentAllocationsRoundId } from "../../../xAllocations/hooks/useCurrentAllocationsRoundId"
 
 const address = getConfig().x2EarnAppsContractAddress
 const abi = X2EarnApps__factory.abi

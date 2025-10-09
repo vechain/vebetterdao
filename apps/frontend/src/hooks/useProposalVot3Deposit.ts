@@ -5,17 +5,17 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { buildClause } from "@/utils/buildClause"
+
 import { getGetProposalDepositsQueryKey } from "../api/contracts/governance/hooks/useGetProposalDeposits"
 import { getProposalClaimableUserDepositsQueryKey } from "../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
-import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
 import { getProposalsEventsQueryKey } from "../api/contracts/governance/hooks/useProposalsEvents"
+import { getProposalUserDepositQueryKey } from "../api/contracts/governance/hooks/useProposalUserDeposit"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
-
-import { buildClause } from "@/utils/buildClause"
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
 
 const config = getConfig()
 const Vot3Interface = VOT3__factory.createInterface()

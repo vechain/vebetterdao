@@ -1,10 +1,10 @@
 import { useWallet } from "@vechain/vechain-kit"
 
-import { useNFTMetadataUri } from "./useNFTMetadataUri"
-import { useTokenIdByAccount } from "./useTokenIdByAccount"
-
 import { useIpfsImage } from "@/api/ipfs/hooks/useIpfsImage"
 import { useIpfsMetadata } from "@/api/ipfs/hooks/useIpfsMetadata"
+
+import { useNFTMetadataUri } from "./useNFTMetadataUri"
+import { useTokenIdByAccount } from "./useTokenIdByAccount"
 
 /**
  * Fetches NFT image from IPFS

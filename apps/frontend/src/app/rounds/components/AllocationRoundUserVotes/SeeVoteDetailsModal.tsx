@@ -3,8 +3,8 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-import { AppVotesHorizontalChart } from "../AllocationXAppsVotesCard/AppVotesHorizontalChart"
 import { CustomModalContent } from "../../../../components/CustomModalContent"
+import { AppVotesHorizontalChart } from "../AllocationXAppsVotesCard/AppVotesHorizontalChart"
 
 type Props = {
   roundId: string

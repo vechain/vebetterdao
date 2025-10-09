@@ -4,15 +4,15 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
 
+import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
+import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
+
 import { CountdownVoting } from "../../../app/components/Countdown/CountdownVoting"
 import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
 import { useDomainOrAddress } from "../../../hooks/useDomainOrAddress"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { B3TRIcon } from "../../Icons/B3TRIcon"
-
-import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
-import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
 
 const compactFormatter = getCompactFormatter(4)
 export const SwapB3trVot3 = ({ address }: { address: string }) => {

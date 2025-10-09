@@ -3,11 +3,11 @@ import { useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useAcceptEntityLink } from "../../../../../../../../../hooks/useAcceptEntityLink"
-import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { BaseModal } from "@/components/BaseModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+import { useAcceptEntityLink } from "../../../../../../../../../hooks/useAcceptEntityLink"
 
 export const AcceptLinkingModal = ({
   modal,

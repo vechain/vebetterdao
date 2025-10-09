@@ -1,25 +1,25 @@
 "use client"
 import { Card, Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
-import { useCallback, useLayoutEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
-import { Trans, useTranslation } from "react-i18next"
 import BigNumber from "bignumber.js"
+import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect, useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
 
-import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
 import {
   useCastAllocationFormStore,
   CastAllocationVoteFormData,
 } from "../../../../../../store/useCastAllocationFormStore"
-import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
-import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
-import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
-import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
-import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 
 import { SelectAppVotesInput } from "./SelectAppVotesInput"
 

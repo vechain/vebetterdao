@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
-
 import { VoteType } from "@/types/voting"
+
+import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 
 /**
  * Map numeric support values to VoteType enum

@@ -2,8 +2,8 @@ import { HStack, Button } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useStartEmission } from "../../../../../hooks/useStartEmission"
 import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useStartEmission } from "../../../../../hooks/useStartEmission"
 
 export const StartEmissionsButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

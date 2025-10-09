@@ -2,12 +2,12 @@ import { Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { MinXNodeLevel } from "@/constants/XNode"
+
 import { useNodesEndorsementScore } from "../../../api/contracts/xApps/hooks/endorsement/useNodesEndorsementScore"
 import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
 import { useEndorsementScoreThreshold } from "../../../api/contracts/xApps/hooks/useEndorsementScoreThreshold"
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-
-import { MinXNodeLevel } from "@/constants/XNode"
 
 export const EndorsementPointsBanner = () => {
   const { t } = useTranslation()

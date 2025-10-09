@@ -1,13 +1,13 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+
 import { getRoundRewardQueryKey } from "../api/contracts/rewards/hooks/useVotingRoundReward"
 import { buildClaimRoundReward } from "../api/contracts/rewards/utils/buildClaimRoundReward"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
-
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 type useClaimRewardProps = {
   roundId: string // The round id to claim the reward for.

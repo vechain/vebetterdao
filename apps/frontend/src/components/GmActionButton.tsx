@@ -4,8 +4,12 @@ import NextLink from "next/link"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useGMMaxLevel } from "../api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+
 import { useGetUserGMs } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMMaxLevel } from "../api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { useParticipatedInGovernance } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
 import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../constants/AnalyticsEvents"
@@ -15,10 +19,6 @@ import { useUpgradeGM } from "../hooks/useUpgradeGM"
 import { GetFreeNFTModal } from "./GmNFTAndNodeCard/GetFreeNFTModal"
 import { MintNFTModal } from "./MintNFTModal"
 import { Tooltip } from "./ui/tooltip"
-
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 
 export const GmActionButton = ({
   b3trBalanceScaled,

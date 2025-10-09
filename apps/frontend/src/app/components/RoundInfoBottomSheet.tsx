@@ -1,26 +1,27 @@
 "use client"
 import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton, SimpleGrid } from "@chakra-ui/react"
-import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
-import { useMemo } from "react"
 import NextLink from "next/link"
+import { useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
 
+import { BaseBottomSheet } from "@/components/BaseBottomSheet"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { useCanUserVote } from "../../api/contracts/governance/hooks/useCanUserVote"
+import { useGetDelegatee } from "../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useAllocationAmount } from "../../api/contracts/xAllocations/hooks/useAllocationAmount"
 import { useAllocationsRoundState } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
-import { useCanUserVote } from "../../api/contracts/governance/hooks/useCanUserVote"
 import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useGetDelegatee } from "../../api/contracts/vePassport/hooks/useGetDelegatee"
 import { useMostVotedAppsInRound } from "../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
-import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 import { AllocationStateBadge } from "../../components/AllocationStateBadge/AllocationStateBadge"
 import { B3TRIcon } from "../../components/Icons/B3TRIcon"
 import { ProposalCompactCard } from "../../components/ProposalCompactCard"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
+import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 
-import { ProposalState } from "@/hooks/proposals/grants/types"
-import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
-import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose } = useDisclosure()

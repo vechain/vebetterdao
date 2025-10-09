@@ -1,10 +1,10 @@
 import { VStack, HStack, Stack } from "@chakra-ui/react"
 
-import { TotalAllocations } from "../../../components/AllocationAmounts/TotalAllocations"
-import { AllocationRoundsList } from "../../../components/AllocationRoundsList/AllocationRoundsList"
-
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
+
+import { TotalAllocations } from "../../../components/AllocationAmounts/TotalAllocations"
+import { AllocationRoundsList } from "../../../components/AllocationRoundsList/AllocationRoundsList"
 
 export const AllocationRoundsContent = () => {
   return (

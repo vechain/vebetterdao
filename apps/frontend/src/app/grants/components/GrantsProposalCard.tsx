@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+
 import { useIsDepositReached } from "../../../api/contracts/governance/hooks/useIsDepositReached"
 import { useProposalDepositEvent } from "../../../api/contracts/governance/hooks/useProposalDepositEvent"
 import { useProposalInteractionDates } from "../../../api/contracts/governance/hooks/useProposalInteractionDates"
@@ -17,10 +21,6 @@ import { AddressWithProfilePicture } from "../../components/AddressWithProfilePi
 
 import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
-
-import { useBreakpoints } from "@/hooks/useBreakpoints"
-import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
-import B3trIcon from "@/components/Icons/svg/b3tr.svg"
 
 type GrantsProposalCardProps = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }

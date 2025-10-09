@@ -13,26 +13,27 @@ import {
   Box,
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
-import { FiInfo } from "react-icons/fi"
-import { useMemo } from "react"
-import { FaArrowUpRightFromSquare } from "react-icons/fa6"
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { FaArrowUpRightFromSquare } from "react-icons/fa6"
+import { FiInfo } from "react-icons/fi"
 
-import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { Tooltip } from "@/components/ui/tooltip"
+
 import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
 import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
-import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
 import { useIsDistributionPaused } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsDistributionPaused"
+import { useIsRewardsPoolEnabled } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useIsRewardsPoolEnabled"
 import { useIsAppAdmin } from "../../../../../api/contracts/xApps/hooks/useIsAppAdmin"
 // Modal components
 import { GenericAlert } from "../../../../components/Alert/GenericAlert"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
-import { TransferAppFundsModal } from "./TransferAppFundsModal"
 import { ManagementCenterModal } from "./ManagementCenterModal"
+import { TransferAppFundsModal } from "./TransferAppFundsModal"
 
-import { Tooltip } from "@/components/ui/tooltip"
 const compactFormatter = getCompactFormatter(4)
 export const AppBalanceCard = () => {
   const { t } = useTranslation()

@@ -3,8 +3,8 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { VOT3Icon } from "../../Icons/VOT3Icon"
 import { B3TRIcon } from "../../Icons/B3TRIcon"
+import { VOT3Icon } from "../../Icons/VOT3Icon"
 
 type Props = {
   isB3TR: boolean

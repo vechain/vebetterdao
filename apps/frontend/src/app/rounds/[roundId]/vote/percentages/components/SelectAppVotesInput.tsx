@@ -4,8 +4,8 @@ import { t } from "i18next"
 
 import { useXAppMetadata } from "../../../../../../api/contracts/xApps/hooks/useXAppMetadata"
 import { useIpfsImage } from "../../../../../../api/ipfs/hooks/useIpfsImage"
-import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
 import { CastAllocationVoteFormData } from "../../../../../../store/useCastAllocationFormStore"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
 
 const notFoundImage = "/assets/images/image-not-found.webp"
 

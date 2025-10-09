@@ -1,14 +1,15 @@
 import { UilCheckCircle } from "@iconscout/react-unicons"
 import { expect, test, describe } from "vitest"
 
+import * as apiHooks from "@/api"
+import { useXAppStatusConfig } from "@/app/apps/[appId]/hooks/useXAppStatusConfig"
+
 import { render, screen } from "../../../test"
 import { XAppStatus } from "../../types/appDetails"
 import { NFTMediaType } from "../../types/media"
 
 import Apps from "./page"
 
-import { useXAppStatusConfig } from "@/app/apps/[appId]/hooks/useXAppStatusConfig"
-import * as apiHooks from "@/api"
 describe("Apps", () => {
   const defaultXNodeMock = {
     xNodeId: "1",

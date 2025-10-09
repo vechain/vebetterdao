@@ -6,10 +6,10 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiInfo } from "react-icons/fi"
 
-import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
-import { useB3trTokenDetails } from "../../api/contracts/b3tr/hooks/useB3trTokenDetails"
-
 import { Tooltip } from "@/components/ui/tooltip"
+
+import { useB3trTokenDetails } from "../../api/contracts/b3tr/hooks/useB3trTokenDetails"
+import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
 
 export const SupplyBreakdownCard = () => {
   const { t } = useTranslation()

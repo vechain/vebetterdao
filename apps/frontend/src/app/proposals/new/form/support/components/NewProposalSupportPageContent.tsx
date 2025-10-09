@@ -6,12 +6,12 @@ import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
-import { useGetVot3Balance } from "../../../../../../hooks/useGetVot3Balance"
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
-import { VOT3Icon } from "../../../../../../components/Icons/VOT3Icon"
 import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
+import { VOT3Icon } from "../../../../../../components/Icons/VOT3Icon"
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { useGetVot3Balance } from "../../../../../../hooks/useGetVot3Balance"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 type FormData = {
   amount: number

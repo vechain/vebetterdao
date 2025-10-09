@@ -17,10 +17,10 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 
-import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
-import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
-import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 import { useColorModeValue } from "@/components/ui/color-mode"
+import { useAdminAssignCategories, AppCategoryAssignment } from "@/hooks/useAdminAssignCategories"
+import { useAppsWithoutCategories } from "@/hooks/useAppsWithoutCategories"
+import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
 export const XAppAssignAppCategory = () => {
   const { t } = useTranslation()
   const [carouselIndex, setCarouselIndex] = useState(0)

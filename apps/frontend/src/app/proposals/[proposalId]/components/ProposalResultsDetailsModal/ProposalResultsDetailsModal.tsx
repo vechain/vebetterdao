@@ -6,15 +6,15 @@ import { Trans, useTranslation } from "react-i18next"
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts"
 import { formatEther, parseEther } from "viem"
 
-import { ProposalState } from "../../../../../hooks/proposals/grants/types"
-import { RegularModal } from "../../../../../components/RegularModal"
-import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
-import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
-
-import { VotingSegment } from "@/types/voting"
-import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import { GroupedProposalVotes } from "@/api/indexer/proposals/useProposalVotes"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import { PROPOSALS_QUORUM_DOCS_LINK } from "@/constants/links"
+import { VotingSegment } from "@/types/voting"
+
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import { RegularModal } from "../../../../../components/RegularModal"
+import { ProposalState } from "../../../../../hooks/proposals/grants/types"
 
 // Types
 interface ProgressBarSegment {

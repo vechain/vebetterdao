@@ -9,17 +9,18 @@ import {
   Alert,
   useBreakpointValue,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useForm } from "react-hook-form"
 import { useCallback, useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 
-import { ExclamationTriangle } from "../../../../../../../../components/Icons/ExclamationTriangle"
-import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
-import { WalletAddressInput } from "../../../../../../../components/Input/WalletAddressInput"
-import { StepModal, type Step } from "../../../../../../../../components/StepModal/StepModal"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { useDelegatePassport } from "@/hooks/useDelegatePassport"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useAccountLinking } from "../../../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { ExclamationTriangle } from "../../../../../../../../components/Icons/ExclamationTriangle"
+import { StepModal, type Step } from "../../../../../../../../components/StepModal/StepModal"
+import { WalletAddressInput } from "../../../../../../../components/Input/WalletAddressInput"
+
 type FormData = {
   walletAddress: string
 }

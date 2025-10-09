@@ -4,9 +4,9 @@ import { t } from "i18next"
 import { useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 
-import { ProposalVoteComment } from "../ProposalVoteComment/ProposalVoteComment"
-import { SelectField } from "../../../../../components/SelectField/SelectField"
 import { useProposalComments } from "../../../../../api/indexer/proposals/useProposalComments"
+import { SelectField } from "../../../../../components/SelectField/SelectField"
+import { ProposalVoteComment } from "../ProposalVoteComment/ProposalVoteComment"
 
 enum VoteType {
   FOR = "FOR",

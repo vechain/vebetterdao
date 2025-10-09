@@ -16,19 +16,19 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 
-import { CustomModalContent } from "../../../components/CustomModalContent"
-import { useGetUserGMs } from "../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
-import { useAttachGMToXNode } from "../../../hooks/useAttachGMToXNode"
-import { useGetLevelAfterAttachingNode } from "../hooks/useGetLevelAfterAttachingNode"
-
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { Tooltip } from "@/components/ui/tooltip"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+
+import { useGetUserGMs } from "../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { UserNode } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { CustomModalContent } from "../../../components/CustomModalContent"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
+import { useAttachGMToXNode } from "../../../hooks/useAttachGMToXNode"
+import { useGetLevelAfterAttachingNode } from "../hooks/useGetLevelAfterAttachingNode"
 
 type Props = {
   gmId: string

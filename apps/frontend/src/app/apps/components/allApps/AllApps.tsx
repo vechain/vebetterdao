@@ -1,5 +1,3 @@
-import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 import {
   Box,
   HStack,
@@ -14,22 +12,24 @@ import {
   CloseButton,
 } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
-
-import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
-import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
-import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
-import { UnendorsedAppCard } from "../UnendorsedAppCard"
-import { AppsEmptyState } from "../AppsEmptyState"
-import { CreatorBanner } from "../CreatorBanner"
-import { useAppsSorting } from "../../hooks/useAppsSorting"
-import { useAppsSearch } from "../../hooks/useAppsSearch"
-import { useAppsFiltering } from "../../hooks/useAppsFiltering"
-import { usePagination } from "../../../../hooks/usePagination"
-
-import { SortingMenu } from "./SortingMenu"
-import { FilteringMenu } from "./FilteringMenu"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { FILTER_ACTIVE_APPS } from "@/types/appDetails"
+
+import { UnendorsedApp, XApp } from "../../../../api/contracts/xApps/getXApps"
+import { useNodesEndorsedApps } from "../../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { useGetUserNodes } from "../../../../api/contracts/xNodes/useGetUserNodes"
+import { usePagination } from "../../../../hooks/usePagination"
+import { useAppsFiltering } from "../../hooks/useAppsFiltering"
+import { useAppsSearch } from "../../hooks/useAppsSearch"
+import { useAppsSorting } from "../../hooks/useAppsSorting"
+import { AppsEmptyState } from "../AppsEmptyState"
+import { CreatorBanner } from "../CreatorBanner"
+import { UnendorsedAppCard } from "../UnendorsedAppCard"
+
+import { FilteringMenu } from "./FilteringMenu"
+import { SortingMenu } from "./SortingMenu"
 
 type Props = {
   currentActiveApps: XApp[]

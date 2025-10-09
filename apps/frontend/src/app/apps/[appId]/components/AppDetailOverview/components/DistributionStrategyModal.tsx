@@ -1,10 +1,10 @@
 import { Box, Separator, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
+import { BaseModal } from "@/components/BaseModal"
+
 import { DistributorItem } from "../../../admin/components/AdminAppPageContent/components/EditAppRewardDistributors/components/DistributorItem"
 import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
-
-import { BaseModal } from "@/components/BaseModal"
 
 export const DistributionStrategyModal = ({
   isOpen,

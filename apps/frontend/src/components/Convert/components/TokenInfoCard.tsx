@@ -2,8 +2,8 @@ import { VStack, Image, Text, Button } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 type Props = {
   isB3TRToVOT3: boolean

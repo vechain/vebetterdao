@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation"
 import React, { useState, useMemo, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
+import { Tooltip } from "@/components/ui/tooltip"
+
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useParticipatedInGovernance } from "../../../../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
 import { usePotentialRewardsFromIndexer } from "../../../../api/contracts/rewards/hooks/usePotentialRewardsFromIndexer"
@@ -14,8 +16,6 @@ import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocat
 import { useGMLevelsOverview } from "../../../../api/indexer/gm/useGMLevelsOverview"
 
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
-
-import { Tooltip } from "@/components/ui/tooltip"
 
 const DECIMAL_PLACES = 2
 const compactFormatter = getCompactFormatter(DECIMAL_PLACES)

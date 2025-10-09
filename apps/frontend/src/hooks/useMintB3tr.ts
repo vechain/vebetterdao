@@ -2,13 +2,13 @@ import { FormattingUtils } from "@repo/utils"
 import { useWallet, UseSendTransactionReturnValue, useThor } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { toaster } from "@/components/ui/toaster"
+
 import { getB3TrTokenDetailsQueryKey } from "../api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { buildMintB3trTx } from "../api/contracts/b3tr/utils/buildMintB3trTx"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
-
-import { toaster } from "@/components/ui/toaster"
 
 type useMintB3trProps = {
   address?: string

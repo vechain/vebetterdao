@@ -2,12 +2,12 @@ import { getConfig } from "@repo/config"
 import { GrantsManager__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
 
 import { getAllMilestoneStatesQueryKey } from "./proposals/grants/useAllMilestoneStates"
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const grantsManagerAddress = getConfig().grantsManagerContractAddress
 const GrantsManagerInterface = GrantsManager__factory.createInterface()

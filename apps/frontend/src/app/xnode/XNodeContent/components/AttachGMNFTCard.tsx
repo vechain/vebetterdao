@@ -14,16 +14,16 @@ import {
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+
 import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { getLevelGradient } from "../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { UserNode } from "../../../../api/contracts/xNodes/useGetUserNodes"
 import { FeatureFlagWrapper } from "../../../../components/FeatureFlagWrapper"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../constants/AnalyticsEvents"
 import { FeatureFlag } from "../../../../constants/featureFlag"
 import AnalyticsUtils from "../../../../utils/AnalyticsUtils/AnalyticsUtils"
-
-import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
-import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 
 export const AttachGMNFTCard = ({ xNode }: { xNode: UserNode }) => {
   const { t } = useTranslation()

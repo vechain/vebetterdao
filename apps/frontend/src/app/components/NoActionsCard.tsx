@@ -3,8 +3,8 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { PiSquaresFourFill } from "react-icons/pi"
 
-import { EmptyState } from "@/components/ui/empty-state"
 import HandPlantIcon from "@/components/Icons/svg/hand-plant.svg"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export const NoActionsCard = () => {
   const { t } = useTranslation()

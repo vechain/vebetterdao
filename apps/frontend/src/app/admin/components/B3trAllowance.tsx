@@ -4,10 +4,10 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
-import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
-import { useB3trApprove } from "../../../hooks/useB3trApprove"
 import { useB3trAllowance } from "../../../api/contracts/b3tr/hooks/useB3trAllowance"
+import { useB3trApprove } from "../../../hooks/useB3trApprove"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { WalletAddressInput } from "../../components/Input/WalletAddressInput"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()

@@ -1,8 +1,8 @@
+import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
+
 import { SubmitCreatorFormData } from "../../../../components/SubmitCreatorForm/SubmitCreatorForm"
 
 import { Submission } from "./submission/route"
-
-import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
 
 // Type guard to check if an object is a complete SubmitCreatorFormData
 function isCompleteSubmitCreatorFormData(data: Partial<SubmitCreatorFormData>): data is SubmitCreatorFormData {

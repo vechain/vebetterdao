@@ -3,8 +3,8 @@ import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { useSetGMMaxLevel } from "@/hooks/useSetGMMaxLevel"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
+import { useSetGMMaxLevel } from "@/hooks/useSetGMMaxLevel"
 
 export const GMSetMaxLevel = () => {
   const { t } = useTranslation()

@@ -1,12 +1,13 @@
-import dayjs from "dayjs"
 import * as chakra from "@chakra-ui/react"
+import dayjs from "dayjs"
 import * as router from "next/navigation"
+
+import * as apiHooks from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 
 import { fireEvent, render, screen } from "../../../../../test"
 
 import { AllocationRoundNavbar } from "./AllocationRoundNavbar"
 
-import * as apiHooks from "@/api/contracts/xAllocations/hooks/useAllocationsRound"
 export const mockedUsePathname = vi.fn()
 vi.mock("@chakra-ui/react", async () => {
   const actual = await vi.importActual("@chakra-ui/react")

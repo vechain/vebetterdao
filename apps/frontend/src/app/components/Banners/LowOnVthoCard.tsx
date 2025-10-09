@@ -7,8 +7,8 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
-import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
 const isProduction = process.env.NODE_ENV === "production"
 export const apiKey = process.env.NEXT_PUBLIC_TRANSAK_API_KEY ?? ""

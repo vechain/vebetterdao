@@ -3,11 +3,11 @@ import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getPendingLinkingsQueryKey } from "../api/contracts/vePassport/hooks/useGetPendingLinkings"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress

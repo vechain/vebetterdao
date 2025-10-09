@@ -3,12 +3,12 @@ import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getDelegatorQueryKey } from "../api/contracts/vePassport/hooks/useGetDelegator"
+import { buildClause } from "@/utils/buildClause"
+
 import { getDelegateeQueryKey } from "../api/contracts/vePassport/hooks/useGetDelegatee"
+import { getDelegatorQueryKey } from "../api/contracts/vePassport/hooks/useGetDelegator"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress

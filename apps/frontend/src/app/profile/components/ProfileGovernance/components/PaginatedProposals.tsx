@@ -2,12 +2,12 @@ import { VStack, Spinner, Box, Button, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaAngleLeft } from "react-icons/fa"
 
+import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+
 import { useInfiniteScroll } from "../../../../../hooks/useInfiniteScroll"
 import { usePagination } from "../../../../../hooks/usePagination"
 
 import { ProposalBox } from "./ProposalBox"
-
-import { ProposalEnriched, GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 type PaginatedProposalsProps = {
   proposals: ProposalEnriched[] | GrantProposalEnriched[]

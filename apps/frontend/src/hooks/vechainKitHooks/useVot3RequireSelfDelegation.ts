@@ -1,9 +1,9 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { ZeroAddress } from "ethers"
 
-import { useVot3Delegates } from "../../api/contracts/vot3/hooks/useVot3Delegates"
-
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+
+import { useVot3Delegates } from "../../api/contracts/vot3/hooks/useVot3Delegates"
 
 export const useVot3RequireSelfDelegation = () => {
   const { account, connection } = useWallet()

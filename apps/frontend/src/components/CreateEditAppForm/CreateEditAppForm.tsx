@@ -12,6 +12,10 @@ import {
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
+import { CategorySelector } from "@/components/CategorySelector"
+import { notFoundImage } from "@/constants"
+import { blobToBase64 } from "@/utils/BlobUtils"
+
 import { XApp } from "../../api/contracts/xApps/getXApps"
 import { WalletAddressInput } from "../../app/components/Input/WalletAddressInput"
 import {
@@ -28,9 +32,6 @@ import { UploadFileButton } from "../UploadFileButton/UploadFileButton"
 
 import { VeWorldFeaturedImageGuidelines } from "./VeWorldFeaturedImageGuidelines"
 
-import { blobToBase64 } from "@/utils/BlobUtils"
-import { notFoundImage } from "@/constants"
-import { CategorySelector } from "@/components/CategorySelector"
 // Validate image uploads with size and type
 const validateImageUpload = async (
   file: File,

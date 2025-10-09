@@ -5,11 +5,11 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+
 import { useGetDelegatee } from "../../../../../../../../../api/contracts/vePassport/hooks/useGetDelegatee"
 
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
-
-import { AddressIcon } from "@/components/AddressIcon"
 
 type Props = {
   address: string

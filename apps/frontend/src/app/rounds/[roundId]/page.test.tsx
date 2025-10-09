@@ -1,11 +1,12 @@
 import dayjs from "dayjs"
 import { expect, test } from "vitest"
 
+import * as apiHooks from "@/api"
+
 import { render, screen } from "../../../../test"
 
 import AllocationDetail from "./page"
 
-import * as apiHooks from "@/api"
 test("Allocations", async () => {
   const roundId = "1"
   //@ts-ignore

@@ -4,10 +4,10 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { GenericBanner } from "../../Banners/GenericBanner"
-import { useVotingRewards } from "../../../../api/contracts/rewards/hooks/useVotingRewards"
-
 import { useClaimRewards } from "@/hooks/useClaimRewards"
+
+import { useVotingRewards } from "../../../../api/contracts/rewards/hooks/useVotingRewards"
+import { GenericBanner } from "../../Banners/GenericBanner"
 
 const compactFormatter = getCompactFormatter(4)
 export type Props = {

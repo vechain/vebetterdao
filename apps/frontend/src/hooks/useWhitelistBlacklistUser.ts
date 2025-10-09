@@ -2,12 +2,12 @@ import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getIsBlacklistedQueryKey } from "../api/contracts/vePassport/hooks/useIsBlacklisted"
 import { getIsWhitelistedQueryKey } from "../api/contracts/vePassport/hooks/useIsWhitelisted"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress

@@ -3,12 +3,12 @@ import { Emissions__factory } from "@vechain/vebetterdao-contracts"
 import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getCurrentAllocationsRoundIdQueryKey } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { buildClause } from "@/utils/buildClause"
+
 import { getAllocationsRoundsEventsQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+import { getCurrentAllocationsRoundIdQueryKey } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 type useStartEmissionsProps = {

@@ -4,9 +4,9 @@ import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
 
-import unknownAnimation from "./unknown.json"
-
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import unknownAnimation from "./unknown.json"
 
 export type UnknownModalContentProps = {
   title?: ReactNode

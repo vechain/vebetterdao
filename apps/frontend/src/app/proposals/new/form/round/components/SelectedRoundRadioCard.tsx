@@ -5,11 +5,11 @@ import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useVotingPeriod } from "../../../../../../api/contracts/governance/hooks/useVotingPeriod"
 import {
   useAllocationsRoundsEvents,
   RoundCreated,
 } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
-import { useVotingPeriod } from "../../../../../../api/contracts/governance/hooks/useVotingPeriod"
 
 const blockTime = getConfig().network.blockTime
 type Props = {

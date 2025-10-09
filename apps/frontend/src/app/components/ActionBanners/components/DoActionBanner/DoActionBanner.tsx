@@ -3,10 +3,10 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { DoActionModal } from "./components/DoActionModal"
-
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+
+import { DoActionModal } from "./components/DoActionModal"
 
 export const DoActionBanner = () => {
   const { t } = useTranslation()

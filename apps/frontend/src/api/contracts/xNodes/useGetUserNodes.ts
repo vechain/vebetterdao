@@ -1,17 +1,18 @@
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
 import { NodeManagement__factory } from "@vechain/vebetterdao-contracts"
-import { executeMultipleClausesCall, useThor, executeCallClause, useWallet } from "@vechain/vechain-kit"
 import {
   GalaxyMember__factory,
   StargateNFT__factory,
   X2EarnApps__factory,
 } from "@vechain/vebetterdao-contracts/typechain-types"
-import { useQuery } from "@tanstack/react-query"
+import { executeMultipleClausesCall, useThor, executeCallClause, useWallet } from "@vechain/vechain-kit"
+
+import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 
 import { getIpfsMetadata } from "../../ipfs/hooks/useIpfsMetadata"
 import { useNodesEndorsementScore } from "../xApps/hooks/endorsement/useNodesEndorsementScore"
 
-import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 const notFoundImage = "/assets/images/image-not-found.webp"
 const UNENDORSED_APP_ID = "0x0000000000000000000000000000000000000000000000000000000000000000"
 const address = getConfig().nodeManagementContractAddress as `0x${string}`

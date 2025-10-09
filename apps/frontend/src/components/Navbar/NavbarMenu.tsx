@@ -1,9 +1,9 @@
 "use client"
 import { Button, Icon, HoverCard, Portal, Text, useMediaQuery, VStack, Collapsible, HStack } from "@chakra-ui/react"
+import { motion } from "framer-motion"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { FaChevronDown } from "react-icons/fa6"
-import { motion } from "framer-motion"
 
 import { Route } from "./Routes"
 type Props = {

@@ -1,9 +1,9 @@
 "use-client"
 import { Button, useClipboard, VStack, Skeleton, Dialog, CloseButton, Link } from "@chakra-ui/react"
-import { FaCopy, FaRegImage } from "react-icons/fa6"
-import { FaExternalLinkAlt } from "react-icons/fa"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
+import { FaExternalLinkAlt } from "react-icons/fa"
+import { FaCopy, FaRegImage } from "react-icons/fa6"
 
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { toaster } from "@/components/ui/toaster"

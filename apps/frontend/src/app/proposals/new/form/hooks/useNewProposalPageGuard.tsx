@@ -2,8 +2,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
 
-import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
 import { useMetProposalCriteria } from "../../../../../api/contracts/governance/hooks/useMetProposalCriteria"
+import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
 
 /**
  * This hook is used to guard the proposal page.

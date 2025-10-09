@@ -3,17 +3,17 @@ import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { RiTwitterXFill } from "react-icons/ri"
-import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
 import Lottie from "react-lottie"
-
-import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
+import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
 
 import { useTweet } from "@/api/twitter/hooks/useTweets"
-import { UseUploadAppMetadataReturnValue } from "@/hooks/useUploadAppMetadata"
-import { useUpdateAppMetadataReturnValue } from "@/hooks/useUpdateAppDetails"
 import { StepModal } from "@/components/StepModal/StepModal"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import { useUpdateAppMetadataReturnValue } from "@/hooks/useUpdateAppDetails"
+import { UseUploadAppMetadataReturnValue } from "@/hooks/useUploadAppMetadata"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+
+import { useCurrentAppMetadata } from "../../../hooks/useCurrentAppMetadata"
 
 import "./tweetStyle.css"
 

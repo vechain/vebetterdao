@@ -1,21 +1,22 @@
 "use client"
 import { Grid, GridItem, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
-import { useLayoutEffect } from "react"
-import { redirect } from "next/navigation"
 import { useWallet } from "@vechain/vechain-kit"
+import { redirect } from "next/navigation"
+import { useLayoutEffect } from "react"
 
-import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
-import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
-import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
+import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
+import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
+
 import { useAllocationsRoundState } from "../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { useHasVotedInRound } from "../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 import { useBreakpoints } from "../../../hooks/useBreakpoints"
+import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar/AllocationRoundNavbar"
+import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
+import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
+import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard/AllocationXAppsVotesCard"
 
-import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
-import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 type Props = {
   roundId: string
 }

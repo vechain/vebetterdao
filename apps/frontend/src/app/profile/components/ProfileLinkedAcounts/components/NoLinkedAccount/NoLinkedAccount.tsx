@@ -3,12 +3,12 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import PeopleIcon from "@/components/Icons/svg/people.svg"
+import { EmptyState } from "@/components/ui/empty-state"
+
 import { useAccountLinking } from "../../../../../../api/contracts/vePassport/hooks/useAccountLinking"
 
 import { LinkAccountModal } from "./components/LinkAccountModal"
-
-import { EmptyState } from "@/components/ui/empty-state"
-import PeopleIcon from "@/components/Icons/svg/people.svg"
 
 type Props = {
   address: string

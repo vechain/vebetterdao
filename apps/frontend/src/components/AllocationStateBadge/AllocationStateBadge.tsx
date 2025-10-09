@@ -3,9 +3,9 @@ import { ReactNode, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaThumbsUp } from "react-icons/fa6"
 
-import { DotSymbol } from "../DotSymbol"
-import { useAllocationsRoundState } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { useAllocationsRound } from "../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { DotSymbol } from "../DotSymbol"
 
 type Props = {
   roundId: string

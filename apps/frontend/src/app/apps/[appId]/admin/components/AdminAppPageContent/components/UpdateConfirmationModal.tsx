@@ -5,12 +5,12 @@ import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { AdminAppForm } from "../AdminAppPageContent"
-import { useCurrentAppAdmin } from "../../../../hooks/useCurrentAppAdmin"
-import { ExclamationTriangle } from "../../../../../../../components/Icons/ExclamationTriangle"
-import { CustomModalContent } from "../../../../../../../components/CustomModalContent"
-
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
+
+import { CustomModalContent } from "../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../components/Icons/ExclamationTriangle"
+import { useCurrentAppAdmin } from "../../../../hooks/useCurrentAppAdmin"
+import { AdminAppForm } from "../AdminAppPageContent"
 
 type Props = {
   onClose: () => void

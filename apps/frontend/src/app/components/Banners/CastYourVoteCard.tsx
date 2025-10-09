@@ -5,11 +5,11 @@ import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import Lottie from "react-lottie"
 
-import { useHasVotedInRound } from "../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { useTotalVotesOnBlock } from "../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
 import voteAnimation from "../../../../public/assets/animations/vote.json"
+import { useTotalVotesOnBlock } from "../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useHasVotedInRound } from "../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()

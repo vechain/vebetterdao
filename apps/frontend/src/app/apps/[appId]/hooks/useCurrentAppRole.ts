@@ -2,8 +2,8 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { useCurrentAppModerators } from "./useCurrentAppModerators"
 import { useCurrentAppAdmin } from "./useCurrentAppAdmin"
+import { useCurrentAppModerators } from "./useCurrentAppModerators"
 
 /*
  * This hook is used to determine the current role of the user in the app.

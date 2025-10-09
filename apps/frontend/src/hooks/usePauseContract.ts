@@ -1,17 +1,17 @@
 import { getConfig } from "@repo/config"
-import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
-import { useCallback, useMemo } from "react"
 import {
   GalaxyMember__factory,
   B3TR__factory,
   VOT3__factory,
   B3TRGovernor__factory,
 } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause, currentBlockQueryKey } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
 
-import { getIsGMPausedQueryKey } from "../api/contracts/galaxyMember/hooks/useIsGMpaused"
 import { getIsB3trPausedQueryKey } from "../api/contracts/b3tr/hooks/useB3trPaused"
-import { getIsVot3PausedQueryKey } from "../api/contracts/vot3/hooks/useVot3Paused"
+import { getIsGMPausedQueryKey } from "../api/contracts/galaxyMember/hooks/useIsGMpaused"
 import { getIsB3TRGovernorPausedQueryKey } from "../api/contracts/governance/hooks/useB3TRGovernorPaused"
+import { getIsVot3PausedQueryKey } from "../api/contracts/vot3/hooks/useVot3Paused"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 type Props = {

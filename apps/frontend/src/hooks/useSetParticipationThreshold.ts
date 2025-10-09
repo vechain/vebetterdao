@@ -2,11 +2,11 @@ import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getParticipationScoreThresholdQueryKey } from "../api/contracts/vePassport/hooks/useParticipationScoreThreshold"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress

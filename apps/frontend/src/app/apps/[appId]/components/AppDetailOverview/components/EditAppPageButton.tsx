@@ -6,9 +6,9 @@ import NextLink from "next/link"
 import { useParams } from "next/navigation"
 import { useMemo } from "react"
 
-import { useCurrentAppModerators } from "../../../hooks/useCurrentAppModerators"
-import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"
 import { useAccountPermissions } from "../../../../../../api/contracts/account/hooks/useAccountPermissions"
+import { useCurrentAppAdmin } from "../../../hooks/useCurrentAppAdmin"
+import { useCurrentAppModerators } from "../../../hooks/useCurrentAppModerators"
 
 export const EditAppPageButton = () => {
   const { appId } = useParams()

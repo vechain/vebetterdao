@@ -3,12 +3,12 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { SecurityLevel, useSecurityMultiplier } from "../../contracts/vePassport/hooks/useSecurityMultiplier"
-import { useCurrentAllocationsRoundId } from "../../contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useGetCumulativeScoreWithDecay } from "../../contracts/vePassport/hooks/useGetCumulativeScoreWithDecay"
 import { useGetDelegator } from "../../contracts/vePassport/hooks/useGetDelegator"
+import { SecurityLevel, useSecurityMultiplier } from "../../contracts/vePassport/hooks/useSecurityMultiplier"
 import { useThresholdParticipationScoreAtTimepoint } from "../../contracts/vePassport/hooks/useThresholdParticipationScoreAtTimepoint"
 import { useAllocationRoundSnapshot } from "../../contracts/xAllocations/hooks/useAllocationRoundSnapshot"
+import { useCurrentAllocationsRoundId } from "../../contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 /**
  * Hook to get the user's score percentage and if the user is qualified.
  * @returns The user's score percentage and if the user is qualified.

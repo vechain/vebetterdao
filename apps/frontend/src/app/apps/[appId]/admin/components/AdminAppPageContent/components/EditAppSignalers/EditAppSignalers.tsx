@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 
 import { AdminAppForm } from "../../AdminAppPageContent"
 
-import { SignalerItem } from "./components/SignalerItem"
 import { AddSignalerButton } from "./components/AddSignalerButton"
+import { SignalerItem } from "./components/SignalerItem"
 
 interface Props {
   form: UseFormReturn<AdminAppForm>

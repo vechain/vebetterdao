@@ -4,10 +4,10 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { RejectLinkingModal } from "./components/RejectLinkingModal"
-import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
-
 import { AddressIcon } from "@/components/AddressIcon"
+
+import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
+import { RejectLinkingModal } from "./components/RejectLinkingModal"
 
 type Props = { isConnectedUser: boolean; secondaryAccount: string }
 export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }: Props) => {

@@ -4,8 +4,8 @@ import { t } from "i18next"
 import { UseFormReturn } from "react-hook-form"
 import { FiInfo } from "react-icons/fi"
 
-import { TokenCards } from "../../TokenCards"
 import { BalanceInfo } from "../../BalanceInfo"
+import { TokenCards } from "../../TokenCards"
 
 type Props = {
   amount: string

@@ -7,8 +7,8 @@ import { v4 as uuid } from "uuid"
 import { useTotalVotesOnBlock } from "../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useVot3PastSupply } from "../../../api/contracts/vot3/hooks/useVot3PastTotalSupply"
 import { useAllocationRoundQuorum } from "../../../api/contracts/xAllocations/hooks/useAllocationRoundQuorum"
-import { useAllocationVotes } from "../../../api/contracts/xAllocations/hooks/useAllocationVotes"
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationVotes } from "../../../api/contracts/xAllocations/hooks/useAllocationVotes"
 import { ProposalSessionSection } from "../../../components/ProposalSessionSection/ProposalSessionSection"
 
 type Props = {

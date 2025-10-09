@@ -3,15 +3,15 @@ import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { getGMbalanceQueryKey } from "../api/contracts/galaxyMember/hooks/useGMbalance"
+import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+import { buildClause } from "@/utils/buildClause"
+
 import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getGMbalanceQueryKey } from "../api/contracts/galaxyMember/hooks/useGMbalance"
 import { getTokenIdByAccountQueryKey } from "../api/contracts/galaxyMember/hooks/useTokenIdByAccount"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
-import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type useMintNFTProps = {

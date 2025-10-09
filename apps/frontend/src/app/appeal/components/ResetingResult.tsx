@@ -3,8 +3,8 @@ import { UilArrowUp, UilArrowDown } from "@iconscout/react-unicons"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
 
-import { ResetStatus } from "../types/resetStatus"
 import { RESET_STATUS } from "../constants/resetStatus"
+import { ResetStatus } from "../types/resetStatus"
 
 export const ResetingResult = ({
   resetingStatus,

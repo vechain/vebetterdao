@@ -5,6 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
 
+import { StepModal } from "@/components/StepModal/StepModal"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { OkHandIcon } from "../../../../../components/Icons/OkHandIcon"
 import { useUpdateAppDetails } from "../../../../../hooks/useUpdateAppDetails"
 import { useUploadAppMetadata } from "../../../../../hooks/useUploadAppMetadata"
@@ -13,11 +18,6 @@ import { useCurrentAppRole } from "../../hooks/useCurrentAppRole"
 
 import { AddTweetModal } from "./components/AddTweetModal"
 import { TweetList } from "./components/TweetList/TweetList"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
-import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
-import { StepModal } from "@/components/StepModal/StepModal"
 
 import "./components/tweetStyle.css"
 enum AppTweetsStep {

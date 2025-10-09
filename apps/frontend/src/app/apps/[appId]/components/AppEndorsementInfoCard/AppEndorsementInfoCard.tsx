@@ -4,6 +4,10 @@ import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
+import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+
 import { useAllocationsRound } from "../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useAppEndorsers } from "../../../../../api/contracts/xApps/hooks/endorsement/useAppEndorsers"
@@ -19,10 +23,6 @@ import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
-
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
-import { useGetUserNodes } from "@/api/contracts/xNodes/useGetUserNodes"
 
 type Props = {
   endorsementScore?: string

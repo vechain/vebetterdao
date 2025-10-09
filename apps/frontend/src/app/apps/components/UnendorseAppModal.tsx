@@ -4,12 +4,12 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
 
-import { useUnendorseApp } from "../../../hooks/useUnendorseApp"
-import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
-import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
-
 import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useNodesEndorsedApps } from "../../../api/contracts/xApps/hooks/endorsement/useUserNodesEndorsement"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useUnendorseApp } from "../../../hooks/useUnendorseApp"
 
 type Props = {
   xNodeId: string

@@ -2,6 +2,8 @@ import { getConfig } from "@repo/config"
 import { useWallet, useThor } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+
 import { getB3TrTokenDetailsQueryKey } from "../api/contracts/b3tr/hooks/useB3trTokenDetails"
 import { buildB3trApprovesTx } from "../api/contracts/b3tr/utils/buildB3trApprovesTx"
 import { buildConvertB3trTx } from "../api/contracts/vot3/utils/buildConvertB3trTx"
@@ -12,8 +14,6 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
 import { getVot3BalanceQueryKey } from "./useGetVot3Balance"
 import { useVot3RequireSelfDelegation } from "./vechainKitHooks/useVot3RequireSelfDelegation"
-
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const config = getConfig()
 // Extra 5% to mitigate sporadic wrong estimation of gas

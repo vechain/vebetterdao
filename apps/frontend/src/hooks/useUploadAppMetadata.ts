@@ -1,12 +1,12 @@
 "use client"
-import { useCallback, useState } from "react"
 import JSZip from "jszip"
+import { useCallback, useState } from "react"
 
-import { XAppMetadata } from "../api/contracts/xApps/getXAppMetadata"
-
+import { IMAGE_REQUIREMENTS } from "@/constants/XAppsMedia"
 import { base64ToBlob } from "@/utils/BlobUtils"
 import { uploadBlobToIPFS } from "@/utils/ipfs"
-import { IMAGE_REQUIREMENTS } from "@/constants/XAppsMedia"
+
+import { XAppMetadata } from "../api/contracts/xApps/getXAppMetadata"
 
 export type UseUploadAppMetadataReturnValue = {
   metadataUploading: boolean

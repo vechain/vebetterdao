@@ -2,8 +2,8 @@ import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useCancelProposal } from "@/hooks/useCancelProposal"
 import { BaseModal } from "@/components/BaseModal"
+import { useCancelProposal } from "@/hooks/useCancelProposal"
 
 export const ProposalCancelModal = ({
   proposalId,

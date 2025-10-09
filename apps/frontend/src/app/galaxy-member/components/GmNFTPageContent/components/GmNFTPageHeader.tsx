@@ -20,13 +20,13 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
-import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
-import { UserGM } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-
+import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { GmActionButton } from "@/components/GmActionButton"
 import { gmNfts } from "@/constants/gmNfts"
-import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
+
+import { UserGM } from "../../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { getLevelGradient } from "../../../../../api/contracts/galaxyMember/utils/getLevelGradient"
+import { useGetB3trBalance } from "../../../../../hooks/useGetB3trBalance"
 
 const compactFormatter = getCompactFormatter(4)
 export const GmNFTPageHeader = ({ gm }: { gm: UserGM }) => {

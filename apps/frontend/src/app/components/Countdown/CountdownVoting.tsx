@@ -4,10 +4,10 @@ import { useMemo } from "react"
 import Countdown from "react-countdown"
 import { FaRegClock } from "react-icons/fa"
 
-import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-
 import dayjs from "@/utils/dayjsConfig"
+
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 interface CountdownProps {
   onOpen: () => void

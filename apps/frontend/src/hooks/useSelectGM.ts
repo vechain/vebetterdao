@@ -3,10 +3,10 @@ import { GalaxyMember__factory } from "@vechain/vebetterdao-contracts"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
-import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 import { getUserGMsQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { buildClause } from "@/utils/buildClause"
+
+import { useBuildTransaction } from "./useBuildTransaction"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 type Props = { tokenId?: string; onSuccess?: () => void }

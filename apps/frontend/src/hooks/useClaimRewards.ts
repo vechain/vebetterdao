@@ -1,14 +1,14 @@
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+
 import { getVotingRewardsQueryKey } from "../api/contracts/rewards/hooks/useVotingRewards"
 import { RoundReward, buildClaimRewardsTx } from "../api/contracts/rewards/utils/buildClaimRewardsTx"
 import { useCurrentAllocationsRoundId } from "../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
-
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 type useClaimRewardsProps = {
   roundRewards: RoundReward[]

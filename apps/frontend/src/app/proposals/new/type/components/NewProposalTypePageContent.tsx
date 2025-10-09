@@ -5,11 +5,11 @@ import { useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 
-import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
-import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
-import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../../../constants/AnalyticsEvents"
 import { CheckableCard, CheckableCardProps } from "../../../../../components/CheckableCard/CheckableCard"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../../../constants/AnalyticsEvents"
+import { useProposalFormStore } from "../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
 
 export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string

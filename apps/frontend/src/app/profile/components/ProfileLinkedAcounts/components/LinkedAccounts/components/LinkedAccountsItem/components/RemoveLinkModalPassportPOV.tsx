@@ -2,11 +2,11 @@ import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreak
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useRemoveEntityLink } from "../../../../../../../../../hooks/useRemoveEntityLink"
-import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { BaseModal } from "@/components/BaseModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+import { useRemoveEntityLink } from "../../../../../../../../../hooks/useRemoveEntityLink"
 
 export const RemoveLinkModalPassportPOV = ({ modal, entity }: { modal: UseDisclosureProps; entity: string }) => {
   const { t } = useTranslation()

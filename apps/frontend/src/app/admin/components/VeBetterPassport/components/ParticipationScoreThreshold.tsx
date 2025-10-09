@@ -2,8 +2,8 @@ import { Button, Card, Field, Heading, HStack, NumberInput, Text, VStack } from 
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useSetParticipationThreshold } from "../../../../../hooks/useSetParticipationThreshold"
 import { useParticipationScoreThreshold } from "../../../../../api/contracts/vePassport/hooks/useParticipationScoreThreshold"
+import { useSetParticipationThreshold } from "../../../../../hooks/useSetParticipationThreshold"
 
 export const ParticipationScoreThreshold = () => {
   const [threshold, setThresholdPoPScore] = useState<string>("")

@@ -1,16 +1,17 @@
-import { describe, expect, it } from "vitest"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { describe, expect, it } from "vitest"
 
+import * as apiHooks from "@/api"
+import * as hooks from "@/hooks"
+import * as store from "@/store"
+
+import { transferAction } from "../../../../../../__mocks__/Actions"
 import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import FormProposalLayout from "../layout"
-import { transferAction } from "../../../../../../__mocks__/Actions"
 
 import NewProposalPreviewAndPublishPage from "./page"
 
-import * as store from "@/store"
-import * as hooks from "@/hooks"
-import * as apiHooks from "@/api"
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore

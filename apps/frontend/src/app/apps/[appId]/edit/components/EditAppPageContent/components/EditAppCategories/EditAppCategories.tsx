@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import {
   Box,
   Text,
@@ -14,13 +13,14 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
-import { FaSearch, FaPlus } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
-
-import { EditAppForm } from "../../EditAppPageContent"
+import { FaSearch, FaPlus } from "react-icons/fa"
 
 import { APP_CATEGORIES, MAX_CATEGORIES } from "@/types/appDetails"
+
+import { EditAppForm } from "../../EditAppPageContent"
 
 type EditAppCategoriesProps = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>

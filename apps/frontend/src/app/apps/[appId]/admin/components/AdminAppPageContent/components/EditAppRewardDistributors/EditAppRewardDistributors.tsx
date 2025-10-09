@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 
 import { AdminAppForm } from "../../AdminAppPageContent"
 
-import { DistributorItem } from "./components/DistributorItem"
 import { AddRewardDistributorButton } from "./components/AddRewardDistributorButton"
+import { DistributorItem } from "./components/DistributorItem"
 
 interface Props {
   form: UseFormReturn<AdminAppForm>

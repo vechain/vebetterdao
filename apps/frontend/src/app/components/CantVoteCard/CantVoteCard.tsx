@@ -6,13 +6,13 @@ import { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCircleCheck, LuCircleDashed } from "react-icons/lu"
 
-import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
-import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
-import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
-import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
-import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
-
 import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
+
+import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
+import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
+import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
 
 type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions"
 type CantVoteReasonText = {

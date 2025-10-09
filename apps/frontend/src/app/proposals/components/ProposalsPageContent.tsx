@@ -14,19 +14,21 @@ import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
+import { ProposalEnriched } from "@/hooks/proposals/grants/types"
+
 import { useMetProposalCriteria } from "../../../api/contracts/governance/hooks/useMetProposalCriteria"
-import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
+import { useProposalClaimableUserDeposits } from "../../../api/contracts/governance/hooks/useProposalClaimableUserDeposits"
 import { MobileFilterDrawer } from "../../../components/MobileFilterDrawer/MobileFilterDrawer"
 import { SearchField } from "../../../components/SearchField/SearchField"
 import { SelectField } from "../../../components/SelectField/SelectField"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
-import { useBreakpoints } from "../../../hooks/useBreakpoints"
-import { useDebounce } from "../../../hooks/useDebounce"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
+import { useDebounce } from "../../../hooks/useDebounce"
 import { ProposalFilter, StateFilter, useProposalFilters } from "../../../store/useProposalFilters"
 import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { GrantsProposalCard } from "../../grants/components/GrantsProposalCard"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
 
 import { ClaimDeposits } from "./components/ClaimDeposits"
@@ -34,7 +36,6 @@ import { CreateProposalCard } from "./components/CreateProposalCard"
 import { NoProposalsCard } from "./components/NoProposalsCard"
 import { RequirementModal } from "./components/RequirementModal"
 
-import { ProposalEnriched } from "@/hooks/proposals/grants/types"
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
   const { open } = useWalletModal()

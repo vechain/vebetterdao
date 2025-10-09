@@ -4,6 +4,8 @@ import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
+
 import { getParticipatedInGovernanceQueryKey } from "../api/contracts/galaxyMember/hooks/useParticipatedInGovernance"
 import { getXAppRoundEarningsQueryKey } from "../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
 import { getAllocationVotersQueryKey } from "../api/contracts/xAllocations/hooks/useAllocationVoters"
@@ -13,8 +15,6 @@ import { getUserVotesInRoundQueryKey } from "../api/contracts/xApps/hooks/useUse
 import { getXAppsSharesQueryKey } from "../api/contracts/xApps/hooks/useXAppShares"
 
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 //Extra 15% to mitigate low gas estimation when voting on a large number of apps
 //Check https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1752523695772269

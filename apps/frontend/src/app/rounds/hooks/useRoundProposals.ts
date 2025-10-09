@@ -1,12 +1,12 @@
 import { useMemo } from "react"
 
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { ProposalState } from "@/hooks/proposals/grants/types"
+
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
 import { ProposalFilter } from "../../../store/useProposalFilters"
-
-import { ProposalState } from "@/hooks/proposals/grants/types"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 
 export const useRoundProposals = (roundId: string) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

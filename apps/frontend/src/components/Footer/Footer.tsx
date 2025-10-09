@@ -1,17 +1,17 @@
 "use client"
 import { VStack, Text, Container, HStack, Box, Link, Flex } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import dayjs from "dayjs"
+import { useTranslation } from "react-i18next"
 
-import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "../../constants/links"
 import packageJson from "../../../package.json"
+import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "../../constants/links"
 import { BeBetterVeBetterIcon } from "../Icons/BeBetterVeBetterIcon"
 
 import { DiscordButton } from "./components/DiscordButton"
-import { TelegramButton } from "./components/TelegramButton"
 import { FreshDeskButton } from "./components/FreshDeskButton"
-import { Socials } from "./components/Socials"
 import { LanguageSelector } from "./components/LanguageSelector"
+import { Socials } from "./components/Socials"
+import { TelegramButton } from "./components/TelegramButton"
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
   const currentYear = dayjs().format("YYYY")

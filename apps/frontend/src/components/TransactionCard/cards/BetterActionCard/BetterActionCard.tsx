@@ -4,8 +4,8 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { TbLeaf } from "react-icons/tb"
 
-import { UserB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
 import { useXApps } from "../../../../api/contracts/xApps/hooks/useXApps"
+import { UserB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
 
 import { ActionModal } from "./components/ActionModal"
 

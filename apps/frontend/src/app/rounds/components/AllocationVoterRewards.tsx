@@ -6,13 +6,13 @@ import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaRegClock } from "react-icons/fa"
 
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
-import { useAllocationsRoundState } from "../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
-import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
-import { useRoundReward } from "../../../api/contracts/rewards/hooks/useVotingRoundReward"
-
 import { useClaimReward } from "@/hooks/useClaimReward"
+
+import { useRoundReward } from "../../../api/contracts/rewards/hooks/useVotingRoundReward"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 type Props = {
   roundId: string

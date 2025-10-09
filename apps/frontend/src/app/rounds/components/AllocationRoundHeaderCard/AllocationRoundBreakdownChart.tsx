@@ -3,9 +3,9 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-import { B3TRIcon } from "../../../../components/Icons/B3TRIcon"
-import { DotSymbol } from "../../../../components/DotSymbol"
 import { useAllocationAmount } from "../../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { DotSymbol } from "../../../../components/DotSymbol"
+import { B3TRIcon } from "../../../../components/Icons/B3TRIcon"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = { roundId: string }

@@ -12,14 +12,14 @@ import {
 } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useVechainDomain } from "@vechain/vechain-kit"
 
-import { AdminAppForm } from "../../../AdminAppPageContent"
 import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
 import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
+import { AdminAppForm } from "../../../AdminAppPageContent"
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }

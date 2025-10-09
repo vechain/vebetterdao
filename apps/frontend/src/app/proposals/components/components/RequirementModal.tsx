@@ -3,13 +3,13 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
-import { useGMRequiredByProposalType } from "../../../../api/contracts/governance/hooks/useGMRequiredByProposalType"
-import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
-
-import { gmNfts } from "@/constants/gmNfts"
-import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
 import { BaseModal } from "@/components/BaseModal"
+import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+import { gmNfts } from "@/constants/gmNfts"
+
+import { useGetUserGMs } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGMRequiredByProposalType } from "../../../../api/contracts/governance/hooks/useGMRequiredByProposalType"
+import { useCurrentAllocationsRoundId } from "../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 
 type Props = {
   isOpen: UseDisclosureProps["open"]

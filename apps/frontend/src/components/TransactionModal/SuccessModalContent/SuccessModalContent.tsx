@@ -4,11 +4,11 @@ import { ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
 
-import { ShareButtons } from "../../ShareButtons"
-import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
-
 import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../constants/AnalyticsEvents"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { ShareButtons } from "../../ShareButtons"
 
 export type SuccessModalContentProps = {
   title?: ReactNode

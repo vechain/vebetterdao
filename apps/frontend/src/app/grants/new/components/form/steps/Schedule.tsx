@@ -5,6 +5,8 @@ import { useCallback, useMemo } from "react"
 import { Control, FieldErrors, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
+import { GrantFormData } from "@/hooks/proposals/grants/types"
+
 import { useCanProposalStartInNextRound } from "../../../../../../api/contracts/governance/hooks/useCanProposalStartInNextRound"
 import { useCurrentAllocationsRoundDeadline } from "../../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundDeadline"
 import { useCurrentAllocationsRoundId } from "../../../../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
@@ -12,8 +14,6 @@ import { CountdownBoxes } from "../../../../../../components/CountdownBoxes/Coun
 import { FormSelect } from "../../../../../../components/CustomFormFields/FormSelect"
 import { useEstimateBlockTimestamp } from "../../../../../../hooks/useEstimateBlockTimestamp"
 import { GenericAlert } from "../../../../../components/Alert/GenericAlert"
-
-import { GrantFormData } from "@/hooks/proposals/grants/types"
 
 const FEW_DAYS_LEFT_THRESHOLD = 4
 interface ScheduleProps {

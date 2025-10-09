@@ -1,7 +1,7 @@
 "use client"
 import { Heading, Image, VStack, Button, Text } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import NextLink from "next/link"
+import { useTranslation } from "react-i18next"
 export default function Custom404() {
   const { t } = useTranslation()
   return (

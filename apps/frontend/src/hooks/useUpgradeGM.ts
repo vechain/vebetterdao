@@ -5,6 +5,8 @@ import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getUserGMsQueryKey } from "../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { getLevelOfTokenQueryKey } from "../api/contracts/galaxyMember/hooks/useLevelOfToken"
 import { getNFTMetadataUriQueryKey } from "../api/contracts/galaxyMember/hooks/useNFTMetadataUri"
@@ -13,8 +15,6 @@ import { getB3trDonatedQueryKey } from "./useB3trDonated"
 import { getB3trToUpgradeQueryKey } from "./useB3trToUpgrade"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getB3trBalanceQueryKey } from "./useGetB3trBalance"
-
-import { buildClause } from "@/utils/buildClause"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 const B3trInterface = B3TR__factory.createInterface()

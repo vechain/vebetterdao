@@ -1,5 +1,7 @@
 import { Grid, GridItem, useMediaQuery, VStack } from "@chakra-ui/react"
 
+import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
+
 import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
 
 import { ActionBanner } from "./ActionBanners/ActionBanner"
@@ -7,8 +9,6 @@ import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
-
-import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])

@@ -8,12 +8,12 @@ import { useMemo } from "react"
 import { Trans } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 
-import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
-import { scaledDivision } from "../../../../utils/MathUtils/MathUtils"
-import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
-import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
-import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useTotalVotesOnBlock } from "../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useHasVotedInRound } from "../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useUserVotesInRound } from "../../../../api/contracts/xApps/hooks/useUserVotesInRound"
+import { scaledDivision } from "../../../../utils/MathUtils/MathUtils"
+import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
 
 import { SeeVoteDetailsModal } from "./SeeVoteDetailsModal"
 

@@ -3,13 +3,13 @@ import { useCallback } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
 
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+
 import { CustomModalContent } from "../../../components/CustomModalContent"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../constants/AnalyticsEvents"
 import { useDetachGMFromXNode } from "../../../hooks/useDetachGMFromXNode"
 import { useGetLevelAfterDetachingNode } from "../hooks/useGetLevelAfterDetachingNode"
-
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 type Props = {
   gmId: string

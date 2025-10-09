@@ -3,11 +3,11 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 
-import { useBreakpoints } from "../../../../../../hooks/useBreakpoints"
-import { AppFundActivityEvent } from "../../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
-
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import { AppFundActivityEvent } from "../../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
+import { useBreakpoints } from "../../../../../../hooks/useBreakpoints"
 
 type Props = {
   transaction: AppFundActivityEvent

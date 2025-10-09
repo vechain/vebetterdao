@@ -2,9 +2,9 @@ import { VStack, Button, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-import { useCurrentRoundActiveState } from "../../../../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
-
 import { useStartRoundAndClaimWorkflow } from "@/hooks/useStartRoundAndClaimWorkflow"
+
+import { useCurrentRoundActiveState } from "../../../../../api/contracts/xAllocations/hooks/useCurrentRoundActiveState"
 
 interface StartRoundButtonProps {
   redirectTo?: string

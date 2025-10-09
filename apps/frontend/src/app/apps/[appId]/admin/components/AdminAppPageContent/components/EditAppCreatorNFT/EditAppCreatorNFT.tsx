@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 
 import { AdminAppForm } from "../../AdminAppPageContent"
 
-import { CreatorNFTItem } from "./components/CreatorNFTItem"
 import { AddCreatorNFTButton } from "./components/AddCreatorNFTButton"
+import { CreatorNFTItem } from "./components/CreatorNFTItem"
 
 interface Props {
   form: UseFormReturn<AdminAppForm>

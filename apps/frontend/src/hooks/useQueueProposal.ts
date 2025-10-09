@@ -3,13 +3,13 @@ import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
 
+import { buildClause } from "@/utils/buildClause"
+
 import { getAllProposalsStateQueryKey } from "../api/contracts/governance/hooks/useAllProposalsState"
 import { getProposalStateQueryKey } from "../api/contracts/governance/hooks/useProposalState"
 
 import { useProposalEnrichedById } from "./proposals/common/useProposalEnrichedById"
 import { useBuildTransaction } from "./useBuildTransaction"
-
-import { buildClause } from "@/utils/buildClause"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 type Props = { proposalId: string; onSuccess?: () => void }

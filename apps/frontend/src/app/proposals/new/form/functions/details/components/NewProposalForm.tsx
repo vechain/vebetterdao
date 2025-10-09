@@ -7,8 +7,8 @@ import { useTranslation } from "react-i18next"
 import rehypeSanitize from "rehype-sanitize"
 import { abi } from "thor-devkit"
 
-import { useProposalFormStore, ProposalFormStoreState } from "../../../../../../../store/useProposalFormStore"
 import { FunctionParamsField } from "../../../../../../../components/GenerateFunctionToCallParamsInput/GenerateFunctionToCallParamsInput"
+import { useProposalFormStore, ProposalFormStoreState } from "../../../../../../../store/useProposalFormStore"
 
 import { ExecutableFunctionCard } from "./ExecutableFunctionCard"
 

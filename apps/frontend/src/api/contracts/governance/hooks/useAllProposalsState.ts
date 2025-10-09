@@ -4,10 +4,10 @@ import { B3TRGovernor__factory, GrantsManager__factory } from "@vechain/vebetter
 import { executeMultipleClausesCall, useThor, type MultipleClausesCallParameters } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
-import { getProposalStateQueryKey } from "./useProposalState"
-import { getGrantProposalStateQueryKey } from "./useGrantProposalState"
-
 import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { getGrantProposalStateQueryKey } from "./useGrantProposalState"
+import { getProposalStateQueryKey } from "./useProposalState"
 
 export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
 export const useAllProposalsState = ({

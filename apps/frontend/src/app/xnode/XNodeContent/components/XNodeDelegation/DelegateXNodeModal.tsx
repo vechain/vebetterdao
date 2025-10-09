@@ -16,12 +16,13 @@ import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
+import { useDelegateXNode } from "@/hooks/useDelegateXNode"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { UserNode } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { ExclamationTriangle } from "../../../../../components/Icons/ExclamationTriangle"
 import { Step, StepModal } from "../../../../../components/StepModal/StepModal"
 
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 type FormData = {
   walletAddress: string
 }

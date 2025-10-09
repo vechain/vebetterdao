@@ -12,11 +12,11 @@ import {
   LinkOverlay,
   Icon,
 } from "@chakra-ui/react"
+import NextLink from "next/link"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { MdKeyboardArrowRight } from "react-icons/md"
 import { v4 as uuid } from "uuid"
-import NextLink from "next/link"
 
 import { usePreviousAllocationRoundId } from "../../api/contracts/xAllocations/hooks/usePreviousAllocationRoundId"
 import { XApp } from "../../api/contracts/xApps/getXApps"

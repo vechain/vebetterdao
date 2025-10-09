@@ -2,10 +2,10 @@ import { Center, Spinner, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import InfiniteScroll from "react-infinite-scroll-component"
 
-import { BetterActionCard } from "../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
-import { useUsersB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
-
 import { BaseModal } from "@/components/BaseModal"
+
+import { useUsersB3trActions } from "../../../../api/indexer/actions/useUsersB3trActions"
+import { BetterActionCard } from "../../../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
 
 type Props = {
   isOpen: boolean

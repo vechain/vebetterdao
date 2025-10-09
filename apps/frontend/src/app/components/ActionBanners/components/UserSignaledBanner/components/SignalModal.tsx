@@ -1,10 +1,10 @@
 import { UseDisclosureProps, VStack, Text, Heading, Link } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-import { SignalCard } from "./SignalCard"
-
 import { SignalEvent } from "@/api/contracts/xApps/hooks/useUserSignalEvents"
 import { BaseModal } from "@/components/BaseModal"
+
+import { SignalCard } from "./SignalCard"
 
 type Props = {
   open: UseDisclosureProps["open"]

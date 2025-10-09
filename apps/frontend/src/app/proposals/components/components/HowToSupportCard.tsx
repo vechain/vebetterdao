@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
-
 import { VOTING_POWER_DOCS_LINK } from "@/constants/links"
+
+import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
 
 export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: () => void }) => {
   const { t } = useTranslation()

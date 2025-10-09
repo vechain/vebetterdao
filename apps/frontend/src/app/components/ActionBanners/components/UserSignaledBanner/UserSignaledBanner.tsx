@@ -3,12 +3,12 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+import { GenericBanner } from "@/app/components/Banners/GenericBanner"
+
 import { useUserSignalEvents } from "../../../../../api/contracts/xApps/hooks/useUserSignalEvents"
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
 
 import { SignalModal } from "./components/SignalModal"
-
-import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
 export const UserSignaledBanner = () => {
   const { t } = useTranslation()

@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from "next/server"
 import * as AddressUtils from "@repo/utils/AddressUtils"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+
+import FreshdeskClient, { FreshdeskTicketBody } from "@/utils/FreshDeskClient"
 
 import { SubmitCreatorFormData } from "../../../../components/SubmitCreatorForm/SubmitCreatorForm"
 import { authOptions } from "../../auth/[...nextauth]/options"
 
 import { checkMissingFields, humanizeSummary } from "./utils"
 
-import FreshdeskClient, { FreshdeskTicketBody } from "@/utils/FreshDeskClient"
 // Handle POST request
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)

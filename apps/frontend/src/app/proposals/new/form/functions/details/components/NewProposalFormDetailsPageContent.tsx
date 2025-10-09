@@ -6,14 +6,14 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { abi } from "thor-devkit"
 
-import AnalyticsUtils from "../../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { useProposalFormStore } from "../../../../../../../store/useProposalFormStore"
-import { updateMarkdownTemplatePlaceholders } from "../../../../../../../constants/GovernanceProposalTemplate"
 import {
   buttonClicked,
   buttonClickActions,
   ButtonClickProperties,
 } from "../../../../../../../constants/AnalyticsEvents"
+import { updateMarkdownTemplatePlaceholders } from "../../../../../../../constants/GovernanceProposalTemplate"
+import { useProposalFormStore } from "../../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { FormData, NewProposalForm } from "./NewProposalForm"
 

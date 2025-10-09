@@ -14,10 +14,11 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
-import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
-import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
-
 import { AddressIcon } from "@/components/AddressIcon"
+
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+
 type Props = {
   moderator: string
   handleDeleteModerator: () => void

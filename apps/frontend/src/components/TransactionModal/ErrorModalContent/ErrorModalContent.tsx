@@ -4,11 +4,11 @@ import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import Lottie from "react-lottie"
 
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
 import { ModalAnimation } from "../ModalAnimation"
 
 import errorAnimation from "./error.json"
-
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 export type ErrorModalContentProps = {
   title?: ReactNode

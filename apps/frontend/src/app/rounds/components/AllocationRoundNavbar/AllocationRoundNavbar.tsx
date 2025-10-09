@@ -17,9 +17,9 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa6"
 
-import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
-import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
 import { useAllocationsRound } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { AllocationStateBadge } from "../../../../components/AllocationStateBadge/AllocationStateBadge"
 export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const router = useRouter()
   const { t } = useTranslation()

@@ -4,6 +4,9 @@ import dayjs from "dayjs"
 import { t } from "i18next"
 import { useCallback, useMemo, useState } from "react"
 
+import { BaseModal } from "@/components/BaseModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
 import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
 import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { UnendorsedApp, XApp } from "../../../api/contracts/xApps/getXApps"
@@ -11,9 +14,6 @@ import { useAppEndorsementScore } from "../../../api/contracts/xApps/hooks/endor
 import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
 import { useEndorseApp } from "../../../hooks/useEndorseApp"
 import { GenericAlert } from "../../components/Alert/GenericAlert"
-
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
-import { BaseModal } from "@/components/BaseModal"
 
 type Props = {
   isOpen: boolean

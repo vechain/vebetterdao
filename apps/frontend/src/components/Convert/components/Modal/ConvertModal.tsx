@@ -1,23 +1,24 @@
 "use-client"
+import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
+import BigNumber from "bignumber.js"
 import { useCallback, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
-import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
-import BigNumber from "bignumber.js"
 
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useB3trConverted } from "../../../../api/contracts/b3tr/hooks/useB3trConverted"
 import { useConvertB3tr } from "../../../../hooks/useConvertB3tr"
 import { useConvertVot3 } from "../../../../hooks/useConvertVot3"
 import { useGetB3trBalance } from "../../../../hooks/useGetB3trBalance"
 import { useGetVot3Balance } from "../../../../hooks/useGetVot3Balance"
 import { useSmartAccountUpgradeRequired } from "../../../../hooks/vechainKitHooks/useSmartAccountUpgradeRequired"
-import { useB3trConverted } from "../../../../api/contracts/b3tr/hooks/useB3trConverted"
 import { Step, StepModal } from "../../../StepModal/StepModal"
 
 import { ReviewSwapContent } from "./contents/ReviewSwapContent"
-import { TokenSelectionContent } from "./contents/TokenSelectionContent"
 import { SwapTokenContent } from "./contents/SwapTokenContent"
+import { TokenSelectionContent } from "./contents/TokenSelectionContent"
 
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {
   isOpen: boolean
   onClose: () => void

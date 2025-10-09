@@ -3,10 +3,10 @@ import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 
+import { gmNfts } from "@/constants/gmNfts"
+
 import { UserGM } from "../../../../api/contracts/galaxyMember/hooks/useGetUserGMs"
 import { useGMMaxLevel } from "../../../../api/contracts/galaxyMember/hooks/useGMMaxLevel"
-
-import { gmNfts } from "@/constants/gmNfts"
 
 type Props = {
   setSelectedGMLevel: (GMLevel: string) => void

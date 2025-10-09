@@ -4,8 +4,8 @@ import { Control, Controller, UseFormSetValue } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
 
-import { type GrantFormData } from "@/hooks/proposals/grants/types"
 import { useColorModeValue } from "@/components/ui/color-mode"
+import { type GrantFormData } from "@/hooks/proposals/grants/types"
 
 interface GrantTypeSelectionProps {
   control: Control<GrantFormData>

@@ -3,11 +3,11 @@ import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 
-import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
-import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
-
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
 
 type Props = {
   event: AppEndorsedEvent

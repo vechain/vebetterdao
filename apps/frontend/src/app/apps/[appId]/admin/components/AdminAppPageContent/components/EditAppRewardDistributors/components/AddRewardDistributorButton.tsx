@@ -5,9 +5,9 @@ import { useCallback } from "react"
 import { useForm, UseFormSetValue, UseFormGetValues } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 
-import { AdminAppForm } from "../../../AdminAppPageContent"
-import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
 import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { WalletAddressInput } from "../../../../../../../../components/Input/WalletAddressInput"
+import { AdminAppForm } from "../../../AdminAppPageContent"
 
 type Props = {
   getValues: UseFormGetValues<AdminAppForm>

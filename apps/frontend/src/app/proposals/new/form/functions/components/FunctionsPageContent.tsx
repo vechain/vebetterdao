@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
-import { getEnvWhitelistedContractsWithFunctions } from "../../../../../../constants/GovernanceFeaturedFunctions"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { getEnvWhitelistedContractsWithFunctions } from "../../../../../../constants/GovernanceFeaturedFunctions"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 

@@ -6,13 +6,14 @@ import { useWallet } from "@vechain/vechain-kit"
 import { Trans, useTranslation } from "react-i18next"
 import { FaQuestionCircle } from "react-icons/fa"
 
-import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
-import { VOT3Icon } from "../../../../../components/Icons/VOT3Icon"
+import { Tooltip } from "@/components/ui/tooltip"
+
 import { useTotalVotesOnBlock } from "../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
 import { useIsQuadraticFundingDisabled } from "../../../../../api/contracts/xAllocationPool/hooks/useIsQuadraticFundingDisabled"
 import { useAllocationsRound } from "../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { VOT3Icon } from "../../../../../components/Icons/VOT3Icon"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
 
-import { Tooltip } from "@/components/ui/tooltip"
 const compactFormatter = getCompactFormatter(2)
 type Props = {
   roundId: string

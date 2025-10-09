@@ -1,23 +1,23 @@
 "use client"
+import { Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
 import MDEditor from "@uiw/react-md-editor"
 import "@uiw/react-md-editor/markdown-editor.css"
-import { Button, Card, Separator, HStack, Heading, VStack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
-
-import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
-import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
-import { useCreateStandardProposal } from "../../../../../../hooks/proposals/standard/useCreateStandardProposal"
-import { useUploadProposalMetadata } from "../../../../../../hooks/useUploadProposalMetadata"
-import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
-import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
-import { useHashProposal } from "../../../../../../api/contracts/governance/hooks/useHashProposal"
-import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
+
+import { useDepositThreshold } from "../../../../../../api/contracts/governance/hooks/useDepositThreshold"
+import { useHashProposal } from "../../../../../../api/contracts/governance/hooks/useHashProposal"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import { useCreateStandardProposal } from "../../../../../../hooks/proposals/standard/useCreateStandardProposal"
+import { useUploadProposalMetadata } from "../../../../../../hooks/useUploadProposalMetadata"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
+import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()

@@ -1,24 +1,25 @@
 "use client"
 import { Grid, GridItem, HStack, Button } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useMemo, useState } from "react"
-import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/vechain-kit"
 import Link from "next/link"
-
-import { ConvertModal } from "../../../components/Convert/components/Modal/ConvertModal"
-import { SearchField } from "../../../components/SearchField/SearchField"
-import { PageBreadcrumb } from "../../components/PageBreadcrumb/PageBreadcrumb"
-import { useDebounce } from "../../../hooks/useDebounce"
-import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
-import { GrantsProposalCard } from "../components/GrantsProposalCard"
-import { useDraftGrantProposalStore } from "../../../store/useGrantProposalFormStore"
-import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
-import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { EmptyState } from "@/components/ui/empty-state"
 import { useProposalEnriched } from "@/hooks/proposals/common/useProposalEnriched"
 import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
+
+import { ConvertModal } from "../../../components/Convert/components/Modal/ConvertModal"
+import { SearchField } from "../../../components/SearchField/SearchField"
+import { useProposalSearch } from "../../../hooks/proposals/common/useProposalSearch"
+import { useDebounce } from "../../../hooks/useDebounce"
+import { useDraftGrantProposalStore } from "../../../store/useGrantProposalFormStore"
+import { PageBreadcrumb } from "../../components/PageBreadcrumb/PageBreadcrumb"
+import { HowToSupportCard } from "../../proposals/components/components/HowToSupportCard"
+import { GrantsProposalCard } from "../components/GrantsProposalCard"
+import { GrantsProposalDraftCard } from "../components/GrantsProposalDraftCard"
+
 const BreadcrumItems = [
   {
     label: "Grants",
