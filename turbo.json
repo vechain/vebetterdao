@@ -39,7 +39,7 @@
     },
     "build": {
       "cache": true,
-      "dependsOn": ["prepare-contracts", "@repo/config#check-or-generate-local-config"],
+      "dependsOn": ["prepare-contracts"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
