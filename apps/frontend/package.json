@@ -13,7 +13,7 @@
     "dev:mainnet": "next dev --turbo",
     "dev:galactica-test": "next dev --turbo",
     "staging": "next dev --turbo",
-    "build": "yarn typecheck && next build",
+    "build": "next build",
     "start": "next start",
     "start:staging": "next start",
     "start:testnet": "next start",

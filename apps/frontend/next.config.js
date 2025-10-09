@@ -26,7 +26,6 @@ const nextConfig = {
       },
     },
   },
-  typescript: { ignoreBuildErrors: true },
   swcMinify: true,
   compress: true,
   webpack(config) {
