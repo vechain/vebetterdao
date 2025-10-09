@@ -73,11 +73,18 @@ interface IRelayerRewardsPool {
   /**
    * @notice Emitted when a relayer action is registered
    * @param relayer The relayer address
+   * @param voter The voter address
    * @param roundId The round ID
    * @param actionCount The new total action count for the relayer
    * @param weight The weight of the action
    */
-  event RelayerActionRegistered(address indexed relayer, uint256 indexed roundId, uint256 actionCount, uint256 weight);
+  event RelayerActionRegistered(
+    address indexed relayer,
+    address indexed voter,
+    uint256 indexed roundId,
+    uint256 actionCount,
+    uint256 weight
+  );
 
   /**
    * @notice Emitted when rewards are deposited for a round
@@ -345,10 +352,11 @@ interface IRelayerRewardsPool {
   /**
    * @notice Registers an action performed by a relayer in a specific round
    * @param relayer The relayer address
+   * @param voter The voter address
    * @param roundId The round ID
    * @param action The type of action performed (VOTE or CLAIM)
    */
-  function registerRelayerAction(address relayer, uint256 roundId, RelayerAction action) external;
+  function registerRelayerAction(address relayer, address voter, uint256 roundId, RelayerAction action) external;
 
   /**
    * @notice Allows a relayer to claim their rewards for a specific round

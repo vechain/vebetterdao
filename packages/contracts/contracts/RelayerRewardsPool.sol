@@ -575,11 +575,13 @@ contract RelayerRewardsPool is
   /**
    * @notice Registers an action performed by a relayer in a specific round
    * @param relayer The relayer address
+   * @param voter The voter address
    * @param roundId The round ID
    * @param action The type of action performed (VOTE or CLAIM)
    */
   function registerRelayerAction(
     address relayer,
+    address voter,
     uint256 roundId,
     RelayerAction action
   ) external override onlyRoleOrAdmin(POOL_ADMIN_ROLE) {
@@ -598,7 +600,7 @@ contract RelayerRewardsPool is
     $.relayerWeightedActions[roundId][relayer] += weight;
     $.completedWeightedActions[roundId] += weight;
 
-    emit RelayerActionRegistered(relayer, roundId, $.relayerActions[roundId][relayer], weight);
+    emit RelayerActionRegistered(relayer, voter, roundId, $.relayerActions[roundId][relayer], weight);
   }
 
   /**
@@ -631,7 +633,6 @@ contract RelayerRewardsPool is
 
   /**
    * @notice Reduces the total expected actions for a round when an auto-voting user cannot vote
-   * @dev This should be called when a user has auto-voting enabled but no eligible apps to vote for
    * @param roundId The round ID
    * @param userCount The number of users to remove from expected actions (typically 1)
    */

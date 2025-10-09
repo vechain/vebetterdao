@@ -399,10 +399,14 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     (uint256 netReward, uint256 netGmReward, uint256 fee) = _getRewardsAndFees(cycle, voter);
     uint256 totalNetReward = netReward + netGmReward;
+    uint256 totalRequiredNetReward = totalNetReward + fee;
 
+    // Ensure user has actual rewards to claim (not just fees to pay)
     require(totalNetReward > 0, "VoterRewards: reward must be greater than 0");
+
+    // Ensure contract has enough balance for both user rewards and relayer fees
     require(
-      $.b3tr.balanceOf(address(this)) >= totalNetReward,
+      $.b3tr.balanceOf(address(this)) >= totalRequiredNetReward,
       "VoterRewards: not enough B3TR in the contract to pay reward"
     );
 
@@ -415,7 +419,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
       $.relayerRewardsPool.deposit(fee, cycle);
 
       // Register CLAIM action for the relayer
-      $.relayerRewardsPool.registerRelayerAction(msg.sender, cycle, RelayerAction.CLAIM);
+      $.relayerRewardsPool.registerRelayerAction(msg.sender, voter, cycle, RelayerAction.CLAIM);
+
+      emit RelayerFeeTaken(msg.sender, fee, cycle, voter);
     }
 
     // Transfer the remaining reward to the voter

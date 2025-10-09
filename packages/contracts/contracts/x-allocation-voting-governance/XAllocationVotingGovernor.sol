@@ -132,7 +132,7 @@ abstract contract XAllocationVotingGovernor is
 
     validatePersonhoodForCurrentRound(_msgSender());
 
-    _castVoteInternal(_msgSender(), roundId, appIds, voteWeights, false);
+    _handleCastVote(_msgSender(), roundId, appIds, voteWeights, false);
   }
 
   // ---------- Internal and Private ---------- //
@@ -160,7 +160,7 @@ abstract contract XAllocationVotingGovernor is
       return;
     }
 
-    _castVoteInternal(voter, roundId, finalAppIds, voteWeights, true);
+    _handleCastVote(voter, roundId, finalAppIds, voteWeights, true);
   }
 
   /**  @dev Internal function to handle common voting logic
@@ -170,7 +170,7 @@ abstract contract XAllocationVotingGovernor is
    * @param voteWeights Array of vote weights for each app
    * @param isAutoVote Whether this is an auto vote (affects events and relayer rewards)
    */
-  function _castVoteInternal(
+  function _handleCastVote(
     address voter,
     uint256 roundId,
     bytes32[] memory appIds,
@@ -182,7 +182,7 @@ abstract contract XAllocationVotingGovernor is
     _countVote(roundId, voter, appIds, voteWeights);
 
     if (isAutoVote) {
-      relayerRewardsPool().registerRelayerAction(msg.sender, roundId, RelayerAction.VOTE);
+      relayerRewardsPool().registerRelayerAction(_msgSender(), voter, roundId, RelayerAction.VOTE);
       emit AllocationAutoVoteCast(voter, roundId, appIds, voteWeights);
     }
   }
@@ -216,7 +216,7 @@ abstract contract XAllocationVotingGovernor is
    * @param roundId The current round ID
    */
   function _checkRelayerEarlyAccessEligibility(uint256 roundId) internal view {
-    relayerRewardsPool().validateEarlyAccessRelayer(msg.sender, roundId);
+    relayerRewardsPool().validateEarlyAccessRelayer(_msgSender(), roundId);
   }
 
   /**
