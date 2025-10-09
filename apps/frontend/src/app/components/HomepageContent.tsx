@@ -15,7 +15,7 @@ export const HomePageContent = () => {
 
       <Grid
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
-        gap={"32px"}
+        gap="32px"
         w="full"
         maxW="full"
         alignItems={"flex-start"}
