@@ -1994,5 +1994,15 @@
   "Created": "Criado",
   "You have been signalled by": "Você foi sinalizado por",
   "You have reached the maximum GM NFT level.": "Você atingiu o nível máximo de NFT GM.",
-  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Remover sua aprovação de um aplicativo pode resultar na sua não seleção para alocações."
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Remover sua aprovação de um aplicativo pode resultar na sua não seleção para alocações.",
+  "Current Status": "Status Atual",
+  "Status After Transaction": "Status Após Transação",
+  "Reset Form": "Redefinir Formulário",
+  "Apps eligible in next round": "Apps elegíveis na próxima rodada",
+  "App not found": "App não encontrado",
+  "Confirm Eligibility Change": "Confirmar Mudança de Elegibilidade",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Tem certeza de que deseja tornar <b>'{{appName}}'</b> <b>{{status}}</b> para a próxima rodada?",
+  "eligible": "elegível",
+  "ineligible": "inelegível",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Ao fazer isso, {{appName}} com id {{appId}} será {{status}} para a próxima rodada."
 }

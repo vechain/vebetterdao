@@ -1994,5 +1994,15 @@
   "Created": "सृजित",
   "You have been signalled by": "आपको संकेत मिला है",
   "You have reached the maximum GM NFT level.": "आप अधिकतम जीएम एनएफटी स्तर तक पहुंच गए हैं।",
-  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "किसी ऐप से अपनी समर्थन को हटाने से यह आवंटनों के लिए चुना नहीं जा सकता है।"
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "किसी ऐप से अपनी समर्थन को हटाने से यह आवंटनों के लिए चुना नहीं जा सकता है।",
+  "Current Status": "वर्तमान स्थिति",
+  "Status After Transaction": "लेन-देन के बाद की स्थिति",
+  "Reset Form": "फॉर्म रीसेट करें",
+  "Apps eligible in next round": "अगले दौर में पात्र ऐप्स",
+  "App not found": "ऐप नहीं मिला",
+  "Confirm Eligibility Change": "पात्रता परिवर्तन की पुष्टि करें",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "क्या आप वाकई सुनिश्चित हैं कि आप <b>'{{appName}}'</b> को अगले दौर के लिए <b>{{status}}</b> बनाना चाहते हैं?",
+  "eligible": "पात्र",
+  "ineligible": "अ-पात्र",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "ऐसा करने से, आईडी {{appId}} के साथ {{appName}} अगले दौर के लिए {{status}} होगा।"
 }

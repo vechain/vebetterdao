@@ -1994,5 +1994,15 @@
   "Created": "Đã tạo",
   "You have been signalled by": "Bạn đã được báo hiệu bởi",
   "You have reached the maximum GM NFT level.": "Bạn đã đạt đến cấp GM NFT tối đa.",
-  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Việc gỡ bỏ sự ủng hộ của bạn đối với một ứng dụng có thể dẫn đến việc nó không còn được chọn cho các phân bổ."
+  "Removing your endorsement from an app may result in it no longer being selected for allocations.": "Việc gỡ bỏ sự ủng hộ của bạn đối với một ứng dụng có thể dẫn đến việc nó không còn được chọn cho các phân bổ.",
+  "Current Status": "Trạng thái hiện tại",
+  "Status After Transaction": "Trạng thái sau giao dịch",
+  "Reset Form": "Đặt lại biểu mẫu",
+  "Apps eligible in next round": "Ứng dụng đủ điều kiện trong vòng tiếp theo",
+  "App not found": "Không tìm thấy ứng dụng",
+  "Confirm Eligibility Change": "Xác nhận thay đổi điều kiện",
+  "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Bạn có chắc chắn muốn làm cho <b>'{{appName}}'</b> <b>{{status}}</b> cho vòng tiếp theo không?",
+  "eligible": "đủ điều kiện",
+  "ineligible": "không đủ điều kiện",
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bằng cách làm điều này, {{appName}} với id {{appId}} sẽ bị {{status}} cho vòng tiếp theo."
 }
