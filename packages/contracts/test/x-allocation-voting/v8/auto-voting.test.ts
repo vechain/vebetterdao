@@ -681,6 +681,35 @@ describe("AutoVoting - @shard14b", function () {
       }
     })
 
+    it("should revert when user tries to set more than 15 app preferences", async function () {
+      const appIds: string[] = []
+      const getAllSigners = await ethers.getSigners()
+      const getAllAppOwners = getAllSigners.slice(4, 20) // 16 apps
+
+      for (let i = 0; i < getAllAppOwners.length; i++) {
+        const appOwner = getAllAppOwners[i]
+        const isCreatorMinted = await x2EarnCreatorContract.balanceOf(appOwner.address)
+
+        if (isCreatorMinted === 0n) {
+          await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
+        }
+
+        const appId = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+        await x2EarnApps
+          .connect(appOwner)
+          .submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+
+        // Endorse the app
+        await endorseApp(appId, appOwner)
+
+        appIds.push(appId)
+      }
+
+      await expect(xAllocationVoting.connect(user).setUserVotingPreferences(appIds)).to.be.revertedWith(
+        "AutoVotingLogic: must vote for less than 15 apps",
+      )
+    })
+
     it("should revert when voter is not a person", async function () {
       // User is non-person without whitelisted
       const user = otherAccounts[5]
@@ -704,6 +733,67 @@ describe("AutoVoting - @shard14b", function () {
       await expect(xAllocationVoting.connect(user).toggleAutoVoting(user.address)).to.be.revertedWith(
         "AutoVotingLogic: must select at least one app",
       )
+    })
+
+    it("[Edge Case] should handle vote distribution with remaining dust correctly", async function () {
+      // User1 has 100 VOT3 that doesn't divide evenly by 3 (100 / 3 = 33.33...)
+
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner1.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner3.address)
+
+      // Create test apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner1.address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner2.address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner3.address))
+
+      await x2EarnApps
+        .connect(appOwner1)
+        .submitApp(appOwner1.address, appOwner1.address, appOwner1.address, "metadataURI")
+      await x2EarnApps
+        .connect(appOwner2)
+        .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
+      await x2EarnApps
+        .connect(appOwner3)
+        .submitApp(appOwner3.address, appOwner3.address, appOwner3.address, "metadataURI")
+
+      await endorseApp(app1Id, appOwner1)
+      await endorseApp(app2Id, appOwner2)
+      await endorseApp(app3Id, appOwner3)
+
+      await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id, app2Id, app3Id])
+      await xAllocationVoting.connect(user1).toggleAutoVoting(user1.address)
+
+      // Start round
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Cast vote on behalf of user
+      const roundId2 = await xAllocationVoting.currentRoundId()
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user1.address, roundId2)).to.not.be.reverted
+
+      // Verify vote was cast
+      const hasVoted = await xAllocationVoting.hasVoted(roundId2, user1.address)
+      expect(hasVoted).to.be.true
+
+      // // Verify votes were distributed (33 VOT3 each, 1 VOT3 dust remains)
+      const app1Votes = await xAllocationVoting.getAppVotes(roundId2, app1Id)
+      const app2Votes = await xAllocationVoting.getAppVotes(roundId2, app2Id)
+      const app3Votes = await xAllocationVoting.getAppVotes(roundId2, app3Id)
+
+      // All apps should get the same amount
+      expect(app1Votes).to.equal(app2Votes)
+      expect(app2Votes).to.equal(app3Votes)
+
+      // Total distributed should be less than original (proving dust exists)
+      const totalVotes = app1Votes + app2Votes + app3Votes
+      const originalAmount = ethers.parseEther("100")
+      expect(totalVotes).to.be.lessThan(originalAmount)
+
+      // Each app should get roughly 33.33 ETH (but as integer division)
+      const totalDistributed = app1Votes + app2Votes + app3Votes
+      const dust = originalAmount - totalDistributed // 1 VOT3 dust
+      expect(dust).to.equal(1)
     })
 
     it("[Edge Case] should revert when the users have no eligible apps to vote for", async function () {
@@ -751,10 +841,27 @@ describe("AutoVoting - @shard14b", function () {
       const roundId4 = await xAllocationVoting.currentRoundId()
       expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId4)).to.be.false
 
-      // Autovoting should fail because no eligible apps
+      // Get the expected actions before auto-disabling
+      const totalActionsBefore = await relayerRewardsPool.totalActions(roundId4)
+      const totalWeightedActionsBefore = await relayerRewardsPool.totalWeightedActions(roundId4)
+
+      // Autovoting should fail because no eligible apps and reduce expected actions by 1 user
       await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4))
         .to.emit(xAllocationVoting, "AutoVotingDisabled")
         .withArgs(user.address, roundId4)
+        .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
+
+      // Verify that expected actions were reduced
+      const totalActionsAfter = await relayerRewardsPool.totalActions(roundId4)
+      const totalWeightedActionsAfter = await relayerRewardsPool.totalWeightedActions(roundId4)
+
+      // Expected actions should be reduced by 2 (1 vote + 1 claim per user)
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+      const expectedReduction = voteWeight + claimWeight
+
+      expect(totalActionsBefore - totalActionsAfter).to.equal(2) // 1 vote + 1 claim
+      expect(totalWeightedActionsBefore - totalWeightedActionsAfter).to.equal(expectedReduction)
 
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
@@ -764,7 +871,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
     })
 
-    it("should filter out apps that become unendorsed during autovoting", async function () {
+    it("[Edge Case] should filter out apps that become unendorsed during autovoting", async function () {
       await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
       await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
 
@@ -827,65 +934,32 @@ describe("AutoVoting - @shard14b", function () {
         .withArgs(user.address, roundId5, [app2Id], [ethers.parseEther("300")])
     })
 
-    it("should handle vote distribution with remaining dust correctly", async function () {
-      // User1 has 100 VOT3 that doesn't divide evenly by 3 (100 / 3 = 33.33...)
+    it("[Edge Case] should revert when a user tries to enable autovoting after it has been bot-signaled", async function () {
+      const botUser = otherAccounts[3]
 
-      await x2EarnCreatorContract.connect(owner).safeMint(appOwner1.address)
-      await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
-      await x2EarnCreatorContract.connect(owner).safeMint(appOwner3.address)
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
 
-      // Create test apps
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner1.address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner2.address))
-      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner3.address))
+      await veBetterPassport.toggleCheck(3)
+      await veBetterPassport.setSignalingThreshold(1)
+      await veBetterPassport.connect(owner).signalUserWithReason(botUser.address, "Some reason")
 
-      await x2EarnApps
-        .connect(appOwner1)
-        .submitApp(appOwner1.address, appOwner1.address, appOwner1.address, "metadataURI")
-      await x2EarnApps
-        .connect(appOwner2)
-        .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
-      await x2EarnApps
-        .connect(appOwner3)
-        .submitApp(appOwner3.address, appOwner3.address, appOwner3.address, "metadataURI")
-
-      await endorseApp(app1Id, appOwner1)
-      await endorseApp(app2Id, appOwner2)
-      await endorseApp(app3Id, appOwner3)
-
-      await xAllocationVoting.connect(user1).setUserVotingPreferences([app1Id, app2Id, app3Id])
-      await xAllocationVoting.connect(user1).toggleAutoVoting(user1.address)
-
-      // Start round
       await waitForNextCycle(emissions)
       await emissions.connect(minterAccount).distribute()
 
-      // Cast vote on behalf of user
-      const roundId2 = await xAllocationVoting.currentRoundId()
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user1.address, roundId2)).to.not.be.reverted
+      const personhood = await veBetterPassport.isPersonAtTimepoint(
+        botUser.address,
+        await xAllocationVoting.currentRoundSnapshot(),
+      )
+      expect(personhood).to.deep.equal([false, "User has been signaled too many times"])
 
-      // Verify vote was cast
-      const hasVoted = await xAllocationVoting.hasVoted(roundId2, user1.address)
-      expect(hasVoted).to.be.true
-
-      // // Verify votes were distributed (33 VOT3 each, 1 VOT3 dust remains)
-      const app1Votes = await xAllocationVoting.getAppVotes(roundId2, app1Id)
-      const app2Votes = await xAllocationVoting.getAppVotes(roundId2, app2Id)
-      const app3Votes = await xAllocationVoting.getAppVotes(roundId2, app3Id)
-
-      // All apps should get the same amount
-      expect(app1Votes).to.equal(app2Votes)
-      expect(app2Votes).to.equal(app3Votes)
-
-      // Total distributed should be less than original (proving dust exists)
-      const totalVotes = app1Votes + app2Votes + app3Votes
-      const originalAmount = ethers.parseEther("100")
-      expect(totalVotes).to.be.lessThan(originalAmount)
-
-      // Each app should get roughly 33.33 ETH (but as integer division)
-      const totalDistributed = app1Votes + app2Votes + app3Votes
-      const dust = originalAmount - totalDistributed // 1 VOT3 dust
-      expect(dust).to.equal(1)
+      await xAllocationVoting.connect(botUser).setUserVotingPreferences([app1Id])
+      await expect(xAllocationVoting.connect(botUser).toggleAutoVoting(botUser.address)).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "GovernorPersonhoodVerificationFailed",
+      )
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(botUser.address)).to.be.false
     })
   })
 
