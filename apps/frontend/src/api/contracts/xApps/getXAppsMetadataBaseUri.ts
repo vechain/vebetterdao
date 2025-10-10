@@ -1,11 +1,10 @@
-import { executeCallClause, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
+import { executeCallClause, ThorClient } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi
 const method = "baseURI" as const
-
 /**
  *  Returns the baseUri of the xApps metadata
  * @param thor  the thor client
@@ -19,6 +18,5 @@ export const getXAppsMetadataBaseUri = async (thor: ThorClient): Promise<string>
     method,
     args: [],
   })
-
   return uri
 }

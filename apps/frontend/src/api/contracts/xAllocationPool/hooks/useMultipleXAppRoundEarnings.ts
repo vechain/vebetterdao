@@ -1,15 +1,15 @@
+import { getConfig } from "@repo/config"
 import { useQuery } from "@tanstack/react-query"
 import { useThor } from "@vechain/dapp-kit-react"
-import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@vechain/vebetterdao-contracts/factories/XAllocationPool__factory"
-import { formatEther } from "viem"
-import { useRoundXApps } from "../../xApps/hooks"
 import { executeMultipleClausesCall } from "@vechain/vechain-kit"
+import { formatEther } from "viem"
+
+import { useRoundXApps } from "@/api/contracts/xApps/hooks/useRoundXApps"
 
 const abi = XAllocationPool__factory.abi
 const address = getConfig().xAllocationPoolContractAddress as `0x${string}`
 const method = "roundEarnings" as const
-
 export const getMultipleXAppRoundEarningsQueryKey = (roundId: string, xAppIds: string[]) => [
   "roundEarnings",
   "roundId",
@@ -17,7 +17,6 @@ export const getMultipleXAppRoundEarningsQueryKey = (roundId: string, xAppIds: s
   "xAppIds",
   xAppIds,
 ]
-
 /**
  *  Get the amount of $B3TR every xApp earned from an allocation round
  * @param roundId  the round id
@@ -27,7 +26,6 @@ export const getMultipleXAppRoundEarningsQueryKey = (roundId: string, xAppIds: s
 export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[]) => {
   const thor = useThor()
   const { data: xAppsInRound = [] } = useRoundXApps(roundId)
-
   return useQuery({
     queryKey: getMultipleXAppRoundEarningsQueryKey(roundId, xAppIds),
     queryFn: async () => {
@@ -43,7 +41,6 @@ export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[])
             }) as const,
         ),
       })
-
       const decoded = res.map((earnings, index) => {
         const parsedAmount = formatEther(earnings[0] || 0n)
         const appId = xAppsInRound[index]?.id as string

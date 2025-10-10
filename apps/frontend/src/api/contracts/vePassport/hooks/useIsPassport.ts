@@ -1,11 +1,10 @@
-import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const contractAddress = getConfig().veBetterPassportContractAddress
 const abi = VeBetterPassport__factory.abi
 const method = "isPassport" as const
-
 /**
  * Returns the query key for checking if an address is a passport.
  * @param address - The address to check.
@@ -19,7 +18,6 @@ export const getIsPassportQueryKey = (address?: string | null) => {
     args: [address as `0x${string}`],
   })
 }
-
 /**
  * Hook to check if an address is a passport using the VeBetterPassport contract.
  * @param address - The address to check.
@@ -37,7 +35,6 @@ export const useIsPassport = (address?: string | null) => {
     },
   })
 }
-
 /**
  * Hook to check if the current user's address is a passport using the VeBetterPassport contract.
  * @returns A boolean indicating whether the current user's address is a passport.

@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress
 const method = "proposalDeadline" as const
-
 export const getProposalDeadlineQueryKey = (proposalId: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -13,7 +12,6 @@ export const getProposalDeadlineQueryKey = (proposalId: string) =>
     method,
     args: [BigInt(proposalId)],
   })
-
 /**
  *  Hook to get the voteEnd block of the given proposal
  * @param proposalId  the id of the proposal

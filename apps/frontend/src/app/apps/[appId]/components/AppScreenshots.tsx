@@ -3,14 +3,13 @@ import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
 
 import { useCurrentAppScreenshots } from "../hooks/useCurrentAppScreenshots"
+
 import { AppScreenshotModal } from "./AppScreenshotModal"
 
 export const AppScreenshots = () => {
   const { t } = useTranslation()
   const { screenshots } = useCurrentAppScreenshots()
-
   const { open: isOpen, onClose, onOpen } = useDisclosure()
-
   if (screenshots.length === 0) {
     return null
   }

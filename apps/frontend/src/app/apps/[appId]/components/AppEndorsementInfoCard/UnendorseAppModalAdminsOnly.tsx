@@ -1,12 +1,14 @@
-import { useXAppMetadata } from "@/api"
-import { useIpfsImage } from "@/api/ipfs"
-import { BaseModal } from "@/components/BaseModal"
-import { useRemoveNodeEndorsement } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
+
+import { BaseModal } from "@/components/BaseModal"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
+import { useRemoveNodeEndorsement } from "../../../../../hooks/useRemoveNodeEndorsement"
 
 type Props = {
   isOpen: boolean
@@ -15,14 +17,12 @@ type Props = {
   nodeId: string
   nodePoints: string
 }
-
 export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, nodePoints }: Props) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   // App data
   const { data: appMetadata } = useXAppMetadata(appId ?? "")
   const { data: logo } = useIpfsImage(appMetadata?.logo)
-
   const rmNodeEndorsementMutation = useRemoveNodeEndorsement({
     appId,
     nodeId,
@@ -30,17 +30,14 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
       rmNodeEndorsementMutation.resetStatus()
     },
   })
-
   const handleUnendorsement = useCallback(() => {
     rmNodeEndorsementMutation.resetStatus()
     rmNodeEndorsementMutation.sendTransaction()
   }, [rmNodeEndorsementMutation])
-
   return (
     <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
       <VStack gap={6} align="flex-start" w="full">
         <Heading textStyle="2xl">{t("Remove endorsement")}</Heading>
-
         <Flex position="relative" alignSelf={"center"}>
           <Image src={logo?.image ?? ""} alt="app-logo" w="28" h="28" rounded="md" />
           <Text

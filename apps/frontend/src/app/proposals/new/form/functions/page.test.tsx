@@ -1,19 +1,21 @@
-import { fireEvent, render, waitFor } from "@testing-library/react"
-import NewProposalFunctions from "./page"
-import FormProposalLayout from "../layout"
-import * as store from "@/store"
-import * as router from "next/navigation"
-import * as vechainKit from "@vechain/vechain-kit"
-import { screen } from "../../../../../../test"
-import { getEnvWhitelistedContractsWithFunctions } from "@/constants"
-import { vi } from "vitest"
 import { EnvConfig, AppEnv } from "@repo/config/contracts"
-const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
+import { fireEvent, render, waitFor } from "@testing-library/react"
+import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { vi } from "vitest"
 
+import * as store from "@/store"
+
+import { screen } from "../../../../../../test"
+import { getEnvWhitelistedContractsWithFunctions } from "../../../../../constants/GovernanceFeaturedFunctions"
+import FormProposalLayout from "../layout"
+
+import NewProposalFunctions from "./page"
+
+const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
 /**
  * Check for the existence of the functions listed in the dev contracts
  */
-
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -22,9 +24,7 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/functions")
-
 const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false, doubleClickFunctions = false) => {
   render(
     <FormProposalLayout>
@@ -36,12 +36,10 @@ const checkCardContractsRendered = async (env: EnvConfig, clickFunctions = false
   } else {
     expect(screen.queryByTestId("dev__select_env")).not.toBeInTheDocument()
   }
-
   await screen.findByText("What is your proposal about?")
   await screen.findByText(
     "Proposals are based on smart contracts that will be executed. Select the action that you proposal will trigger if succeed in the voting session.",
   )
-
   expect(screen.queryByText("Please select at least one function")).not.toBeInTheDocument()
   const goBackButton = await screen.findByTestId("go-back")
   fireEvent.click(goBackButton)

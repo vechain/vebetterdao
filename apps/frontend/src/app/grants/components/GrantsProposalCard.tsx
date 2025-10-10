@@ -1,37 +1,35 @@
-import {
-  useIsDepositReached,
-  useProposalDepositEvent,
-  useProposalInteractionDates,
-  useProposalUserDeposit,
-  useProposalVotes,
-  useUserSingleProposalVoteEvent,
-} from "@/api"
-import { AddressWithProfilePicture } from "@/app/components/AddressWithProfilePicture"
-import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantsProposalStatusBadge } from "@/components/Proposal/Grants"
-import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
-import { useBreakpoints } from "@/hooks/useBreakpoints"
 import { Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
 import { formatTimeLeft, humanNumber } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { formatEther } from "ethers"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
+import { GrantProposalEnriched, ProposalEnriched, ProposalState, ProposalType } from "@/hooks/proposals/grants/types"
+import { useBreakpoints } from "@/hooks/useBreakpoints"
+
+import { useIsDepositReached } from "../../../api/contracts/governance/hooks/useIsDepositReached"
+import { useProposalDepositEvent } from "../../../api/contracts/governance/hooks/useProposalDepositEvent"
+import { useProposalInteractionDates } from "../../../api/contracts/governance/hooks/useProposalInteractionDates"
+import { useProposalUserDeposit } from "../../../api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useProposalVotes } from "../../../api/indexer/proposals/useProposalVotes"
+import { GrantsProposalStatusBadge } from "../../../components/Proposal/Grants/GrantsProposalStatusBadge"
+import { AddressWithProfilePicture } from "../../components/AddressWithProfilePicture/AddressWithProfilePicture"
+
 import { ProposalCommunityInteractions } from "./ProposalCommunityInteractions"
 import { ProposalLinksAndSocials } from "./ProposalLinksAndSocials"
-import { useRouter } from "next/navigation"
 
 type GrantsProposalCardProps = {
   proposal: (GrantProposalEnriched | ProposalEnriched) & { isDepositReached: boolean }
   variant?: "grant" | "proposal"
 }
-
 // Type guard to check if a proposal is a grant proposal
 const isGrantProposal = (proposal: GrantProposalEnriched | ProposalEnriched): proposal is GrantProposalEnriched => {
   return proposal.type === ProposalType.Grant
 }
-
 export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsProposalCardProps) => {
   const { t } = useTranslation()
   const { account } = useWallet()
@@ -43,7 +41,6 @@ export const GrantsProposalCard = ({ proposal, variant = "grant" }: GrantsPropos
   const { data: userVoteEvent } = useUserSingleProposalVoteEvent(proposal.id)
   const { data: depositReached } = useIsDepositReached(proposal.id ?? "")
   const router = useRouter()
-
   const communityDepositPercentage =
     (proposalDepositEvent.communityDeposits / Number(formatEther(proposal.depositThreshold))) * 100
 

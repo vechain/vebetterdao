@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().x2EarnRewardsPoolContractAddress
 const abi = X2EarnRewardsPool__factory.abi
 const method = "isRewardsPoolEnabled" as const
-
 /**
  * Returns the query key for checking if rewards pool is enabled.
  * @param xAppId The xApp id
@@ -13,7 +12,6 @@ const method = "isRewardsPoolEnabled" as const
  */
 export const getIsRewardsPoolEnabledQueryKey = (xAppId: string) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [xAppId as `0x${string}`] })
-
 /**
  * Hook to get whether the rewards pool is enabled or not for a specific xApp
  * @param xAppId The xApp id

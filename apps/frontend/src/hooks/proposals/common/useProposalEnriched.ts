@@ -1,27 +1,24 @@
-import { useAllProposalsState } from "@/api"
 import BigNumber from "bignumber.js"
 import { useMemo } from "react"
 
+import { useAllProposalsState } from "../../../api/contracts/governance/hooks/useAllProposalsState"
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "../grants/types"
 import { useStandardOrGrantProposalDetails } from "../grants/useStandardOrGrantProposalDetails"
+
 import { useProposalCreatedEvents } from "./useProposalCreatedEvents"
 
 // Utility type to ensure required fields stay required after spreading
 type EnsureRequired<T, K extends keyof T> = T & Required<Pick<T, K>>
-
 export const useProposalEnriched = () => {
   // Step 1: Fetch events
   const { grantProposals, standardProposals, allProposals } = useProposalCreatedEvents()
-
   // Step 2: Get proposal IDs
   const grantProposalsIds = useMemo(() => {
     return grantProposals?.map(event => event.id) || []
   }, [grantProposals])
-
   const standardProposalsIds = useMemo(() => {
     return standardProposals?.map(event => event.id) || []
   }, [standardProposals])
-
   // Step 3: Get proposal states, details, and voting data
   const {
     data: { grantProposalsDetailsMap, standardProposalsDetailsMap } = {
@@ -30,7 +27,6 @@ export const useProposalEnriched = () => {
     },
     isLoading: isDetailsLoading,
   } = useStandardOrGrantProposalDetails({ standardProposals, grantProposals })
-
   const {
     data: { grantsProposalStates, standardProposalStates } = {
       grantsProposalStates: [],
@@ -41,11 +37,9 @@ export const useProposalEnriched = () => {
     grantProposalsIds,
     standardProposalsIds,
   })
-
   // Step 4: Reactively enrich grant proposals using useMemo
   const enrichedGrantProposals = useMemo((): GrantProposalEnriched[] => {
     if (!grantProposals?.length) return []
-
     return grantProposals.map(event => {
       const stateData = grantsProposalStates?.find(state => state.proposalId === event.id)
       const state = stateData?.state ?? ProposalState.Pending

@@ -1,11 +1,9 @@
-import { useCurrentAllocationsRoundId } from "@/api/contracts"
+import { useCurrentAllocationsRoundId } from "../../contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
 import { indexerQueryClient } from "../api"
 import { paths } from "../schema"
 
 type UserActionOverviewQuery = paths["/api/v1/b3tr/actions/users/{wallet}/overview"]["get"]
-
 type UserActionOverviewQueryOptions = UserActionOverviewQuery["parameters"]["query"]
-
 export const useUserActionOverview = (
   wallet: string,
   queryOptions?: UserActionOverviewQueryOptions,
@@ -20,7 +18,6 @@ export const useUserActionOverview = (
     { enabled: !!wallet && !!enabled },
   )
 }
-
 export const useUserActionCurrentRoundOverview = (wallet: string) => {
   const { data: currentRound } = useCurrentAllocationsRoundId()
   return useUserActionOverview(wallet, { roundId: currentRound ? Number(currentRound) : undefined }, !!currentRound)

@@ -1,6 +1,7 @@
-import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+
+import { useEvents } from "../../../../hooks/useEvents"
 
 const abi = VeBetterPassport__factory.abi
 const contractAddress = getConfig().veBetterPassportContractAddress
@@ -17,7 +18,6 @@ export type SignalEvent = {
  */
 export const useUserSignalEvents = (user: string) => {
   const filterParams = { user }
-
   const rawSignaledEvents = useEvents({
     contractAddress,
     abi,
@@ -31,7 +31,6 @@ export const useUserSignalEvents = (user: string) => {
       txOrigin: meta.txOrigin,
     }),
   })
-
   const rawUnsignaledEvents = useEvents({
     contractAddress,
     abi,
@@ -45,7 +44,6 @@ export const useUserSignalEvents = (user: string) => {
       txOrigin: meta.txOrigin,
     }),
   })
-
   const signaledEvents = rawSignaledEvents.data || []
   const unsignaledEvents = rawUnsignaledEvents.data || []
   const isLoading = rawSignaledEvents.isLoading || rawUnsignaledEvents.isLoading

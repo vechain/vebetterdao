@@ -1,11 +1,12 @@
 import { Card, HStack, Box, Text, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { t } from "i18next"
+import NextLink from "next/link"
 import { useMemo } from "react"
 import { Trans } from "react-i18next"
+
 import { AddressIcon } from "../AddressIcon"
-import { useVechainDomain } from "@vechain/vechain-kit"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import NextLink from "next/link"
 
 export type LeaderboardRanking = {
   position: number
@@ -19,7 +20,6 @@ type LeaderboardRankingComponentProps = {
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
   const { data: vnsData } = useVechainDomain(ranking.address)
   const domain = vnsData?.domain
-
   const positionStyles = useMemo(() => {
     if (ranking.position === 1)
       return {

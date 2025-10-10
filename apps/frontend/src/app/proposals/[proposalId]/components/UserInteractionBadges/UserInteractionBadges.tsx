@@ -1,29 +1,27 @@
+import { Box, HStack, Icon, Text } from "@chakra-ui/react"
+import { humanNumber } from "@repo/utils/FormattingUtils"
+import { ethers } from "ethers"
+import { useTranslation } from "react-i18next"
+
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import HeartIconFilled from "@/components/Icons/svg/heart-solid.svg"
 import ThumbsDownIconFilled from "@/components/Icons/svg/thumbs-down-solid.svg"
 import ThumbsUpIconFilled from "@/components/Icons/svg/thumbs-up-solid.svg"
-import { Box, HStack, Icon, Text } from "@chakra-ui/react"
-import { humanNumber } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
-import { ethers } from "ethers"
 import { VoteType } from "@/types/voting"
 
 export interface UserInteractionBadgesProps {
   userDeposits?: bigint
   userVoteOption?: VoteType
 }
-
 type InteractionType = "voted" | "supported" | null
-
 type BadgeConfig = {
   label: string
   color: string
   icon: React.ElementType
   text: string
 }
-
 // Define badge configurations for each interaction type
-const VOTE_CONFIG: { [key in VoteType]: Omit<BadgeConfig, "label" | "text"> & { translationKey: string } } = {
+const VOTE_CONFIG: Record<VoteType, Omit<BadgeConfig, "label" | "text"> & { translationKey: string }> = {
   [VoteType.VOTE_FOR]: {
     color: "status.positive.primary",
     icon: ThumbsUpIconFilled,
@@ -40,13 +38,10 @@ const VOTE_CONFIG: { [key in VoteType]: Omit<BadgeConfig, "label" | "text"> & { 
     translationKey: "Abstain",
   },
 }
-
 export const UserInteractionBadges = ({ userDeposits, userVoteOption }: UserInteractionBadgesProps) => {
   const { t } = useTranslation()
-
   // Determine interaction type (priority: voted > supported > none)
   const interactionType: InteractionType = userVoteOption ? "voted" : userDeposits ? "supported" : null
-
   // Get badge configuration based on interaction type
   const getBadgeConfig = (): BadgeConfig | null => {
     if (interactionType === "voted" && userVoteOption) {

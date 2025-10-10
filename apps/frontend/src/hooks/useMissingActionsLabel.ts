@@ -15,7 +15,6 @@ export const useMissingActionsLabel = ({
   isUserDelegatee: boolean
 }) => {
   const { t } = useTranslation()
-
   const short = useMemo(() => {
     if (isUserDelegatee)
       return t(`Your delegator needs {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, {
@@ -23,7 +22,6 @@ export const useMissingActionsLabel = ({
       })
     return t(`You need {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, { missingActions })
   }, [t, missingActions, isUserDelegatee])
-
   const long = useMemo(() => {
     if (isUserDelegatee)
       return t(
@@ -39,6 +37,5 @@ export const useMissingActionsLabel = ({
       },
     )
   }, [isUserDelegatee, t, missingActions])
-
   return { short, long }
 }

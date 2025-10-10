@@ -1,19 +1,22 @@
-import { UseFormReturn } from "react-hook-form"
-import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack } from "@chakra-ui/react"
-import {
-  VEWORLD_BANNER_UPLOAD_GUIDELINES,
-  AVG_PHONE_WIDTH,
-  notFoundImage,
-  VE_WOLRD_SCALING_FACTOR,
-  IMAGE_REQUIREMENTS,
-} from "@/constants"
-import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
+import { useCallback, useRef } from "react"
+import { UseFormReturn } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+
+import { toaster } from "@/components/ui/toaster"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { handleImageCompression } from "@/utils/imageListCompression"
-import { useTranslation } from "react-i18next"
-import { toaster } from "@/components/ui/toaster"
+
+import {
+  IMAGE_REQUIREMENTS,
+  VE_WOLRD_SCALING_FACTOR,
+  AVG_PHONE_WIDTH,
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
+} from "../../../../../../../constants/XAppsMedia"
+import { EditAppForm } from "../EditAppPageContent"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, EditAppForm>

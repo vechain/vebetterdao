@@ -9,16 +9,13 @@ export const stepsSlotRecipe = defineSlotRecipe({
         indicator: {
           bg: "{colors.actions.secondary.default}",
         },
-
         separator: {
           _complete: {
             bg: "{colors.actions.primary.default}",
           },
-
           _horizontal: {
             "--steps-gutter": "0",
           },
-
           "&[data-orientation=vertical]": {
             maxHeight: "calc(100% - var(--steps-size))",
             top: "calc(var(--steps-size))",

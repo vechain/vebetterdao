@@ -1,27 +1,27 @@
-import { useWallet, executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
 import { useQuery } from "@tanstack/react-query"
-import { NFTMetadata, getIpfsMetadata } from "@/api"
-import { gmNfts } from "@/constants/gmNfts"
-import { notFoundImage } from "@/constants"
+import { GalaxyMember__factory, VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { useWallet, executeMultipleClausesCall, useThor } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
+import { gmNfts } from "@/constants/gmNfts"
+
+import { getIpfsMetadata } from "../../../ipfs/hooks/useIpfsMetadata"
+
+import { NFTMetadata } from "./useNFTImage"
+
+const notFoundImage = "/assets/images/image-not-found.webp"
 const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress
 const galaxyMemberAbi = GalaxyMember__factory.abi
-
 const voterRewardsContractAddress = getConfig().voterRewardsContractAddress
 const voterRewardsAbi = VoterRewards__factory.abi
-
 const PAGE_SIZE = 10
-
 /**
  * Returns the query key for fetching the GM balance.
  * @param userAddress The user address to get the balance for
  * @returns The query key for fetching the GM balance.
  */
 export const getUserGMsQueryKey = (userAddress: string) => ["user-gms", userAddress]
-
 export interface UserGM {
   tokenId: string
   tokenURI: string
@@ -32,7 +32,6 @@ export interface UserGM {
   nodeIdAttached?: string
   metadata?: NFTMetadata
 }
-
 /**
  * Hook to get the number of GM NFTs for an address
  * @param userAddress The address to get the number of GM NFTs owned

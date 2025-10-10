@@ -1,6 +1,8 @@
 import { expect, test } from "vitest"
-import NewAppForm from "./page"
+
 import { render, screen } from "../../../../../test"
+
+import NewAppForm from "./page"
 
 test("NewAppForm", async () => {
   render(<NewAppForm />)

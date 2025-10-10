@@ -8,7 +8,6 @@ import { hashFn } from "@wagmi/core/query"
 export const persister: Persister = createSyncStoragePersister({
   storage: typeof window !== "undefined" ? window.localStorage : undefined,
 })
-
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

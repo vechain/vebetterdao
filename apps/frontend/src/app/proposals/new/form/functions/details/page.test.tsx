@@ -1,19 +1,20 @@
-import NewProposalFunctionsDetails from "./page"
-import FormProposalLayout from "../../layout"
-import * as store from "@/store"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
-import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
+import * as router from "next/navigation"
 import { vi } from "vitest"
-import { transferAction } from "../../../../../../../__mocks__/Actions"
+
+import * as store from "@/store"
+
 import { address } from "../../../../../../../__mocks__"
+import { transferAction } from "../../../../../../../__mocks__/Actions"
+import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
+import FormProposalLayout from "../../layout"
+
+import NewProposalFunctionsDetails from "./page"
 
 const spyOnUseProposalFormStore = vi.spyOn(store, "useProposalFormStore")
-
 /**
  * Check for the existence of the functions listed in the dev contracts
  */
-
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 const mockSetData = vi.fn()
@@ -23,9 +24,7 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/functions/details")
-
 const fillGeneratedInput = async (index: number, inputType: string) => {
   const input = await screen.findByTestId(`generated-function-to-call-${index}`)
   switch (inputType) {
@@ -42,7 +41,6 @@ const fillGeneratedInput = async (index: number, inputType: string) => {
       expect(input).toHaveValue("10")
       return
   }
-
   fireEvent.change(input, { target: { value: "0x123" } })
   expect(input).toHaveValue("0x123")
 }

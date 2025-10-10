@@ -1,23 +1,23 @@
-import { useTranslation } from "react-i18next"
-import { useCallback, useMemo, useState } from "react"
-import { useTransactions } from "@/api"
 import { VStack, Heading, Card, Text, HStack, Menu, Spinner, Center, Portal } from "@chakra-ui/react"
-import { TransactionCard } from "@/components"
-import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
-import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
-import { TransactionType } from "@/constants"
+
 import { TransactionEvent } from "@/api/indexer/transactions/useTransactions"
+
+import { useTransactions } from "../../../api/indexer/transactions/useTransactions"
+import { TransactionCard } from "../../../components/TransactionCard/TransactionCard"
+import { TransactionType } from "../../../constants/transactions"
 
 type Props = {
   address: string
 }
-
 export const TransactionsContent = ({ address }: Props) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-
   const filters: { id: TransactionType | "all"; label: string; filter: TransactionEvent[] | undefined }[] = useMemo(
     () => [
       {

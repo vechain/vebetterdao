@@ -1,6 +1,3 @@
-import { WalletAddressInput } from "@/app/components/Input"
-import { useXApps } from "@/api"
-import { useRegisterUserAction } from "@/hooks"
 import {
   Button,
   Card,
@@ -17,34 +14,31 @@ import { AddressUtils } from "@repo/utils"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useXApps } from "../../../../../api/contracts/xApps/hooks/useXApps"
+import { useRegisterUserAction } from "../../../../../hooks/useRegisterUserAction"
+import { WalletAddressInput } from "../../../../components/Input/WalletAddressInput"
 export const RegisterUserAction = () => {
   const [user, setUser] = useState<string>("")
   const [appId, setAppId] = useState<string | undefined>()
   const [round, setRound] = useState<string | undefined>()
   const [roundFieldIsDirty, setRoundFieldIsDirty] = useState<boolean>(false)
-
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(user)
   }, [user])
-
   const isRoundValid = useMemo(() => {
     if (!round) return false
     return Number(round) >= 0
   }, [round])
-
   const { data: xApps } = useXApps()
   const { t } = useTranslation()
-
   const { sendTransaction, isTransactionPending, status } = useRegisterUserAction({
     address: user,
     appId: appId ?? "",
     roundId: Number(round) ?? 0,
   })
-
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
-
       sendTransaction()
     },
     [sendTransaction],

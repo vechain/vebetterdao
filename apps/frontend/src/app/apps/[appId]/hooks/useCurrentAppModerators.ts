@@ -1,5 +1,6 @@
-import { useAppModerators } from "@/api"
 import { useParams } from "next/navigation"
+
+import { useAppModerators } from "../../../../api/contracts/xApps/hooks/useAppModerators"
 
 /**
  * Custom hook to fetch the current app moderators.
@@ -8,7 +9,6 @@ import { useParams } from "next/navigation"
 export const useCurrentAppModerators = () => {
   const { appId } = useParams<{ appId: string }>()
   const { data: moderators, isLoading, error } = useAppModerators(appId)
-
   return {
     moderators: moderators || [],
     isLoading,

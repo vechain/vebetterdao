@@ -1,9 +1,9 @@
 import { HStack, VStack } from "@chakra-ui/react"
+import { UilArrowDown, UilArrowUp, UilTopArrowToTop, UilTrash } from "@iconscout/react-unicons"
 import { UseQueryResult } from "@tanstack/react-query"
+import { Dispatch, ReactNode, SetStateAction, useCallback } from "react"
 import { EmbeddedTweet, TweetSkeleton } from "react-tweet"
 import { Tweet } from "react-tweet/api"
-import { UilArrowDown, UilArrowUp, UilTopArrowToTop, UilTrash } from "@iconscout/react-unicons"
-import { Dispatch, ReactNode, SetStateAction, useCallback } from "react"
 
 type Props = {
   tweetQuery: UseQueryResult<Tweet, Error>
@@ -12,17 +12,14 @@ type Props = {
   tweets: string[]
   setTweets: Dispatch<SetStateAction<string[]>>
 }
-
 export const TweetCard = ({ tweetQuery, editMode, index, tweets, setTweets }: Props) => {
   const { data: tweet, isLoading: isTweetLoading, error: tweetError } = tweetQuery
-
   const removeTweet = useCallback(
     (tweetId: string) => {
       setTweets(prev => prev.filter(tweet => tweet !== tweetId))
     },
     [setTweets],
   )
-
   const moveTweetUp = useCallback(
     (tweetId: string) => {
       const tweetIndex = tweets.indexOf(tweetId)
@@ -34,7 +31,6 @@ export const TweetCard = ({ tweetQuery, editMode, index, tweets, setTweets }: Pr
     },
     [setTweets, tweets],
   )
-
   const moveTweetDown = useCallback(
     (tweetId: string) => {
       const tweetIndex = tweets.indexOf(tweetId)
@@ -46,7 +42,6 @@ export const TweetCard = ({ tweetQuery, editMode, index, tweets, setTweets }: Pr
     },
     [setTweets, tweets],
   )
-
   const moveTweetOnTop = useCallback(
     (tweetId: string) => {
       const newTweets = [tweetId, ...tweets.filter(tweet => tweet !== tweetId)]

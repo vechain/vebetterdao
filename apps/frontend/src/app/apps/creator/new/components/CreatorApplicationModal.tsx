@@ -1,10 +1,10 @@
-import { CustomModalContent } from "@/components"
-import { ErrorModalContent } from "@/components/TransactionModal/ErrorModalContent"
-import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent"
 import { Dialog, VStack, Button } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
-
 import { useTranslation } from "react-i18next"
+
+import { CustomModalContent } from "../../../../../components/CustomModalContent"
+import { ErrorModalContent } from "../../../../../components/TransactionModal/ErrorModalContent/ErrorModalContent"
+import { SuccessModalContent } from "../../../../../components/TransactionModal/SuccessModalContent/SuccessModalContent"
 
 type CreatorApplicationModalProps = {
   isOpen: boolean
@@ -13,7 +13,6 @@ type CreatorApplicationModalProps = {
   status: "success" | "error"
   errorMessage?: string
 }
-
 export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = ({
   isOpen,
   onClose,
@@ -27,7 +26,6 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
       onButtonClick()
     }
   }, [onClose, status, onButtonClick])
-
   const { t } = useTranslation()
   const modalContent = useMemo(() => {
     if (status === "error" || errorMessage) {

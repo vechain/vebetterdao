@@ -1,27 +1,25 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Heading, Text, UseDisclosureProps, VStack, Button, Box, Alert, useBreakpointValue } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle } from "@/components"
+import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
 import { useRemovePendingDelegationDelegateePOV } from "@/hooks/useRemovePendingDelegationDelegateePOV"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { ExclamationTriangle } from "../../../../../../../../components/Icons/ExclamationTriangle"
 
 export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
   const rejectDelegation = useRemovePendingDelegationDelegateePOV({})
-
   const handleDelegate = useCallback(() => {
     rejectDelegation.sendTransaction({ delegator })
   }, [rejectDelegation, delegator])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-
   const handleClose = useCallback(() => {
     modal.onClose?.()
     rejectDelegation.resetStatus()
   }, [modal, rejectDelegation])
-
   return (
     <BaseModal onClose={handleClose} isOpen={(modal.open && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>

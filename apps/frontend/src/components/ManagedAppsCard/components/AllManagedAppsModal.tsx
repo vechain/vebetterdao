@@ -1,19 +1,18 @@
-import { AppDetails } from "./AppDetails"
 import { Heading, Dialog, VStack, Portal, CloseButton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { AppDetails } from "./AppDetails"
 
 export type AppAdministrationRole = {
   isAdmin: boolean
   isModerator: boolean
   appId: string
 }
-
 type Props = {
   userAppRoles: AppAdministrationRole[]
   isOpen: boolean
   onClose: () => void
 }
-
 export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   return (

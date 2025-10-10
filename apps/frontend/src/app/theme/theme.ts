@@ -1,24 +1,23 @@
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 
 import { alertSlotRecipe } from "./alert"
+import { badgeRecipe } from "./badge"
+import { buttonRecipe } from "./button"
 import { cardSlotRecipe } from "./card"
 import { checkboxSlotRecipe } from "./checkbox"
 import { dialogSlotRecipe } from "./dialog"
-import { popoverSlotRecipe } from "./popover"
-import { radioGroupSlotRecipe } from "./radio-group"
-import { selectSlotRecipe } from "./select"
-import { stepsSlotRecipe } from "./steps"
-import { tableSlotRecipe } from "./table"
-
-import { badgeRecipe } from "./badge"
-import { buttonRecipe } from "./button"
 import { headingRecipe } from "./heading"
 import { inputRecipe, numberInputSlotRecipe } from "./input"
 import { nativeSelectSlotRecipe } from "./native-select"
-import { textRecipe } from "./text"
-import { tabsSlotRecipe } from "./tabs"
-import { skeletonRecipe } from "./skeleton"
+import { popoverSlotRecipe } from "./popover"
+import { radioGroupSlotRecipe } from "./radio-group"
+import { selectSlotRecipe } from "./select"
 import { separatorRecipe } from "./separator"
+import { skeletonRecipe } from "./skeleton"
+import { stepsSlotRecipe } from "./steps"
+import { tableSlotRecipe } from "./table"
+import { tabsSlotRecipe } from "./tabs"
+import { textRecipe } from "./text"
 
 const config = defineConfig({
   preflight: true,
@@ -29,10 +28,8 @@ const config = defineConfig({
       cursor: "pointer",
     },
   },
-
   // TODO: use this to force using tokens
   // strictTokens: true,
-
   theme: {
     textStyles: {
       "6xl": { value: { fontSize: "3.75rem", lineHeight: "3.75rem" } }, //60px
@@ -47,7 +44,6 @@ const config = defineConfig({
       xs: { value: { fontSize: "0.75rem", lineHeight: "1rem" } }, //12px
       xxs: { value: { fontSize: "0.625rem", lineHeight: "0.875rem" } }, //10px
     },
-
     recipes: {
       heading: headingRecipe,
       button: buttonRecipe,

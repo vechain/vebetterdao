@@ -1,9 +1,10 @@
-import { describe, expect } from "vitest"
-import NewproposalPage from "./page"
-import { fireEvent, render, screen, waitFor } from "../../../../test"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { describe, expect } from "vitest"
 
+import { fireEvent, render, screen, waitFor } from "../../../../test"
+
+import NewproposalPage from "./page"
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -12,7 +13,6 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 describe("NewProposal", async () => {
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
@@ -22,7 +22,6 @@ describe("NewProposal", async () => {
     render(<NewproposalPage />)
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
-
   it("should render correctly", async () => {
     render(<NewproposalPage />)
     await screen.findByTestId("new-proposal-page")
@@ -34,7 +33,6 @@ describe("NewProposal", async () => {
     await screen.findByText("Look for support")
     await screen.findByText("Voting")
     await screen.findByText("Execution")
-
     const goBack = await screen.findByTestId("go-back")
     const continueButton = await screen.findByTestId("continue")
     fireEvent.click(goBack)

@@ -1,29 +1,27 @@
-import { AppVotesGiven, useIpfsImage, useXAppMetadata } from "@/api"
-import { notFoundImage } from "@/constants"
 import { Button, HStack, Skeleton, Text, VStack, Image, Card } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
+import { notFoundImage } from "@/constants"
+
+import { AppVotesGiven } from "../../../../../api/contracts/xApps/hooks/useUserTopVotedApps"
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
+
 type Props = {
   appVoted: AppVotesGiven
 }
-
 const compactFormatter = getCompactFormatter(0)
-
 export const AppVotedBox = ({ appVoted }: Props) => {
   const router = useRouter()
-
   const { t } = useTranslation()
-
   const { data: appMetadata } = useXAppMetadata(appVoted.appId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
-
   const goToApp = useCallback(() => {
     router.push(`/apps/${appVoted.appId}`)
   }, [router, appVoted.appId])
-
   return (
     <Button
       h="auto"

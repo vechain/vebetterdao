@@ -1,5 +1,6 @@
 import { Card, Flex, HStack, Text, VStack } from "@chakra-ui/react"
-import { ExclamationTriangle } from "@/components"
+
+import { ExclamationTriangle } from "../../../../../../components/Icons/ExclamationTriangle"
 
 type Props = {
   appName?: string

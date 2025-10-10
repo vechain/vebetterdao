@@ -1,9 +1,10 @@
-import { buildQueryString } from "@/api/utils"
-import { SubmissionsResponse } from "@/app/api/app/creator/submission/route"
 import { useQuery } from "@tanstack/react-query"
 
-export const creatorSubmissionQueryKey = (walletAddress: string) => ["FETCH_CREATOR_SUBMISSION", walletAddress]
+import { SubmissionsResponse } from "@/app/api/app/creator/submission/route"
 
+import { buildQueryString } from "../../utils/buildQueryString"
+
+export const creatorSubmissionQueryKey = (walletAddress: string) => ["FETCH_CREATOR_SUBMISSION", walletAddress]
 /**
  * Fetches the creator submissions for a specific wallet address
  * @param walletAddress The wallet address of the creator
@@ -11,7 +12,6 @@ export const creatorSubmissionQueryKey = (walletAddress: string) => ["FETCH_CREA
  */
 export const useCreatorSubmission = (walletAddress: string) => {
   const queryString = buildQueryString({ walletAddress: walletAddress.toLowerCase() })
-
   return useQuery({
     queryKey: creatorSubmissionQueryKey(walletAddress),
     queryFn: async () => {

@@ -2,6 +2,7 @@ import { Button, Checkbox, HStack, Icon, ListCollection, type StackProps, Text, 
 import { UilFilter } from "@iconscout/react-unicons"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+
 import { BaseModal } from "../BaseModal"
 
 interface MobileFilterDrawerProps extends StackProps {
@@ -10,7 +11,6 @@ interface MobileFilterDrawerProps extends StackProps {
   onApply: (values: any[]) => void
   placeholder?: string
 }
-
 export const MobileFilterDrawer = ({
   options,
   selectedValues,
@@ -21,32 +21,25 @@ export const MobileFilterDrawer = ({
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [tempSelectedValues, setTempSelectedValues] = useState<any[]>(selectedValues)
-
   const selectedCount = selectedValues.length
-
   const handleToggleOption = (value: any) => {
     setTempSelectedValues(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]))
   }
-
   const handleReset = () => {
     setTempSelectedValues([])
   }
-
   const handleApply = () => {
     onApply(tempSelectedValues)
     setIsOpen(false)
   }
-
   const handleOpen = () => {
     setTempSelectedValues(selectedValues)
     setIsOpen(true)
   }
-
   const handleClose = () => {
     setIsOpen(false)
     setTempSelectedValues(selectedValues) // Reset temp values when closing
   }
-
   return (
     <VStack {...boxProps}>
       {/* Filter Icon Button */}

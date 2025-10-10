@@ -19,26 +19,22 @@ import {
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { UseFormRegisterReturn, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa"
 import { LuCalendar } from "react-icons/lu"
-
 //TODO: This input needs a optimization, it's not efficient with those lots of calculations and state updates
-
 // Starting the week on Monday
 dayjs.extend(updateLocale)
 dayjs.updateLocale("en", {
   weekStart: 1,
 })
-
 type CalendarHeaderProps = {
   currentDate: dayjs.Dayjs
   changeMonth: (increment: number) => void
   isPrevMonthDisabled: boolean
   isNextMonthDisabled: boolean
 }
-
 type CalendarBodyProps = {
   currentDate: dayjs.Dayjs
   daysInMonth: number

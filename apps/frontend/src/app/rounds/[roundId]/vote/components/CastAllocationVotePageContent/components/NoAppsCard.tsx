@@ -6,7 +6,6 @@ type Props = {
 }
 export const NoAppsCard = ({ onShowAllApps }: Props) => {
   const { t } = useTranslation()
-
   return (
     <Box
       bg={"#FFF"}
@@ -29,7 +28,6 @@ export const NoAppsCard = ({ onShowAllApps }: Props) => {
         <Heading size="2xl" alignSelf={"flex-start"}>
           {t("No Apps found")}
         </Heading>
-
         <Button onClick={onShowAllApps} variant={"primary"} alignSelf={"flex-start"} mt={4} mb={2}>
           {t("Show all apps")}
         </Button>

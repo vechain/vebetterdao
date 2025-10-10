@@ -1,39 +1,30 @@
-import {
-  XApp,
-  useAllocationsRound,
-  useCurrentAllocationsRoundId,
-  useXAppRoundEarnings,
-  useXAppTotalEarnings,
-} from "@/api"
 import { Card, Box, Text, HStack, Skeleton, Grid, GridItem } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useXAppRoundEarnings } from "../../../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
+import { useXAppTotalEarnings } from "../../../api/contracts/xAllocationPool/hooks/useXAppTotalEarnings"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { XApp } from "../../../api/contracts/xApps/getXApps"
+
 const compactFormatter = getCompactFormatter()
-
 type Props = { xApp: XApp }
-
 export const AppCardInnerDetails = ({ xApp }: Props) => {
   const { t } = useTranslation()
-
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
-
   // Generate roundIds from 1 to currentRoundId or previous round if current round is not active
   const roundIds = useMemo(() => {
     return Array.from({ length: Number(currentRoundId) - (currentRound.state === 0 ? 1 : 0) }, (_, i) => i + 1)
   }, [currentRoundId, currentRound])
-
   const previousRoundId = useMemo(() => {
     return (Number(currentRoundId) - 1).toString()
   }, [currentRoundId])
-
   const { data: prevRoundEarning, isLoading: prevRoundEarningLoading } = useXAppRoundEarnings(previousRoundId, xApp.id)
-
   const { data: totalEarnings, isLoading: totalEarningsLoading } = useXAppTotalEarnings(roundIds, xApp.id)
-
   return (
     <Card.Root variant="primary" w="full" rounded={"xl"}>
       <Card.Body>

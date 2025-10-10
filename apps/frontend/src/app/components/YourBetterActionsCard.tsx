@@ -1,14 +1,15 @@
-import { useUsersB3trActions } from "@/api"
-import { UserSustainabilityOverviewStats } from "@/components"
 import { Card, Heading, VStack, Text, Link } from "@chakra-ui/react"
-import NextLink from "next/link"
-
-import { useTranslation } from "react-i18next"
-import { NoActionsCard } from "./NoActionsCard"
-import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
-import { NoAccountActionCard } from "./NoAccountActionCard"
-import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import NextLink from "next/link"
+import { useTranslation } from "react-i18next"
+
+import { useUsersB3trActions } from "../../api/indexer/actions/useUsersB3trActions"
+import { UserSustainabilityOverviewStats } from "../../components/Sustainability/UserOverview/UserSustainabilityOverviewStats"
+import { BetterActionCard } from "../../components/TransactionCard/cards/BetterActionCard/BetterActionCard"
+
+import { NoAccountActionCard } from "./NoAccountActionCard"
+import { NoActionsCard } from "./NoActionsCard"
 
 type Props = {
   address: string
@@ -17,15 +18,11 @@ type Props = {
 }
 export const YourBetterActionsCard = ({ address, renderActions = true, maxActions = 3 }: Props) => {
   const { t } = useTranslation()
-
   const { account } = useWallet()
   const isConnectedUser = compareAddresses(account?.address ?? "", address)
-
   const { data } = useUsersB3trActions(address, { direction: "DESC" })
-
   const lastActions = data?.pages.map(page => page.data).flat() ?? []
   const lastActionsData = lastActions.slice(0, maxActions)
-
   return (
     <Card.Root w={"full"} variant="primary">
       <Card.Body>
@@ -42,7 +39,6 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
           </VStack>
           <VStack gap={6} align="stretch">
             {address && <UserSustainabilityOverviewStats address={address} />}
-
             {renderActions && (
               <VStack gap={4} align="stretch">
                 {address ? (

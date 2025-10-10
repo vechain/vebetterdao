@@ -1,5 +1,3 @@
-import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { AddressIcon } from "@/components/AddressIcon"
 import {
   Button,
   Heading,
@@ -16,17 +14,20 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+
 type Props = {
   signaler: string
   handleDeleteSignaler: () => void
 }
-
 export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { data: vnsData } = useVechainDomain(signaler)
   const domain = vnsData?.domain
-
   return (
     <>
       <Dialog.Root open={isOpen} onOpenChange={details => !details.open && onClose()} size={"xl"}>

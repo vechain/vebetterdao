@@ -1,9 +1,11 @@
 import { HStack, Text, VStack, Skeleton } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { useGetUserNodes } from "../../../../../api/contracts/xNodes/useGetUserNodes"
+import { XAppStatus } from "../../../../../types/appDetails"
+import { useXAppStatusConfig } from "../../hooks/useXAppStatusConfig"
+
 import { EndorsersIcon } from "./EndorsersIcon"
-import { XAppStatus } from "@/types"
-import { useXAppStatusConfig } from "../../hooks"
-import { useGetUserNodes } from "@/api"
 
 type Props = {
   endorsementScore?: string
@@ -15,7 +17,6 @@ type Props = {
   isAppEndorsersLoading: boolean
   appId: string
 }
-
 export const EndorsementDetails = ({
   endorsementScore,
   endorsementStatus,
@@ -29,10 +30,8 @@ export const EndorsementDetails = ({
   const { t } = useTranslation()
   const { data: userNodes, isLoading: isUserNodesLoading } = useGetUserNodes()
   const yourScore = userNodes?.allNodes?.find(node => node.endorsedAppId === appId)?.xNodePoints
-
   const STATUS_CONFIG = useXAppStatusConfig()
   const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }
-
   return (
     <HStack w="full" justify="space-between" gap={4}>
       <VStack gap={0} alignItems="center">

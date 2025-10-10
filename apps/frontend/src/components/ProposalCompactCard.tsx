@@ -1,30 +1,30 @@
 import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import NextLink from "next/link"
 import React, { useMemo } from "react"
-import { ProposalMetadata, useProposalInteractionDates } from "@/api"
-import { useIpfsMetadata } from "@/api/ipfs"
-import { toIPFSURL } from "@/utils"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
-import dayjs from "dayjs"
-import { useWallet } from "@vechain/vechain-kit"
+
+import { ProposalMetadata } from "../api/contracts/governance/getProposalsEvents"
+import { useProposalInteractionDates } from "../api/contracts/governance/hooks/useProposalInteractionDates"
+import { useIpfsMetadata } from "../api/ipfs/hooks/useIpfsMetadata"
+import { ProposalEnriched, ProposalState } from "../hooks/proposals/grants/types"
+import { toIPFSURL } from "../utils/ipfs"
+
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
-import NextLink from "next/link"
-import { ProposalEnriched, ProposalState } from "@/hooks"
 
 type Props = {
   proposal: ProposalEnriched
   proposalState?: ProposalState
 }
-
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
   const { id: proposalId, ipfsDescription } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(ipfsDescription))
   const { supportEndDate } = useProposalInteractionDates(proposalId)
-
   const { t } = useTranslation()
-
   const proposalExtraInfo = useMemo(() => {
     if (proposal.state === ProposalState.Pending) {
       return (

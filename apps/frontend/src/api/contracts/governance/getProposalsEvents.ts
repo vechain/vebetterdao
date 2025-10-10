@@ -1,28 +1,25 @@
-import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
+import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { getAllEventLogs, ThorClient } from "@vechain/vechain-kit"
 import { ExtractAbiEvent, ExtractAbiEventNames, AbiParametersToPrimitiveTypes, Abi } from "abitype"
+
 import { decodeEventLog } from "./getEvents"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const eventNames = ["ProposalCanceled", "ProposalExecuted", "ProposalQueued", "ProposalDeposit"] as ProposalEvents[]
-
 type ProposalEvents = ExtractAbiEventNames<typeof abi>
-
 // Utility type to extract event parameters from ABI
 export type ExtractEventParams<T extends Abi, K extends string> = AbiParametersToPrimitiveTypes<
   ExtractAbiEvent<T, K>["inputs"],
   "outputs"
 >
-
 export type ProposalMetadata = {
   title: string
   shortDescription: string
   markdownDescription: string
 }
-
 export type ProposalCanceledEvent = {
   proposalId: string
   blockMeta: EventLogs["meta"]
@@ -42,7 +39,6 @@ export type ProposalDepositEvent = {
   amount: string
   blockMeta: EventLogs["meta"]
 }
-
 export const getProposalsEvents = async (thor: ThorClient, proposalId?: string) => {
   const contract = thor.contracts.load(address, abi)
   const eventAbis = eventNames.map(eventName => contract.getEventAbi(eventName))

@@ -1,10 +1,12 @@
 import { Box, Button, Card, HStack, Heading, IconButton, Text, VStack } from "@chakra-ui/react"
 import { Control, FieldArrayWithId, FieldError, FieldErrors, UseFormRegister } from "react-hook-form"
-import { GenerateFunctionToCallParamsInput } from "@/components"
-import { FormData } from "./NewProposalForm"
 import { useTranslation } from "react-i18next"
 import { FaPlus } from "react-icons/fa6"
 import { FiTrash } from "react-icons/fi"
+
+import { GenerateFunctionToCallParamsInput } from "../../../../../../../components/GenerateFunctionToCallParamsInput/GenerateFunctionToCallParamsInput"
+
+import { FormData } from "./NewProposalForm"
 
 type Props = {
   field: FieldArrayWithId<FormData, "actions", "id">
@@ -16,7 +18,6 @@ type Props = {
   onAddAnotherTransactionClick?: () => void
   onRemoveTransactionClick?: () => void
 }
-
 export const ExecutableFunctionCard: React.FC<Props> = ({
   field,
   index,

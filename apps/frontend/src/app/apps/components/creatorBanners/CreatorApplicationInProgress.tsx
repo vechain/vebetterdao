@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationInProgress = () => {
   const { t } = useTranslation()
-
   return (
     <Card.Root
       variant="primary"
@@ -31,7 +30,6 @@ export const CreatorApplicationInProgress = () => {
                 borderRadius="9px"
               />
             </Box>
-
             <Stack
               w={{ base: "full", md: "90%", lg: "80%" }}
               px={{ base: 5, md: 5 }}

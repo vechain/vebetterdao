@@ -1,38 +1,35 @@
-import { useAllocationAmount, useAllocationsRound, useMostVotedAppsInRound } from "@/api"
 import { Box, Card, HStack, Heading, Icon, LinkBox, LinkOverlay, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
-import { FaAngleRight } from "react-icons/fa6"
-import { DotSymbol } from "@/components/DotSymbol"
-import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { AllocationStateBadge } from "@/components/AllocationStateBadge"
-import { useTranslation } from "react-i18next"
-import { B3TRIcon } from "@/components/Icons"
-import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import NextLink from "next/link"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { FaAngleRight } from "react-icons/fa6"
+
+import { DotSymbol } from "@/components/DotSymbol"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+
+import { useAllocationAmount } from "../../../api/contracts/xAllocations/hooks/useAllocationAmount"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useMostVotedAppsInRound } from "../../../api/contracts/xApps/hooks/useMostVotedAppsInRound"
+import { AllocationStateBadge } from "../../AllocationStateBadge/AllocationStateBadge"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   roundId: string
 }
-
 const compactFormatter = getCompactFormatter()
-
 export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const { t } = useTranslation()
-
   const { data: allocationRound, isLoading } = useAllocationsRound(roundId)
   const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
-
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
     return Object.values(roundAmount).reduce((acc, amount) => acc + Number(amount), 0)
   }, [roundAmount])
-
   const isActive = useMemo(() => {
     return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
   }, [allocationRound])
-
   const mostVotedAppsQuery = useMostVotedAppsInRound(roundId)
-
   return (
     <LinkBox asChild>
       <Card.Root

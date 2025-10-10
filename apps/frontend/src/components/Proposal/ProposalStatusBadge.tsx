@@ -1,12 +1,14 @@
-import { useIsDepositReached } from "@/api"
 import { Icon, Badge, BadgeProps, Skeleton } from "@chakra-ui/react"
 import { UilBan, UilCheck, UilClockEight, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { TFunction } from "i18next"
+import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
-import { DotSymbol } from "@/components"
-import { TFunction } from "i18next"
+
 import { ProposalState } from "@/hooks/proposals/grants/types"
-import { ReactNode } from "react"
+
+import { useIsDepositReached } from "../../api/contracts/governance/hooks/useIsDepositReached"
+import { DotSymbol } from "../DotSymbol"
 
 type Props = {
   proposalId: string
@@ -14,7 +16,6 @@ type Props = {
   proposalState?: ProposalState
   badgeProps?: BadgeProps
 }
-
 const getProposalBadgeDetails = ({
   t,
   proposalState,

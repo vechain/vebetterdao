@@ -1,15 +1,17 @@
-import { creatorSubmissionQueryKey } from "@/api"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { SubmitCreatorForm, SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
-import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
 import { Box, Card, Heading, HStack, Image, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useWallet } from "@vechain/vechain-kit"
-import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { signOut } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
+
+import { creatorSubmissionQueryKey } from "../../../../../api/contracts/x2EarnCreator/useCreatorSubmission"
+import { SubmitCreatorFormData, SubmitCreatorForm } from "../../../../../components/SubmitCreatorForm/SubmitCreatorForm"
 
 import { CreatorApplicationModal } from "./CreatorApplicationModal"
 
@@ -35,7 +37,6 @@ export const NewCreatorPageFormContent = () => {
         securityAntiFarming: false,
       },
     })
-
   const { errors } = formState
   const { t } = useTranslation()
   const { open: isOpen, onClose, onOpen } = useDisclosure()

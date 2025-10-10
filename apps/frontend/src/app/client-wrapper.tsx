@@ -1,23 +1,29 @@
 "use client"
-
 import { Container, Flex, VStack } from "@chakra-ui/react"
-import { Providers } from "./providers"
-import { Footer, TransactionModal } from "@/components"
-import dynamic from "next/dynamic"
-import { AnalyticsUtils } from "@/utils"
-import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
-import { useEffect } from "react"
 import { datadogRum } from "@datadog/browser-rum"
-import "@/i18n"
+import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
+import dynamic from "next/dynamic"
+import { useEffect } from "react"
+
 import { Toaster } from "@/components/ui/toaster"
+
+import { Footer } from "../components/Footer/Footer"
+import { TransactionModal } from "../components/TransactionModal/TransactionModal"
+import AnalyticsUtils from "../utils/AnalyticsUtils/AnalyticsUtils"
+
+import { Providers } from "./providers"
+
+import "@/i18n"
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
-const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
-const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").then(mod => mod.FreshDeskWidget), {
-  ssr: false,
-})
-
+const Navbar = dynamic(() => import("@/components/Navbar/Navbar").then(mod => mod.Navbar), { ssr: false })
+const FreshDeskWidget = dynamic(
+  () => import("@/components/FreshDeskWidget/FreshDeskWidget").then(mod => mod.FreshDeskWidget),
+  {
+    ssr: false,
+  },
+)
 // Initialise Datadog RUM - get the app token and client token from environment variables
 const datadog_app_token = getEnvDatadogApp()
 const datadog_client_token = getEnvDatadogClient()

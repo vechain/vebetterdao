@@ -5,18 +5,15 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const abi = VeBetterPassport__factory.abi
 const address = getConfig().veBetterPassportContractAddress
 const method = "securityMultiplier" as const
-
 export enum SecurityLevel {
   NONE = 0,
   LOW = 1,
   MEDIUM = 2,
   HIGH = 3,
 }
-
 export const getSecurityMultiplierQueryKey = (securityLevel: SecurityLevel) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [securityLevel] })
 }
-
 /**
  * Hook to get the security multiplier of an app
  * @param securityLevel - the security level of the app

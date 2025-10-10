@@ -5,10 +5,8 @@ interface ContractInterface {
   encodeFunctionData(functionFragment: string, values?: any[]): string
   getFunction(nameOrSignature: string): any
 }
-
 // Define a type to infer method names from the function definition
 type MethodName<T> = T extends { getFunction: (nameOrSignature: infer U) => any } ? U : string
-
 /**
  * Parameters for building a clause.
  */
@@ -18,7 +16,6 @@ export type BuildClauseParams<T extends ContractInterface> = {
   args?: unknown[] // Optional arguments for the method
   value?: number // The value to be sent with the transaction
 } & Omit<EnhancedClause, "data" | "abi" | "value">
-
 /**
  * Builds a clause for sending a transaction.
  * @param contractInterface The contract interface.

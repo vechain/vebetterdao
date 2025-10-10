@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const contractAddress = getConfig().veBetterPassportContractAddress
 const abi = VeBetterPassport__factory.abi
 const method = "isBlacklisted" as const
-
 /**
  * Returns the query key for fetching the IsBlacklisted status.
  * @returns The query key for fetching the IsBlacklisted status.
@@ -18,7 +17,6 @@ export const getIsBlacklistedQueryKey = (user: string) => {
     args: [user as `0x${string}`],
   })
 }
-
 /**
  * Hook to get the IsBlacklisted status from the VeBetterPassport contract.
  * @param address - The user address.

@@ -1,11 +1,10 @@
-import { useThor, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useThor, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const method = "proposalDepositReached" as const
-
 /**
  * Generates the query key for the 'getIsDepositReached' function.
  * @param proposalId - The ID of the proposal.
@@ -18,7 +17,6 @@ export const getIsDepositReachedQueryKey = (proposalId: string) =>
     method,
     args: [BigInt(proposalId)],
   })
-
 /**
  * Custom hook for retrieving the deposit reached status for a proposal.
  * @param proposalId - The ID of the proposal.
@@ -26,7 +24,6 @@ export const getIsDepositReachedQueryKey = (proposalId: string) =>
  */
 export const useIsDepositReached = (proposalId: string) => {
   const thor = useThor()
-
   return useCallClause({
     abi,
     address,

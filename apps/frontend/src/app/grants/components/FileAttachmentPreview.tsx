@@ -1,18 +1,18 @@
-import { useIpfsImage } from "@/api/ipfs"
-import { AttachmentFile } from "@/hooks"
-import { convertUriToUrl, toIPFSURL } from "@/utils"
 import { Box, Button, Card, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { LuDownload, LuFile } from "react-icons/lu"
 
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { AttachmentFile } from "../../../hooks/proposals/grants/types"
+import { toIPFSURL } from "../../../utils/ipfs"
+import { convertUriToUrl } from "../../../utils/uri"
+
 export const FileAttachmentPreview = ({ attachment, uniqueKey }: { attachment: AttachmentFile; uniqueKey: number }) => {
   const { data: previewImage } = useIpfsImage(toIPFSURL(attachment.ipfs))
-
   const goToFile = (ipfsHash: string) => {
     const ipfsUrl = toIPFSURL(ipfsHash)
     const downloadUrl = convertUriToUrl(ipfsUrl)
     window.open(downloadUrl, "_blank")
   }
-
   return (
     <Card.Root
       key={`${attachment.name}-${uniqueKey}`}

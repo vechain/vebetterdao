@@ -1,10 +1,15 @@
-import { useGetVotesOnBlock, useProposalSnapshot, useUserSingleProposalVoteEvent, useVotingThreshold } from "@/api"
 import { Box, HStack, Icon, Image, Skeleton, Text, TextProps, Em } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
-import { useTranslation } from "react-i18next"
-import { useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
 import { ProposalState } from "@/hooks/proposals/grants/types"
+
+import { useProposalSnapshot } from "../../api/contracts/governance/hooks/useProposalSnapshot"
+import { useUserSingleProposalVoteEvent } from "../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useGetVotesOnBlock } from "../../api/contracts/governance/hooks/useVotesOnBlock"
+import { useVotingThreshold } from "../../api/contracts/governance/hooks/useVotingThreshold"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
@@ -33,7 +38,6 @@ const SupportMapping = {
     ),
   },
 }
-
 type Props = {
   proposalId: string
   renderTitle?: boolean

@@ -1,9 +1,8 @@
 "use client"
-
-import { MotionVStack } from "@/components"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
+import { MotionVStack } from "../../components/MotionVStack"
 const AppealSteps = dynamic(() => import("./AppealSteps").then(mod => mod.AppealSteps), {
   ssr: false,
   loading: () => (
@@ -12,7 +11,6 @@ const AppealSteps = dynamic(() => import("./AppealSteps").then(mod => mod.Appeal
     </VStack>
   ),
 })
-
 export default function AppealPage() {
   return (
     <MotionVStack>

@@ -1,5 +1,5 @@
-import { SessionProviderProps } from "next-auth/react"
 import dynamic from "next/dynamic"
+import { SessionProviderProps } from "next-auth/react"
 
 const SessionProvider = dynamic(
   async () => {
@@ -10,7 +10,6 @@ const SessionProvider = dynamic(
     ssr: false,
   },
 )
-
 export const AuthSessionProvider = ({ children, session }: SessionProviderProps) => {
   return <SessionProvider session={session}>{children}</SessionProvider>
 }

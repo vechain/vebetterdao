@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const abi = B3TRGovernor__factory.abi
 const address = getConfig().b3trGovernorAddress
 const method = "getUserDeposit" as const
-
 export const getProposalUserDepositQueryKey = (proposalId: string, userAddress: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -13,7 +12,6 @@ export const getProposalUserDepositQueryKey = (proposalId: string, userAddress: 
     method,
     args: [BigInt(proposalId), userAddress as `0x${string}`],
   })
-
 export const useProposalUserDeposit = (proposalId: string, userAddress: string) => {
   return useCallClause({
     abi,

@@ -1,13 +1,12 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
-import { ProposalType } from "@/types"
+import { ProposalType } from "../../../../types/proposals"
 
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
 const method = "getRequiredGMLevelByProposalType" as const
-
 /**
  * Returns the query key for fetching the GM level required by proposal type
  * @param proposalType - The type of proposal to get the GM required for. If not provided, the standard proposal GM required is returned.
@@ -15,7 +14,6 @@ const method = "getRequiredGMLevelByProposalType" as const
  */
 export const getGMRequiredByProposalTypeQueryKey = (proposalType: ProposalType) =>
   getCallClauseQueryKeyWithArgs({ abi, address, method, args: [proposalType] })
-
 /**
  * Hook to get the GM level required by proposal type
  * @param proposalType - The type of proposal to get the GM required for. If not provided, the standard proposal GM required is returned.

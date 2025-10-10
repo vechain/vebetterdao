@@ -2,15 +2,10 @@ import { indexerQueryClient } from "../api"
 import { paths } from "../schema"
 
 type TransactionsQuery = paths["/api/v1/history/{account}"]["get"]
-
 type TransactionsQueryOptions = TransactionsQuery["parameters"]["query"]
-
 type TransactionsQueryResponse = TransactionsQuery["responses"]["200"]["content"]["*/*"]
-
 export type Transaction = TransactionsQueryResponse["data"][number]
-
 export type TransactionEvent = NonNullable<NonNullable<TransactionsQueryOptions>["eventName"]>[number]
-
 export const useTransactions = (account: string, queryOptions?: TransactionsQueryOptions) => {
   const {
     // default event names

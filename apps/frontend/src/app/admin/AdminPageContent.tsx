@@ -1,42 +1,38 @@
 "use client"
-
-import { useCurrentAllocationsRoundId } from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account"
-import { AnalyticsUtils } from "@/utils"
 import { Grid, GridItem, Tabs } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useEffect } from "react"
+
+import { useAccountPermissions } from "../../api/contracts/account/hooks/useAccountPermissions"
+import { useCurrentAllocationsRoundId } from "../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import AnalyticsUtils from "../../utils/AnalyticsUtils/AnalyticsUtils"
+
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
-import { XAppCheckEndorsement } from "./components/XAppCheckEndorsement"
+import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { ContractsDetails } from "./components/ContractsDetails"
+import { GMSetMaxLevel } from "./components/GMSetMaxLevel"
+import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
 import { Pause } from "./components/Pause"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
-import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
-import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
-import { GMSetMaxLevel } from "./components/GMSetMaxLevel"
 import { XAppAssignAppCategory } from "./components/XAppAssignAppCategory"
-
+import { XAppCheckEndorsement } from "./components/XAppCheckEndorsement"
 export const AdminPageContent = () => {
   useEffect(() => {
     AnalyticsUtils.trackPage("Admin")
   }, [])
-
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
-
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   const canSeePauseTab =
     permissions?.isAdminOfB3tr ||
     permissions?.isAdminOfGalaxyMember ||
     permissions?.isAdminOfVot3 ||
     permissions?.isAdminOfB3TRGovernor
-
   const canSeeVeBetterPassportTab =
     permissions?.isAdminOfVeBetterPassport ||
     permissions?.isPassportSettingsManager ||
@@ -44,7 +40,6 @@ export const AdminPageContent = () => {
     permissions?.isPassportActionRegistrar ||
     permissions?.isPassportScoreManager ||
     permissions?.isPassportWhitelister
-
   const canSeeX2EarnCreatorUtils =
     permissions?.isAdminOfX2EarnCreator || permissions?.isMinterOfX2EarnCreator || permissions?.isBurnerOfX2EarnCreator
   const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember

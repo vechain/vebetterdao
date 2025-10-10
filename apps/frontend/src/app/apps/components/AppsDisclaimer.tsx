@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 export const AppsDisclaimer: React.FC = () => {
   const { t } = useTranslation()
-
   return (
     <Text color="text.subtle" textStyle="sm" textAlign="left">
       {t(

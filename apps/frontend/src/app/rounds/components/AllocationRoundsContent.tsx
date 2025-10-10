@@ -1,14 +1,16 @@
+import { VStack, HStack, Stack } from "@chakra-ui/react"
+
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
-import { AllocationRoundsList, TotalAllocations } from "@/components"
-import { VStack, HStack, Stack } from "@chakra-ui/react"
+
+import { TotalAllocations } from "../../../components/AllocationAmounts/TotalAllocations"
+import { AllocationRoundsList } from "../../../components/AllocationRoundsList/AllocationRoundsList"
 
 export const AllocationRoundsContent = () => {
   return (
     <VStack w="full" gap={8} data-testid="allocations-page">
       <CantVoteCard />
       <StartNewRoundAlert />
-
       <Stack
         direction={["column-reverse", "column-reverse", "row"]}
         w="full"

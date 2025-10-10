@@ -1,5 +1,5 @@
-import NextLink from "next/link"
 import { Icon, Link } from "@chakra-ui/react"
+import NextLink from "next/link"
 
 import VBDLogo from "@/components/Icons/svg/vebetter-dao-logo.svg"
 

@@ -1,18 +1,22 @@
 import { Card, Heading, Stack, Flex, Image, Skeleton, useDisclosure, Box, Icon } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/vechain-kit"
-import { SwapB3trVot3 } from "./components/SwapB3trVot3"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { useMemo } from "react"
-import { useBreakpoints, useGetB3trBalance } from "@/hooks"
-import { useGetUserGMs, useGetUserNodes } from "@/api"
-import { GmEmptyStateCard } from "./GmEmptyStateCard"
-import { GmActionButton } from "../GmActionButton"
-import { GmCard } from "./GmCard"
-import { GetNodeModal } from "./GetNodeModal"
+import { useTranslation } from "react-i18next"
 
 import NFTEarthIcon from "@/components/Icons/svg/nft-earth.svg"
+
+import { useGetUserGMs } from "../../api/contracts/galaxyMember/hooks/useGetUserGMs"
+import { useGetUserNodes } from "../../api/contracts/xNodes/useGetUserNodes"
+import { useRetrieveProfilIdentity } from "../../app/profile/components/utils/useRetrieveProfilIdentity"
+import { useBreakpoints } from "../../hooks/useBreakpoints"
+import { useGetB3trBalance } from "../../hooks/useGetB3trBalance"
+import { GmActionButton } from "../GmActionButton"
+
+import { NotConnectedWallet } from "./components/NotConnectedWallet"
+import { SwapB3trVot3 } from "./components/SwapB3trVot3"
+import { GetNodeModal } from "./GetNodeModal"
+import { GmCard } from "./GmCard"
+import { GmEmptyStateCard } from "./GmEmptyStateCard"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
@@ -28,18 +32,14 @@ export const GmNFTAndNodeCard = () => {
     onOpen: onOpenGetGMAndNodeModal,
     onClose: onCloseGetGMAndNodeModal,
   } = useDisclosure()
-
   const isLoading = isUserGMsLoading || isNodesLoading
   const userHasNoNodeOrGm = !isLoading && userGMs?.length === 0 && nodes?.allNodes?.length === 0
-
   const totalPoints = useMemo(() => {
     return nodes?.allNodes?.reduce((acc, node) => acc + node.xNodePoints, 0) || 0
   }, [nodes])
-
   if (!account?.address && !viewMode) {
     return <NotConnectedWallet />
   }
-
   if (isLoading) {
     return <Skeleton height={isMobile ? "96" : "64"} width="full" rounded="xl" />
   }

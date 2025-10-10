@@ -1,9 +1,8 @@
-import { EnhancedClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@vechain/vebetterdao-contracts"
+import { EnhancedClause } from "@vechain/vechain-kit"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()
-
 /**
  * Builds a transaction clause to claim rewards for a specific voting round.
  * This function constructs a transaction object that can be used to interact with the VoterRewards smart contract.
@@ -20,6 +19,5 @@ export const buildClaimRoundReward = (roundId: string, address: string): Enhance
     comment: `Claim rewards for round ${roundId}`,
     abi: JSON.parse(JSON.stringify(voterRewardsInterface.getFunction("claimReward"))),
   }
-
   return clause
 }

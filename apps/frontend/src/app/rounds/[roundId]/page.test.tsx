@@ -1,9 +1,11 @@
+import dayjs from "dayjs"
 import { expect, test } from "vitest"
-import AllocationDetail from "./page"
-import { render, screen } from "../../../../test"
 
 import * as apiHooks from "@/api"
-import dayjs from "dayjs"
+
+import { render, screen } from "../../../../test"
+
+import AllocationDetail from "./page"
 
 test("Allocations", async () => {
   const roundId = "1"
@@ -13,7 +15,6 @@ test("Allocations", async () => {
     isLoading: false,
     isError: false,
   })
-
   //@ts-ignore
   vi.spyOn(apiHooks, "useHasVotedInRound").mockReturnValue({
     data: true, //Has voted

@@ -2,16 +2,13 @@ export enum ProposalType {
   Standard,
   Grant,
 }
-
 export enum GovernanceType {
   OnChain,
   Text,
 }
-
 export type CommunityInteraction = {
   percentage: number
 }
-
 export type ProposalEnriched = ProposalCreatedEvent & {
   title: string
   shortDescription: string
@@ -21,13 +18,11 @@ export type ProposalEnriched = ProposalCreatedEvent & {
   state: ProposalState
   discourseUrl?: string
 }
-
 export type GrantProposalEnriched = ProposalEnriched &
   Omit<GrantFormData, "termsOfService"> & {
     grantType: string
     grantAmountRequested: number // Amount requested by the grantee
   }
-
 export type ProposalCreatedEvent = {
   id: string
   type: ProposalType
@@ -41,7 +36,6 @@ export type ProposalCreatedEvent = {
   createdAtBlock: number
   values: readonly string[]
 }
-
 export type GrantFormData = {
   grantType: string // dapp or infra grant
   proposerAddress: string

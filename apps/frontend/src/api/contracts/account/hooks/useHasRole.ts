@@ -1,10 +1,9 @@
+import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
-import { AccessControl__factory } from "@vechain/vebetterdao-contracts/typechain-types"
 
 const abi = AccessControl__factory.abi
 const method = "hasRole" as const
-
 // Roles
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000"
 export const MINTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["MINTER_ROLE"])
@@ -30,10 +29,8 @@ export const SIGNALER_ROLE = ethers.solidityPackedKeccak256(["string"], ["SIGNAL
 export const ACTION_REGISTRAR_ROLE = ethers.solidityPackedKeccak256(["string"], ["ACTION_REGISTRAR_ROLE"])
 export const WHITELISTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["WHITELISTER_ROLE"])
 export const ACTION_SCORE_MANAGER_ROLE = ethers.solidityPackedKeccak256(["string"], ["ACTION_SCORE_MANAGER_ROLE"])
-
 export const getBytes32Role = (role: string) =>
   role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])
-
 export const hasRoleQueryKey = (role: string, contractAddress: string, address?: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -41,7 +38,6 @@ export const hasRoleQueryKey = (role: string, contractAddress: string, address?:
     method,
     args: [getBytes32Role(role) as `0x${string}`, address as `0x${string}`],
   })
-
 /**
  *  Hook to check if the user has a specific role
  * @param role  the role to check (will be converted to bytes32)

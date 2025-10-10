@@ -1,26 +1,24 @@
-import { Transaction } from "@/api"
 import { Card, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import dayjs from "dayjs"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { ActionModal } from "./BetterActionCard"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+
+import { Transaction } from "../../../api/indexer/transactions/useTransactions"
+import { useRetrieveProfilIdentity } from "../../../app/profile/components/utils/useRetrieveProfilIdentity"
+
+import { ActionModal } from "./BetterActionCard/components/ActionModal"
 
 type Props = {
   transaction: Transaction
   vot3ToB3tr: boolean
 }
-
 const compactFormatter = getCompactFormatter(2)
-
 export const SwapCard = ({ transaction, vot3ToB3tr }: Props) => {
   const { t } = useTranslation()
-
   const actionModal = useDisclosure()
   const { isConnectedUser } = useRetrieveProfilIdentity()
-
   return (
     <Card.Root size="sm" variant={"primary"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <Card.Body>

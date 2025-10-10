@@ -1,6 +1,8 @@
-import { convertUriToUrl, resolveMediaTypeFromMimeType } from "@/utils"
 import { useQueries, useQuery } from "@tanstack/react-query"
-import { NFTMediaType } from "@/types"
+
+import { NFTMediaType } from "../../../types/media"
+import { resolveMediaTypeFromMimeType } from "../../../utils/media"
+import { convertUriToUrl } from "../../../utils/uri"
 
 export interface IpfsImage {
   image: string
@@ -8,7 +10,6 @@ export interface IpfsImage {
   mediaType: NFTMediaType
 }
 export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
-
 /**
  * Fetches NFT media from IPFS
  * @param uri - The IPFS URI of the NFT media
@@ -16,19 +17,14 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  */
 export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
   if (!uri) throw new Error("IPFS URI is required")
-
   const response = await fetch(convertUriToUrl(uri))
-
   if (!response.ok) {
     throw new Error(`Failed to fetch IPFS image: ${response.status}`)
   }
-
   const blob = await response.blob()
-
   if (blob.size > MAX_IMAGE_SIZE) {
     throw new Error("IPFS image exceeds max supported size")
   }
-
   // Check if the MIME type is allowed
   const allowedMimeTypes = [
     "image/jpeg",
@@ -42,7 +38,6 @@ export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
     "application/json",
   ]
   const mimeType = blob.type || response.headers.get("content-type") || ""
-
   if (!allowedMimeTypes.includes(mimeType)) {
     throw new Error(`Unsupported MIME type: ${mimeType}`)
   }

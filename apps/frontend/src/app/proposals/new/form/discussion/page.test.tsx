@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest"
-import NewProposalTextOnlyPage from "./page"
-import { fireEvent, render, screen, waitFor } from "../../../../../../test"
-import * as router from "next/navigation"
 import * as vechainKit from "@vechain/vechain-kit"
+import * as router from "next/navigation"
+import { describe, expect, it } from "vitest"
+
+import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import FormProposalLayout from "../layout"
 
+import NewProposalTextOnlyPage from "./page"
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
 //@ts-ignore
@@ -13,14 +14,11 @@ vi.spyOn(router, "useRouter").mockReturnValue({
   replace: vi.fn(),
   back: mockBack,
 })
-
 vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/discussion")
-
 describe("NewProposalDiscussion", async () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
-
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
     vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
@@ -31,10 +29,8 @@ describe("NewProposalDiscussion", async () => {
         <NewProposalTextOnlyPage />
       </FormProposalLayout>,
     )
-
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
-
   it("form errors - should render correctly", async () => {
     render(
       <FormProposalLayout>

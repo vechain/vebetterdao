@@ -1,16 +1,15 @@
 import { Box, VStack, Heading, Text, Grid, GridItem, Card, Icon } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
+import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 import ProposalIcon from "@/components/Icons/svg/proposal.svg"
 import VoteIcon from "@/components/Icons/svg/vote.svg"
-import HandshakeIcon from "@/components/Icons/svg/handshake.svg"
 
 interface StatsCardProps {
   icon: React.ElementType
   value: number | string
   label: string
 }
-
 const StatsCard = ({ icon, value, label }: StatsCardProps) => (
   <Card.Root
     variant="primary"

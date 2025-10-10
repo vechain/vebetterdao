@@ -1,10 +1,14 @@
-import { expect, test, describe } from "vitest"
-import Apps from "./page"
-import { render, screen } from "../../../test"
-import * as apiHooks from "@/api"
-import * as useXAppStatusConfig from "@/app/apps/[appId]/hooks"
-import { NFTMediaType, XAppStatus } from "@/types"
 import { UilCheckCircle } from "@iconscout/react-unicons"
+import { expect, test, describe } from "vitest"
+
+import * as apiHooks from "@/api"
+import { useXAppStatusConfig } from "@/app/apps/[appId]/hooks/useXAppStatusConfig"
+
+import { render, screen } from "../../../test"
+import { XAppStatus } from "../../types/appDetails"
+import { NFTMediaType } from "../../types/media"
+
+import Apps from "./page"
 
 describe("Apps", () => {
   const defaultXNodeMock = {
@@ -27,14 +31,12 @@ describe("Apps", () => {
     isXNodeOnCooldown: false,
     isXNodeLoading: false,
   }
-
   const defaultAppEndorsementStatusMock = {
     threshold: "100",
     score: "100",
     status: XAppStatus.ENDORSED_AND_ELIGIBLE,
     isLoading: false,
   }
-
   const defaultXAppMetadataMock = {
     data: {
       logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
