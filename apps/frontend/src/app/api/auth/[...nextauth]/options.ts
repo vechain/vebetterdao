@@ -1,4 +1,4 @@
-import { NextAuthOptions } from "next-auth"
+import type { NextAuthOptions } from "next-auth"
 import GithubProvider from "next-auth/providers/github"
 // import DiscordProvider from "next-auth/providers/discord"
 import TwitterProvider from "next-auth/providers/twitter"
