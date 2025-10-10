@@ -1,16 +1,15 @@
 import { getConfig } from "@repo/config"
-import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { useQuery } from "@tanstack/react-query"
+import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts"
 import { executeMultipleClausesCall, ThorClient, useThor } from "@vechain/vechain-kit"
+
 import { getXAppMetadata } from "../../getXAppMetadata"
 import { isNewApp, XApp, XAppWithMetadata } from "../../getXApps"
 import { useXAppsMetadataBaseUri } from "../useXAppsMetadataBaseUri"
 
 const abi = X2EarnApps__factory.abi
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
-
 const UNENDORSED_APP_ID = "0x0000000000000000000000000000000000000000000000000000000000000000"
-
 export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], baseURI: string) => {
   const apps = await executeMultipleClausesCall({
     thor,
@@ -24,18 +23,14 @@ export const getNodesEndorsedApps = async (thor: ThorClient, nodeIds: string[], 
         }) as const,
     ),
   })
-
   if (apps.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
-
   const appToNodeIndexMap = apps.reduce(
     (acc, app, index) => {
       if (app !== UNENDORSED_APP_ID) acc[app] = index
-
       return acc
     },
     {} as Record<`0x${string}`, number>,
   )
-
   const appDetails = (
     await executeMultipleClausesCall({
       thor,

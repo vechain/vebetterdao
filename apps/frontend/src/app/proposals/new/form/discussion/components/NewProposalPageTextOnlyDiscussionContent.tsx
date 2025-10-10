@@ -1,25 +1,20 @@
 import { Card, VStack, Heading, HStack, Button, Text } from "@chakra-ui/react"
-import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-import { useProposalFormStore } from "@/store"
-import { useTranslation } from "react-i18next"
-import {
-  buttonClickActions,
-  buttonClicked,
-  ButtonClickProperties,
-  updateMarkdownTemplatePlaceholders,
-} from "@/constants"
 import { useWallet } from "@vechain/vechain-kit"
-import { AnalyticsUtils } from "@/utils"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { updateMarkdownTemplatePlaceholders } from "../../../../../../constants/GovernanceProposalTemplate"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { FormData, NewProposalForm } from "../../functions/details/components/NewProposalForm"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const { account } = useWallet()
   const router = useRouter()
-
   const { t } = useTranslation()
   const { setData } = useProposalFormStore()
-
   const onSubmit = useCallback(
     (data: FormData) => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({
@@ -33,7 +28,6 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
         markdownDescription,
         actions: [],
       })
-
       router.push("/proposals/new/form/content")
       AnalyticsUtils.trackEvent(
         buttonClicked,
@@ -42,7 +36,6 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
     },
     [setData, router, account],
   )
-
   return (
     <Card.Root w="full" data-testid="new-proposal-textonly-page">
       <Card.Body py={8}>

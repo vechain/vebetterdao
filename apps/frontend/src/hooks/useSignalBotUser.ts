@@ -1,21 +1,21 @@
-import { useCallback, useMemo } from "react"
-import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
 import { getConfig } from "@repo/config"
-import { getUserBotSignalsQueryKey } from "@/api"
+import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallback, useMemo } from "react"
+
 import { buildClause } from "@/utils/buildClause"
+
+import { getUserBotSignalsQueryKey } from "../api/contracts/vePassport/hooks/useUserBotSignals"
+
 import { useBuildTransaction } from "./useBuildTransaction"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
-
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
-
 type Props = {
   address: string
   reason: string
   onSuccess?: () => void
   onSuccessMessageTitle?: string
 }
-
 /**
  * Signal a user in the VeBetterPassport contract
  * @param {string} props.address - the user address
@@ -31,12 +31,9 @@ export const useSignalBotUser = ({ address, reason, onSuccess }: Props) => {
       args: [address, reason],
       comment: `Signal user ${address} with reason: ${reason}`,
     })
-
     return [clauses]
   }, [address, reason])
-
   const refetchQueryKeys = useMemo(() => [getUserBotSignalsQueryKey(address)], [address])
-
   return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,

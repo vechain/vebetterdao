@@ -1,11 +1,11 @@
 import { getConfig } from "@repo/config"
-import { getEventsKey, useEvents } from "@/hooks"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
+
+import { getEventsKey, useEvents } from "../../../../hooks/useEvents"
 
 const abi = XAllocationVoting__factory.abi
 const contractAddress = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const eventName = "AllocationVoteCast" as const
-
 export const getUserVotesInAllRoundsQueryKey = (address?: string) =>
   getEventsKey({
     eventName,
@@ -13,7 +13,6 @@ export const getUserVotesInAllRoundsQueryKey = (address?: string) =>
       voter: address,
     },
   })
-
 /**
  * useUserVotes is a custom hook that fetches the votes of a user for all rounds up to the current one.
  * @param currentRound - The id of the current round.
@@ -30,7 +29,6 @@ export const useUserVotesInAllRounds = (address?: string) => {
     },
     mapResponse: data => {
       const { voter, roundId, appsIds, voteWeights } = data.decodedData.args
-
       return {
         voter,
         roundId: roundId.toString(),

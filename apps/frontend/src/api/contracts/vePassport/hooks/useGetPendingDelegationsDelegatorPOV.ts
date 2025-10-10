@@ -1,11 +1,10 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 
 const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "getPendingDelegations" as const
-
 /**
  * Returns the query key for fetching pending delegations.
  * @param delegator - The delegator address.
@@ -14,7 +13,6 @@ const method = "getPendingDelegations" as const
 export const getPendingDelegationsQueryKeyDelegatorPOV = (delegator: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [delegator as `0x${string}`] })
 }
-
 /**
  * Hook to get pending delegations from the VeBetterPassport contract.
  * @param delegator - The delegator address.

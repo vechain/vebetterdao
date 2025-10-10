@@ -1,34 +1,3 @@
-import {
-  useGetProposalDeposits,
-  useGetVotesOnBlock,
-  useHasVotedInProposals,
-  useIsDepositReached,
-  useProposalDepositEvent,
-  useProposalDepositThreshold,
-  useProposalQuorumByType,
-  useProposalSnapshot,
-  useProposalTotalVotes,
-  useProposalUserDeposit,
-  useProposalVotes,
-  useUserSingleProposalVoteEvent,
-  useVot3PastSupply,
-} from "@/api"
-import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
-import { CountdownBoxes, MulticolorBar, ResultsDisplay } from "@/components"
-import AbstainIcon from "@/components/Icons/svg/abstain.svg"
-import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
-import HeartIcon from "@/components/Icons/svg/heart.svg"
-import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
-import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
-import {
-  ProposalType as GrantsProposalType,
-  ProposalEnriched,
-  ProposalState,
-  useExecuteProposal,
-  useGetVot3Balance,
-  useQueueProposal,
-} from "@/hooks"
-import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
 import { Button, Card, Heading, HStack, Icon, Separator, Skeleton, VStack } from "@chakra-ui/react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -37,11 +6,43 @@ import { Clock, Reports } from "iconoir-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ProposalCancelModal } from "../ProposalCancelModal"
-import { ProposalCastVoteModal } from "../ProposalCastVoteModal"
-import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal"
-import { ProposalSupportModal } from "../ProposalSupportModal"
-import { UserInteractionBadges } from "../UserInteractionBadges"
+import { useAccountPermissions } from "@/api/contracts/account/hooks/useAccountPermissions"
+import AbstainIcon from "@/components/Icons/svg/abstain.svg"
+import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
+import HeartIcon from "@/components/Icons/svg/heart.svg"
+import ThumbsDownIcon from "@/components/Icons/svg/thumbs-down.svg"
+import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
+import { VotingSegment, votingSegmentToProgressBar } from "@/types/voting"
+
+import { useGetProposalDeposits } from "../../../../../api/contracts/governance/hooks/useGetProposalDeposits"
+import { useHasVotedInProposals } from "../../../../../api/contracts/governance/hooks/useHasVotedInProposals"
+import { useIsDepositReached } from "../../../../../api/contracts/governance/hooks/useIsDepositReached"
+import { useProposalDepositEvent } from "../../../../../api/contracts/governance/hooks/useProposalDepositEvent"
+import { useProposalDepositThreshold } from "../../../../../api/contracts/governance/hooks/useProposalDepositThreshold"
+import { useProposalQuorumByType } from "../../../../../api/contracts/governance/hooks/useProposalQuorumByType"
+import { useProposalSnapshot } from "../../../../../api/contracts/governance/hooks/useProposalSnapshot"
+import { useProposalTotalVotes } from "../../../../../api/contracts/governance/hooks/useProposalTotalVotes"
+import { useProposalUserDeposit } from "../../../../../api/contracts/governance/hooks/useProposalUserDeposit"
+import { useUserSingleProposalVoteEvent } from "../../../../../api/contracts/governance/hooks/useUserProposalsVoteEvents"
+import { useGetVotesOnBlock } from "../../../../../api/contracts/governance/hooks/useVotesOnBlock"
+import { useVot3PastSupply } from "../../../../../api/contracts/vot3/hooks/useVot3PastTotalSupply"
+import { useProposalVotes } from "../../../../../api/indexer/proposals/useProposalVotes"
+import { CountdownBoxes } from "../../../../../components/CountdownBoxes/CountdownBoxes"
+import { MulticolorBar } from "../../../../../components/MulticolorBar/MulticolorBar"
+import { ResultsDisplay } from "../../../../../components/Proposal/ResultsDisplay"
+import {
+  ProposalType as GrantsProposalType,
+  ProposalEnriched,
+  ProposalState,
+} from "../../../../../hooks/proposals/grants/types"
+import { useExecuteProposal } from "../../../../../hooks/useExecuteProposal"
+import { useGetVot3Balance } from "../../../../../hooks/useGetVot3Balance"
+import { useQueueProposal } from "../../../../../hooks/useQueueProposal"
+import { ProposalCancelModal } from "../ProposalCancelModal/ProposalCancelModal"
+import { ProposalCastVoteModal } from "../ProposalCastVoteModal/ProposalCastVoteModal"
+import { ProposalResultsDetailsModal } from "../ProposalResultsDetailsModal/ProposalResultsDetailsModal"
+import { ProposalSupportModal } from "../ProposalSupportModal/ProposalSupportModal"
+import { UserInteractionBadges } from "../UserInteractionBadges/UserInteractionBadges"
 
 export const ProposalInteractionCard = ({
   proposal,

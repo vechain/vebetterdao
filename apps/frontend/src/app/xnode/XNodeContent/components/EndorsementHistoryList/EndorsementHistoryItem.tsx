@@ -1,22 +1,22 @@
-import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { useIpfsImage } from "@/api/ipfs"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
-import { useXAppMetadata } from "@/api"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
+
+import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+
+import { useXAppMetadata } from "../../../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../../../api/ipfs/hooks/useIpfsImage"
 
 type Props = {
   event: AppEndorsedEvent
 }
-
 export const EndorsementHistoryItem = ({ event }: Props) => {
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(event.appId)
   const { data: logo } = useIpfsImage(appMetadata?.logo)
   const eventTimestamp = useEstimateBlockTimestamp({ blockNumber: event.blockNumber })
-
   return (
     <HStack gap="4">
       <Box position="relative">

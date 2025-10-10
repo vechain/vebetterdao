@@ -1,5 +1,3 @@
-import { CustomModalContent, ExclamationTriangle } from "@/components"
-import { AddressIcon } from "@/components/AddressIcon"
 import {
   Button,
   Heading,
@@ -16,17 +14,20 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
+import { AddressIcon } from "@/components/AddressIcon"
+
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
+
 type Props = {
   distributor: string
   handleDeleteDistributor?: () => void
 }
-
 export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props) => {
   const { t } = useTranslation()
   const { open: isOpen, onOpen, onClose } = useDisclosure()
   const { data: vnsData } = useVechainDomain(distributor)
   const domain = vnsData?.domain
-
   const isDeleteable = handleDeleteDistributor !== undefined
   const iconSize = useBreakpointValue({ base: 150, sm: 230 })
   return (

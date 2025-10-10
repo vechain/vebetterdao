@@ -1,25 +1,21 @@
-import { notFoundImage } from "@/constants"
+const notFoundImage = "/assets/images/image-not-found.webp"
 import { Box, Card, HStack, Image, VStack, Text, Icon } from "@chakra-ui/react"
-import { useRouter } from "next/navigation"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-
 type Props = {
   name?: string
   appId?: string
   logo?: string
   banner?: string
 }
-
 export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
   const router = useRouter()
   const { t } = useTranslation()
-
   const navigateToAppDetail = () => {
     if (appId && appId !== "") router.push(`/apps/${appId}`)
     else router.push(`/apps`)
   }
-
   return (
     <Card.Root variant="primary" w={["70%", "60%"]} alignSelf={"center"} onClick={navigateToAppDetail}>
       <Box w="full" position={"relative"} h={[70, 150]}>
@@ -41,7 +37,6 @@ export const PreviewAppCard = ({ logo, banner, name, appId }: Props) => {
             <Text fontWeight="bold" textStyle={["xxs", "xl"]}>
               {name ?? "Error loading name"}
             </Text>
-
             <Icon
               as={UilArrowUpRight}
               bg={"rgba(224, 233, 254, 1)"}

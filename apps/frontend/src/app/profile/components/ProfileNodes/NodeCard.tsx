@@ -1,15 +1,16 @@
 import { Box, Card, Image, LinkBox, LinkOverlay, Text } from "@chakra-ui/react"
 import NextLink from "next/link"
 import { useTranslation } from "react-i18next"
-import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { FaChevronRight } from "react-icons/fa"
+
+import { UserNode } from "@/api/contracts/xNodes/useGetUserNodes"
 import { ConditionalWrapper } from "@/components/ConditionalWrapper"
-import { useBreakpoints } from "@/hooks"
+
+import { useBreakpoints } from "../../../../hooks/useBreakpoints"
 
 export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: boolean }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   return (
     <LinkBox flex={1}>
       <Card.Root
@@ -26,7 +27,6 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
         <Card.Header p="0">
           <Image src={node?.image} alt={node?.name} boxSize="62px" rounded="8px" />
         </Card.Header>
-
         <Card.Body p="0" gap="0">
           {node ? (
             <>
@@ -41,11 +41,9 @@ export const NodeCard = ({ node, isClickable }: { node?: UserNode; isClickable: 
                   {t("Node")}
                 </Text>
               </ConditionalWrapper>
-
               <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
                 {`${node.name} #${node.nodeId}`}
               </Text>
-
               <Box
                 w="fit-content"
                 display="inline-block"

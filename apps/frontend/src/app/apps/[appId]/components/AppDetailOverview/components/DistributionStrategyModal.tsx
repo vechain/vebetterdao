@@ -1,8 +1,11 @@
-import { BaseModal } from "@/components/BaseModal"
 import { Box, Separator, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { BaseModal } from "@/components/BaseModal"
+
 import { DistributorItem } from "../../../admin/components/AdminAppPageContent/components/EditAppRewardDistributors/components/DistributorItem"
 import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
+
 export const DistributionStrategyModal = ({
   isOpen,
   onClose,
@@ -16,14 +19,12 @@ export const DistributionStrategyModal = ({
 }) => {
   const { t } = useTranslation()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
-
   return (
     <BaseModal isOpen={isOpen} onClose={onClose}>
       <VStack gap={6} p={4}>
         <Box position="relative" p={4} bg="white" borderRadius="xl" boxShadow="0 4px 20px rgba(0, 0, 0, 0.1)">
           <Image src={logo ?? ""} alt="app-logo" w="32" h="32" rounded="xl" objectFit="cover" />
         </Box>
-
         <VStack gap={3}>
           <Heading
             textStyle={{
@@ -32,7 +33,6 @@ export const DistributionStrategyModal = ({
             }}>
             {t("Distribution Strategy")}
           </Heading>
-
           <Text
             textStyle={{
               base: "md",

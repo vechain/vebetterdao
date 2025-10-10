@@ -1,3 +1,6 @@
+import { HStack, Icon, Text } from "@chakra-ui/react"
+import { useMemo } from "react"
+
 import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import HeartSolidIcon from "@/components/Icons/svg/heart-solid.svg"
 import HeartIcon from "@/components/Icons/svg/heart.svg"
@@ -7,8 +10,6 @@ import ThumbsUpSolidIcon from "@/components/Icons/svg/thumbs-up-solid.svg"
 import ThumbsUpIcon from "@/components/Icons/svg/thumbs-up.svg"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 import { VoteType } from "@/types/voting"
-import { HStack, Icon, Text } from "@chakra-ui/react"
-import { useMemo } from "react"
 
 export const ProposalCommunityInteractions = ({
   proposalId,
@@ -39,12 +40,10 @@ export const ProposalCommunityInteractions = ({
       abstainColor: userVoteOption === VoteType.ABSTAIN ? "status.warning.strong" : "icon.subtle",
     }
   }, [userVoteOption])
-
   if (state === ProposalState.Pending) {
     const formattedDepositPercentage = Math.floor(Number(depositPercentage))
     const heartIcon = hasUserDeposited ? HeartSolidIcon : HeartIcon
     const heartColor = hasUserDeposited ? "actions.primary.default" : "icon.subtle"
-
     return (
       <HStack key={`${proposalId}-depositPercentage`} textStyle={{ base: "sm", md: "md" }} gap={1} color={heartColor}>
         <Icon as={heartIcon} boxSize={5} />

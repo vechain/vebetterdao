@@ -1,16 +1,17 @@
 import { Heading, Link, Text, VStack } from "@chakra-ui/react"
-import loadingAnimation from "./loading.json"
 import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import Lottie from "react-lottie"
+
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
+
+import loadingAnimation from "./loading.json"
 
 export type LoadingModalContentProps = {
   title?: ReactNode
   description?: string
   txId?: string
 }
-
 export const LoadingModalContent = ({
   title = "Sending Transaction...",
   description,

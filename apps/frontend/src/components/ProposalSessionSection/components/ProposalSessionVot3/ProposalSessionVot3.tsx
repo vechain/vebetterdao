@@ -1,9 +1,10 @@
 import { HStack, Skeleton, Text, Icon, Stat } from "@chakra-ui/react"
-import { FaQuestionCircle } from "react-icons/fa"
 import { FormattingUtils } from "@repo/utils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { FaQuestionCircle } from "react-icons/fa"
+
 import { Tooltip } from "@/components/ui/tooltip"
 
 type Props = {
@@ -17,28 +18,23 @@ type Props = {
     unknown
   >
 }
-
 export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQuery }: Props) => {
   const { t } = useTranslation()
-
   const hasDepositVotingPower = useMemo(() => {
     const data = userVotesAtSnapshotQuery.data
     if (!data || typeof data === "string") return false
     return data.depositsVotes !== "0"
   }, [userVotesAtSnapshotQuery.data])
-
   const totalVotesWithDeposits = useMemo(() => {
     const data = userVotesAtSnapshotQuery.data
     if (!data || typeof data === "string") return "0"
     return data.totalVotesWithDeposits
   }, [userVotesAtSnapshotQuery.data])
-
   const depositsVotes = useMemo(() => {
     const data = userVotesAtSnapshotQuery.data
     if (!data || typeof data === "string") return "0"
     return data.depositsVotes
   }, [userVotesAtSnapshotQuery.data])
-
   return (
     <HStack justify="space-between" align="start">
       <Stat.Root size="sm" gap="0">

@@ -1,11 +1,12 @@
-import { useQuery } from "@tanstack/react-query"
-import { getAllEventLogs, useThor } from "@vechain/vechain-kit"
-import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
-import { useCallback, useMemo } from "react"
-import { Abi } from "abitype"
 import { getConfig } from "@repo/config"
-import { decodeEventLog } from "@/api"
+import { useQuery } from "@tanstack/react-query"
+import { EventLogs, FilterCriteria } from "@vechain/sdk-network"
+import { getAllEventLogs, useThor } from "@vechain/vechain-kit"
+import { Abi } from "abitype"
+import { useCallback, useMemo } from "react"
 import { ContractEventName, decodeEventLog as viemDecodeEventLog } from "viem"
+
+import { decodeEventLog } from "../api/contracts/governance/getEvents"
 
 export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, R> = {
   abi: T
@@ -20,7 +21,6 @@ export type UseEventsParams<T extends Abi, K extends ContractEventName<T>, R> = 
     decodedData: ReturnType<typeof viemDecodeEventLog<T, K>>
   }) => R
 }
-
 /**
  * Custom hook for fetching contract events.
  */
@@ -32,13 +32,10 @@ export const useEvents = <T extends Abi, K extends ContractEventName<T>, R>({
   mapResponse,
 }: UseEventsParams<T, K, R>) => {
   const thor = useThor()
-
   const queryFn = useCallback(async () => {
     if (!thor) return []
-
     const eventAbi = thor.contracts.load(contractAddress, abi).getEventAbi(eventName)
     const topics = eventAbi.encodeFilterTopicsNoNull(filterParams ?? {})
-
     // Construct filter criteria
     const filterCriteria: FilterCriteria[] = [
       {

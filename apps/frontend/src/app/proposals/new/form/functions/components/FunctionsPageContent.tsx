@@ -1,38 +1,29 @@
 import { Card, VStack, Heading, HStack, Box, Text, Button, Field, NativeSelect, Stack } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
-import { useProposalFormStore } from "@/store"
-import { useRouter } from "next/navigation"
-
 import { getConfig } from "@repo/config"
-import { useTranslation } from "react-i18next"
 import { EnvConfig, EnvConfigValues, AppEnv } from "@repo/config/contracts"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "../../../../../../constants/AnalyticsEvents"
+import { getEnvWhitelistedContractsWithFunctions } from "../../../../../../constants/GovernanceFeaturedFunctions"
+import { useProposalFormStore } from "../../../../../../store/useProposalFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
-import {
-  buttonClicked,
-  buttonClickActions,
-  ButtonClickProperties,
-  getEnvWhitelistedContractsWithFunctions,
-} from "@/constants"
-import { AnalyticsUtils } from "@/utils"
-
 const devEnvs: EnvConfig[] = [AppEnv.LOCAL, AppEnv.E2E, AppEnv.TESTNET_STAGING, AppEnv.GALACTICA_TEST]
-
 export const FunctionsPageContent = () => {
   const env = getConfig().environment
   const { t } = useTranslation()
   const { actions, setData } = useProposalFormStore()
-
   const [featuredFunctionsEnv, setFeaturedFunctionsEnv] = useState<EnvConfig>(env)
-
   const [submitError, setSubmitError] = useState<string | null>(null)
   const contractsWithFunctionsToRender = useMemo(
     () => getEnvWhitelistedContractsWithFunctions(featuredFunctionsEnv),
     [featuredFunctionsEnv],
   )
-
   const router = useRouter()
-
   const onContinue = useCallback(() => {
     if (actions?.length === 0) {
       setSubmitError(t("Please select at least one function"))
@@ -44,7 +35,6 @@ export const FunctionsPageContent = () => {
       buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_FUNCTIONS),
     )
   }, [router, actions, t])
-
   const handleAddFunction = useCallback(
     (data: SelectedFunction) => () => {
       setSubmitError(null)

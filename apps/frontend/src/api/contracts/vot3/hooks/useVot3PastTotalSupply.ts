@@ -1,12 +1,11 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VOT3__factory } from "@vechain/vebetterdao-contracts"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 const abi = VOT3__factory.abi
 const address = getConfig().vot3ContractAddress
 const method = "getPastTotalSupply" as const
-
 export const getVot3PastTotalSupplyQueryKey = (timepoint: number) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -14,7 +13,6 @@ export const getVot3PastTotalSupplyQueryKey = (timepoint: number) =>
     method,
     args: [BigInt(timepoint)],
   })
-
 /**
  *  Hook to get the total supply of VOT3 at a given timepoint (in the past)
  * @param timepoint  The timepoint to get the total supply at (block)

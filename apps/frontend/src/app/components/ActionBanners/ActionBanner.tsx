@@ -1,47 +1,49 @@
-import {
-  useAccountLinking,
-  useCanUserVote,
-  useCurrentAllocationsRoundId,
-  useGetDelegatee,
-  useHasVotedInProposals,
-  useIsCreatorOfAnyApp,
-  useUserBotSignals,
-  useUserDelegation,
-  useVotingRewards,
-  useGMRewards,
-  useXApps,
-  useGetUserNodes,
-} from "@/api"
-import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { IconButton, Box } from "@chakra-ui/react"
 import { useAccountBalance, useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+import { A11y, Navigation } from "swiper/modules"
+import { Swiper, SwiperSlide } from "swiper/react"
 
+import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
+
+import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
+import { useHasVotedInProposals } from "../../../api/contracts/governance/hooks/useHasVotedInProposals"
+import { useGMRewards } from "../../../api/contracts/rewards/hooks/useGMRewards"
+import { useVotingRewards } from "../../../api/contracts/rewards/hooks/useVotingRewards"
+import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useGetDelegatee } from "../../../api/contracts/vePassport/hooks/useGetDelegatee"
+import { useUserBotSignals } from "../../../api/contracts/vePassport/hooks/useUserBotSignals"
+import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useIsCreatorOfAnyApp } from "../../../api/contracts/xApps/hooks/useIsCreatorOfAnyApp"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useGetUserNodes } from "../../../api/contracts/xNodes/useGetUserNodes"
+import { useProposalEnriched } from "../../../hooks/proposals/common/useProposalEnriched"
+import { useGetB3trBalance } from "../../../hooks/useGetB3trBalance"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+import { useIsVeDelegated } from "../../../hooks/useIsVeDelegated"
+import { ProposalFilter } from "../../../store/useProposalFilters"
+
+import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners/CastProposalVoteBanners"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
 import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
-import { DoActionBanner } from "./components/DoActionBanner"
-import { LowVthoBanner } from "./components/LowVthoBanner"
-import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
-import { StargateMigrationBanner } from "./components/StargateMigrationBanner"
+import { DoActionBanner } from "./components/DoActionBanner/DoActionBanner"
+import { LowVthoBanner } from "./components/LowVthoBanner/LowVthoBanner"
+import { NewAppBanner } from "./components/NewAppBanner/NewAppBanner"
+import { StargateMigrationBanner } from "./components/StargateMigrationBanner/StargateMigrationBanner"
+import { UserSignaledBanner } from "./components/UserSignaledBanner/UserSignaledBanner"
 
-import { A11y, Navigation } from "swiper/modules"
-import { Swiper, SwiperSlide } from "swiper/react"
 import "swiper/css"
 import "swiper/css/navigation"
 import "@/app/theme/swiper-custom.css"
-
-import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
-import { ProposalFilter } from "@/store"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useGetB3trBalance, useGetVot3Balance, useIsVeDelegated, useProposalEnriched } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5

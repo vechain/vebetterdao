@@ -1,10 +1,9 @@
 // eslint-disable-next-line
 // @ts-nocheck
-import { useScript } from "@/hooks/useScript"
-
 import React from "react"
-import "./FreshDeskWidget.css"
 
+import { useScript } from "@/hooks/useScript"
+import "./FreshDeskWidget.css"
 const runBeforeInit = (widgetId: number | string) => () => {
   window.fwSettings = {
     widget_id: widgetId,
@@ -16,7 +15,6 @@ const runBeforeInit = (widgetId: number | string) => () => {
     ;((n.q = []), (window.FreshworksWidget = n))
   }
 }
-
 /**
  *  Initialize FreshDesk widget loading a script
  * @returns React.ReactNode
@@ -26,6 +24,5 @@ type Props = {
 }
 export const FreshDeskWidget: React.FC<Props> = ({ widgetId }) => {
   useScript(`https://euc-widget.freshworks.com/widgets/${widgetId}.js`, true, runBeforeInit(widgetId))
-
   return <></>
 }

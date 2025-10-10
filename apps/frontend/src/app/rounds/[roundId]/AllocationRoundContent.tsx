@@ -1,19 +1,21 @@
 "use client"
-
 import { Grid, GridItem, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
-import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
+import { useWallet } from "@vechain/vechain-kit"
+import { redirect } from "next/navigation"
+import { useLayoutEffect } from "react"
+
+import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
+import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
+
+import { useAllocationsRoundState } from "../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useBreakpoints } from "../../../hooks/useBreakpoints"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
+import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar/AllocationRoundNavbar"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
 import { AllocationRoundUserVotes } from "../components/AllocationRoundUserVotes/AllocationRoundUserVotes"
-import { useAllocationsRoundState, useHasVotedInRound } from "@/api"
-import { useLayoutEffect } from "react"
-import { redirect } from "next/navigation"
-import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard"
-import { useWallet } from "@vechain/vechain-kit"
 import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
-import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
-import { useBreakpoints } from "@/hooks"
-import { StartNewRoundAlert } from "@/app/components/StartNewRoundAlert"
+import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard/AllocationXAppsVotesCard"
 
 type Props = {
   roundId: string
@@ -21,7 +23,6 @@ type Props = {
 export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
   const { account } = useWallet()
   const { isMobile } = useBreakpoints()
-
   const userVoteMinPercentageToNotMerge = useBreakpointValue(
     {
       base: 25,
@@ -33,14 +34,11 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
       fallback: "base",
     },
   )
-
   const currentAllocationState = useAllocationsRoundState(roundId)
   const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
-
   useLayoutEffect(() => {
     if (currentAllocationState.error) redirect("/")
   }, [currentAllocationState.error])
-
   if (currentAllocationState.isLoading)
     return (
       <VStack w="full" gap={12} h="80vh" justify="center">

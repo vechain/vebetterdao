@@ -1,15 +1,15 @@
-import B3trIcon from "@/components/Icons/svg/b3tr.svg"
-import { GrantFormData } from "@/hooks/proposals/grants/types"
-import { useGrantProposalFormStore } from "@/store"
 import { Button, Card, Heading, HStack, Icon, Separator, Stack, Text, VStack } from "@chakra-ui/react"
 import { humanNumber } from "@repo/utils/FormattingUtils"
 import { Clock } from "iconoir-react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
-import { DeleteGrantProposalModal } from "./DeleteGrantProposalModal"
+import B3trIcon from "@/components/Icons/svg/b3tr.svg"
+import { GrantFormData } from "@/hooks/proposals/grants/types"
 
-type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T]
+import { useGrantProposalFormStore } from "../../../store/useGrantProposalFormStore"
+
+import { DeleteGrantProposalModal } from "./DeleteGrantProposalModal"
 
 const requiredGrantFieldKeys = [
   "grantType",
@@ -32,15 +32,13 @@ const requiredGrantFieldKeys = [
   "highLevelRoadmap",
   "termsOfService",
   "votingRoundId",
-] as const satisfies ReadonlyArray<RequiredKeys<GrantFormData>>
-
+] as const satisfies ReadonlyArray<keyof GrantFormData>
 const requiredMilestoneFieldKeys = [
   "description",
   "fundingAmount",
   "durationFrom",
   "durationTo",
-] as const satisfies ReadonlyArray<RequiredKeys<GrantFormData["milestones"][0]>>
-
+] as const satisfies ReadonlyArray<keyof GrantFormData["milestones"][0]>
 /**
  * Calculates the completion percentage of a grant proposal draft
  * @param proposal - The grant form data

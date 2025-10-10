@@ -13,7 +13,6 @@ export interface Route {
   description?: string
   subRoutes?: Route[]
 }
-
 export const Routes: Route[] = [
   {
     name: "Dashboard",
@@ -36,7 +35,6 @@ export const Routes: Route[] = [
     icon: LiaChartPieSolid,
     description: "Vote weekly with your VOT3 to assign B3TR funds to your favorite apps.",
   },
-
   {
     name: "Governance",
     onClick: "/proposals",

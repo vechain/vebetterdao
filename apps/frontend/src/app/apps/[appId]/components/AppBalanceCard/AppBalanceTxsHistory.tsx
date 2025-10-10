@@ -12,40 +12,35 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCallback, useState, useMemo } from "react"
-import { DatePicker } from "@/components"
-import { useAppFundActivityEvents } from "@/api/contracts/x2EarnRewardsPool"
-import { TransactionsHistory } from "./components/TransactionsHistory"
+import { useTranslation } from "react-i18next"
 import { FaSync } from "react-icons/fa"
 
+import { useAppFundActivityEvents } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppFundActivityEvents"
+import { DatePicker } from "../../../../../components/DatePicker/DatePicker"
+
+import { TransactionsHistory } from "./components/TransactionsHistory"
 export type Props = {
   appId: string
   isOpen: boolean
   onClose: () => void
 }
-
 export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
   const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>("ALL")
   const [startDate, setStartDate] = useState<string>("")
   const [endDate, setEndDate] = useState<string>("")
   const [isRotating, setIsRotating] = useState<boolean>(false)
-
   const { t } = useTranslation()
   const { data: transactions, refetch, isLoading } = useAppFundActivityEvents(appId)
-
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
-
   const handleDateRangeChange = useCallback((start: string, end: string) => {
     setStartDate(start)
     setEndDate(end)
   }, [])
-
   const filteredTransactions = useMemo(() => {
     if (!transactions) return []
-
     let filtered = transactions
     if (transactionTypeFilter !== "ALL") {
       filtered = filtered.filter(tx => tx.txType === transactionTypeFilter)

@@ -5,7 +5,6 @@ import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-k
 const address = getConfig().x2EarnAppsContractAddress as `0x${string}`
 const abi = X2EarnApps__factory.abi
 const method = "isCreatorOfAnyApp" as const
-
 /**
  * Returns the query key boolean if the creator have already submitted an app
  * @returns The query key for fetching the creator NFT.
@@ -13,7 +12,6 @@ const method = "isCreatorOfAnyApp" as const
 export const getIsCreatorOfAnyAppQueryKey = (walletAddress?: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [(walletAddress ?? "0x") as `0x${string}`] })
 }
-
 /**
  * Hook to get if the user has already submitted an app
  *

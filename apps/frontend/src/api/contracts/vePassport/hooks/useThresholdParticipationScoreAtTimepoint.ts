@@ -1,12 +1,11 @@
-import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@vechain/vebetterdao-contracts/typechain-types"
+import { useCallClause, getCallClauseQueryKeyWithArgs } from "@vechain/vechain-kit"
 import { formatEther } from "viem"
 
 const address = getConfig().veBetterPassportContractAddress as `0x${string}`
 const abi = VeBetterPassport__factory.abi
 const method = "thresholdPoPScoreAtTimepoint" as const
-
 /**
  * Returns the query key for fetching the threshold participation score at a specific timepoint.
  * @param blockNumber - The block number at which to get the threshold participation score.
@@ -15,7 +14,6 @@ const method = "thresholdPoPScoreAtTimepoint" as const
 export const getThresholdParticipationScoreAtTimepointQueryKey = (blockNumber: string) => {
   return getCallClauseQueryKeyWithArgs({ abi, address, method, args: [Number(blockNumber)] })
 }
-
 /**
  * Hook to get the threshold participation score at a specific timepoint from the VeBetterPassport contract.
  * @param blockNumber - The block number at which to get the threshold participation score.

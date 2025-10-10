@@ -1,12 +1,14 @@
-import { CastAllocationVoteFormData } from "@/store"
 import { VStack, InputGroup, Icon, Input, HStack, Skeleton, Heading, Checkbox } from "@chakra-ui/react"
 import { UilSearch } from "@iconscout/react-unicons"
 import { useCallback, useMemo, useState } from "react"
-import { AppSelectableCard } from "./AppSelectableCard"
 import { useTranslation } from "react-i18next"
-import { NoAppsCard } from "./NoAppsCard"
+
+import { XApp } from "../../../../../../../api/contracts/xApps/getXApps"
+import { CastAllocationVoteFormData } from "../../../../../../../store/useCastAllocationFormStore"
 import { splitEvenly } from "../../../utils/splitEvenly"
-import { XApp } from "@/api"
+
+import { AppSelectableCard } from "./AppSelectableCard"
+import { NoAppsCard } from "./NoAppsCard"
 
 type Props = {
   selectedApps: CastAllocationVoteFormData[]
@@ -14,15 +16,12 @@ type Props = {
   xApps?: XApp[]
   isLoading?: boolean
 }
-
 const searchApp = (app: XApp, query: string) => {
   return app.name.toLowerCase().includes(query.toLowerCase())
 }
-
 export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps, isLoading }: Props) => {
   const { t } = useTranslation()
   const [appsToSearch, setAppsToSearch] = useState("")
-
   const onCheckboxChange = useCallback(
     (checked: boolean) => {
       if (!xApps) return
@@ -34,17 +33,14 @@ export const SearchAndSelectApps = ({ selectedApps, onSelectedAppsChange, xApps,
     },
     [onSelectedAppsChange, xApps],
   )
-
   const isSelectAllChecked = useMemo(() => {
     if (!xApps) return false
     return selectedApps.length === xApps.length
   }, [selectedApps, xApps])
-
   const filteredApps = useMemo(() => {
     if (!xApps) return []
     return xApps.filter(xApp => searchApp(xApp, appsToSearch))
   }, [appsToSearch, xApps])
-
   return (
     <VStack w="full" gap={6}>
       <InputGroup startElement={<Icon as={UilSearch} boxSize={"24px"} color="text.subtle" />}>

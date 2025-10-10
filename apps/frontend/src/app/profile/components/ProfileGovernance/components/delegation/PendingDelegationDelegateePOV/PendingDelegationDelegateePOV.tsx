@@ -1,19 +1,19 @@
 import { Card, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { useGetPendingDelegationsDelegateePOV } from "../../../../../../../api/contracts/vePassport/hooks/useGetPendingDelegationsDelegateePOV"
+
 import { PendingDelegationItemDelegateePOV } from "./components/PendingDelegationItemDelegateePOV"
-import { useGetPendingDelegationsDelegateePOV } from "@/api"
 
 type Props = {
   address: string
   isConnectedUser: boolean
 }
-
 export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetPendingDelegationsDelegateePOV(address)
   if (isPendingDelegationsLoading || !pendingDelegations?.length) return null
-
   return (
     <Card.Root variant="primary" w="full">
       <Card.Body borderRadius="xl">

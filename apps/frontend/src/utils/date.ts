@@ -1,4 +1,5 @@
 import dayjs from "@/utils/dayjsConfig"
+
 /**
  * Converts a timestamp to a compact time left string.
  * @param endDate - The end date timestamp.
@@ -11,7 +12,6 @@ export const timestampToTimeLeftCompact = (endDate: number, startDate: number = 
   let difference = endDate - startDate
   return dayjs.duration(difference, "milliseconds").humanize(false)
 }
-
 /**
  * Converts a timestamp to a time left string.
  * @param endDate - The end date timestamp.
@@ -21,13 +21,10 @@ export const timestampToTimeLeftCompact = (endDate: number, startDate: number = 
  */
 export const timestampToTimeLeft = (endDate: number, startDate: number = new Date().getTime()): string => {
   let difference = endDate - startDate
-
   if (difference < 0) {
     return "0s"
   }
-
   const dayjsObject = dayjs.duration(difference, "milliseconds")
-
   if (dayjsObject.days() > 0) {
     return dayjsObject.format("D[d] H[h] m[m] s[s]")
   }
@@ -39,7 +36,6 @@ export const timestampToTimeLeft = (endDate: number, startDate: number = new Dat
   }
   return dayjsObject.format("s[s]")
 }
-
 /**
  * Converts a timestamp to a time left object with decomposed units.
  * @param endDate - The end date timestamp.

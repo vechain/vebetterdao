@@ -14,15 +14,17 @@ import {
   Portal,
   CloseButton,
 } from "@chakra-ui/react"
-import { useAppAvailableFunds, useAppRewardsBalance, useRefillRewardsPool } from "@/api/contracts/x2EarnRewardsPool"
-import { useTranslation } from "react-i18next"
-import { useCallback, useState, useMemo, useEffect } from "react"
-import { useBreakpoints } from "@/hooks"
-import { HiMiniArrowsUpDown } from "react-icons/hi2"
-import { removingExcessDecimals } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
-import { filterAmountInput } from "@/utils"
+import { useCallback, useState, useMemo, useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { HiMiniArrowsUpDown } from "react-icons/hi2"
 
+import { useAppAvailableFunds } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppAvailableFunds"
+import { useAppRewardsBalance } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/getter/useAppRewardsBalance"
+import { useRefillRewardsPool } from "../../../../../api/contracts/x2EarnRewardsPool/hooks/setter/useRefillRewardsPool"
+import { useBreakpoints } from "../../../../../hooks/useBreakpoints"
+import { filterAmountInput } from "../../../../../utils/filterAmountInput"
+import { removingExcessDecimals } from "../../../../../utils/MathUtils/MathUtils"
 type Props = {
   appId: string
   isOpen: boolean
@@ -30,19 +32,15 @@ type Props = {
   isEnablingRewardsPool?: boolean
   isRefillingPools?: boolean
 }
-
 type TabType = "balance-to-rewards" | "rewards-to-balance"
-
 interface TabConfig {
   id: TabType
   sourceLabel: string
   targetLabel: string
 }
-
 export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
-
   const [activeTab, setActiveTab] = useState<TabType>("balance-to-rewards")
   const [amount, setAmount] = useState<string>("")
   //TODO: Add this to review modal before sending transaction

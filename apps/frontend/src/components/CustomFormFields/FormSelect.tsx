@@ -7,7 +7,6 @@ interface FormSelectOption {
   value: string | number
   disabled?: boolean
 }
-
 interface FormSelectProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -24,7 +23,6 @@ interface FormSelectProps<
   onValueChange?: (value: string | number) => void
   leftIcon?: ElementType
 }
-
 export const FormSelect = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -45,7 +43,6 @@ export const FormSelect = <
     leftIcon,
     ...rest
   } = props
-
   // Create list collection for Chakra UI Select
   const collection = useMemo(() => {
     return createListCollection({

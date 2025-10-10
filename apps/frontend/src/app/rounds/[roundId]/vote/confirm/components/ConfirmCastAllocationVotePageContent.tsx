@@ -1,43 +1,45 @@
 "use client"
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useHasVotedInRound,
-  useVotingThreshold,
-  useRoundXApps,
-  useTotalVotesOnBlock,
-} from "@/api"
 import { Button, Card, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useMemo } from "react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect, useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
-import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
-import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
-import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
-import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+
+import { useTotalVotesOnBlock } from "../../../../../../api/contracts/governance/hooks/useTotalVotesOnBlock"
+import { useVotingThreshold } from "../../../../../../api/contracts/governance/hooks/useVotingThreshold"
+import { useAllocationsRound } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useAllocationsRoundState } from "../../../../../../api/contracts/xAllocations/hooks/useAllocationsRoundState"
+import { useHasVotedInRound } from "../../../../../../api/contracts/xAllocations/hooks/useHasVotedInRound"
+import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import { useCastAllocationVotes, CastAllocationVotesProps } from "../../../../../../hooks/useCastAllocationVotes"
+import {
+  CastAllocationVoteFormData,
+  useCastAllocationFormStore,
+} from "../../../../../../store/useCastAllocationFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
+import { scaledDivision } from "../../../../../../utils/MathUtils/MathUtils"
+import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
+
 type Props = {
   roundId: string
 }
 
 const compactFormatter = getCompactFormatter(2)
+
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { onClose: closeTxModal } = useTransactionModal()
   const router = useRouter()
-
   const xAppsQuery = useRoundXApps(roundId)
-
   const { data: votes } = useCastAllocationFormStore()
-
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes

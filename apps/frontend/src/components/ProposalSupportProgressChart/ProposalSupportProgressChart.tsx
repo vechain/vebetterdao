@@ -1,13 +1,11 @@
 import { Box, Circle, Flex, HStack, Text, VStack } from "@chakra-ui/react"
-import { t } from "i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { t } from "i18next"
 import { useMemo } from "react"
 import { FaRegHeart } from "react-icons/fa6"
 
 const getSafeScaledPercentage = (percentage: number) => Math.min(percentage, 1) * 100
-
 const compactFormatter = getCompactFormatter(1)
-
 type Props = {
   isDepositThresholdReached?: boolean
   isFailedDueToDeposit?: boolean
@@ -47,7 +45,6 @@ export const ProposalSupportProgressChart = ({
     }
     return "#004CFC"
   }, [isFailedDueToDeposit, isDepositThresholdReached])
-
   const othersDepositColor = useMemo(() => {
     if (isFailedDueToDeposit) {
       return "#EC9BAF"

@@ -1,12 +1,4 @@
 import {
-  useAllocationsRound,
-  useCurrentAllocationsRoundId,
-  useHasXAppClaimed,
-  useXApps,
-  useXAppRoundEarnings,
-} from "@/api"
-import { useClaimXAppsAllocations } from "@/hooks"
-import {
   VStack,
   Button,
   Field,
@@ -22,6 +14,12 @@ import {
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useHasXAppClaimed } from "../../../api/contracts/xAllocationPool/hooks/useHasXAppClaimed"
+import { useXAppRoundEarnings } from "../../../api/contracts/xAllocationPool/hooks/useXAppRoundEarnings"
+import { useAllocationsRound } from "../../../api/contracts/xAllocations/hooks/useAllocationsRound"
+import { useCurrentAllocationsRoundId } from "../../../api/contracts/xAllocations/hooks/useCurrentAllocationsRoundId"
+import { useXApps } from "../../../api/contracts/xApps/hooks/useXApps"
+import { useClaimXAppsAllocations } from "../../../hooks/useClaimXAppsAllocations"
 export const ClaimXAppAllocations = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [roundId, setRoundId] = useState<string>("1")
@@ -31,13 +29,11 @@ export const ClaimXAppAllocations = () => {
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
   const { data: claimableAmountResponse } = useXAppRoundEarnings(roundId?.toString() || "", appId || "")
   const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId || "")
-
   const { sendTransaction, isTransactionPending, status } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
     appIds: appId ? [appId] : [],
   })
   const isLoading = isTransactionPending || status === "pending"
-
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
       event.preventDefault()
@@ -45,7 +41,6 @@ export const ClaimXAppAllocations = () => {
     },
     [sendTransaction],
   )
-
   const isRoundValid = useMemo(() => {
     if (currentRoundId === undefined || !currentRound) return false
     if (parseInt(roundId) === parseInt(currentRoundId) && currentRound.state === 0) return false

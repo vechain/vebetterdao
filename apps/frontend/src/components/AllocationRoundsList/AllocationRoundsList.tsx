@@ -1,10 +1,12 @@
 import { Alert, Box, Button, Card, HStack, Heading, Link, VStack } from "@chakra-ui/react"
-import { useAllocationsRoundsEvents } from "@/api"
-import { AllocationRoundCard } from "./components/AllocationRoundCard"
-import { useCallback, useMemo, useState } from "react"
-import { FiArrowUpRight } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
 import NextLink from "next/link"
+import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { FiArrowUpRight } from "react-icons/fi"
+
+import { useAllocationsRoundsEvents } from "../../api/contracts/xAllocations/hooks/useAllocationsRoundsEvents"
+
+import { AllocationRoundCard } from "./components/AllocationRoundCard"
 
 type Props = {
   maxRoundsToShow?: number
@@ -17,22 +19,17 @@ export const AllocationRoundsList: React.FC<Props> = ({
   showViewAll = true,
 }) => {
   const { t } = useTranslation()
-
   const [totalRoundsToShow, setTotalRoundsToShow] = useState<number>(maxRoundsToShow)
-
   const { data: allocationRoundsEvents, error: allocationRoundEventsError } = useAllocationsRoundsEvents()
   const invertedCreatedRounds = allocationRoundsEvents?.created.slice().reverse()
-
   const loadMore = useCallback(() => {
     setTotalRoundsToShow(prev => prev + maxRoundsToShow)
   }, [maxRoundsToShow])
-
   const renderRounds = useMemo(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map(round => {
       return <AllocationRoundCard roundId={round.roundId} key={round.roundId} />
     })
   }, [totalRoundsToShow, invertedCreatedRounds])
-
   const renderList = useMemo(() => {
     return (
       <VStack gap={8} w="full" align={"flex-start"}>
@@ -55,17 +52,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
         </VStack>
       </VStack>
     )
-  }, [
-    maxRoundsToShow,
-    allocationRoundEventsError,
-    totalRoundsToShow,
-    invertedCreatedRounds,
-    loadMore,
-    showViewAll,
-    showLoadMore,
-    renderRounds,
-    t,
-  ])
+  }, [allocationRoundEventsError, totalRoundsToShow, invertedCreatedRounds, loadMore, showLoadMore, renderRounds, t])
 
   return (
     <Card.Root w="full" variant="primary">

@@ -1,17 +1,20 @@
-import { MilestoneItem } from "@/app/grants/components"
-import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
-import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { Accordion, Button, Circle, Icon, Skeleton, Steps, Text, VStack } from "@chakra-ui/react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/vechain-kit"
+import dayjs from "dayjs"
+import { EditPencil, Prohibition } from "iconoir-react"
 import { useEffect, useMemo, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { BsCheck } from "react-icons/bs"
-import { EditPencil, Prohibition } from "iconoir-react"
-import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
-import { compareAddresses } from "@repo/utils/AddressUtils"
+
+import { GrantFormData, GrantProposalEnriched, MilestoneState } from "@/hooks/proposals/grants/types"
+import { useAllMilestoneStates } from "@/hooks/proposals/grants/useAllMilestoneStates"
 import { useUpdateGrantMilestoneMetadata } from "@/hooks/proposals/grants/useUpdateGrantMilestoneMetadata"
 import { useUploadGrantProposalMetadata } from "@/hooks/useUploadGrantProposalMetadata"
-import { GenericAlert } from "@/app/components/Alert"
+
+import { GenericAlert } from "../../components/Alert/GenericAlert"
+
+import { MilestoneItem } from "./MilestoneItem"
 
 export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnriched }) => {
   // ==========================================
@@ -23,11 +26,8 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
   const [accordionValue, setAccordionValue] = useState<string[]>([])
   const [milestoneEditIndex, setMilestoneEditIndex] = useState<number>()
   const [milestoneDuration, setMilestoneDuration] = useState<{ from: string; to: string } | undefined>(undefined)
-
   const { onMetadataUpload, metadataUploading } = useUploadGrantProposalMetadata()
-
   const { sendTransaction: updateMilestoneMetadata } = useUpdateGrantMilestoneMetadata(proposal?.id || "")
-
   const milestones = useMemo(() => {
     return (
       proposal?.milestones
@@ -39,7 +39,6 @@ export const MilestonesActions = ({ proposal }: { proposal?: GrantProposalEnrich
         .filter(item => item.milestone !== undefined) || []
     )
   }, [milestoneStatesData, proposal?.milestones])
-
   const currentStep = useMemo(() => {
     // Find first pending/rejected milestone, or return last index if all completed, or 0 if empty
     const firstPendingIndex = milestones.findIndex(

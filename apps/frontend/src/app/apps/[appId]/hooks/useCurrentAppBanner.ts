@@ -1,4 +1,5 @@
-import { useIpfsImage } from "@/api/ipfs"
+import { useIpfsImage } from "../../../../api/ipfs/hooks/useIpfsImage"
+
 import { useCurrentAppMetadata } from "./useCurrentAppMetadata"
 
 /**
@@ -11,7 +12,6 @@ import { useCurrentAppMetadata } from "./useCurrentAppMetadata"
 export const useCurrentAppBanner = () => {
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
   const { data: banner, isLoading: isBannerLoading, error: isBannerError } = useIpfsImage(appMetadata?.banner)
-
   return {
     banner: banner?.image,
     isBannerLoading: isBannerLoading || appMetadataLoading,

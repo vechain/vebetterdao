@@ -9,7 +9,6 @@ type Props = {
 }
 export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => {
   const { t } = useTranslation()
-
   return (
     <Card.Root
       bg="card.subtle"

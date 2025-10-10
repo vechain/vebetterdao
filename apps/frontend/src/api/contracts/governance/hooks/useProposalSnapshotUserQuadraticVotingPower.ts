@@ -5,7 +5,6 @@ import { useWallet, useCallClause, getCallClauseQueryKeyWithArgs } from "@vechai
 const address = getConfig().b3trGovernorAddress as `0x${string}`
 const abi = B3TRGovernor__factory.abi
 const method = "getQuadraticVotingPower" as const
-
 /**
  * Returns the query key for fetching the snapshot user quadratic voting power of a proposal round.
  * @param roundId - The ID of the proposal round.
@@ -19,7 +18,6 @@ export const getProposalSnapshotUserQuadraticVotingPowerQueryKey = (userAddress:
     args: [(userAddress ?? "0x") as `0x${string}`, BigInt(roundId ?? 0)],
   })
 }
-
 /**
  * Custom hook for fetching the snapshot user quadratic voting power of a proposal round.
  * @param roundId - The ID of the proposal round.

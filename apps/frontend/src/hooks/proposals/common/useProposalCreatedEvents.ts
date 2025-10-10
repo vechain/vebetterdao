@@ -1,12 +1,12 @@
-import { useMemo } from "react"
-import { useEvents } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
+import { useMemo } from "react"
+
+import { useEvents } from "../../useEvents"
 import { ProposalType, ProposalCreatedEvent } from "../grants/types"
 
 const b3trGovernorAddress = getConfig().b3trGovernorAddress
 const abi = B3TRGovernor__factory.abi
-
 export const useProposalCreatedEvents = (): {
   standardProposals: ProposalCreatedEvent[]
   grantProposals: ProposalCreatedEvent[]
@@ -29,7 +29,6 @@ export const useProposalCreatedEvents = (): {
       values: response.decodedData.args.values.map(value => value.toString()),
     }),
   })
-
   const proposalTypeEvents = useEvents({
     contractAddress: b3trGovernorAddress,
     eventName: "ProposalCreatedWithType",
@@ -39,13 +38,11 @@ export const useProposalCreatedEvents = (): {
       type: response.decodedData.args.proposalType,
     }),
   })
-
   const { standardProposals, grantProposals, allProposals } = useMemo(() => {
     // Early return if no data to prevent unnecessary processing
     if (!proposalEvents.data?.length) {
       return { standardProposals: [], grantProposals: [], allProposals: [] }
     }
-
     const typeMap = new Map(proposalTypeEvents.data?.map(proposal => [proposal.id, proposal.type]) ?? [])
 
     const standard: ProposalCreatedEvent[] = []

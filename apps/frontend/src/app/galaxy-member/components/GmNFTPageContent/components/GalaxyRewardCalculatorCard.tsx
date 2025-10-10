@@ -1,17 +1,14 @@
 import { Button, Card, Heading, Icon, Text, VStack } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { UilCalculatorAlt } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "react-i18next"
 
 export const GalaxyRewardCalculatorCard = () => {
   const { t } = useTranslation()
-
   const router = useRouter()
-
   const goToCalculator = () => {
     router.push("/galaxy-member/rewards-calculator")
   }
-
   return (
     <Card.Root variant="primary">
       <Card.Body>
@@ -22,7 +19,6 @@ export const GalaxyRewardCalculatorCard = () => {
               {t("Estimate your rewards based on your GM NFT level, and potential upgrades")}
             </Text>
           </VStack>
-
           <Button onClick={goToCalculator} variant="secondary">
             <Icon as={UilCalculatorAlt} />
             {t("Estimate Rewards")}

@@ -1,5 +1,6 @@
-import { validateIpfsUri } from "./ipfs"
 import { getConfig } from "@repo/config"
+
+import { validateIpfsUri } from "./ipfs"
 
 /**
  * Convert a URI to a URL
@@ -11,23 +12,17 @@ import { getConfig } from "@repo/config"
 export const convertUriToUrl = (uri: string) => {
   // if it is a data uri just return it
   if (uri.startsWith("data:")) return uri
-
   const splitUri = uri?.split("://")
   if (splitUri.length !== 2) throw new Error(`Invalid URI ${uri}`)
-
   const protocol = splitUri?.[0]?.trim()
   const uriWithoutProtocol = splitUri[1]
-
   switch (protocol) {
     case "ipfs":
       if (!validateIpfsUri(uri)) throw new Error(`Invalid IPFS URI ${uri}`)
-
       // Check cache for IPFS document
       return `${getConfig().ipfsFetchingService}/${uriWithoutProtocol}`
-
     case "ar":
       return `https://arweave.net/${uriWithoutProtocol}`
-
     default:
       return uri
   }

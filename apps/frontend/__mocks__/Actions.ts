@@ -1,4 +1,4 @@
-import { ProposalFormAction } from "@/store"
+import { ProposalFormAction } from "@/store/useProposalFormStore"
 
 export const transferAction: ProposalFormAction = {
   abiDefinition: {

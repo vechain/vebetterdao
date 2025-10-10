@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
+
 import { useCurrentAllocationsRoundId } from "./useCurrentAllocationsRoundId"
 
 export const getPreviousAllocationRoundId = () => ["PREVIOUS_ALLOCATION_ROUND_ID"]
-
 /**
  * Returns the previous allocation round id
  *
@@ -10,7 +10,6 @@ export const getPreviousAllocationRoundId = () => ["PREVIOUS_ALLOCATION_ROUND_ID
  */
 export const usePreviousAllocationRoundId = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-
   return useQuery({
     queryKey: getPreviousAllocationRoundId(),
     queryFn: async () => {

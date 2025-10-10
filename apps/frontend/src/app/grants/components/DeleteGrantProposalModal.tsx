@@ -1,8 +1,10 @@
-import { useState } from "react"
 import { Button, Dialog, Portal, CloseButton, Text } from "@chakra-ui/react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { GrantFormData, GrantProposalEnriched, useCancelProposal } from "@/hooks"
-import { useDraftGrantProposalStore } from "@/store"
+
+import { GrantFormData, GrantProposalEnriched } from "../../../hooks/proposals/grants/types"
+import { useCancelProposal } from "../../../hooks/useCancelProposal"
+import { useDraftGrantProposalStore } from "../../../store/useGrantProposalFormStore"
 
 export const DeleteGrantProposalModal = ({
   proposal,
@@ -13,10 +15,8 @@ export const DeleteGrantProposalModal = ({
 }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-
   const cancelProposalMutation = useCancelProposal({ proposalId: "id" in proposal ? proposal.id : "" })
   const { removeDraftGrantProposal } = useDraftGrantProposalStore()
-
   return (
     <Dialog.Root role="alertdialog" open={open} onOpenChange={e => setOpen(e.open)}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>

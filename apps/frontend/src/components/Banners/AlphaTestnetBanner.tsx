@@ -1,6 +1,6 @@
 import { HStack, Text } from "@chakra-ui/react"
-import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
+import { motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
@@ -13,20 +13,15 @@ export const AlphaTestnetBanner = () => {
   const textsNumber = 50
   const texts = Array.from({ length: textsNumber }, _ => text)
   const gap = 8
-
   //Create an ininite horizontal text slider with framer motion
-
   const [width, setWidth] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     if (containerRef.current) {
       setWidth(containerRef.current.offsetWidth)
     }
   }, [containerRef])
-
   if (!isTestnetPhase) return null
-
   return (
     <HStack
       py={[4, 3]}

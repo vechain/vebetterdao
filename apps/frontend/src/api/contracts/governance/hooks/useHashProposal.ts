@@ -1,13 +1,12 @@
-import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
-
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@vechain/vebetterdao-contracts"
-import { ProposalAction, ReducedActions } from "@/hooks"
+import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
+
+import { ReducedActions, ProposalAction } from "../../../../hooks/proposals/standard/useCreateStandardProposal"
 
 const abi = B3TRGovernor__factory.abi
 const method = "hashProposal" as const
 const address = getConfig().b3trGovernorAddress as `0x${string}`
-
 const transformActions = (actions: ProposalAction[]) =>
   actions.reduce<ReducedActions>(
     (acc, action) => {
@@ -17,10 +16,8 @@ const transformActions = (actions: ProposalAction[]) =>
     },
     { contractsAddress: [] as `0x${string}`[], calldatas: [] as `0x${string}`[] },
   )
-
 export const getHashProposalQueryKey = (actions: ProposalAction[], descriptionHash: string) => {
   const targetsAndCalldata = transformActions(actions)
-
   getCallClauseQueryKeyWithArgs({
     abi,
     address,
@@ -41,7 +38,6 @@ export const getHashProposalQueryKey = (actions: ProposalAction[], descriptionHa
  */
 export const useHashProposal = (actions: ProposalAction[], descriptionHash: string) => {
   const targetsAndCalldata = transformActions(actions)
-
   return useCallClause({
     abi,
     address,

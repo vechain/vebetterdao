@@ -1,9 +1,11 @@
 import { Heading, Text, VStack } from "@chakra-ui/react"
+import { useCallback } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+
 import { AdminAppForm } from "../../AdminAppPageContent"
+
 import { AddCreatorNFTButton } from "./components/AddCreatorNFTButton"
-import { useCallback } from "react"
 import { CreatorNFTItem } from "./components/CreatorNFTItem"
 
 interface Props {
@@ -12,7 +14,6 @@ interface Props {
 export const EditAppCreatorNFT = ({ form }: Props) => {
   const { t } = useTranslation()
   const creators = form.watch("creators")
-
   const handleDeleteCreator = useCallback(
     (index: number) => () =>
       form.setValue(
@@ -21,7 +22,6 @@ export const EditAppCreatorNFT = ({ form }: Props) => {
       ),
     [form, creators],
   )
-
   return (
     <VStack align="stretch">
       <Heading size="2xl">{t("Creator NFT")}</Heading>

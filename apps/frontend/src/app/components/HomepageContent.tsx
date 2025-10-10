@@ -1,18 +1,20 @@
-import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
 import { Grid, GridItem, useMediaQuery, VStack } from "@chakra-ui/react"
+
+import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
+
+import { GmNFTAndNodeCard } from "../../components/GmNFTAndNodeCard/GmNFTAndNodeCard"
+
+import { ActionBanner } from "./ActionBanners/ActionBanner"
+import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
-import { ActionBanner } from "./ActionBanners"
-import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
-import { GmNFTAndNodeCard } from "@/components/GmNFTAndNodeCard"
 
 export const HomePageContent = () => {
   const [isAboveMd] = useMediaQuery(["(min-width: 768px)"])
   return (
     <>
       {!isAboveMd && <RoundInfoBottomSheet />}
-
       <Grid
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap="32px"

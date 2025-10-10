@@ -1,8 +1,3 @@
-import { FormSocialConnectButton, validateWalletAddress } from "@/components/CustomFormFields"
-import { FormItem } from "@/components/CustomFormFields/FormItem"
-import { patternUrlCheck } from "@/components/CustomFormFields/validators"
-import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
-import { uploadBlobToIPFS } from "@/utils/ipfs"
 import { Accordion, Box, Field, FileUpload, Grid, GridItem, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { UilGithub } from "@iconscout/react-unicons"
 import { Linkedin, Mail, Telegram } from "iconoir-react"
@@ -21,6 +16,14 @@ import { useTranslation } from "react-i18next"
 import { FaXTwitter } from "react-icons/fa6"
 import { LuUpload } from "react-icons/lu"
 import { PiLinkSimple } from "react-icons/pi"
+
+import { FormItem } from "@/components/CustomFormFields/FormItem"
+import { patternUrlCheck } from "@/components/CustomFormFields/validators"
+import { AttachmentFile, GrantFormData } from "@/hooks/proposals/grants/types"
+import { uploadBlobToIPFS } from "@/utils/ipfs"
+
+import { FormSocialConnectButton } from "../../../../../../components/CustomFormFields/FormSocialConnectButton"
+import { validateWalletAddress } from "../../../../../../components/CustomFormFields/validators"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/jpg"]

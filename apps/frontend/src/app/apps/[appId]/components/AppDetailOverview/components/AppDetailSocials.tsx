@@ -6,7 +6,6 @@ export type Social = {
   name: string
   url: string
 }
-
 const SocialIconMap = {
   Twitter: RiTwitterXFill,
   Discord: FaDiscord,
@@ -15,7 +14,6 @@ const SocialIconMap = {
   Medium: FaMedium,
   Linkedin: FaLinkedin,
 }
-
 const SocialIconColorMap = {
   Twitter: "social.twitter",
   Discord: "social.discord",
@@ -23,7 +21,6 @@ const SocialIconColorMap = {
   Youtube: "social.youtube",
   Medium: "social.medium",
 }
-
 export const AppDetailSocials = ({ socialUrls }: { socialUrls: Social[] }) => {
   return (
     <HStack>

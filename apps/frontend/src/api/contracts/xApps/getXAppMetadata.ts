@@ -1,4 +1,4 @@
-import { convertUriToUrl } from "@/utils"
+import { convertUriToUrl } from "../../../utils/uri"
 
 /**
  * The metadata of an xApp from the xApps metadata base uri
@@ -44,7 +44,6 @@ export type XAppMetadata = {
 export const getXAppMetadata = async (uri: string): Promise<XAppMetadata | undefined> => {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 20000)
-
   try {
     const response = await fetch(convertUriToUrl(uri), {
       signal: controller.signal,

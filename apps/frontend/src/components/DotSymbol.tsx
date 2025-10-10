@@ -7,7 +7,6 @@ type Props = {
   scaledPulse?: number
   boxProps?: BoxProps
 }
-
 export const DotSymbol: React.FC<Props> = ({
   color = "inherit",
   size = 1.5,
@@ -16,7 +15,6 @@ export const DotSymbol: React.FC<Props> = ({
   boxProps = {},
 }) => {
   if (!pulse) return <Box w={size} h={size} bg={color} borderRadius={"full"} {...boxProps} />
-
   return (
     <Box pos="relative" boxSize={pulse ? Number(size) * scaledPulse : size} {...boxProps}>
       <Box

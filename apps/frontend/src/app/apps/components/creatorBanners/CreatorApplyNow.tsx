@@ -2,6 +2,7 @@ import { Box, Button, Card, Heading, HStack, Image, Stack, useDisclosure, useMed
 import { UilPlus } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
+
 import { SubmitCreatorFormModal } from "../SubmitCreatorFormModal"
 
 export const CreatorApplyNow = () => {
@@ -12,7 +13,6 @@ export const CreatorApplyNow = () => {
   }
   const { onOpen, open: isOpen, onClose } = useDisclosure()
   const [isMobile] = useMediaQuery(["(max-width: 767px)"])
-
   return (
     <>
       <Card.Root
@@ -39,7 +39,6 @@ export const CreatorApplyNow = () => {
               borderRadius="9px"
             />
           </Box>
-
           <Stack direction={{ base: "column", md: "row" }} w="full" h="full" justify={"center"} align={"stretch"}>
             {/* Left Section: Image, Title, and Description */}
             <HStack>

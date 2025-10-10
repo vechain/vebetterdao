@@ -1,19 +1,18 @@
-import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 import { HStack, Icon } from "@chakra-ui/react"
-import { Discord, X } from "iconoir-react"
 import { UilGithub } from "@iconscout/react-unicons"
+import { Discord, X } from "iconoir-react"
+
+import { GrantProposalEnriched } from "@/hooks/proposals/grants/types"
 
 export const ProposalLinksAndSocials = ({ proposal }: { proposal: GrantProposalEnriched }) => {
   const hasTwitter = proposal?.twitterUsername
   const hasDiscord = proposal?.discordUsername
   const hasGithub = proposal?.githubUsername
   if (!hasTwitter && !hasDiscord && !hasGithub) return null
-
   const handleLinkClick = (e: React.MouseEvent, url: string) => {
     e.stopPropagation() // Prevent card click
     window.open(url, "_blank")
   }
-
   return (
     <HStack gap={"16px"} color="icon.subtle">
       {/* <Icon as={LiaDiscourse} onClick={(e) => handleLinkClick(e, discourseUrl)} cursor="pointer" /> */}

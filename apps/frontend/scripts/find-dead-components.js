@@ -3,6 +3,7 @@
 
 const fs = require("fs")
 const path = require("path")
+
 const ts = require("typescript")
 
 const projectRoot = path.resolve(__dirname, "..")

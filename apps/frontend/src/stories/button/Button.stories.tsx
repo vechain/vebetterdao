@@ -1,6 +1,5 @@
-import type { Meta } from "@storybook/nextjs-vite"
-
 import { Button, VStack } from "@chakra-ui/react"
+import { Meta } from "@storybook/nextjs-vite"
 
 const meta = {
   title: "b3tr/components/Button",

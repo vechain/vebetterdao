@@ -1,14 +1,20 @@
 "use client"
-import { useCanUserVote, useRoundXApps } from "@/api"
 import { Card, Heading, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useCallback, useLayoutEffect, useMemo, useState, useEffect } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
-import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
+
+import { useCanUserVote } from "../../../../../../api/contracts/governance/hooks/useCanUserVote"
+import { useRoundXApps } from "../../../../../../api/contracts/xApps/hooks/useRoundXApps"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "../../../../../../constants/AnalyticsEvents"
+import {
+  useCastAllocationFormStore,
+  CastAllocationVoteFormData,
+} from "../../../../../../store/useCastAllocationFormStore"
+import AnalyticsUtils from "../../../../../../utils/AnalyticsUtils/AnalyticsUtils"
 import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottomBar"
-import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+
+import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
 
 type Props = {
   roundId: string
@@ -17,11 +23,8 @@ type Props = {
 export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
-
   const xAppsQuery = useRoundXApps(roundId)
-
   const { data: selectedApps, setData: onSelectedAppsChange, filterValidApps } = useCastAllocationFormStore()
-
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return selectedApps
@@ -34,9 +37,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
         }
       })
   }, [selectedApps, xAppsQuery])
-
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
-
   const handleOnSelectedAppsChange = useCallback(
     (data: CastAllocationVoteFormData[]) => {
       setOnContinueError(null)

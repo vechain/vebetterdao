@@ -1,13 +1,14 @@
-import { buttonClickActions, ButtonClickProperties, buttonClicked, TELEGRAM_URL } from "@/constants"
-import { AnalyticsUtils } from "@/utils"
 import { Button, Link, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaTelegram } from "react-icons/fa6"
 
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "../../../constants/AnalyticsEvents"
+import { TELEGRAM_URL } from "../../../constants/links"
+import AnalyticsUtils from "../../../utils/AnalyticsUtils/AnalyticsUtils"
+
 type Props = {
   isFullWidth?: boolean
 }
-
 export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
   const { t } = useTranslation()
   return (

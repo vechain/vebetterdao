@@ -1,28 +1,30 @@
-import { useAccountLinking, useCanUserVote, useUserDelegation, useUserScore } from "@/api"
-import { useGetVot3Balance } from "@/hooks"
 import { VStack, Button, useDisclosure, Card, Text, Stack, HStack, List, Skeleton } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { ReactNode, useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LuCircleCheck, LuCircleDashed } from "react-icons/lu"
 
-type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions"
+import { DoActionModal } from "@/app/components/ActionBanners/components/DoActionBanner/components/DoActionModal"
 
+import { useCanUserVote } from "../../../api/contracts/governance/hooks/useCanUserVote"
+import { useAccountLinking } from "../../../api/contracts/vePassport/hooks/useAccountLinking"
+import { useUserDelegation } from "../../../api/contracts/vePassport/hooks/useUserDelegation"
+import { useUserScore } from "../../../api/indexer/sustainability/useUserScore"
+import { useGetVot3Balance } from "../../../hooks/useGetVot3Balance"
+
+type CantVoteReason = "no-votes" | "delegator" | "secondary" | "no-actions"
 type CantVoteReasonText = {
   title: string
   description: ReactNode
   onLearnMoreClick?: () => void
 }
-
 export const VotingRequirementsList = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { missingActions, isLoading: isLoadingMissingActions } = useUserScore()
   const { data: voteBalance, isLoading: isLoadingVoteBalance } = useGetVot3Balance(account?.address)
-
   return (
     <Skeleton loading={isLoadingMissingActions || isLoadingVoteBalance}>
       <List.Root variant="plain">
@@ -30,14 +32,12 @@ export const VotingRequirementsList = () => {
           <List.Indicator asChild color="inherit">
             {missingActions <= 0 ? <LuCircleCheck /> : <LuCircleDashed />}
           </List.Indicator>
-
           {t("Complete at least 3 sustainable actions")}
         </List.Item>
         <List.Item>
           <List.Indicator asChild color="inherit">
             {!!voteBalance?.original && Number(voteBalance.original) > 0 ? <LuCircleCheck /> : <LuCircleDashed />}
           </List.Indicator>
-
           {t("Swap your B3TR for VOT3 this round before the snapshot")}
         </List.Item>
       </List.Root>

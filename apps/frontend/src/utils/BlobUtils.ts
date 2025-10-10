@@ -2,7 +2,6 @@ export const downloadBlob = async (url: string) => {
   const response = await fetch(url)
   return response.blob()
 }
-
 export const blobToBase64 = async (blob: Blob): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -10,7 +9,6 @@ export const blobToBase64 = async (blob: Blob): Promise<string> =>
     reader.readAsDataURL(blob)
     reader.onerror = reject
   })
-
 // return a promise that resolves with a File instance
 export const base64UrlToFile = async (base64Url: string, filename: string, mimeType: string) => {
   if (base64Url.startsWith("data:")) {
@@ -29,7 +27,6 @@ export const base64UrlToFile = async (base64Url: string, filename: string, mimeT
     .then(res => res.arrayBuffer())
     .then(buf => new File([buf], filename, { type: mimeType }))
 }
-
 export const base64ToBlob = (base64: string, mimeType: string) => {
   const byteCharacters = atob(base64)
   const byteNumbers = new Array(byteCharacters.length)

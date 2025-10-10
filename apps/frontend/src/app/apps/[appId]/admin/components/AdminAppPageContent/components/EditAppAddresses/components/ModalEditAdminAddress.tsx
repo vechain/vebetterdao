@@ -1,13 +1,14 @@
-import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { Box, Button, Heading, Dialog, Text, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+
+import { CustomModalContent } from "../../../../../../../../../components/CustomModalContent"
+import { ExclamationTriangle } from "../../../../../../../../../components/Icons/ExclamationTriangle"
 
 type Props = {
   handleEditAdminAddress: () => void
   onClose: () => void
   open: boolean
 }
-
 export const ModalEditAdminAddress = ({ handleEditAdminAddress, onClose, open }: Props) => {
   const { t } = useTranslation()
   return (

@@ -1,28 +1,29 @@
-import { useMemo } from "react"
 import { Heading, VStack, Card, HStack, Button, Text, useDisclosure } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { useCanUserVote, useGetDelegatee, useGetPendingDelegationsDelegateePOV } from "@/api"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
-import { DelegationModal } from "./components/DelegationModal"
-import { DelegatorDelegations } from "./components/DelegatorDelegations"
-import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+
 import { VotingRequirementsList } from "@/app/components/CantVoteCard/CantVoteCard"
+
+import { useCanUserVote } from "../../../../../../../api/contracts/governance/hooks/useCanUserVote"
+import { useGetDelegatee } from "../../../../../../../api/contracts/vePassport/hooks/useGetDelegatee"
+import { useGetPendingDelegationsDelegateePOV } from "../../../../../../../api/contracts/vePassport/hooks/useGetPendingDelegationsDelegateePOV"
+
+import { DelegationModal } from "./components/DelegationModal"
+import { DelegatorDelegations } from "./components/DelegatorDelegations/DelegatorDelegations"
+import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV/PendingDelegationDelegatorPOV"
 
 type Props = {
   address: string
   isConnectedUser: boolean
 }
-
 export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
-
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetPendingDelegationsDelegateePOV(address)
-
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
   const { isPerson } = useCanUserVote(address, delegateeAddress)
-
   const descriptionLabel = useMemo(() => {
     return isConnectedUser
       ? t("Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens")
@@ -30,11 +31,8 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
           "The user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens",
         )
   }, [t, isConnectedUser])
-
   const delegationModal = useDisclosure()
-
   if (isPendingDelegationsLoading) return null
-
   return (
     <Card.Root variant="primary" rounded="xl" w="full">
       <Card.Body borderRadius="xl">

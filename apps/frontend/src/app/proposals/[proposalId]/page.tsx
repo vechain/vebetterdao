@@ -5,7 +5,6 @@ export type Props = {
     proposalId: string
   }
 }
-
 export default function Proposal({ params }: Readonly<Props>) {
   return <ProposalPage params={params} />
 }

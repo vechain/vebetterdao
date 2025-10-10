@@ -1,12 +1,12 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVoting__factory } from "@vechain/vebetterdao-contracts"
 import { getCallClauseQueryKeyWithArgs, useCallClause } from "@vechain/vechain-kit"
+
 import { AllApps, isNewApp } from "../getXApps"
 
 const abi = XAllocationVoting__factory.abi
 const address = getConfig().xAllocationVotingContractAddress as `0x${string}`
 const method = "getAppsOfRound" as const
-
 export const getRoundXAppsQueryKey = (roundId?: string) =>
   getCallClauseQueryKeyWithArgs({
     abi,
@@ -14,7 +14,6 @@ export const getRoundXAppsQueryKey = (roundId?: string) =>
     method,
     args: [BigInt(roundId ?? 0)],
   })
-
 export const useRoundXApps = (roundId?: string) => {
   return useCallClause({
     abi,

@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/react-query"
-import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
-import { FilterCriteria } from "@vechain/sdk-network"
 import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
+import { FilterCriteria } from "@vechain/sdk-network"
 import { X2EarnApps__factory } from "@vechain/vebetterdao-contracts/typechain-types"
-import { decodeEventLog } from "@/api"
+import { getAllEventLogs, ThorClient, useThor } from "@vechain/vechain-kit"
+
+import { decodeEventLog } from "../../../governance/getEvents"
 
 const abi = X2EarnApps__factory.abi
-
 export type AppEndorsedEvent = {
   appId: string
   nodeId: string
@@ -14,7 +14,6 @@ export type AppEndorsedEvent = {
   blockNumber: number
   txOrigin: string
 }
-
 /**
  * Fetches all AppEndorsed events
  * @param {ThorClient} thor - The thor client
@@ -27,15 +26,12 @@ export const getAppEndorsedEvents = async (
   filterOptions?: { appId?: string; nodeId?: string; endorsed?: boolean },
 ): Promise<AppEndorsedEvent[]> => {
   const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress
-
   const eventAbi = thor.contracts.load(x2EarnAppsContractAddress, abi).getEventAbi("AppEndorsed")
-
   const topics = eventAbi.encodeFilterTopicsNoNull({
     endorsed: filterOptions?.endorsed ?? undefined,
     id: filterOptions?.appId ?? undefined,
     nodeId: filterOptions?.nodeId ?? undefined,
   })
-
   const filterCriteria: FilterCriteria[] = [
     {
       criteria: {

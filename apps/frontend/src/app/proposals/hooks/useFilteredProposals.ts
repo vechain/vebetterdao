@@ -1,7 +1,9 @@
-import { useAllProposalsDepositReached } from "@/api"
+import { useCallback, useMemo } from "react"
+
 import { GrantProposalEnriched, ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
 import { ProposalFilter, StateFilter } from "@/store/useProposalFilters"
-import { useCallback, useMemo } from "react"
+
+import { useAllProposalsDepositReached } from "../../../api/contracts/governance/hooks/useAllProposalsDepositReached"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
@@ -11,17 +13,13 @@ export const useFilteredProposals = (
   proposals?: ProposalEnriched[] | GrantProposalEnriched[],
 ) => {
   type ProposalWithStateAndDeposit = (ProposalEnriched | GrantProposalEnriched) & { isDepositReached?: boolean }
-
   const proposalsIds = useMemo(() => {
     return proposals?.map(proposal => proposal.id) || []
   }, [proposals])
-
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
     useAllProposalsDepositReached(proposalsIds)
-
   const proposalsWithStateAndDeposit = useMemo(() => {
     if (!proposals?.length) return []
-
     return proposals.map(proposal => ({
       ...proposal,
       isDepositReached: allProposalsDepositReached?.find(
@@ -29,11 +27,9 @@ export const useFilteredProposals = (
       )?.depositReached,
     }))
   }, [proposals, allProposalsDepositReached])
-
   const filteredProposals: ProposalWithStateAndDeposit[] = useMemo(() => {
     if (!proposalsWithStateAndDeposit?.length) return []
     if (!selectedFilter || selectedFilter.length === 0) return proposalsWithStateAndDeposit
-
     // Create filter condition mapping
     const getFilterCondition = (
       proposal: (typeof proposalsWithStateAndDeposit)[0],

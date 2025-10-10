@@ -1,20 +1,20 @@
 import { Card, Flex, HStack, Image, LinkBox, LinkOverlay, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
-import { B3TRIcon } from "@/components/Icons"
-import { useXAppMetadata } from "@/api"
 import NextLink from "next/link"
+
+import { notFoundImage } from "@/constants"
+
+import { useXAppMetadata } from "../../../api/contracts/xApps/hooks/useXAppMetadata"
+import { useIpfsImage } from "../../../api/ipfs/hooks/useIpfsImage"
+import { B3TRIcon } from "../../Icons/B3TRIcon"
 
 type Props = {
   xAppId?: string
   amount?: string | number
   isLoading?: boolean
 }
-
 const compactFormatter = getCompactFormatter()
-
 export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
   const { data: appMetadata, isLoading: appMetadataLoading } = useXAppMetadata(xAppId)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
@@ -38,7 +38,6 @@ export const AppAmount = ({ xAppId, amount, isLoading }: Props) => {
                     {appMetadata?.name}
                   </Text>
                 </Skeleton>
-
                 <VStack gap={0} alignItems={"flex-end"}>
                   <Skeleton loading={isLoading}>
                     <HStack alignItems={"center"} gap={1}>

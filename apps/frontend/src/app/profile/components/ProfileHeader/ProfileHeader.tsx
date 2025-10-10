@@ -1,32 +1,29 @@
-import React, { useState, useEffect, useCallback } from "react"
 import { Text, VStack, HStack, Card, useClipboard, IconButton, Stack, Heading, Icon } from "@chakra-ui/react"
-import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import React, { useState, useEffect, useCallback } from "react"
+
+import { AddressIcon } from "@/components/AddressIcon"
 
 type Props = {
   address: string
 }
-
 export const ProfileHeader = ({ address }: Props) => {
   const { data: vnsData } = useVechainDomain(address ?? "")
   const domain = vnsData?.domain
   const { copy } = useClipboard({ value: address ?? "" })
   const [isCopied, setIsCopied] = useState(false)
-
   useEffect(() => {
     if (isCopied) {
       const timer = setTimeout(() => setIsCopied(false), 3000)
       return () => clearTimeout(timer)
     }
   }, [isCopied])
-
   const handleCopy = useCallback(() => {
     copy()
     setIsCopied(true)
   }, [copy])
-
   return (
     <Card.Root variant="primary">
       <Card.Body>
@@ -43,7 +40,6 @@ export const ProfileHeader = ({ address }: Props) => {
                 <Text textStyle="xl" fontWeight="semibold">
                   {humanAddress(address ?? "", 6, 4)}
                 </Text>
-
                 <IconButton
                   boxSize={6}
                   variant="plain"
