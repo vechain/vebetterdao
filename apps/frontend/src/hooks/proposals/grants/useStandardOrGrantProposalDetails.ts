@@ -98,11 +98,20 @@ const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Pr
 
   try {
     const result = await getIpfsMetadata<T>(ipfsUri, parseJson)
-    // Validate that we got actual data, not just an empty object
-    if (result && typeof result === "object" && Object.keys(result).length > 0) {
-      return result
+
+    if (parseJson) {
+      // Validate that we got actual data, not just an empty object
+      if (result && typeof result === "object" && Object.keys(result).length > 0) {
+        return result
+      }
+    } else {
+      // For text content, check if it's a non-empty string
+      if (typeof result === "string" && result.trim().length > 0) {
+        return result
+      }
     }
-    // If we got an empty object or null, treat it as a failure to trigger retry
+
+    // If we got an empty object/string or null, treat it as a failure to trigger retry
     throw new Error(`Empty or invalid metadata received for ${ipfsUri}`)
   } catch (error) {
     console.error("Error fetching proposal IPFS metadata for", ipfsUri, ":", error)
