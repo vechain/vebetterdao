@@ -29,18 +29,18 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
     onOpenConvertModal()
   }, [account?.address, onOpenConvertModal, openWalletModal, router, userHasNoTokens])
   return (
-    <Card.Root w="full" variant="subtle">
-      <Card.Body gap={2}>
+    <Card.Root w="full" variant="primary" p="8">
+      <Card.Body gap={4}>
         <Heading size="md">{t("How to support Grant and Proposal?")}</Heading>
 
         {userHasNoTokens ? (
           <>
-            <Text color="text.subtle" fontSize="sm">
+            <Text color="text.subtle" textStyle="sm">
               {t(
                 "To support and vote for your favourite projects  Apps through Grants and for Proposals, you first need B3TR tokens.",
               )}
             </Text>
-            <Text color="text.subtle" fontSize="sm">
+            <Text color="text.subtle" textStyle="sm">
               <Trans
                 i18nKey="Earn them by completing <b>three sustainable actions</b> in any VeBetter App."
                 components={{
@@ -50,7 +50,7 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
             </Text>
           </>
         ) : (
-          <Text color="text.subtle" fontSize="sm">
+          <Text color="text.subtle" textStyle="sm">
             <Trans
               i18nKey="To support and vote for your favourite grants and proposal, you need to gain voting power. <Link>Learn more.</Link>"
               components={{
@@ -60,7 +60,7 @@ export const HowToSupportCard = ({ onOpenConvertModal }: { onOpenConvertModal: (
           </Text>
         )}
 
-        <Button onClick={buttonOnClick} size="md" variant="tertiary" p={0} alignSelf="flex-start">
+        <Button onClick={buttonOnClick} size="md" variant="tertiary" alignSelf="flex-start">
           {buttonText}
         </Button>
       </Card.Body>

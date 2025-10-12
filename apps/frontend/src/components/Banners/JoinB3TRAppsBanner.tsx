@@ -1,32 +1,16 @@
-import { Card, Button, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
+import { Card, Heading, HStack, Image, Text, VStack, Link, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { FaPlus } from "react-icons/fa"
+import { GoPlus } from "react-icons/go"
 import { useBreakpoints } from "@/hooks"
 
 export const JoinB3TRAppsBanner = () => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
 
-  const openGrantPage = () => {
-    window.open("https://vebetter.com/grants", "_blank", "noopener noreferrer")
-  }
-
   return (
-    <Card.Root
-      w={"full"}
-      bg="#B1F16C"
-      color="black"
-      overflow={"hidden"}
-      borderRadius={"12px"}
-      bgImage="url('/assets/backgrounds/community-green-blob.webp')"
-      backgroundPosition="center"
-      bgSize="full">
+    <Card.Root w={"full"} bg="banner.green" color="black" overflow={"hidden"} borderRadius={"xl"} p={6}>
       <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
-        <VStack
-          alignItems={"flex-start"}
-          py={{ base: "50px", md: "70px" }}
-          px={{ base: "20px", md: "70px" }}
-          w={{ base: "full", md: "50%" }}>
+        <VStack alignItems={"flex-start"} w={{ base: "full", md: "50%" }} gap={4}>
           {isMobile && (
             <Image
               src="/assets/mascot/mascot-welcoming-left-head.webp"
@@ -37,17 +21,21 @@ export const JoinB3TRAppsBanner = () => {
               objectPosition="top"
             />
           )}
-          <Heading fontSize="2xl" fontWeight="bold" lineHeight={1.2}>
+          <Heading textStyle="2xl" fontWeight="bold" lineHeight={1.2}>
             {t("Do you have an app to join the VeBetter DAO ecosystem?")}
           </Heading>
-          <Text>
+          <Text textStyle="sm">
             {t(
               "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!",
             )}
           </Text>
-          <Button variant="applyButton" onClick={openGrantPage}>
-            <FaPlus />
-            {t("Apply now")}
+          <Button variant="secondary" size="md" asChild>
+            <Link href="https://vebetterdao.org/grants" target="_blank" rel="noopener noreferrer" px={8} py={4}>
+              <GoPlus />
+              <Text textStyle="md" color="current">
+                {t("Apply now")}
+              </Text>
+            </Link>
           </Button>
         </VStack>
         {!isMobile && (

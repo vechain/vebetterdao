@@ -24,11 +24,11 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
               <VStack gap={4} align="flex-start">
                 <Image src="/assets/icons/node-placeholder.svg" alt="node-placeholder" />
 
-                <Heading fontSize="2xl">{t("Become a node holder")}</Heading>
+                <Heading textStyle="2xl">{t("Become a node holder")}</Heading>
               </VStack>
             </Dialog.Header>
             <Dialog.Body gap={[0, 4]} pt={0}>
-              <Text fontSize={["16px"]}>
+              <Text textStyle="md">
                 {t("A VeChain Node gives you rewards, voting power in the DAO, and the ability to endorse apps.")}
                 <br /> <br />
                 {t(
@@ -39,10 +39,10 @@ export const GetNodeModal: React.FC<UpgradeGMModalProps> = ({ isOpen, onClose })
 
             <Dialog.Footer w="full" px={4} pt={1}>
               <SimpleGrid columns={{ base: 1, md: 2 }} gap={2} w="full">
-                <Button variant={"whiteAction"} color={"#004CFC"} onClick={onClose}>
+                <Button variant={"secondary"} onClick={onClose}>
                   {t("Maybe later")}
                 </Button>
-                <Button variant={"primaryAction"} onClick={onGetNodeClick}>
+                <Button variant={"primary"} onClick={onGetNodeClick}>
                   {t("Get a node")}
                 </Button>
               </SimpleGrid>

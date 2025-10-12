@@ -27,7 +27,13 @@ export const PaginatedTopVotedApps = ({ topVotedApps, itemsPerPage = 6, goBack }
 
   return (
     <VStack w={"full"}>
-      <Button variant={"plain"} color="primary" onClick={goBack} size="sm" alignItems="center" alignSelf={"flex-start"}>
+      <Button
+        variant={"plain"}
+        color="actions.tertiary.default"
+        onClick={goBack}
+        size="sm"
+        alignItems="center"
+        alignSelf={"flex-start"}>
         <FaAngleLeft />
         {t("Go back")}
       </Button>

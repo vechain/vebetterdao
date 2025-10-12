@@ -26,7 +26,7 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
           onClick={() => {
             setValue("amount", new BigNumber(availableAmount).times(percentage).toString())
           }}
-          variant="primarySubtle"
+          variant="secondary"
           w={"full"}
           h={"30px"}
           textStyle="md">

@@ -31,18 +31,18 @@ export const FormDateSelect = ({
     <Field.Root invalid={!!error}>
       {label && (
         <HStack justify="space-between" w="full">
-          <Field.Label fontSize="sm" fontWeight="medium" mb={description ? 0 : undefined} htmlFor={register.name}>
+          <Field.Label textStyle="sm" mb={description ? 0 : undefined} htmlFor={register.name}>
             {label}
           </Field.Label>
           {isOptional && (
-            <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+            <Text textStyle="sm" color="text.subtle">
               {"Optional"}
             </Text>
           )}
         </HStack>
       )}
       {description && (
-        <Text fontSize="xs" color="gray.500" mb={2}>
+        <Text textStyle="xs" color="gray.500" mb={2}>
           {description}
         </Text>
       )}

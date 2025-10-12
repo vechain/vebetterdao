@@ -42,7 +42,7 @@ export const LoadingModalContent = ({
           target="_blank"
           rel="noopener noreferrer"
           color="gray.500"
-          fontSize={"14px"}
+          textStyle="sm"
           textDecoration={"underline"}>
           {t("View it on the explorer")}
         </Link>

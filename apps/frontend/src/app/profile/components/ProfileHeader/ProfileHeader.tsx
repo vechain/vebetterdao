@@ -28,7 +28,7 @@ export const ProfileHeader = ({ address }: Props) => {
   }, [copy])
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={6}>
           <HStack gap={4}>
@@ -38,9 +38,9 @@ export const ProfileHeader = ({ address }: Props) => {
               align={["flex-start", "flex-start", "column"]}
               w="full"
               gap={1}>
-              <Heading fontSize="xl">{humanDomain(domain ?? "", 15)}</Heading>
+              <Heading textStyle="xl">{humanDomain(domain ?? "", 15)}</Heading>
               <HStack gap={2}>
-                <Text fontSize="xl" fontWeight="500">
+                <Text textStyle="xl" fontWeight="semibold">
                   {humanAddress(address ?? "", 6, 4)}
                 </Text>
 

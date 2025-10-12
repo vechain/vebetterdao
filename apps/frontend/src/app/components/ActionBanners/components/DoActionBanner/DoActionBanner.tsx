@@ -1,4 +1,4 @@
-import { useDisclosure } from "@chakra-ui/react"
+import { Button, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { DoActionModal } from "./components/DoActionModal"
 import { UilInfoCircle } from "@iconscout/react-unicons"
@@ -22,15 +22,16 @@ export const DoActionBanner = () => {
   return (
     <>
       <GenericBanner
+        variant="warning"
         title={t("TIME TO STEP UP! 🏃🏼‍♂️")}
         description={description}
         logoSrc="/assets/icons/info-bell.webp"
-        backgroundColor="#FFD979"
-        backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
-        buttonLabel={t("Know more")}
-        onButtonClick={doActionModal.onOpen}
-        buttonVariant="outline"
-        buttonIcon={<UilInfoCircle />}
+        cta={
+          <Button variant="primary" onClick={doActionModal.onOpen}>
+            <UilInfoCircle />
+            {t("Know more")}
+          </Button>
+        }
       />
       <DoActionModal doActionModal={doActionModal} />
     </>

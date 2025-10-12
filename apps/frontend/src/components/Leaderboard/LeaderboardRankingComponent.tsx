@@ -1,11 +1,11 @@
-import { Card, HStack, Box, Image, Text } from "@chakra-ui/react"
+import { Card, HStack, Box, Text, LinkBox, LinkOverlay } from "@chakra-ui/react"
 import { t } from "i18next"
-import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { Trans } from "react-i18next"
-import { AddressButton } from "../AddressButton"
 import { AddressIcon } from "../AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import NextLink from "next/link"
 
 export type LeaderboardRanking = {
   position: number
@@ -19,11 +19,6 @@ type LeaderboardRankingComponentProps = {
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
   const { data: vnsData } = useVechainDomain(ranking.address)
   const domain = vnsData?.domain
-  const router = useRouter()
-
-  const onClick = () => {
-    router.push(`/profile/${ranking.address}`)
-  }
 
   const positionStyles = useMemo(() => {
     if (ranking.position === 1)
@@ -55,84 +50,53 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
     }
   }, [ranking.position])
 
-  const whiteColor = isYourRanking ? "white" : "auto"
-  const grayColor = isYourRanking ? "white" : "#6A6A6A"
-
   return (
-    <Card.Root
-      onClick={onClick}
-      _hover={{
-        cursor: "pointer",
-        bg: isYourRanking ? "your-ranking-hover" : "hover-contrast-bg",
-        transition: "all 0.2s",
-      }}
-      boxShadow={positionStyles.boxShadow}
-      variant={"baseWithBorder"}
-      {...(isYourRanking && { bg: "#004CFC" })}
-      pos="relative"
-      overflow={"hidden"}
-      borderColor={positionStyles.borderColor}>
-      <Card.Body color={whiteColor} p="12px">
-        {isYourRanking && (
-          <Image
-            src="/assets/backgrounds/your-ranking-bg.svg"
-            alt="Bg image"
-            zIndex={0}
-            rounded={"full"}
-            pos="absolute"
-            right={-7}
-            top={"50%"}
-            h="full"
-            transform={"translateY(-50%)"}
-            aria-label="Bg image"
-          />
-        )}
-        <HStack w="full" justify="space-between">
-          <HStack gap={2} zIndex={1}>
-            <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
-            <Box>
-              <HStack gap={1}>
-                {isYourRanking && (
-                  <Text fontSize="sm" fontWeight={600}>
-                    {`(${t("You")})`}
-                  </Text>
-                )}
+    <LinkBox asChild>
+      <Card.Root
+        p="3"
+        bg={{
+          base: isYourRanking ? "actions.primary.default" : "bg.tertiary",
+          _hover: isYourRanking ? "actions.primary.hover" : undefined,
+        }}
+        color={isYourRanking ? "white" : "text.default"}
+        boxShadow={positionStyles.boxShadow}
+        borderColor={positionStyles.borderColor}
+        transition="all 0.2s ease-in-out">
+        <Card.Body>
+          <LinkOverlay asChild>
+            <NextLink href={`/profile/${ranking.address}`}>
+              <HStack w="full" justify="space-between">
+                <HStack gap={2} zIndex={1}>
+                  <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
 
-                {domain && (
-                  <Text fontSize="md" fontWeight={600} h="auto" colorPalette={"gray"}>
-                    {domain}
+                  <Box>
+                    <HStack
+                      textStyle="sm"
+                      fontWeight={isYourRanking ? "bold" : "semibold"}
+                      gap={1}
+                      color={isYourRanking ? "white" : "text.default"}>
+                      {domain ? domain : humanAddress(ranking.address, 6, 4) || ""} {isYourRanking && ` (${t("You")})`}
+                    </HStack>
+
+                    <Text textStyle="sm" color={isYourRanking ? "white" : "text.default"}>
+                      <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
+                    </Text>
+                  </Box>
+                </HStack>
+                {ranking.position !== 0 && (
+                  <Text
+                    color={isYourRanking ? "white" : "text.default"}
+                    textStyle={positionStyles.fontSize}
+                    fontWeight="semibold"
+                    zIndex={1}>
+                    {positionStyles.text}
                   </Text>
-                )}
-                {!domain && (
-                  <AddressButton
-                    unstyled
-                    fontSize="sm"
-                    fontWeight={600}
-                    h="auto"
-                    address={ranking.address}
-                    size={"sm"}
-                    onClick={e => e.preventDefault()}
-                    showAddressIcon={false}
-                    showCopyIcon={false}
-                    padding={0}
-                    digitsBeforeEllipsis={5}
-                    digitsAfterEllipsis={3}
-                  />
                 )}
               </HStack>
-
-              <Text fontSize="sm" color={grayColor} fontWeight={400}>
-                <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
-              </Text>
-            </Box>
-          </HStack>
-          {ranking.position !== 0 && (
-            <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
-              {positionStyles.text}
-            </Text>
-          )}
-        </HStack>
-      </Card.Body>
-    </Card.Root>
+            </NextLink>
+          </LinkOverlay>
+        </Card.Body>
+      </Card.Root>
+    </LinkBox>
   )
 }

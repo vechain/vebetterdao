@@ -131,7 +131,7 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
               <Skeleton loading={vote.isRest ? false : logoLoading}>
                 {vote.isRest ? (
                   <Flex boxSize={"32px"} borderRadius="9px" bg="gray.100" justify={"center"} align={"center"}>
-                    <Text fontSize="16px" fontWeight={600} data-testid="app-rest-vote">
+                    <Text color="black" textStyle="md" fontWeight="semibold" data-testid="app-rest-vote">
                       {t("+{{value}}", { value: vote.restNumber })}
                     </Text>
                   </Flex>
@@ -139,7 +139,7 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
                   <Image src={logo ?? notFoundImage} alt={metadata?.name} boxSize={"32px"} borderRadius="9px" />
                 )}
               </Skeleton>
-              <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
+              <Text textStyle="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
                 {t("{{percentage}}%", { percentage: vote.value })}
               </Text>
             </VStack>

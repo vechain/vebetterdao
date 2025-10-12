@@ -1,9 +1,10 @@
 import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
-import { Text, HStack, Image, useMediaQuery, Skeleton } from "@chakra-ui/react"
+import { Text, HStack, useMediaQuery, Skeleton, Icon, Flex } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import Countdown from "react-countdown"
 import dayjs from "@/utils/dayjsConfig"
+import { FaRegClock } from "react-icons/fa"
 
 interface CountdownProps {
   onOpen: () => void
@@ -40,11 +41,11 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
       <Skeleton
         as={HStack}
         justifyContent={"space-between"}
-        px={3}
-        py={1}
+        px="3"
+        py="1"
         rounded={"full"}
-        fontSize={isAbove500 ? "13px" : "10px"}
-        height="24px"
+        textStyle={isAbove500 ? "xs" : "xxs"}
+        height="6"
       />
     )
   }
@@ -55,47 +56,24 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
       date={expiryTimestamp}
       now={() => Date.now()}
       renderer={({ days, hours, minutes, seconds }) => {
-        // Check if near end (1 hour or less)
-        const isNearEnd = days === 0 && hours <= 1
-        const isNearEndText = isNearEnd ? "#C84968" : "#004CFC"
-        const isNearEndBg = isNearEnd ? "#FCEEF1" : "#E5EEFF"
-        const isNearEndIcon = isNearEnd ? "/assets/icons/clock-red.svg" : "/assets/icons/clock-blue.svg"
-
         return (
-          <HStack
-            onClick={onOpen}
-            cursor={"pointer"}
-            justify={"space-between"}
-            px={3}
-            py={1}
-            rounded={"full"}
-            color={isNearEndText}
-            bg={isNearEndBg}
-            borderColor={"#F2F2F2"}
-            fontSize={isAbove500 ? "13px" : "10px"}
-            fontWeight={600}
-            gap={1}>
-            <Image src={isNearEndIcon} alt="clock" boxSize={"20px"} />
-            <Text>{t("Next snapshot")}</Text>
-            <HStack gap={0}>
-              <Text>{days}</Text>
-              <Text>{"d"}</Text>
-            </HStack>
-
-            <HStack gap={0}>
-              <Text>{hours}</Text>
-              <Text>{"h"}</Text>
-            </HStack>
-
-            <HStack gap={0}>
-              <Text>{minutes}</Text>
-              <Text>{"m"}</Text>
-            </HStack>
-            <HStack gap={0}>
-              <Text minW={seconds >= 10 ? "1.4em" : "0.8em"}>{seconds}</Text>
-              <Text>{"s"}</Text>
-            </HStack>
-          </HStack>
+          <Flex as="button" onClick={onOpen} alignItems={"center"} color="actions.primary.text" gap="1">
+            <Icon boxSize={4} as={FaRegClock} />
+            <Text textStyle={isAbove500 ? "xs" : "xxs"} color="current" fontWeight="semibold">
+              {t("Next snapshot")} {days}
+              {"d"} {hours}
+              {"h"} {minutes}
+              {"m"}
+            </Text>
+            <Text
+              textStyle={isAbove500 ? "xs" : "xxs"}
+              color="current"
+              fontWeight="semibold"
+              minW={seconds >= 10 ? "1.4em" : "0.8em"}>
+              {seconds}
+              {"s"}
+            </Text>
+          </Flex>
         )
       }}
     />

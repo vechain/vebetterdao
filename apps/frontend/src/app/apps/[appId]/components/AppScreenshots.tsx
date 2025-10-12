@@ -15,12 +15,10 @@ export const AppScreenshots = () => {
     return null
   }
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={4}>
-          <Heading fontSize="24px" fontWeight="700">
-            {t("Screenshots")}
-          </Heading>
+          <Heading size="2xl">{t("Screenshots")}</Heading>
           <Box overflowX="auto" gap={4} whiteSpace={"nowrap"} onClick={onOpen} cursor={"pointer"}>
             {screenshots.map((screenshot, index) => (
               <Box

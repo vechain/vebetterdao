@@ -9,7 +9,16 @@ FAVICON_CONFIG="$ASSETS_DIR/favicon/browserconfig.xml"
 # all_assets=$(find "$ASSETS_DIR" -type f -not -name ".DS_Store" | sed "s|$ASSETS_DIR/||")
 
 # changed assets in the current commit
-changed_assets=$(git diff --cached --name-status | awk '$2 ~ /^apps\/frontend\/public\/assets\// && $1 != "D" { sub(/^apps\/frontend\/public\/assets\//, "", $2); print $2 }' | grep -v ".DS_Store")
+changed_assets=$(git diff --cached --name-status | awk '
+  $2 ~ /^apps\/frontend\/public\/assets\// && $1 != "D" && $1 !~ /^R/ {
+    sub(/^apps\/frontend\/public\/assets\//, "", $2);
+    print $2
+  }
+  $1 ~ /^R/ && $3 ~ /^apps\/frontend\/public\/assets\// {
+    sub(/^apps\/frontend\/public\/assets\//, "", $3);
+    print $3
+  }
+' | grep -v ".DS_Store")
 
 # if no changed assets, exit
 if [ -z "$changed_assets" ]; then

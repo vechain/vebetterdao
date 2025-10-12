@@ -1,5 +1,5 @@
 import { useAllocationsRound, useAllocationsRoundState } from "@/api"
-import { HStack, Icon, Skeleton, StackProps, Text, TextProps } from "@chakra-ui/react"
+import { BadgeProps, Badge as ChakraBadge, Icon, Skeleton } from "@chakra-ui/react"
 import { ReactNode, useMemo } from "react"
 import { DotSymbol } from "../DotSymbol"
 import { FaThumbsUp } from "react-icons/fa6"
@@ -8,17 +8,8 @@ import { useTranslation } from "react-i18next"
 type Props = {
   roundId: string
   renderIcon?: boolean
-  renderBadge?: boolean
-  textProps?: TextProps
-  containerProps?: StackProps
 }
-export const AllocationStateBadge = ({
-  roundId,
-  renderBadge = true,
-  renderIcon = true,
-  textProps = {},
-  containerProps = {},
-}: Props) => {
+export const AllocationStateBadge = ({ roundId, renderIcon = true }: Props) => {
   const { t } = useTranslation()
   const { data, isLoading, error } = useAllocationsRoundState(roundId)
   const { data: allocationRound } = useAllocationsRound(roundId)
@@ -29,110 +20,41 @@ export const AllocationStateBadge = ({
   if (isLoading)
     return (
       <Skeleton>
-        <Badge
-          text={t("loading")}
-          containerProps={
-            renderBadge
-              ? {
-                  bgColor: "#F8F8F8",
-                  ...containerProps,
-                }
-              : {
-                  px: 0,
-                  py: 0,
-                  ...containerProps,
-                }
-          }
-          icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
-        />
+        <Badge variant="neutral" text={t("loading")} icon={renderIcon ? <DotSymbol size={4} /> : undefined} />
       </Skeleton>
     )
   if (error || data === undefined)
     return (
       <Badge
-        textProps={{
-          color: "#D23F63",
-          ...textProps,
-        }}
-        containerProps={
-          renderBadge
-            ? {
-                bgColor: "#F8F8F8",
-                ...containerProps,
-              }
-            : {
-                px: 0,
-                py: 0,
-                ...containerProps,
-              }
-        }
+        variant="negative"
         text={t("Error getting state")}
-        icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
+        icon={renderIcon ? <DotSymbol size={4} /> : undefined}
       />
     )
 
   if (isActive)
     return (
       <Badge
-        textProps={{
-          color: "#3A6F00",
-          ...textProps,
-        }}
-        containerProps={
-          renderBadge
-            ? {
-                bgColor: "#CDFF9F",
-                ...containerProps,
-              }
-            : {
-                px: 0,
-                py: 0,
-                ...containerProps,
-              }
-        }
+        variant="info"
         text={t("Active now")}
-        icon={renderIcon ? <DotSymbol pulse size={2} color={"#3A6F00"} /> : undefined}
+        icon={renderIcon ? <DotSymbol pulse size={2} color="status.info.strong" /> : undefined}
       />
     )
   if (!isActive)
     return (
       <Badge
-        textProps={{
-          color: "#004CFC",
-          ...textProps,
-        }}
-        containerProps={
-          renderBadge
-            ? {
-                bgColor: "#EBF1FE",
-                ...containerProps,
-              }
-            : {
-                px: 0,
-                py: 0,
-                ...containerProps,
-              }
-        }
+        variant="neutral"
         text={t("Concluded")}
-        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} color={"#004CFC"} /> : undefined}
+        icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} /> : undefined}
       />
     )
 }
 
-type BadgeProps = {
-  containerProps?: StackProps
-  icon?: ReactNode
-  text: string
-  textProps?: TextProps
-}
-
-export const Badge = ({ containerProps, icon, text, textProps }: BadgeProps) => {
+export const Badge = ({ icon, variant, text }: { icon?: ReactNode; text: string; variant: BadgeProps["variant"] }) => {
   return (
-    <HStack gap={2} align="center" rounded={"full"} py={2} px={4} {...containerProps}>
-      {icon}
-      <Text fontSize="sm" color="gray.500" fontWeight={600} {...textProps} data-testid={`round-status`}>
-        {text}
-      </Text>
-    </HStack>
+    <ChakraBadge variant={variant} fontWeight="semibold">
+      {icon && icon}
+      {text}
+    </ChakraBadge>
   )
 }

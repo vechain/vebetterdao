@@ -16,8 +16,8 @@ export const OverlappedAppsImages: React.FC<Props> = ({
   maxAppsToShow = 4,
   iconSize,
 }) => {
-  const boxSize = useBreakpointValue({ base: iconSize ?? 28, lg: iconSize ?? 36 })
-  const borderRadius = (boxSize ?? 36) / 4
+  const boxSize = useBreakpointValue({ base: iconSize ?? 28, lg: iconSize ?? 32 })
+  const borderRadius = (boxSize ?? 32) / 4
 
   const appsToRender = appsIds.slice(0, maxAppsToShow)
   const plusCount = appsIds.length - maxAppsToShow
@@ -36,7 +36,7 @@ export const OverlappedAppsImages: React.FC<Props> = ({
 
   if (appsIds?.length && appsIds?.length > 0) {
     return (
-      <AvatarGroup rounded="8px" shape="square" size="md" stacking="last-on-top" spaceX={"-0.5rem"}>
+      <AvatarGroup rounded="8px" shape="square" size="md" stacking="last-on-top" spaceX={"-3"}>
         {appsToRender?.map(appId => (
           <AppImage key={appId} appId={appId} boxSize={`${boxSize}px`} borderRadius={`${borderRadius}px`} />
         ))}
@@ -49,8 +49,8 @@ export const OverlappedAppsImages: React.FC<Props> = ({
             bgColor={otherAppsBoxColor}>
             <Avatar.Fallback>
               <Text
-                fontSize={`${(boxSize ?? 0) / 2}px`}
-                fontWeight={600}
+                textStyle={`${(boxSize ?? 0) / 2}px`}
+                fontWeight="semibold"
                 data-testid="participating-add-more-apps"
                 color={otherAppsTextColor}>
                 {`+${plusCount}`}

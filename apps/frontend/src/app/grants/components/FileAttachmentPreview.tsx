@@ -16,7 +16,7 @@ export const FileAttachmentPreview = ({ attachment, uniqueKey }: { attachment: A
   return (
     <Card.Root
       key={`${attachment.name}-${uniqueKey}`}
-      variant="baseWithBorder"
+      variant="primary"
       borderColor="border.secondary"
       borderRadius={"16px"}
       onClick={() => goToFile(attachment.ipfs)}
@@ -38,9 +38,7 @@ export const FileAttachmentPreview = ({ attachment, uniqueKey }: { attachment: A
               )}
             </Box>
             <VStack align="flex-start">
-              <Text fontSize="sm" fontWeight="medium">
-                {attachment.name}
-              </Text>
+              <Text textStyle="sm">{attachment.name}</Text>
             </VStack>
           </HStack>
           <Button

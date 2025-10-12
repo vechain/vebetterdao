@@ -1,9 +1,9 @@
 import { useIsCreatorOfAnyApp, useSortXappAlphabetically, useXApps, useGetUserNodes, useNodesEndorsedApps } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
-import { VStack, Heading, Text, Box, HStack, useMediaQuery } from "@chakra-ui/react"
+import { VStack, Heading, Text, Box, HStack, useMediaQuery, Card } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
-import { AllApps } from "./AllApps"
+import { AllApps } from "./allApps/AllApps"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsDisclaimer } from "./AppsDisclaimer"
@@ -61,12 +61,14 @@ export const AppsPageContent = () => {
       <AppsBanner />
 
       {!isXNodeLoading && isEndorsingApp && (
-        <VStack alignItems={"flex-start"} gap={4}>
-          <Heading size="3xl">{t("Your endorsed apps")}</Heading>
-          <Text color="#6a6a6a">
-            {t("With your Node, you endorse apps to allow them to participate in governance")}
-          </Text>
-          <VStack gap={4}>
+        <Card.Root variant="primary" gap="4">
+          <VStack alignItems={"flex-start"}>
+            <Heading size="2xl">{t("Your endorsed apps")}</Heading>
+            <Text color="text.subtle">
+              {t("With your Node, you endorse apps to allow them to participate in governance")}
+            </Text>
+          </VStack>
+          <VStack gap={4} alignItems="stretch">
             {endorsedApps?.map(endorsedApp => (
               <UnendorsedAppCard
                 key={endorsedApp.endorsedApp.id}
@@ -76,36 +78,38 @@ export const AppsPageContent = () => {
               />
             ))}
           </VStack>
-        </VStack>
+        </Card.Root>
       )}
 
       {hasLookingForEndorsementApps && <AppsLookingForEndorsement filteredApps={newLookingForEndorsementApps} />}
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
-      {!isAbove800 ? (
-        <VStack alignItems={"flex-start"} gap={4} w="full">
-          <Heading size="3xl">{t("Sustainability apps")}</Heading>
-          <AllApps
-            newApps={newApps}
-            currentActiveApps={activeAppsWithoutGracePeriod}
-            gracePeriodApps={gracePeriodApps}
-            endorsementLostApps={endorsementLostApps}
-            isXAppsLoading={appsLoading}
-          />
-        </VStack>
-      ) : (
-        <HStack w="full" alignItems={"flex-start"} gap={0}>
-          <AllApps
-            headingComponent={<Heading size="3xl">{t("Sustainability apps")}</Heading>}
-            newApps={newApps}
-            currentActiveApps={activeAppsWithoutGracePeriod}
-            gracePeriodApps={gracePeriodApps}
-            endorsementLostApps={endorsementLostApps}
-            isXAppsLoading={appsLoading}
-          />
-        </HStack>
-      )}
+      <Card.Root variant="primary" w="full">
+        {!isAbove800 ? (
+          <VStack alignItems={"flex-start"} gap={4} w="full">
+            <Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>
+            <AllApps
+              newApps={newApps}
+              currentActiveApps={activeAppsWithoutGracePeriod}
+              gracePeriodApps={gracePeriodApps}
+              endorsementLostApps={endorsementLostApps}
+              isXAppsLoading={appsLoading}
+            />
+          </VStack>
+        ) : (
+          <HStack w="full" alignItems={"flex-start"} gap={0}>
+            <AllApps
+              headingComponent={<Heading size={{ base: "xl", md: "2xl" }}>{t("Sustainability apps")}</Heading>}
+              newApps={newApps}
+              currentActiveApps={activeAppsWithoutGracePeriod}
+              gracePeriodApps={gracePeriodApps}
+              endorsementLostApps={endorsementLostApps}
+              isXAppsLoading={appsLoading}
+            />
+          </HStack>
+        )}
+      </Card.Root>
 
       {!isCreatorOfAnyApp && <JoinB3TRAppsBanner />}
 

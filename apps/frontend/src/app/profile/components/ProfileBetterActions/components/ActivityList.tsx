@@ -42,12 +42,17 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
   const groupedActions = groupActionsByDay(actions)
 
   return (
-    <Card.Root w="full" variant="baseWithBorder">
+    <Card.Root w="full" variant="primary">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between" align="baseline" mb={4}>
             <Heading size="md">{t("Actions history")}</Heading>
-            <Button variant="primaryLink" size="sm" h={"16px"} onClick={handleSetCalendarView}>
+            <Button
+              variant="plain"
+              color="actions.tertiary.default"
+              size="sm"
+              h={"16px"}
+              onClick={handleSetCalendarView}>
               {t("Change to calendar view")}
             </Button>
           </HStack>
@@ -67,7 +72,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
               <VStack gap={6} align="stretch">
                 {Object.entries(groupedActions).map(([day, dayActions]) => (
                   <VStack key={day} gap={3} align="stretch">
-                    <Text fontWeight="600" color="#848484">
+                    <Text fontWeight="semibold" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {dayActions.map(action => (

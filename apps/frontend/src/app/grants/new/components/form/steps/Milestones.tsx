@@ -144,10 +144,10 @@ const MilestoneTips = ({ index }: { index: number }) => {
         {t("Tips")}
       </Heading>
       {}
-      <Text fontSize="sm" color="text.subtle" alignSelf="start">
+      <Text textStyle="sm" color="text.subtle" alignSelf="start">
         {tips?.[index]?.title}
       </Text>
-      <List.Root listStyle="disc" alignSelf="end" fontSize="sm" color="text.subtle" textAlign="justify" px={5}>
+      <List.Root listStyle="disc" alignSelf="end" textStyle="sm" color="text.subtle" textAlign="justify" px={5}>
         {tips?.[index]?.items.map((tip, index) => (
           <List.Item key={index}>{tip}</List.Item>
         ))}
@@ -175,7 +175,7 @@ const MilestoneHeader = ({
     <HStack w="full" gap={4}>
       <Heading size="md">{t("Milestone {{milestoneNumber}}", { milestoneNumber })}</Heading>
       {hasDurationInfo && !isMobile && (
-        <Badge variant="outline" fontSize="sm" fontWeight="regular">
+        <Badge variant="outline" textStyle="sm" fontWeight="regular">
           <Text>{formattedDurationFrom}</Text>
           <LuArrowRight color="subtle.active" size={16} />
           <Text>{formattedDurationTo}</Text>
@@ -332,7 +332,7 @@ export const MilestoneSection = ({
         <Accordion.ItemIndicator />
       </Accordion.ItemTrigger>
       <Accordion.ItemContent>
-        <Text fontSize="sm" color="gray.500">
+        <Text textStyle="sm" color="gray.500">
           {t("Define the milestones for your project. Funds will be released as milestones are completed.")}
         </Text>
         <Accordion.ItemBody>
@@ -423,7 +423,7 @@ export const MilestoneSection = ({
             </GridItem>
             {canRemoveAnyMilestone && (
               <GridItem colSpan={{ base: 1, md: 2 }} justifySelf="end">
-                <Button variant="whiteAction" borderRadius="full" onClick={() => removeMilestone(index)}>
+                <Button variant="secondary" borderRadius="full" onClick={() => removeMilestone(index)}>
                   <Icon as={UilTrash} />
                   {t("Remove")}
                 </Button>
@@ -524,7 +524,7 @@ export const Milestones = ({
       </Accordion.Root>
       <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(2, 1fr)" }} gap={6}>
         <GridItem>
-          <Button variant="primaryLink" onClick={handleAddMilestone}>
+          <Button variant="plain" color="actions.tertiary.default" onClick={handleAddMilestone}>
             <Icon as={UilPlus} />
             {t("Add milestone")}
           </Button>

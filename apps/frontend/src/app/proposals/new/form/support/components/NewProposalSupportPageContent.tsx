@@ -36,10 +36,6 @@ export const NewProposalSupportPageContent = () => {
 
   const { errors } = formState
 
-  const goBack = useCallback(() => {
-    router.back()
-  }, [router])
-
   const onSubmit = useCallback(
     (data: FormData) => {
       setData({ depositAmount: data.amount })
@@ -53,15 +49,13 @@ export const NewProposalSupportPageContent = () => {
   )
 
   return (
-    <Card.Root variant="baseWithBorder">
+    <Card.Root variant="primary">
       <Card.Body py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={[6, 8]} alignItems="flex-start">
             <VStack gap={[4, 6]} alignItems="flex-start">
-              <Heading size={["xl", "2xl"]} fontWeight="bold">
-                {t("Community support")}
-              </Heading>
-              <Text fontSize={["sm", "md"]} color="gray.500">
+              <Heading size={["xl", "2xl"]}>{t("Community support")}</Heading>
+              <Text textStyle={["sm", "md"]} color="gray.500">
                 {t(
                   "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",
                 )}{" "}
@@ -71,7 +65,7 @@ export const NewProposalSupportPageContent = () => {
             </VStack>
             <VStack gap={2} align="flex-start" w="full">
               <Heading size={["sm", "md"]}>{t("How much VOT3 do you want to lock to fund this proposal?")}</Heading>
-              <Text fontSize="sm" color="gray.500">
+              <Text textStyle="sm" color="gray.500">
                 {t("Your VOT3 will be unlocked when the voting session ends.")}
               </Text>
 
@@ -86,7 +80,7 @@ export const NewProposalSupportPageContent = () => {
                   }}
                   endElement={
                     <Skeleton loading={thresholdLoading}>
-                      <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500" fontWeight={400}>
+                      <Heading w="auto" size={["lg", "lg", "3xl"]} color="gray.500">
                         {`/ ${compactFormatter.format(Number(threshold))}`}
                       </Heading>
                     </Skeleton>
@@ -108,7 +102,7 @@ export const NewProposalSupportPageContent = () => {
                     })}
                     w="full"
                     placeholder={t("Enter the amount of VOT3")}
-                    fontSize={["xl", "xl", "3xl"]}
+                    textStyle={["xl", "xl", "3xl"]}
                   />
                 </InputGroup>
                 <Skeleton loading={balanceLoading}>
@@ -126,10 +120,10 @@ export const NewProposalSupportPageContent = () => {
             </VStack>
 
             <HStack alignSelf={"flex-end"} justify={"flex-end"} gap={4} flex={1}>
-              <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+              <Button data-testid="go-back" variant="ghost" color="actions.tertiary.default" onClick={router.back}>
                 {t("Go back")}
               </Button>
-              <Button data-testid="continue" variant="primaryAction" type="submit">
+              <Button data-testid="continue" variant="primary" type="submit">
                 {t("Continue")}
               </Button>
             </HStack>

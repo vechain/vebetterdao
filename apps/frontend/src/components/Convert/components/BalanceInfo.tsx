@@ -23,20 +23,18 @@ export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
   }, [isB3TR])
 
   const bgColor = useMemo(() => {
-    return isB3TR ? "b3tr-balance-bg" : "vot3-balance-bg"
+    return isB3TR ? "banner.blue" : "banner.green"
   }, [isB3TR])
 
   return (
     <VStack bg={bgColor} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"} align="center">
       <HStack>
         {image}
-        <Text fontSize={20} fontWeight={500}>
+        <Text textStyle="xl" fontWeight="semibold">
           {compactFormatter.format(Number(balanceScaled))}
         </Text>
       </HStack>
-      <Text fontSize="12px" fontWeight="400">
-        {title}
-      </Text>
+      <Text textStyle="xs">{title}</Text>
     </VStack>
   )
 }

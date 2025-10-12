@@ -223,7 +223,7 @@ export const GrantsPageContent = () => {
                 fontWeight={500}
                 color="primary.500"
                 px={0}
-                fontSize={{ base: "xs", lg: "md" }}
+                textStyle={{ base: "xs", lg: "md" }}
                 onClick={onOpen}>
                 <Icon as={UilInfoCircle} boxSize={4} />
                 {!isMobile && t("More info")}
@@ -231,21 +231,21 @@ export const GrantsPageContent = () => {
             )}
           </HStack>
           {showApplyForGrant && (
-            <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }} gap={4}>
+            <HStack w="full" justifyContent={{ base: "space-between", md: "flex-end" }}>
               <Button
                 asChild
                 variant={isMobile ? "secondary" : "ghost"}
-                color="actions.tertiary.default"
+                color={isMobile ? "actions.secondary.text" : "actions.tertiary.default"}
                 focusRingColor="actions.tertiary.default"
                 size="md"
-                w={{ base: "50%", md: "auto" }}
+                w={{ base: "48%", md: "auto" }}
                 rounded="full">
-                <Link href="grants/manage" fontSize={"md"}>
+                <Link href="grants/manage" textStyle={"md"}>
                   {t("My grants")}
                 </Link>
               </Button>
 
-              <Button variant="primaryAction" size="md" onClick={onApplyForGrant} w={{ base: "50%", md: "auto" }}>
+              <Button variant="primary" size="md" onClick={onApplyForGrant} w={{ base: "48%", md: "auto" }}>
                 {t("Apply for Grant")}
               </Button>
             </HStack>
@@ -274,28 +274,22 @@ export const GrantsPageContent = () => {
                 />
 
                 {isMobile ? (
-                  <>
-                    {/* Mobile Filter */}
-                    <MobileFilterDrawer
-                      options={filterOptions}
-                      selectedValues={selectedFilter}
-                      onApply={setSelectedFilter}
-                      placeholder={t("Filter statuses")}
-                    />
-                  </>
+                  <MobileFilterDrawer
+                    options={filterOptions}
+                    selectedValues={selectedFilter}
+                    onApply={setSelectedFilter}
+                    placeholder={t("Filter statuses")}
+                  />
                 ) : (
-                  <>
-                    {/* Desktop Filter */}
-                    <SelectField
-                      w="25%"
-                      placeholder={t("Status")}
-                      options={filterOptions}
-                      defaultValue={[]}
-                      showReset
-                      onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
-                      isMultiOption
-                    />
-                  </>
+                  <SelectField
+                    w="25%"
+                    placeholder={t("Status")}
+                    options={filterOptions}
+                    defaultValue={[]}
+                    showReset
+                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
+                    isMultiOption
+                  />
                 )}
               </HStack>
 

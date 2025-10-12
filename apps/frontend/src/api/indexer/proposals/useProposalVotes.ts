@@ -63,5 +63,6 @@ export const useProposalVotes = (proposalId: string) =>
           votes: groupedVotes,
         }
       },
+      refetchInterval: 10000,
     },
   )

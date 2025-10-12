@@ -1,4 +1,3 @@
-import { JoinCommunity } from "@/components"
 import { StepCardProps, StepCard } from "@/components/StepCard"
 import { Button, Card, Grid, GridItem, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -70,16 +69,13 @@ export const NewAppPageContent = () => {
                 <Button onClick={LINK_TO_DOCS} rounded="full" variant={"outline"} colorPalette="primary" size="lg">
                   {t("More info")}
                 </Button>
-                <Button variant="primaryAction" rounded="full" size="lg" onClick={onContinueClick}>
+                <Button variant="primary" rounded="full" size="lg" onClick={onContinueClick}>
                   {t("Continue")}
                 </Button>
               </HStack>
             </VStack>
           </Card.Body>
         </Card.Root>
-      </GridItem>
-      <GridItem colSpan={1}>
-        <JoinCommunity />
       </GridItem>
     </Grid>
   )

@@ -295,8 +295,8 @@ export const GrantsNewFormStepCard = () => {
   // ============================================================================
 
   return (
-    <Card.Root>
-      <Card.Body px={{ base: 3, md: 8 }}>
+    <Card.Root p={{ base: "6", md: "8" }}>
+      <Card.Body>
         <form ref={formRef} onSubmit={handleSubmit(onSubmit, onError)} style={{ width: "100%" }}>
           <VStack gap={4} w="full" align="flex-start">
             <GrantsNewFormStepIndicator activeStep={currentStepIndex} steps={steps} />
@@ -309,7 +309,7 @@ export const GrantsNewFormStepCard = () => {
                     {t("Back")}
                   </Button>
                 )}
-                <Button w="40" type="submit" variant="primaryAction" px={8} size="lg">
+                <Button w="40" type="submit" variant="primary" px={8} size="lg">
                   {currentStepIndex === LAST_STEP ? t("Apply") : t("Continue")}
                 </Button>
               </HStack>

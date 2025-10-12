@@ -31,7 +31,7 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
       ariaDescription={`ActivityDayModal for ${date}`}
       modalBodyProps={{ maxH: "80vh", overflowY: "auto" }}>
       <VStack gap={3} align="stretch">
-        <Text fontWeight="600" color="#848484">
+        <Text fontWeight="semibold" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
         </Text>
         <InfiniteScroll
@@ -44,16 +44,18 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
               <Spinner size="md" mt={4} alignSelf="center" />
             </Center>
           }>
-          {actions.map(action => (
-            <BetterActionCard
-              key={`action-day-${action.appId}-${action.blockTimestamp}-${action.blockNumber}`}
-              amountB3tr={action.amount}
-              appId={action.appId}
-              blockNumber={action.blockNumber}
-              blockTimestamp={action.blockTimestamp}
-              proof={action.proof}
-            />
-          ))}
+          <VStack gap="4">
+            {actions.map(action => (
+              <BetterActionCard
+                key={`action-day-${action.appId}-${action.blockTimestamp}-${action.blockNumber}`}
+                amountB3tr={action.amount}
+                appId={action.appId}
+                blockNumber={action.blockNumber}
+                blockTimestamp={action.blockTimestamp}
+                proof={action.proof}
+              />
+            ))}
+          </VStack>
         </InfiniteScroll>
       </VStack>
     </BaseModal>

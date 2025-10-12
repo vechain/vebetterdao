@@ -28,7 +28,7 @@ export const AppCard = ({ xApp }: Props) => {
 
   return (
     <Card.Root
-      variant={"baseWithBorder"}
+      variant="primary"
       w="full"
       onClick={navigateToAppDetail}
       _hover={{
@@ -55,7 +55,7 @@ export const AppCard = ({ xApp }: Props) => {
           <VStack gap={1} align="flex-start" w="full">
             <HStack gap={1} justifyContent={"space-between"} align="center" w={"full"}>
               <Skeleton loading={appMetadataLoading}>
-                <Text fontWeight={"600"} textStyle={"xs"}>
+                <Text fontWeight="semibold" textStyle={"xs"}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                 </Text>
               </Skeleton>
@@ -91,7 +91,7 @@ export const AppCard = ({ xApp }: Props) => {
               )}
             </HStack>
             <Skeleton loading={appMetadataLoading}>
-              <Text fontSize={"sm"} color={"gray.500"}>
+              <Text textStyle={"sm"} color={"gray.500"}>
                 {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
             </Skeleton>

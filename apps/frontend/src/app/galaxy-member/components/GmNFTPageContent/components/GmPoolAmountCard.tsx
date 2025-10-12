@@ -11,14 +11,14 @@ export const GmPoolAmountCard = () => {
   const { formatted: gmPoolAmount } = useGMPoolAmount(Number(currentRoundId))
 
   return (
-    <Card.Root variant="primaryBoxShadow">
+    <Card.Root variant="primary" border="sm" borderColor="border.active">
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack gap={2}>
-            <Heading fontSize="lg">{t("GM Pool Amount")}</Heading>
+            <Heading textStyle="lg">{t("GM Pool Amount")}</Heading>
           </HStack>
           <Flex p={4} borderRadius="md" justify="center" align="center" direction="column">
-            <Text fontSize="2xl" fontWeight="bold">
+            <Text textStyle="2xl">
               {gmPoolAmount} {"B3TR"}
             </Text>
             <Badge mt={1} borderRadius="full" px={2}>
@@ -26,7 +26,7 @@ export const GmPoolAmountCard = () => {
             </Badge>
           </Flex>
 
-          <Text fontSize="sm" color="gray.600">
+          <Text textStyle="sm" color="gray.600">
             {t("Total B3TR in the GM Pool for the current round")}
           </Text>
         </VStack>

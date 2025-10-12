@@ -1,0 +1,38 @@
+---
+description: 
+alwaysApply: false
+---
+
+# Notes for using design tokens
+
+- Always use `textStyle` for Text components and `size` for Headings.
+  - Never use `lineHeight` or `fontSize` directly.
+  - Use `color` for text color. Always use semantic colors in theme.ts, do not use hex colors.
+    If new colors should be used add it to the theme.ts.
+
+- If you want to use icons,
+  1. Use react-icons if possible.
+  2. Otherwise, add it under folder `@/components/Icons/svg`.
+     > When using, wrap it that icon with chakra `<Icon/>` component to change the size and color of the icon.
+     > Search codebase for reference.
+     > Do not import multiple times the same svg for different colors. Use the method above.
+
+- For fontWeight, as Design teams request, use only "normal", "semibold" and "bold" for the sake of simplicity.
+  Which is equivalent to 400, 600 and 700.
+
+- For page redirection, if not necessary, use only `Link` from chakra.
+  - If you need to wrap all the card or box with link, use `LinkBox` and `LinkOverlay` from chakra. Check codebase for reference.
+  - Link component has 3 variants, underline, plain and ghost. Choose one according to the design.
+
+- For cards, variant `primary` , `tertiary` is used mostly. If something else needed, add it to the theme.ts.
+
+- Since most of our users come from mobile, we should embrace mobile-first design.
+  So always use base style for mobile and use `md` or `lg` property for the style you need to change for larger screens.
+  As an example:
+
+  ```tsx
+  <Text textStyle={{ base: "sm", md: "lg" }}> Example </Text>
+  ```
+
+  - For layout purposes, instead of nesting Stack, VStack, HStack, Flex etc. you can use SimpleGrid or Grid component from chakra.
+    Check codebase for reference. This way we can avoid unnecessary nesting and apply mobile-first design easier.

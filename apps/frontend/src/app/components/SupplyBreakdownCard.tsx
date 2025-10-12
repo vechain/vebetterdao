@@ -59,23 +59,15 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card.Root variant="baseWithBorder" w="full">
+    <Card.Root variant="primary" w="full">
       <Card.Header>
         <HStack w="full" justify={"space-between"}>
-          <Heading size="xl" fontWeight="bold">
-            {t("Supply breakdown")}
-          </Heading>
+          <Heading size="xl">{t("Supply breakdown")}</Heading>
           <Tooltip
-            content={
-              <Text>
-                {t(
-                  `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
-                )}
-              </Text>
-            }>
-            <span>
-              <Icon as={FiInfo} color="rgba(0, 76, 252, 1)" position={"relative"} />
-            </span>
+            content={t(
+              `B3TR tokens are generated weekly and distributed to x2earn apps, the DAO Treasury and to the VotingRewards contract.`,
+            )}>
+            <Icon as={FiInfo} color="actions.tertiary.default" position={"relative"} />
           </Tooltip>
         </HStack>
       </Card.Header>
@@ -83,21 +75,17 @@ export const SupplyBreakdownCard = () => {
         <VStack gap={4} align="flex-start">
           <SimpleGrid templateColumns={["repeat(1, 2fr)", "repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
             <VStack gap={1} align="flex-start">
-              <Text textStyle="md" fontWeight="400">
-                {t("B3TR in circulation")}
-              </Text>
+              <Text textStyle="md">{t("B3TR in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#004CFC"}>
+                <Heading size={["2xl", "2xl", "xl"]} color="brand.primary">
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack gap={1} align="flex-start">
-              <Text textStyle="md" fontWeight="400">
-                {t("VOT3 in circulation")}
-              </Text>
+              <Text textStyle="md">{t("VOT3 in circulation")}</Text>
               <Skeleton loading={!data}>
-                <Heading size={["2xl", "2xl", "xl"]} fontWeight="bold" color={"#3DBA67"}>
+                <Heading size={["2xl", "2xl", "xl"]} color={"brand.secondary"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>

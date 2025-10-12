@@ -97,7 +97,7 @@ export const languages = [
     flag: "🇪🇸",
   },
   {
-    name: "Turkey",
+    name: "Turkish",
     code: "tr",
     flag: "🇹🇷",
   },

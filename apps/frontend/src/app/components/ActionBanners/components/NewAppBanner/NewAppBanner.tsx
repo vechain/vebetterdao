@@ -4,6 +4,8 @@ import { useMemo } from "react"
 import { t } from "i18next"
 import { useXApps } from "@/api"
 import { UilArrowRight } from "@iconscout/react-unicons"
+import { Button, Icon } from "@chakra-ui/react"
+
 interface NewApp {
   name: string
   id: string
@@ -47,18 +49,16 @@ export const NewAppBanner = () => {
 
   return (
     <GenericBanner
+      variant="info"
       title={t("NEW APP AVAILABLE")}
       description={description}
-      titleColor="#3A5798"
-      descriptionColor="#0C2D75"
       logoSrc="/assets/icons/new-app-gold.svg"
-      backgroundColor="#C8DDFF"
-      backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
-      buttonIconPosition="right"
-      buttonLabel={t("Explore")}
-      onButtonClick={GOTOAPPS}
-      buttonVariant="primaryAction"
-      buttonIcon={<UilArrowRight />}
+      cta={
+        <Button onClick={GOTOAPPS} variant="primary">
+          {t("Explore")}
+          <Icon as={UilArrowRight} />
+        </Button>
+      }
     />
   )
 }

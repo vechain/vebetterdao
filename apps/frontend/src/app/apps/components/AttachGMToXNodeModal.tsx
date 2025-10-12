@@ -89,7 +89,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
           <CloseButton />
         </Dialog.CloseTrigger>
         <Dialog.Header>
-          <Heading fontSize="lg">{t("Attaching Node to GM NFT")}</Heading>
+          <Heading textStyle="lg">{t("Attaching Node to GM NFT")}</Heading>
         </Dialog.Header>
         <Dialog.Body>
           <VStack align="stretch" gap={4}>
@@ -108,18 +108,18 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                       <step.Icon size={iconSize} />
                     </Flex>
                     <VStack align="flex-start" gap={[0, 0, 2]}>
-                      <Text fontSize="xs" color="#6A6A6A">
+                      <Text textStyle="xs" color="text.subtle">
                         {t("STEP {{value}}", { value: index + 1 })}
                       </Text>
-                      <Text fontSize="xl" fontWeight={700} color="#1E1E1E">
+                      <Text textStyle="xl" color="#1E1E1E">
                         {step.title}
                       </Text>
-                      <Text hideBelow="md" fontSize="sm" color="#6A6A6A">
+                      <Text hideBelow="md" textStyle="sm" color="text.subtle">
                         {step.description}
                       </Text>
                     </VStack>
                   </Stack>
-                  <Text hideFrom="md" fontSize="sm" color="#6A6A6A">
+                  <Text hideFrom="md" textStyle="sm" color="text.subtle">
                     {step.description}
                   </Text>
                 </VStack>
@@ -131,7 +131,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
           <VStack align="stretch" w="full">
             <Alert.Root status="info" borderRadius={["xl", "xl", "3xl"]}>
               <Alert.Indicator w={5} h={5} />
-              <Box lineHeight={"1.20rem"} fontSize="sm">
+              <Box textStyle="sm">
                 <Alert.Description as="span">
                   {t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}
                 </Alert.Description>
@@ -145,7 +145,7 @@ export const AttachGMToXNodeModal = ({ gmId, node, isOpen, onClose }: Props) => 
                 <Button
                   loading={isLoadingUserGMs}
                   disabled={isNoAffectAttachment}
-                  variant={"primaryAction"}
+                  variant={"primary"}
                   w={"full"}
                   onClick={handleAttachment}>
                   <UilLink />

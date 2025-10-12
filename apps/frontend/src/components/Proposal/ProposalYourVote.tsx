@@ -1,9 +1,8 @@
 import { useGetVotesOnBlock, useProposalSnapshot, useUserSingleProposalVoteEvent, useVotingThreshold } from "@/api"
-import { Box, HStack, Icon, Image, Skeleton, Text, TextProps } from "@chakra-ui/react"
+import { Box, HStack, Icon, Image, Skeleton, Text, TextProps, Em } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
-import { MdHowToVote } from "react-icons/md"
 import { useWallet } from "@vechain/vechain-kit"
 import { ProposalState } from "@/hooks/proposals/grants/types"
 
@@ -57,7 +56,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     if (!account?.address) return null
     if (!userVote)
       return (
-        <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} {...textProps}>
+        <Text textStyle="xs" {...textProps}>
           {t("You haven't voted")}
         </Text>
       )
@@ -67,21 +66,21 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
     //if for some reason we are not able to map the support
     if (!support)
       return (
-        <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} {...textProps}>
+        <Text textStyle="xs" {...textProps}>
           {t("You have voted")}
         </Text>
       )
 
     return (
       <HStack gap={1}>
-        {support.icon}
-
-        <Text fontSize={["lg", "lg", "md"]} fontWeight={600} {...textProps}>
+        <Text textStyle={["sm", "sm", "xs"]} {...textProps}>
           {t("You voted")}
         </Text>
-        <Text fontSize={["lg", "lg", "md"]} fontWeight={600} {...textProps}>
-          {t(support.label as any)}
-        </Text>
+        <Em>
+          <Text textStyle={["sm", "sm", "xs"]} {...textProps}>
+            {t(support.label as any)}
+          </Text>
+        </Em>
       </HStack>
     )
   }, [userVote, account?.address, textProps, t])
@@ -104,13 +103,9 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   if (!userVote)
     return (
       <Box>
-        {renderTitle && (
-          <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
-            {t("Your vote")}
-          </Text>
-        )}
+        {renderTitle && <Text textStyle={["lg", "lg", "md"]}>{t("Your vote")}</Text>}
         {isFinished ? (
-          <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
+          <Text textStyle={["lg", "lg", "md"]} {...textProps}>
             {t("You have not voted")}
           </Text>
         ) : (
@@ -122,7 +117,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   return (
     <Box>
       {renderTitle && (
-        <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
+        <Text textStyle={["lg", "lg", "md"]} {...textProps}>
           {t("Your vote")}
         </Text>
       )}
@@ -155,13 +150,9 @@ const NoVoteAndActiveCheckVotingPower = ({
 
   return (
     <Skeleton loading={snapshotLoading}>
-      <HStack gap={2}>
-        <Icon as={MdHowToVote} boxSize={4} color={"contrast-fg-on-muted"} />
-
-        <Text fontSize={["lg", "lg", "md"]} fontWeight={400} {...textProps}>
-          {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}
-        </Text>
-      </HStack>
+      <Text textStyle={["lg", "lg", "md"]} {...textProps}>
+        {hasVotesAtSnapshot ? t("You have not voted") : t("No votes to cast")}
+      </Text>
     </Skeleton>
   )
 }

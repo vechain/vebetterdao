@@ -131,24 +131,24 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         </Dialog.CloseTrigger>
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
-            <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+            <Text textStyle={{ base: "lg", md: "2xl" }} fontWeight="bold" alignSelf={"center"}>
               <Trans i18nKey={"Deposit B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
             </Text>
           </HStack>
-          <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} opacity={0.7}>
+          <Text textStyle={{ base: "sm", md: "md" }} opacity={0.7}>
             {t("Send B3TR tokens from the connected account to the app, and use them for rewards distribution.")}
           </Text>
 
           <VStack bg={"b3tr-balance-bg"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
               <Skeleton loading={isAppBalanceLoading}>
-                <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
+                <Text textStyle={{ base: "2xl", md: "xl" }} fontWeight="semibold">
                   {FormattingUtils.humanNumber(Number(appBalanceScaled))}
                 </Text>
               </Skeleton>
             </HStack>
 
-            <Text fontSize="12px" fontWeight="400" opacity={0.7}>
+            <Text textStyle="xs" opacity={0.7}>
               {t("App current B3TR Balance")}
             </Text>
           </VStack>
@@ -166,9 +166,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
                 <HStack align={"stretch"} justify={"stretch"} gap={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
-                      <Text fontSize={14} fontWeight={400}>
-                        {t("You'll deposit")}
-                      </Text>
+                      <Text textStyle="sm">{t("You'll deposit")}</Text>
                     </HStack>
                     <HStack w="full">
                       <B3TRIcon boxSize={"30px"} />
@@ -185,13 +183,13 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
           <Button
             mt={2}
             type="submit"
-            variant={"primaryAction"}
+            variant={"primary"}
             w={"full"}
             rounded={"full"}
             disabled={invalidAmount}
             size={"lg"}>
             <Icon as={IoAddCircleOutline} mr={2} />
-            <Text fontSize={{ base: 14, md: 18 }}>{t("Deposit now")}</Text>
+            <Text textStyle={{ base: "sm", md: "lg" }}>{t("Deposit now")}</Text>
           </Button>
         </VStack>
       </form>

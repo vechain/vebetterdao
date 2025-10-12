@@ -81,13 +81,13 @@ const CalendarHeader = ({
 
   return (
     <Flex justify="space-between" align="center">
-      <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)} disabled={isPrevMonthDisabled}>
+      <Button variant="plain" size="sm" onClick={() => changeMonth(-1)} disabled={isPrevMonthDisabled}>
         <FaChevronLeft />
       </Button>
       <Heading size="md" textAlign="center">
         {monthName}
       </Heading>
-      <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
+      <Button variant="plain" size="sm" onClick={() => changeMonth(1)} disabled={isNextMonthDisabled}>
         <FaChevronRight />
       </Button>
     </Flex>
@@ -108,7 +108,7 @@ const CalendarBody = ({
       {/* Day Headers */}
       {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
         <Box key={day} textAlign="center">
-          <Text fontSize="xs" fontWeight="medium" color="#D9D9D9">
+          <Text textStyle="xs" color="#D9D9D9">
             {day}
           </Text>
         </Box>
@@ -128,7 +128,7 @@ const CalendarBody = ({
 
         // A day is unavailable if it's not selectable
         const isUnavailable = !isSelectable
-        const bgColor = isUnavailable ? "bg.subtle" : isSelected ? "#004CFC" : "transparent"
+        const bgColor = isUnavailable ? "bg.subtle" : isSelected ? "actions.tertiary.default" : "transparent"
         const textColor = isUnavailable ? "text.subtle" : isSelected ? "white" : "inherit"
         const borderColor = isUnavailable ? "none" : isSelected ? "border.secondary" : "border.primary"
         return (
@@ -141,12 +141,11 @@ const CalendarBody = ({
             p="0"
             disabled={!isSelectable}
             unstyled
-            fontSize={isMobile ? "2xs" : "xs"}
-            fontWeight="medium"
+            textStyle={isMobile ? "2xs" : "xs"}
             bg={bgColor}
             color={textColor}
             borderRadius="md"
-            borderWidth={isUnavailable ? "0px" : "1px"}
+            border={isUnavailable ? "none" : "sm"}
             borderColor={borderColor}
             _hover={{ opacity: isSelectable ? 0.8 : 1 }}
             cursor={isUnavailable ? "not-allowed" : "pointer"}
@@ -166,7 +165,7 @@ const CalendarFooter = ({ resetSelection }: CalendarFooterProps) => {
 
   return (
     <HStack justify="space-between">
-      <Button size="sm" variant="tertiary" onClick={resetSelection}>
+      <Button size="sm" variant="primary" onClick={resetSelection}>
         {t("Clear")}
       </Button>
     </HStack>
@@ -327,20 +326,20 @@ export const FormDateInput = ({
       {/* Always render label container for consistent alignment */}
       <HStack justify="space-between" w="full" minH="5" mb={description ? 0 : 2}>
         {label ? (
-          <Field.Label fontSize="sm" fontWeight="medium" htmlFor={register.name}>
+          <Field.Label textStyle="sm" htmlFor={register.name}>
             {label}
           </Field.Label>
         ) : (
           <Box /> // Empty box to maintain space
         )}
         {isOptional && (
-          <Text fontSize="sm" fontWeight="medium" color="text.subtle">
+          <Text textStyle="sm" color="text.subtle">
             {"Optional"}
           </Text>
         )}
       </HStack>
       {description && (
-        <Text fontSize="xs" color="gray.500" mb={2}>
+        <Text textStyle="xs" color="gray.500" mb={2}>
           {description}
         </Text>
       )}

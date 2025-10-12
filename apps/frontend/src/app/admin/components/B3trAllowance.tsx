@@ -56,7 +56,7 @@ export const B3trAllowance = () => {
     <Card.Root w={"full"}>
       <Card.Header>
         <Heading size="3xl">{t("B3TR Token Allowance")}</Heading>
-        <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
+        <Text textStyle="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
       </Card.Header>
       <Card.Body>
         <form onSubmit={handleSubmit}>

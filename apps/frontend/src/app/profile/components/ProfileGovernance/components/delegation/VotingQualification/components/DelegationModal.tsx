@@ -71,19 +71,19 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     () => (
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(goToNext)}>
         <Box>
-          <Text color="#6A6A6A" as="span">
+          <Text color="text.subtle" as="span">
             {t(
               "By delegating your qualification, another person will be able to vote on next round's allocation and proposals.",
             )}
           </Text>
-          <Text color="#6A6A6A" as="span" fontWeight="600">
+          <Text color="text.subtle" as="span" fontWeight="semibold">
             {t("You won't lose any of your VOT3 or B3TR tokens with this operation.")}
           </Text>
         </Box>
         <VStack align="stretch">
-          <Heading fontSize="lg">{t("Who do you want to add as a manager?")}</Heading>
+          <Heading textStyle="lg">{t("Who do you want to add as a manager?")}</Heading>
           <Field.Root invalid={!delegatee}>
-            <Field.Label color="#6A6A6A" fontSize="sm">
+            <Field.Label color="text.subtle" textStyle="sm">
               {t("User wallet address")}
             </Field.Label>
             <WalletAddressInput
@@ -91,18 +91,18 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
               onAddressResolved={address => setValue("walletAddress", address ?? "")}
             />
             {isEntity ? (
-              <Text color="#C84968" fontSize="sm">
+              <Text color="status.negative.primary" textStyle="sm">
                 {t("You can't delegate from an account linked as a secondary account")}
               </Text>
             ) : null}
           </Field.Root>
         </VStack>
         <VStack alignItems="stretch">
-          <Button variant="primaryAction" type="submit" disabled={isEntity || !delegatee}>
+          <Button variant="primary" type="submit" disabled={isEntity || !delegatee}>
             {t("Send request")}
           </Button>
 
-          <Button variant={"primaryGhost"} onClick={handleClose}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={handleClose}>
             {t("Cancel")}
           </Button>
         </VStack>
@@ -115,27 +115,27 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     () => (
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
-          <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
+          <ExclamationTriangle color="status.negative.primary" size={triangleSize} />
+          <Heading size={["lg", "lg", "2xl"]} textAlign="center">
             {t("Are you sure you want to delegate your Voting Qualification?")}
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You're delegating it to")}</Text>
-          <Text fontSize="sm">{delegatee}</Text>
+          <Text fontWeight="semibold">{t("You're delegating it to")}</Text>
+          <Text textStyle="sm">{delegatee}</Text>
         </VStack>
         <Alert.Root status="error" borderRadius="2xl">
           <Alert.Indicator w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
+          <Box color="status.negative.primary" textStyle="sm">
             <Alert.Title as="span">{t("You will not be able to vote until you remove the delegation")}</Alert.Title>
             <Alert.Description as="span">{t("or you receive someone else’s voting qualification.")}</Alert.Description>
           </Box>
         </Alert.Root>
         <VStack>
-          <Button variant="primaryAction" onClick={handleDelegate}>
+          <Button variant="primary" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={goToPrevious}>
+          <Button variant="ghost" color="actions.tertiary.default" onClick={goToPrevious}>
             {t("No, go back")}
           </Button>
         </VStack>

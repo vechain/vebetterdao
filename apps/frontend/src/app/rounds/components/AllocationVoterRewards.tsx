@@ -1,5 +1,5 @@
 import { useAllocationsRound, useAllocationsRoundState, useRoundReward } from "@/api"
-import { Box, Button, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
@@ -8,6 +8,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { Gift } from "iconoir-react"
 
 type Props = {
   roundId: string
@@ -62,7 +63,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const description = useMemo(() => {
     if (hasVoted && !isFinished) {
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <b>{t("You’ve voted on this allocation round!")}</b>
           {!isFinished && ` ${t("You’ll be able to claim your reward when the round is over.")}`}
         </Text>
@@ -71,7 +72,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (!hasVoted && !isFinished)
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <Trans
             i18nKey={"Vote on this allocation round to receive rewards after the voting session has ended."}
             t={t}
@@ -81,7 +82,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (!hasVoted && isFinished)
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <Trans
             i18nKey={"You didn't vote on this allocation round. You can still vote on the next one to receive rewards."}
             t={t}
@@ -91,7 +92,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (formattedRoundReward > 0)
       return (
-        <Text fontSize={14} fontWeight={400}>
+        <Text textStyle="sm">
           <Trans
             i18nKey={
               "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!"
@@ -103,7 +104,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       )
 
     return (
-      <Text fontSize={14} fontWeight={400}>
+      <Text textStyle="sm">
         <Trans
           i18nKey={
             "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards."
@@ -135,15 +136,15 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       borderColor={"#D5D5D5"}
       py={8}
       px={6}
-      bg={"info-bg"}
+      bg={"bg.primary"}
       w={"full"}
       mt={{ base: 0, md: 8 }}
       position={"relative"}
       overflow={"clip"}>
       <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
       <VStack alignItems={"flex-start"}>
-        <Image src="/assets/icons/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
-        <Text fontSize={24} fontWeight={700}>
+        <Icon as={Gift} boxSize="16" color="icon.default" />
+        <Text textStyle="2xl" fontWeight="bold">
           {t("Voting rewards")}
         </Text>
         <Box mt={3} mb={1}>
@@ -155,13 +156,11 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
           disabled={!canClaim}
           loading={isRoundRewardLoading}
           onClick={handleClaim}
-          variant={"primaryAction"}
-          borderRadius={"full"}
+          variant={"primary"}
           w={"full"}
-          bg={canClaim ? "primary" : "#abb0b0"}
-          color={canClaim ? "white" : "black"}>
-          {!isFinished ? <FaRegClock /> : undefined}
-          <Text fontSize={{ base: 14, md: 16 }}>{buttonText}</Text>
+          textStyle={{ base: "sm", md: "md" }}>
+          {!isFinished ? <Icon as={FaRegClock} color="icon.default" /> : undefined}
+          {buttonText}
         </Button>
       </VStack>
     </Box>

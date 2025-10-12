@@ -44,13 +44,13 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
           </Dialog.CloseTrigger>
           <Dialog.Body p={"40px"}>
             <VStack align="stretch" gap="32px">
-              <UilUser size="54px" color="#004CFC" />
-              <Heading fontSize="28px">{t("Add a new signaler")}</Heading>
+              <UilUser size="54px" color="actions.tertiary.default" />
+              <Heading size="3xl">{t("Add a new signaler")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
-                  <Text fontSize="14px">{t("User wallet address")}</Text>
+                  <Text textStyle="sm">{t("User wallet address")}</Text>
                   {domain && (
-                    <Text fontSize="14px" fontWeight={"600"}>
+                    <Text textStyle="sm" fontWeight="semibold">
                       {"@"}
                       {domain}
                     </Text>
@@ -71,12 +71,12 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
               <VStack align="stretch">
                 <Button
                   disabled={!signalerAddress}
-                  variant="primaryAction"
+                  variant="primary"
                   type="submit"
                   onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add signaler")}
                 </Button>
-                <Button variant="primaryGhost" onClick={onClose}>
+                <Button variant="ghost" color="actions.tertiary.default" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
               </VStack>
@@ -87,7 +87,8 @@ export const AddSignalerButton = ({ editAdminForm }: Props) => {
       <Button
         mt={4}
         onClick={onOpen}
-        variant="primarySubtle"
+        variant="ghost"
+        color="actions.tertiary.default"
         disabled={editAdminForm.getValues("signalers").length >= 3}
         alignSelf={"flex-start"}>
         <UilPlus size="14px" />

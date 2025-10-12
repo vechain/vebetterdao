@@ -1,16 +1,16 @@
-import { useIsDepositReached } from "@/api"
-import { useProposalInteractionDates } from "@/api/contracts/governance/hooks/useProposalInteractionDates"
-import { ProposalEnriched, ProposalState } from "@/hooks/proposals/grants/types"
-import { Card, HStack, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/vechain-kit"
-import dayjs from "dayjs"
-import { useRouter } from "next/navigation"
-import React, { useCallback, useMemo } from "react"
+import { Text, Card, VStack, HStack, Skeleton, IconButton, LinkBox, LinkOverlay } from "@chakra-ui/react"
+import React, { useMemo } from "react"
+import { ProposalMetadata, useProposalInteractionDates } from "@/api"
+import { useIpfsMetadata } from "@/api/ipfs"
+import { toIPFSURL } from "@/utils"
 import { useTranslation } from "react-i18next"
 import { FaAngleRight } from "react-icons/fa6"
-
+import dayjs from "dayjs"
+import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
+import NextLink from "next/link"
+import { ProposalEnriched, ProposalState } from "@/hooks"
 
 type Props = {
   proposal: ProposalEnriched
@@ -19,23 +19,17 @@ type Props = {
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }) => {
   const { account } = useWallet()
-  const { id } = proposal
-  const { data: isDepositReached } = useIsDepositReached(id)
-  const router = useRouter()
-
-  const { supportEndDate } = useProposalInteractionDates(id)
+  const { id: proposalId, ipfsDescription } = proposal
+  const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(ipfsDescription))
+  const { supportEndDate } = useProposalInteractionDates(proposalId)
 
   const { t } = useTranslation()
-
-  const goToProposal = useCallback(() => {
-    router.push(`/proposals/${id}`)
-  }, [router, id])
 
   const proposalExtraInfo = useMemo(() => {
     if (proposal.state === ProposalState.Pending) {
       return (
         <Skeleton loading={!supportEndDate}>
-          <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+          <Text textStyle="sm" color={"gray.500"}>
             {t("Starting {{date}}", { date: dayjs(supportEndDate).format("MMM D, YYYY") })}
           </Text>
         </Skeleton>
@@ -43,7 +37,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     }
     if (proposal.state === ProposalState.DepositNotMet) {
       return (
-        <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+        <Text textStyle="sm" color={"gray.500"}>
           {t("Vote didn't start")}
         </Text>
       )
@@ -54,48 +48,54 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal, proposalState }
     ) {
       return (
         <ProposalYourVote
-          proposalId={id}
+          proposalId={proposalId}
           proposalState={proposal.state}
           renderTitle={false}
           textProps={{ color: "gray.500", fontSize: "14px" }}
         />
       )
     }
-    return ""
-  }, [supportEndDate, proposal.state, t, id, account?.address])
+  }, [proposal.state, account?.address, supportEndDate, t, proposalId])
 
   return (
-    <Card.Root
-      variant={["filledSmall", "filledSmall", "filled"]}
-      onClick={goToProposal}
-      _hover={{ bg: "light-contrast-on-card-bg" }}
-      cursor={"pointer"}
-      alignSelf={"flex-start"}
-      w={"full"}>
-      <Card.Body>
-        <HStack justifyContent={"space-between"} w="full">
-          <VStack w="full" justifyContent={"space-between"} gap={3} align={"flex-start"}>
-            <ProposalStatusBadge
-              proposalState={proposalState}
-              isDepositReached={isDepositReached ?? false}
-              containerProps={{
-                py: 1,
-                px: 2,
-              }}
-              proposalType={proposal.type}
-            />
-            <VStack w="full" gap={1} align={"flex-start"}>
-              <Text fontSize={"14px"} fontWeight={600}>
-                {proposal?.title}
-              </Text>
-              {proposalExtraInfo}
-            </VStack>
-          </VStack>
-          <IconButton aria-label="Go to proposal" onClick={goToProposal} variant="ghost" colorPalette="primary">
-            <FaAngleRight />
-          </IconButton>
-        </HStack>
-      </Card.Body>
-    </Card.Root>
+    <LinkBox asChild>
+      <Card.Root
+        variant="subtle"
+        rounded="lg"
+        data-testid={`proposal-compact-card-#${proposalId}`}
+        alignSelf={"flex-start"}
+        w={"full"}
+        p="4">
+        <LinkOverlay asChild>
+          <NextLink href={`proposals/${proposalId}`}>
+            <Card.Body p="0">
+              <HStack justifyContent={"space-between"} w="full">
+                <VStack w="full" justifyContent={"space-between"} gap="3" align={"flex-start"}>
+                  <ProposalStatusBadge proposalId={proposal.id} proposalState={proposalState} />
+                  <VStack w="full" gap="1" align={"flex-start"}>
+                    <Skeleton
+                      loading={proposalMetadata.isLoading}
+                      lineClamp={3}
+                      flex={2.5}
+                      mr={{ base: 0, md: 10 }}
+                      alignSelf={"flex-start"}>
+                      <VStack alignItems="flex-start">
+                        <Text textStyle={"sm"} fontWeight="semibold">
+                          {proposalMetadata.data?.title}
+                        </Text>
+                        {proposalExtraInfo}
+                      </VStack>
+                    </Skeleton>
+                  </VStack>
+                </VStack>
+                <IconButton aria-label="Go to proposal" variant="ghost">
+                  <FaAngleRight />
+                </IconButton>
+              </HStack>
+            </Card.Body>
+          </NextLink>
+        </LinkOverlay>
+      </Card.Root>
+    </LinkBox>
   )
 }

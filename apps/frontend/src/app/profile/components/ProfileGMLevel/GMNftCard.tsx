@@ -25,7 +25,8 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
   return (
     <LinkBox flex={1}>
       <Card.Root
-        variant={gm?.isSelected ? "primaryBoxShadow" : "outline"}
+        variant="subtle"
+        //variant={gm?.isSelected ? "primaryBoxShadow" : "outline"}
         alignItems="center"
         flexDirection="row"
         gap="8px"
@@ -45,16 +46,16 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
               <ConditionalWrapper
                 condition={isClickable}
                 wrapper={({ children }) => (
-                  <LinkOverlay href={`/galaxy-member/${gm?.tokenId}`} as={NextLink}>
-                    {children}
+                  <LinkOverlay asChild>
+                    <NextLink href={`/galaxy-member/${gm?.tokenId}`}>{children}</NextLink>
                   </LinkOverlay>
                 )}>
-                <Text fontSize="sm" lineHeight={1} _dark={{ color: "#FFFFFFB2" }}>
+                <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
                   {t("NFT")}
                 </Text>
               </ConditionalWrapper>
 
-              <Text fontWeight={700} lineHeight={1.6} lineClamp={1}>
+              <Text fontWeight="bold" lineHeight={1.6} lineClamp={1}>
                 {gm?.metadata?.name}
               </Text>
 
@@ -65,13 +66,13 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
                 _dark={{ bg: "#FFFFFF4A" }}
                 rounded="8px"
                 padding="4px 8px">
-                <Text fontSize={"xs"} fontWeight={400} lineClamp={1}>
+                <Text textStyle={"xs"} lineClamp={1}>
                   {t("{{value}}x reward weight", { value: gm.multiplier || 0 })}
                 </Text>
               </Box>
             </>
           ) : (
-            <Text fontSize="sm" _dark={{ color: "#FFFFFFB2" }}>
+            <Text textStyle="sm" _dark={{ color: "#FFFFFFB2" }}>
               {t("No NFT attached")}
             </Text>
           )}
@@ -80,7 +81,7 @@ export const GMNftCard = ({ gm, isClickable }: { gm?: UserGM; isClickable: boole
         {isClickable && (
           <Card.Footer p="0">
             <HStack gap="4" w="full" justifyContent={!isMobile ? "flex-start" : "center"}>
-              <Button variant="primarySubtle" w="7rem" disabled={gm?.isSelected} onClick={handleSelectGM}>
+              <Button variant="secondary" w="7rem" disabled={gm?.isSelected} onClick={handleSelectGM}>
                 {t(gm?.isSelected ? "Active" : "Activate")}
               </Button>
 

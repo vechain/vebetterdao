@@ -50,7 +50,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
   return (
     <VStack alignItems="stretch" gap={4}>
       <HStack justifyContent="space-between" w="full">
-        <Heading fontWeight={700} fontSize="24px" w="full">
+        <Heading fontWeight="bold" size="2xl" w="full">
           {t("Comments ({{amount}})", { amount: commentsCount })}
         </Heading>
         <HStack w="full" justifyContent="flex-end">

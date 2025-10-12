@@ -143,9 +143,7 @@ export const CreateEditAppForm = ({
   return (
     <Card.Root>
       <Card.Header>
-        <Heading size="3xl" fontWeight="bold">
-          {isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}
-        </Heading>
+        <Heading size="3xl">{isEdit ? `Edit App ${editedApp?.name}` : "Create a new App"}</Heading>
       </Card.Header>
       <Card.Body>
         <VStack gap={8} w="full">
@@ -235,7 +233,7 @@ export const CreateEditAppForm = ({
 
           <Field.Root invalid={!treasuryWalletAddress}>
             <Field.Label>{t("Treasury address")}</Field.Label>
-            <Text fontSize="xs" color="gray.500" mb={2}>
+            <Text textStyle="xs" color="gray.500" mb={2}>
               {t(`The wallet address where you will receive your app's B3TR`)}
             </Text>
             <InputGroup>
@@ -261,7 +259,7 @@ export const CreateEditAppForm = ({
 
           <Field.Root invalid={!adminWalletAddress}>
             <Field.Label>{t("Admin address")}</Field.Label>
-            <Text fontSize="xs" color="gray.500" mb={2}>
+            <Text textStyle="xs" color="gray.500" mb={2}>
               {t("The wallet address which will be used to manage your app")}
             </Text>
             <InputGroup>

@@ -103,17 +103,15 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
       </Field.Root>
       {tweetId && !errors.tweetUrl && !tweetError && (
         <VStack align="stretch">
-          <Heading fontSize="20px" fontWeight={700}>
-            {t("Preview")}
-          </Heading>
+          <Heading size="xl">{t("Preview")}</Heading>
           {tweet && !isTweetLoading ? <EmbeddedTweet key={tweet.id_str} tweet={tweet} /> : <TweetSkeleton />}
         </VStack>
       )}
       <VStack align={"stretch"}>
-        <Button variant="primaryAction" type="submit">
+        <Button variant="primary" type="submit">
           {t("Save and show on feed")}
         </Button>
-        <Button variant="primaryGhost" onClick={onClose}>
+        <Button variant="ghost" color="actions.tertiary.default" onClick={onClose}>
           {t("Maybe later")}
         </Button>
       </VStack>

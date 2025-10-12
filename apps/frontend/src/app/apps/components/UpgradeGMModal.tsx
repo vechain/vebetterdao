@@ -77,28 +77,26 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
         <Dialog.Header>
           <VStack gap={4} align="flex-start">
             <UilArrowCircleUp cursor="pointer" size="50px" color="#004CFC" />
-            <Heading fontSize="xl">{t("Upgrade GM NFT")}</Heading>
+            <Heading textStyle="xl">{t("Upgrade GM NFT")}</Heading>
           </VStack>
         </Dialog.Header>
         <Dialog.Body gap={[0, 4]} pt={0}>
-          <Text fontSize={["16px"]} color="#6A6A6A">
+          <Text textStyle="md" color="text.subtle">
             {t(
               "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
             )}
           </Text>
           <VStack align="stretch" w="full" py={[2, 5]}>
-            <Text color="#6A6A6A" fontSize={["16px"]}>
+            <Text color="text.subtle" textStyle="md">
               {t("You'll donate")}
             </Text>
             <HStack>
               <B3TRIcon boxSize={7} />
-              <Heading fontSize="x-large" fontWeight={700}>
-                {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
-              </Heading>
+              <Heading size="xl">{compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}</Heading>
             </HStack>
           </VStack>
           <VStack align="stretch" py={[2, 5]}>
-            <Text color="#6A6A6A" textStyle={"md"}>
+            <Text color="text.subtle" textStyle={"md"}>
               {t("You’re upgrading to")}
             </Text>
             {/*GM CARD */}
@@ -124,7 +122,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                   rounded="12px"
                   gap={isAbove800 ? 5 : 3}
                   flex={1}
-                  color="#FFFFFF"
+                  color="white"
                   flexGrow={4}>
                   <Box
                     w={isAbove800 ? "70px" : "46px"}
@@ -148,15 +146,15 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     </Skeleton>
                   </Box>
                   <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
-                    <Text fontWeight={700} lineClamp={1} fontSize={isAbove800 ? "x-large" : "md"}>
+                    <Text lineClamp={1} textStyle={isAbove800 ? "xl" : "md"}>
                       {`${nextLevelGM?.name} #${tokenId}`}
                     </Text>
                     <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                       <HStack rounded="8px" justifyContent="space-between">
-                        <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                        <Text textStyle={isAbove800 ? "md" : "xs"} fontWeight="semibold">
                           {nextLevelGM?.multiplier}
                         </Text>
-                        <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} lineClamp={1}>
+                        <Text textStyle={isAbove800 ? "md" : "xs"} lineClamp={1}>
                           {t("GM reward weight").toLowerCase()}
                         </Text>
                       </HStack>
@@ -171,7 +169,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             <Alert.Root bg={"rgb(255, 250, 235)"} borderRadius="2xl">
               <UilInfoCircle color={"rgb(217, 119, 6)"} size={"50px"} />
               <Box lineHeight="1.20rem">
-                <Text px={3} color={"rgb(217, 119, 6)"} fontSize={["12px", "16px"]}>
+                <Text px={3} color={"rgb(217, 119, 6)"} textStyle={["xs", "md"]}>
                   {t(
                     "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
                   )}
@@ -183,10 +181,10 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
         <Dialog.Footer w="full" px={4} pt={1}>
           <VStack align="stretch" w="full">
-            <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
+            <Button variant={"primary"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
             </Button>
-            <Button variant={"primaryGhost"} fontWeight={700} color={"#004CFC"} w={"full"} onClick={handleClose}>
+            <Button variant="ghost" color="actions.tertiary.default" w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

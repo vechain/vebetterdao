@@ -77,14 +77,12 @@ export const EditScreenshots = ({ form }: Props) => {
     <VStack align="stretch" gap={6}>
       <HStack justify={"space-between"} flexWrap={"wrap"}>
         <VStack align="flex-start" gap={1}>
-          <Heading fontSize="24px" fontWeight="700">
-            {t("Edit screenshots")}
-          </Heading>
-          <Text fontSize={14} color={invalidFormat ? "red" : "gray"}>
+          <Heading size="2xl">{t("Edit screenshots")}</Heading>
+          <Text textStyle="sm" color={invalidFormat ? "red" : "gray"}>
             {invalidFormat ? invalidMessage : t(SCREENSHOT_UPLOAD_GUIDELINES)}
           </Text>
         </VStack>
-        <Button variant="primaryAction" onClick={handleUpload} loading={loadingScreenshot}>
+        <Button variant="primary" onClick={handleUpload} loading={loadingScreenshot}>
           <UilUpload size="16px" />
           {t("Upload")}
         </Button>
@@ -96,7 +94,7 @@ export const EditScreenshots = ({ form }: Props) => {
           control={form.control}
         />
       </HStack>
-      {screenshots.length === 0 && <Text color="#6A6A6A">{t("No screenshot added yet")}</Text>}
+      {screenshots.length === 0 && <Text color="text.subtle">{t("No screenshot added yet")}</Text>}
       <Reorder.Group
         axis="x"
         values={screenshots}

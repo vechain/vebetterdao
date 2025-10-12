@@ -18,6 +18,7 @@ export const SearchField = ({ placeholder = "Search", value, onChange, disabled,
         placeholder={placeholder}
         borderRadius={"xl"}
         bg="bg.primary"
+        border="border.primary"
         value={value}
         onChange={e => onChange?.(e.target.value)}
       />

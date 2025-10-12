@@ -6,7 +6,7 @@ export const CreatorApplicationInProgress = () => {
 
   return (
     <Card.Root
-      variant={"baseWithBorder"}
+      variant="primary"
       w="full"
       maxW="100%"
       h={"full"}
@@ -38,10 +38,8 @@ export const CreatorApplicationInProgress = () => {
               py={{ base: 5, md: 5 }}
               align="flex-start"
               justify="center">
-              <Heading fontWeight={700} fontSize="18px">
-                {t("We're reviewing your Creator's NFT application form")}
-              </Heading>
-              <Text fontSize="15px" color="#6A6A6A" fontWeight={400}>
+              <Heading size="lg">{t("We're reviewing your Creator's NFT application form")}</Heading>
+              <Text textStyle="md" color="text.subtle">
                 {t(
                   "If it’s approved you’ll receive a Creator’s NFT and you’ll be able to submit your app to VeBetter!",
                 )}

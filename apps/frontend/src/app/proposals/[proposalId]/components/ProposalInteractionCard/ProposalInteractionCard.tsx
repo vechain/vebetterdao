@@ -221,7 +221,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.for?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.for?.percentagePower ?? 0,
-        color: "success.primary",
+        color: "status.positive.primary",
         icon: ThumbsUpIcon,
       },
       {
@@ -231,7 +231,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.abstain?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.abstain?.percentagePower ?? 0,
-        color: "warning.primary",
+        color: "status.warning.primary",
         icon: AbstainIcon,
       },
       {
@@ -241,7 +241,7 @@ export const ProposalInteractionCard = ({
         totalWeight: proposalVotesQueryData.votes.against?.totalWeight ?? BigInt(0),
         percentage: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
         percentagePower: proposalVotesQueryData.votes.against?.percentagePower ?? 0,
-        color: "error.primary",
+        color: "status.negative.primary",
         icon: ThumbsDownIcon,
       },
     ]
@@ -256,7 +256,7 @@ export const ProposalInteractionCard = ({
       return [
         {
           percentage: Number(percentageSupported ?? 0),
-          color: "success.primary",
+          color: "status.positive.primary",
           icon: userDeposits ? HeartSolidIcon : HeartIcon,
         },
       ]
@@ -338,12 +338,9 @@ export const ProposalInteractionCard = ({
 
   return (
     <>
-      {/* ===== MAIN CARD ===== */}
       <Skeleton loading={isLoading}>
-        <Card.Root gap={"0px"} variant="baseWithBorder">
-          {/* Card Header - Countdown Timer */}
-
-          <Card.Body gap={"32px"} p={"32px"}>
+        <Card.Root gap={"0"} variant="primary">
+          <Card.Body gap="8">
             {showCountdownBoxes && (
               <>
                 <HStack>
@@ -358,19 +355,18 @@ export const ProposalInteractionCard = ({
               </>
             )}
 
-            <VStack w="full" gap={"24px"} align={"stretch"}>
-              {/* Results Section Header */}
+            <VStack w="full" gap="6" align={"stretch"}>
               <HStack justify="space-between">
                 <HStack>
                   <Icon as={Reports} boxSize={5} />
                   <Heading>{t("Results")}</Heading>
                 </HStack>
-                <Button variant="primaryGhost" onClick={() => setIsResultsModalOpen(true)}>
+                <Button variant="plain" color="actions.tertiary.default" onClick={() => setIsResultsModalOpen(true)}>
                   {t("Details")}
                 </Button>
               </HStack>
               {/* Progress Bar and Results Display */}
-              <VStack gap={"16px"}>
+              <VStack gap="4">
                 <MulticolorBar segments={progressBarSegments} />
                 <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
               </VStack>
@@ -382,7 +378,7 @@ export const ProposalInteractionCard = ({
               {/* Action Button */}
               {shouldShowActionButton && (
                 <Button
-                  variant="primaryAction"
+                  variant="primary"
                   w="full"
                   flex={1}
                   onClick={handleButtonClick}

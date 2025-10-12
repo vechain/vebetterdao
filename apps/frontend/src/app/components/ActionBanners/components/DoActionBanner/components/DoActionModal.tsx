@@ -24,7 +24,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
   return (
     <BaseModal isOpen={doActionModal.open || false} onClose={doActionModal.onClose || (() => {})}>
       <VStack align="stretch" gap="2">
-        <Heading size={"2xl"} fontWeight={700}>
+        <Heading size={"2xl"} fontWeight="bold">
           {t("You're not eligible to vote yet.")}
         </Heading>
         <Text textStyle="xl">{t("To be able to vote on the next round’s allocations and proposals")}</Text>
@@ -33,14 +33,13 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         </Flex>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} gap="4" mt="4">
-          <Button w="full" variant="primaryAction" onClick={goToApps}>
+          <Button w="full" variant="primary" onClick={goToApps}>
             <IoGridOutline />
             {t("Explore apps")}
           </Button>
           <Button
             w="full"
-            variant="primarySubtle"
-            _hover={{ textDecoration: "none" }}
+            variant="secondary"
             onClick={() => {
               window.open(VEPASSPORT_DOCS_URL, "_blank")
             }}>

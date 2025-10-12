@@ -100,22 +100,20 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
         id="user-votes"
         maxH={[!account?.address ? "600px" : "auto", "auto"]}
         overflowY={"hidden"}
-        variant="baseWithBorder"
+        variant="primary"
         data-testid={"user-votes-card"}>
         <Card.Body>
           <VStack flex={1} w="full" gap={8} align={"flex-start"}>
             <VStack gap={2} align="flex-start" w="full">
               <HStack w="full" justify="space-between">
-                <Heading fontSize="24px" fontWeight={700}>
-                  {t("Your vote")}
-                </Heading>
+                <Heading size="2xl">{t("Your vote")}</Heading>
                 <Button variant="ghost" colorPalette="primary" onClick={seeAllModal.onOpen}>
                   {t("See details")}
                   <FiArrowUpRight />
                 </Button>
               </HStack>
               <Skeleton loading={castVotesEventLoading}>
-                <Text fontSize="16px" fontWeight="400">
+                <Text textStyle="md">
                   <Trans
                     i18nKey={"{{amount}} distributed among {{apps}} apps"}
                     values={{ amount: compactFormatter.format(totalVotesCast ?? 0), apps: totalAppsVoted }}

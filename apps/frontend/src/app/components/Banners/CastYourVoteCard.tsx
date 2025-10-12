@@ -46,7 +46,7 @@ export const CastYourVoteCard: React.FC = () => {
   if (!account?.address || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
 
   return (
-    <Card.Root borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>
+    <Card.Root borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant="primary" overflow={"hidden"}>
       <Card.Body p={6} pos="relative">
         <Image
           rotate="180deg"
@@ -61,16 +61,16 @@ export const CastYourVoteCard: React.FC = () => {
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={2} order={[2, 2, 1]}>
             <VStack gap={4} w="full" justifyContent={"start"} alignItems={"start"}>
-              <Heading fontSize="16px" fontWeight={"700"} textTransform={"uppercase"} color="primary.500" zIndex={1}>
+              <Heading size="md" textTransform={"uppercase"} color="primary.500" zIndex={1}>
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
               </Heading>
-              <Heading fontSize={["24px", "24px", "36px"]} fontWeight={"700"} zIndex={1}>
+              <Heading size={["2xl", "2xl", "4xl"]} zIndex={1}>
                 {t("Time to cast your vote and earn rewards!")}
               </Heading>
 
-              <Text fontSize={["16px"]} fontWeight={400} zIndex={1}>
+              <Text textStyle="md" zIndex={1}>
                 {t(
                   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
                   {
@@ -79,9 +79,9 @@ export const CastYourVoteCard: React.FC = () => {
                 )}
               </Text>
 
-              <Button zIndex={1} mt={2} variant={"primaryAction"} borderRadius={"full"} onClick={onClick}>
+              <Button zIndex={1} mt={2} variant={"primary"} borderRadius={"full"} onClick={onClick}>
                 {t("See round")}
-                <FiArrowUpRight color="#FFFFFF" />
+                <FiArrowUpRight color="white" />
               </Button>
             </VStack>
           </GridItem>
