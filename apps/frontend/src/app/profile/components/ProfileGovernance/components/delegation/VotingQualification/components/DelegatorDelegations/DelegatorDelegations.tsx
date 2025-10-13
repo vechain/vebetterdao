@@ -46,13 +46,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
             )}
           </Text>
         </VStack>
-        <Stack
-          direction={["column", "column", "row"]}
-          justify={"space-between"}
-          bg="#F8F8F8"
-          rounded="xl"
-          p={3}
-          gap={[2, 2, 6]}>
+        <Stack direction={["column", "column", "row"]} justify={"space-between"} rounded="xl" p={3} gap={[2, 2, 6]}>
           <HStack gap={4}>
             <AddressIcon address={delegateeAddress} w={12} h={12} rounded="full" />
             <VStack align="start" gap={0}>
