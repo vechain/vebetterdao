@@ -23,13 +23,20 @@ export const useRoundProposals = (roundId: string) => {
   }, [currentRoundIdProposals, roundId, currentRoundId])
   const { data: allocationRound, isLoading: allocationRoundLoading } = useAllocationsRound(roundId)
   const proposalsToRender = useMemo(() => {
+    if (allocationRoundLoading) return []
     const proposals = []
     if (allocationRound?.roundId === currentRoundId) {
       proposals.push(...currentRoundIdProposals.filteredProposals)
     }
     proposals.push(...otherProposals)
     return proposals
-  }, [allocationRound, currentRoundIdProposals, otherProposals, currentRoundId])
+  }, [
+    allocationRoundLoading,
+    allocationRound?.roundId,
+    currentRoundId,
+    otherProposals,
+    currentRoundIdProposals.filteredProposals,
+  ])
   return {
     allocationRound,
     proposalsToRender,
