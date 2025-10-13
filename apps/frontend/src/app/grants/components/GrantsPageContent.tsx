@@ -55,6 +55,13 @@ enum GrantsStep {
   COMMUNITY_VOTE = "COMMUNITY_VOTE",
   RECEIVE_FUNDS = "RECEIVE_FUNDS",
 }
+//All filters except Canceled
+const DEFAULT_FILTERS = [
+  ProposalFilter.ApprovalPhase,
+  ProposalFilter.SupportPhase,
+  StateFilter.InDevelopment,
+  StateFilter.Completed,
+]
 
 export const GrantsPageContent = () => {
   const { t } = useTranslation()
@@ -62,6 +69,7 @@ export const GrantsPageContent = () => {
   const router = useRouter()
 
   //CONSTANTS
+
   const filterOptions = useMemo(() => {
     return createListCollection({
       items: [
@@ -140,7 +148,11 @@ export const GrantsPageContent = () => {
     isLoading: isLoadingEnrichedGrantProposals,
   } = useProposalEnriched()
   const searchedProposals = useProposalSearch(enrichedGrantProposals, debouncedSearchTerm)
-  const { filteredProposals } = useFilteredProposals(selectedFilter, searchedProposals as GrantProposalEnriched[])
+  const { filteredProposals } = useFilteredProposals(
+    selectedFilter,
+    searchedProposals as GrantProposalEnriched[],
+    DEFAULT_FILTERS,
+  )
   const { data: milestoneClaimedEvents } = useMilestoneClaimedEvents()
 
   const visibleProposal = filteredProposals?.slice(startRange, endRange)
@@ -290,8 +302,10 @@ export const GrantsPageContent = () => {
                     options={filterOptions}
                     defaultValue={[]}
                     showReset
-                    onChange={values => setSelectedFilter(values.map(item => item as ProposalFilter | StateFilter))}
                     isMultiOption
+                    onChange={(value: string[]) =>
+                      setSelectedFilter(value.map(item => item as ProposalFilter | StateFilter))
+                    }
                   />
                 )}
               </HStack>
