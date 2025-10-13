@@ -69,6 +69,7 @@ const initialState: GrantFormData = {
   votingRoundId: "",
 
   grantsReceiverAddress: "",
+  outcomesAttachment: [],
 }
 
 export const GRANT_PROPOSAL_FORM_STORE_NAME = "GRANT_PROPOSAL_FORM_STORE"
