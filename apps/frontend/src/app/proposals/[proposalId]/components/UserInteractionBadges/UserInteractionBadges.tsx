@@ -3,16 +3,17 @@ import AbstainIcon from "@/components/Icons/svg/abstain.svg"
 import HeartIconFilled from "@/components/Icons/svg/heart-solid.svg"
 import ThumbsDownIconFilled from "@/components/Icons/svg/thumbs-down-solid.svg"
 import ThumbsUpIconFilled from "@/components/Icons/svg/thumbs-up-solid.svg"
+import { ProposalState } from "@/hooks/proposals/grants/types"
 import { Box, HStack, Icon, Text } from "@chakra-ui/react"
 import { humanNumber } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
+import { useTranslation } from "react-i18next"
+
 export interface UserInteractionBadgesProps {
   userDeposits?: bigint
   userVoteOption?: VoteType
+  proposalState?: ProposalState
 }
-
-type InteractionType = "voted" | "supported" | null
 
 type BadgeConfig = {
   label: string
@@ -40,15 +41,15 @@ const VOTE_CONFIG: { [key in VoteType]: Omit<BadgeConfig, "label" | "text"> & { 
   },
 }
 
-export const UserInteractionBadges = ({ userDeposits, userVoteOption }: UserInteractionBadgesProps) => {
+export const UserInteractionBadges = ({ userDeposits, userVoteOption, proposalState }: UserInteractionBadgesProps) => {
   const { t } = useTranslation()
 
-  // Determine interaction type (priority: voted > supported > none)
-  const interactionType: InteractionType = userVoteOption ? "voted" : userDeposits ? "supported" : null
+  const supportBadgeState = [ProposalState.Pending, ProposalState.DepositNotMet]
+  const shouldShowSupportedBadge = supportBadgeState.includes(proposalState as ProposalState)
 
   // Get badge configuration based on interaction type
   const getBadgeConfig = (): BadgeConfig | null => {
-    if (interactionType === "voted" && userVoteOption) {
+    if (!shouldShowSupportedBadge && userVoteOption) {
       const config = VOTE_CONFIG[userVoteOption]
       return {
         label: t("You voted"),
@@ -58,7 +59,7 @@ export const UserInteractionBadges = ({ userDeposits, userVoteOption }: UserInte
       }
     }
 
-    if (interactionType === "supported" && userDeposits) {
+    if (shouldShowSupportedBadge && userDeposits) {
       return {
         label: t("You supported with"),
         color: "status.positive.primary",
