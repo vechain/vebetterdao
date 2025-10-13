@@ -2004,5 +2004,6 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Sind Sie sicher, dass Sie <b>'{{appName}}'</b>  <b>{{status}}</b> für die nächste Runde machen wollen?",
   "eligible": "berechtigt",
   "ineligible": "nicht berechtigt",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Dadurch wird {{appName}} mit der ID {{appId}} für die nächste Runde {{status}}."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Dadurch wird {{appName}} mit der ID {{appId}} für die nächste Runde {{status}}.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimales <Link>Quorum</Link> ({{quorumNumerator}}%) erreicht"
 }

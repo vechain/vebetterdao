@@ -2004,5 +2004,6 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "您确定要让 <b>'{{appName}}'</b> 在下轮中变为 <b>{{status}}</b> 吗？",
   "eligible": "符合条件",
   "ineligible": "不符合条件",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "这样做的话，ID为{{appId}}的{{appName}}将在下轮中变为{{status}}。"
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "这样做的话，ID为{{appId}}的{{appName}}将在下轮中变为{{status}}。",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "达到最低<Link>法定人数</Link> ({{quorumNumerator}}%)"
 }

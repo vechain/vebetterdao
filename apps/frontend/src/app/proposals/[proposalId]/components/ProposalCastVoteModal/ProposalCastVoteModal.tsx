@@ -42,15 +42,15 @@ export const ProposalCastVoteModal = ({ isVoteModalOpen, onClose, proposalId }: 
     ],
     [],
   )
-  const onVoteSuccess = useCallback(() => {
-    onClose()
-    setSelectedVote(null)
-    setComment("")
-  }, [onClose])
 
   const castVoteMutation = useProposalCastVote({
     proposalId,
-    onSuccess: onVoteSuccess,
+    onSuccess: () => {
+      onClose()
+      castVoteMutation.resetStatus()
+      setSelectedVote(null)
+      setComment("")
+    },
   })
 
   const handleCastVote = useCallback(() => {
