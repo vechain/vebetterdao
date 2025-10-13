@@ -2005,5 +2005,6 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "您確定要將<b>'{{appName}}'</b>設定為<b>{{status}}</b>參加下一輪嗎？",
   "eligible": "合格",
   "ineligible": "不合格",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "這樣做，ID為{{appId}}的{{appName}}將在下一輪被設定為{{status}}。"
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "這樣做，ID為{{appId}}的{{appName}}將在下一輪被設定為{{status}}。",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "達到最低<Link>法定人數</Link> ({{quorumNumerator}}%)"
 }

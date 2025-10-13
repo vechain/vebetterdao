@@ -2004,5 +2004,6 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "次のラウンドで<b>'{{appName}}'</b> を<b>{{status}}</b>にしますか？",
   "eligible": "適格",
   "ineligible": "不適格",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "これにより、ID {{appId}} の{{appName}} は次のラウンドで{{status}}になります。"
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "これにより、ID {{appId}} の{{appName}} は次のラウンドで{{status}}になります。",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "<Link>定足数</Link> ({{quorumNumerator}}%) に達しました"
 }

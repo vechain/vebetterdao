@@ -2004,5 +2004,6 @@
   "Are you sure you want to make <b>'{{appName}}'</b>  <b>{{status}}</b> for the next round?": "Bir sonraki tur için <b>'{{appName}}'</b>'i <b>{{status}}</b> yapmak istediğinize emin misiniz?",
   "eligible": "uygun",
   "ineligible": "uygun olmayan",
-  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bunu yaparak, kimliği {{appId}} olan {{appName}}, bir sonraki tur için {{status}} olacaktır."
+  "By doing this, {{appName}} with id {{appId}} will be {{status}} for the next round.": "Bunu yaparak, kimliği {{appId}} olan {{appName}}, bir sonraki tur için {{status}} olacaktır.",
+  "Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached": "Minimum <Link>çoğunluk</Link> (%{{quorumNumerator}}) sağlandı"
 }
