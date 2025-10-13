@@ -42,6 +42,7 @@ interface BaseProposalProps {
 
 interface BaseVotingProps {
   proposalQuorum: bigint
+  proposalQuorumNumerator: bigint
   proposalTotalVotes: bigint
   totalVotesAtSnapshot: string
 }
@@ -78,6 +79,7 @@ const VotingResultContent = ({
   totalVotesAtSnapshot,
   votingSegments,
   proposalQuorum,
+  proposalQuorumNumerator,
   proposalTotalVotes,
   proposalVotesData,
 }: VotingResultContentProps) => {
@@ -136,6 +138,7 @@ const VotingResultContent = ({
           {"Quorum"}
         </Text>
         <ChartQuorum
+          proposalQuorumNumerator={proposalQuorumNumerator}
           proposalQuorum={proposalQuorum}
           proposalTotalVotes={proposalTotalVotes}
           totalVotesAtSnapshot={totalVotesAtSnapshot}
@@ -197,7 +200,12 @@ const SupportResultContent = ({
   )
 }
 
-const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot }: ChartQuorumProps) => {
+const ChartQuorum = ({
+  proposalQuorum,
+  proposalTotalVotes,
+  totalVotesAtSnapshot,
+  proposalQuorumNumerator,
+}: ChartQuorumProps) => {
   const percentageFilled = useMemo(() => {
     if (!totalVotesAtSnapshot || !proposalTotalVotes) return BigInt(0)
     const totalVotesAtSnapshotBigInt = parseEther(totalVotesAtSnapshot.toString())
@@ -253,7 +261,10 @@ const ChartQuorum = ({ proposalQuorum, proposalTotalVotes, totalVotesAtSnapshot 
           <Icon as={UilCheckCircle} color="status.positive.primary" boxSize={5} />
           <Text textStyle="xs" fontWeight="semibold">
             <Trans
-              i18nKey="Minimum <Link>quorum</Link> (30%) reached"
+              i18nKey="Minimum <Link>quorum</Link> ({{quorumNumerator}}%) reached"
+              values={{
+                quorumNumerator: proposalQuorumNumerator,
+              }}
               components={{
                 Link: <Link target="_blank" href={PROPOSALS_QUORUM_DOCS_LINK} textDecoration="underline" />,
               }}
@@ -277,6 +288,7 @@ export const ProposalResultsDetailsModal = ({
   proposalState,
   proposalId,
   proposalQuorum,
+  proposalQuorumNumerator,
   proposalTotalVotes,
   proposalSupportAmount,
   totalSupporters,
@@ -312,6 +324,7 @@ export const ProposalResultsDetailsModal = ({
           totalVotesAtSnapshot={totalVotesAtSnapshot}
           votingSegments={votingSegments}
           proposalQuorum={proposalQuorum}
+          proposalQuorumNumerator={proposalQuorumNumerator}
           proposalTotalVotes={proposalTotalVotes}
           proposalVotesData={proposalVotesData}
         />
