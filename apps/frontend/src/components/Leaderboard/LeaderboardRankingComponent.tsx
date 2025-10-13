@@ -70,13 +70,17 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                   <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
 
                   <Box>
-                    <HStack
+                    <Text
                       textStyle="sm"
                       fontWeight={isYourRanking ? "bold" : "semibold"}
                       gap={1}
-                      color={isYourRanking ? "white" : "text.default"}>
+                      color={isYourRanking ? "white" : "text.default"}
+                      lineClamp={1}
+                      wordBreak="break-all"
+                      overflow="hidden"
+                      textOverflow="ellipsis">
                       {domain ? domain : humanAddress(ranking.address, 6, 4) || ""} {isYourRanking && ` (${t("You")})`}
-                    </HStack>
+                    </Text>
 
                     <Text textStyle="sm" color={isYourRanking ? "white" : "text.default"}>
                       <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
