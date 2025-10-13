@@ -28,6 +28,7 @@ const nextConfig = {
   },
   swcMinify: true,
   compress: true,
+  transpilePackages: ["express", "ts-node"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

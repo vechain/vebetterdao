@@ -32,9 +32,14 @@
     "DISCORD_CLIENT_SECRET"
   ],
   "tasks": {
+    "prepare-contracts": {
+      "cache": true,
+      "dependsOn": ["@vechain/vebetterdao-contracts#compile"],
+      "outputs": ["packages/contracts/artifacts/**", "packages/contracts/typechain-types/**"]
+    },
     "build": {
       "cache": true,
-      "dependsOn": ["@vechain/vebetterdao-contracts#compile", "@repo/config#check-or-generate-local-config"],
+      "dependsOn": ["prepare-contracts"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {
@@ -45,6 +50,7 @@
     },
     "dev": {
       "cache": false,
+      "persistent": true,
       "dependsOn": ["^setup-contracts"]
     },
     "dev:staging": {
@@ -157,7 +163,7 @@
     "compile": {
       "cache": true,
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
-      "outputs": ["dist/**", "artifacts/**", "typechain-types/**"]
+      "outputs": ["dist/**", "artifacts/**", "typechain-types/**", "cache/**"]
     },
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
@@ -268,10 +274,6 @@
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:watch": {
-      "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
-    },
-    "test:coverage:fe": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
