@@ -24,26 +24,10 @@ const FreshDeskWidget = dynamic(
     ssr: false,
   },
 )
-// Initialise Datadog RUM - get the app token and client token from environment variables
+// Datadog RUM config - will be initialized after page load
 const datadog_app_token = getEnvDatadogApp()
 const datadog_client_token = getEnvDatadogClient()
 const datadog_env = getEnvDatadogEnv()
-
-if (typeof window !== "undefined" && isProduction) {
-  datadogRum.init({
-    applicationId: datadog_app_token,
-    clientToken: datadog_client_token,
-    site: "datadoghq.eu",
-    service: "b3tr",
-    env: datadog_env,
-    sessionSampleRate: 100,
-    sessionReplaySampleRate: 20,
-    trackUserInteractions: true,
-    trackResources: true,
-    trackLongTasks: true,
-    defaultPrivacyLevel: "mask-user-input",
-  })
-}
 
 // workaround for "@iconscout/react-unicons and data-new-gr-c-s-check-loaded
 const error = console.error
@@ -53,17 +37,48 @@ console.error = (...args: any) => {
   error(...args)
 }
 
-//TODO: Is there a better place to initialise mixpanel? next/script?
-if (typeof window !== "undefined" && mixpanelToken) {
-  AnalyticsUtils.initialise()
-}
-
 export function ClientWrapper({ children }: { children: React.ReactNode }) {
   // set color mode of @uiw/react-md-editor
   useEffect(() => {
     document.documentElement.setAttribute("data-color-mode", "light")
     return () => {
       document.documentElement.removeAttribute("data-color-mode")
+    }
+  }, [])
+
+  // Defer analytics initialization until after page load
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const initAnalytics = () => {
+      // Initialize Datadog RUM
+      if (isProduction && datadog_app_token && datadog_client_token) {
+        datadogRum.init({
+          applicationId: datadog_app_token,
+          clientToken: datadog_client_token,
+          site: "datadoghq.eu",
+          service: "b3tr",
+          env: datadog_env,
+          sessionSampleRate: 100,
+          sessionReplaySampleRate: 20,
+          trackUserInteractions: true,
+          trackResources: true,
+          trackLongTasks: true,
+          defaultPrivacyLevel: "mask-user-input",
+        })
+      }
+
+      // Initialize Mixpanel
+      if (mixpanelToken) {
+        AnalyticsUtils.initialise()
+      }
+    }
+
+    // Defer initialization after page load
+    if (document.readyState === "complete") {
+      setTimeout(initAnalytics, 1000)
+    } else {
+      window.addEventListener("load", () => setTimeout(initAnalytics, 1000))
     }
   }, [])
 

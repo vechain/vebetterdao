@@ -41,22 +41,19 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   }
   const bgColor = data.state === 0 ? "banner.green" : "bg.primary"
   // State to store the client width
-  const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
+  const [clientWidth, setClientWidth] = useState(0)
 
-  // Effect to update the clientWidth state on window resize
+  // Effect to update the clientWidth state using ResizeObserver
   useEffect(() => {
-    const updateWidth = () => {
-      setClientWidth(document.body.clientWidth)
-    }
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setClientWidth(entry.contentRect.width)
+      }
+    })
 
-    // Set initial width
-    updateWidth()
+    resizeObserver.observe(document.body)
 
-    // Add window resize event listener
-    window.addEventListener("resize", updateWidth)
-
-    // Clean up listener on component unmount
-    return () => window.removeEventListener("resize", updateWidth)
+    return () => resizeObserver.disconnect()
   }, [])
 
   if (isDesktop)

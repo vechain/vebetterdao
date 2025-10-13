@@ -57,7 +57,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       style={{
         scrollBehavior: "smooth",
       }}>
-      <head />
+      <head>
+        <link rel="dns-prefetch" href="https://indexer.mainnet.vechain.org" />
+        <link rel="dns-prefetch" href="https://euc-widget.freshworks.com" />
+        <link rel="dns-prefetch" href="https://datadoghq.eu" />
+        <link rel="preconnect" href="https://indexer.mainnet.vechain.org" crossOrigin="anonymous" />
+      </head>
       <body>
         <ClientWrapper>{children}</ClientWrapper>
       </body>
