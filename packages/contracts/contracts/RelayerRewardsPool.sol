@@ -380,21 +380,30 @@ contract RelayerRewardsPool is
   }
 
   /**
-   * @notice Check if a relayer can perform an action during early access
-   * @param relayer The relayer address
+   * @notice Validates if an action can proceed for an auto-voting user
    * @param roundId The round ID
+   * @param voter The voter whose action is being performed
+   * @param caller The address attempting to perform the action
+   * @dev Reverts if action is not allowed during early access period
    */
-  function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view {
+  function validateAutoVotingActionEarlyAccessPeriod(uint256 roundId, address voter, address caller) external view {
     RelayerRewardsPoolStorage storage $ = _getRelayerRewardsPoolStorage();
 
-    // if early access period ended, anyone can call vote/claim on auto-voting user's behalf
+    // Check if early access period is still active
     if (!isEarlyAccessActive(roundId)) {
+      // After early access, anyone can perform actions
       return;
     }
 
-    // During early access, check if relayer is registered
+    // During early access period, user cannot perform actions for themselves
     require(
-      $.registeredRelayers[relayer],
+      caller != voter,
+      "RelayerRewardsPool: auto-voting users cannot perform actions for themselves during early access period"
+    );
+
+    // Only registered relayers can perform actions during early access
+    require(
+      $.registeredRelayers[caller],
       "RelayerRewardsPool: caller is not a registered relayer during early access period"
     );
   }
