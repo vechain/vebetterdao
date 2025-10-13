@@ -50,7 +50,8 @@
     },
     "dev": {
       "cache": false,
-      "dependsOn": ["prepare-contracts"]
+      "persistent": true,
+      "dependsOn": ["^setup-contracts"]
     },
     "dev:staging": {
       "cache": false,
