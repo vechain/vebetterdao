@@ -107,9 +107,15 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
   error InvalidCaller(address caller);
 
   /**
-   * @dev Emitted when auto-voting is disabled.
+   * @dev Emitted when auto-voting is skipped.
    */
-  event AutoVotingDisabled(address voter, uint256 roundId);
+  event AutoVoteSkipped(
+    address indexed voter,
+    uint256 indexed roundId,
+    bool isPerson,
+    uint256 appCount,
+    uint256 votingPower
+  );
 
   /**
    * @dev Emitted when a round is created.

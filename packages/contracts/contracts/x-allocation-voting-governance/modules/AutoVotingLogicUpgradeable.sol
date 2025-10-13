@@ -56,7 +56,12 @@ abstract contract AutoVotingLogicUpgradeable is XAllocationVotingGovernor {
     address voter,
     uint256 roundId,
     bytes32[] memory preferredApps
-  ) internal virtual override returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights) {
+  )
+    internal
+    virtual
+    override
+    returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights, uint256 votingPower)
+  {
     return AutoVotingLogic.prepareAutoVoteArrays(address(this), voter, roundId, preferredApps);
   }
 

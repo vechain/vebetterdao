@@ -126,7 +126,7 @@ abstract contract XAllocationVotingGovernor is
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
     require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
-    if (this.isUserAutoVotingEnabledInCurrentRound(_msgSender())) {
+    if (this.isUserAutoVotingEnabledAtTimepoint(_msgSender(), SafeCast.toUint48(currentRoundSnapshot()))) {
       revert AutoVotingEnabled(_msgSender());
     }
 
@@ -142,21 +142,33 @@ abstract contract XAllocationVotingGovernor is
    * @notice Reverts if autovoting is not enabled for the voter.
    */
   function castVoteOnBehalfOf(address voter, uint256 roundId) public {
-    if (!this.isUserAutoVotingEnabledInCurrentRound(voter)) {
+    if (!this.isUserAutoVotingEnabledAtTimepoint(voter, SafeCast.toUint48(roundSnapshot(roundId)))) {
       revert AutoVotingNotEnabled(voter);
     }
 
-    _checkRelayerEarlyAccessEligibility(roundId);
+    _checkEarlyAccessEligibility(roundId, voter);
 
     (bool isPerson, ) = veBetterPassport().isPersonAtTimepoint(voter, SafeCast.toUint48(currentRoundSnapshot()));
 
     bytes32[] memory appIds = _getUserVotingPreferences(voter);
-    (bytes32[] memory finalAppIds, uint256[] memory voteWeights) = _prepareAutoVoteArrays(voter, roundId, appIds);
 
+    (bytes32[] memory finalAppIds, uint256[] memory voteWeights, uint256 votingPower) = _prepareAutoVoteArrays(
+      voter,
+      roundId,
+      appIds
+    );
+
+    // We disable auto-voting if,
+    // - voter is not a person
+    // - there are no eligible apps
+    // - voter has insufficient voting power
     if (!isPerson || finalAppIds.length == 0) {
-      _toggleAutoVoting(voter);
-      relayerRewardsPool().reduceExpectedActionsForRound(roundId, 1);
-      emit AutoVotingDisabled(voter, roundId);
+      // Only toggle and reduce expected actions if autovoting is enabled
+      if (_isAutoVotingEnabled(voter)) {
+        _toggleAutoVoting(voter);
+        relayerRewardsPool().reduceExpectedActionsForRound(roundId, 1);
+      }
+      emit AutoVoteSkipped(voter, roundId, isPerson, finalAppIds.length, votingPower);
       return;
     }
 
@@ -215,8 +227,8 @@ abstract contract XAllocationVotingGovernor is
    * @dev Check if the caller is eligible to perform relayer actions during early access period
    * @param roundId The current round ID
    */
-  function _checkRelayerEarlyAccessEligibility(uint256 roundId) internal view {
-    relayerRewardsPool().validateEarlyAccessRelayer(_msgSender(), roundId);
+  function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
+    relayerRewardsPool().validateAutoVotingActionEarlyAccessPeriod(roundId, voter, _msgSender());
   }
 
   /**
@@ -485,5 +497,5 @@ abstract contract XAllocationVotingGovernor is
     address voter,
     uint256 roundId,
     bytes32[] memory preferredApps
-  ) internal virtual returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights);
+  ) internal virtual returns (bytes32[] memory finalAppIds, uint256[] memory voteWeights, uint256 votingPower);
 }
