@@ -45,9 +45,9 @@
           "caseInsensitive": true
         }
       }
-    ]
+    ],
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }]
   },
-  "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 0 }],
   "overrides": [
     {
       "files": ["**/*.stories.{ts,tsx}"],
