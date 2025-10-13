@@ -672,10 +672,6 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as XAllocationVoting
 
-  vot3 = (await upgradeProxy("VOT3V1", "VOT3", await vot3.getAddress(), [await xAllocationVoting.getAddress()], {
-    version: 2,
-  })) as VOT3
-
   voterRewards = (await upgradeProxy(
     "VoterRewardsV5",
     "VoterRewards",

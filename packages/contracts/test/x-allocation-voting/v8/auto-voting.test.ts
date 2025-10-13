@@ -342,7 +342,7 @@ describe("AutoVoting - @shard14b", function () {
       )
     })
 
-    it("should revert when relayer tries to cast vote on behalf of user when has below 1 VOT3 available", async function () {
+    it("should skip auto-vote and disable autovoting when user has below 1 VOT3 available", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
       await endorseApp(app1Id, appOwner)
@@ -468,7 +468,7 @@ describe("AutoVoting - @shard14b", function () {
       await expect(voterRewards.connect(autoUser).claimReward(roundId, autoUser.address)).to.not.be.reverted
     })
 
-    it("should allow user to add new apps and re-enable after all apps become ineligible", async function () {
+    it("should skip auto-vote and disable autovoting when apps become ineligible, then allow user to re-enable with new apps", async function () {
       // This test verifies the path when:
       // 1. User has auto-voting enabled with app1
       // 2. App1 becomes ineligible (auto-disabled)
@@ -571,7 +571,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(app2Votes).to.equal(ethers.parseEther("100"))
     })
 
-    it("should toggle off autovoting when user has dropped below 1 VOT3 when autovoting is enabled", async function () {
+    it("should skip auto-vote and disable autovoting when user drops below 1 VOT3 threshold", async function () {
       const recipient = otherAccounts[3]
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
@@ -592,7 +592,6 @@ describe("AutoVoting - @shard14b", function () {
       await emissions.connect(minterAccount).distribute()
 
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
-      expect(await vot3.version()).to.equal("2")
 
       // Transfer 99.5 VOT3 which would leave user with 0.5 VOT3 (below 1 VOT3)
       await vot3.connect(user).transfer(recipient.address, ethers.parseEther("99.5"))
@@ -946,13 +945,13 @@ describe("AutoVoting - @shard14b", function () {
       const originalAmount = ethers.parseEther("100")
       expect(totalVotes).to.be.lessThan(originalAmount)
 
-      // Each app should get roughly 33.33 ETH (but as integer division)
+      // Each app should get roughly 33.33 VOT3 (but as integer division)
       const totalDistributed = app1Votes + app2Votes + app3Votes
-      const dust = originalAmount - totalDistributed // 1 VOT3 dust
+      const dust = originalAmount - totalDistributed // 1  wei of VOT3 dust
       expect(dust).to.equal(1)
     })
 
-    it("[Edge Case] should revert when the users have no eligible apps to vote for", async function () {
+    it("[Edge Case] should skip auto-vote and disable autovoting when user has no eligible apps to vote for", async function () {
       await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
       await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")

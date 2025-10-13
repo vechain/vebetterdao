@@ -572,12 +572,7 @@ export const getOrDeployContractInstances = async ({
   const b3tr = await B3trContract.deploy(owner, minterAccount, owner)
 
   // Deploy VOT3 version 1
-  let vot3 = (await deployProxy("VOT3V1", [
-    owner.address,
-    owner.address,
-    owner.address,
-    await b3tr.getAddress(),
-  ])) as VOT3
+  let vot3 = (await deployProxy("VOT3", [owner.address, owner.address, owner.address, await b3tr.getAddress()])) as VOT3
 
   // Deploy TimeLock
   const timeLock = (await deployProxy("TimeLock", [
@@ -897,11 +892,6 @@ export const getOrDeployContractInstances = async ({
       logOutput: false,
     },
   )) as XAllocationVoting
-
-  // Upgrade VOT3 to version 2 latest
-  vot3 = (await upgradeProxy("VOT3V1", "VOT3", await vot3.getAddress(), [await xAllocationVoting.getAddress()], {
-    version: 2,
-  })) as VOT3
 
   const veBetterPassportV1 = (await initializeProxy(
     veBetterPassportContractAddress,

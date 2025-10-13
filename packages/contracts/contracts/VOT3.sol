@@ -31,16 +31,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./interfaces/IXAllocationVotingGovernor.sol";
 
-/**
- * @title VOT3 Token Contract
- * @dev Extends ERC20 Fungible Token Standard basic implementation with upgradeability, pausability, ability for gasless transactions and governance capabilities.
- * @notice This contract governs the issuance and management of VOT3 tokens, which are the tokens used for voting in the VeBetter DAO Ecosystem.
- * ------------------ Version 2 Changes ------------------
- * - Integrated with XAllocationVoting contract to enable auto-voting
- * - Added a check to revert if the user is transferring below 1 VOT3 while autovoting is enabled
- */
+/// @title VOT3 Token Contract
+/// @dev Extends ERC20 Fungible Token Standard basic implementation with upgradeability, pausability, ability for gasless transactions and governance capabilities.
+/// @notice This contract governs the issuance and management of VOT3 tokens, which are the tokens used for voting in the VeBetter DAO Ecosystem.
 contract VOT3 is
   ERC20Upgradeable,
   ERC20PausableUpgradeable,
@@ -59,7 +53,6 @@ contract VOT3 is
   struct VOT3Storage {
     IERC20 b3tr; // B3TR token contract
     mapping(address account => uint256) _convertedB3TR; // Mapping of B3TR tokens converted to VOT3 tokens
-    IXAllocationVotingGovernor xAllocationVoting;
   }
 
   /// @dev The slot for VOT3 storage in contract storage
@@ -103,15 +96,6 @@ contract VOT3 is
 
     require(_b3tr != address(0), "VOT3: B3TR address cannot be 0");
     $.b3tr = IERC20(_b3tr);
-  }
-
-  /// @notice Initialize V2 - sets the XAllocationVoting contract
-  /// @dev This function is called during contract upgrade to set the XAllocationVoting contract
-  /// @param _xAllocationVoting The address of the XAllocationVoting contract
-  function initializeV2(IXAllocationVotingGovernor _xAllocationVoting) external reinitializer(2) {
-    require(address(_xAllocationVoting) != address(0), "VOT3: XAllocationVoting address cannot be 0");
-    VOT3Storage storage $ = _getVOT3Storage();
-    $.xAllocationVoting = _xAllocationVoting;
   }
 
   /// @notice Pauses the VOT3 contract
@@ -217,14 +201,6 @@ contract VOT3 is
   ) internal override(ERC20Upgradeable, ERC20VotesUpgradeable, ERC20PausableUpgradeable) {
     super._update(from, to, amount);
 
-    // Toggle off if the transfer would leave the sender with less than 1 VOT3 while autovoting is enabled
-    if (from != address(0) && balanceOf(from) < 1 ether) {
-      VOT3Storage storage $ = _getVOT3Storage();
-      if (address($.xAllocationVoting) != address(0) && $.xAllocationVoting.isUserAutoVotingEnabled(from)) {
-        $.xAllocationVoting.toggleAutoVoting(from);
-      }
-    }
-
     // self-delegate if the user is neither unstaking nor has delegated previously nor burning tokens
     if (to != address(0) && !isContract(to) && delegates(to) == address(0)) {
       _delegate(to, to);
@@ -272,16 +248,10 @@ contract VOT3 is
     return Math.sqrt(getPastVotes(account, timepoint)) * 1e9;
   }
 
-  /// @notice Get the XAllocationVoting contract.
-  function getXAllocationVotingAddress() external view returns (address) {
-    VOT3Storage storage $ = _getVOT3Storage();
-    return address($.xAllocationVoting);
-  }
-
   /// @notice Returns the version of the contract
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() public pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 }

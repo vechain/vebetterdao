@@ -177,7 +177,7 @@ describe("VOT3 - @shard9", function () {
         forceDeploy: true,
       })
 
-      expect(await vot3.version()).to.equal("2")
+      expect(await vot3.version()).to.equal("1")
     })
   })
 
