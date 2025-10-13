@@ -162,13 +162,11 @@ contract XAllocationVoting is
    * @dev Toggle autovoting for the caller
    */
   function toggleAutoVoting(address user) public {
-    // VOT3 contract and the user themselves can toggle autovoting
-    if (_msgSender() == address(token()) || _msgSender() == user) {
-      _toggleAutoVoting(user);
-      return;
+    if (_msgSender() != user) {
+      revert InvalidCaller(_msgSender());
     }
 
-    revert InvalidCaller(_msgSender());
+    _toggleAutoVoting(user);
   }
 
   /**

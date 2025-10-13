@@ -713,7 +713,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(app3Votes).to.equal(expectedVotePerApp)
     })
 
-    it("should successfully cast vote on behalf of user with 10 apps and distribute votes equally", async function () {
+    it("should successfully cast vote on behalf of user with 15 apps and distribute votes equally", async function () {
       const appIds: string[] = []
       const getAllSigners = await ethers.getSigners()
       const getAllAppOwners = getAllSigners.slice(5, 20)
