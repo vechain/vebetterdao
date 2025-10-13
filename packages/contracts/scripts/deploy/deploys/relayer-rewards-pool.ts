@@ -58,6 +58,14 @@ export async function main() {
   const version = await relayerRewardsPool.version()
   console.log(`RelayerRewardsPool version: ${version}`)
 
+  // Register a relayer
+  console.log("Registering a relayer...")
+  await relayerRewardsPool.connect(deployer).registerRelayer(deployer.address)
+
+  // Verify the relayer is registered
+  const isRegistered = await relayerRewardsPool.isRegisteredRelayer(deployer.address)
+  console.log(`${deployer.address} is now registered: ${isRegistered}`)
+
   console.log("================  RelayerRewardsPool deployment completed")
   console.log("================  Next steps:")
   console.log("================  1. Update config with RelayerRewardsPool address")
