@@ -99,22 +99,15 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
   }
 }
 
-const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = true): Promise<T | undefined> => {
+const safeFetchIpfsMetadata = async <T>(ipfsUri?: string): Promise<T | undefined> => {
   if (!ipfsUri) return undefined
 
   try {
-    const result = await getIpfsMetadata<T>(ipfsUri, parseJson)
+    const result = await getIpfsMetadata<T>(ipfsUri)
 
-    if (parseJson) {
-      // Validate that we got actual data, not just an empty object
-      if (result && typeof result === "object" && Object.keys(result).length > 0) {
-        return result
-      }
-    } else {
-      // For text content, check if it's a non-empty string
-      if (typeof result === "string" && result.trim().length > 0) {
-        return result
-      }
+    // Validate that we got actual data, not just an empty object
+    if (result && typeof result === "object" && Object.keys(result).length > 0) {
+      return result
     }
 
     // If we got an empty object/string or null, treat it as a failure to trigger retry

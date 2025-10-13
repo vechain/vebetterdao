@@ -165,7 +165,7 @@ export const useGetUserNodes = (user?: string) => {
       })
       const stargateTokenURIList = stargateTokenURIs?.map(uri => uri?.toString() ?? "") ?? []
       const stargateMetadatas = await Promise.all(
-        stargateTokenURIList.map(uri => getIpfsMetadata<StargateMetadata>(uri, false)),
+        stargateTokenURIList.map(uri => getIpfsMetadata<StargateMetadata>(uri)),
       )
       const stargateNodesWithMetadata = stargateNodes
         .map((node, index) => ({

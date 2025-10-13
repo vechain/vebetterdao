@@ -8,15 +8,14 @@ import { convertUriToUrl } from "@/utils/uri"
  * @param parseJson - Whether to parse the JSON
  * @returns The metadata
  */
-export const getIpfsMetadata = async <T>(uri?: string, parseJson = false): Promise<T> => {
+export const getIpfsMetadata = async <T>(uri?: string): Promise<T> => {
   if (!uri) throw new Error("No URI provided")
   const newUri = convertUriToUrl(uri)
   const response = await fetch(newUri)
   if (!response.ok) {
     throw new Error(`Failed to fetch IPFS metadata: ${response.status}`)
   }
-  const data = await response.text()
-  if (parseJson) return JSON.parse(data)
+  const data = await response.json()
   return data as unknown as T
 }
 export const getIpfsMetadataQueryKey = (ipfsUri?: string) => ["IPFS_METADATA", ipfsUri]
@@ -25,10 +24,10 @@ export const getIpfsMetadataQueryKey = (ipfsUri?: string) => ["IPFS_METADATA", i
  * @param ipfsUri - The IPFS URI
  * @returns The metadata from IPFS
  */
-export const useIpfsMetadata = <T>(ipfsUri?: string, parseJson = false) => {
+export const useIpfsMetadata = <T>(ipfsUri?: string) => {
   return useQuery({
     queryKey: getIpfsMetadataQueryKey(ipfsUri),
-    queryFn: () => getIpfsMetadata<T>(ipfsUri, parseJson),
+    queryFn: () => getIpfsMetadata<T>(ipfsUri),
     enabled: !!ipfsUri,
     staleTime: Infinity,
   })
