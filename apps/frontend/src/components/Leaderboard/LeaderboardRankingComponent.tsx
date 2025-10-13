@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { Trans } from "react-i18next"
 import { AddressIcon } from "../AddressIcon"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import NextLink from "next/link"
 
 export type LeaderboardRanking = {
@@ -79,7 +79,8 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                       wordBreak="break-all"
                       overflow="hidden"
                       textOverflow="ellipsis">
-                      {domain ? domain : humanAddress(ranking.address, 6, 4) || ""} {isYourRanking && ` (${t("You")})`}
+                      {domain ? humanDomain(domain) : humanAddress(ranking.address, 6, 4) || ""}{" "}
+                      {isYourRanking && ` (${t("You")})`}
                     </Text>
 
                     <Text textStyle="sm" color={isYourRanking ? "white" : "text.default"}>
