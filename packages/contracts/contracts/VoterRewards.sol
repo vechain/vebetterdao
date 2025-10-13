@@ -281,6 +281,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   ) external reinitializer(6) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
+    require(address(_xAllocationVoting) != address(0), "VoterRewards: invalid xAllocationVoting");
+    require(address(_relayerRewardsPool) != address(0), "VoterRewards: invalid relayerRewardsPool");
+
     $.xAllocationVoting = _xAllocationVoting;
     $.relayerRewardsPool = _relayerRewardsPool;
   }
@@ -394,7 +397,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     bool hadAutoVotingEnabled = $.xAllocationVoting.isUserAutoVotingEnabledAtTimepoint(voter, emissionCycleStartBlock);
 
     if (hadAutoVotingEnabled) {
-      _checkAutoVotingClaimEligibility(cycle, voter);
+      _checkEarlyAccessEligibility(cycle, voter);
     }
 
     (uint256 netReward, uint256 netGmReward, uint256 fee) = _getRewardsAndFees(cycle, voter);
@@ -477,7 +480,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice Get the fee for a user in a specific cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
-  function getFee(uint256 cycle, address voter) public view virtual returns (uint256) {
+  function getRelayerFee(uint256 cycle, address voter) public view virtual returns (uint256) {
     (, , uint256 fee) = _getRewardsAndFees(cycle, voter);
     return fee;
   }
@@ -717,35 +720,13 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   }
 
   // ----------------- Private Functions ----------------- //
-
-  /// @notice Check if the caller is eligible to claim rewards for an auto-voting user
-  /// @param cycle - The current cycle
-  /// @param voter - The voter whose rewards are being claimed
-  function _checkAutoVotingClaimEligibility(uint256 cycle, address voter) internal view {
-    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-
-    // Check if early access period is still active
-    bool isEarlyAccessActive = $.relayerRewardsPool.isEarlyAccessActive(cycle);
-
-    if (isEarlyAccessActive) {
-      // During early access period, user cannot claim for themselves
-      require(
-        msg.sender != voter,
-        "VoterRewards: auto-voting users cannot claim their own rewards during early access period"
-      );
-
-      // Only registered relayers can claim on behalf of auto-voting users during early access
-      _checkRelayerEarlyAccessEligibility(cycle);
-    }
-  }
-
   /**
    * @dev Check if the caller is eligible to perform relayer actions during early access period
    * @param roundId The current round ID
    */
-  function _checkRelayerEarlyAccessEligibility(uint256 roundId) internal view {
+  function _checkEarlyAccessEligibility(uint256 roundId, address voter) internal view {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    $.relayerRewardsPool.validateEarlyAccessRelayer(msg.sender, roundId);
+    $.relayerRewardsPool.validateAutoVotingActionEarlyAccessPeriod(roundId, voter, msg.sender);
   }
 
   /// @notice Scales the vote power based on the quadratic rewarding status.

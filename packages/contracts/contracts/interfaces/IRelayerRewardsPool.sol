@@ -375,8 +375,9 @@ interface IRelayerRewardsPool {
 
   /**
    * @notice Check if a relayer can perform an action during early access
-   * @param relayer The relayer address
    * @param roundId The round ID
+   * @param voter The voter address
+   * @param caller The caller address
    */
-  function validateEarlyAccessRelayer(address relayer, uint256 roundId) external view;
+  function validateAutoVotingActionEarlyAccessPeriod(uint256 roundId, address voter, address caller) external view;
 }
