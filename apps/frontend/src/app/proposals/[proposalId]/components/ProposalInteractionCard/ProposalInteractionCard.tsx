@@ -6,6 +6,7 @@ import {
   useProposalDepositEvent,
   useProposalDepositThreshold,
   useProposalQuorumByType,
+  useProposalQuorumNumeratorByType,
   useProposalSnapshot,
   useProposalTotalVotes,
   useProposalUserDeposit,
@@ -78,6 +79,9 @@ export const ProposalInteractionCard = ({
   const { data: userVot3OnSnapshot } = useGetVotesOnBlock(Number(roundSnapshot ?? 0), account?.address ?? "")
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
   const { data: userDeposits } = useProposalUserDeposit(proposalId, account?.address ?? "")
+  const { data: proposalQuorumNumerator } = useProposalQuorumNumeratorByType(
+    proposal?.type ?? GrantsProposalType.Standard,
+  )
   const { data: proposalQuorum } = useProposalQuorumByType(
     Number(roundSnapshot ?? 0),
     proposal?.type ?? GrantsProposalType.Standard,
@@ -371,7 +375,11 @@ export const ProposalInteractionCard = ({
                 <ResultsDisplay proposalId={proposalId} segments={progressBarSegments} />
               </VStack>
               {/* User Interaction Badges */}
-              <UserInteractionBadges userDeposits={userDeposits} userVoteOption={userVoteOption} />
+              <UserInteractionBadges
+                proposalState={proposal?.state ?? ProposalState.Pending}
+                userDeposits={userDeposits}
+                userVoteOption={userVoteOption}
+              />
             </VStack>
 
             <HStack w="full" gap={4}>
@@ -409,6 +417,7 @@ export const ProposalInteractionCard = ({
         proposalState={proposal?.state ?? ProposalState.Pending}
         proposalId={proposalId}
         proposalQuorum={proposalQuorumBigInt}
+        proposalQuorumNumerator={proposalQuorumNumerator ?? BigInt(0)}
         proposalTotalVotes={proposalTotalVotes}
         proposalVotesData={proposalVotesQueryData}
         proposalSupportAmount={currentDepositAmount}
