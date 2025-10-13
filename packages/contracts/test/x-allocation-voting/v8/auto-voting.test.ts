@@ -231,59 +231,7 @@ describe("AutoVoting - @shard14b", function () {
       expect(await xAllocationVoting.getTotalAutoVotingUsers()).to.equal(2)
     })
 
-    it("should toggle off autovoting when transfer below 1 VOT3 when autovoting is enabled", async function () {
-      const recipient = otherAccounts[3]
-
-      // Create a test app
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
-      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
-      await endorseApp(app1Id, appOwner)
-
-      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("100"))
-
-      // Set preferences first then enable autovoting
-      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
-      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
-      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
-
-      await waitForNextCycle(emissions)
-      await emissions.connect(minterAccount).distribute()
-
-      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
-      expect(await vot3.version()).to.equal("2")
-
-      // Transfer 99.5 VOT3 which would leave user with 0.5 VOT3 (below 1 VOT3)
-      // This should automatically toggle off autovoting and allow the transfer
-      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("99.5"))
-      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.5"))
-
-      // Verify autovoting is now disabled (using current status, not round snapshot)
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
-
-      // Test multiple transfers with low balance - should NOT revert
-      // Transfer 0.1 VOT3 more (user still has 0.4 VOT3, still below 1 VOT3)
-      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("0.1"))
-      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.4"))
-      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.6"))
-
-      // Another transfer - should still work without reverting
-      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("0.1"))
-      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.3"))
-      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.7"))
-
-      // Wait for next cycle for round snapshot to update
-      await waitForNextCycle(emissions)
-      await emissions.connect(minterAccount).distribute()
-
-      // Verify autovoting is disabled in both current status and round snapshot
-      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
-      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
-
-      // Verify final balances
-      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.3"))
-    })
-
-    it("revert if app preferences are empty before enabling autovoting", async function () {
+    it("should revert if app preferences are empty before enabling autovoting", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(user.address))
       await x2EarnApps.connect(owner).submitApp(user.address, user.address, user.address, "metadataURI")
       await endorseApp(app1Id, user)
@@ -394,6 +342,49 @@ describe("AutoVoting - @shard14b", function () {
       )
     })
 
+    it("should revert when relayer tries to cast vote on behalf of user when has below 1 VOT3 available", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Register relayer
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      // User has 100 VOT3 initially
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("100"))
+
+      // Set preferences and enable auto-voting
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
+
+      // Wait for next cycle for auto-voting to be active
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
+
+      // User transfers VOT3 to drop below 1 VOT3 (keeps only 0.5 VOT3)
+      const recipient = otherAccounts[3]
+      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("99.5"))
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.5"))
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId2 = await xAllocationVoting.currentRoundId()
+
+      // Relayer tries to cast vote
+      // - should toggle off auto-voting
+      // - should emit AutoVoteSkipped event
+      // - should emit ExpectedActionsReduced event
+      const castVoteTx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId2)
+      await expect(castVoteTx)
+        .to.emit(xAllocationVoting, "AutoVoteSkipped")
+        .withArgs(user.address, roundId2, true, 0, ethers.parseEther("0.5"))
+      await expect(castVoteTx).to.emit(relayerRewardsPool, "ExpectedActionsReduced").withArgs(roundId2, 1, 0, 0)
+    })
+
     it("should revert non-relayers from claiming rewards during early access period for auto-voting users", async function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await x2EarnApps
@@ -423,7 +414,7 @@ describe("AutoVoting - @shard14b", function () {
       const manualUserBalance = await vot3.balanceOf(manualUser.address)
 
       await xAllocationVoting.connect(manualUser).castVote(roundId, [app1Id], [manualUserBalance])
-      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser, roundId)
+      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser.address, roundId)
       await waitForRoundToEnd(roundId)
 
       // Manual user can be claimed by anyone
@@ -464,7 +455,7 @@ describe("AutoVoting - @shard14b", function () {
       const roundId = await xAllocationVoting.currentRoundId()
 
       // Cast auto vote
-      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser, roundId)
+      await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser.address, roundId)
       await waitForRoundToEnd(roundId)
 
       // Set early access period to 5 blocks to make it expire quickly
@@ -475,6 +466,171 @@ describe("AutoVoting - @shard14b", function () {
 
       // Auto user should now be able to claim their own rewards
       await expect(voterRewards.connect(autoUser).claimReward(roundId, autoUser.address)).to.not.be.reverted
+    })
+
+    it("should allow user to add new apps and re-enable after all apps become ineligible", async function () {
+      // This test verifies the path when:
+      // 1. User has auto-voting enabled with app1
+      // 2. App1 becomes ineligible (auto-disabled)
+      // 3. User adds new app2 to preferences
+      // 4. User re-enables auto-voting
+      // 5. User can successfully vote again with app2
+
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner.address)
+      await x2EarnCreatorContract.connect(owner).safeMint(appOwner2.address)
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(appOwner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Register relayer
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      // User sets preferences for app1 and enables auto-voting
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
+
+      // Wait for autovoting to be active
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId)).to.be.true
+
+      // App gets unendorsed - will become ineligible after grace period
+      const nodeId = 1
+      await x2EarnApps.connect(appOwner).unendorseApp(app1Id, nodeId)
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.be.true
+
+      // Autovoting still works during current round
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)).to.not.be.reverted
+
+      // Fast forward through grace period (3 rounds)
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // Now app1 is ineligible
+      const roundId4 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, roundId4)).to.be.false
+
+      // Relayer tries to vote - auto-voting gets disabled
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4))
+        .to.emit(xAllocationVoting, "AutoVoteSkipped")
+        .withArgs(user.address, roundId4, true, 0, await vot3.balanceOf(user.address))
+
+      // Wait for next cycle
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Verify auto-voting is disabled and preferences cleared
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
+      expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([])
+
+      // Recovery: User creates/adds a new app (app2)
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner2.address))
+      await x2EarnApps
+        .connect(appOwner2)
+        .submitApp(appOwner2.address, appOwner2.address, appOwner2.address, "metadataURI")
+      await endorseApp(app2Id, appOwner2)
+
+      // User sets preferences for new app2
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app2Id])
+      expect(await xAllocationVoting.getUserVotingPreferences(user.address)).to.deep.equal([app2Id])
+
+      // User re-enables auto-voting
+      await expect(xAllocationVoting.connect(user).toggleAutoVoting(user.address))
+        .to.emit(xAllocationVoting, "AutoVotingToggled")
+        .withArgs(user.address, true)
+
+      // Wait for next cycle for re-enabled status to be active
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId6 = await xAllocationVoting.currentRoundId()
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, roundId6)).to.be.true
+
+      // User can successfully vote again with new app
+      const tx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId6)
+      await expect(tx)
+        .to.emit(xAllocationVoting, "AllocationAutoVoteCast")
+        .withArgs(user.address, roundId6, [app2Id], [ethers.parseEther("100")])
+      expect(await xAllocationVoting.hasVoted(roundId6, user.address)).to.be.true
+
+      // Verify votes went to app2 (not app1)
+      const app2Votes = await xAllocationVoting.getAppVotes(roundId6, app2Id)
+      expect(app2Votes).to.equal(ethers.parseEther("100"))
+    })
+
+    it("should toggle off autovoting when user has dropped below 1 VOT3 when autovoting is enabled", async function () {
+      const recipient = otherAccounts[3]
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      // Register relayer
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer1.address)
+
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("100"))
+
+      // Set preferences first then enable autovoting
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.false
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
+      expect(await vot3.version()).to.equal("2")
+
+      // Transfer 99.5 VOT3 which would leave user with 0.5 VOT3 (below 1 VOT3)
+      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("99.5"))
+      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.5"))
+
+      // Verify autovoting is still enabled because the relayer has not cast the vote yet
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
+
+      // Test multiple transfers with low balance - should NOT revert
+      // Transfer 0.1 VOT3 more (user still has 0.4 VOT3, still below 1 VOT3)
+      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("0.1"))
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.4"))
+      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.6"))
+
+      // Another transfer - should still work without reverting
+      await vot3.connect(user).transfer(recipient.address, ethers.parseEther("0.1"))
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.3"))
+      expect(await vot3.balanceOf(recipient.address)).to.equal(ethers.parseEther("99.7"))
+
+      // Wait for next cycle for round snapshot to update
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Verify autovoting is still enabled because the relayer has not cast the vote yet
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.true
+      expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(user.address)).to.be.true
+      expect(await vot3.balanceOf(user.address)).to.equal(ethers.parseEther("0.3"))
+
+      // Cast vote on behalf of user
+      const roundId = await xAllocationVoting.currentRoundId()
+      const castVoteTx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+      await expect(castVoteTx).to.emit(xAllocationVoting, "AutoVotingToggled").withArgs(user.address, false)
+      await expect(castVoteTx)
+        .to.emit(xAllocationVoting, "AutoVoteSkipped")
+        .withArgs(user.address, roundId, true, 0, await vot3.balanceOf(user.address))
+
+      // Verify autovoting is disabled
+      expect(await xAllocationVoting.isUserAutoVotingEnabled(user.address)).to.be.false
     })
   })
 
@@ -846,10 +1002,11 @@ describe("AutoVoting - @shard14b", function () {
       const totalWeightedActionsBefore = await relayerRewardsPool.totalWeightedActions(roundId4)
 
       // Autovoting should fail because no eligible apps and reduce expected actions by 1 user
-      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4))
-        .to.emit(xAllocationVoting, "AutoVotingDisabled")
-        .withArgs(user.address, roundId4)
-        .to.emit(relayerRewardsPool, "ExpectedActionsReduced")
+      const castVoteTx = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId4)
+      await expect(castVoteTx)
+        .to.emit(xAllocationVoting, "AutoVoteSkipped")
+        .withArgs(user.address, roundId4, true, 0, await vot3.balanceOf(user.address))
+      await expect(castVoteTx).to.emit(relayerRewardsPool, "ExpectedActionsReduced")
 
       // Verify that expected actions were reduced
       const totalActionsAfter = await relayerRewardsPool.totalActions(roundId4)
@@ -961,6 +1118,97 @@ describe("AutoVoting - @shard14b", function () {
       )
       expect(await xAllocationVoting.isUserAutoVotingEnabledInCurrentRound(botUser.address)).to.be.false
     })
+
+    it("should revert when non-relayer tries to vote on behalf during early access period", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      const autoUser = user
+      const nonRelayer = otherAccounts[3]
+      await veBetterPassport.whitelist(nonRelayer.address)
+
+      await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting(autoUser.address)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Early access period is still active
+      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.true
+
+      // Non-relayer cannot vote on behalf during early access
+      await expect(
+        xAllocationVoting.connect(nonRelayer).castVoteOnBehalfOf(autoUser.address, roundId),
+      ).to.be.revertedWith("RelayerRewardsPool: caller is not a registered relayer during early access period")
+
+      // Registered relayer CAN vote on behalf during early access
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser.address, roundId)).to.not.be.reverted
+    })
+
+    it("should revert when auto-voting user tries to vote for themselves during early access period", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      const autoUser = user
+
+      await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting(autoUser.address)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Early access period is still active
+      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.true
+
+      // Auto-voting user cannot vote for themselves during early access period
+      await expect(
+        xAllocationVoting.connect(autoUser).castVoteOnBehalfOf(autoUser.address, roundId),
+      ).to.be.revertedWith(
+        "RelayerRewardsPool: auto-voting users cannot perform actions for themselves during early access period",
+      )
+
+      // Registered relayer CAN vote on behalf of auto-voting user
+      await expect(xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(autoUser.address, roundId)).to.not.be.reverted
+    })
+
+    it("should allow auto-voting users to vote for themselves after early access period", async function () {
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      const autoUser = user
+
+      await xAllocationVoting.connect(autoUser).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(autoUser).toggleAutoVoting(autoUser.address)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      // Set early access period to 0 blocks to make it expire quickly
+      await relayerRewardsPool.connect(owner).setEarlyAccessBlocks(0)
+
+      // Verify early access period has ended
+      expect(await relayerRewardsPool.isEarlyAccessActive(roundId)).to.be.false
+
+      // Auto-voting user should now be able to vote for themselves after early access
+      await expect(xAllocationVoting.connect(autoUser).castVoteOnBehalfOf(autoUser.address, roundId)).to.not.be.reverted
+
+      // Verify vote was cast
+      const hasVoted = await xAllocationVoting.hasVoted(roundId, autoUser.address)
+      expect(hasVoted).to.be.true
+
+      // Setting it back to default early access period
+      await expect(relayerRewardsPool.connect(owner).setEarlyAccessBlocks(432000)).to.not.be.reverted
+      expect(await relayerRewardsPool.getEarlyAccessBlocks()).to.equal(432000)
+    })
   })
 
   describe("Events", function () {
@@ -1026,7 +1274,7 @@ describe("AutoVoting - @shard14b", function () {
        * Actual rewards should be 1.9999M B3TR
        */
       const reward = await voterRewards.getReward(round3, user.address)
-      const fee = await voterRewards.getFee(round3, user.address)
+      const fee = await voterRewards.getRelayerFee(round3, user.address)
       expect(reward).to.equal(ethers.parseEther("1999900"))
       expect(fee).to.equal(ethers.parseEther("100")) // Fee cap is 100 B3TR
 

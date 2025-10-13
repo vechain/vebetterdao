@@ -11,6 +11,7 @@ import {
   VoterRewards,
   B3TR,
   Emissions,
+  VOT3,
   RelayerRewardsPool,
 } from "../../../typechain-types"
 
@@ -20,6 +21,7 @@ describe("VoterRewards V6 - @shard10b", function () {
   let veBetterPassport: VeBetterPassport
   let voterRewards: VoterRewards
   let b3tr: B3TR
+  let vot3: VOT3
   let emissions: Emissions
   let relayerRewardsPool: RelayerRewardsPool
   let owner: HardhatEthersSigner
@@ -43,6 +45,7 @@ describe("VoterRewards V6 - @shard10b", function () {
     veBetterPassport = config.veBetterPassport
     voterRewards = config.voterRewards
     b3tr = config.b3tr
+    vot3 = config.vot3
     emissions = config.emissions
     owner = config.owner
     minterAccount = config.minterAccount
@@ -123,7 +126,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       const userTotalReward = userReward + userGMReward
 
       // Calculate expected fee (10% of total reward)
-      const expectedFee = await voterRewards.getFee(roundId, user.address)
+      const expectedFee = await voterRewards.getRelayerFee(roundId, user.address)
 
       // Relayer claims for user (who has auto-voting enabled)
       const tx = await voterRewards.connect(relayer1).claimReward(roundId, user.address)
@@ -227,7 +230,7 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       // User claims their own rewards
       await expect(voterRewards.connect(user).claimReward(roundId, user.address)).to.be.revertedWith(
-        "VoterRewards: auto-voting users cannot claim their own rewards during early access period",
+        "RelayerRewardsPool: auto-voting users cannot perform actions for themselves during early access period",
       )
     })
 
@@ -274,10 +277,10 @@ describe("VoterRewards V6 - @shard10b", function () {
       const user1TotalReward = user1Reward + user1GMReward
 
       // 10% fee for auto-voting user
-      const expectedFee = await voterRewards.getFee(roundId, user.address)
+      const expectedFee = await voterRewards.getRelayerFee(roundId, user.address)
 
       // No fee for user1 because auto-voting is disabled
-      const expectedUser1Fee = await voterRewards.getFee(roundId, user1.address)
+      const expectedUser1Fee = await voterRewards.getRelayerFee(roundId, user1.address)
 
       // Initial balances
       const initialRelayerBalance = await b3tr.balanceOf(relayer1.address)
@@ -354,7 +357,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       const claimWeight = await relayerRewardsPool.getClaimWeight()
 
       // Relayer1 claims for user (earns CLAIM action)
-      const userFee = await voterRewards.getFee(roundId, user.address)
+      const userFee = await voterRewards.getRelayerFee(roundId, user.address)
       const tx1 = await voterRewards.connect(relayer1).claimReward(roundId, user.address)
 
       await expect(tx1)
@@ -362,7 +365,7 @@ describe("VoterRewards V6 - @shard10b", function () {
         .withArgs(relayer1.address, user.address, roundId, 2, claimWeight) // 2nd action for relayer1
 
       // Relayer2 claims for user1 (earns CLAIM action)
-      const user1Fee = await voterRewards.getFee(roundId, user1.address)
+      const user1Fee = await voterRewards.getRelayerFee(roundId, user1.address)
       const tx2 = await voterRewards.connect(relayer2).claimReward(roundId, user1.address)
 
       await expect(tx2)
@@ -448,7 +451,7 @@ describe("VoterRewards V6 - @shard10b", function () {
       // Get net rewards and fee from contract
       const netUserReward = await voterRewards.getReward(roundId, user.address)
       const netUserGMReward = await voterRewards.getGMReward(roundId, user.address)
-      const actualFee = await voterRewards.getFee(roundId, user.address)
+      const actualFee = await voterRewards.getRelayerFee(roundId, user.address)
 
       // Calculate raw total reward (before fees)
       const rawTotalReward = netUserReward + netUserGMReward + actualFee
@@ -550,9 +553,12 @@ describe("VoterRewards V6 - @shard10b", function () {
       const reducedTotalActions = expectedTotalActions - 2 // Remove 2 actions for 1 user
       const reducedTotalWeightedActions = expectedTotalWeightedActions - (voteWeight + claimWeight) // Remove weighted actions for 1 user
 
-      // Attempt to cast vote for user1 should fail and reduce expected actions
+      // Attempt to cast vote for user1 should toggle off auto-voting and reduce expected actions
       const castVoteTx = xAllocationVoting.connect(relayer2).castVoteOnBehalfOf(user1.address, roundId)
-      await expect(castVoteTx).to.emit(xAllocationVoting, "AutoVotingDisabled").withArgs(user1.address, roundId)
+      await expect(castVoteTx).to.emit(xAllocationVoting, "AutoVotingToggled").withArgs(user1.address, false)
+      await expect(castVoteTx)
+        .to.emit(xAllocationVoting, "AutoVoteSkipped")
+        .withArgs(user1.address, roundId, false, 1, await vot3.balanceOf(user1.address))
       await expect(castVoteTx).to.not.emit(xAllocationVoting, "AllocationVoteCast")
 
       // Check that expected actions reduction event is emitted
@@ -572,7 +578,7 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       // Only relayer1 should be able to claim rewards for user (who successfully voted)
       const userReward = await voterRewards.getReward(roundId, user.address)
-      const userFee = await voterRewards.getFee(roundId, user.address)
+      const userFee = await voterRewards.getRelayerFee(roundId, user.address)
 
       expect(userReward).to.be.gt(0)
       expect(userFee).to.be.gt(0)
@@ -596,6 +602,89 @@ describe("VoterRewards V6 - @shard10b", function () {
 
       // Verify relayer2 gets no rewards since they performed no successful actions
       expect(await relayerRewardsPool.claimableRewards(relayer2.address, roundId)).to.equal(0)
+    })
+
+    it("[Race Condition] should handle when 2 relayers try to vote for same user in same block", async function () {
+      // This test verifies that when multiple relayers attempt to vote for the same user
+      // in the same block, only one vote succeeds and only that relayer gets credit.
+      // This prevents double-voting and ensures fair relayer reward distribution.
+
+      // Setup additional relayer
+      const relayer2 = otherAccounts[5]
+      await relayerRewardsPool.connect(owner).registerRelayer(relayer2.address)
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(appOwner.address))
+      await x2EarnApps.connect(owner).submitApp(appOwner.address, appOwner.address, appOwner.address, "metadataURI")
+      await endorseApp(app1Id, appOwner)
+
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      // Enable auto-voting for user
+      await xAllocationVoting.connect(user).setUserVotingPreferences([app1Id])
+      await xAllocationVoting.connect(user).toggleAutoVoting(user.address)
+
+      // Start a new round
+      await waitForNextCycle(emissions)
+      await emissions.connect(minterAccount).distribute()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+      const voteWeight = await relayerRewardsPool.getVoteWeight()
+
+      // First relayer successfully votes
+      const tx1 = await xAllocationVoting.connect(relayer1).castVoteOnBehalfOf(user.address, roundId)
+      await expect(tx1)
+        .to.emit(relayerRewardsPool, "RelayerActionRegistered")
+        .withArgs(relayer1.address, user.address, roundId, 1, voteWeight)
+
+      // Verify the vote was cast
+      await expect(tx1).to.emit(xAllocationVoting, "AllocationVoteCast")
+
+      // Second relayer tries to vote for the same user - should fail
+      await expect(
+        xAllocationVoting.connect(relayer2).castVoteOnBehalfOf(user.address, roundId),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorAlreadyCastVote")
+
+      // Verify only relayer1 got credit for the vote
+      const relayer1Actions = await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)
+      const relayer2Actions = await relayerRewardsPool.totalRelayerActions(relayer2.address, roundId)
+
+      expect(relayer1Actions).to.equal(1)
+      expect(relayer2Actions).to.equal(0)
+
+      // Wait for round to end and claim rewards
+      await waitForRoundToEnd(roundId)
+
+      const userReward = await voterRewards.getReward(roundId, user.address)
+      const userFee = await voterRewards.getRelayerFee(roundId, user.address)
+      expect(userReward).to.be.gt(0)
+      expect(userFee).to.be.gt(0)
+
+      // Both relayers try to claim - first one succeeds
+      const claimWeight = await relayerRewardsPool.getClaimWeight()
+      const claimTx = await voterRewards.connect(relayer1).claimReward(roundId, user.address)
+      await expect(claimTx)
+        .to.emit(relayerRewardsPool, "RelayerActionRegistered")
+        .withArgs(relayer1.address, user.address, roundId, 2, claimWeight)
+
+      // Second relayer tries to claim for same user - should fail
+      await expect(voterRewards.connect(relayer2).claimReward(roundId, user.address)).to.be.revertedWith(
+        "VoterRewards: reward must be greater than 0",
+      )
+
+      // Verify final relayer action counts
+      const finalRelayer1Actions = await relayerRewardsPool.totalRelayerActions(relayer1.address, roundId)
+      const finalRelayer2Actions = await relayerRewardsPool.totalRelayerActions(relayer2.address, roundId)
+
+      expect(finalRelayer1Actions).to.equal(2) // Vote + Claim
+      expect(finalRelayer2Actions).to.equal(0) // No successful actions
+
+      // Verify relayer rewards distribution
+      const relayer1ClaimableRewards = await relayerRewardsPool.claimableRewards(relayer1.address, roundId)
+      const relayer2ClaimableRewards = await relayerRewardsPool.claimableRewards(relayer2.address, roundId)
+
+      expect(relayer1ClaimableRewards).to.be.gt(0) // Relayer1 should get all rewards
+      expect(relayer2ClaimableRewards).to.equal(0) // Relayer2 should get nothing
     })
   })
 })
