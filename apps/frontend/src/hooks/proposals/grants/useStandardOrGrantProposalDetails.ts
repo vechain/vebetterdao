@@ -93,7 +93,7 @@ const getStandardProposalMetadataOrReturnDefault = (ipfsMetadata?: ProposalEnric
   }
 }
 
-const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = false): Promise<T | undefined> => {
+const safeFetchIpfsMetadata = async <T>(ipfsUri?: string, parseJson = true): Promise<T | undefined> => {
   if (!ipfsUri) return undefined
 
   try {
@@ -141,10 +141,7 @@ export const useStandardOrGrantProposalDetails = ({
       queryFn: async () => {
         if (!proposal.ipfsDescription) return undefined
 
-        const proposalDetails = await safeFetchIpfsMetadata<GrantProposalEnriched>(
-          `ipfs://${proposal.ipfsDescription}`,
-          false,
-        )
+        const proposalDetails = await safeFetchIpfsMetadata<GrantProposalEnriched>(`ipfs://${proposal.ipfsDescription}`)
         const [milestoneMetadataURI] = await executeCallClause({
           thor,
           abi,
@@ -156,7 +153,6 @@ export const useStandardOrGrantProposalDetails = ({
         if (milestoneMetadataURI) {
           const milestones = await safeFetchIpfsMetadata<GrantProposalEnriched["milestones"]>(
             `ipfs://${milestoneMetadataURI}`,
-            false,
           )
           if (milestones && proposalDetails) proposalDetails.milestones = milestones
         }
@@ -173,7 +169,7 @@ export const useStandardOrGrantProposalDetails = ({
       queryKey: getStandardProposalMetadataQueryKey(proposal.id, proposal.ipfsDescription),
       queryFn: async () => {
         if (!proposal.ipfsDescription) return undefined
-        return await safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${proposal.ipfsDescription}`, false)
+        return await safeFetchIpfsMetadata<ProposalEnriched>(`ipfs://${proposal.ipfsDescription}`)
       },
     })),
   })
