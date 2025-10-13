@@ -37,7 +37,7 @@ export const BaseBottomSheet = ({
       <Drawer.Portal>
         <Drawer.Overlay
           style={{
-            zIndex: 2,
+            zIndex: 3,
             position: "fixed",
             top: 0,
             right: 0,

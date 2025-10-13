@@ -192,7 +192,7 @@ export const ActionBanner = () => {
       <CastProposalVoteBanners
         key={`cast-vote-in-proposal-${proposal?.id}`}
         id={proposal?.id}
-        description={proposal?.description ?? ""}
+        description={proposal?.ipfsDescription ?? ""}
       />
     ))
 
